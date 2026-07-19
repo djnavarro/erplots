@@ -7,6 +7,11 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/erplots)](https://CRAN.R-project.org/package=erplots)
+[![R-CMD-check](https://github.com/djnavarro/erplots/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/djnavarro/erplots/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/djnavarro/erplots/graph/badge.svg)](https://app.codecov.io/gh/djnavarro/erplots)
 <!-- badges: end -->
 
 erplots provides a fluent mini-language for building exposure-response
@@ -89,11 +94,11 @@ sim
 #>    <int> <dbl> <fct>   <int>  <int>
 #>  1     1  673. Male        1      1
 #>  2     1 2806. Female      2      1
-#>  3     0    0  Female      3      1
-#>  4     1 1169. Female      4      1
+#>  3     1    0  Female      3      1
+#>  4     0 1169. Female      4      1
 #>  5     0  377. Male        5      1
-#>  6     1  327. Female      6      1
-#>  7     0    0  Male        7      1
+#>  6     0  327. Female      6      1
+#>  7     1    0  Male        7      1
 #>  8     1 1208. Female      8      1
 #>  9     0    0  Male        9      1
 #> 10     0  254. Female     10      1
