@@ -1,12 +1,12 @@
 test_that("er_plot creates an er_plot (minimal)", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
   expect_no_error(er_plot(er_test_data, aucss, ae1))
   plt <- er_plot(er_test_data, aucss, ae1)
   expect_s3_class(plt, "er_plot")
 })
 
 test_that("er_plot creates an er_plot (all parts)", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
   expect_no_error(
     er_test_data |>
       dplyr::mutate(dose = factor(dose)) |>
@@ -27,8 +27,8 @@ test_that("er_plot creates an er_plot (all parts)", {
 })
 
 test_that("er_plot creates an er_plot (all parts, all strata)", {
-  skip_if_not_installed("erlr")
-  mod <- erlr::lr_model(ae1 ~ aucss + sex, er_test_data)
+  skip_if_not_installed("erglm")
+  mod <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
   expect_no_error(
     er_test_data |>
       dplyr::mutate(dose = factor(dose)) |>
@@ -49,7 +49,7 @@ test_that("er_plot creates an er_plot (all parts, all strata)", {
 })
 
 test_that("er_plot_build does not error", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
 
   plt1 <- er_test_data |>
     er_plot(aucss, ae1) |>
@@ -75,7 +75,7 @@ test_that("er_plot_build does not error", {
 })
 
 test_that("er_plot_build constructs ggplot2 objects", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
 
   plt1 <- er_test_data |>
     er_plot(aucss, ae1) |>
@@ -118,7 +118,7 @@ test_that("er_plot_build constructs ggplot2 objects", {
 })
 
 test_that("print method works as expected", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
 
   plt1 <- er_test_data |>
     er_plot(aucss, ae1) |>

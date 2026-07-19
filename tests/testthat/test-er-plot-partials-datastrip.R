@@ -1,6 +1,6 @@
 test_that("build_datastrip_jitter returns geom + coord + yscale", {
-  skip_if_not_installed("erlr")
-  mod2 <- erlr::lr_model(ae1 ~ aucss + sex, er_test_data)
+  skip_if_not_installed("erglm")
+  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)

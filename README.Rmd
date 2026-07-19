@@ -23,7 +23,7 @@ erplots provides a fluent mini-language for building exposure-response
 plots: model curves/ribbons, quantile-binned response-rate summaries, data
 strips, and grouped distribution panels. It is model-agnostic: erplots
 never fits a model itself. Instead, you fit a model with whatever package
-suits your workflow (e.g. [erlr](https://github.com/djnavarro/erlr) for
+suits your workflow (e.g. [erglm](https://github.com/djnavarro/erglm) for
 logistic regression), and pass the fitted object to `er_plot_show_model()`.
 Any model that implements `er_predict()` can be visualised; implementing
 `er_simulate()` and `er_summary()` additionally enables uncertainty
@@ -45,21 +45,21 @@ pak::pak("djnavarro/erplots")
 #| label: er-plot
 
 library(erplots)
-library(erlr)
+library(erglm)
 
-mod <- lr_model(ae1 ~ aucss, lr_data)
+mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 
-lr_data |> 
+erglm_data |> 
   er_plot(aucss, ae1) |> 
   er_plot_show_model(mod) |> 
   er_plot_show_quantiles() |> 
   er_plot_show_groups(aucss) |> 
   plot()
 
-mod2 <- lr_model(ae2 ~ aucss + sex, lr_data)
-mod2_marginal <- lr_model(ae2 ~ aucss, lr_data)
+mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+mod2_marginal <- erglm_model(ae2 ~ aucss, erglm_data, family = binomial())
 
-plt <- lr_data |> 
+plt <- erglm_data |> 
    er_plot(aucss, ae2, stratify_by = sex) |> 
    # keep_strata = FALSE needs a model without the stratification
    # variable as a term, so we pass `mod2_marginal` here
@@ -76,9 +76,9 @@ plot(plt)
 
 ```{r}
 #| label: er-vpc
-sim <- lr_vpc_sim(mod2, seed = 1234)
+sim <- erglm_vpc_sim(mod2, seed = 1234)
 sim
 
-er_vpc_plot(lr_data, sim, aucss, ae2, group_by = aucss)
-er_vpc_plot(lr_data, sim, aucss, ae2, group_by = sex)
+er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
+er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = sex)
 ```

@@ -10,11 +10,17 @@ can be visualised; implementing `er_simulate()` and `er_summary()`
 additionally enables uncertainty spaghetti plots/VPCs and summary
 annotations (e.g. p-values). See `?er_model_interface`.
 
-The companion package [erlr](https://github.com/djnavarro/erlr) (soon to
-be renamed `erglm`, see its PLAN.md) fits logistic-regression-based
-exposure-response models and implements this package's generics for its
-model objects. erplots has no hard dependency on erlr -- it's listed only
-under `Suggests`, for examples/tests/vignettes.
+The companion package [erglm](https://github.com/djnavarro/erglm)
+(formerly `erlr`) fits GLM-based exposure-response models (binomial,
+poisson, gaussian, Gamma) and implements this package's generics for its
+model objects. erplots has no hard dependency on erglm -- it's listed only
+under `Suggests`, for examples/tests/vignettes. Since erglm is GitHub-only
+(not on CRAN), `DESCRIPTION` also declares `Remotes: djnavarro/erglm` so
+CI can resolve it. Key API points to remember: the example dataset is
+`erglm::erglm_data` (not `erlr::lr_data`), and models are fit with
+`erglm::erglm_model(formula, data, family = ...)` (family is now explicit
+-- use `family = binomial()` for the binary `ae1`/`ae2` responses in the
+example data), and simulated with `erglm::erglm_vpc_sim()`.
 
 ## Planned work
 

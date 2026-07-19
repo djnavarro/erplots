@@ -1,6 +1,6 @@
 test_that(".part_model constructs the correct data structure", {
-  skip_if_not_installed("erlr")
-  mod2 <- erlr::lr_model(ae1 ~ aucss + sex, er_test_data)
+  skip_if_not_installed("erglm")
+  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
@@ -39,7 +39,7 @@ test_that(".part_model constructs the correct data structure", {
 
 
 test_that(".part_quantile constructs the correct data structure", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
 
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
@@ -93,7 +93,7 @@ test_that(".part_quantile constructs the correct data structure", {
 
 
 test_that(".part_strip constructs the correct data structure", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
 
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
@@ -129,7 +129,7 @@ test_that(".part_strip constructs the correct data structure", {
 
 
 test_that(".part_group constructs the correct data structure", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
 
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)

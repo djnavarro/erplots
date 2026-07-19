@@ -1,5 +1,5 @@
 test_that("build_quantile_errorbar returns 3 geoms", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)

@@ -1,5 +1,5 @@
 test_that("build_group_boxplot returns geom + coord", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
@@ -47,7 +47,7 @@ test_that("build_group_boxplot returns geom + coord", {
 
 
 test_that("build_group_violin returns geom + coord", {
-  skip_if_not_installed("erlr")
+  skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)

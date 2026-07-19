@@ -5,7 +5,7 @@
 #' model, stratified by a grouping variable. This function is model-agnostic:
 #' it operates purely on data frames. The `sim` data frame is expected to
 #' contain one row per simulated observation per replicate, with a `sim_id`
-#' column identifying each replicate (see e.g. `erlr::lr_vpc_sim()` for one
+#' column identifying each replicate (see e.g. `erglm::erglm_vpc_sim()` for one
 #' way to generate such simulations from a fitted model).
 #'
 #' @param data Observed data
@@ -21,11 +21,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' library(erlr)
-#' mod <- lr_model(ae2 ~ aucss + sex, lr_data)
-#' sim <- lr_vpc_sim(mod)
-#' er_vpc_plot(lr_data, sim, aucss, ae2, group_by = aucss)
-#' er_vpc_plot(lr_data, sim, aucss, ae2, group_by = sex)
+#' library(erglm)
+#' mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+#' sim <- erglm_vpc_sim(mod)
+#' er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
+#' er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = sex)
 #' }
 #'
 #' @export

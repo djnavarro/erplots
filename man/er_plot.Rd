@@ -84,18 +84,18 @@ Builds an exposure-response plot for a fitted model
 }
 \examples{
 \dontrun{
-library(erlr)
-mod <- lr_model(ae1 ~ aucss, lr_data)
+library(erglm)
+mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 
-lr_data |>
+erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_show_model(mod) |>
   er_plot_show_quantiles() |>
   er_plot_show_groups(aucss) |>
   plot()
 
-mod2 <- lr_model(ae2 ~ aucss + sex, lr_data)
-plt <- lr_data |>
+mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+plt <- erglm_data |>
   er_plot(aucss, ae2, stratify_by = sex) |>
   er_plot_show_model(mod2, keep_strata = FALSE) |>
   er_plot_show_quantiles() |>
