@@ -1,0 +1,37 @@
+Package: erplots
+Title: Model-Agnostic Exposure-Response Plots
+Version: 0.0.0.9000
+Authors@R: 
+    person("Danielle", "Navarro", , "djnavarro@protonmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0001-7648-6578"))
+Description: Provides a fluent mini-language for building exposure-response
+    plots (model curves/ribbons, quantile-binned summaries, data strips,
+    and grouped distribution panels) from observed data and a fitted
+    exposure-response model. Designed to be model-agnostic: any model
+    object that implements the 'er_predict()' generic (and, optionally,
+    'er_simulate()' and 'er_summary()') can be visualised.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Imports: 
+    dplyr,
+    ggplot2,
+    patchwork,
+    purrr,
+    rlang,
+    scales,
+    stats,
+    tibble,
+    tidyselect,
+    withr
+Suggests: 
+    erlr,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+URL: https://github.com/djnavarro/erplots, https://erplots.djnavarro.net/
+BugReports: https://github.com/djnavarro/erplots/issues
+Depends: 
+    R (>= 4.1.0)
+LazyData: true
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

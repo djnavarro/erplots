@@ -1,0 +1,84 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# erplots
+
+<!-- badges: start -->
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+<!-- badges: end -->
+
+erplots provides a fluent mini-language for building exposure-response
+plots: model curves/ribbons, quantile-binned response-rate summaries, data
+strips, and grouped distribution panels. It is model-agnostic: erplots
+never fits a model itself. Instead, you fit a model with whatever package
+suits your workflow (e.g. [erlr](https://github.com/djnavarro/erlr) for
+logistic regression), and pass the fitted object to `er_plot_show_model()`.
+Any model that implements `er_predict()` can be visualised; implementing
+`er_simulate()` and `er_summary()` additionally enables uncertainty
+spaghetti plots/VPCs and summary annotations (e.g. p-values). See
+`?er_model_interface`.
+
+## Installation
+
+You can install the development version of erplots like so:
+
+``` r
+pak::pak("djnavarro/erplots")
+```
+
+## Example
+
+```{r}
+#| fig-height: 8
+#| label: er-plot
+
+library(erplots)
+library(erlr)
+
+mod <- lr_model(ae1 ~ aucss, lr_data)
+
+lr_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles() |> 
+  er_plot_show_groups(aucss) |> 
+  plot()
+
+mod2 <- lr_model(ae2 ~ aucss + sex, lr_data)
+mod2_marginal <- lr_model(ae2 ~ aucss, lr_data)
+
+plt <- lr_data |> 
+   er_plot(aucss, ae2, stratify_by = sex) |> 
+   # keep_strata = FALSE needs a model without the stratification
+   # variable as a term, so we pass `mod2_marginal` here
+   er_plot_show_model(mod2_marginal, keep_strata = FALSE) |> 
+   er_plot_show_quantiles(bins = 3) |> 
+   er_plot_show_datastrip() |> 
+   er_plot_show_groups(group_by = c(aucss, treatment), keep_strata = FALSE)
+
+print(plt)
+plot(plt)
+```
+
+## VPC plots
+
+```{r}
+#| label: er-vpc
+sim <- lr_vpc_sim(mod2, seed = 1234)
+sim
+
+er_vpc_plot(lr_data, sim, aucss, ae2, group_by = aucss)
+er_vpc_plot(lr_data, sim, aucss, ae2, group_by = sex)
+```

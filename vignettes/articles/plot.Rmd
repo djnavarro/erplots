@@ -1,0 +1,165 @@
+---
+title: "Plotting"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+erplots draws exposure-response plots from *any* model that implements the
+[er_model_interface]. This article uses logistic regression models fitted
+with erlr, but the plotting code itself has no knowledge of `glm()`.
+
+```{r setup}
+library(erplots)
+library(erlr)
+```
+
+## Fit the model first
+
+Unlike a plotting function that fits a model behind the scenes, erplots
+expects you to fit the model yourself and pass it in explicitly:
+
+```{r fit}
+mod <- lr_model(ae1 ~ aucss, lr_data)
+```
+
+## Defining plots
+
+Basic usage
+
+```{r basic-plot-1}
+lr_data |> 
+  er_plot(exposure = aucss, response = ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles() |> 
+  plot()
+```
+
+Adding extra components
+
+```{r basic-plot-2}
+lr_data |> 
+  er_plot(exposure = aucss, response = ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles() |>
+  er_plot_show_datastrip() |>
+  er_plot_show_groups(group_by = aucss) |> 
+  plot()
+```
+
+## Stratification
+
+Stratification adds colour across all components. This requires a model
+that includes the stratification variable as a term:
+
+```{r stratification-1}
+mod_strat <- lr_model(ae1 ~ aucss + sex, lr_data)
+
+lr_data |> 
+  er_plot(
+    exposure = aucss, 
+    response = ae1, 
+    stratify_by = sex
+  ) |> 
+  er_plot_show_model(mod_strat) |> 
+  er_plot_show_quantiles() |> 
+  er_plot_show_datastrip() |>
+  plot()
+```
+
+You can suppress stratification for specific components
+
+```{r stratification-2}
+lr_data |> 
+  er_plot(
+    exposure = aucss, 
+    response = ae1, 
+    stratify_by = sex
+  ) |> 
+  # keep_strata = FALSE needs a model that doesn't include the
+  # stratification variable, so we pass the un-stratified `mod` here
+  er_plot_show_model(mod, keep_strata = FALSE) |> 
+  er_plot_show_quantiles() |> 
+  er_plot_show_datastrip() |>
+  plot()
+```
+
+## Model component
+
+Default is `style = "ribbonline"` but you can also draw spaghetti plots to
+represent parameter uncertainty. Spaghetti plots require the model to
+implement `er_simulate()` (erlr's models do); models that only implement
+`er_predict()` fall back to `"ribbonline"` with a message.
+
+```{r model-1}
+lr_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_show_model(mod, style = "spaghetti") |> 
+  er_plot_show_quantiles() |> 
+  plot()
+```
+
+## Quantile component
+
+You can modify the number of bins:
+
+```{r quantile-1}
+lr_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles(bins = 6) |> 
+  plot()
+```
+
+You can also modify the confidence level for the Clopper-Pearson interval
+(this empirical-summary layer currently assumes a binary response):
+
+```{r quantile-2}
+lr_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles(bins = 6, conf_level = .8) |> 
+  plot()
+```
+
+## Strip component
+
+
+## Group component
+
+Multiple grouping variables are allowed:
+
+```{r group-1}
+lr_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles() |>
+  er_plot_show_groups(group_by = c(aucss, sex)) |> 
+  plot()
+```
+
+Stratification propagates to the group component:
+
+```{r group-2}
+lr_data |> 
+  er_plot(aucss, ae1, stratify_by = sex) |> 
+  er_plot_show_model(mod_strat) |> 
+  er_plot_show_quantiles() |>
+  er_plot_show_groups(group_by = aucss) |> 
+  plot()
+```
+
+The default is `style = "boxplot"` but you can also use violin plots:
+
+```{r group-3}
+lr_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles() |>
+  er_plot_show_groups(group_by = sex, style = "violin") |> 
+  plot()
+```
