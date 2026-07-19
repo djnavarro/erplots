@@ -67,22 +67,59 @@ style binary-response models, without changing the model-side contract.
   approximation for a first pass, but worth flagging as a known
   simplification rather than deciding definitively now.
 
-### Open questions to resolve before implementation
+### Design decisions (reviewed)
 
-1. Auto-detect response type vs. explicit `response_type` argument (with
-   what default/detection heuristic)?
-2. What does the data-strip layer become for continuous responses --
-   omitted, or replaced with a different geometry (e.g. a rug plot)?
-3. Should quantile-bin CIs for continuous responses assume normality
-   (t-interval) or use something more robust (bootstrap)? This should
-   probably mirror whatever convention `erlr`/`erglm` and other
-   model-fitting packages in this ecosystem use for consistency, rather
-   than being decided in isolation.
-4. Do we need a third "count" response-type path, or is "continuous" an
-   adequate approximation for v1?
-5. Coordinate with the `erlr` → `erglm` generalisation (see erglm's
-   PLAN.md) so example data/models for continuous responses are
-   available to test against here.
+The questions below were originally left open; each now has a working
+recommendation so implementation isn't blocked, but all are still up for
+debate if new information changes the calculus.
+
+1. **Response-type detection.** Add an explicit `response_type` argument
+   (probably on `er_plot()`, since it governs which builders are valid
+   for the whole plot, not just one component), defaulting to `"auto"`.
+   The auto-detection heuristic: values entirely in `{0, 1}` or a logical
+   column → `"binary"`, otherwise → `"continuous"`. This mirrors the
+   "automatic with an escape hatch" pattern already adopted on the erlr
+   side (e.g. its SCM test-selection decision) -- convenient by default,
+   overridable when the heuristic gets it wrong (e.g. a genuine 0/1
+   count variable).
+
+2. **Data strip for continuous responses.** Omit it for v1, as a
+   documented limitation, rather than design a continuous-specific
+   replacement now. The two-panel "responders above the line,
+   non-responders below" design is structurally about a binary flag --
+   there's no variant of *that* geometry for a continuous response, only
+   a different plot entirely (e.g. a rug or raw scatter), and building
+   that speculatively before anyone needs it isn't worth the design
+   effort yet. Revisit if/when a concrete use case shows up.
+
+3. **Quantile-bin CI method for continuous responses.** Use a t-interval,
+   not a bootstrap. This mirrors the convention erlr/erglm's own
+   generalisation plan settled on for the analogous problem (families
+   with estimated dispersion -- gaussian, Gamma -- use `Pr(>|t|)`-based
+   inference, not a chi-squared/asymptotic-normal approximation), so the
+   two packages stay consistent, and it's simpler to implement and
+   explain than a bootstrap.
+
+4. **Count responses.** Treat them as "continuous" for v1 (mean ± CI via
+   the same t-interval as (3)), documented as a known approximation.
+   Fast follow, once there's a concrete need: add an exact Poisson CI
+   path (analogous to how the binary path uses an exact Clopper-Pearson
+   interval rather than a normal approximation) -- the machinery for
+   swapping in a response-type-specific interval method already exists
+   once (1)-(3) are in place, so this is a small addition, not a
+   redesign. Not worth building speculatively now given erglm's own v1
+   family scope already treats poisson support as a real but secondary
+   priority.
+
+5. **Coordination with `erlr`/`erglm`.** Don't block on erglm's rename
+   timeline. erplots' continuous-response work only needs *some* model
+   object implementing `er_predict()` for a continuous response to test
+   against -- that's easy to stub today with a plain
+   `glm(family = gaussian())` (or even `lm()`) and a few lines of local
+   `er_predict.<class>()`/`er_summary.<class>()` methods in this
+   package's own test suite, without waiting for erglm to exist. Revisit
+   using erglm's actual continuous-response support once it lands, but
+   start this work independently.
 
 ### Suggested step ordering
 
