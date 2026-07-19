@@ -88,14 +88,14 @@ sim
 #> # A tibble: 30,000 × 5
 #>      ae2 aucss sex    row_id sim_id
 #>    <int> <dbl> <fct>   <int>  <int>
-#>  1     1  673. Male        1      1
+#>  1     0  673. Male        1      1
 #>  2     1 2806. Female      2      1
-#>  3     1    0  Female      3      1
+#>  3     0    0  Female      3      1
 #>  4     0 1169. Female      4      1
-#>  5     0  377. Male        5      1
+#>  5     1  377. Male        5      1
 #>  6     0  327. Female      6      1
-#>  7     1    0  Male        7      1
-#>  8     1 1208. Female      8      1
+#>  7     0    0  Male        7      1
+#>  8     0 1208. Female      8      1
 #>  9     0    0  Male        9      1
 #> 10     0  254. Female     10      1
 #> # ℹ 29,990 more rows
