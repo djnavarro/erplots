@@ -22,13 +22,16 @@
 #'   `"auto"`, the response column is classified as `"binary"` if it is
 #'   logical or takes only values in `{0, 1}`, and `"continuous"` otherwise.
 #'
-#' @details [er_plot_show_quantiles()] and [er_plot_show_datastrip()]
-#'   currently only support a binary (0/1) response -- their underlying
-#'   summaries assume a response *rate*, not a continuous quantity. Calling
-#'   either on an `er_plot` whose response was classified (or declared) as
-#'   `"continuous"` raises an error rather than silently producing a
-#'   misleading plot; see `PLAN.md` for the plan to generalise these
-#'   components.
+#' @details [er_plot_show_quantiles()] supports both binary (response
+#'   *rate* with a Clopper-Pearson CI) and continuous (bin *mean* with a
+#'   t-interval) responses; see `PLAN.md` for the generalisation history.
+#'   [er_plot_show_datastrip()], by contrast, has a design that is
+#'   inherently about a binary response (responders jittered above the
+#'   exposure line, non-responders below) with no obvious continuous
+#'   analogue. Calling it on an `er_plot` whose response was classified
+#'   (or declared) as `"continuous"` raises an error rather than silently
+#'   producing an empty/misleading strip; see `PLAN.md` for the design
+#'   decision behind omitting a continuous-response variant.
 #'
 #' @returns Plot object of class `er_plot`
 #'
@@ -205,7 +208,9 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 er_plot_show_datastrip <- function(object, keep_strata = NULL, style = "jitter", panel = "both") {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  if (identical(object$response$type, "continuous")) .abort_continuous_unsupported("er_plot_show_datastrip")
+  if (identical(object$response$type, "continuous")) {
+    .abort_continuous_unsupported("er_plot_show_datastrip", planned = FALSE)
+  }
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
   object$part$strip <- .part_strip(

@@ -55,6 +55,20 @@ test_that("er_plot_show_datastrip errors clearly for a continuous response", {
 
   plt <- er_test_data |> er_plot(aucss, biomarker_change)
   expect_error(er_plot_show_datastrip(plt), class = "rlang_error")
+  expect_error(
+    er_plot_show_datastrip(plt),
+    regexp = "does not support continuous responses"
+  )
+  # the datastrip layer has no continuous variant planned (unlike
+  # er_plot_show_quantiles()/er_vpc_plot(), which now support continuous
+  # responses) -- the error message should say so, not imply a fix is
+  # coming
+  cnd <- rlang::catch_cnd(er_plot_show_datastrip(plt))
+  expect_match(
+    paste(conditionMessage(cnd), collapse = " "),
+    "no continuous-response variant .* is currently planned",
+    ignore.case = TRUE
+  )
 
   # binary response still works
   plt_binary <- er_test_data |> er_plot(aucss, ae1)

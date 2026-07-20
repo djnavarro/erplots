@@ -236,17 +236,35 @@ criteria are meant to be concrete enough to check off, not aspirational.
   produces a sensible mean-based VPC without erroring or silently
   mis-plotting. Met.
 
-**Stage 3 -- data strip layer**
-- Per design decision (2) above: omit a continuous-response variant for
-  now. Instead, make `er_plot_show_datastrip()` fail loudly (not
-  silently) when `object$response$type == "continuous"`, with a message
-  pointing at the limitation, rather than leaving it to silently produce
-  an empty/nonsensical strip (today's `dplyr::filter(response == 1)` /
-  `== 0` simply returns zero rows for a continuous response).
-- Files: `R/er-plot-api.R` (`er_plot_show_datastrip()`). Tests: assert the
-  informative error in `test-er-plot-partials-datastrip.R`.
+**Stage 3 -- data strip layer [done]**
+- The loud-failure guard for `object$response$type == "continuous"` on
+  `er_plot_show_datastrip()` already existed from Stage 5 (it was added
+  there as a stopgap shared with the quantile/VPC layers before any of
+  Stages 1-4 landed). What Stage 3 actually needed, now that Stages 1-2
+  have generalised the *other* two callers of
+  `.abort_continuous_unsupported()`, was to stop the datastrip's error
+  message implying a fix is coming: it previously said "See PLAN.md for
+  the planned generalisation to continuous/count responses", which is no
+  longer accurate for this specific component (per design decision (2),
+  no continuous variant is planned for the data strip, unlike quantiles/
+  VPC which are now done).
+- `.abort_continuous_unsupported()` gained a `planned` argument
+  (`TRUE`/default for the "stopgap, fix coming" framing; `FALSE` for the
+  "settled design decision, no fix planned" framing).
+  `er_plot_show_datastrip()` is now the helper's only caller, and passes
+  `planned = FALSE`.
+- Updated the stale `?er_plot` `@details` block, which described both
+  `er_plot_show_quantiles()` and `er_plot_show_datastrip()` as "currently
+  only support[ing] a binary (0/1) response" -- no longer true for the
+  former.
+- Files: `R/utils-helpers.R` (`.abort_continuous_unsupported()`),
+  `R/er-plot-api.R` (`er_plot_show_datastrip()`, `?er_plot` docs). Tests:
+  `test-er-plot-api.R`'s existing "errors clearly" test extended to
+  assert the specific "no continuous-response variant ... is currently
+  planned" wording, not just that *some* error is raised.
 - Done when: calling `er_plot_show_datastrip()` on a continuous-response
-  `er_plot` errors with a clear message instead of building a blank strip.
+  `er_plot` errors with a message that accurately reflects this is a
+  permanent limitation, not a stopgap. Met.
 - Revisit a genuine continuous-response strip/rug design later, as a
   separate, independently-scoped item, once there's a concrete use case.
 
@@ -298,10 +316,11 @@ criteria are meant to be concrete enough to check off, not aspirational.
 Stages 0 and 5 first (foundation + guard rails, low risk, unblock safe
 iteration), then 1 → 2 → 3 → 4 in order, then 6 throughout/at the end as
 each stage's tests/docs land alongside it rather than as a single final
-pass. Stages 0, 1, 2, and 5 are now done; next up is Stage 3 (the data
-strip layer), per design decision (2) above -- making
-`er_plot_show_datastrip()` fail loudly for continuous responses rather
-than designing a continuous-specific replacement.
+pass. Stages 0, 1, 2, 3, and 5 are now done; next up is Stage 4 (count/
+Poisson responses), which per design decision (4) needs no new dispatch
+code -- just confirming the `"auto"` heuristic handles a Poisson count
+column correctly and documenting the t-interval-vs-exact-Poisson-CI
+approximation.
 
 ## Other known issues / follow-ups
 

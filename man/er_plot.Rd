@@ -89,13 +89,16 @@ Plot object of class \code{er_plot}
 Builds an exposure-response plot for a fitted model
 }
 \details{
-\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} and \code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}
-currently only support a binary (0/1) response -- their underlying
-summaries assume a response \emph{rate}, not a continuous quantity. Calling
-either on an \code{er_plot} whose response was classified (or declared) as
-\code{"continuous"} raises an error rather than silently producing a
-misleading plot; see \code{PLAN.md} for the plan to generalise these
-components.
+\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} supports both binary (response
+\emph{rate} with a Clopper-Pearson CI) and continuous (bin \emph{mean} with a
+t-interval) responses; see \code{PLAN.md} for the generalisation history.
+\code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}, by contrast, has a design that is
+inherently about a binary response (responders jittered above the
+exposure line, non-responders below) with no obvious continuous
+analogue. Calling it on an \code{er_plot} whose response was classified
+(or declared) as \code{"continuous"} raises an error rather than silently
+producing an empty/misleading strip; see \code{PLAN.md} for the design
+decision behind omitting a continuous-response variant.
 }
 \examples{
 \dontrun{

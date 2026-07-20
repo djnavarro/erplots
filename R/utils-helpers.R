@@ -99,24 +99,39 @@ t_interval <- function(x, conf_level = 0.95) {
 }
 
 
-#' Abort with an informative error for components that don't yet support
+#' Abort with an informative error for components that don't support
 #' continuous responses
 #'
 #' @param fn_name Name of the calling function, used in the error message
+#' @param planned Logical. If `TRUE` (the default), the message frames
+#'   this as a stopgap pending a planned generalisation (see `PLAN.md`,
+#'   "Extend beyond binary responses"). If `FALSE`, the message instead
+#'   frames this as a settled design decision with no continuous-response
+#'   variant currently planned (used by [er_plot_show_datastrip()]; see
+#'   `PLAN.md` Stage 3).
 #'
-#' @details A stopgap guard rail: several plot components (the quantile
-#'   summary layer, the data strip, `er_vpc_plot()`) still hardcode a
-#'   binary (0/1) response assumption and will silently mis-plot rather
-#'   than error if given a continuous response. This helper turns that
-#'   silent failure into an explicit one until each component is
-#'   generalised (see `PLAN.md`, "Extend beyond binary responses").
+#' @details Originally a stopgap guard rail shared by every component that
+#'   hardcoded a binary (0/1) response assumption and would otherwise
+#'   silently mis-plot a continuous response. The quantile summary layer
+#'   and `er_vpc_plot()` have since been generalised to support continuous
+#'   responses directly (PLAN.md Stages 1-2) and no longer call this
+#'   helper. `er_plot_show_datastrip()` is the remaining caller: its
+#'   "responders above the line, non-responders below" design is
+#'   inherently binary-response, so (per PLAN.md's Stage 3 design
+#'   decision) no continuous-response variant is currently planned, hence
+#'   `planned = FALSE` there.
 #'
 #' @noRd
-.abort_continuous_unsupported <- function(fn_name) {
+.abort_continuous_unsupported <- function(fn_name, planned = TRUE) {
+  if (planned) {
+    detail <- "See PLAN.md for the planned generalisation to continuous/count responses."
+  } else {
+    detail <- "No continuous-response variant of this component is currently planned; see PLAN.md."
+  }
   rlang::abort(c(
-    paste0("`", fn_name, "()` does not yet support continuous responses."),
+    paste0("`", fn_name, "()` does not support continuous responses."),
     "i" = "Only binary (0/1, or logical) responses are currently supported by this component.",
-    "i" = "See PLAN.md for the planned generalisation to continuous/count responses."
+    "i" = detail
   ))
 }
 
