@@ -11,34 +11,44 @@ er_plot_show_data(object, keep_strata = NULL, style = "jitter", panel = "both")
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise}
+\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. For a
+continuous/count response this produces one panel per stratum level
+(see "Stratification" above) rather than a shared color aesthetic.}
 
 \item{style}{Character string selecting the partial builder (currently
 only \code{"jitter"}, the default)}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
-default)}
+default). Only meaningful for a binary response; must be \code{"both"}
+for a continuous/count response (there's no upper/lower partition to
+select from).}
 }
 \value{
 The input \code{object}, with the data layer added
 }
 \description{
 Adds the data layer: individual observations jittered along the
-exposure axis. Currently supports only a binary response --
-responders (\code{response == 1}) are jittered in an upper panel and
-non-responders (\code{response == 0}) in a lower panel. Calling this on an
-\code{er_plot} whose \code{response_type} is \code{"continuous"} or \code{"count"} errors,
-since the two-panel design has no direct analogue for those response
-types; see \code{PLAN.md}'s "Continuous-response data strip" section for
-the planned generalisation (a single, continuously colour-encoded
-panel).
+exposure axis. Which builder is used dispatches automatically on the
+plot's \code{response_type} (set in \code{\link[=er_plot]{er_plot()}}):
+\itemize{
+\item \code{"binary"} -- responders (\code{response == 1}) are jittered in an upper
+panel and non-responders (\code{response == 0}) in a lower panel.
+\item \code{"continuous"}/\code{"count"} -- a single panel, with points colored
+continuously by the response value in place of the upper/lower
+partition (there's no binary flag to split on). \code{panel} must be
+\code{"both"} (the default) for these response types -- passing
+\code{"upper"}/\code{"lower"} errors, since that partition is binary-specific.
+}
 }
 \details{
 This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
 singleton or additive". It's also the one layer whose stratification
-behaviour is expected to become a partial exception to "always color/
-fill" once it supports continuous/count responses -- see \code{\link[=er_plot]{er_plot()}}'s
-"Stratification" section and \code{PLAN.md}.
+behaviour is a partial exception to "always color/fill" (see
+\code{\link[=er_plot]{er_plot()}}'s "Stratification" section): for a continuous/count
+response, the color aesthetic is already spoken for by the response
+value, so stratification instead produces one panel per stratum level
+(stacked below the base plot, each colored by the response), rather
+than a shared strata legend.
 }
 \examples{
 \dontrun{
@@ -48,6 +58,15 @@ erglm_data |>
   er_plot(aucss, ae2, stratify_by = sex) |>
   er_plot_show_model(mod2, keep_strata = FALSE) |>
   er_plot_show_quantiles() |>
+  er_plot_show_data() |>
+  plot()
+
+# continuous response: a single color-encoded panel instead of the
+# binary upper/lower partition
+mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_show_model(mod3) |>
   er_plot_show_data() |>
   plot()
 }

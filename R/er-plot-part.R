@@ -168,18 +168,47 @@
   config$style <- style
   config$panel <- panel
   config$seed  <- 1234L
-  
-  if (style == "jitter") config$builder <- build_data_jitter
 
   # `panels` is a named list of panels to build, keyed by panel name, in
   # build order; `panel_position` records where each named panel sits
   # relative to the base plot ("above"/"below"), which the composition
   # helpers (R/er-plot-compose.R) use instead of hardcoding "upper"/"lower".
-  panels <- character(0)
-  if (panel %in% c("upper", "both")) panels <- c(panels, "upper")
-  if (panel %in% c("lower", "both")) panels <- c(panels, "lower")
-  config$panels <- panels
-  config$panel_position <- c(upper = "above", lower = "below")[panels]
+  # `color_role` tags what the layer's `colour` aesthetic means --
+  # "strata" (the usual case, dispatched to via the shared strata legend)
+  # or "response" (the continuous/count variant's color-encoded response
+  # value, which needs its own label/legend and isn't deduplicated across
+  # stratum panels) -- consumed by `.polish_labels()`/`.polish_legends()`
+  # in R/er-plot-compose.R. See `PLAN.md`'s "Continuous-response data
+  # strip" section.
+  if (object$response$type == "binary") {
+    if (style == "jitter") config$builder <- build_data_jitter
+    config$color_role <- "strata"
+
+    panels <- character(0)
+    if (panel %in% c("upper", "both")) panels <- c(panels, "upper")
+    if (panel %in% c("lower", "both")) panels <- c(panels, "lower")
+    config$panels <- panels
+    config$panel_position <- c(upper = "above", lower = "below")[panels]
+
+  } else {
+    # continuous/count response: a single panel, points colored
+    # continuously by the response value, in place of the binary
+    # upper/lower partition -- `er_plot_show_data()` guards `panel` to
+    # "both" for this response type, since there's no upper/lower
+    # partition to select from. When stratified, the color channel is
+    # already spoken for by the response, so stratification becomes one
+    # panel per stratum level instead (all placed "below" the base plot).
+    if (style == "jitter") config$builder <- build_data_color
+    config$color_role <- "response"
+
+    if (stratify) {
+      panels <- as.character(object$strata$limits)
+    } else {
+      panels <- "data"
+    }
+    config$panels <- panels
+    config$panel_position <- stats::setNames(rep("below", length(panels)), panels)
+  }
 
   part_data$stratify <- stratify
   part_data$config <- config 

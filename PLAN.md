@@ -592,14 +592,70 @@ the current (post-rename) names throughout.
     (`sex`-stratified `ae1 ~ aucss`) was also re-rendered end-to-end and
     visually matches the pre-refactor design (flush margins between base
     and both strip panels, per-stratum color/legend intact).
-- **Stage 7b -- `build_data_color()` + dispatch.** New builder,
-  `.part_data()` dispatch on `object$response$type`, the `color_role`
-  tag and its consumption in `.polish_labels()`/`.polish_legends()`, the
-  `panel` argument guard for continuous/count, guard-rail removal in
-  `er_plot_show_data()`. Tests: unstratified continuous/count
-  round-trip, stratified continuous/count round-trip (N panels, one per
-  stratum), response-label-not-strata-label assertion, `panel != "both"`
-  error assertion.
+- **Stage 7b -- `build_data_color()` + dispatch. [done]** New builder
+  (`build_data_color()`, `R/er-plot-partials-data.R`), colors points
+  continuously by the response value instead of partitioning into
+  upper/lower panels; filters to `config$panel`'s stratum level when
+  stratified, otherwise uses all rows.
+  - `.part_data()` (`R/er-plot-part.R`) now dispatches on
+    `object$response$type`: `"binary"` keeps the original
+    `build_data_jitter()`/upper-lower-panel logic unchanged (now tagged
+    `config$color_role <- "strata"` for symmetry); `"continuous"`/
+    `"count"` route to `build_data_color()` with `config$color_role <-
+    "response"` and `config$panels` set to either `"data"` (a single
+    unstratified panel) or `as.character(object$strata$limits)` (one
+    panel per stratum level when stratified), all tagged `"below"` in
+    `config$panel_position` (there's no "upper" for a single color-coded
+    panel).
+  - `.polish_labels()`/`.polish_legends()` (`R/er-plot-compose.R`)
+    consult `config$color_role` instead of assuming every `colour`
+    aesthetic means strata: the data layer's legend label is
+    `object$response$label` when `color_role == "response"`, and that
+    part is excluded from `.polish_legends()`'s strata-legend
+    deduplication (each stratum panel keeps its own response colorbar,
+    since the panels are a facet fallback, not overlaid series sharing
+    one legend). When the response-colored layer is faceted (more than
+    one panel), each panel gets a plot *title* naming its stratum level
+    -- not a y-axis label, since `axes = "collect"` (set in
+    `er_plot_build()`) merges y-axis titles across all stacked panels,
+    which was tried first and visually overlapped the panels' titles.
+  - `.polish_arrangement()`'s data-panel height was generalised from a
+    hardcoded `height$data / 2` (a two-panel-only assumption, deliberately
+    preserved as a quirk by Stage 7a) to `height$data /
+    length(data_panels)`, since the continuous/count facet fallback can
+    have 1 (unstratified) or N (one per stratum) panels, not just 2.
+  - `er_plot_show_data()`'s `.abort_continuous_unsupported()` guard is
+    removed; it gained a new guard instead, erroring if `panel != "both"`
+    is passed explicitly for a continuous/count response (there's no
+    upper/lower partition to select from for that response type).
+    `er_plot_show_data()` was `.abort_continuous_unsupported()`'s only
+    remaining caller (per Stage 3's note), so the now-dead helper was
+    removed from `R/utils-helpers.R`.
+  - Files: `R/er-plot-partials-data.R` (`build_data_color()`),
+    `R/er-plot-part.R` (`.part_data()`), `R/er-plot-api.R`
+    (`er_plot_show_data()`'s guard + docs, `er_plot()`'s "Stratification"
+    docs), `R/er-plot-compose.R` (`.polish_labels()`,
+    `.polish_legends()`, `.polish_arrangement()`), `R/utils-helpers.R`
+    (`.abort_continuous_unsupported()` removed). Tests:
+    `test-er-plot-partials-data.R` (`build_data_color()` unit test,
+    unstratified + stratified, asserting the stratified builder filters
+    to just its stratum's rows), `test-er-plot-part.R` (`.part_data()`
+    dispatch for continuous and count responses, panel/panel_position
+    shape for both), `test-er-plot-api.R` (continuous/count support
+    replacing the old "errors clearly" tests, the `panel != "both"` error
+    assertion, and an end-to-end `er_plot_build()` round-trip asserting N
+    stratum panels each carry the response label -- not the strata label
+    -- on their color legend).
+  - Done when: `devtools::check()` is clean and a stratified
+    `biomarker_change ~ aucss + sex` model round-trips through
+    `er_plot_show_data()` and `er_plot_build()` producing one
+    color-coded, titled panel per stratum level, each with its own
+    response colorbar. Met -- `devtools::check()` clean (0/0/0), 325
+    tests passing (up from 289); both the unstratified and
+    `sex`-stratified continuous-response data layer were rendered
+    end-to-end and visually spot-checked (colorbar reads the response
+    label; stratum panels are titled "Male"/"Female" with no visual
+    overlap).
 - **Stage 7c -- docs/vignette.** `?er_plot_show_data` update (already on
   its own Rd topic as of the naming-decision rename above, so this is
   content, not structure); replace `vignettes/articles/plot.Rmd`'s

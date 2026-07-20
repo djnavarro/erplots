@@ -222,17 +222,61 @@ test_that(".part_data constructs the correct data structure", {
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
 
-  expect_length(cfg1, 6)
-  expect_length(cfg2, 6)
+  expect_length(cfg1, 7)
+  expect_length(cfg2, 7)
 
-  cfg_names <- c("style", "panel", "seed", "builder", "panels", "panel_position")
+  cfg_names <- c("style", "panel", "seed", "builder", "color_role", "panels", "panel_position")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 
+  expect_equal(cfg1$color_role, "strata")
+  expect_equal(cfg2$color_role, "strata")
   expect_equal(cfg1$panels, c("upper", "lower"))
   expect_equal(cfg2$panels, c("upper", "lower"))
   expect_equal(cfg1$panel_position, c(upper = "above", lower = "below"))
   expect_equal(cfg2$panel_position, c(upper = "above", lower = "below"))
+})
+
+
+test_that(".part_data dispatches to build_data_color for a continuous response", {
+  skip_if_not_installed("erglm")
+
+  plt1 <- er_test_data |> er_plot(aucss, biomarker_change)
+  plt2 <- er_test_data |> er_plot(aucss, biomarker_change, sex)
+
+  expect_no_error(plt1 |> er_plot_show_data())
+  expect_no_error(plt2 |> er_plot_show_data())
+
+  plt1 <- plt1 |> er_plot_show_data()
+  plt2 <- plt2 |> er_plot_show_data()
+
+  cfg1 <- plt1$part$data$config
+  cfg2 <- plt2$part$data$config
+
+  expect_identical(cfg1$builder, build_data_color)
+  expect_identical(cfg2$builder, build_data_color)
+  expect_equal(cfg1$color_role, "response")
+  expect_equal(cfg2$color_role, "response")
+
+  # unstratified: a single panel named "data"
+  expect_equal(cfg1$panels, "data")
+  expect_equal(cfg1$panel_position, c(data = "below"))
+
+  # stratified: one panel per stratum level, all "below"
+  expect_equal(sort(cfg2$panels), sort(as.character(unique(er_test_data$sex))))
+  expect_true(all(cfg2$panel_position == "below"))
+})
+
+
+test_that(".part_data routes a count response through build_data_color too", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
+  expect_no_error(plt |> er_plot_show_data())
+  cfg <- (plt |> er_plot_show_data())$part$data$config
+  expect_identical(cfg$builder, build_data_color)
+  expect_equal(cfg$color_role, "response")
+  expect_equal(cfg$panels, "data")
 })
 
 

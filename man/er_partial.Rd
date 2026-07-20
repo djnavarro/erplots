@@ -5,6 +5,7 @@
 %   R/er-plot-partials.R
 \name{build_data_jitter}
 \alias{build_data_jitter}
+\alias{build_data_color}
 \alias{build_group_boxplot}
 \alias{build_group_violin}
 \alias{build_model_ribbonline}
@@ -15,6 +16,8 @@
 \title{Partial builders for exposure-response plots}
 \usage{
 build_data_jitter(data, config, stratify, exposure, response, strata, style)
+
+build_data_color(data, config, stratify, exposure, response, strata, style)
 
 build_group_boxplot(data, config, stratify, exposure, response, strata, style)
 

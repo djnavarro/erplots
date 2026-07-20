@@ -68,10 +68,13 @@ discrete variable used to split layers by color/fill, with one shared,
 deduplicated legend across the whole composed plot. Each layer
 function's \code{keep_strata} argument controls whether \emph{that} layer
 actually uses the stratification (it defaults to \code{TRUE} whenever
-\code{stratify_by} was set, \code{FALSE} otherwise). \code{\link[=er_plot_show_data]{er_plot_show_data()}}
-is a partial exception to the "always color/fill" rule -- see its own
-documentation and \code{PLAN.md} for why a continuous-response variant of
-that layer would need to fall back to faceting instead.
+\code{stratify_by} was set, \code{FALSE} otherwise). \code{\link[=er_plot_show_data]{er_plot_show_data()}} is a
+partial exception to the "always color/fill" rule for a
+continuous/count response: its color aesthetic is already spoken for
+by the response value itself, so stratification falls back to one
+panel per stratum level instead of a shared legend -- see its own
+documentation and \code{PLAN.md} for the general "a layer's own encoding
+takes precedence" rule this follows.
 }
 
 \section{Response type}{

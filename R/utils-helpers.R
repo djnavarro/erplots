@@ -139,47 +139,6 @@ poisson_interval <- function(x, n, conf_level = 0.95) {
 }
 
 
-#' Abort with an informative error for components that don't support
-#' continuous responses
-#'
-#' @param fn_name Name of the calling function, used in the error message
-#' @param response_type The offending response type (e.g. `"continuous"`
-#'   or `"count"`), used in the error message. Defaults to `"continuous"`
-#'   for backward compatibility.
-#' @param planned Logical. If `TRUE` (the default), the message frames
-#'   this as a stopgap pending a planned generalisation (see `PLAN.md`,
-#'   "Extend beyond binary responses"). If `FALSE`, the message instead
-#'   frames this as a settled design decision with no continuous-response
-#'   variant currently planned (used by [er_plot_show_data()]; see
-#'   `PLAN.md` Stage 3).
-#'
-#' @details Originally a stopgap guard rail shared by every component that
-#'   hardcoded a binary (0/1) response assumption and would otherwise
-#'   silently mis-plot a continuous response. The quantile summary layer
-#'   and `er_vpc_plot()` have since been generalised to support continuous
-#'   (and, via `response_type = "count"`, exact-Poisson) responses
-#'   directly (PLAN.md Stages 1-2, and the design decision (4)
-#'   fast-follow) and no longer call this helper. `er_plot_show_data()`
-#'   is the remaining caller: its "responders above the line,
-#'   non-responders below" design is inherently binary-response, so (per
-#'   PLAN.md's Stage 3 design decision) no continuous- or count-response
-#'   variant is currently planned, hence `planned = FALSE` there.
-#'
-#' @noRd
-.abort_continuous_unsupported <- function(fn_name, response_type = "continuous", planned = TRUE) {
-  if (planned) {
-    detail <- "See PLAN.md for the planned generalisation to continuous/count responses."
-  } else {
-    detail <- "No continuous-response variant of this component is currently planned; see PLAN.md."
-  }
-  rlang::abort(c(
-    paste0("`", fn_name, "()` does not support ", response_type, " responses."),
-    "i" = "Only binary (0/1, or logical) responses are currently supported by this component.",
-    "i" = detail
-  ))
-}
-
-
 #' Cut a continuous variable into quantiles
 #'
 #' @param x Numeric vector

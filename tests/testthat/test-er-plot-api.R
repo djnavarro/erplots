@@ -50,40 +50,71 @@ test_that("er_plot_show_quantiles supports both binary and continuous responses"
   expect_no_error(er_plot_show_quantiles(plt_binary))
 })
 
-test_that("er_plot_show_data errors clearly for a continuous response", {
+test_that("er_plot_show_data supports a continuous response (single color-encoded panel)", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, biomarker_change)
-  expect_error(er_plot_show_data(plt), class = "rlang_error")
-  expect_error(
-    er_plot_show_data(plt),
-    regexp = "does not support continuous responses"
-  )
-  # the data layer has no continuous variant planned (unlike
-  # er_plot_show_quantiles()/er_vpc_plot(), which now support continuous
-  # responses) -- the error message should say so, not imply a fix is
-  # coming
-  cnd <- rlang::catch_cnd(er_plot_show_data(plt))
-  expect_match(
-    paste(conditionMessage(cnd), collapse = " "),
-    "no continuous-response variant .* is currently planned",
-    ignore.case = TRUE
-  )
+  expect_no_error(er_plot_show_data(plt))
 
-  # binary response still works
+  plt <- er_plot_show_data(plt)
+  expect_equal(plt$part$data$config$color_role, "response")
+  expect_equal(plt$part$data$config$panels, "data")
+
+  # binary response still works, dispatched to build_data_jitter
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
   expect_no_error(er_plot_show_data(plt_binary))
+  expect_equal((plt_binary |> er_plot_show_data())$part$data$config$color_role, "strata")
 })
 
-test_that("er_plot_show_data errors clearly for a declared count response", {
+test_that("er_plot_show_data supports a declared count response", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_error(er_plot_show_data(plt), class = "rlang_error")
+  expect_no_error(er_plot_show_data(plt))
+  expect_equal((plt |> er_plot_show_data())$part$data$config$color_role, "response")
+})
+
+test_that("er_plot_show_data errors when panel != 'both' for a continuous/count response", {
+  skip_if_not_installed("erglm")
+
+  plt_continuous <- er_test_data |> er_plot(aucss, biomarker_change)
   expect_error(
-    er_plot_show_data(plt),
-    regexp = "does not support count responses"
+    er_plot_show_data(plt_continuous, panel = "upper"),
+    regexp = "must be \"both\""
   )
+
+  plt_count <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
+  expect_error(
+    er_plot_show_data(plt_count, panel = "lower"),
+    regexp = "must be \"both\""
+  )
+
+  # default ("both") and binary responses are unaffected
+  expect_no_error(er_plot_show_data(plt_continuous))
+  plt_binary <- er_test_data |> er_plot(aucss, ae1)
+  expect_no_error(er_plot_show_data(plt_binary, panel = "upper"))
+})
+
+test_that("er_plot_show_data produces N stratum panels, each with a response colorbar", {
+  skip_if_not_installed("erglm")
+
+  mod3 <- erglm::erglm_model(biomarker_change ~ aucss + sex, er_test_data, family = gaussian())
+  plt <- er_test_data |>
+    er_plot(aucss, biomarker_change, sex) |>
+    er_plot_show_model(mod3) |>
+    er_plot_show_data()
+
+  expect_no_error(er_plot_build(plt))
+  built <- er_plot_build(plt)
+
+  strata_levels <- sort(as.character(unique(er_test_data$sex)))
+  expect_equal(sort(names(built$plot$data)), strata_levels)
+
+  # the response label -- not the strata label -- should be on the color legend
+  labs_by_panel <- purrr::map(built$plot$data, ggplot2::get_labs)
+  purrr::walk(labs_by_panel, function(l) {
+    expect_equal(l$colour, plt$response$label)
+  })
 })
 
 test_that("er_plot creates an er_plot (all parts)", {

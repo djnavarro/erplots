@@ -36,10 +36,13 @@
 #' deduplicated legend across the whole composed plot. Each layer
 #' function's `keep_strata` argument controls whether *that* layer
 #' actually uses the stratification (it defaults to `TRUE` whenever
-#' `stratify_by` was set, `FALSE` otherwise). [er_plot_show_data()]
-#' is a partial exception to the "always color/fill" rule -- see its own
-#' documentation and `PLAN.md` for why a continuous-response variant of
-#' that layer would need to fall back to faceting instead.
+#' `stratify_by` was set, `FALSE` otherwise). [er_plot_show_data()] is a
+#' partial exception to the "always color/fill" rule for a
+#' continuous/count response: its color aesthetic is already spoken for
+#' by the response value itself, so stratification falls back to one
+#' panel per stratum level instead of a shared legend -- see its own
+#' documentation and `PLAN.md` for the general "a layer's own encoding
+#' takes precedence" rule this follows.
 #'
 #' # Response type
 #'
@@ -353,29 +356,37 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #' Add a raw-data layer
 #'
 #' Adds the data layer: individual observations jittered along the
-#' exposure axis. Currently supports only a binary response --
-#' responders (`response == 1`) are jittered in an upper panel and
-#' non-responders (`response == 0`) in a lower panel. Calling this on an
-#' `er_plot` whose `response_type` is `"continuous"` or `"count"` errors,
-#' since the two-panel design has no direct analogue for those response
-#' types; see `PLAN.md`'s "Continuous-response data strip" section for
-#' the planned generalisation (a single, continuously colour-encoded
-#' panel).
+#' exposure axis. Which builder is used dispatches automatically on the
+#' plot's `response_type` (set in [er_plot()]):
+#' * `"binary"` -- responders (`response == 1`) are jittered in an upper
+#'   panel and non-responders (`response == 0`) in a lower panel.
+#' * `"continuous"`/`"count"` -- a single panel, with points colored
+#'   continuously by the response value in place of the upper/lower
+#'   partition (there's no binary flag to split on). `panel` must be
+#'   `"both"` (the default) for these response types -- passing
+#'   `"upper"`/`"lower"` errors, since that partition is binary-specific.
 #'
 #' This layer is **singleton** -- see [er_plot()]'s "Layers are either
 #' singleton or additive". It's also the one layer whose stratification
-#' behaviour is expected to become a partial exception to "always color/
-#' fill" once it supports continuous/count responses -- see [er_plot()]'s
-#' "Stratification" section and `PLAN.md`.
+#' behaviour is a partial exception to "always color/fill" (see
+#' [er_plot()]'s "Stratification" section): for a continuous/count
+#' response, the color aesthetic is already spoken for by the response
+#' value, so stratification instead produces one panel per stratum level
+#' (stacked below the base plot, each colored by the response), rather
+#' than a shared strata legend.
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`)
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. For a
+#'   continuous/count response this produces one panel per stratum level
+#'   (see "Stratification" above) rather than a shared color aesthetic.
 #' @param style Character string selecting the partial builder (currently
 #'   only `"jitter"`, the default)
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
-#'   default)
+#'   default). Only meaningful for a binary response; must be `"both"`
+#'   for a continuous/count response (there's no upper/lower partition to
+#'   select from).
 #'
 #' @returns The input `object`, with the data layer added
 #'
@@ -389,6 +400,15 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #'   er_plot_show_quantiles() |>
 #'   er_plot_show_data() |>
 #'   plot()
+#'
+#' # continuous response: a single color-encoded panel instead of the
+#' # binary upper/lower partition
+#' mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+#' erglm_data |>
+#'   er_plot(aucss, biomarker_change) |>
+#'   er_plot_show_model(mod3) |>
+#'   er_plot_show_data() |>
+#'   plot()
 #' }
 #'
 #' @seealso [er_plot()], [er_plot_show_model()],
@@ -398,13 +418,15 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 er_plot_show_data <- function(object, keep_strata = NULL, style = "jitter", panel = "both") {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  if (object$response$type %in% c("continuous", "count")) {
-    .abort_continuous_unsupported(
-      "er_plot_show_data",
-      response_type = object$response$type,
-      planned = FALSE
-    )
+
+  if (object$response$type %in% c("continuous", "count") && panel != "both") {
+    rlang::abort(c(
+      paste0("`panel` must be \"both\" for a ", object$response$type, " response."),
+      "i" = "The \"upper\"/\"lower\" two-panel design is specific to binary responses.",
+      "i" = "A continuous/count response uses a single color-encoded panel instead."
+    ))
   }
+
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
   object$part$data <- .part_data(
