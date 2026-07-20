@@ -7,7 +7,7 @@ up a plot by piping it through one or more layer functions –
 [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md)
 (exposure-quantile-binned response summary),
 [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
-(a strip depicting the raw data), and/or
+(raw observations, by default overlaid on the model panel), and/or
 [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
 (grouped exposure-distribution panels) – then render with
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`print()`](https://rdrr.io/r/base/print.html),
