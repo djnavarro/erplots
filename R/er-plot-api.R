@@ -1,21 +1,60 @@
 
-#' Builds an exposure-response plot for a fitted model
+#' The exposure-response plotting mini-language
+#'
+#' `er_plot()` creates an (empty) plot object of S3 class `er_plot`. Build
+#' up a plot by piping it through one or more layer functions --
+#' [er_plot_show_model()] (fitted-model curve/ribbon and summary),
+#' [er_plot_show_quantiles()] (exposure-quantile-binned response summary),
+#' [er_plot_show_datastrip()] (a strip depicting the raw data), and/or
+#' [er_plot_show_groups()] (grouped exposure-distribution panels) -- then
+#' render with `plot()`/`print()`, or build the ggplot2/patchwork objects
+#' directly with [er_plot_build()]. `er_plot()` never fits a model itself;
+#' any model implementing the small interface in [er_model_interface] can
+#' be passed to [er_plot_show_model()].
+#'
+#' @details
+#' # Layers are either singleton or additive
+#'
+#' [er_plot_show_model()], [er_plot_show_quantiles()], and
+#' [er_plot_show_datastrip()] are **singleton**: calling one of them twice
+#' on the same object overwrites the first call's result rather than
+#' combining the two. [er_plot_show_groups()] is **additive**: each call
+#' adds another grouped-distribution panel alongside any already added,
+#' rather than replacing them. This asymmetry is deliberate, not
+#' accidental -- there is only one "the model" and one "the quantile
+#' summary" to show per plot, but many legitimate ways to slice the
+#' exposure distribution by different grouping variables. See `PLAN.md`'s
+#' "Mini-language architecture review" for the design discussion,
+#' including the one flagged future exception: overlaying two model
+#' curves for comparison isn't currently supported, but is the one
+#' singleton layer where an additive variant might eventually make sense.
+#'
+#' # Stratification
+#'
+#' `stratify_by` (set once, here in `er_plot()`) declares a single
+#' discrete variable used to split layers by color/fill, with one shared,
+#' deduplicated legend across the whole composed plot. Each layer
+#' function's `keep_strata` argument controls whether *that* layer
+#' actually uses the stratification (it defaults to `TRUE` whenever
+#' `stratify_by` was set, `FALSE` otherwise). [er_plot_show_datastrip()]
+#' is a partial exception to the "always color/fill" rule -- see its own
+#' documentation and `PLAN.md` for why a continuous-response variant of
+#' that layer would need to fall back to faceting instead.
+#'
+#' # Response type
+#'
+#' `response_type` (set once, here in `er_plot()`) governs the response's
+#' scale (`object$response$limits`) and which summary/CI method
+#' [er_plot_show_quantiles()] and [er_vpc_plot()] use; see the
+#' `response_type` parameter below and [er_plot_show_quantiles()]'s own
+#' documentation for the specifics of each response type's summary
+#' statistic.
 #'
 #' @param data Observed data
 #' @param exposure Exposure variable (one variable, unquoted)
 #' @param response Response variable (one variable, unquoted)
-#' @param stratify_by Stratification variable used for color and fill (one variable, unquoted)
-#' @param group_by Grouping variables to define groups for distribution plots (a tidyselection of variables)
-#' @param keep_strata Logical, indicating whether this component should keep the color stratification
-#' @param labels Named list of labels
-#' @param bins Number of exposure bins (not counting placebo)
-#' @param style Character string used to specify the partial builder for this component
-#' @param panel Character string: "upper", "lower", or "both" (the default)
-#' @param conf_level Confidence level
-#' @param object Partially constructed plot (has S3 class `er_plot`)
-#' @param model A fitted exposure-response model. Must implement [er_predict()];
-#'   implementing [er_simulate()] and [er_summary()] enables additional
-#'   visualisations (see [er_model_interface])
+#' @param stratify_by Stratification variable used for color and fill (one
+#'   variable, unquoted); see "Stratification" above
 #' @param response_type One of `"auto"` (the default), `"binary"`,
 #'   `"continuous"`, or `"count"`. Governs response-scale defaults (e.g.
 #'   axis limits) and which summary/CI method the quantile and VPC layers
@@ -31,22 +70,7 @@
 #'   approximation -- never produces a negative lower bound. See
 #'   `PLAN.md`'s design decision (4) for the rationale.
 #'
-#' @details [er_plot_show_quantiles()] supports binary (response *rate*
-#'   with a Clopper-Pearson CI), continuous (bin *mean* with a
-#'   t-interval), and count (bin *mean* with an exact Poisson interval)
-#'   responses; see `PLAN.md` for the generalisation history. Count
-#'   responses are routed through the continuous path unless
-#'   `response_type = "count"` is declared explicitly (see
-#'   `response_type` above). [er_plot_show_datastrip()], by contrast, has
-#'   a design that is inherently about a binary response (responders
-#'   jittered above the exposure line, non-responders below) with no
-#'   obvious continuous or count analogue. Calling it on an `er_plot`
-#'   whose response was classified (or declared) as `"continuous"` or
-#'   `"count"` raises an error rather than silently producing an
-#'   empty/misleading strip; see `PLAN.md` for the design decision behind
-#'   omitting a continuous/count-response variant.
-#'
-#' @returns Plot object of class `er_plot`
+#' @returns An (empty) plot object of class `er_plot`
 #'
 #' @examples
 #' \dontrun{
@@ -59,37 +83,11 @@
 #'   er_plot_show_quantiles() |>
 #'   er_plot_show_groups(aucss) |>
 #'   plot()
-#'
-#' mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
-#' plt <- erglm_data |>
-#'   er_plot(aucss, ae2, stratify_by = sex) |>
-#'   er_plot_show_model(mod2, keep_strata = FALSE) |>
-#'   er_plot_show_quantiles() |>
-#'   er_plot_show_datastrip() |>
-#'   er_plot_show_groups(group_by = c(aucss, treatment), keep_strata = FALSE)
-#'
-#' print(plt)
-#' plot(plt)
-#'
-#' # continuous response: bin means/t-intervals instead of rates/
-#' # Clopper-Pearson intervals, auto-detected from the response column
-#' mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
-#' erglm_data |>
-#'   er_plot(aucss, biomarker_change) |>
-#'   er_plot_show_model(mod3) |>
-#'   er_plot_show_quantiles() |>
-#'   plot()
-#'
-#' # count response: declare response_type = "count" explicitly for an
-#' # exact Poisson interval instead of the t-interval approximation used
-#' # by the auto-detected ("continuous") default
-#' mod4 <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
-#' erglm_data |>
-#'   er_plot(aucss, ae_count, response_type = "count") |>
-#'   er_plot_show_model(mod4) |>
-#'   er_plot_show_quantiles() |>
-#'   plot()
 #' }
+#'
+#' @seealso [er_plot_show_model()], [er_plot_show_quantiles()],
+#'   [er_plot_show_datastrip()], [er_plot_show_groups()],
+#'   [er_plot_build()], [er_plot_style()], [er_model_interface]
 #'
 #' @name er_plot
 NULL
@@ -183,7 +181,19 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   return(object)
 }
 
-#' @rdname er_plot
+#' Adjust style/labels for an `er_plot` object
+#'
+#' Not yet implemented -- currently a no-op placeholder for future styling
+#' customisation (labels, theme, formatters). See `object$style` (set by
+#' [er_plot()]) for what's already there to be made adjustable.
+#'
+#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param labels Named list of labels
+#'
+#' @returns The input `object`, unchanged
+#'
+#' @seealso [er_plot()]
+#'
 #' @export
 er_plot_style <- function(object, labels) {
 
@@ -195,7 +205,47 @@ er_plot_style <- function(object, labels) {
 
 # model -----------------------------------------------------------------------
 
-#' @rdname er_plot
+#' Add a fitted-model curve/ribbon layer
+#'
+#' Adds the model layer: a fitted exposure-response curve with an
+#' uncertainty ribbon (`style = "ribbonline"`, via [er_predict()]), or a
+#' spaghetti plot of simulated draws (`style = "spaghetti"`, via
+#' [er_simulate()]), plus an optional summary annotation (e.g. a p-value)
+#' via [er_summary()] when the layer isn't stratified. This layer needs no
+#' `response_type` dispatch -- it only ever consumes [er_predict()]'s
+#' output on the response's own scale.
+#'
+#' This layer is **singleton** -- see [er_plot()]'s "Layers are either
+#' singleton or additive" -- so calling it twice replaces the previous
+#' model layer rather than overlaying two model curves.
+#'
+#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param model A fitted exposure-response model. Must implement
+#'   [er_predict()]; implementing [er_simulate()] and [er_summary()]
+#'   enables additional visualisations (see [er_model_interface])
+#' @param keep_strata Logical, indicating whether this layer should be
+#'   split by the plot's stratification variable; defaults to `TRUE` if
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
+#' @param style Character string selecting the partial builder:
+#'   `"ribbonline"` (default; mean prediction + confidence ribbon) or
+#'   `"spaghetti"` (simulated draws, via [er_simulate()])
+#' @param conf_level Confidence level for the prediction ribbon
+#'
+#' @returns The input `object`, with the model layer added
+#'
+#' @examples
+#' \dontrun{
+#' library(erglm)
+#' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_show_model(mod) |>
+#'   plot()
+#' }
+#'
+#' @seealso [er_plot()], [er_plot_show_quantiles()],
+#'   [er_plot_show_datastrip()], [er_plot_show_groups()]
+#'
 #' @export
 er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbonline", conf_level = 0.95) {
 
@@ -216,7 +266,70 @@ er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbo
 
 # quantiles -------------------------------------------------------------------
 
-#' @rdname er_plot
+#' Add a quantile-binned response summary layer
+#'
+#' Adds the quantile layer: exposure is cut into quantile bins (see
+#' [cut_exposure_quantile()]) and, within each bin, the response is
+#' summarised with a point estimate and confidence interval. Which
+#' summary/CI method is used dispatches on the plot's `response_type`
+#' (set in [er_plot()]):
+#' * `"binary"` -- response *rate*, with a Clopper-Pearson interval (see [clopper_pearson()])
+#' * `"continuous"` -- bin *mean*, with a t-interval (see [t_interval()])
+#' * `"count"` -- bin *mean*, with an exact Poisson interval (see [poisson_interval()])
+#'
+#' Count responses auto-detect as `"continuous"` (see [er_plot()]'s
+#' `response_type` parameter) and are summarised the same way as any other
+#' continuous response unless `response_type = "count"` is declared
+#' explicitly.
+#'
+#' This layer is **singleton** -- see [er_plot()]'s "Layers are either
+#' singleton or additive" -- so calling it twice replaces the previous
+#' quantile summary rather than combining bins from both calls.
+#'
+#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param keep_strata Logical, indicating whether this layer should be
+#'   split by the plot's stratification variable; defaults to `TRUE` if
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
+#' @param style Character string selecting the partial builder (currently
+#'   only `"errorbar"`, the default)
+#' @param bins Number of exposure bins (not counting placebo)
+#' @param conf_level Confidence level for the interval
+#'
+#' @returns The input `object`, with the quantile layer added
+#'
+#' @examples
+#' \dontrun{
+#' library(erglm)
+#' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_show_model(mod) |>
+#'   er_plot_show_quantiles() |>
+#'   plot()
+#'
+#' # continuous response: bin means/t-intervals instead of rates/
+#' # Clopper-Pearson intervals, auto-detected from the response column
+#' mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+#' erglm_data |>
+#'   er_plot(aucss, biomarker_change) |>
+#'   er_plot_show_model(mod3) |>
+#'   er_plot_show_quantiles() |>
+#'   plot()
+#'
+#' # count response: declare response_type = "count" explicitly for an
+#' # exact Poisson interval instead of the t-interval approximation used
+#' # by the auto-detected ("continuous") default
+#' mod4 <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
+#' erglm_data |>
+#'   er_plot(aucss, ae_count, response_type = "count") |>
+#'   er_plot_show_model(mod4) |>
+#'   er_plot_show_quantiles() |>
+#'   plot()
+#' }
+#'
+#' @seealso [er_plot()], [er_plot_show_model()],
+#'   [er_plot_show_datastrip()], [er_plot_show_groups()], [er_vpc_plot()]
+#'
 #' @export
 er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar", bins = 4, conf_level = 0.95) {
 
@@ -237,7 +350,52 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 
 # strips ----------------------------------------------------------------------
 
-#' @rdname er_plot
+#' Add a raw-data strip layer
+#'
+#' Adds the data strip layer: individual observations jittered along the
+#' exposure axis. Currently supports only a binary response --
+#' responders (`response == 1`) are jittered in an upper panel and
+#' non-responders (`response == 0`) in a lower panel. Calling this on an
+#' `er_plot` whose `response_type` is `"continuous"` or `"count"` errors,
+#' since the two-panel design has no direct analogue for those response
+#' types; see `PLAN.md`'s "Continuous-response data strip" section for
+#' the planned generalisation (a single, continuously colour-encoded
+#' panel) and "Mini-language architecture review" for the naming change
+#' this layer is expected to undergo (`er_plot_show_datastrip()` ->
+#' `er_plot_show_data()`).
+#'
+#' This layer is **singleton** -- see [er_plot()]'s "Layers are either
+#' singleton or additive". It's also the one layer whose stratification
+#' behaviour is expected to become a partial exception to "always color/
+#' fill" once it supports continuous/count responses -- see [er_plot()]'s
+#' "Stratification" section and `PLAN.md`.
+#'
+#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param keep_strata Logical, indicating whether this layer should be
+#'   split by the plot's stratification variable; defaults to `TRUE` if
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
+#' @param style Character string selecting the partial builder (currently
+#'   only `"jitter"`, the default)
+#' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
+#'   default)
+#'
+#' @returns The input `object`, with the data strip layer added
+#'
+#' @examples
+#' \dontrun{
+#' library(erglm)
+#' mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+#' erglm_data |>
+#'   er_plot(aucss, ae2, stratify_by = sex) |>
+#'   er_plot_show_model(mod2, keep_strata = FALSE) |>
+#'   er_plot_show_quantiles() |>
+#'   er_plot_show_datastrip() |>
+#'   plot()
+#' }
+#'
+#' @seealso [er_plot()], [er_plot_show_model()],
+#'   [er_plot_show_quantiles()], [er_plot_show_groups()]
+#'
 #' @export
 er_plot_show_datastrip <- function(object, keep_strata = NULL, style = "jitter", panel = "both") {
 
@@ -264,7 +422,54 @@ er_plot_show_datastrip <- function(object, keep_strata = NULL, style = "jitter",
 
 # groups plot -----------------------------------------------------------------
 
-#' @rdname er_plot
+#' Add a grouped exposure-distribution panel
+#'
+#' Adds a group layer: a boxplot/violin panel showing the *exposure*
+#' distribution, split by one or more grouping variables (continuous
+#' grouping variables are binned into quantiles first, via
+#' [cut_quantile()]). This layer only looks at the exposure variable, not
+#' the response, so it needs no `response_type` dispatch.
+#'
+#' Unlike the other three layers, this one is **additive** -- see
+#' [er_plot()]'s "Layers are either singleton or additive" -- each call
+#' adds another panel alongside any already added by a previous call,
+#' rather than replacing it.
+#'
+#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param group_by Grouping variables to define groups for distribution
+#'   plots (a tidyselection of variables)
+#' @param style Character string selecting the partial builder:
+#'   `"boxplot"` (default) or `"violin"`
+#' @param bins Number of quantile bins used for continuous grouping
+#'   variables (`NULL`, the default, uses [cut_quantile()]'s own default)
+#' @param keep_strata Logical, indicating whether this layer should be
+#'   split by the plot's stratification variable; defaults to `TRUE` if
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
+#'
+#' @returns The input `object`, with a group panel added
+#'
+#' @examples
+#' \dontrun{
+#' library(erglm)
+#' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_show_model(mod) |>
+#'   er_plot_show_groups(aucss) |>
+#'   plot()
+#'
+#' # additive: a second call adds a second panel rather than replacing the first
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_show_model(mod) |>
+#'   er_plot_show_groups(aucss) |>
+#'   er_plot_show_groups(treatment) |>
+#'   plot()
+#' }
+#'
+#' @seealso [er_plot()], [er_plot_show_model()],
+#'   [er_plot_show_quantiles()], [er_plot_show_datastrip()]
+#'
 #' @export
 er_plot_show_groups <- function(object, group_by, style = "boxplot", bins = NULL, keep_strata = NULL) {
 
@@ -333,7 +538,21 @@ plot.er_plot <- function(x, y = NULL, ...) {
 
 # top level build function ----------------------------------------------------
 
-#' @rdname er_plot
+#' Build and render an `er_plot` object
+#'
+#' Assembles whichever layers have been added (via the `er_plot_show_*()`
+#' functions) into ggplot2 objects, applies shared theming and legend
+#' deduplication across layers, and composes the final output with
+#' patchwork. Usually invoked indirectly, via `plot()`/`print()` on an
+#' `er_plot` object, rather than called directly.
+#'
+#' @param object Partially constructed plot (has S3 class `er_plot`)
+#'
+#' @returns The input `object`, with `object$plot` (per-layer ggplot2
+#'   objects) and `object$output` (the final composed plot) populated
+#'
+#' @seealso [er_plot()]
+#'
 #' @export
 er_plot_build <- function(object) {
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")

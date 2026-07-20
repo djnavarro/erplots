@@ -2,50 +2,9 @@
 % Please edit documentation in R/er-plot-api.R
 \name{er_plot}
 \alias{er_plot}
-\alias{er_plot_style}
-\alias{er_plot_show_model}
-\alias{er_plot_show_quantiles}
-\alias{er_plot_show_datastrip}
-\alias{er_plot_show_groups}
-\alias{er_plot_build}
-\title{Builds an exposure-response plot for a fitted model}
+\title{The exposure-response plotting mini-language}
 \usage{
 er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
-
-er_plot_style(object, labels)
-
-er_plot_show_model(
-  object,
-  model,
-  keep_strata = NULL,
-  style = "ribbonline",
-  conf_level = 0.95
-)
-
-er_plot_show_quantiles(
-  object,
-  keep_strata = NULL,
-  style = "errorbar",
-  bins = 4,
-  conf_level = 0.95
-)
-
-er_plot_show_datastrip(
-  object,
-  keep_strata = NULL,
-  style = "jitter",
-  panel = "both"
-)
-
-er_plot_show_groups(
-  object,
-  group_by,
-  style = "boxplot",
-  bins = NULL,
-  keep_strata = NULL
-)
-
-er_plot_build(object)
 }
 \arguments{
 \item{data}{Observed data}
@@ -54,7 +13,8 @@ er_plot_build(object)
 
 \item{response}{Response variable (one variable, unquoted)}
 
-\item{stratify_by}{Stratification variable used for color and fill (one variable, unquoted)}
+\item{stratify_by}{Stratification variable used for color and fill (one
+variable, unquoted); see "Stratification" above}
 
 \item{response_type}{One of \code{"auto"} (the default), \code{"binary"},
 \code{"continuous"}, or \code{"count"}. Governs response-scale defaults (e.g.
@@ -70,49 +30,59 @@ count response to instead get bin mean plus an \emph{exact} Poisson
 interval (see \code{\link[=poisson_interval]{poisson_interval()}}), which -- unlike the t-interval
 approximation -- never produces a negative lower bound. See
 \code{PLAN.md}'s design decision (4) for the rationale.}
-
-\item{object}{Partially constructed plot (has S3 class \code{er_plot})}
-
-\item{labels}{Named list of labels}
-
-\item{model}{A fitted exposure-response model. Must implement \code{\link[=er_predict]{er_predict()}};
-implementing \code{\link[=er_simulate]{er_simulate()}} and \code{\link[=er_summary]{er_summary()}} enables additional
-visualisations (see \link{er_model_interface})}
-
-\item{keep_strata}{Logical, indicating whether this component should keep the color stratification}
-
-\item{style}{Character string used to specify the partial builder for this component}
-
-\item{conf_level}{Confidence level}
-
-\item{bins}{Number of exposure bins (not counting placebo)}
-
-\item{panel}{Character string: "upper", "lower", or "both" (the default)}
-
-\item{group_by}{Grouping variables to define groups for distribution plots (a tidyselection of variables)}
 }
 \value{
-Plot object of class \code{er_plot}
+An (empty) plot object of class \code{er_plot}
 }
 \description{
-Builds an exposure-response plot for a fitted model
+\code{er_plot()} creates an (empty) plot object of S3 class \code{er_plot}. Build
+up a plot by piping it through one or more layer functions --
+\code{\link[=er_plot_show_model]{er_plot_show_model()}} (fitted-model curve/ribbon and summary),
+\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} (exposure-quantile-binned response summary),
+\code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}} (a strip depicting the raw data), and/or
+\code{\link[=er_plot_show_groups]{er_plot_show_groups()}} (grouped exposure-distribution panels) -- then
+render with \code{plot()}/\code{print()}, or build the ggplot2/patchwork objects
+directly with \code{\link[=er_plot_build]{er_plot_build()}}. \code{er_plot()} never fits a model itself;
+any model implementing the small interface in \link{er_model_interface} can
+be passed to \code{\link[=er_plot_show_model]{er_plot_show_model()}}.
 }
-\details{
-\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} supports binary (response \emph{rate}
-with a Clopper-Pearson CI), continuous (bin \emph{mean} with a
-t-interval), and count (bin \emph{mean} with an exact Poisson interval)
-responses; see \code{PLAN.md} for the generalisation history. Count
-responses are routed through the continuous path unless
-\code{response_type = "count"} is declared explicitly (see
-\code{response_type} above). \code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}, by contrast, has
-a design that is inherently about a binary response (responders
-jittered above the exposure line, non-responders below) with no
-obvious continuous or count analogue. Calling it on an \code{er_plot}
-whose response was classified (or declared) as \code{"continuous"} or
-\code{"count"} raises an error rather than silently producing an
-empty/misleading strip; see \code{PLAN.md} for the design decision behind
-omitting a continuous/count-response variant.
+\section{Layers are either singleton or additive}{
+\code{\link[=er_plot_show_model]{er_plot_show_model()}}, \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, and
+\code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}} are \strong{singleton}: calling one of them twice
+on the same object overwrites the first call's result rather than
+combining the two. \code{\link[=er_plot_show_groups]{er_plot_show_groups()}} is \strong{additive}: each call
+adds another grouped-distribution panel alongside any already added,
+rather than replacing them. This asymmetry is deliberate, not
+accidental -- there is only one "the model" and one "the quantile
+summary" to show per plot, but many legitimate ways to slice the
+exposure distribution by different grouping variables. See \code{PLAN.md}'s
+"Mini-language architecture review" for the design discussion,
+including the one flagged future exception: overlaying two model
+curves for comparison isn't currently supported, but is the one
+singleton layer where an additive variant might eventually make sense.
 }
+
+\section{Stratification}{
+\code{stratify_by} (set once, here in \code{er_plot()}) declares a single
+discrete variable used to split layers by color/fill, with one shared,
+deduplicated legend across the whole composed plot. Each layer
+function's \code{keep_strata} argument controls whether \emph{that} layer
+actually uses the stratification (it defaults to \code{TRUE} whenever
+\code{stratify_by} was set, \code{FALSE} otherwise). \code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}
+is a partial exception to the "always color/fill" rule -- see its own
+documentation and \code{PLAN.md} for why a continuous-response variant of
+that layer would need to fall back to faceting instead.
+}
+
+\section{Response type}{
+\code{response_type} (set once, here in \code{er_plot()}) governs the response's
+scale (\code{object$response$limits}) and which summary/CI method
+\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} and \code{\link[=er_vpc_plot]{er_vpc_plot()}} use; see the
+\code{response_type} parameter below and \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}'s own
+documentation for the specifics of each response type's summary
+statistic.
+}
+
 \examples{
 \dontrun{
 library(erglm)
@@ -124,36 +94,11 @@ erglm_data |>
   er_plot_show_quantiles() |>
   er_plot_show_groups(aucss) |>
   plot()
-
-mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
-plt <- erglm_data |>
-  er_plot(aucss, ae2, stratify_by = sex) |>
-  er_plot_show_model(mod2, keep_strata = FALSE) |>
-  er_plot_show_quantiles() |>
-  er_plot_show_datastrip() |>
-  er_plot_show_groups(group_by = c(aucss, treatment), keep_strata = FALSE)
-
-print(plt)
-plot(plt)
-
-# continuous response: bin means/t-intervals instead of rates/
-# Clopper-Pearson intervals, auto-detected from the response column
-mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
-erglm_data |>
-  er_plot(aucss, biomarker_change) |>
-  er_plot_show_model(mod3) |>
-  er_plot_show_quantiles() |>
-  plot()
-
-# count response: declare response_type = "count" explicitly for an
-# exact Poisson interval instead of the t-interval approximation used
-# by the auto-detected ("continuous") default
-mod4 <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
-erglm_data |>
-  er_plot(aucss, ae_count, response_type = "count") |>
-  er_plot_show_model(mod4) |>
-  er_plot_show_quantiles() |>
-  plot()
 }
 
+}
+\seealso{
+\code{\link[=er_plot_show_model]{er_plot_show_model()}}, \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}},
+\code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}},
+\code{\link[=er_plot_build]{er_plot_build()}}, \code{\link[=er_plot_style]{er_plot_style()}}, \link{er_model_interface}
 }
