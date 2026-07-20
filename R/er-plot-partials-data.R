@@ -1,7 +1,7 @@
 
 #' @rdname er_partial
 #' @export
-build_data_jitter <- function(data, config, stratify, exposure, response, strata, style) {
+build_data_jitter <- er_layout(function(data, config, stratify, exposure, response, strata, style) {
 
   if (config$panel == "upper") dat <- data |> dplyr::filter(.data[[response$name]] == 1)
   if (config$panel == "lower") dat <- data |> dplyr::filter(.data[[response$name]] == 0)
@@ -47,12 +47,12 @@ build_data_jitter <- function(data, config, stratify, exposure, response, strata
   )
 
   return(geoms)
-}
+}, layout = "panel")
 
 
 #' @rdname er_partial
 #' @export
-build_data_overlay <- function(data, config, stratify, exposure, response, strata, style) {
+build_data_overlay <- er_layout(function(data, config, stratify, exposure, response, strata, style) {
 
   # unlike `build_data_jitter()`/`build_data_color()`, this builder draws
   # points at their true (exposure, response) coordinates and its output
@@ -99,12 +99,12 @@ build_data_overlay <- function(data, config, stratify, exposure, response, strat
   )
 
   return(geoms)
-}
+}, layout = "overlay")
 
 
 #' @rdname er_partial
 #' @export
-build_data_color <- function(data, config, stratify, exposure, response, strata, style) {
+build_data_color <- er_layout(function(data, config, stratify, exposure, response, strata, style) {
 
   # continuous/count-response variant of `build_data_jitter()` -- see
   # `PLAN.md`'s "Continuous-response data strip". There's no binary
@@ -152,4 +152,4 @@ build_data_color <- function(data, config, stratify, exposure, response, strata,
   )
 
   return(geoms)
-}
+}, layout = "panel")

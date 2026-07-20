@@ -4,82 +4,81 @@
 \alias{er_plot_show_data}
 \title{Add a raw-data layer}
 \usage{
-er_plot_show_data(
-  object,
-  keep_strata = NULL,
-  style = "overlay",
-  builder = NULL,
-  panel = "both"
-)
+er_plot_show_data(object, keep_strata = NULL, builder = NULL, panel = "both")
 }
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_plot})}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. For \code{style = "jitter"} on a continuous/count response this produces one panel per
-stratum level (see "Stratification" above) rather than a shared
-color aesthetic; for \code{style = "overlay"} it always means a shared
-color aesthetic, for any response type.}
+\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. For a
+"panel"-layout builder on a continuous/count response this produces
+one panel per stratum level (see "Stratification" above) rather than
+a shared color aesthetic; for an "overlay"-layout builder it always
+means a shared color aesthetic, for any response type.}
 
-\item{style}{Character string selecting the \emph{structural} family:
-\code{"overlay"} (default; a single scatter merged into the main panel, at
-each point's true \verb{(exposure, response)} coordinates) or \code{"jitter"}
-(the older panel-based design -- see above). This choice is still
-respected when \code{builder} is supplied: \code{style} picks which of the two
-layouts (single main-panel overlay vs. one-or-more panels stacked
-below the base plot) your custom builder is slotted into, while
-\code{builder} picks the geoms it actually draws.}
-
-\item{builder}{Optional function overriding the builder that \code{style}
-(crossed with the response type, for \code{style = "jitter"}) would
-otherwise select -- the escape hatch documented in \code{\link[=er_partial]{er_partial()}} for
-plugging in a custom \verb{build_data_*()}-style function (e.g. a 2D
-density in the main panel, or per-panel histograms) without touching
-package internals. Must accept and use the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature.}
+\item{builder}{Function drawing the data layer -- defaults to
+\code{\link[=build_data_overlay]{build_data_overlay()}}. \code{\link[=build_data_jitter]{build_data_jitter()}} (binary response) and
+\code{\link[=build_data_color]{build_data_color()}} (continuous/count response) are the other
+built-in options; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature and tagged
+with \code{\link[=er_layout]{er_layout()}} can be supplied instead -- see \code{\link[=er_partial]{er_partial()}} for
+the full contract, e.g. a 2D density in the main panel, or per-panel
+histograms.}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
-default). Only meaningful for \code{style = "jitter"} on a binary
-response; must be \code{"both"} for \code{style = "overlay"} (no upper/lower
-partition exists) or for a continuous/count response under \code{style = "jitter"} (there's no upper/lower partition to select from either
-way).}
+default). Only meaningful for \code{\link[=build_data_jitter]{build_data_jitter()}} on a binary
+response; must be \code{"both"} for an "overlay"-layout builder (no
+upper/lower partition exists) or for a continuous/count response
+under a "panel"-layout builder (there's no upper/lower partition to
+select from either way).}
 }
 \value{
 The input \code{object}, with the data layer added
 }
 \description{
-Adds the data layer: individual observations. By default (\code{style = "overlay"}), points are drawn at their true \verb{(exposure, response)}
-coordinates in the \emph{main} model panel -- a plain scatter for
+Adds the data layer: individual observations. By default (\code{builder = build_data_overlay}), points are drawn at their true \verb{(exposure, response)} coordinates in the \emph{main} model panel -- a plain scatter for
 continuous/count responses, or a scatter with a small vertical jitter
 for a binary response (whose y-values are exactly 0/1 and would
 otherwise overplot into two solid lines). This works uniformly across
 all three response types, with no response-type dispatch on which
-builder to use. \code{style = "jitter"} instead uses the older, panel-based
-design, which \emph{does} dispatch on \code{response_type} (set in \code{\link[=er_plot]{er_plot()}}):
+builder to use. \code{build_data_jitter()}/\code{build_data_color()} instead use
+the older, panel-based design, which \emph{does} dispatch on \code{response_type}
+(set in \code{\link[=er_plot]{er_plot()}}):
 \itemize{
-\item \code{"binary"} -- responders (\code{response == 1}) are jittered in an upper
-panel and non-responders (\code{response == 0}) in a lower panel.
-\item \code{"continuous"}/\code{"count"} -- a single panel, with points colored
-continuously by the response value in place of the upper/lower
-partition (there's no binary flag to split on). \code{panel} must be
-\code{"both"} (the default) for these response types -- passing
-\code{"upper"}/\code{"lower"} errors, since that partition is binary-specific.
+\item \code{build_data_jitter()} (binary response) -- responders (\code{response == 1}) are jittered in an upper panel and non-responders (\code{response == 0}) in a lower panel.
+\item \code{build_data_color()} (continuous/count response) -- a single panel,
+with points colored continuously by the response value in place of
+the upper/lower partition (there's no binary flag to split on).
+\code{panel} must be \code{"both"} (the default) for these response types --
+passing \code{"upper"}/\code{"lower"} errors, since that partition is
+binary-specific.
 }
 }
 \details{
+Every data-layer builder declares which of these two \emph{structural}
+families it belongs to via \code{\link[=er_layout]{er_layout()}} -- \code{"overlay"} (a single call
+merged into the main panel) or \code{"panel"} (one-or-more panels stacked
+below the base plot) -- which \code{er_plot_show_data()} reads off \code{builder}
+to decide how to assemble the layer, rather than taking a separate
+argument for it. This makes the pairing structural rather than
+incidental: \code{build_data_overlay()} can never be routed into upper/lower
+panels, and \code{build_data_jitter()}/\code{build_data_color()} can never be
+merged into the main panel. See \code{\link[=er_layout]{er_layout()}} and \code{\link[=er_partial]{er_partial()}} for
+how to tag a custom builder the same way.
+
 This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
-singleton or additive" -- calling it again (with either style) fully
-replaces the previous data layer. \code{style = "jitter"} is also the one
-case where stratification behaviour is a partial exception to "always
-color/fill" (see \code{\link[=er_plot]{er_plot()}}'s "Stratification" section): for a
+singleton or additive" -- calling it again (with any builder) fully
+replaces the previous data layer. A "panel"-layout builder is also the
+one case where stratification behaviour is a partial exception to
+"always color/fill" (see \code{\link[=er_plot]{er_plot()}}'s "Stratification" section): for a
 continuous/count response, the color aesthetic is already spoken for
 by the response value, so stratification instead produces one panel
 per stratum level (stacked below the base plot, each colored by the
-response), rather than a shared strata legend. \code{style = "overlay"} has
-no such exception -- its color aesthetic (when stratified) is always
-strata, since the response is already shown via y-position, and it
-shares the base plot's own strata legend (the same one the model/
-quantile layers use) rather than needing one of its own.
+response), rather than a shared strata legend. An "overlay"-layout
+builder has no such exception -- its color aesthetic (when stratified)
+is always strata, since the response is already shown via y-position,
+and it shares the base plot's own strata legend (the same one the
+model/quantile layers use) rather than needing one of its own.
 }
 \examples{
 \dontrun{
@@ -106,17 +105,21 @@ erglm_data |>
 erglm_data |>
   er_plot(aucss, biomarker_change) |>
   er_plot_show_model(mod3) |>
-  er_plot_show_data(style = "jitter") |>
+  er_plot_show_data(builder = build_data_color) |>
   plot()
 
-# plug in a 2D density in the main panel instead of a scatter; `style`
-# still picks the "overlay" (single main-panel) layout -- see `?er_partial`
-build_data_density <- function(data, config, stratify, exposure, response, strata, style) {
-  ggplot2::geom_density_2d(
-    data = data,
-    mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
-  )
-}
+# plug in a 2D density in the main panel instead of a scatter; tagging
+# it "overlay" via `er_layout()` keeps it in the single main-panel
+# layout -- see `?er_partial`
+build_data_density <- er_layout(
+  function(data, config, stratify, exposure, response, strata, style) {
+    ggplot2::geom_density_2d(
+      data = data,
+      mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
+    )
+  },
+  layout = "overlay"
+)
 erglm_data |>
   er_plot(aucss, biomarker_change) |>
   er_plot_show_model(mod3) |>

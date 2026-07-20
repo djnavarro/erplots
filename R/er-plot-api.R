@@ -213,8 +213,8 @@ er_plot_style <- function(object, labels) {
 #' Add a fitted-model curve/ribbon layer
 #'
 #' Adds the model layer: a fitted exposure-response curve with an
-#' uncertainty ribbon (`style = "ribbonline"`, via [er_predict()]), or a
-#' spaghetti plot of simulated draws (`style = "spaghetti"`, via
+#' uncertainty ribbon (the default, via [er_predict()]), or a spaghetti
+#' plot of simulated draws (`builder = build_model_spaghetti`, via
 #' [er_simulate()]), plus an optional summary annotation (e.g. a p-value)
 #' via [er_summary()] when the layer isn't stratified. This layer needs no
 #' `response_type` dispatch -- it only ever consumes [er_predict()]'s
@@ -231,19 +231,16 @@ er_plot_style <- function(object, labels) {
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
-#' @param style Character string selecting the partial builder:
-#'   `"ribbonline"` (default; mean prediction + confidence ribbon) or
-#'   `"spaghetti"` (simulated draws, via [er_simulate()]). Ignored when
-#'   `builder` is supplied.
-#' @param builder Optional function overriding the model-curve builder that
-#'   `style` would otherwise select -- the escape hatch documented in
-#'   [er_partial()] for plugging in a custom `build_model_*()`-style
-#'   function without touching package internals. Must accept and use the
-#'   standard `(data, config, stratify, exposure, response, strata,
-#'   style)` signature.
-#' @param summary_builder Optional function overriding the summary-
-#'   annotation builder (`build_summary_pvalue()` by default), using the
-#'   same standard signature as `builder`. See [er_partial()].
+#' @param builder Function drawing the model curve/ribbon -- defaults to
+#'   [build_model_ribbonline()] (mean prediction + confidence ribbon).
+#'   [build_model_spaghetti()] (simulated draws, via [er_simulate()]) is
+#'   the other built-in option; any function matching the standard
+#'   `(data, config, stratify, exposure, response, strata, style)`
+#'   signature can be supplied instead -- see [er_partial()].
+#' @param summary_builder Function drawing the summary annotation --
+#'   defaults to [build_summary_pvalue()]. Any function matching the same
+#'   standard signature as `builder` can be supplied instead. See
+#'   [er_partial()].
 #' @param conf_level Confidence level for the prediction ribbon
 #'
 #' @returns The input `object`, with the model layer added
@@ -257,8 +254,14 @@ er_plot_style <- function(object, labels) {
 #'   er_plot_show_model(mod) |>
 #'   plot()
 #'
-#' # plug in a custom model-curve builder instead of choosing a built-in
-#' # `style`; see `?er_partial` for the full contract
+#' # a spaghetti plot instead of the default ribbon
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_show_model(mod, builder = build_model_spaghetti) |>
+#'   plot()
+#'
+#' # plug in a fully custom model-curve builder; see `?er_partial` for the
+#' # full contract
 #' build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
 #'   ggplot2::geom_line(
 #'     data = config$predictions,
@@ -276,25 +279,21 @@ er_plot_style <- function(object, labels) {
 #'   [er_plot_show_data()], [er_plot_show_groups()], [er_partial()]
 #'
 #' @export
-er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbonline",
+er_plot_show_model <- function(object, model, keep_strata = NULL,
                                 builder = NULL, summary_builder = NULL, conf_level = 0.95) {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(builder) && !is.function(builder)) rlang::abort("`builder` must be a function or NULL")
   if (!is.null(summary_builder) && !is.function(summary_builder)) rlang::abort("`summary_builder` must be a function or NULL")
-  if (is.null(builder) && !style %in% c("ribbonline", "spaghetti")) {
-    rlang::abort("`style` must be \"ribbonline\" or \"spaghetti\" unless `builder` is supplied")
-  }
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
   object$part$model <- .part_model(
     object = object, 
     model = model,
     stratify = keep_strata, 
-    style = style, 
     conf_level = conf_level,
-    builder = builder,
-    summary_builder = summary_builder
+    builder = builder %||% build_model_ribbonline,
+    summary_builder = summary_builder %||% build_summary_pvalue
   )
   
   return(object)
@@ -327,18 +326,14 @@ er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbo
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
-#' @param style Character string selecting the partial builder:
-#'   `"errorbar"` (default; point + error bar, via
-#'   [build_quantile_errorbar()]) or `"pointrange"` (a single
-#'   [ggplot2::geom_pointrange()], via [build_quantile_pointrange()]).
-#'   Ignored when `builder` is supplied.
-#' @param builder Optional function overriding the builder that `style`
-#'   would otherwise select -- the escape hatch documented in
-#'   [er_partial()] for plugging in a custom `build_quantile_*()`-style
-#'   function without touching package internals. Must accept and use the
-#'   standard `(data, config, stratify, exposure, response, strata,
-#'   style)` signature; `config$summary` is the pre-computed per-bin data
-#'   frame (point estimate + CI) to draw.
+#' @param builder Function drawing the quantile summary -- defaults to
+#'   [build_quantile_errorbar()] (point + error bar).
+#'   [build_quantile_pointrange()] (a single [ggplot2::geom_pointrange()])
+#'   is the other built-in option; any function matching the standard
+#'   `(data, config, stratify, exposure, response, strata, style)`
+#'   signature can be supplied instead -- see [er_partial()].
+#'   `config$summary` is the pre-computed per-bin data frame (point
+#'   estimate + CI) to draw.
 #' @param bins Number of exposure bins (not counting placebo)
 #' @param conf_level Confidence level for the interval
 #'
@@ -373,15 +368,14 @@ er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbo
 #'   er_plot_show_quantiles() |>
 #'   plot()
 #'
-#' # a pointrange instead of an errorbar
+#' # a pointrange instead of the default errorbar
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
 #'   er_plot_show_model(mod) |>
-#'   er_plot_show_quantiles(style = "pointrange") |>
+#'   er_plot_show_quantiles(builder = build_quantile_pointrange) |>
 #'   plot()
 #'
-#' # plug in a fully custom builder instead of choosing a built-in
-#' # `style`; see `?er_partial` for the full contract
+#' # plug in a fully custom builder; see `?er_partial` for the full contract
 #' build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
 #'   ggplot2::geom_crossbar(
 #'     data = config$summary,
@@ -401,23 +395,19 @@ er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbo
 #'   [er_partial()]
 #'
 #' @export
-er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar", builder = NULL,
+er_plot_show_quantiles <- function(object, keep_strata = NULL, builder = NULL,
                                     bins = 4, conf_level = 0.95) {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(builder) && !is.function(builder)) rlang::abort("`builder` must be a function or NULL")
-  if (is.null(builder) && !style %in% c("errorbar", "pointrange")) {
-    rlang::abort("`style` must be \"errorbar\" or \"pointrange\" unless `builder` is supplied")
-  }
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
   
   object$part$quantile <- .part_quantile(
     object = object,
     stratify = keep_strata,
-    style = style,
     bins = bins,
     conf_level = conf_level,
-    builder = builder
+    builder = builder %||% build_quantile_errorbar
   )
   
   return(object)
@@ -426,68 +416,128 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 
 # data --------------------------------------------------------------------
 
+#' Declare a data-layer builder's structural layout
+#'
+#' Tags a `build_data_*()`-style function with the *structural* family it
+#' belongs to -- `"overlay"` (a single call merged into the main panel) or
+#' `"panel"` (one-or-more panels stacked below the base plot) -- so
+#' [er_plot_show_data()] can route to the right internal assembly path
+#' (`.part_overlay()` vs. `.part_data()`) just by inspecting the `builder`
+#' it was given, with no separate `style`/`layout` argument needed. See
+#' [er_partial()]'s "Writing your own builder" section for the full
+#' contract; all three built-in data builders ([build_data_overlay()],
+#' [build_data_jitter()], [build_data_color()]) already carry this tag.
+#'
+#' @param builder A function matching the standard `build_*()` signature
+#'   (see [er_partial()])
+#' @param layout One of `"overlay"` or `"panel"` -- see [er_plot_show_data()]
+#'   for what each structural family means
+#'
+#' @returns `builder`, with an `"er_layout"` attribute attached
+#'
+#' @seealso [er_plot_show_data()], [er_partial()]
+#'
+#' @examples
+#' build_data_density <- er_layout(
+#'   function(data, config, stratify, exposure, response, strata, style) {
+#'     ggplot2::geom_density_2d(
+#'       data = data,
+#'       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
+#'     )
+#'   },
+#'   layout = "overlay"
+#' )
+#'
+#' @export
+er_layout <- function(builder, layout = c("overlay", "panel")) {
+  if (!is.function(builder)) rlang::abort("`builder` must be a function")
+  layout <- match.arg(layout)
+  structure(builder, er_layout = layout)
+}
+
+#' @noRd
+.builder_layout <- function(builder) {
+  layout <- attr(builder, "er_layout")
+  if (is.null(layout)) {
+    rlang::abort(c(
+      "`builder` must declare its structural layout.",
+      "i" = "Wrap a custom data-layer builder with `er_layout(builder, \"overlay\")` or `er_layout(builder, \"panel\")`.",
+      "i" = "The built-in builders (`build_data_overlay()`, `build_data_jitter()`, `build_data_color()`) already do this."
+    ))
+  }
+  layout
+}
+
+
 #' Add a raw-data layer
 #'
-#' Adds the data layer: individual observations. By default (`style =
-#' "overlay"`), points are drawn at their true `(exposure, response)`
-#' coordinates in the *main* model panel -- a plain scatter for
+#' Adds the data layer: individual observations. By default (`builder =
+#' build_data_overlay`), points are drawn at their true `(exposure,
+#' response)` coordinates in the *main* model panel -- a plain scatter for
 #' continuous/count responses, or a scatter with a small vertical jitter
 #' for a binary response (whose y-values are exactly 0/1 and would
 #' otherwise overplot into two solid lines). This works uniformly across
 #' all three response types, with no response-type dispatch on which
-#' builder to use. `style = "jitter"` instead uses the older, panel-based
-#' design, which *does* dispatch on `response_type` (set in [er_plot()]):
-#' * `"binary"` -- responders (`response == 1`) are jittered in an upper
-#'   panel and non-responders (`response == 0`) in a lower panel.
-#' * `"continuous"`/`"count"` -- a single panel, with points colored
-#'   continuously by the response value in place of the upper/lower
-#'   partition (there's no binary flag to split on). `panel` must be
-#'   `"both"` (the default) for these response types -- passing
-#'   `"upper"`/`"lower"` errors, since that partition is binary-specific.
+#' builder to use. `build_data_jitter()`/`build_data_color()` instead use
+#' the older, panel-based design, which *does* dispatch on `response_type`
+#' (set in [er_plot()]):
+#' * `build_data_jitter()` (binary response) -- responders (`response ==
+#'   1`) are jittered in an upper panel and non-responders (`response ==
+#'   0`) in a lower panel.
+#' * `build_data_color()` (continuous/count response) -- a single panel,
+#'   with points colored continuously by the response value in place of
+#'   the upper/lower partition (there's no binary flag to split on).
+#'   `panel` must be `"both"` (the default) for these response types --
+#'   passing `"upper"`/`"lower"` errors, since that partition is
+#'   binary-specific.
+#'
+#' Every data-layer builder declares which of these two *structural*
+#' families it belongs to via [er_layout()] -- `"overlay"` (a single call
+#' merged into the main panel) or `"panel"` (one-or-more panels stacked
+#' below the base plot) -- which `er_plot_show_data()` reads off `builder`
+#' to decide how to assemble the layer, rather than taking a separate
+#' argument for it. This makes the pairing structural rather than
+#' incidental: `build_data_overlay()` can never be routed into upper/lower
+#' panels, and `build_data_jitter()`/`build_data_color()` can never be
+#' merged into the main panel. See [er_layout()] and [er_partial()] for
+#' how to tag a custom builder the same way.
 #'
 #' This layer is **singleton** -- see [er_plot()]'s "Layers are either
-#' singleton or additive" -- calling it again (with either style) fully
-#' replaces the previous data layer. `style = "jitter"` is also the one
-#' case where stratification behaviour is a partial exception to "always
-#' color/fill" (see [er_plot()]'s "Stratification" section): for a
+#' singleton or additive" -- calling it again (with any builder) fully
+#' replaces the previous data layer. A "panel"-layout builder is also the
+#' one case where stratification behaviour is a partial exception to
+#' "always color/fill" (see [er_plot()]'s "Stratification" section): for a
 #' continuous/count response, the color aesthetic is already spoken for
 #' by the response value, so stratification instead produces one panel
 #' per stratum level (stacked below the base plot, each colored by the
-#' response), rather than a shared strata legend. `style = "overlay"` has
-#' no such exception -- its color aesthetic (when stratified) is always
-#' strata, since the response is already shown via y-position, and it
-#' shares the base plot's own strata legend (the same one the model/
-#' quantile layers use) rather than needing one of its own.
+#' response), rather than a shared strata legend. An "overlay"-layout
+#' builder has no such exception -- its color aesthetic (when stratified)
+#' is always strata, since the response is already shown via y-position,
+#' and it shares the base plot's own strata legend (the same one the
+#' model/quantile layers use) rather than needing one of its own.
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`)
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. For `style =
-#'   "jitter"` on a continuous/count response this produces one panel per
-#'   stratum level (see "Stratification" above) rather than a shared
-#'   color aesthetic; for `style = "overlay"` it always means a shared
-#'   color aesthetic, for any response type.
-#' @param style Character string selecting the *structural* family:
-#'   `"overlay"` (default; a single scatter merged into the main panel, at
-#'   each point's true `(exposure, response)` coordinates) or `"jitter"`
-#'   (the older panel-based design -- see above). This choice is still
-#'   respected when `builder` is supplied: `style` picks which of the two
-#'   layouts (single main-panel overlay vs. one-or-more panels stacked
-#'   below the base plot) your custom builder is slotted into, while
-#'   `builder` picks the geoms it actually draws.
-#' @param builder Optional function overriding the builder that `style`
-#'   (crossed with the response type, for `style = "jitter"`) would
-#'   otherwise select -- the escape hatch documented in [er_partial()] for
-#'   plugging in a custom `build_data_*()`-style function (e.g. a 2D
-#'   density in the main panel, or per-panel histograms) without touching
-#'   package internals. Must accept and use the standard `(data, config,
-#'   stratify, exposure, response, strata, style)` signature.
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. For a
+#'   "panel"-layout builder on a continuous/count response this produces
+#'   one panel per stratum level (see "Stratification" above) rather than
+#'   a shared color aesthetic; for an "overlay"-layout builder it always
+#'   means a shared color aesthetic, for any response type.
+#' @param builder Function drawing the data layer -- defaults to
+#'   [build_data_overlay()]. [build_data_jitter()] (binary response) and
+#'   [build_data_color()] (continuous/count response) are the other
+#'   built-in options; any function matching the standard `(data, config,
+#'   stratify, exposure, response, strata, style)` signature and tagged
+#'   with [er_layout()] can be supplied instead -- see [er_partial()] for
+#'   the full contract, e.g. a 2D density in the main panel, or per-panel
+#'   histograms.
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
-#'   default). Only meaningful for `style = "jitter"` on a binary
-#'   response; must be `"both"` for `style = "overlay"` (no upper/lower
-#'   partition exists) or for a continuous/count response under `style =
-#'   "jitter"` (there's no upper/lower partition to select from either
-#'   way).
+#'   default). Only meaningful for [build_data_jitter()] on a binary
+#'   response; must be `"both"` for an "overlay"-layout builder (no
+#'   upper/lower partition exists) or for a continuous/count response
+#'   under a "panel"-layout builder (there's no upper/lower partition to
+#'   select from either way).
 #'
 #' @returns The input `object`, with the data layer added
 #'
@@ -516,17 +566,21 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #' erglm_data |>
 #'   er_plot(aucss, biomarker_change) |>
 #'   er_plot_show_model(mod3) |>
-#'   er_plot_show_data(style = "jitter") |>
+#'   er_plot_show_data(builder = build_data_color) |>
 #'   plot()
 #'
-#' # plug in a 2D density in the main panel instead of a scatter; `style`
-#' # still picks the "overlay" (single main-panel) layout -- see `?er_partial`
-#' build_data_density <- function(data, config, stratify, exposure, response, strata, style) {
-#'   ggplot2::geom_density_2d(
-#'     data = data,
-#'     mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
-#'   )
-#' }
+#' # plug in a 2D density in the main panel instead of a scatter; tagging
+#' # it "overlay" via `er_layout()` keeps it in the single main-panel
+#' # layout -- see `?er_partial`
+#' build_data_density <- er_layout(
+#'   function(data, config, stratify, exposure, response, strata, style) {
+#'     ggplot2::geom_density_2d(
+#'       data = data,
+#'       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
+#'     )
+#'   },
+#'   layout = "overlay"
+#' )
 #' erglm_data |>
 #'   er_plot(aucss, biomarker_change) |>
 #'   er_plot_show_model(mod3) |>
@@ -538,20 +592,22 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #'   [er_plot_show_quantiles()], [er_plot_show_groups()], [er_partial()]
 #'
 #' @export
-er_plot_show_data <- function(object, keep_strata = NULL, style = "overlay", builder = NULL, panel = "both") {
+er_plot_show_data <- function(object, keep_strata = NULL, builder = NULL, panel = "both") {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  style <- match.arg(style, c("overlay", "jitter"))
   if (!is.null(builder) && !is.function(builder)) rlang::abort("`builder` must be a function or NULL")
 
-  if (style == "overlay" && panel != "both") {
+  builder <- builder %||% build_data_overlay
+  layout <- .builder_layout(builder)
+
+  if (layout == "overlay" && panel != "both") {
     rlang::abort(c(
-      "`panel` must be \"both\" for `style = \"overlay\"`.",
-      "i" = "The \"upper\"/\"lower\" partition is specific to `style = \"jitter\"` on a binary response."
+      "`panel` must be \"both\" for an \"overlay\"-layout `builder`.",
+      "i" = "The \"upper\"/\"lower\" partition is specific to a \"panel\"-layout builder on a binary response."
     ))
   }
 
-  if (style == "jitter" && object$response$type %in% c("continuous", "count") && panel != "both") {
+  if (layout == "panel" && object$response$type %in% c("continuous", "count") && panel != "both") {
     rlang::abort(c(
       paste0("`panel` must be \"both\" for a ", object$response$type, " response."),
       "i" = "The \"upper\"/\"lower\" two-panel design is specific to binary responses.",
@@ -564,14 +620,13 @@ er_plot_show_data <- function(object, keep_strata = NULL, style = "overlay", bui
   # use `[` (not `$`) to clear the other slot -- `object$part$x <- NULL`
   # would remove "x" from the list entirely rather than setting it to
   # NULL, dropping it from `part_set`/`plot_set` in `print.er_plot()`
-  if (style == "overlay") {
+  if (layout == "overlay") {
     object$part$overlay <- .part_overlay(object = object, stratify = keep_strata, builder = builder)
     object$part["data"] <- list(NULL)
   } else {
     object$part$data <- .part_data(
       object = object,
       stratify = keep_strata, 
-      style = style,
       panel = panel,
       builder = builder
     )
@@ -600,16 +655,12 @@ er_plot_show_data <- function(object, keep_strata = NULL, style = "overlay", bui
 #' @param object Partially constructed plot (has S3 class `er_plot`)
 #' @param group_by Grouping variables to define groups for distribution
 #'   plots (a tidyselection of variables)
-#' @param style Character string selecting the partial builder:
-#'   `"boxplot"` (default) or `"violin"`. Ignored when `builder` is
-#'   supplied.
-#' @param builder Optional function overriding the builder that `style`
-#'   would otherwise select -- the escape hatch documented in
-#'   [er_partial()] for plugging in a custom `build_group_*()`-style
-#'   function without touching package internals. Must accept and use the
-#'   standard `(data, config, stratify, exposure, response, strata,
-#'   style)` signature; applied to every grouping variable added by this
-#'   call.
+#' @param builder Function drawing each group panel -- defaults to
+#'   [build_group_boxplot()]. [build_group_violin()] is the other
+#'   built-in option; any function matching the standard `(data, config,
+#'   stratify, exposure, response, strata, style)` signature can be
+#'   supplied instead -- see [er_partial()]. Applied to every grouping
+#'   variable added by this call.
 #' @param bins Number of quantile bins used for continuous grouping
 #'   variables (`NULL`, the default, uses [cut_quantile()]'s own default)
 #' @param keep_strata Logical, indicating whether this layer should be
@@ -641,13 +692,10 @@ er_plot_show_data <- function(object, keep_strata = NULL, style = "overlay", bui
 #'   [er_plot_show_quantiles()], [er_plot_show_data()], [er_partial()]
 #'
 #' @export
-er_plot_show_groups <- function(object, group_by, style = "boxplot", builder = NULL, bins = NULL, keep_strata = NULL) {
+er_plot_show_groups <- function(object, group_by, builder = NULL, bins = NULL, keep_strata = NULL) {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(builder) && !is.function(builder)) rlang::abort("`builder` must be a function or NULL")
-  if (is.null(builder) && !style %in% c("boxplot", "violin")) {
-    rlang::abort("`style` must be \"boxplot\" or \"violin\" unless `builder` is supplied")
-  }
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
   group_cols <- tidyselect::eval_select(rlang::enquo(group_by), object$data) 
   group_cols <- names(group_cols)
@@ -656,9 +704,8 @@ er_plot_show_groups <- function(object, group_by, style = "boxplot", builder = N
     object = object,
     group_cols = group_cols, 
     stratify = keep_strata, 
-    style = style,
     bins = bins,
-    builder = builder
+    builder = builder %||% build_group_boxplot
   )
 
   return(object)  
@@ -683,7 +730,7 @@ print.er_plot <- function(x, ...) {
     cat("  plot components:\n")
     if (part_set["model"])    cat("    - model:           ", paste(class(x$part$model$config$model), collapse = "/"), "\n", sep = "")
     if (part_set["quantile"]) cat("    - quantile:        ", x$part$quantile$config$n_quantiles, " bins\n", sep = "")
-    if (part_set["data"])     cat("    - data:            ", x$part$data$config$style, " ", x$part$data$config$panel, "\n", sep = "")
+    if (part_set["data"])     cat("    - data:            ", x$part$data$config$layout, " ", x$part$data$config$panel, "\n", sep = "")
     if (part_set["overlay"])  cat("    - overlay:         ", if (x$part$overlay$stratify) "stratified" else "unstratified", "\n", sep = "")
     if (part_set["group"])    cat("    - group:           ", paste(names(x$part$group$config), collapse = ", "), "\n", sep = "")
   } else {

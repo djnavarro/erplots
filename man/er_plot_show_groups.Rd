@@ -7,7 +7,6 @@
 er_plot_show_groups(
   object,
   group_by,
-  style = "boxplot",
   builder = NULL,
   bins = NULL,
   keep_strata = NULL
@@ -19,16 +18,11 @@ er_plot_show_groups(
 \item{group_by}{Grouping variables to define groups for distribution
 plots (a tidyselection of variables)}
 
-\item{style}{Character string selecting the partial builder:
-\code{"boxplot"} (default) or \code{"violin"}. Ignored when \code{builder} is
-supplied.}
-
-\item{builder}{Optional function overriding the builder that \code{style}
-would otherwise select -- the escape hatch documented in
-\code{\link[=er_partial]{er_partial()}} for plugging in a custom \verb{build_group_*()}-style
-function without touching package internals. Must accept and use the
-standard \verb{(data, config, stratify, exposure, response, strata, style)} signature; applied to every grouping variable added by this
-call.}
+\item{builder}{Function drawing each group panel -- defaults to
+\code{\link[=build_group_boxplot]{build_group_boxplot()}}. \code{\link[=build_group_violin]{build_group_violin()}} is the other
+built-in option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature can be
+supplied instead -- see \code{\link[=er_partial]{er_partial()}}. Applied to every grouping
+variable added by this call.}
 
 \item{bins}{Number of quantile bins used for continuous grouping
 variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default)}

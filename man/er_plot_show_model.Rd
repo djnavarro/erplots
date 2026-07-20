@@ -8,7 +8,6 @@ er_plot_show_model(
   object,
   model,
   keep_strata = NULL,
-  style = "ribbonline",
   builder = NULL,
   summary_builder = NULL,
   conf_level = 0.95
@@ -25,20 +24,17 @@ enables additional visualisations (see \link{er_model_interface})}
 split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise}
 
-\item{style}{Character string selecting the partial builder:
-\code{"ribbonline"} (default; mean prediction + confidence ribbon) or
-\code{"spaghetti"} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}}). Ignored when
-\code{builder} is supplied.}
+\item{builder}{Function drawing the model curve/ribbon -- defaults to
+\code{\link[=build_model_ribbonline]{build_model_ribbonline()}} (mean prediction + confidence ribbon).
+\code{\link[=build_model_spaghetti]{build_model_spaghetti()}} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}}) is
+the other built-in option; any function matching the standard
+\verb{(data, config, stratify, exposure, response, strata, style)}
+signature can be supplied instead -- see \code{\link[=er_partial]{er_partial()}}.}
 
-\item{builder}{Optional function overriding the model-curve builder that
-\code{style} would otherwise select -- the escape hatch documented in
-\code{\link[=er_partial]{er_partial()}} for plugging in a custom \verb{build_model_*()}-style
-function without touching package internals. Must accept and use the
-standard \verb{(data, config, stratify, exposure, response, strata, style)} signature.}
-
-\item{summary_builder}{Optional function overriding the summary-
-annotation builder (\code{build_summary_pvalue()} by default), using the
-same standard signature as \code{builder}. See \code{\link[=er_partial]{er_partial()}}.}
+\item{summary_builder}{Function drawing the summary annotation --
+defaults to \code{\link[=build_summary_pvalue]{build_summary_pvalue()}}. Any function matching the same
+standard signature as \code{builder} can be supplied instead. See
+\code{\link[=er_partial]{er_partial()}}.}
 
 \item{conf_level}{Confidence level for the prediction ribbon}
 }
@@ -47,8 +43,8 @@ The input \code{object}, with the model layer added
 }
 \description{
 Adds the model layer: a fitted exposure-response curve with an
-uncertainty ribbon (\code{style = "ribbonline"}, via \code{\link[=er_predict]{er_predict()}}), or a
-spaghetti plot of simulated draws (\code{style = "spaghetti"}, via
+uncertainty ribbon (the default, via \code{\link[=er_predict]{er_predict()}}), or a spaghetti
+plot of simulated draws (\code{builder = build_model_spaghetti}, via
 \code{\link[=er_simulate]{er_simulate()}}), plus an optional summary annotation (e.g. a p-value)
 via \code{\link[=er_summary]{er_summary()}} when the layer isn't stratified. This layer needs no
 \code{response_type} dispatch -- it only ever consumes \code{\link[=er_predict]{er_predict()}}'s
@@ -68,8 +64,14 @@ erglm_data |>
   er_plot_show_model(mod) |>
   plot()
 
-# plug in a custom model-curve builder instead of choosing a built-in
-# `style`; see `?er_partial` for the full contract
+# a spaghetti plot instead of the default ribbon
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod, builder = build_model_spaghetti) |>
+  plot()
+
+# plug in a fully custom model-curve builder; see `?er_partial` for the
+# full contract
 build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
   ggplot2::geom_line(
     data = config$predictions,

@@ -5,11 +5,11 @@ test_that("build_data_jitter returns geom + coord + yscale", {
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  expect_no_error(p1 |> er_plot_show_data(style = "jitter"))
-  expect_no_error(p2 |> er_plot_show_data(style = "jitter"))
+  expect_no_error(p1 |> er_plot_show_data(builder = build_data_jitter))
+  expect_no_error(p2 |> er_plot_show_data(builder = build_data_jitter))
 
-  p1 <- p1 |> er_plot_show_data(style = "jitter")
-  p2 <- p2 |> er_plot_show_data(style = "jitter")
+  p1 <- p1 |> er_plot_show_data(builder = build_data_jitter)
+  p2 <- p2 |> er_plot_show_data(builder = build_data_jitter)
 
   config1 <- p1$part$data$config
   config2 <- p2$part$data$config
@@ -61,8 +61,8 @@ test_that("build_data_color returns geom + coord + yscale for a continuous respo
   p1 <- er_plot(er_test_data, aucss, biomarker_change)
   p2 <- er_plot(er_test_data, aucss, biomarker_change, sex)
 
-  p1 <- p1 |> er_plot_show_data(style = "jitter")
-  p2 <- p2 |> er_plot_show_data(style = "jitter")
+  p1 <- p1 |> er_plot_show_data(builder = build_data_color)
+  p2 <- p2 |> er_plot_show_data(builder = build_data_color)
 
   config1 <- p1$part$data$config
   config2 <- p2$part$data$config

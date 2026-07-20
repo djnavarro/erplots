@@ -54,27 +54,27 @@ test_that("er_plot_show_data supports a continuous response (single color-encode
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, biomarker_change)
-  expect_no_error(er_plot_show_data(plt, style = "jitter"))
+  expect_no_error(er_plot_show_data(plt, builder = build_data_color))
 
-  plt <- er_plot_show_data(plt, style = "jitter")
+  plt <- er_plot_show_data(plt, builder = build_data_color)
   expect_equal(plt$part$data$config$color_role, "response")
   expect_equal(plt$part$data$config$panels, "data")
 
-  # binary response still works, dispatched to build_data_jitter
+  # binary response still works, with build_data_jitter
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
-  expect_no_error(er_plot_show_data(plt_binary, style = "jitter"))
-  expect_equal((plt_binary |> er_plot_show_data(style = "jitter"))$part$data$config$color_role, "strata")
+  expect_no_error(er_plot_show_data(plt_binary, builder = build_data_jitter))
+  expect_equal((plt_binary |> er_plot_show_data(builder = build_data_jitter))$part$data$config$color_role, "strata")
 })
 
 test_that("er_plot_show_data supports a declared count response", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_no_error(er_plot_show_data(plt, style = "jitter"))
-  expect_equal((plt |> er_plot_show_data(style = "jitter"))$part$data$config$color_role, "response")
+  expect_no_error(er_plot_show_data(plt, builder = build_data_color))
+  expect_equal((plt |> er_plot_show_data(builder = build_data_color))$part$data$config$color_role, "response")
 })
 
-test_that("er_plot_show_data's default style is overlay, replacing data/overlay on re-call", {
+test_that("er_plot_show_data's default builder is build_data_overlay, replacing data/overlay on re-call", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae1)
@@ -83,15 +83,15 @@ test_that("er_plot_show_data's default style is overlay, replacing data/overlay 
   expect_false(is.null(plt_overlay$part$overlay))
   expect_null(plt_overlay$part$data)
 
-  plt_jitter <- plt_overlay |> er_plot_show_data(style = "jitter")
+  plt_jitter <- plt_overlay |> er_plot_show_data(builder = build_data_jitter)
   expect_false(is.null(plt_jitter$part$data))
   expect_null(plt_jitter$part$overlay)
 
-  plt_back <- plt_jitter |> er_plot_show_data(style = "overlay")
+  plt_back <- plt_jitter |> er_plot_show_data()
   expect_false(is.null(plt_back$part$overlay))
   expect_null(plt_back$part$data)
 
-  expect_error(er_plot_show_data(plt, style = "nope"))
+  expect_error(er_plot_show_data(plt, builder = "not a function"))
 })
 
 test_that("er_plot_show_data errors when panel != 'both'", {
@@ -99,27 +99,27 @@ test_that("er_plot_show_data errors when panel != 'both'", {
 
   plt_continuous <- er_test_data |> er_plot(aucss, biomarker_change)
   expect_error(
-    er_plot_show_data(plt_continuous, style = "jitter", panel = "upper"),
+    er_plot_show_data(plt_continuous, builder = build_data_color, panel = "upper"),
     regexp = "must be \"both\""
   )
 
   plt_count <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
   expect_error(
-    er_plot_show_data(plt_count, style = "jitter", panel = "lower"),
+    er_plot_show_data(plt_count, builder = build_data_color, panel = "lower"),
     regexp = "must be \"both\""
   )
 
-  # `style = "overlay"` (the default) has no upper/lower partition for
-  # any response type, unlike `style = "jitter"` on a binary response
+  # `build_data_overlay` (the default) has no upper/lower partition for
+  # any response type, unlike `build_data_jitter` on a binary response
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
   expect_error(
     er_plot_show_data(plt_binary, panel = "upper"),
     regexp = "must be \"both\""
   )
 
-  # default ("both") and binary + style = "jitter" are unaffected
+  # default ("both") and binary + build_data_jitter are unaffected
   expect_no_error(er_plot_show_data(plt_continuous))
-  expect_no_error(er_plot_show_data(plt_binary, style = "jitter", panel = "upper"))
+  expect_no_error(er_plot_show_data(plt_binary, builder = build_data_jitter, panel = "upper"))
 })
 
 test_that("er_plot_show_data produces N stratum panels, each with a response colorbar", {
@@ -129,7 +129,7 @@ test_that("er_plot_show_data produces N stratum panels, each with a response col
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change, sex) |>
     er_plot_show_model(mod3) |>
-    er_plot_show_data(style = "jitter")
+    er_plot_show_data(builder = build_data_color)
 
   expect_no_error(er_plot_build(plt))
   built <- er_plot_build(plt)
@@ -224,14 +224,14 @@ test_that("er_plot_build constructs ggplot2 objects", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data(style = "jitter")
+    er_plot_show_data(builder = build_data_jitter)
 
   plt3 <- er_test_data |>
     dplyr::mutate(dose = factor(dose)) |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data(style = "jitter")  |>
+    er_plot_show_data(builder = build_data_jitter)  |>
     er_plot_show_groups(c(treatment, dose))
 
   plt1_built <- er_plot_build(plt1)
@@ -267,14 +267,14 @@ test_that("print method works as expected", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data(style = "jitter")
+    er_plot_show_data(builder = build_data_jitter)
 
   plt3 <- er_test_data |>
     dplyr::mutate(dose = factor(dose)) |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data(style = "jitter")  |>
+    er_plot_show_data(builder = build_data_jitter)  |>
     er_plot_show_groups(c(treatment, dose))
 
   print_quiet <- purrr::quietly(print.er_plot)
@@ -308,7 +308,7 @@ test_that("print method works as expected", {
   expect_length(outlines3, 12)
 })
 
-test_that("er_plot_show_data(style = 'overlay') merges into the base plot", {
+test_that("er_plot_show_data() with the default build_data_overlay merges into the base plot", {
   skip_if_not_installed("erglm")
 
   # overlay as the *only* layer: the base plot must still get built (for
@@ -362,12 +362,11 @@ test_that("er_plot_show_model() accepts a custom builder/summary_builder", {
   expect_no_error(er_plot_build(plt))
 })
 
-test_that("er_plot_show_model() rejects a non-function builder and an unrecognised style without one", {
+test_that("er_plot_show_model() rejects a non-function builder", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae1)
   expect_error(er_plot_show_model(plt, er_test_mod1, builder = "not a function"))
-  expect_error(er_plot_show_model(plt, er_test_mod1, style = "nonsense"))
 })
 
 test_that("er_plot_show_quantiles() accepts a custom builder", {
@@ -390,34 +389,34 @@ test_that("er_plot_show_quantiles() accepts a custom builder", {
   expect_no_error(er_plot_build(plt))
 })
 
-test_that("er_plot_show_quantiles() rejects an unrecognised style without a builder", {
+test_that("er_plot_show_quantiles() rejects a non-function builder", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_show_model(er_test_mod1)
-  expect_error(er_plot_show_quantiles(plt, style = "nonsense"))
+  expect_error(er_plot_show_quantiles(plt, builder = "not a function"))
 })
 
-test_that("er_plot_show_data() accepts a custom builder for both the overlay and jitter structural families", {
+test_that("er_plot_show_data() accepts a custom builder for both the overlay and panel structural families", {
   skip_if_not_installed("erglm")
 
-  custom_overlay_builder <- function(data, config, stratify, exposure, response, strata, style) {
+  custom_overlay_builder <- er_layout(function(data, config, stratify, exposure, response, strata, style) {
     ggplot2::geom_point(
       data = data,
       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]]),
       shape = 4
     )
-  }
-  custom_panel_builder <- function(data, config, stratify, exposure, response, strata, style) {
+  }, layout = "overlay")
+  custom_panel_builder <- er_layout(function(data, config, stratify, exposure, response, strata, style) {
     ggplot2::geom_histogram(
       data = data,
       mapping = ggplot2::aes(x = .data[[exposure$name]])
     )
-  }
+  }, layout = "panel")
 
   plt_overlay <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
-    er_plot_show_data(style = "overlay", builder = custom_overlay_builder)
+    er_plot_show_data(builder = custom_overlay_builder)
 
   expect_identical(plt_overlay$part$overlay$config$builder, custom_overlay_builder)
   expect_null(plt_overlay$part$data)
@@ -426,11 +425,19 @@ test_that("er_plot_show_data() accepts a custom builder for both the overlay and
   plt_jitter <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
-    er_plot_show_data(style = "jitter", builder = custom_panel_builder)
+    er_plot_show_data(builder = custom_panel_builder)
 
   expect_identical(plt_jitter$part$data$config$builder, custom_panel_builder)
   expect_null(plt_jitter$part$overlay)
   expect_no_error(er_plot_build(plt_jitter))
+})
+
+test_that("er_plot_show_data() rejects a builder with no declared layout", {
+  skip_if_not_installed("erglm")
+
+  untagged_builder <- function(data, config, stratify, exposure, response, strata, style) list()
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_show_model(er_test_mod1)
+  expect_error(er_plot_show_data(plt, builder = untagged_builder))
 })
 
 test_that("er_plot_show_groups() accepts a custom builder, applied to every grouping variable", {
@@ -452,9 +459,9 @@ test_that("er_plot_show_groups() accepts a custom builder, applied to every grou
   expect_no_error(er_plot_build(plt))
 })
 
-test_that("er_plot_show_groups() rejects an unrecognised style without a builder", {
+test_that("er_plot_show_groups() rejects a non-function builder", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_show_model(er_test_mod1)
-  expect_error(er_plot_show_groups(plt, aucss, style = "nonsense"))
+  expect_error(er_plot_show_groups(plt, aucss, builder = "not a function"))
 })

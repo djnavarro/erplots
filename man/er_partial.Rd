@@ -124,27 +124,28 @@ Every \verb{build_*()} function above shares the signature documented in
 implementation detail: any function \verb{function(data, config, stratify, exposure, response, strata, style)} that returns a geom or list of
 geoms can stand in for a built-in builder. This is the officially
 supported way to draw a layer differently from any of the built-in
-\code{style} options -- e.g. a 2D density instead of a scatter for the data
-overlay, per-panel histograms instead of jittered points for the
+\code{builder} options -- e.g. a 2D density instead of a scatter for the
+data overlay, per-panel histograms instead of jittered points for the
 panel-based data layer, or a \code{geom_crossbar()} instead of a
 \code{geom_errorbar()}/\code{geom_pointrange()} for the quantile summary.
 (\code{build_quantile_pointrange()} started life as exactly this kind of
-custom builder -- it was promoted to a built-in \code{style = "pointrange"}
-option once it proved to be a natural, low-risk alternative to
-\code{build_quantile_errorbar()}, with no new config requirements.)
+custom builder -- it was promoted to a built-in option once it proved
+to be a natural, low-risk alternative to \code{build_quantile_errorbar()},
+with no new config requirements.)
 
 Each \verb{er_plot_show_*()} function takes a \code{builder} argument (and
-\code{er_plot_show_model()} additionally takes \code{summary_builder}) for
-exactly this purpose: supplying a function there bypasses the built-in
-\code{style} string dispatch entirely, so a custom builder can be plugged
-in without forking the package or reaching into \code{object$part}
-internals. For the data layer, \code{style} still selects the \emph{structural}
-family your builder is slotted into -- \code{"overlay"} (a single call
-merged into the main panel) or \code{"jitter"} (one or more panels stacked
-below the base plot, per \code{object$response$type}) -- while \code{builder}
-selects the geoms drawn within that structure. For the other layers
-there is only one structural call site, so \code{style} is ignored once
-\code{builder} is supplied. See the \verb{@examples} on \code{\link[=er_plot_show_model]{er_plot_show_model()}},
+\code{er_plot_show_model()} additionally takes \code{summary_builder}) that
+defaults to one built-in \verb{build_*()} function and can be set to any
+other -- built-in or custom -- matching the standard signature, with no
+string-based \code{style} argument in between: a custom builder can be
+plugged in without forking the package or reaching into \code{object$part}
+internals. For the data layer specifically, \code{builder} also has to
+declare which \emph{structural} family it belongs to -- a single call
+merged into the main panel, or one or more panels stacked below the
+base plot -- via \code{\link[=er_layout]{er_layout()}}, since \code{\link[=er_plot_show_data]{er_plot_show_data()}} reads that
+tag off \code{builder} to decide how to assemble the layer; the other three
+layers have only one structural call site, so no such tagging is
+needed there. See the \verb{@examples} on \code{\link[=er_plot_show_model]{er_plot_show_model()}},
 \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, and \code{\link[=er_plot_show_data]{er_plot_show_data()}} for worked
 custom builders (a dashed model curve, a quantile crossbar, and a
 data-overlay density, respectively).

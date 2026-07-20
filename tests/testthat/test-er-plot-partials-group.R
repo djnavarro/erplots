@@ -4,11 +4,11 @@ test_that("build_group_boxplot returns geom + coord", {
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  expect_no_error(p1 |> er_plot_show_groups(treatment, style = "boxplot"))
-  expect_no_error(p2 |> er_plot_show_groups(treatment, style = "boxplot"))
+  expect_no_error(p1 |> er_plot_show_groups(treatment))
+  expect_no_error(p2 |> er_plot_show_groups(treatment))
 
-  p1 <- p1 |> er_plot_show_groups(treatment, style = "boxplot")
-  p2 <- p2 |> er_plot_show_groups(treatment, style = "boxplot")
+  p1 <- p1 |> er_plot_show_groups(treatment)
+  p2 <- p2 |> er_plot_show_groups(treatment)
 
   args1 <- list(
     data = p1$data,
@@ -52,11 +52,11 @@ test_that("build_group_violin returns geom + coord", {
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  expect_no_error(p1 |> er_plot_show_groups(treatment, style = "violin"))
-  expect_no_error(p2 |> er_plot_show_groups(treatment, style = "violin"))
+  expect_no_error(p1 |> er_plot_show_groups(treatment, builder = build_group_violin))
+  expect_no_error(p2 |> er_plot_show_groups(treatment, builder = build_group_violin))
 
-  p1 <- p1 |> er_plot_show_groups(treatment, style = "violin")
-  p2 <- p2 |> er_plot_show_groups(treatment, style = "violin")
+  p1 <- p1 |> er_plot_show_groups(treatment, builder = build_group_violin)
+  p2 <- p2 |> er_plot_show_groups(treatment, builder = build_group_violin)
 
   args1 <- list(
     data = p1$data,

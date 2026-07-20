@@ -4,11 +4,11 @@ test_that("build_quantile_errorbar returns 3 geoms", {
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  expect_no_error(p1 |> er_plot_show_quantiles(style = "errorbar"))
-  expect_no_error(p2 |> er_plot_show_quantiles(style = "errorbar"))
+  expect_no_error(p1 |> er_plot_show_quantiles())
+  expect_no_error(p2 |> er_plot_show_quantiles())
 
-  p1 <- p1 |> er_plot_show_quantiles(style = "errorbar")
-  p2 <- p2 |> er_plot_show_quantiles(style = "errorbar")
+  p1 <- p1 |> er_plot_show_quantiles()
+  p2 <- p2 |> er_plot_show_quantiles()
 
   args1 <- list(
     data = p1$data,
@@ -50,7 +50,7 @@ test_that("build_quantile_errorbar returns 3 geoms", {
 test_that("build_quantile_errorbar dodges stratified points/bars/labels horizontally", {
   skip_if_not_installed("erglm")
 
-  p2 <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_show_quantiles(style = "errorbar")
+  p2 <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_show_quantiles()
 
   args2 <- list(
     data = p2$data,
@@ -91,7 +91,7 @@ test_that("build_quantile_errorbar dodges stratified points/bars/labels horizont
 test_that("build_quantile_errorbar leaves x unmodified (no x_dodge column) when unstratified", {
   skip_if_not_installed("erglm")
 
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_show_quantiles(style = "errorbar")
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_show_quantiles()
 
   args1 <- list(
     data = p1$data,
@@ -113,11 +113,11 @@ test_that("build_quantile_errorbar returns 3 geoms for a continuous response", {
   p1 <- er_plot(er_test_data, aucss, biomarker_change)
   p2 <- er_plot(er_test_data, aucss, biomarker_change, sex)
 
-  expect_no_error(p1 |> er_plot_show_quantiles(style = "errorbar"))
-  expect_no_error(p2 |> er_plot_show_quantiles(style = "errorbar"))
+  expect_no_error(p1 |> er_plot_show_quantiles())
+  expect_no_error(p2 |> er_plot_show_quantiles())
 
-  p1 <- p1 |> er_plot_show_quantiles(style = "errorbar")
-  p2 <- p2 |> er_plot_show_quantiles(style = "errorbar")
+  p1 <- p1 |> er_plot_show_quantiles()
+  p2 <- p2 |> er_plot_show_quantiles()
 
   args1 <- list(
     data = p1$data,
@@ -160,11 +160,11 @@ test_that("build_quantile_pointrange returns 2 geoms", {
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  expect_no_error(p1 |> er_plot_show_quantiles(style = "pointrange"))
-  expect_no_error(p2 |> er_plot_show_quantiles(style = "pointrange"))
+  expect_no_error(p1 |> er_plot_show_quantiles(builder = build_quantile_pointrange))
+  expect_no_error(p2 |> er_plot_show_quantiles(builder = build_quantile_pointrange))
 
-  p1 <- p1 |> er_plot_show_quantiles(style = "pointrange")
-  p2 <- p2 |> er_plot_show_quantiles(style = "pointrange")
+  p1 <- p1 |> er_plot_show_quantiles(builder = build_quantile_pointrange)
+  p2 <- p2 |> er_plot_show_quantiles(builder = build_quantile_pointrange)
 
   expect_identical(p1$part$quantile$config$builder, build_quantile_pointrange)
   expect_identical(p2$part$quantile$config$builder, build_quantile_pointrange)
@@ -204,13 +204,13 @@ test_that("build_quantile_pointrange returns 2 geoms", {
   expect_true(inherits(p2_out[[2]], "LayerInstance"))
 })
 
-test_that("er_plot_show_quantiles() builds and renders with style = \"pointrange\"", {
+test_that("er_plot_show_quantiles() builds and renders with builder = build_quantile_pointrange", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
-    er_plot_show_quantiles(style = "pointrange")
+    er_plot_show_quantiles(builder = build_quantile_pointrange)
 
   expect_no_error(er_plot_build(plt))
 })

@@ -201,11 +201,11 @@ test_that(".part_data constructs the correct data structure", {
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
-  expect_no_error(plt1 |> er_plot_show_data(style = "jitter"))
-  expect_no_error(plt2 |> er_plot_show_data(style = "jitter"))
+  expect_no_error(plt1 |> er_plot_show_data(builder = build_data_jitter))
+  expect_no_error(plt2 |> er_plot_show_data(builder = build_data_jitter))
 
-  plt1 <- plt1 |> er_plot_show_data(style = "jitter")
-  plt2 <- plt2 |> er_plot_show_data(style = "jitter")
+  plt1 <- plt1 |> er_plot_show_data(builder = build_data_jitter)
+  plt2 <- plt2 |> er_plot_show_data(builder = build_data_jitter)
 
   expect_type(plt1$part$data, "list")
   expect_type(plt2$part$data, "list")
@@ -225,7 +225,7 @@ test_that(".part_data constructs the correct data structure", {
   expect_length(cfg1, 7)
   expect_length(cfg2, 7)
 
-  cfg_names <- c("style", "panel", "seed", "builder", "color_role", "panels", "panel_position")
+  cfg_names <- c("layout", "panel", "seed", "builder", "color_role", "panels", "panel_position")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 
@@ -238,17 +238,17 @@ test_that(".part_data constructs the correct data structure", {
 })
 
 
-test_that(".part_data dispatches to build_data_color for a continuous response", {
+test_that(".part_data records build_data_color's panel structure for a continuous response", {
   skip_if_not_installed("erglm")
 
   plt1 <- er_test_data |> er_plot(aucss, biomarker_change)
   plt2 <- er_test_data |> er_plot(aucss, biomarker_change, sex)
 
-  expect_no_error(plt1 |> er_plot_show_data(style = "jitter"))
-  expect_no_error(plt2 |> er_plot_show_data(style = "jitter"))
+  expect_no_error(plt1 |> er_plot_show_data(builder = build_data_color))
+  expect_no_error(plt2 |> er_plot_show_data(builder = build_data_color))
 
-  plt1 <- plt1 |> er_plot_show_data(style = "jitter")
-  plt2 <- plt2 |> er_plot_show_data(style = "jitter")
+  plt1 <- plt1 |> er_plot_show_data(builder = build_data_color)
+  plt2 <- plt2 |> er_plot_show_data(builder = build_data_color)
 
   cfg1 <- plt1$part$data$config
   cfg2 <- plt2$part$data$config
@@ -268,12 +268,12 @@ test_that(".part_data dispatches to build_data_color for a continuous response",
 })
 
 
-test_that(".part_data routes a count response through build_data_color too", {
+test_that(".part_data records the same single-panel structure for a count response", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_no_error(plt |> er_plot_show_data(style = "jitter"))
-  cfg <- (plt |> er_plot_show_data(style = "jitter"))$part$data$config
+  expect_no_error(plt |> er_plot_show_data(builder = build_data_color))
+  cfg <- (plt |> er_plot_show_data(builder = build_data_color))$part$data$config
   expect_identical(cfg$builder, build_data_color)
   expect_equal(cfg$color_role, "response")
   expect_equal(cfg$panels, "data")
@@ -378,9 +378,9 @@ test_that(".part_overlay constructs the correct data structure", {
   expect_equal(plt1$part$overlay$stratify, FALSE)
   expect_equal(plt2$part$overlay$stratify, TRUE)
 
-  # `style = "overlay"` (the default) is a mutually exclusive alternative
-  # to `style = "jitter"` -- only one of `part$data`/`part$overlay` is
-  # ever non-NULL
+  # an "overlay"-layout builder (the default) is a mutually exclusive
+  # alternative to a "panel"-layout builder -- only one of
+  # `part$data`/`part$overlay` is ever non-NULL
   expect_null(plt1$part$data)
   expect_null(plt2$part$data)
 

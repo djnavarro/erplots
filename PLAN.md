@@ -228,6 +228,65 @@ anywhere.
 `builder`/`summary_builder` arguments on all four layer functions and
 the `style = "pointrange"` render path.
 
+## Completed: removing `style`, making `builder` the sole mechanism
+
+**Motivation.** Once `builder` (see above) could always override
+whatever a `style` string would otherwise select, `style` became
+redundant with `builder` for three of the four layers -- it was purely
+sugar for choosing a default `build_*()` function. For the data layer,
+`style` did double duty: it also picked the *structural* family a
+builder was slotted into (a single call merged into the main panel, vs.
+one-or-more panels stacked below the base plot), which is not itself a
+builder-selection concern. Having both `style` and `builder` arguments
+doing overlapping jobs was inelegant, and for the data layer, nothing
+stopped a user from pairing a builder with the wrong structural `style`
+(e.g. `build_data_overlay()` with `style = "jitter"`) even though that
+combination was never sensible.
+
+**What was done:**
+- `style` was removed entirely from `er_plot_show_model()`,
+  `er_plot_show_quantiles()`, `er_plot_show_data()`, and
+  `er_plot_show_groups()`. Each now has a `builder` argument that
+  defaults to one built-in `build_*()` function (`build_model_ribbonline()`,
+  `build_quantile_errorbar()`, `build_data_overlay()`,
+  `build_group_boxplot()`) and can be set to any other function matching
+  the standard signature -- built-in or custom. `summary_builder`
+  (`er_plot_show_model()` only) similarly defaults to
+  `build_summary_pvalue()`.
+- For the data layer specifically, the structural distinction that
+  `style` used to carry (`"overlay"` vs. `"jitter"`) is now declared
+  *on the builder function itself*, via a new exported helper,
+  `er_layout(builder, layout = c("overlay", "panel"))`, which attaches
+  an `"er_layout"` attribute. `er_plot_show_data()` reads this tag off
+  whatever `builder` it's given (`.builder_layout()`) to decide whether
+  to route through `.part_overlay()` (single call merged into the main
+  panel) or `.part_data()` (one-or-more panels stacked below the base
+  plot), with no separate argument needed. All three built-in data
+  builders (`build_data_overlay()`: `"overlay"`; `build_data_jitter()`/
+  `build_data_color()`: `"panel"`) carry this tag; a custom data-layer
+  builder that omits it now errors immediately and informatively at
+  `er_plot_show_data()` call time, rather than silently ending up in the
+  wrong structural slot.
+- This was chosen over the alternative of encoding layout in a
+  builder's *return value* instead of on the function itself, because
+  `.part_overlay()`/`.part_data()` build genuinely different `config`
+  shapes (the latter computes `panels`/`panel_position`/`color_role`)
+  *before* any builder runs -- so the layout has to be knowable without
+  calling the builder. Tagging the function keeps the "a builder returns
+  a plain list of ggplot2 layers" contract uniform across all four
+  layers, rather than introducing an inconsistent richer return type for
+  the data layer alone.
+- `?er_partial`'s "Writing your own builder" section, each layer
+  function's own Rd topic, `vignettes/articles/design.Rmd`'s "Extending
+  erplots" section, and `vignettes/articles/plot.Rmd` were all updated
+  to describe `builder`-only dispatch (no more `style` strings) and,
+  for the data layer, the `er_layout()` tagging requirement.
+
+**Status:** done. `devtools::check()` clean (0 errors/warnings/notes);
+existing tests updated to use `builder =` instead of `style =`, plus new
+tests for the missing-layout error path and for `er_layout()`-tagged
+custom builders.
+
 ## Other completed fixes
 
 - **Stratified quantile labels visually overlapping.** Two strata's

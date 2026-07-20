@@ -27,18 +27,20 @@ mean + exact Poisson interval for `"count"`). The data layer
 works for any response type, with no `"continuous"`/`"count"` error path
 left -- see "Planned work" below.
 
-`er_plot_show_data()` offers two mutually exclusive styles: `"overlay"`
-(the default) plots raw observations at their true `(exposure, response)`
-coordinates directly on the model panel -- a single, response-type-agnostic
-builder (`build_data_overlay()`) with a small vertical jitter applied only
-for binary responses, and a `color` aesthetic that's always strata (sharing
-the base plot's own legend) rather than the response value. `"jitter"` is
-the older panel-based design (`build_data_jitter()` for a binary response,
-`build_data_color()` for continuous/count, `object$part$data`) -- for a
-continuous/count response it produces one color-coded panel (or one per
-stratum level) below the base plot instead of an overlay in the main
-panel. The two styles live in separate `object$part` slots (`overlay` vs.
-`data`); setting one via `er_plot_show_data()` clears the other.
+`er_plot_show_data()` offers two mutually exclusive structural families,
+selected by which `builder` function is passed in (no separate style
+argument -- see "Extensibility" below): the default, `build_data_overlay()`,
+plots raw observations at their true `(exposure, response)` coordinates
+directly on the model panel -- a single, response-type-agnostic builder
+with a small vertical jitter applied only for binary responses, and a
+`color` aesthetic that's always strata (sharing the base plot's own
+legend) rather than the response value. `build_data_jitter()`
+(binary)/`build_data_color()` (continuous/count) are the older
+panel-based design (`object$part$data`) -- for a continuous/count
+response it produces one color-coded panel (or one per stratum level)
+below the base plot instead of an overlay in the main panel. The two
+families live in separate `object$part` slots (`overlay` vs. `data`);
+passing a builder from one family clears the other slot.
 
 The companion package [erglm](https://github.com/djnavarro/erglm)
 (formerly `erlr`) fits GLM-based exposure-response models and implements
@@ -57,39 +59,46 @@ continuous (`biomarker_change`, `ae_duration`) response columns in
 `er_summary()` methods erglm registers for its model objects are correct
 for all four families, so no erplots-side changes are needed there.
 
-## Extensibility: the `builder`/`summary_builder` escape hatch
+## Extensibility: `builder` is the sole mechanism (no `style` argument)
 
 Every `er_plot_show_*()` function (`er_plot_show_model()`,
 `er_plot_show_quantiles()`, `er_plot_show_data()`, `er_plot_show_groups()`)
 takes a `builder` argument (`er_plot_show_model()` additionally takes
-`summary_builder`) that lets a user supply their own function matching
-the standard `build_*()` signature (`function(data, config, stratify,
-exposure, response, strata, style)`) in place of whatever the `style`
-string would otherwise select -- e.g. a `geom_crossbar()`-based quantile
-builder instead of the built-ins, or a density/histogram-based
-data-layer builder instead of a scatter. This is a first-class,
-documented part of the API (see `?er_partial`'s "Writing your own
-builder" section), not an internal implementation detail -- previously
-it only worked as an undocumented escape hatch (reassigning
-`object$part$<layer>$config$builder` directly), since `.build_*_geoms()`
-always calls whatever function lives in `config$builder` regardless of
-how it got there. For the data layer, `style` still selects the
-*structural* family (`"overlay"`: single call merged into the main
-panel; `"jitter"`: one-or-more panels stacked below the base plot, per
-`object$response$type`) that a custom `builder` is slotted into; for the
-other three layers there's only one structural call site, so `style` is
-ignored once `builder` is supplied. This also resolved the old TODO
-about customising the model layer's summary annotation without breaking
-the `style` arg (now `summary_builder`).
+`summary_builder`) that defaults to one built-in `build_*()` function
+(`build_model_ribbonline()`, `build_quantile_errorbar()`,
+`build_data_overlay()`, `build_group_boxplot()`; `summary_builder`
+defaults to `build_summary_pvalue()`) and can be set to any other
+function matching the standard `build_*()` signature
+(`function(data, config, stratify, exposure, response, strata, style)`)
+-- built-in (e.g. `build_model_spaghetti()`, `build_quantile_pointrange()`,
+`build_data_jitter()`/`build_data_color()`, `build_group_violin()`) or
+fully custom (e.g. a `geom_crossbar()`-based quantile builder, or a
+density/histogram-based data-layer builder instead of a scatter). There
+used to be a separate `style` string argument alongside `builder`, but
+it was redundant for three of the four layers (pure sugar for choosing a
+default `build_*()` function) and has been removed; `builder` is now the
+only mechanism, documented in `?er_partial`'s "Writing your own builder"
+section.
 
-`er_plot_show_quantiles()`'s `style` now has two built-in options:
-`"errorbar"` (default, `build_quantile_errorbar()`) and `"pointrange"`
-(`build_quantile_pointrange()`, a single `geom_pointrange()` in place of
-the separate point + error bar). `build_quantile_pointrange()` started
-as a hypothetical example of the `builder` escape hatch above and was
-promoted to a built-in `style` option since it needed no new `config`
-fields beyond what `.part_quantile()` already computes for
-`build_quantile_errorbar()`.
+For the data layer specifically, the one thing `style` used to do that
+wasn't just builder selection -- picking the *structural* family a
+builder is slotted into (single call merged into the main panel, vs.
+one-or-more panels stacked below the base plot) -- is now declared *on
+the builder function itself* via `er_layout(builder, layout =
+c("overlay", "panel"))`, an exported helper that attaches an
+`"er_layout"` attribute. `er_plot_show_data()` reads this tag off
+whatever `builder` it's given (internal `.builder_layout()`) to decide
+whether to route through `.part_overlay()` or `.part_data()`. All three
+built-in data builders already carry this tag (`build_data_overlay()`:
+`"overlay"`; `build_data_jitter()`/`build_data_color()`: `"panel"`); a
+custom data-layer builder that omits it errors immediately and
+informatively, rather than silently landing in the wrong structural
+slot. This was chosen over encoding layout in a builder's *return
+value* because `.part_overlay()`/`.part_data()` build different
+`config` shapes before any builder runs, so the layout has to be
+knowable without calling the builder -- see PLAN.md's "removing
+`style`, making `builder` the sole mechanism" section for the full
+rationale.
 
 ## Planned work
 
@@ -98,19 +107,22 @@ design work (rationale kept, implementation narrative trimmed) and a
 short "Open / deferred" list at the end. Everything scoped so far is
 done: the binary→continuous/count response generalisation (response-type
 detection/declaration, the quantile summary layer, `er_vpc_plot()`), the
-data layer's continuous/count-response redesign (`style = "jitter"`'s
-`build_data_color()` and `style = "overlay"`'s `build_data_overlay()`,
-now the default), the mini-language documentation review (singleton/
-additive layer semantics, the stratification color/facet precedence
-rule, `?er_partial`, `vignettes/articles/design.Rmd`), and formalising
-the `builder`/`summary_builder` escape hatch (see above) -- including
-`vignettes/articles/design.Rmd`'s "Extending erplots" section, which
-walks through a runnable custom quantile builder. The only genuinely
-open items are deferred, not scheduled -- see PLAN.md's "Open /
-deferred" section (an additive `model` layer for overlaying two fitted
-curves; whether `build_data_color()` should use a deliberately chosen
-continuous color scale instead of ggplot2's default gradient; a
-quantile-binned rug as a fallback data-layer design).
+data layer's continuous/count-response redesign (`build_data_color()`
+and `build_data_overlay()`, now the default), the mini-language
+documentation review (singleton/additive layer semantics, the
+stratification color/facet precedence rule, `?er_partial`,
+`vignettes/articles/design.Rmd`), formalising the
+`builder`/`summary_builder` escape hatch, and then removing `style`
+entirely in favor of `builder` alone, with the data layer's structural
+distinction moved onto the builder function itself via `er_layout()`
+(see "Extensibility" above) -- including `vignettes/articles/design.Rmd`'s
+"Extending erplots" section, which walks through a runnable custom
+quantile builder. The only genuinely open items are deferred, not
+scheduled -- see PLAN.md's "Open / deferred" section (an additive
+`model` layer for overlaying two fitted curves; whether
+`build_data_color()` should use a deliberately chosen continuous color
+scale instead of ggplot2's default gradient; a quantile-binned rug as a
+fallback data-layer design).
 
 ## Structure
 
