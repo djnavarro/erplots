@@ -38,7 +38,7 @@
   response_hi <- object$response$limits[2]
   config$corner_distance <- config$predictions |> 
     dplyr::select(dplyr::all_of(c(object$exposure$name, "fit_resp"))) |> 
-    dplyr::rename(y = fit_resp, x = .data[[object$exposure$name]]) |> 
+    dplyr::rename(y = fit_resp, x = dplyr::all_of(object$exposure$name)) |> 
     dplyr::mutate(
       x = x / sum(x),
       y = (y - response_lo) / (response_hi - response_lo),

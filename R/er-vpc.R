@@ -84,7 +84,7 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
       y_mid_lbl = percent(n1 / (n0 + n1)),
       ci_lower = clopper_pearson(n1, n0 + n1, conf_level)["lower"], 
       ci_upper = clopper_pearson(n1, n0 + n1, conf_level)["upper"], 
-      .by = c("Source", grp_var)
+      .by = c("Source", dplyr::all_of(grp_var))
     ) |> 
     dplyr::select(-n1, -n0)
 
@@ -93,14 +93,14 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
     dplyr::filter(Source == "Simulated") |> 
     dplyr::summarise(
       y = mean(.data[[rsp_var]], na.rm = TRUE),
-      .by = c("Source", grp_var, "sim_id")
+      .by = c("Source", dplyr::all_of(grp_var), "sim_id")
     ) |> 
     dplyr::summarise(
       y_mid = mean(y, na.rm = TRUE),
       y_mid_lbl = percent(y_mid),
       ci_lower = stats::quantile(y, probs = alpha, na.rm = TRUE), 
       ci_upper = stats::quantile(y, probs = 1 - alpha, na.rm = TRUE), 
-      .by = c("Source", grp_var)
+      .by = c("Source", dplyr::all_of(grp_var))
     )
 
   smm <- dplyr::bind_rows(smm_obs, smm_sim)
