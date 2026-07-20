@@ -5,6 +5,54 @@ test_that("er_plot creates an er_plot (minimal)", {
   expect_s3_class(plt, "er_plot")
 })
 
+test_that("er_plot resolves response_type = 'auto' correctly", {
+  skip_if_not_installed("erglm")
+
+  plt_binary <- er_plot(er_test_data, aucss, ae1)
+  expect_equal(plt_binary$response$type, "binary")
+  expect_equal(plt_binary$response$limits, c(0, 1))
+
+  plt_continuous <- er_plot(er_test_data, aucss, biomarker_change)
+  expect_equal(plt_continuous$response$type, "continuous")
+  expect_equal(
+    plt_continuous$response$limits,
+    range(er_test_data$biomarker_change, na.rm = TRUE)
+  )
+})
+
+test_that("er_plot's response_type argument overrides auto-detection", {
+  skip_if_not_installed("erglm")
+
+  # a 0/1 response explicitly declared continuous
+  plt <- er_plot(er_test_data, aucss, ae1, response_type = "continuous")
+  expect_equal(plt$response$type, "continuous")
+  expect_equal(plt$response$limits, range(er_test_data$ae1, na.rm = TRUE))
+
+  expect_error(er_plot(er_test_data, aucss, ae1, response_type = "nope"))
+})
+
+test_that("er_plot_show_quantiles errors clearly for a continuous response", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, biomarker_change)
+  expect_error(er_plot_show_quantiles(plt), class = "rlang_error")
+
+  # binary response still works
+  plt_binary <- er_test_data |> er_plot(aucss, ae1)
+  expect_no_error(er_plot_show_quantiles(plt_binary))
+})
+
+test_that("er_plot_show_datastrip errors clearly for a continuous response", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, biomarker_change)
+  expect_error(er_plot_show_datastrip(plt), class = "rlang_error")
+
+  # binary response still works
+  plt_binary <- er_test_data |> er_plot(aucss, ae1)
+  expect_no_error(er_plot_show_datastrip(plt_binary))
+})
+
 test_that("er_plot creates an er_plot (all parts)", {
   skip_if_not_installed("erglm")
   expect_no_error(

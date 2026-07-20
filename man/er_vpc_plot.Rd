@@ -14,8 +14,9 @@ columns as \code{data}, plus a \code{sim_id} column identifying each replicate}
 
 \item{exposure}{Exposure variable (one variable, unquoted)}
 
-\item{response}{Response variable (one variable, unquoted). Assumed to
-be binary (0/1)}
+\item{response}{Response variable (one variable, unquoted). Must
+currently be binary (0/1, or logical); continuous responses are not
+yet supported and raise an error (see \code{PLAN.md})}
 
 \item{group_by}{Variable (unquoted) to stratify predictions}
 

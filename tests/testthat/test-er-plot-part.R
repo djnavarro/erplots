@@ -1,3 +1,27 @@
+test_that(".detect_response_type classifies binary and continuous vectors", {
+  expect_equal(.detect_response_type(c(0, 1, 0, 1)), "binary")
+  expect_equal(.detect_response_type(c(0, 1, NA)), "binary")
+  expect_equal(.detect_response_type(c(TRUE, FALSE, NA)), "binary")
+  expect_equal(.detect_response_type(c(0, 1, 2)), "continuous")
+  expect_equal(.detect_response_type(c(0.1, 0.9, 1.5)), "continuous")
+  expect_equal(.detect_response_type(as.numeric(c(NA, NA))), "continuous")
+})
+
+test_that(".part_model's corner_distance normalises y for a continuous response", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |>
+    er_plot(aucss, biomarker_change) |>
+    er_plot_show_model(er_test_mod_gaussian)
+
+  cfg <- plt$part$model$config
+  expect_true(all(cfg$corner_distance >= 0))
+  # every corner distance should be a finite, non-degenerate value on a
+  # comparable scale regardless of the response's raw (non [0,1]) range
+  expect_true(all(is.finite(cfg$corner_distance)))
+  expect_length(cfg$corner_distance, 4)
+})
+
 test_that(".part_model constructs the correct data structure", {
   skip_if_not_installed("erglm")
   mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())

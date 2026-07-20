@@ -16,6 +16,19 @@
 #' @param model A fitted exposure-response model. Must implement [er_predict()];
 #'   implementing [er_simulate()] and [er_summary()] enables additional
 #'   visualisations (see [er_model_interface])
+#' @param response_type One of `"auto"` (the default), `"binary"`, or
+#'   `"continuous"`. Governs response-scale defaults (e.g. axis limits) and,
+#'   eventually, which plot components are valid for the response. When
+#'   `"auto"`, the response column is classified as `"binary"` if it is
+#'   logical or takes only values in `{0, 1}`, and `"continuous"` otherwise.
+#'
+#' @details [er_plot_show_quantiles()] and [er_plot_show_datastrip()]
+#'   currently only support a binary (0/1) response -- their underlying
+#'   summaries assume a response *rate*, not a continuous quantity. Calling
+#'   either on an `er_plot` whose response was classified (or declared) as
+#'   `"continuous"` raises an error rather than silently producing a
+#'   misleading plot; see `PLAN.md` for the plan to generalise these
+#'   components.
 #'
 #' @returns Plot object of class `er_plot`
 #'
@@ -51,7 +64,9 @@ NULL
 
 #' @rdname er_plot
 #' @export
-er_plot <- function(data, exposure, response, stratify_by = NULL) {
+er_plot <- function(data, exposure, response, stratify_by = NULL, response_type = "auto") {
+
+  response_type <- match.arg(response_type, c("auto", "binary", "continuous"))
 
   # empty plot object
   object <- structure(
@@ -93,9 +108,19 @@ er_plot <- function(data, exposure, response, stratify_by = NULL) {
     object$strata$label <- .get_label(object$data[[object$strata$name]]) %||% object$strata$name
   }
 
+  # resolve and store response type ("binary" or "continuous")
+  if (response_type == "auto") {
+    response_type <- .detect_response_type(object$data[[object$response$name]])
+  }
+  object$response$type <- response_type
+
   # store limits
   object$exposure$limits <- range(object$data[[object$exposure$name]])
-  object$response$limits <- c(0, 1)
+  if (object$response$type == "binary") {
+    object$response$limits <- c(0, 1)
+  } else {
+    object$response$limits <- range(object$data[[object$response$name]], na.rm = TRUE)
+  }
   if (!is.null(object$strata$name)) {
     object$strata$limits <- unique(object$data[[object$strata$name]])
   }
@@ -158,6 +183,7 @@ er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbo
 er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar", bins = 4, conf_level = 0.95) {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
+  if (identical(object$response$type, "continuous")) .abort_continuous_unsupported("er_plot_show_quantiles")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
   
   object$part$quantile <- .part_quantile(
@@ -179,6 +205,7 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 er_plot_show_datastrip <- function(object, keep_strata = NULL, style = "jitter", panel = "both") {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
+  if (identical(object$response$type, "continuous")) .abort_continuous_unsupported("er_plot_show_datastrip")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
   object$part$strip <- .part_strip(

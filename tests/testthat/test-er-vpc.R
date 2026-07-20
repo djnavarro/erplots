@@ -9,3 +9,13 @@ test_that("er_vpc_plot returns a ggplot", {
   expect_true(inherits(p1, "ggplot"))
   expect_true(inherits(p2, "ggplot"))
 })
+
+test_that("er_vpc_plot errors clearly for a continuous response", {
+  skip_if_not_installed("erglm")
+  sim <- erglm::erglm_vpc_sim(er_test_mod_gaussian, nsim = 5)
+
+  expect_error(
+    er_vpc_plot(er_test_data, sim, aucss, biomarker_change, group_by = aucss),
+    class = "rlang_error"
+  )
+})

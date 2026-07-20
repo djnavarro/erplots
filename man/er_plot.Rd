@@ -10,7 +10,7 @@
 \alias{er_plot_build}
 \title{Builds an exposure-response plot for a fitted model}
 \usage{
-er_plot(data, exposure, response, stratify_by = NULL)
+er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
 
 er_plot_style(object, labels)
 
@@ -56,6 +56,12 @@ er_plot_build(object)
 
 \item{stratify_by}{Stratification variable used for color and fill (one variable, unquoted)}
 
+\item{response_type}{One of \code{"auto"} (the default), \code{"binary"}, or
+\code{"continuous"}. Governs response-scale defaults (e.g. axis limits) and,
+eventually, which plot components are valid for the response. When
+\code{"auto"}, the response column is classified as \code{"binary"} if it is
+logical or takes only values in \verb{\{0, 1\}}, and \code{"continuous"} otherwise.}
+
 \item{object}{Partially constructed plot (has S3 class \code{er_plot})}
 
 \item{labels}{Named list of labels}
@@ -81,6 +87,15 @@ Plot object of class \code{er_plot}
 }
 \description{
 Builds an exposure-response plot for a fitted model
+}
+\details{
+\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} and \code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}
+currently only support a binary (0/1) response -- their underlying
+summaries assume a response \emph{rate}, not a continuous quantity. Calling
+either on an \code{er_plot} whose response was classified (or declared) as
+\code{"continuous"} raises an error rather than silently producing a
+misleading plot; see \code{PLAN.md} for the plan to generalise these
+components.
 }
 \examples{
 \dontrun{

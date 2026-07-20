@@ -36,6 +36,52 @@ clopper_pearson <- function(x, n, conf_level = 0.95) {
 }
 
 
+#' Detect whether a response variable is binary or continuous
+#'
+#' @param x A vector (the response column)
+#'
+#' @returns `"binary"` if `x` is logical or takes only values in `{0, 1}`
+#'   (ignoring `NA`s); `"continuous"` otherwise. A response with no
+#'   non-missing values is treated as `"continuous"` (there's no evidence
+#'   either way, and `"continuous"` is the more permissive default -- it
+#'   doesn't restrict which plot components can be used).
+#'
+#' @details Used by [er_plot()] to resolve `response_type = "auto"`. See
+#'   `PLAN.md` for the broader plan to generalise response-type-specific
+#'   plot components (quantile summaries, data strips, VPCs) beyond the
+#'   binary case.
+#'
+#' @noRd
+.detect_response_type <- function(x) {
+  if (is.logical(x)) return("binary")
+  ux <- unique(x[!is.na(x)])
+  if (length(ux) > 0 && all(ux %in% c(0, 1))) return("binary")
+  return("continuous")
+}
+
+
+#' Abort with an informative error for components that don't yet support
+#' continuous responses
+#'
+#' @param fn_name Name of the calling function, used in the error message
+#'
+#' @details A stopgap guard rail: several plot components (the quantile
+#'   summary layer, the data strip, `er_vpc_plot()`) still hardcode a
+#'   binary (0/1) response assumption and will silently mis-plot rather
+#'   than error if given a continuous response. This helper turns that
+#'   silent failure into an explicit one until each component is
+#'   generalised (see `PLAN.md`, "Extend beyond binary responses").
+#'
+#' @noRd
+.abort_continuous_unsupported <- function(fn_name) {
+  rlang::abort(c(
+    paste0("`", fn_name, "()` does not yet support continuous responses."),
+    "i" = "Only binary (0/1, or logical) responses are currently supported by this component.",
+    "i" = "See PLAN.md for the planned generalisation to continuous/count responses."
+  ))
+}
+
+
 #' Cut a continuous variable into quantiles
 #'
 #' @param x Numeric vector

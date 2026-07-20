@@ -12,8 +12,9 @@
 #' @param sim Simulated data, with the same `exposure`/`response`/`group_by`
 #'   columns as `data`, plus a `sim_id` column identifying each replicate
 #' @param exposure Exposure variable (one variable, unquoted)
-#' @param response Response variable (one variable, unquoted). Assumed to
-#'   be binary (0/1)
+#' @param response Response variable (one variable, unquoted). Must
+#'   currently be binary (0/1, or logical); continuous responses are not
+#'   yet supported and raise an error (see `PLAN.md`)
 #' @param group_by Variable (unquoted) to stratify predictions
 #' @param conf_level Confidence level
 #'
@@ -35,6 +36,10 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
   exp_var <- rlang::as_name(rlang::enquo(exposure))
   rsp_var <- rlang::as_name(rlang::enquo(response))
   grp_var <- rlang::as_name(rlang::enquo(group_by))
+
+  if (identical(.detect_response_type(data[[rsp_var]]), "continuous")) {
+    .abort_continuous_unsupported("er_vpc_plot")
+  }
 
   ll <- list()
   ll[[rsp_var]] <- .get_label(data[[rsp_var]]) %||% rsp_var

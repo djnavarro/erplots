@@ -30,12 +30,18 @@
     config$p_value <- model_summary$p_value
   }
 
-  # visual distance from corners (used for placement of summary)
+  # visual distance from corners (used for placement of summary). `y` is
+  # rescaled onto [0, 1] using the response's own limits before computing
+  # corner distances, since `fit_resp` lives on the response's scale (only
+  # [0, 1] itself for a binary response) -- see `PLAN.md` Stage 0.
+  response_lo <- object$response$limits[1]
+  response_hi <- object$response$limits[2]
   config$corner_distance <- config$predictions |> 
     dplyr::select(dplyr::all_of(c(object$exposure$name, "fit_resp"))) |> 
     dplyr::rename(y = fit_resp, x = .data[[object$exposure$name]]) |> 
     dplyr::mutate(
       x = x / sum(x),
+      y = (y - response_lo) / (response_hi - response_lo),
       tl_dist = sqrt(x^2 + (1-y)^2),
       tr_dist = sqrt((1-x)^2 + (1-y)^2),
       bl_dist = sqrt(x^2 + y^2),
@@ -206,8 +212,8 @@
 
 # miscellaneous helpers -------------------------------------------------------
 
-.plot_variable <- function(name = NULL, label = NULL, limits = NULL, role = NULL) {
-  list(name = name, label = label, limits = limits,role = role)
+.plot_variable <- function(name = NULL, label = NULL, limits = NULL, role = NULL, type = NULL) {
+  list(name = name, label = label, limits = limits, role = role, type = type)
 }
 
 .get_strata_values <- function(data, name) {

@@ -154,7 +154,7 @@ Each stage below is intended to be a self-contained, mergeable unit of
 work with its own tests; later stages depend on earlier ones. "Done"
 criteria are meant to be concrete enough to check off, not aspirational.
 
-**Stage 0 -- response-type plumbing (foundation for everything else)**
+**Stage 0 -- response-type plumbing (foundation for everything else) [done]**
 - Add `response_type = c("auto", "binary", "continuous")` to `er_plot()`.
   Auto-detection: response entirely in `{0, 1}` or logical → `"binary"`,
   else `"continuous"`. Store the resolved type on `object$response$type`.
@@ -237,7 +237,7 @@ criteria are meant to be concrete enough to check off, not aspirational.
 - Done when: an `erglm_model(ae_count ~ aucss, erglm_data, family =
   poisson())` model round-trips through Stages 1-3 without special-casing.
 
-**Stage 5 -- guard rails for the interim**
+**Stage 5 -- guard rails for the interim [done]**
 - Because Stages 1-4 are sequential work, land a defensive check *first*
   (can piggyback on Stage 0) so that, until each layer is generalised,
   `er_plot_show_quantiles()`/`er_vpc_plot()`/`er_plot_show_datastrip()`
@@ -247,6 +247,13 @@ criteria are meant to be concrete enough to check off, not aspirational.
 - Done when: no code path in the package can silently produce a
   misleading plot for a non-binary response; every unsupported
   combination fails loudly with an actionable message.
+- Implemented via a shared `.abort_continuous_unsupported()` helper
+  (`R/utils-helpers.R`), called from `er_plot_show_quantiles()`,
+  `er_plot_show_datastrip()` (using `object$response$type` from Stage 0),
+  and `er_vpc_plot()` (which has no `er_plot` object to read from, so it
+  runs `.detect_response_type()` directly on the observed response
+  column). `er_plot_show_model()` and `er_plot_show_groups()` are
+  unaffected -- they already generalise for free (see above).
 
 **Stage 6 -- tests, vignettes, docs**
 - Update `tests/testthat/helper-data.R` to add continuous/count model
