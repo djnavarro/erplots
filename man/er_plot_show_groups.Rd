@@ -66,5 +66,5 @@ erglm_data |>
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_show_model]{er_plot_show_model()}},
-\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, \code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}
+\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, \code{\link[=er_plot_show_data]{er_plot_show_data()}}
 }

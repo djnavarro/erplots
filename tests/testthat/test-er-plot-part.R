@@ -195,29 +195,29 @@ test_that(".part_quantile uses an exact Poisson interval when response_type = \"
 })
 
 
-test_that(".part_strip constructs the correct data structure", {
+test_that(".part_data constructs the correct data structure", {
   skip_if_not_installed("erglm")
 
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
-  expect_no_error(plt1 |> er_plot_show_datastrip())
-  expect_no_error(plt2 |> er_plot_show_datastrip())
+  expect_no_error(plt1 |> er_plot_show_data())
+  expect_no_error(plt2 |> er_plot_show_data())
 
-  plt1 <- plt1 |> er_plot_show_datastrip()
-  plt2 <- plt2 |> er_plot_show_datastrip()
+  plt1 <- plt1 |> er_plot_show_data()
+  plt2 <- plt2 |> er_plot_show_data()
 
-  expect_type(plt1$part$strip, "list")
-  expect_type(plt2$part$strip, "list")
+  expect_type(plt1$part$data, "list")
+  expect_type(plt2$part$data, "list")
 
-  expect_named(plt1$part$strip, c("stratify", "config"))
-  expect_named(plt2$part$strip, c("stratify", "config"))
+  expect_named(plt1$part$data, c("stratify", "config"))
+  expect_named(plt2$part$data, c("stratify", "config"))
 
-  expect_equal(plt1$part$strip$stratify, FALSE)
-  expect_equal(plt2$part$strip$stratify, TRUE)
+  expect_equal(plt1$part$data$stratify, FALSE)
+  expect_equal(plt2$part$data$stratify, TRUE)
 
-  cfg1 <- plt1$part$strip$config
-  cfg2 <- plt2$part$strip$config
+  cfg1 <- plt1$part$data$config
+  cfg2 <- plt2$part$data$config
 
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
@@ -225,9 +225,14 @@ test_that(".part_strip constructs the correct data structure", {
   expect_length(cfg1, 6)
   expect_length(cfg2, 6)
 
-  cfg_names <- c("style", "panel", "seed", "builder", "lower", "upper")
+  cfg_names <- c("style", "panel", "seed", "builder", "panels", "panel_position")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
+
+  expect_equal(cfg1$panels, c("upper", "lower"))
+  expect_equal(cfg2$panels, c("upper", "lower"))
+  expect_equal(cfg1$panel_position, c(upper = "above", lower = "below"))
+  expect_equal(cfg2$panel_position, c(upper = "above", lower = "below"))
 })
 
 

@@ -84,5 +84,5 @@ erglm_data |>
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_show_model]{er_plot_show_model()}},
-\code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}}, \code{\link[=er_vpc_plot]{er_vpc_plot()}}
+\code{\link[=er_plot_show_data]{er_plot_show_data()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}}, \code{\link[=er_vpc_plot]{er_vpc_plot()}}
 }

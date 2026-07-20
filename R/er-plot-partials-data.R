@@ -1,7 +1,7 @@
 
 #' @rdname er_partial
 #' @export
-build_datastrip_jitter <- function(data, config, stratify, exposure, response, strata, style) {
+build_data_jitter <- function(data, config, stratify, exposure, response, strata, style) {
 
   if (config$panel == "upper") dat <- data |> dplyr::filter(.data[[response$name]] == 1)
   if (config$panel == "lower") dat <- data |> dplyr::filter(.data[[response$name]] == 0)

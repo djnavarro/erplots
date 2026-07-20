@@ -50,20 +50,20 @@ test_that("er_plot_show_quantiles supports both binary and continuous responses"
   expect_no_error(er_plot_show_quantiles(plt_binary))
 })
 
-test_that("er_plot_show_datastrip errors clearly for a continuous response", {
+test_that("er_plot_show_data errors clearly for a continuous response", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, biomarker_change)
-  expect_error(er_plot_show_datastrip(plt), class = "rlang_error")
+  expect_error(er_plot_show_data(plt), class = "rlang_error")
   expect_error(
-    er_plot_show_datastrip(plt),
+    er_plot_show_data(plt),
     regexp = "does not support continuous responses"
   )
-  # the datastrip layer has no continuous variant planned (unlike
+  # the data layer has no continuous variant planned (unlike
   # er_plot_show_quantiles()/er_vpc_plot(), which now support continuous
   # responses) -- the error message should say so, not imply a fix is
   # coming
-  cnd <- rlang::catch_cnd(er_plot_show_datastrip(plt))
+  cnd <- rlang::catch_cnd(er_plot_show_data(plt))
   expect_match(
     paste(conditionMessage(cnd), collapse = " "),
     "no continuous-response variant .* is currently planned",
@@ -72,16 +72,16 @@ test_that("er_plot_show_datastrip errors clearly for a continuous response", {
 
   # binary response still works
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
-  expect_no_error(er_plot_show_datastrip(plt_binary))
+  expect_no_error(er_plot_show_data(plt_binary))
 })
 
-test_that("er_plot_show_datastrip errors clearly for a declared count response", {
+test_that("er_plot_show_data errors clearly for a declared count response", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_error(er_plot_show_datastrip(plt), class = "rlang_error")
+  expect_error(er_plot_show_data(plt), class = "rlang_error")
   expect_error(
-    er_plot_show_datastrip(plt),
+    er_plot_show_data(plt),
     regexp = "does not support count responses"
   )
 })
@@ -94,7 +94,7 @@ test_that("er_plot creates an er_plot (all parts)", {
       er_plot(aucss, ae1) |>
       er_plot_show_model(er_test_mod1) |>
       er_plot_show_quantiles()  |>
-      er_plot_show_datastrip()  |>
+      er_plot_show_data()  |>
       er_plot_show_groups(c(treatment, dose))
   )
   plt <- er_test_data |>
@@ -102,7 +102,7 @@ test_that("er_plot creates an er_plot (all parts)", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_datastrip()  |>
+    er_plot_show_data()  |>
     er_plot_show_groups(c(treatment, dose))
   expect_s3_class(plt, "er_plot")
 })
@@ -116,7 +116,7 @@ test_that("er_plot creates an er_plot (all parts, all strata)", {
       er_plot(aucss, ae1, sex) |>
       er_plot_show_model(mod) |>
       er_plot_show_quantiles()  |>
-      er_plot_show_datastrip()  |>
+      er_plot_show_data()  |>
       er_plot_show_groups(c(treatment, dose))
   )
   plt <- er_test_data |>
@@ -124,7 +124,7 @@ test_that("er_plot creates an er_plot (all parts, all strata)", {
     er_plot(aucss, ae1, sex) |>
     er_plot_show_model(mod) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_datastrip()  |>
+    er_plot_show_data()  |>
     er_plot_show_groups(c(treatment, dose))
   expect_s3_class(plt, "er_plot")
 })
@@ -140,14 +140,14 @@ test_that("er_plot_build does not error", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_datastrip()
+    er_plot_show_data()
 
   plt3 <- er_test_data |>
     dplyr::mutate(dose = factor(dose)) |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_datastrip()  |>
+    er_plot_show_data()  |>
     er_plot_show_groups(c(treatment, dose))
 
   expect_no_error(er_plot_build(plt1))
@@ -166,14 +166,14 @@ test_that("er_plot_build constructs ggplot2 objects", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_datastrip()
+    er_plot_show_data()
 
   plt3 <- er_test_data |>
     dplyr::mutate(dose = factor(dose)) |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_datastrip()  |>
+    er_plot_show_data()  |>
     er_plot_show_groups(c(treatment, dose))
 
   plt1_built <- er_plot_build(plt1)
@@ -186,15 +186,15 @@ test_that("er_plot_build constructs ggplot2 objects", {
 
   expect_equal(
     plt1_built_gg,
-    c(base = TRUE, strip = FALSE, group = FALSE)
+    c(base = TRUE, data = FALSE, group = FALSE)
   )
   expect_equal(
     plt2_built_gg,
-    c(base = TRUE, strip_upper = TRUE, strip_lower = TRUE, group = FALSE)
+    c(base = TRUE, data_upper = TRUE, data_lower = TRUE, group = FALSE)
   )
   expect_equal(
     plt3_built_gg,
-    c(base = TRUE, strip_upper = TRUE, strip_lower = TRUE, group_treatment = TRUE, group_dose = TRUE)
+    c(base = TRUE, data_upper = TRUE, data_lower = TRUE, group_treatment = TRUE, group_dose = TRUE)
   )
 })
 
@@ -209,14 +209,14 @@ test_that("print method works as expected", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_datastrip()
+    er_plot_show_data()
 
   plt3 <- er_test_data |>
     dplyr::mutate(dose = factor(dose)) |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_datastrip()  |>
+    er_plot_show_data()  |>
     er_plot_show_groups(c(treatment, dose))
 
   print_quiet <- purrr::quietly(print.er_plot)

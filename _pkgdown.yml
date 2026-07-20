@@ -10,7 +10,7 @@ reference:
   - er_plot_style
   - er_plot_show_model
   - er_plot_show_quantiles
-  - er_plot_show_datastrip
+  - er_plot_show_data
   - er_plot_show_groups
   - er_plot_build
   - er_partial

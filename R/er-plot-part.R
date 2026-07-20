@@ -158,26 +158,33 @@
 }
 
 
-# part_strip ------------------------------------------------------------------
+# part_data -------------------------------------------------------------------
 
-.part_strip <- function(object, stratify, style, panel) {
+.part_data <- function(object, stratify, style, panel) {
 
-  part_strip <- list()
+  part_data <- list()
   
   config <- list()
   config$style <- style
   config$panel <- panel
   config$seed  <- 1234L
   
-  if (style == "jitter") config$builder <- build_datastrip_jitter
+  if (style == "jitter") config$builder <- build_data_jitter
 
-  if (panel %in% c("lower", "both")) config$lower <- TRUE
-  if (panel %in% c("upper", "both")) config$upper <- TRUE
+  # `panels` is a named list of panels to build, keyed by panel name, in
+  # build order; `panel_position` records where each named panel sits
+  # relative to the base plot ("above"/"below"), which the composition
+  # helpers (R/er-plot-compose.R) use instead of hardcoding "upper"/"lower".
+  panels <- character(0)
+  if (panel %in% c("upper", "both")) panels <- c(panels, "upper")
+  if (panel %in% c("lower", "both")) panels <- c(panels, "lower")
+  config$panels <- panels
+  config$panel_position <- c(upper = "above", lower = "below")[panels]
 
-  part_strip$stratify <- stratify
-  part_strip$config <- config 
+  part_data$stratify <- stratify
+  part_data$config <- config 
 
-  return(part_strip)
+  return(part_data)
 }
 
 

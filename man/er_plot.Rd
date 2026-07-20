@@ -39,7 +39,7 @@ An (empty) plot object of class \code{er_plot}
 up a plot by piping it through one or more layer functions --
 \code{\link[=er_plot_show_model]{er_plot_show_model()}} (fitted-model curve/ribbon and summary),
 \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} (exposure-quantile-binned response summary),
-\code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}} (a strip depicting the raw data), and/or
+\code{\link[=er_plot_show_data]{er_plot_show_data()}} (a strip depicting the raw data), and/or
 \code{\link[=er_plot_show_groups]{er_plot_show_groups()}} (grouped exposure-distribution panels) -- then
 render with \code{plot()}/\code{print()}, or build the ggplot2/patchwork objects
 directly with \code{\link[=er_plot_build]{er_plot_build()}}. \code{er_plot()} never fits a model itself;
@@ -48,7 +48,7 @@ be passed to \code{\link[=er_plot_show_model]{er_plot_show_model()}}.
 }
 \section{Layers are either singleton or additive}{
 \code{\link[=er_plot_show_model]{er_plot_show_model()}}, \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, and
-\code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}} are \strong{singleton}: calling one of them twice
+\code{\link[=er_plot_show_data]{er_plot_show_data()}} are \strong{singleton}: calling one of them twice
 on the same object overwrites the first call's result rather than
 combining the two. \code{\link[=er_plot_show_groups]{er_plot_show_groups()}} is \strong{additive}: each call
 adds another grouped-distribution panel alongside any already added,
@@ -68,7 +68,7 @@ discrete variable used to split layers by color/fill, with one shared,
 deduplicated legend across the whole composed plot. Each layer
 function's \code{keep_strata} argument controls whether \emph{that} layer
 actually uses the stratification (it defaults to \code{TRUE} whenever
-\code{stratify_by} was set, \code{FALSE} otherwise). \code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}
+\code{stratify_by} was set, \code{FALSE} otherwise). \code{\link[=er_plot_show_data]{er_plot_show_data()}}
 is a partial exception to the "always color/fill" rule -- see its own
 documentation and \code{PLAN.md} for why a continuous-response variant of
 that layer would need to fall back to faceting instead.
@@ -99,6 +99,6 @@ erglm_data |>
 }
 \seealso{
 \code{\link[=er_plot_show_model]{er_plot_show_model()}}, \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}},
-\code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}},
+\code{\link[=er_plot_show_data]{er_plot_show_data()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}},
 \code{\link[=er_plot_build]{er_plot_build()}}, \code{\link[=er_plot_style]{er_plot_style()}}, \link{er_model_interface}
 }

@@ -3,23 +3,32 @@
 ## What this package is
 
 erplots provides a fluent mini-language for building exposure-response
-plots: model curves/ribbons, quantile-binned response-rate summaries,
-data strips, and grouped distribution panels. It is model-agnostic:
-erplots never fits a model itself. Any model implementing `er_predict()`
-can be visualised; implementing `er_simulate()` and `er_summary()`
-additionally enables uncertainty spaghetti plots/VPCs and summary
-annotations (e.g. p-values). See `?er_model_interface`.
+plots: model curves/ribbons, quantile-binned response-rate/mean
+summaries, a raw-data layer, and grouped distribution panels. It is
+model-agnostic: erplots never fits a model itself. Any model
+implementing `er_predict()` can be visualised; implementing
+`er_simulate()` and `er_summary()` additionally enables uncertainty
+spaghetti plots/VPCs and summary annotations (e.g. p-values). See
+`?er_model_interface`.
 
-`er_plot()` takes a `response_type = c("auto", "binary", "continuous")`
-argument (auto-detected from the response column if not given: logical
-or values entirely in `{0, 1}` → `"binary"`, else `"continuous"`),
-stored on `object$response$type`/`object$response$limits`. The model
-curve/ribbon (`er_plot_show_model()`) and group panel
-(`er_plot_show_groups()`) layers work for either response type. The
-quantile summary layer (`er_plot_show_quantiles()`), the data strip
-(`er_plot_show_datastrip()`), and `er_vpc_plot()` still assume a binary
-response internally and currently *error* (rather than silently
-mis-plot) if given a continuous response -- see "Planned work" below.
+`er_plot()` takes a `response_type = c("auto", "binary", "continuous",
+"count")` argument (auto-detected from the response column if not
+given: logical or values entirely in `{0, 1}` → `"binary"`, else
+`"continuous"`; `"auto"` never resolves to `"count"` -- that must be
+declared explicitly), stored on `object$response$type`/
+`object$response$limits`. The model curve/ribbon
+(`er_plot_show_model()`) and group panel (`er_plot_show_groups()`)
+layers work for any response type with no dispatch needed. The
+quantile summary layer (`er_plot_show_quantiles()`) and `er_vpc_plot()`
+are now fully generalised across all three response types (rate +
+Clopper-Pearson for `"binary"`; mean + t-interval for `"continuous"`;
+mean + exact Poisson interval for `"count"`). The data layer
+(`er_plot_show_data()`, renamed from `er_plot_show_datastrip()`) is the
+one remaining binary-only layer -- it still *errors* (rather than
+silently mis-plot) for `"continuous"`/`"count"` responses, and a
+continuous-response variant (a single color-encoded panel rather than
+the current two-panel jitter strip) is scoped but not yet built -- see
+"Planned work" below.
 
 The companion package [erglm](https://github.com/djnavarro/erglm)
 (formerly `erlr`) fits GLM-based exposure-response models and implements
@@ -40,18 +49,26 @@ for all four families, so no erplots-side changes are needed there.
 
 ## Planned work
 
-See [PLAN.md](PLAN.md) for scoped-out future development. The main item
-is extending several data-summary layers (quantile bins, data strips, VPC
-plots), which currently assume a binary (0/1) response, to also support
-continuous-response exposure-response models -- now a live need, since
-erglm can produce those models directly (see above). Progress so far:
-response-type detection/declaration (`er_plot(response_type = ...)`) and
-guard rails (continuous responses now error clearly rather than silently
-mis-plotting in `er_plot_show_quantiles()`/`er_plot_show_datastrip()`/
-`er_vpc_plot()`) are done (PLAN.md Stages 0 and 5). The substantive
-generalisation of those three layers (t-interval-based quantile/VPC
-summaries, a continuous-response data strip design or documented
-omission, count-response handling) is still open (Stages 1-4, 6).
+See [PLAN.md](PLAN.md) for scoped-out future development. The original
+continuous/count-response generalisation (PLAN.md Stages 0-6, plus the
+exact-Poisson-interval fast-follow) is done: response-type detection/
+declaration, guard rails, and the substantive generalisation of the
+quantile summary layer and `er_vpc_plot()` have all landed. The
+remaining open item is the **data layer's continuous-response variant**
+(PLAN.md's "Continuous-response data strip" section, Stages 7a-7c): a
+single color-encoded panel (rather than the current binary two-panel
+jitter strip). Stage 7a (generalising the composition machinery from
+fixed `$upper`/`$lower` slots to a named list of panels) is done, and
+the layer has since been renamed `er_plot_show_data()` (from
+`er_plot_show_datastrip()`; internals renamed to match --
+`.part_data()`, `build_data_jitter()`, `object$part/plot$data`). Still
+open: Stage 7b (`build_data_color()`, the `object$response$type`
+dispatch, the `color_role` concept for the data layer's non-strata
+color legend) and Stage 7c (docs/vignette for the new variant). Also
+see PLAN.md's "Mini-language architecture review" section for
+documented-but-unimplemented design notes (singleton/additive layer
+semantics, stratification/color precedence) that inform Stage 7b's
+design.
 
 ## Structure
 
@@ -59,8 +76,10 @@ omission, count-response handling) is still open (Stages 1-4, 6).
   `er_simulate()`, `er_summary()` generics and their default methods.
 - `R/er-plot-api.R` -- the public plot-building API: `er_plot()`,
   `er_plot_show_model()`, `er_plot_show_quantiles()`,
-  `er_plot_show_datastrip()`, `er_plot_show_groups()`, `er_plot_build()`,
-  plus `print`/`plot` methods for the `er_plot` S3 class.
+  `er_plot_show_data()`, `er_plot_show_groups()`, `er_plot_build()`,
+  plus `print`/`plot` methods for the `er_plot` S3 class. Each layer
+  function (except `er_plot()` itself) has its own dedicated Rd topic
+  (no shared `@rdname`).
 - `R/er-plot-part.R` -- internal `.part_*()` functions that assemble the
   configuration for each plot component (this is where `er_predict()` /
   `er_simulate()` / `er_summary()` get called on the user-supplied model).
@@ -68,7 +87,7 @@ omission, count-response handling) is still open (Stages 1-4, 6).
   machinery that turns parts into ggplot2 objects and composes them with
   patchwork.
 - `R/er-plot-partials-*.R` -- the pluggable `build_*()` partial builders
-  (one file per component: model, summary, quantile, datastrip, group).
+  (one file per component: model, summary, quantile, data, group).
   See `?er_partial` for the interface these builders share.
 - `R/er-vpc.R` -- `er_vpc_plot()`, a model-agnostic VPC-style plot
   operating on plain observed/simulated data frames.

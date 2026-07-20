@@ -495,8 +495,13 @@ instead of inferring meaning from `stratify` alone.
 
 ### API changes
 
-- `er_plot_show_datastrip()`'s dispatch to `build_datastrip_jitter()` vs.
-  a new `build_datastrip_color()` should be automatic, keyed off
+Note: the rename described under "Naming decision" above (`er_plot_show_data()`,
+`.part_data()`, `build_data_jitter()`, `object$part/plot$data`) has already
+landed, ahead of this section's original sequencing. The items below use
+the current (post-rename) names throughout.
+
+- `er_plot_show_data()`'s dispatch to `build_data_jitter()` vs.
+  a new `build_data_color()` should be automatic, keyed off
   `object$response$type`, mirroring how `.part_quantile()` dispatches
   invisibly rather than asking the caller to name a style. No new
   user-facing `style` value.
@@ -508,9 +513,9 @@ instead of inferring meaning from `stratify` alone.
   elsewhere), and treat `panel = "both"` (the default) as "the one
   panel" for continuous/count.
 - The existing `.abort_continuous_unsupported(planned = FALSE)` call in
-  `er_plot_show_datastrip()` is removed for `"continuous"`/`"count"`
+  `er_plot_show_data()` is removed for `"continuous"`/`"count"`
   response types (mirroring how the quantile/VPC guards were removed
-  once those were generalized). Check whether `er_plot_show_datastrip()`
+  once those were generalized). Check whether `er_plot_show_data()`
   was `.abort_continuous_unsupported()`'s only remaining caller (per
   Stage 3's note) -- if so, the helper (and its now-unused `planned`
   parameter) likely become dead code worth removing rather than leaving
@@ -539,24 +544,68 @@ instead of inferring meaning from `stratify` alone.
 
 ### Suggested staging
 
-- **Stage 7a -- composition refactor (no behavior change).** Generalize
-  `.build_strip_plot()`/`.polish_margins()`/`.polish_arrangement()`/
-  `.polish_labels()` from fixed `$upper`/`$lower` slots to a named list
-  of panels. Binary behavior must be bit-for-bit unchanged; full
-  regression tests on the existing binary strip (unstratified and
-  stratified) before adding anything continuous-specific.
-- **Stage 7b -- `build_datastrip_color()` + dispatch.** New builder,
-  `.part_strip()` dispatch on `object$response$type`, the `color_role`
+- **Stage 7a -- composition refactor (no behavior change). [done]**
+  Generalized `.build_strip_plot()`/`.polish_margins()`/
+  `.polish_arrangement()`/`.polish_labels()` from fixed `$upper`/`$lower`
+  slots to a named list of panels.
+  - `.part_strip()`'s config no longer has `$upper`/`$lower` booleans;
+    it now has `config$panels` (a character vector of panel names to
+    build, in build order -- `c("upper", "lower")`, `c("upper")`, or
+    `c("lower")`, per the `panel` argument) and
+    `config$panel_position` (a named vector mapping each panel name to
+    `"above"`/`"below"`, i.e. its vertical position relative to the base
+    plot -- currently always `upper = "above"`, `lower = "below"`, but
+    looked up by name rather than hardcoded, so a future panel name
+    doesn't require new branches).
+  - `.build_strip_plot()` (`R/er-plot-build.R`) now loops over
+    `config$panels` once instead of two copy-pasted `if (config$upper)`/
+    `if (config$lower)` blocks, building `strip_plots[[panel_name]]` for
+    each. Returns the same `list(upper = <ggplot>, lower = <ggplot>)`
+    shape as before for the binary case.
+  - `.polish_margins()`/`.polish_labels()` (`R/er-plot-compose.R`) now
+    iterate over `names(p$strip)` generically -- margins consult
+    `panel_position` to decide which side's margin to zero, instead of
+    two hardcoded `if (!is.null(p$strip$upper))`/`if (!is.null(p$strip$lower))`
+    blocks; labels apply the same `x`/`y`/legend logic to every panel in
+    the loop rather than duplicating it per fixed slot.
+  - `.polish_arrangement()` splits `names(object$plot$strip)` into
+    `above_panels`/`below_panels` via `panel_position`, placing all
+    "above" panels before the base plot and all "below" panels after it
+    (in place of the previous `strip$upper` block, then base, then
+    `strip$lower` block). Panel naming (`"strip_upper"`/`"strip_lower"`)
+    and sizing (`height$strip / 2`, unconditionally -- an existing quirk
+    where a single panel still only gets half the strip height budget,
+    deliberately preserved rather than fixed here, since this stage is
+    scoped as no-behavior-change) are untouched for the binary case.
+  - Files: `R/er-plot-part.R` (`.part_strip()`), `R/er-plot-build.R`
+    (`.build_strip_plot()`), `R/er-plot-compose.R` (`.polish_margins()`,
+    `.polish_labels()`, `.polish_arrangement()`). Tests:
+    `test-er-plot-part.R`'s `.part_strip()` structure test updated for
+    the new config field names (`panels`/`panel_position` in place of
+    `lower`/`upper`), asserting the resolved panel list/position mapping
+    for both the unstratified and stratified fixtures.
+  - Done when: `devtools::check()` is clean and the existing binary
+    strip regression tests (unstratified and stratified, including
+    `test-er-plot-api.R`'s `strip_upper`/`strip_lower` build/arrangement
+    assertions) pass unchanged. Met -- `devtools::check()` clean (0/0/0),
+    289 tests passing (up from 285); a stratified binary datastrip plot
+    (`sex`-stratified `ae1 ~ aucss`) was also re-rendered end-to-end and
+    visually matches the pre-refactor design (flush margins between base
+    and both strip panels, per-stratum color/legend intact).
+- **Stage 7b -- `build_data_color()` + dispatch.** New builder,
+  `.part_data()` dispatch on `object$response$type`, the `color_role`
   tag and its consumption in `.polish_labels()`/`.polish_legends()`, the
   `panel` argument guard for continuous/count, guard-rail removal in
-  `er_plot_show_datastrip()`. Tests: unstratified continuous/count
+  `er_plot_show_data()`. Tests: unstratified continuous/count
   round-trip, stratified continuous/count round-trip (N panels, one per
   stratum), response-label-not-strata-label assertion, `panel != "both"`
   error assertion.
-- **Stage 7c -- docs/vignette.** `?er_plot_show_datastrip` update;
-  replace `vignettes/articles/plot.Rmd`'s current continuous-response
-  error demo (added in Stage 6) with a real example; update this
-  section's status and design decision (2) once shipped.
+- **Stage 7c -- docs/vignette.** `?er_plot_show_data` update (already on
+  its own Rd topic as of the naming-decision rename above, so this is
+  content, not structure); replace `vignettes/articles/plot.Rmd`'s
+  current continuous-response error demo (added in Stage 6) with a real
+  example; update this section's status and design decision (2) once
+  shipped.
 
 ## Other known issues / follow-ups
 
@@ -646,51 +695,84 @@ section's proposals are implemented or revised, check
 `vignettes/articles/design.Rmd` for staleness at the same time, not as a
 follow-up.
 
-### Naming decision: "data strip" -> "data layer"
+### Naming decision: "data strip" -> "data layer" [rename done; `build_data_color()` still pending]
 
-Going forward, the layer currently called the "data strip"
+The layer formerly called the "data strip"
 (`er_plot_show_datastrip()`, `.part_strip()`, `build_datastrip_jitter()`,
-`object$part$strip`/`object$plot$strip`) will be called the **data
-layer** in code and docs once it's renamed: `er_plot_show_data()`,
-`.part_data()`, `build_data_jitter()` (binary) /
-`build_data_color()` (continuous/count, per Stage 7b). This matches the
+`object$part$strip`/`object$plot$strip`) is now called the **data
+layer** in code and docs: `er_plot_show_data()`,
+`.part_data()`, `build_data_jitter()` (binary). This matches the
 existing `model`/`quantile`/`group` naming pattern -- all four layers
-named for *what they show*, not how they're drawn -- and "strip" stops
-being an accurate name anyway once a continuous variant exists (a single
-color-coded panel, not two stacked jitter panels).
+named for *what they show*, not how they're drawn -- and "strip" stopped
+being an accurate name once a continuous variant was on the roadmap (a
+single color-coded panel, not two stacked jitter panels). `build_data_color()`
+(the continuous/count builder) is still Stage 7b's job -- only the
+rename itself landed here.
 
-The rename itself is **not done in this pass**. It's scoped here as a
-checklist for whoever implements it, and it should land as part of Stage
-7's implementation PR rather than as a separate rename PR, to avoid two
-full-package diffs for what's really one unit of work. Symbols/places
-that need to change:
+The rename originally was scoped to land as part of Stage 7's
+implementation PR rather than as a separate pass, to avoid two
+full-package diffs for what's really one unit of work -- see the
+checklist below, all now applied as a standalone pass ahead of Stage 7b
+(a deliberate deviation from that sequencing, made explicitly rather
+than assumed). Symbols/places that changed:
 
-- `er_plot_show_datastrip()` -> `er_plot_show_data()`
-- `.part_strip()` -> `.part_data()`
-- `build_datastrip_jitter()` -> `build_data_jitter()`; new
-  `build_data_color()` per Stage 7b
+- `er_plot_show_datastrip()` -> `er_plot_show_data()` [done]
+- `.part_strip()` -> `.part_data()` [done]
+- `build_datastrip_jitter()` -> `build_data_jitter()` [done]; new
+  `build_data_color()` still pending, per Stage 7b
 - `object$part$strip`, `object$plot$strip` -> `object$part$data`,
-  `object$plot$data`
+  `object$plot$data` [done]
 - `config$panel` and its `"upper"`/`"lower"`/`"both"` values (binary-only;
-  Stage 7's API-changes section already covers the guard for
-  continuous/count)
-- `object$style$height$strip` -> `object$style$height$data`
-- `print.er_plot()`'s `"strip"` branch and its printed label
-- `.abort_continuous_unsupported()`'s call site (currently
-  `er_plot_show_datastrip()`)
-- Roxygen `@rdname`/`@name` anchors referencing the strip functions,
-  `R/er-plot-partials-datastrip.R`'s filename
-  (-> `R/er-plot-partials-data.R`)
-- `vignettes/articles/plot.Rmd`'s "Strip component" section heading and
-  prose
-- This file's own prose (`PLAN.md`'s "Continuous-response data strip"
-  section title and body)
+  unchanged by the rename; Stage 7's API-changes section still covers the
+  guard for continuous/count, not yet added)
+- `object$style$height$strip` -> `object$style$height$data` [done]
+- `print.er_plot()`'s `"strip"` branch and its printed label -> now
+  `"data"`/`"data:"` [done]
+- `.abort_continuous_unsupported()`'s call site (now
+  `er_plot_show_data()`) [done]
+- Roxygen `@rdname`/`@name` anchors referencing the strip functions
+  [done]; `R/er-plot-partials-datastrip.R` renamed to
+  `R/er-plot-partials-data.R` [done]
+- `vignettes/articles/plot.Rmd`'s "Strip component" section renamed to
+  "Data component", prose updated [done]; `vignettes/articles/design.Rmd`
+  updated to match (layer table, singleton-status prose, stratification/
+  response-type sections) [done]
+- `README.Rmd`/`README.md`, `_pkgdown.yml`'s reference index [done]
+- This file's own prose (this section) [done]
+
+Also done as part of this pass, ahead of the Stage A' item below since
+it turned out to already be satisfied: the `?er_plot` Rd-page split
+(`er_plot()`, `er_plot_style()`, `er_plot_show_model()`,
+`er_plot_show_quantiles()`, `er_plot_show_data()`, `er_plot_show_groups()`,
+`er_plot_build()` each already had, or now have, their own dedicated Rd
+topic/`@rdname` rather than sharing `@rdname er_plot`) -- see Stage A'
+below for the up-to-date status.
+
+Files touched: `R/er-plot-api.R`, `R/er-plot-part.R`,
+`R/er-plot-build.R`, `R/er-plot-compose.R`, `R/utils-helpers.R`,
+`R/er-plot-partials.R`, `R/er-plot-partials-data.R` (renamed from
+`R/er-plot-partials-datastrip.R`), `NAMESPACE`/`man/*.Rd` (regenerated
+via `devtools::document()`), `tests/testthat/test-er-plot-part.R`,
+`tests/testthat/test-er-plot-api.R`,
+`tests/testthat/test-er-plot-partials-data.R` (renamed from
+`test-er-plot-partials-datastrip.R`), `vignettes/articles/plot.Rmd`,
+`vignettes/articles/design.Rmd`, `README.Rmd`/`README.md`,
+`_pkgdown.yml`. Done when: `devtools::check()` is clean and every test/
+vignette/example referring to the old names is updated rather than
+merely still passing by coincidence. Met -- `devtools::check()` clean
+(0/0/0), 289 tests passing (unchanged from Stage 7a, since this was a
+pure rename with no behavior change); both `vignettes/articles/plot.Rmd`
+and `vignettes/articles/design.Rmd` re-rendered end-to-end after
+`devtools::install()`ing the renamed source, and a stratified binary
+data-layer plot was re-rendered and visually spot-checked to confirm the
+rename didn't alter output.
 
 ### Layer composition semantics: singleton vs. additive
 
 Documenting current (undocumented) behavior: `er_plot_show_model()`,
-`er_plot_show_quantiles()`, and `er_plot_show_datastrip()`
-(future `er_plot_show_data()`) are **singleton** -- calling one twice
+`er_plot_show_quantiles()`, and `er_plot_show_data()`
+(renamed from `er_plot_show_datastrip()` -- see "Naming decision" above)
+are **singleton** -- calling one twice
 overwrites `object$part$<x>`, silently discarding the first call's
 result. `er_plot_show_groups()` is **additive** -- each call's `group_by`
 accumulates into its own named entry, so multiple calls produce multiple
@@ -774,42 +856,39 @@ Two gaps, proposed (not yet written):
   closing section instructs future changes to update it in the same
   change as any grammar-altering decision -- see this section's
   cross-reference note above.
-- **`?er_plot`'s `@rdname er_plot` groups too much.** `er_plot()`,
+- **`?er_plot`'s `@rdname er_plot` groups too much. [done]** `er_plot()`,
   `er_plot_style()`, `er_plot_show_model()`, `er_plot_show_quantiles()`,
-  `er_plot_show_datastrip()`/(future) `er_plot_show_data()`,
-  `er_plot_show_groups()`, and `er_plot_build()` currently share one Rd
+  `er_plot_show_data()` (renamed from `er_plot_show_datastrip()`),
+  `er_plot_show_groups()`, and `er_plot_build()` used to share one Rd
   page and one shared `@param` list, even though not every parameter
   applies to every function (`panel` only means something for the data
   layer; `bins` means different things for quantile vs. group bins).
-  Resolved: split into per-layer Rd topics (`?er_plot_show_model`,
-  `?er_plot_show_quantiles`, etc.), each documenting its own
-  singleton/additive status, response-type dispatch, and layer-specific
-  arguments. Sequencing decision: do this split **before** Stage 7's
-  implementation, not as a later Stage D item -- Stage 7 is about to add
-  a second data-layer builder (`build_data_color()`), a `color_role`
-  concept, and a `panel != "both"` guard that only make sense for that
-  one layer, and writing those into the existing shared page would just
-  create more to untangle later. Splitting first gives Stage 7 a clean,
-  dedicated `?er_plot_show_data` topic to write straight into. Trade-off
-  accepted explicitly: this changes `@rdname er_plot` anchors that users/
-  scripts may reference by topic name, and is a larger docs diff than it
-  looks -- worth it here because of the direction the docs are already
-  heading, but noted so it isn't a surprise.
+  Verified while starting Stage 7b prep: the split into per-layer Rd
+  topics (`?er_plot_show_model`, `?er_plot_show_quantiles`, etc., each
+  documenting its own singleton/additive status, response-type
+  dispatch, and layer-specific arguments) had, in fact, already
+  happened -- `@rdname er_plot` now appears exactly once in
+  `R/er-plot-api.R` (attached only to `er_plot()` itself), and every
+  other layer function already had its own full roxygen block. Combined
+  with this pass's rename, there is now a dedicated `?er_plot_show_data`
+  topic (not `?er_plot_show_datastrip`) ready for Stage 7b to write its
+  `color_role`/`build_data_color()` documentation straight into. Trade-
+  off noted for completeness even though it predates this pass: the
+  split changed `@rdname er_plot` anchors that users/scripts may
+  reference by topic name.
 
 ### Staged roadmap
 
-- **Stage A -- naming decision + rename scoping (docs only).** The "data
-  layer" name and full symbol inventory above are the checklist Stage
-  7's implementation PR should execute against. No renames land in this
-  stage.
-- **Stage A' -- `?er_plot` Rd-page split (docs only, before Stage 7).**
-  Split the shared Rd page into per-layer topics as resolved above.
-  Lands before Stage 7a so the new `er_plot_show_data()` docs (Stage 7)
-  get a dedicated home from the start rather than another round of
-  untangling a shared page. Also documents, per-topic, the
-  singleton/additive status settled in Stage B below and the
-  layer-specific `color_role`/facet behavior from Stage C, once each is
-  written.
+- **Stage A -- naming decision + rename scoping (docs only originally;
+  the rename itself has since landed). [done]** The "data layer" name
+  and full symbol inventory above were originally scoped as a checklist
+  for Stage 7's implementation PR to execute against; that rename has
+  since been applied as its own pass (see "Naming decision" above),
+  ahead of Stage 7b, rather than bundled with it as originally planned.
+- **Stage A' -- `?er_plot` Rd-page split (docs only, before Stage 7). [done]**
+  Split the shared Rd page into per-layer topics as resolved above --
+  turned out to already be the case when checked (see the resolved
+  question immediately above for detail); nothing left to do here.
 - **Stage B -- document singleton/additive semantics.** Pure docs
   (now written into the appropriate per-layer topic from Stage A', plus
   `?er_partial` and the vignette): state that model/quantile/data are

@@ -5,7 +5,7 @@
 #' up a plot by piping it through one or more layer functions --
 #' [er_plot_show_model()] (fitted-model curve/ribbon and summary),
 #' [er_plot_show_quantiles()] (exposure-quantile-binned response summary),
-#' [er_plot_show_datastrip()] (a strip depicting the raw data), and/or
+#' [er_plot_show_data()] (a strip depicting the raw data), and/or
 #' [er_plot_show_groups()] (grouped exposure-distribution panels) -- then
 #' render with `plot()`/`print()`, or build the ggplot2/patchwork objects
 #' directly with [er_plot_build()]. `er_plot()` never fits a model itself;
@@ -16,7 +16,7 @@
 #' # Layers are either singleton or additive
 #'
 #' [er_plot_show_model()], [er_plot_show_quantiles()], and
-#' [er_plot_show_datastrip()] are **singleton**: calling one of them twice
+#' [er_plot_show_data()] are **singleton**: calling one of them twice
 #' on the same object overwrites the first call's result rather than
 #' combining the two. [er_plot_show_groups()] is **additive**: each call
 #' adds another grouped-distribution panel alongside any already added,
@@ -36,7 +36,7 @@
 #' deduplicated legend across the whole composed plot. Each layer
 #' function's `keep_strata` argument controls whether *that* layer
 #' actually uses the stratification (it defaults to `TRUE` whenever
-#' `stratify_by` was set, `FALSE` otherwise). [er_plot_show_datastrip()]
+#' `stratify_by` was set, `FALSE` otherwise). [er_plot_show_data()]
 #' is a partial exception to the "always color/fill" rule -- see its own
 #' documentation and `PLAN.md` for why a continuous-response variant of
 #' that layer would need to fall back to faceting instead.
@@ -86,7 +86,7 @@
 #' }
 #'
 #' @seealso [er_plot_show_model()], [er_plot_show_quantiles()],
-#'   [er_plot_show_datastrip()], [er_plot_show_groups()],
+#'   [er_plot_show_data()], [er_plot_show_groups()],
 #'   [er_plot_build()], [er_plot_style()], [er_model_interface]
 #'
 #' @name er_plot
@@ -111,12 +111,12 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
       part = list(
         model    = NULL, 
         quantile = NULL, 
-        strip    = NULL,
+        data     = NULL,
         group    = NULL
       ),
       plot = list(
         base = NULL, 
-        strip = NULL, 
+        data = NULL, 
         group = NULL
       ),
       style = list(),
@@ -164,7 +164,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   object$style$format_p <- scales::label_pvalue(accuracy = .001, add_p = TRUE)
   object$style$format_percent <- scales::label_percent(accuracy = 1)
   object$style$format_number <- scales::label_number(accuracy = 0.01)
-  object$style$height <- list(base = 6, strip = 2, group = 3) 
+  object$style$height <- list(base = 6, data = 2, group = 3) 
   object$style$theme_base <- function() ggplot2::theme_bw()
   object$style$theme_args <- function() {
     ggplot2::theme(
@@ -244,7 +244,7 @@ er_plot_style <- function(object, labels) {
 #' }
 #'
 #' @seealso [er_plot()], [er_plot_show_quantiles()],
-#'   [er_plot_show_datastrip()], [er_plot_show_groups()]
+#'   [er_plot_show_data()], [er_plot_show_groups()]
 #'
 #' @export
 er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbonline", conf_level = 0.95) {
@@ -328,7 +328,7 @@ er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbo
 #' }
 #'
 #' @seealso [er_plot()], [er_plot_show_model()],
-#'   [er_plot_show_datastrip()], [er_plot_show_groups()], [er_vpc_plot()]
+#'   [er_plot_show_data()], [er_plot_show_groups()], [er_vpc_plot()]
 #'
 #' @export
 er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar", bins = 4, conf_level = 0.95) {
@@ -348,11 +348,11 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 }
 
 
-# strips ----------------------------------------------------------------------
+# data --------------------------------------------------------------------
 
-#' Add a raw-data strip layer
+#' Add a raw-data layer
 #'
-#' Adds the data strip layer: individual observations jittered along the
+#' Adds the data layer: individual observations jittered along the
 #' exposure axis. Currently supports only a binary response --
 #' responders (`response == 1`) are jittered in an upper panel and
 #' non-responders (`response == 0`) in a lower panel. Calling this on an
@@ -360,9 +360,7 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #' since the two-panel design has no direct analogue for those response
 #' types; see `PLAN.md`'s "Continuous-response data strip" section for
 #' the planned generalisation (a single, continuously colour-encoded
-#' panel) and "Mini-language architecture review" for the naming change
-#' this layer is expected to undergo (`er_plot_show_datastrip()` ->
-#' `er_plot_show_data()`).
+#' panel).
 #'
 #' This layer is **singleton** -- see [er_plot()]'s "Layers are either
 #' singleton or additive". It's also the one layer whose stratification
@@ -379,7 +377,7 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
 #'   default)
 #'
-#' @returns The input `object`, with the data strip layer added
+#' @returns The input `object`, with the data layer added
 #'
 #' @examples
 #' \dontrun{
@@ -389,7 +387,7 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #'   er_plot(aucss, ae2, stratify_by = sex) |>
 #'   er_plot_show_model(mod2, keep_strata = FALSE) |>
 #'   er_plot_show_quantiles() |>
-#'   er_plot_show_datastrip() |>
+#'   er_plot_show_data() |>
 #'   plot()
 #' }
 #'
@@ -397,19 +395,19 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #'   [er_plot_show_quantiles()], [er_plot_show_groups()]
 #'
 #' @export
-er_plot_show_datastrip <- function(object, keep_strata = NULL, style = "jitter", panel = "both") {
+er_plot_show_data <- function(object, keep_strata = NULL, style = "jitter", panel = "both") {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (object$response$type %in% c("continuous", "count")) {
     .abort_continuous_unsupported(
-      "er_plot_show_datastrip",
+      "er_plot_show_data",
       response_type = object$response$type,
       planned = FALSE
     )
   }
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
-  object$part$strip <- .part_strip(
+  object$part$data <- .part_data(
     object = object,
     stratify = keep_strata, 
     style = style,
@@ -468,7 +466,7 @@ er_plot_show_datastrip <- function(object, keep_strata = NULL, style = "jitter",
 #' }
 #'
 #' @seealso [er_plot()], [er_plot_show_model()],
-#'   [er_plot_show_quantiles()], [er_plot_show_datastrip()]
+#'   [er_plot_show_quantiles()], [er_plot_show_data()]
 #'
 #' @export
 er_plot_show_groups <- function(object, group_by, style = "boxplot", bins = NULL, keep_strata = NULL) {
@@ -508,7 +506,7 @@ print.er_plot <- function(x, ...) {
     cat("  plot components:\n")
     if (part_set["model"])    cat("    - model:           ", paste(class(x$part$model$config$model), collapse = "/"), "\n", sep = "")
     if (part_set["quantile"]) cat("    - quantile:        ", x$part$quantile$config$n_quantiles, " bins\n", sep = "")
-    if (part_set["strip"])    cat("    - strip:           ", x$part$strip$config$style, " ", x$part$strip$config$panel, "\n", sep = "")
+    if (part_set["data"])     cat("    - data:            ", x$part$data$config$style, " ", x$part$data$config$panel, "\n", sep = "")
     if (part_set["group"])    cat("    - group:           ", paste(names(x$part$group$config), collapse = ", "), "\n", sep = "")
   } else {
     cat("  plot components: <none>\n")
@@ -517,7 +515,7 @@ print.er_plot <- function(x, ...) {
   if (any(plot_set)) {
     cat("  plots built:\n")
     if (plot_set["base"])   cat("    - model\n", sep = "")
-    if (plot_set["strip"])  cat("    - strip\n", sep = "")
+    if (plot_set["data"])   cat("    - data\n", sep = "")
     if (plot_set["group"])  cat("    - group\n", sep = "")
   } else {
     cat("  plots built: <none>\n")
@@ -559,7 +557,7 @@ er_plot_build <- function(object) {
   
   # build
   if (!is.null(object$part$model) | !is.null(object$part$quantile)) object$plot$base <- .build_base_plot(object)
-  if (!is.null(object$part$strip)) object$plot$strip <- .build_strip_plot(object)
+  if (!is.null(object$part$data)) object$plot$data <- .build_data_plot(object)
   if (!is.null(object$part$group)) object$plot$group <- .build_group_plot(object)
 
   # polish

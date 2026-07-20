@@ -14,7 +14,7 @@
 #' - model
 #' - summary
 #' - quantile
-#' - datastrip
+#' - data
 #' - group
 #' 
 #' Arguments are standardised to allow users to write their own 
@@ -26,7 +26,7 @@
 #' which, at a minimum, already has the base theme applied. For 
 #' "model", "summary", and "quantile", the pieces will be added to
 #' a plot that already has a coord that sets the axis limits. For
-#' the "datastrip" and "group" plots, the plot object does not yet
+#' the "data" and "group" plots, the plot object does not yet
 #' have a coord. The expectation, however, is that the builder will
 #' supply an x-axis limit that is consistent with the base plot. That
 #' is, since all component plots use the exposure variable for the

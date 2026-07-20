@@ -26,36 +26,29 @@
   return(base)
 }
 
-.build_strip_plot <- function(object) {
+.build_data_plot <- function(object) {
 
   data     <- object$data
-  config   <- object$part$strip$config
-  stratify <- object$part$strip$stratify
+  config   <- object$part$data$config
+  stratify <- object$part$data$stratify
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
   style    <- object$style
 
-  strip_plots <- list()
+  data_plots <- list()
 
-  if (config$upper) {
-    config$panel <- "upper"
-    strip_plots$upper <- ggplot2::ggplot() +
+  for (panel_name in config$panels) {
+    panel_config <- config
+    panel_config$panel <- panel_name
+    data_plots[[panel_name]] <- ggplot2::ggplot() +
       style$theme_base() +
-      config$builder(
-        data, config, stratify, exposure, response, strata, style
-      )
-  }
-  if (config$lower) {
-    config$panel <- "lower"
-    strip_plots$lower <- ggplot2::ggplot() +
-      style$theme_base() +
-      config$builder(
-        data, config, stratify, exposure, response, strata, style
+      panel_config$builder(
+        data, panel_config, stratify, exposure, response, strata, style
       )
   }
 
-  return(strip_plots)
+  return(data_plots)
 }
 
 .build_group_plot <- function(object) {

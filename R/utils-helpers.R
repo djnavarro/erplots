@@ -150,7 +150,7 @@ poisson_interval <- function(x, n, conf_level = 0.95) {
 #'   this as a stopgap pending a planned generalisation (see `PLAN.md`,
 #'   "Extend beyond binary responses"). If `FALSE`, the message instead
 #'   frames this as a settled design decision with no continuous-response
-#'   variant currently planned (used by [er_plot_show_datastrip()]; see
+#'   variant currently planned (used by [er_plot_show_data()]; see
 #'   `PLAN.md` Stage 3).
 #'
 #' @details Originally a stopgap guard rail shared by every component that
@@ -159,7 +159,7 @@ poisson_interval <- function(x, n, conf_level = 0.95) {
 #'   and `er_vpc_plot()` have since been generalised to support continuous
 #'   (and, via `response_type = "count"`, exact-Poisson) responses
 #'   directly (PLAN.md Stages 1-2, and the design decision (4)
-#'   fast-follow) and no longer call this helper. `er_plot_show_datastrip()`
+#'   fast-follow) and no longer call this helper. `er_plot_show_data()`
 #'   is the remaining caller: its "responders above the line,
 #'   non-responders below" design is inherently binary-response, so (per
 #'   PLAN.md's Stage 3 design decision) no continuous- or count-response

@@ -61,7 +61,7 @@ plt <- erglm_data |>
    # variable as a term, so we pass `mod2_marginal` here
    er_plot_show_model(mod2_marginal, keep_strata = FALSE) |> 
    er_plot_show_quantiles(bins = 3) |> 
-   er_plot_show_datastrip() |> 
+   er_plot_show_data() |> 
    er_plot_show_groups(group_by = c(aucss, treatment), keep_strata = FALSE)
 
 print(plt)
@@ -73,7 +73,7 @@ print(plt)
 #>   plot components:
 #>     - model:           erglm_model/glm/lm
 #>     - quantile:        3 bins
-#>     - strip:           jitter both
+#>     - data:            jitter both
 #>     - group:           .aucss_quantile, treatment
 #>   plots built: <none>
 #>   output built: no
@@ -93,11 +93,11 @@ sim
 #>  1     0  673. Male        1      1
 #>  2     1 2806. Female      2      1
 #>  3     0    0  Female      3      1
-#>  4     0 1169. Female      4      1
-#>  5     1  377. Male        5      1
+#>  4     1 1169. Female      4      1
+#>  5     0  377. Male        5      1
 #>  6     0  327. Female      6      1
 #>  7     0    0  Male        7      1
-#>  8     0 1208. Female      8      1
+#>  8     1 1208. Female      8      1
 #>  9     0    0  Male        9      1
 #> 10     0  254. Female     10      1
 #> # ℹ 29,990 more rows

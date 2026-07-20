@@ -67,7 +67,7 @@ plt <- erglm_data |>
    # variable as a term, so we pass `mod2_marginal` here
    er_plot_show_model(mod2_marginal, keep_strata = FALSE) |> 
    er_plot_show_quantiles(bins = 3) |> 
-   er_plot_show_datastrip() |> 
+   er_plot_show_data() |> 
    er_plot_show_groups(group_by = c(aucss, treatment), keep_strata = FALSE)
 
 print(plt)

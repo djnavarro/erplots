@@ -8,21 +8,23 @@
   zero_pt <- ggplot2::unit(0, "pt")
 
   base_mar <- margins
-  uppr_mar <- margins
-  lowr_mar <- margins
+  panel_position <- object$part$data$config$panel_position %||% character(0)
 
-  if (!is.null(p$strip$upper)) {
-    base_mar[1] <- zero_pt
-    uppr_mar[3] <- zero_pt
-  }
-  if (!is.null(p$strip$lower)) {
-    base_mar[3] <- zero_pt
-    lowr_mar[1] <- zero_pt
+  for (panel_name in names(p$data)) {
+    panel_mar <- margins
+    position <- panel_position[[panel_name]]
+    if (identical(position, "above")) {
+      base_mar[1] <- zero_pt
+      panel_mar[3] <- zero_pt
+    }
+    if (identical(position, "below")) {
+      base_mar[3] <- zero_pt
+      panel_mar[1] <- zero_pt
+    }
+    p$data[[panel_name]] <- p$data[[panel_name]] + ggplot2::theme(margins = panel_mar)
   }
 
   p$base <- p$base + ggplot2::theme(margins = base_mar)
-  if (!is.null(p$strip$upper)) p$strip$upper <- p$strip$upper + ggplot2::theme(margins = uppr_mar)
-  if (!is.null(p$strip$lower)) p$strip$lower <- p$strip$lower + ggplot2::theme(margins = lowr_mar)
   if (!is.null(p$group)) {
     for(g in seq_along(p$group)) {
       p$group[[g]] + ggplot2::theme(margins = margins)
@@ -43,25 +45,14 @@
   if ("fill" %in% ll) p$base <- p$base + ggplot2::labs(fill = object$strata$label)
   if ("colour" %in% ll) p$base <- p$base + ggplot2::labs(color = object$strata$label)
 
-  if (!is.null(p$strip)) {
-    if (!is.null(p$strip$upper)) {
-      p$strip$upper <- p$strip$upper + ggplot2::labs(
-        x = object$exposure$label,
-        y = NULL
-      )
-      ll <- names(ggplot2::get_labs(p$strip$upper))
-      if ("fill" %in% ll) p$strip$upper <- p$strip$upper + ggplot2::labs(fill = object$strata$label)
-      if ("colour" %in% ll) p$strip$upper <- p$strip$upper + ggplot2::labs(color = object$strata$label)
-    }
-    if (!is.null(p$strip$lower)) {
-      p$strip$lower <- p$strip$lower + ggplot2::labs(
-        x = object$exposure$label,
-        y = NULL
-      )
-      ll <- names(ggplot2::get_labs(p$strip$lower))
-      if ("fill" %in% ll) p$strip$lower <- p$strip$lower + ggplot2::labs(fill = object$strata$label)
-      if ("colour" %in% ll) p$strip$lower <- p$strip$lower + ggplot2::labs(color = object$strata$label)
-    }
+  for (panel_name in names(p$data)) {
+    p$data[[panel_name]] <- p$data[[panel_name]] + ggplot2::labs(
+      x = object$exposure$label,
+      y = NULL
+    )
+    ll <- names(ggplot2::get_labs(p$data[[panel_name]]))
+    if ("fill" %in% ll) p$data[[panel_name]] <- p$data[[panel_name]] + ggplot2::labs(fill = object$strata$label)
+    if ("colour" %in% ll) p$data[[panel_name]] <- p$data[[panel_name]] + ggplot2::labs(color = object$strata$label)
   }
 
   if (!is.null(p$group)) {
@@ -90,15 +81,20 @@
   )
   ind <- 0L
 
-  if (!is.null(object$plot$strip$upper)) {
+  data_panels <- names(object$plot$data)
+  panel_position <- object$part$data$config$panel_position %||% character(0)
+  above_panels <- data_panels[panel_position[data_panels] == "above"]
+  below_panels <- data_panels[panel_position[data_panels] == "below"]
+
+  for (panel_name in above_panels) {
     ind <- ind + 1L
-    plot_list[[ind]] <- object$plot$strip$upper
+    plot_list[[ind]] <- object$plot$data[[panel_name]]
     plot_info <- plot_info |> 
       tibble::add_row(
         id = ind,
-        size = object$style$height$strip / 2,
-        plot = "strip",
-        name = "strip_upper"
+        size = object$style$height$data / 2,
+        plot = "data",
+        name = paste0("data_", panel_name)
       )
   }
 
@@ -112,15 +108,15 @@
       name = "base"
     )
 
-  if (!is.null(object$plot$strip$lower)) {
+  for (panel_name in below_panels) {
     ind <- ind + 1L
-    plot_list[[ind]] <- object$plot$strip$lower
+    plot_list[[ind]] <- object$plot$data[[panel_name]]
     plot_info <- plot_info |> 
       tibble::add_row(
         id = ind,
-        size = object$style$height$strip / 2,
-        plot = "strip",
-        name = "strip_lower"
+        size = object$style$height$data / 2,
+        plot = "data",
+        name = paste0("data_", panel_name)
       )
   }
   
