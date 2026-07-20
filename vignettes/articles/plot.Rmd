@@ -172,19 +172,57 @@ erglm_data |>
 Declaring `response_type = "count"` swaps the t-interval approximation
 for an exact Poisson interval (bin mean plus [poisson_interval()]
 instead of [t_interval()]), which never produces a negative lower bound
--- useful for low-count bins, where the t-interval approximation can:
+-- useful for low-count bins, where the t-interval approximation can. For
+`erglm_data`'s own `ae_count`, none of the bin means are low enough for
+this to actually happen, so the two plots above would look almost
+identical if you re-ran the last one with `response_type = "count"`. To
+make the difference concrete, here's a synthetic dataset where the
+placebo arm has only 2 events among 20 subjects:
+
+```{r count-synthetic}
+set.seed(84)
+placebo_counts <- rpois(20, 0.05)
+while (sum(placebo_counts) != 2) placebo_counts <- rpois(20, 0.05)
+
+aucss_dosed <- sort(runif(80, 100, 3000))
+count_dosed <- rpois(80, 0.1 + 0.003 * aucss_dosed)
+
+low_count_data <- data.frame(
+  aucss = c(rep(0, 20), aucss_dosed),
+  ae_count = c(placebo_counts, count_dosed)
+)
+
+mod_low_count <- erglm_model(ae_count ~ aucss, low_count_data, family = poisson())
+```
+
+The default (t-interval) path's placebo-arm error bar dips visibly below
+zero -- a nonsensical negative event rate:
 
 ```{r count-1}
-erglm_data |> 
-  er_plot(aucss, ae_count, response_type = "count") |> 
-  er_plot_show_model(mod_poisson) |> 
+low_count_data |> 
+  er_plot(aucss, ae_count) |> 
+  er_plot_show_model(mod_low_count) |> 
   er_plot_show_quantiles() |> 
-  plot()
+  plot() +
+  ggplot2::coord_cartesian(ylim = c(-0.5, 1.5), xlim = c(-50, 800))
+```
+
+Declaring `response_type = "count"` keeps the same placebo-arm point
+estimate but replaces the t-interval with an exact Poisson interval,
+which stays non-negative:
+
+```{r count-2}
+low_count_data |> 
+  er_plot(aucss, ae_count, response_type = "count") |> 
+  er_plot_show_model(mod_low_count) |> 
+  er_plot_show_quantiles() |> 
+  plot() +
+  ggplot2::coord_cartesian(ylim = c(-0.5, 1.5), xlim = c(-50, 800))
 ```
 
 The same declaration works for `er_vpc_plot()`:
 
-```{r count-2}
+```{r count-3}
 sim_poisson <- erglm_vpc_sim(mod_poisson, seed = 6142)
 er_vpc_plot(
   erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
