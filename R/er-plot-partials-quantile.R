@@ -85,3 +85,63 @@ build_quantile_errorbar <- function(data, config, stratify, exposure, response, 
   return(geoms)
 }
 
+
+#' @rdname er_partial
+#' @export
+build_quantile_pointrange <- function(data, config, stratify, exposure, response, strata, style) {
+
+  if (stratify == FALSE) {
+
+    range <- ggplot2::geom_pointrange(
+      data = config$summary,
+      mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
+      inherit.aes = FALSE,
+      key_glyph = style$draw_key
+    )
+
+    label <- ggplot2::geom_text(
+      data = config$summary,
+      mapping = ggplot2::aes(x = x_mid, y = y_lbl, label = y_mid_lbl),
+      inherit.aes = FALSE,
+      size = 3,
+      show.legend = FALSE
+    )
+  }
+
+  if (stratify == TRUE) {
+
+    # see `build_quantile_errorbar()` for why strata are dodged
+    # horizontally before plotting
+    summary_dodged <- .dodge_quantile_strata(config$summary, exposure$limits)
+
+    range <- ggplot2::geom_pointrange(
+      data = summary_dodged,
+      mapping = ggplot2::aes(
+        x = x_dodge,
+        y = y_mid,
+        ymin = ci_lower,
+        ymax = ci_upper,
+        color = .data[["strata"]]
+      ),
+      inherit.aes = FALSE,
+      key_glyph = style$draw_key
+    )
+
+    label <- ggplot2::geom_text(
+      data = summary_dodged,
+      mapping = ggplot2::aes(
+        x = x_dodge,
+        y = y_lbl,
+        label = y_mid_lbl,
+        color = .data[["strata"]]
+      ),
+      inherit.aes = FALSE,
+      size = 3,
+      show.legend = FALSE
+    )
+  }
+
+  geoms <- list(range, label)
+  return(geoms)
+}
+

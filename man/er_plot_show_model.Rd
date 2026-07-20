@@ -9,6 +9,8 @@ er_plot_show_model(
   model,
   keep_strata = NULL,
   style = "ribbonline",
+  builder = NULL,
+  summary_builder = NULL,
   conf_level = 0.95
 )
 }
@@ -25,7 +27,18 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 
 \item{style}{Character string selecting the partial builder:
 \code{"ribbonline"} (default; mean prediction + confidence ribbon) or
-\code{"spaghetti"} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}})}
+\code{"spaghetti"} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}}). Ignored when
+\code{builder} is supplied.}
+
+\item{builder}{Optional function overriding the model-curve builder that
+\code{style} would otherwise select -- the escape hatch documented in
+\code{\link[=er_partial]{er_partial()}} for plugging in a custom \verb{build_model_*()}-style
+function without touching package internals. Must accept and use the
+standard \verb{(data, config, stratify, exposure, response, strata, style)} signature.}
+
+\item{summary_builder}{Optional function overriding the summary-
+annotation builder (\code{build_summary_pvalue()} by default), using the
+same standard signature as \code{builder}. See \code{\link[=er_partial]{er_partial()}}.}
 
 \item{conf_level}{Confidence level for the prediction ribbon}
 }
@@ -54,10 +67,24 @@ erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_show_model(mod) |>
   plot()
+
+# plug in a custom model-curve builder instead of choosing a built-in
+# `style`; see `?er_partial` for the full contract
+build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
+  ggplot2::geom_line(
+    data = config$predictions,
+    mapping = ggplot2::aes(x = .data[[exposure$name]], y = fit_resp),
+    linetype = "dashed"
+  )
+}
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod, builder = build_model_dashed) |>
+  plot()
 }
 
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}},
-\code{\link[=er_plot_show_data]{er_plot_show_data()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}}
+\code{\link[=er_plot_show_data]{er_plot_show_data()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}}, \code{\link[=er_partial]{er_partial()}}
 }

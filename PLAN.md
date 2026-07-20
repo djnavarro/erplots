@@ -179,6 +179,55 @@ grammar-altering decision (a rename, a new response-type dispatch, a
 change to singleton/additive status, etc.) -- treat a design change that
 isn't reflected there as incomplete.
 
+## Completed: formalising the `builder`/`summary_builder` escape hatch
+
+**Motivation.** `.build_*_geoms()` always calls whatever function lives
+in `config$builder` (or `config$builder$model`/`$summary` for the model
+layer), regardless of how it got there -- so a user could already
+override a layer's drawing logic by reassigning
+`object$part$<layer>$config$builder` directly after calling the normal
+`er_plot_show_*()` function. This worked, but was undocumented, required
+knowing the internal list structure, and wasn't exposed as an argument
+anywhere.
+
+**What was done:**
+- Every `er_plot_show_*()` function gained a `builder` argument
+  (`er_plot_show_model()` additionally gained `summary_builder`) that
+  gets threaded through to the corresponding `.part_*()` function and
+  assigned into `config$builder` in place of the `style`-string dispatch,
+  with validation (`builder` must be a function or `NULL`; an
+  unrecognised `style` without a `builder` now errors clearly instead of
+  failing obscurely downstream). This also resolved the long-standing
+  `.part_model()` TODO about customising the summary annotation without
+  breaking the `style` arg.
+- For the data layer, `style` keeps its *structural* meaning even when
+  `builder` is supplied: `"overlay"` (single call merged into the main
+  panel) vs. `"jitter"` (one-or-more panels stacked below the base plot,
+  per `object$response$type`) -- `builder` only swaps out the geoms drawn
+  within whichever structure `style` selects. The other three layers
+  have a single structural call site, so `style` is simply ignored once
+  `builder` is supplied.
+- `?er_partial` gained a "Writing your own builder" section stating the
+  contract explicitly (the shared signature is public API, not an
+  implementation detail), and each layer function's own Rd topic
+  documents its `builder`/`summary_builder` argument with a worked
+  example (a dashed model curve, a quantile crossbar, a data-overlay
+  scatter).
+- `vignettes/articles/design.Rmd` gained an "Extending erplots: writing
+  your own builder" section (runnable custom-quantile-builder example,
+  cross-referencing `?er_partial` and the per-layer examples).
+- `build_quantile_pointrange()` (a single `geom_pointrange()` in place of
+  `build_quantile_errorbar()`'s separate point + error bar) started as a
+  hypothetical example of the escape hatch and was promoted to a
+  built-in `er_plot_show_quantiles(style = "pointrange")` option, since
+  it needed no new `config` fields beyond what `.part_quantile()`
+  already computes for `build_quantile_errorbar()` -- a template for
+  deciding whether a custom builder is worth proposing upstream.
+
+**Status:** done. `devtools::check()` clean; new tests cover the
+`builder`/`summary_builder` arguments on all four layer functions and
+the `style = "pointrange"` render path.
+
 ## Other completed fixes
 
 - **Stratified quantile labels visually overlapping.** Two strata's

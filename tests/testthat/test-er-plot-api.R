@@ -335,3 +335,126 @@ test_that("er_plot_show_data(style = 'overlay') merges into the base plot", {
   expect_true(ggplot2::is_ggplot(built_strat$output))
   expect_equal(ggplot2::get_labs(built_strat$output)$colour, plt_strat$strata$label)
 })
+
+
+# builder escape hatch ---------------------------------------------------------
+
+test_that("er_plot_show_model() accepts a custom builder/summary_builder", {
+  skip_if_not_installed("erglm")
+
+  custom_model_builder <- function(data, config, stratify, exposure, response, strata, style) {
+    ggplot2::geom_line(
+      data = config$predictions,
+      mapping = ggplot2::aes(x = .data[[exposure$name]], y = fit_resp),
+      linetype = "dashed"
+    )
+  }
+  custom_summary_builder <- function(data, config, stratify, exposure, response, strata, style) {
+    list()
+  }
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_show_model(er_test_mod1, builder = custom_model_builder, summary_builder = custom_summary_builder)
+
+  expect_identical(plt$part$model$config$builder$model, custom_model_builder)
+  expect_identical(plt$part$model$config$builder$summary, custom_summary_builder)
+  expect_no_error(er_plot_build(plt))
+})
+
+test_that("er_plot_show_model() rejects a non-function builder and an unrecognised style without one", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae1)
+  expect_error(er_plot_show_model(plt, er_test_mod1, builder = "not a function"))
+  expect_error(er_plot_show_model(plt, er_test_mod1, style = "nonsense"))
+})
+
+test_that("er_plot_show_quantiles() accepts a custom builder", {
+  skip_if_not_installed("erglm")
+
+  custom_quantile_builder <- function(data, config, stratify, exposure, response, strata, style) {
+    ggplot2::geom_pointrange(
+      data = config$summary,
+      mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
+      inherit.aes = FALSE
+    )
+  }
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_show_model(er_test_mod1) |>
+    er_plot_show_quantiles(builder = custom_quantile_builder)
+
+  expect_identical(plt$part$quantile$config$builder, custom_quantile_builder)
+  expect_no_error(er_plot_build(plt))
+})
+
+test_that("er_plot_show_quantiles() rejects an unrecognised style without a builder", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_show_model(er_test_mod1)
+  expect_error(er_plot_show_quantiles(plt, style = "nonsense"))
+})
+
+test_that("er_plot_show_data() accepts a custom builder for both the overlay and jitter structural families", {
+  skip_if_not_installed("erglm")
+
+  custom_overlay_builder <- function(data, config, stratify, exposure, response, strata, style) {
+    ggplot2::geom_point(
+      data = data,
+      mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]]),
+      shape = 4
+    )
+  }
+  custom_panel_builder <- function(data, config, stratify, exposure, response, strata, style) {
+    ggplot2::geom_histogram(
+      data = data,
+      mapping = ggplot2::aes(x = .data[[exposure$name]])
+    )
+  }
+
+  plt_overlay <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_show_model(er_test_mod1) |>
+    er_plot_show_data(style = "overlay", builder = custom_overlay_builder)
+
+  expect_identical(plt_overlay$part$overlay$config$builder, custom_overlay_builder)
+  expect_null(plt_overlay$part$data)
+  expect_no_error(er_plot_build(plt_overlay))
+
+  plt_jitter <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_show_model(er_test_mod1) |>
+    er_plot_show_data(style = "jitter", builder = custom_panel_builder)
+
+  expect_identical(plt_jitter$part$data$config$builder, custom_panel_builder)
+  expect_null(plt_jitter$part$overlay)
+  expect_no_error(er_plot_build(plt_jitter))
+})
+
+test_that("er_plot_show_groups() accepts a custom builder, applied to every grouping variable", {
+  skip_if_not_installed("erglm")
+
+  custom_group_builder <- function(data, config, stratify, exposure, response, strata, style) {
+    ggplot2::geom_violin(
+      data = config$data,
+      mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[config$groupings[1]]])
+    )
+  }
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_show_model(er_test_mod1) |>
+    er_plot_show_groups(c(aucss, sex), builder = custom_group_builder)
+
+  expect_true(all(purrr::map_lgl(plt$part$group$config, \(cfg) identical(cfg$builder, custom_group_builder))))
+  expect_no_error(er_plot_build(plt))
+})
+
+test_that("er_plot_show_groups() rejects an unrecognised style without a builder", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_show_model(er_test_mod1)
+  expect_error(er_plot_show_groups(plt, aucss, style = "nonsense"))
+})

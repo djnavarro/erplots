@@ -12,6 +12,7 @@
 \alias{build_model_ribbonline}
 \alias{build_model_spaghetti}
 \alias{build_quantile_errorbar}
+\alias{build_quantile_pointrange}
 \alias{build_summary_pvalue}
 \alias{er_partial}
 \title{Partial builders for exposure-response plots}
@@ -56,6 +57,16 @@ build_quantile_errorbar(
   style
 )
 
+build_quantile_pointrange(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  style
+)
+
 build_summary_pvalue(data, config, stratify, exposure, response, strata, style)
 }
 \arguments{
@@ -87,6 +98,63 @@ supply an x-axis limit that is consistent with the base plot. That
 is, since all component plots use the exposure variable for the
 x-axis, they should use the values stored in \code{exposure$limits} tp
 set the x-axis limits.
+}
+\description{
+Partial builders for exposure-response plots
+}
+\details{
+Things we can have partials for:
+\itemize{
+\item model
+\item summary
+\item quantile
+\item data
+\item overlay
+\item group
+}
+
+Arguments are standardised to allow users to write their own
+as needed
+}
+\section{Writing your own builder}{
+
+
+Every \verb{build_*()} function above shares the signature documented in
+\verb{@param}s, and that signature is a public part of the API, not an
+implementation detail: any function \verb{function(data, config, stratify, exposure, response, strata, style)} that returns a geom or list of
+geoms can stand in for a built-in builder. This is the officially
+supported way to draw a layer differently from any of the built-in
+\code{style} options -- e.g. a 2D density instead of a scatter for the data
+overlay, per-panel histograms instead of jittered points for the
+panel-based data layer, or a \code{geom_crossbar()} instead of a
+\code{geom_errorbar()}/\code{geom_pointrange()} for the quantile summary.
+(\code{build_quantile_pointrange()} started life as exactly this kind of
+custom builder -- it was promoted to a built-in \code{style = "pointrange"}
+option once it proved to be a natural, low-risk alternative to
+\code{build_quantile_errorbar()}, with no new config requirements.)
+
+Each \verb{er_plot_show_*()} function takes a \code{builder} argument (and
+\code{er_plot_show_model()} additionally takes \code{summary_builder}) for
+exactly this purpose: supplying a function there bypasses the built-in
+\code{style} string dispatch entirely, so a custom builder can be plugged
+in without forking the package or reaching into \code{object$part}
+internals. For the data layer, \code{style} still selects the \emph{structural}
+family your builder is slotted into -- \code{"overlay"} (a single call
+merged into the main panel) or \code{"jitter"} (one or more panels stacked
+below the base plot, per \code{object$response$type}) -- while \code{builder}
+selects the geoms drawn within that structure. For the other layers
+there is only one structural call site, so \code{style} is ignored once
+\code{builder} is supplied. See the \verb{@examples} on \code{\link[=er_plot_show_model]{er_plot_show_model()}},
+\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, and \code{\link[=er_plot_show_data]{er_plot_show_data()}} for worked
+custom builders (a dashed model curve, a quantile crossbar, and a
+data-overlay density, respectively).
+
+A custom builder receives the same pre-computed \code{config} a built-in
+builder would have received for that layer (e.g. \code{config$predictions}
+for \code{model}, \code{config$summary} for \code{quantile}) -- it does not need to
+recompute anything the corresponding \verb{.part_*()} function already
+derived from \code{data}/\code{exposure}/\code{response}/\code{strata}; it only needs to
+turn that \code{config} into ggplot2 layers.
 
 All of the builders above feed a \strong{singleton} layer: \code{model},
 \code{summary}, \code{quantile}, \code{data}, and \code{overlay} each occupy a single named
@@ -116,20 +184,4 @@ strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. See
 \code{\link[=er_plot_show_data]{er_plot_show_data()}} for the user-facing version of this rule.
 }
-\description{
-Partial builders for exposure-response plots
-}
-\details{
-Things we can have partials for:
-\itemize{
-\item model
-\item summary
-\item quantile
-\item data
-\item overlay
-\item group
-}
 
-Arguments are standardised to allow users to write their own
-as needed
-}

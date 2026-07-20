@@ -8,6 +8,7 @@ er_plot_show_quantiles(
   object,
   keep_strata = NULL,
   style = "errorbar",
+  builder = NULL,
   bins = 4,
   conf_level = 0.95
 )
@@ -19,8 +20,18 @@ er_plot_show_quantiles(
 split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise}
 
-\item{style}{Character string selecting the partial builder (currently
-only \code{"errorbar"}, the default)}
+\item{style}{Character string selecting the partial builder:
+\code{"errorbar"} (default; point + error bar, via
+\code{\link[=build_quantile_errorbar]{build_quantile_errorbar()}}) or \code{"pointrange"} (a single
+\code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}}, via \code{\link[=build_quantile_pointrange]{build_quantile_pointrange()}}).
+Ignored when \code{builder} is supplied.}
+
+\item{builder}{Optional function overriding the builder that \code{style}
+would otherwise select -- the escape hatch documented in
+\code{\link[=er_partial]{er_partial()}} for plugging in a custom \verb{build_quantile_*()}-style
+function without touching package internals. Must accept and use the
+standard \verb{(data, config, stratify, exposure, response, strata, style)} signature; \code{config$summary} is the pre-computed per-bin data
+frame (point estimate + CI) to draw.}
 
 \item{bins}{Number of exposure bins (not counting placebo)}
 
@@ -79,10 +90,33 @@ erglm_data |>
   er_plot_show_model(mod4) |>
   er_plot_show_quantiles() |>
   plot()
+
+# a pointrange instead of an errorbar
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod) |>
+  er_plot_show_quantiles(style = "pointrange") |>
+  plot()
+
+# plug in a fully custom builder instead of choosing a built-in
+# `style`; see `?er_partial` for the full contract
+build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
+  ggplot2::geom_crossbar(
+    data = config$summary,
+    mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
+    inherit.aes = FALSE
+  )
+}
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod) |>
+  er_plot_show_quantiles(builder = build_quantile_crossbar) |>
+  plot()
 }
 
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_show_model]{er_plot_show_model()}},
-\code{\link[=er_plot_show_data]{er_plot_show_data()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}}, \code{\link[=er_vpc_plot]{er_vpc_plot()}}
+\code{\link[=er_plot_show_data]{er_plot_show_data()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}}, \code{\link[=er_vpc_plot]{er_vpc_plot()}},
+\code{\link[=er_partial]{er_partial()}}
 }

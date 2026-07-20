@@ -57,6 +57,40 @@ continuous (`biomarker_change`, `ae_duration`) response columns in
 `er_summary()` methods erglm registers for its model objects are correct
 for all four families, so no erplots-side changes are needed there.
 
+## Extensibility: the `builder`/`summary_builder` escape hatch
+
+Every `er_plot_show_*()` function (`er_plot_show_model()`,
+`er_plot_show_quantiles()`, `er_plot_show_data()`, `er_plot_show_groups()`)
+takes a `builder` argument (`er_plot_show_model()` additionally takes
+`summary_builder`) that lets a user supply their own function matching
+the standard `build_*()` signature (`function(data, config, stratify,
+exposure, response, strata, style)`) in place of whatever the `style`
+string would otherwise select -- e.g. a `geom_crossbar()`-based quantile
+builder instead of the built-ins, or a density/histogram-based
+data-layer builder instead of a scatter. This is a first-class,
+documented part of the API (see `?er_partial`'s "Writing your own
+builder" section), not an internal implementation detail -- previously
+it only worked as an undocumented escape hatch (reassigning
+`object$part$<layer>$config$builder` directly), since `.build_*_geoms()`
+always calls whatever function lives in `config$builder` regardless of
+how it got there. For the data layer, `style` still selects the
+*structural* family (`"overlay"`: single call merged into the main
+panel; `"jitter"`: one-or-more panels stacked below the base plot, per
+`object$response$type`) that a custom `builder` is slotted into; for the
+other three layers there's only one structural call site, so `style` is
+ignored once `builder` is supplied. This also resolved the old TODO
+about customising the model layer's summary annotation without breaking
+the `style` arg (now `summary_builder`).
+
+`er_plot_show_quantiles()`'s `style` now has two built-in options:
+`"errorbar"` (default, `build_quantile_errorbar()`) and `"pointrange"`
+(`build_quantile_pointrange()`, a single `geom_pointrange()` in place of
+the separate point + error bar). `build_quantile_pointrange()` started
+as a hypothetical example of the `builder` escape hatch above and was
+promoted to a built-in `style` option since it needed no new `config`
+fields beyond what `.part_quantile()` already computes for
+`build_quantile_errorbar()`.
+
 ## Planned work
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed
@@ -66,10 +100,13 @@ done: the binary→continuous/count response generalisation (response-type
 detection/declaration, the quantile summary layer, `er_vpc_plot()`), the
 data layer's continuous/count-response redesign (`style = "jitter"`'s
 `build_data_color()` and `style = "overlay"`'s `build_data_overlay()`,
-now the default), and the mini-language documentation review (singleton/
+now the default), the mini-language documentation review (singleton/
 additive layer semantics, the stratification color/facet precedence
-rule, `?er_partial`, `vignettes/articles/design.Rmd`). The only
-genuinely open items are deferred, not scheduled -- see PLAN.md's "Open /
+rule, `?er_partial`, `vignettes/articles/design.Rmd`), and formalising
+the `builder`/`summary_builder` escape hatch (see above) -- including
+`vignettes/articles/design.Rmd`'s "Extending erplots" section, which
+walks through a runnable custom quantile builder. The only genuinely
+open items are deferred, not scheduled -- see PLAN.md's "Open /
 deferred" section (an additive `model` layer for overlaying two fitted
 curves; whether `build_data_color()` should use a deliberately chosen
 continuous color scale instead of ggplot2's default gradient; a

@@ -8,6 +8,7 @@ er_plot_show_groups(
   object,
   group_by,
   style = "boxplot",
+  builder = NULL,
   bins = NULL,
   keep_strata = NULL
 )
@@ -19,7 +20,15 @@ er_plot_show_groups(
 plots (a tidyselection of variables)}
 
 \item{style}{Character string selecting the partial builder:
-\code{"boxplot"} (default) or \code{"violin"}}
+\code{"boxplot"} (default) or \code{"violin"}. Ignored when \code{builder} is
+supplied.}
+
+\item{builder}{Optional function overriding the builder that \code{style}
+would otherwise select -- the escape hatch documented in
+\code{\link[=er_partial]{er_partial()}} for plugging in a custom \verb{build_group_*()}-style
+function without touching package internals. Must accept and use the
+standard \verb{(data, config, stratify, exposure, response, strata, style)} signature; applied to every grouping variable added by this
+call.}
 
 \item{bins}{Number of quantile bins used for continuous grouping
 variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default)}
@@ -66,5 +75,5 @@ erglm_data |>
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_show_model]{er_plot_show_model()}},
-\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, \code{\link[=er_plot_show_data]{er_plot_show_data()}}
+\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, \code{\link[=er_plot_show_data]{er_plot_show_data()}}, \code{\link[=er_partial]{er_partial()}}
 }

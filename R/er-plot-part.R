@@ -1,7 +1,7 @@
 
 # part_model ------------------------------------------------------------------
 
-.part_model <- function(object, model, stratify, style, conf_level) {
+.part_model <- function(object, model, stratify, style, conf_level, builder = NULL, summary_builder = NULL) {
   
   part_model <- list()
   config <- list()
@@ -55,10 +55,19 @@
     ) |> 
     unlist()  
 
+  # `builder`/`summary_builder` are the escape hatch documented in
+  # `?er_partial`: supplying a function bypasses the built-in `style`
+  # string dispatch entirely, so any function matching the standard
+  # `build_*()` signature can be plugged in without touching package
+  # internals.
   config$builder <- list()
-  if (style == "ribbonline") config$builder$model <- build_model_ribbonline
-  if (style == "spaghetti")  config$builder$model <- build_model_spaghetti
-  config$builder$summary <- build_summary_pvalue # TODO: how to allow custom summary without breaking the style arg
+  if (!is.null(builder)) {
+    config$builder$model <- builder
+  } else {
+    if (style == "ribbonline") config$builder$model <- build_model_ribbonline
+    if (style == "spaghetti")  config$builder$model <- build_model_spaghetti
+  }
+  config$builder$summary <- summary_builder %||% build_summary_pvalue
 
   # store and return
   part_model$stratify <- stratify
@@ -70,7 +79,7 @@
 
 # part_quantile ---------------------------------------------------------------
 
-.part_quantile <- function(object, stratify, style, bins, conf_level) {
+.part_quantile <- function(object, stratify, style, bins, conf_level, builder = NULL) {
 
   part_quantile <- list()
   config <- list()
@@ -148,8 +157,15 @@
       )
     )
   
-  if (style == "errorbar") config$builder <- build_quantile_errorbar
-  
+  # see `?er_partial` for the `builder` escape hatch
+  if (!is.null(builder)) {
+    config$builder <- builder
+  } else if (style == "errorbar") {
+    config$builder <- build_quantile_errorbar
+  } else if (style == "pointrange") {
+    config$builder <- build_quantile_pointrange
+  }
+
   # store and return
   part_quantile$stratify <- stratify
   part_quantile$config <- config
@@ -160,7 +176,7 @@
 
 # part_data -------------------------------------------------------------------
 
-.part_data <- function(object, stratify, style, panel) {
+.part_data <- function(object, stratify, style, panel, builder = NULL) {
 
   part_data <- list()
   
@@ -181,7 +197,12 @@
   # in R/er-plot-compose.R. See `PLAN.md`'s "Continuous-response data
   # strip" section.
   if (object$response$type == "binary") {
-    if (style == "jitter") config$builder <- build_data_jitter
+    # see `?er_partial` for the `builder` escape hatch
+    if (!is.null(builder)) {
+      config$builder <- builder
+    } else if (style == "jitter") {
+      config$builder <- build_data_jitter
+    }
     config$color_role <- "strata"
 
     panels <- character(0)
@@ -198,7 +219,11 @@
     # partition to select from. When stratified, the color channel is
     # already spoken for by the response, so stratification becomes one
     # panel per stratum level instead (all placed "below" the base plot).
-    if (style == "jitter") config$builder <- build_data_color
+    if (!is.null(builder)) {
+      config$builder <- builder
+    } else if (style == "jitter") {
+      config$builder <- build_data_color
+    }
     config$color_role <- "response"
 
     if (stratify) {
@@ -219,7 +244,7 @@
 
 # part_overlay ------------------------------------------------------------------
 
-.part_overlay <- function(object, stratify) {
+.part_overlay <- function(object, stratify, builder = NULL) {
 
   part_overlay <- list()
 
@@ -230,9 +255,10 @@
   # response type -- `build_data_overlay()` only needs to know the
   # response type to decide how much vertical jitter to apply (binary
   # responses get a small nudge so 0/1 points don't overplot into two
-  # solid lines; continuous/count responses get none).
+  # solid lines; continuous/count responses get none). See `?er_partial`
+  # for the `builder` escape hatch.
   config$response_type <- object$response$type
-  config$builder <- build_data_overlay
+  config$builder <- builder %||% build_data_overlay
 
   part_overlay$stratify <- stratify
   part_overlay$config <- config
@@ -243,7 +269,7 @@
 
 # part_group ------------------------------------------------------------------
 
-.part_group <- function(object, group_cols, stratify, style, bins) {
+.part_group <- function(object, group_cols, stratify, style, bins, builder = NULL) {
 
   part_group <- list()
   part_group$stratify <- stratify
@@ -252,8 +278,13 @@
   for(g in group_cols) {
 
     config <- list()
-    if (style == "boxplot") config$builder <- build_group_boxplot
-    if (style == "violin")  config$builder <- build_group_violin
+    # see `?er_partial` for the `builder` escape hatch
+    if (!is.null(builder)) {
+      config$builder <- builder
+    } else {
+      if (style == "boxplot") config$builder <- build_group_boxplot
+      if (style == "violin")  config$builder <- build_group_violin
+    }
 
     # data 
     dat <- object$data

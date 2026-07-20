@@ -8,6 +8,7 @@ er_plot_show_data(
   object,
   keep_strata = NULL,
   style = "overlay",
+  builder = NULL,
   panel = "both"
 )
 }
@@ -21,10 +22,21 @@ stratum level (see "Stratification" above) rather than a shared
 color aesthetic; for \code{style = "overlay"} it always means a shared
 color aesthetic, for any response type.}
 
-\item{style}{Character string selecting the partial builder:
-\code{"overlay"} (default; a scatter in the main panel, at each point's
-true \verb{(exposure, response)} coordinates) or \code{"jitter"} (the older
-panel-based design -- see above)}
+\item{style}{Character string selecting the \emph{structural} family:
+\code{"overlay"} (default; a single scatter merged into the main panel, at
+each point's true \verb{(exposure, response)} coordinates) or \code{"jitter"}
+(the older panel-based design -- see above). This choice is still
+respected when \code{builder} is supplied: \code{style} picks which of the two
+layouts (single main-panel overlay vs. one-or-more panels stacked
+below the base plot) your custom builder is slotted into, while
+\code{builder} picks the geoms it actually draws.}
+
+\item{builder}{Optional function overriding the builder that \code{style}
+(crossed with the response type, for \code{style = "jitter"}) would
+otherwise select -- the escape hatch documented in \code{\link[=er_partial]{er_partial()}} for
+plugging in a custom \verb{build_data_*()}-style function (e.g. a 2D
+density in the main panel, or per-panel histograms) without touching
+package internals. Must accept and use the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature.}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
 default). Only meaningful for \code{style = "jitter"} on a binary
@@ -96,10 +108,24 @@ erglm_data |>
   er_plot_show_model(mod3) |>
   er_plot_show_data(style = "jitter") |>
   plot()
+
+# plug in a 2D density in the main panel instead of a scatter; `style`
+# still picks the "overlay" (single main-panel) layout -- see `?er_partial`
+build_data_density <- function(data, config, stratify, exposure, response, strata, style) {
+  ggplot2::geom_density_2d(
+    data = data,
+    mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
+  )
+}
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_show_model(mod3) |>
+  er_plot_show_data(builder = build_data_density) |>
+  plot()
 }
 
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_show_model]{er_plot_show_model()}},
-\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}}
+\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}}, \code{\link[=er_partial]{er_partial()}}
 }
