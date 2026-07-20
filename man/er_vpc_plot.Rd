@@ -35,8 +35,13 @@ response \emph{rate} with a Clopper-Pearson CI for \code{"binary"}, bin \emph{me
 with a t-interval for \code{"continuous"} (see \code{\link[=t_interval]{t_interval()}}). \code{"auto"}
 detects from the observed \code{response} column (entirely in \verb{\{0, 1\}},
 or logical, is treated as binary; see \code{\link[=er_plot]{er_plot()}}'s
-\code{response_type} for the same heuristic). Count responses are
-currently treated as continuous, an approximation noted in \code{PLAN.md}.}
+\code{response_type} for the same heuristic). There is no separate
+\code{"count"} type: a count (Poisson-style) response is auto-detected as
+\code{"continuous"} (counts aren't confined to \verb{\{0, 1\}}) and summarised
+with the same bin-mean-plus-t-interval approximation used for any
+other continuous response, rather than an exact Poisson interval.
+This is a known simplification -- see \code{PLAN.md}'s design decision (4)
+for the rationale and the planned fast-follow.}
 }
 \value{
 A ggplot2 object

@@ -268,14 +268,21 @@ criteria are meant to be concrete enough to check off, not aspirational.
 - Revisit a genuine continuous-response strip/rug design later, as a
   separate, independently-scoped item, once there's a concrete use case.
 
-**Stage 4 -- count (Poisson) responses**
+**Stage 4 -- count (Poisson) responses [docs done; round-trip not yet verified]**
 - Route through the `"continuous"` path from Stages 1-2 (mean + t-interval),
   as agreed in design decision (4). No new code needed beyond ensuring the
   `"auto"` detection heuristic doesn't misclassify a Poisson count column
   (it won't, since counts aren't confined to `{0, 1}`).
-- Document the approximation (t-interval instead of an exact Poisson
-  interval) in `?er_plot` and this plan; flag as a fast-follow, not part
-  of this pass.
+- The approximation (t-interval instead of an exact Poisson interval) is
+  now documented: `?er_plot`'s `response_type` and `@details`, and
+  `?er_vpc_plot`'s `response_type`, both explain that count responses
+  auto-detect as `"continuous"` and are summarised the same way as any
+  other continuous response, with a forward pointer to this design
+  decision. Flagged there as a known simplification with a planned
+  fast-follow (an exact Poisson CI path), not part of this pass.
+- Not yet done: an actual round-trip check/test with an
+  `erglm_model(ae_count ~ aucss, erglm_data, family = poisson())` model
+  through `er_plot_show_quantiles()` and `er_vpc_plot()`.
 - Done when: an `erglm_model(ae_count ~ aucss, erglm_data, family =
   poisson())` model round-trips through Stages 1-3 without special-casing.
 

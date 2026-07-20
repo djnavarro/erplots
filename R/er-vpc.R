@@ -22,8 +22,13 @@
 #'   with a t-interval for `"continuous"` (see [t_interval()]). `"auto"`
 #'   detects from the observed `response` column (entirely in `{0, 1}`,
 #'   or logical, is treated as binary; see [er_plot()]'s
-#'   `response_type` for the same heuristic). Count responses are
-#'   currently treated as continuous, an approximation noted in `PLAN.md`.
+#'   `response_type` for the same heuristic). There is no separate
+#'   `"count"` type: a count (Poisson-style) response is auto-detected as
+#'   `"continuous"` (counts aren't confined to `{0, 1}`) and summarised
+#'   with the same bin-mean-plus-t-interval approximation used for any
+#'   other continuous response, rather than an exact Poisson interval.
+#'   This is a known simplification -- see `PLAN.md`'s design decision (4)
+#'   for the rationale and the planned fast-follow.
 #'
 #' @returns A ggplot2 object
 #'
