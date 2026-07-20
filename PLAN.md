@@ -112,14 +112,16 @@ debate if new information changes the calculus.
    overridable when the heuristic gets it wrong (e.g. a genuine 0/1
    count variable).
 
-2. **Data strip for continuous responses.** Omit it for v1, as a
+2. **Data strip for continuous responses.** [Superseded -- see "Continuous-
+   response data strip" section below.] Originally: omit it for v1, as a
    documented limitation, rather than design a continuous-specific
    replacement now. The two-panel "responders above the line,
    non-responders below" design is structurally about a binary flag --
    there's no variant of *that* geometry for a continuous response, only
    a different plot entirely (e.g. a rug or raw scatter), and building
    that speculatively before anyone needs it isn't worth the design
-   effort yet. Revisit if/when a concrete use case shows up.
+   effort yet. Revisit if/when a concrete use case shows up. That revisit
+   has now happened -- see below for the scoped design.
 
 3. **Quantile-bin CI method for continuous responses.** Use a t-interval,
    not a bootstrap. This mirrors the convention erlr/erglm's own
@@ -405,8 +407,156 @@ specifically for this comparison. Zoomed in on the placebo arm
 the default (t-interval) path's error bar visibly dips below zero,
 while the `response_type = "count"` (exact Poisson) path's stays
 non-negative -- verified visually. Remaining open work is limited to
-the stratified-label-overlap item below; there is no other scoped work
-left in this plan.
+the stratified-label-overlap item below (now fixed -- see "Other known
+issues / follow-ups") and the continuous-response data strip scoped
+below.
+
+## Continuous-response data strip (revisiting design decision (2))
+
+### Motivation
+
+Design decision (2) deliberately omitted a continuous-response variant
+of `er_plot_show_datastrip()`, on the grounds that the binary "responders
+above the line, non-responders below" geometry has no direct analogue
+for a continuous response, and that inventing one speculatively wasn't
+worth the design effort without a concrete need. That decision explicitly
+left the door open to revisiting it "if/when a concrete use case shows
+up" -- this section is that revisit. It replaces the binary partition
+with a different encoding (below) rather than declining to have a
+continuous variant at all.
+
+### Chosen design: single color-encoded strip
+
+One panel (not two), points jittered along `y = 0` exactly as today
+(`height = 0.1`, `width = 0`), but with `color` mapped continuously to
+the response value instead of the panel being pre-split by `response ==
+1`/`== 0`. This is the closest continuous analogue to the existing
+jitter grammar -- same axis, same jitter mechanics, same compact strip
+footprint -- just without the binary partition, which never had a
+continuous equivalent to begin with. Applies to both `"continuous"` and
+`"count"` response types (the same "route count through the continuous
+path" convention used throughout the rest of this plan).
+
+Rejected alternatives (from the three sketched when scoping this):
+- **Threshold-split two-panel** (median or user-supplied cutoff instead
+  of `== 1`/`== 0`): rejected because the threshold is an arbitrary,
+  user-visible choice for *every* continuous response, and silently
+  picking one (e.g. the median) reintroduces exactly the kind of
+  under-motivated design decision the original omission was trying to
+  avoid.
+- **Quantile-binned rug** (one strip per response tertile, reusing
+  `cut_quantile()`): rejected as a first pass because it uses more
+  vertical space than the single-panel option for comparable
+  information content, though it remains a reasonable fallback if the
+  single-panel color encoding turns out to be hard to read in practice.
+
+### Complication: composition machinery assumes two named panels
+
+The datastrip's plot-building/composition code
+(`.build_strip_plot()` in `R/er-plot-build.R`;
+`.polish_margins()`/`.polish_arrangement()`/`.polish_labels()` in
+`R/er-plot-compose.R`) hardcodes exactly two named slots,
+`object$plot$strip$upper`/`$lower`, keyed off `config$panel %in%
+c("upper", "lower", "both")`. Supporting stratification for the new
+single-panel design needs more than one panel again, but keyed by
+*stratum*, not by response partition -- there's no way to also encode
+strata via `color` without dual-encoding the same aesthetic channel with
+two different variables (the continuous response and the discrete
+strata), so stratification has to become vertical faceting: one
+mini-panel per stratum level, each internally colored by the continuous
+response.
+
+This means the four composition helpers above need to generalize from
+"exactly zero, one, or two fixed slots named `upper`/`lower`" to "a
+named list of zero or more panels", with `object$plot$strip` becoming a
+named list (e.g. `list(Male = <ggplot>, Female = <ggplot>)` when
+stratified-continuous, `list(upper = <ggplot>, lower = <ggplot>)`
+unchanged for binary) rather than a struct with fixed `$upper`/`$lower`
+fields. This is a shared refactor, not something specific to the
+continuous case -- the binary path needs to keep working, with full
+regression coverage, through the same generalized code path.
+
+### Complication: the strip's color legend isn't a strata legend
+
+`.polish_labels()` currently assumes that whenever a part's `colour`
+aesthetic is present, it means strata, and labels it
+`object$strata$label` unconditionally; `.polish_legends()` assumes any
+`stratify == TRUE` part's legend is a strata legend to dedupe across
+panels. Neither assumption holds for the new strip: its `colour`
+aesthetic is the *response* value, and its legend is a continuous
+colorbar for `object$response$label`, present regardless of whether
+`stratify` is `TRUE` (it's not conditional on strata at all -- it's
+mapped in every panel, stratified or not). Both helpers need a way to
+distinguish "this part's color means strata" from "this part's color
+means the response value" -- e.g. a `config$color_role <- "response"`
+(vs. implicitly `"strata"` elsewhere) tag set by whichever builder
+constructs the part, consulted by `.polish_labels()`/`.polish_legends()`
+instead of inferring meaning from `stratify` alone.
+
+### API changes
+
+- `er_plot_show_datastrip()`'s dispatch to `build_datastrip_jitter()` vs.
+  a new `build_datastrip_color()` should be automatic, keyed off
+  `object$response$type`, mirroring how `.part_quantile()` dispatches
+  invisibly rather than asking the caller to name a style. No new
+  user-facing `style` value.
+- The `panel` argument (`"upper"`/`"lower"`/`"both"`) is binary-specific
+  and meaningless for the single continuous panel. Recommend: error if a
+  continuous/count-response call passes `panel != "both"` explicitly
+  (actionable message, consistent with this package's "fail loudly
+  rather than silently do something different than asked" convention
+  elsewhere), and treat `panel = "both"` (the default) as "the one
+  panel" for continuous/count.
+- The existing `.abort_continuous_unsupported(planned = FALSE)` call in
+  `er_plot_show_datastrip()` is removed for `"continuous"`/`"count"`
+  response types (mirroring how the quantile/VPC guards were removed
+  once those were generalized). Check whether `er_plot_show_datastrip()`
+  was `.abort_continuous_unsupported()`'s only remaining caller (per
+  Stage 3's note) -- if so, the helper (and its now-unused `planned`
+  parameter) likely become dead code worth removing rather than leaving
+  unreferenced.
+
+### Open questions (not yet decided -- flagging rather than assuming)
+
+- **Color scale.** This package's convention so far (quantile/model/
+  group builders) is to map `color`/`fill` and let ggplot2's default
+  discrete hue scale apply, with no explicit `scale_color_*()` call
+  anywhere. A *continuous* colorbar under the default
+  `scale_colour_gradient()` (dark-blue-on-white gradient) may read as
+  lower-contrast/less legible than a discrete hue scale would, which is
+  a reason to consider breaking convention here specifically (e.g.
+  `scale_colour_viridis_c()`) -- but that is a real deviation from house
+  style and worth deciding deliberately rather than defaulting into.
+- **Legibility at scale.** A single continuous color gradient over a
+  jittered 1-D strip is a fairly weak channel for reading exact response
+  values (color is good for relative/qualitative reading, poor for
+  precise reading) -- this is an inherent tradeoff of the chosen design,
+  not a bug, but worth calling out: it will read more as "where are the
+  higher/lower responses concentrated along exposure" than "what is
+  subject X's response", which may or may not match what users actually
+  want from this component. Worth a sanity check against a real
+  continuous dataset before committing.
+
+### Suggested staging
+
+- **Stage 7a -- composition refactor (no behavior change).** Generalize
+  `.build_strip_plot()`/`.polish_margins()`/`.polish_arrangement()`/
+  `.polish_labels()` from fixed `$upper`/`$lower` slots to a named list
+  of panels. Binary behavior must be bit-for-bit unchanged; full
+  regression tests on the existing binary strip (unstratified and
+  stratified) before adding anything continuous-specific.
+- **Stage 7b -- `build_datastrip_color()` + dispatch.** New builder,
+  `.part_strip()` dispatch on `object$response$type`, the `color_role`
+  tag and its consumption in `.polish_labels()`/`.polish_legends()`, the
+  `panel` argument guard for continuous/count, guard-rail removal in
+  `er_plot_show_datastrip()`. Tests: unstratified continuous/count
+  round-trip, stratified continuous/count round-trip (N panels, one per
+  stratum), response-label-not-strata-label assertion, `panel != "both"`
+  error assertion.
+- **Stage 7c -- docs/vignette.** `?er_plot_show_datastrip` update;
+  replace `vignettes/articles/plot.Rmd`'s current continuous-response
+  error demo (added in Stage 6) with a real example; update this
+  section's status and design decision (2) once shipped.
 
 ## Other known issues / follow-ups
 
