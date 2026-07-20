@@ -18,6 +18,8 @@ reference:
 - contents:
   - clopper_pearson
   - cut_quantile
+  - poisson_interval
+  - t_interval
 
 articles:
   - title:
