@@ -11,7 +11,15 @@ for one way to generate such simulations from a fitted model).
 ## Usage
 
 ``` r
-er_vpc_plot(data, sim, exposure, response, group_by, conf_level = 0.95)
+er_vpc_plot(
+  data,
+  sim,
+  exposure,
+  response,
+  group_by,
+  conf_level = 0.95,
+  response_type = c("auto", "binary", "continuous", "count")
+)
 ```
 
 ## Arguments
@@ -31,9 +39,8 @@ er_vpc_plot(data, sim, exposure, response, group_by, conf_level = 0.95)
 
 - response:
 
-  Response variable (one variable, unquoted). Must currently be binary
-  (0/1, or logical); continuous responses are not yet supported and
-  raise an error (see `PLAN.md`)
+  Response variable (one variable, unquoted). May be binary (0/1, or
+  logical) or continuous; see `response_type`
 
 - group_by:
 
@@ -42,6 +49,26 @@ er_vpc_plot(data, sim, exposure, response, group_by, conf_level = 0.95)
 - conf_level:
 
   Confidence level
+
+- response_type:
+
+  One of `"auto"` (default), `"binary"`, `"continuous"`, or `"count"`.
+  Governs how the observed-side summary is computed: response *rate*
+  with a Clopper-Pearson CI for `"binary"`, bin *mean* with a t-interval
+  for `"continuous"` (see
+  [`t_interval()`](https://erplots.djnavarro.net/reference/t_interval.md)),
+  or bin *mean* with an exact Poisson interval for `"count"` (see
+  [`poisson_interval()`](https://erplots.djnavarro.net/reference/poisson_interval.md)).
+  `"auto"` detects from the observed `response` column (entirely in
+  `{0, 1}`, or logical, is treated as binary; see
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
+  `response_type` for the same heuristic) and never resolves to
+  `"count"`: a count (Poisson-style) response auto-detects as
+  `"continuous"` (counts aren't confined to `{0, 1}`) and is summarised
+  with the bin-mean-plus-t-interval approximation unless
+  `response_type = "count"` is declared explicitly, in which case the
+  exact Poisson interval is used instead – see `PLAN.md`'s design
+  decision (4) for the rationale.
 
 ## Value
 
@@ -56,5 +83,16 @@ mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 sim <- erglm_vpc_sim(mod)
 er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
 er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = sex)
+
+mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+sim_gaussian <- erglm_vpc_sim(mod_gaussian)
+er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
+
+mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
+sim_poisson <- erglm_vpc_sim(mod_poisson)
+er_vpc_plot(
+  erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
+  response_type = "count"
+)
 } # }
 ```

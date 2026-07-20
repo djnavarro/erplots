@@ -107,11 +107,20 @@
 
 
 <dt id="arg-response-type">response_type<a class="anchor" aria-label="anchor" href="#arg-response-type"></a></dt>
-<dd><p>One of <code>"auto"</code> (the default), <code>"binary"</code>, or
-<code>"continuous"</code>. Governs response-scale defaults (e.g. axis limits) and,
-eventually, which plot components are valid for the response. When
-<code>"auto"</code>, the response column is classified as <code>"binary"</code> if it is
-logical or takes only values in <code>{0, 1}</code>, and <code>"continuous"</code> otherwise.</p></dd>
+<dd><p>One of <code>"auto"</code> (the default), <code>"binary"</code>,
+<code>"continuous"</code>, or <code>"count"</code>. Governs response-scale defaults (e.g.
+axis limits) and which summary/CI method the quantile and VPC layers
+use. When <code>"auto"</code>, the response column is classified as <code>"binary"</code>
+if it is logical or takes only values in <code>{0, 1}</code>, and <code>"continuous"</code>
+otherwise – this means a count (Poisson-style) response, e.g. an
+adverse-event count, auto-detects as <code>"continuous"</code> (counts aren't
+confined to <code>{0, 1}</code>) and is summarised as an approximately-continuous
+quantity (bin mean plus a t-interval). <code>"auto"</code> never resolves to
+<code>"count"</code>: pass <code>response_type = "count"</code> explicitly for a genuine
+count response to instead get bin mean plus an <em>exact</em> Poisson
+interval (see <code><a href="poisson_interval.html">poisson_interval()</a></code>), which – unlike the t-interval
+approximation – never produces a negative lower bound. See
+<code>PLAN.md</code>'s design decision (4) for the rationale.</p></dd>
 
 
 <dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
@@ -158,13 +167,20 @@ visualisations (see <a href="er_model_interface.html">er_model_interface</a>)</p
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>er_plot_show_quantiles()</code> and <code>er_plot_show_datastrip()</code>
-currently only support a binary (0/1) response – their underlying
-summaries assume a response <em>rate</em>, not a continuous quantity. Calling
-either on an <code>er_plot</code> whose response was classified (or declared) as
-<code>"continuous"</code> raises an error rather than silently producing a
-misleading plot; see <code>PLAN.md</code> for the plan to generalise these
-components.</p>
+    <p><code>er_plot_show_quantiles()</code> supports binary (response <em>rate</em>
+with a Clopper-Pearson CI), continuous (bin <em>mean</em> with a
+t-interval), and count (bin <em>mean</em> with an exact Poisson interval)
+responses; see <code>PLAN.md</code> for the generalisation history. Count
+responses are routed through the continuous path unless
+<code>response_type = "count"</code> is declared explicitly (see
+<code>response_type</code> above). <code>er_plot_show_datastrip()</code>, by contrast, has
+a design that is inherently about a binary response (responders
+jittered above the exposure line, non-responders below) with no
+obvious continuous or count analogue. Calling it on an <code>er_plot</code>
+whose response was classified (or declared) as <code>"continuous"</code> or
+<code>"count"</code> raises an error rather than silently producing an
+empty/misleading strip; see <code>PLAN.md</code> for the design decision behind
+omitting a continuous/count-response variant.</p>
     </div>
 
     <div class="section level2">
@@ -190,6 +206,25 @@ components.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plt</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">plt</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># continuous response: bin means/t-intervals instead of rates/</span></span></span>
+<span class="r-in"><span><span class="co"># Clopper-Pearson intervals, auto-detected from the response column</span></span></span>
+<span class="r-in"><span><span class="va">mod3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">biomarker_change</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot</span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot_show_model</span><span class="op">(</span><span class="va">mod3</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot_show_quantiles</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># count response: declare response_type = "count" explicitly for an</span></span></span>
+<span class="r-in"><span><span class="co"># exact Poisson interval instead of the t-interval approximation used</span></span></span>
+<span class="r-in"><span><span class="co"># by the auto-detected ("continuous") default</span></span></span>
+<span class="r-in"><span><span class="va">mod4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae_count</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot</span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span>, response_type <span class="op">=</span> <span class="st">"count"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot_show_model</span><span class="op">(</span><span class="va">mod4</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot_show_quantiles</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

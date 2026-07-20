@@ -42,3 +42,7 @@ Other functions and objects
 - [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   : Cut a continuous variable into quantiles
+- [`poisson_interval()`](https://erplots.djnavarro.net/reference/poisson_interval.md)
+  : Exact Poisson confidence interval for a count rate
+- [`t_interval()`](https://erplots.djnavarro.net/reference/t_interval.md)
+  : t-interval confidence interval for the mean of continuous data

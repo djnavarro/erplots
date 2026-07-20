@@ -133,9 +133,9 @@ erglm_data |>
 
 ![](plot_files/figure-html/quantile-1-1.png)
 
-You can also modify the confidence level for the Clopper-Pearson
-interval (this empirical-summary layer currently assumes a binary
-response):
+You can also modify the confidence level for the interval around each
+bin’s summary. For a binary response this is a Clopper-Pearson interval
+for the response *rate*:
 
 ``` r
 
@@ -148,7 +148,161 @@ erglm_data |>
 
 ![](plot_files/figure-html/quantile-2-1.png)
 
+## Continuous responses
+
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
+auto-detects whether the response is binary (logical, or values entirely
+in `{0, 1}`) or continuous, and you can override the detection with
+`response_type`. The model component and quantile component both adapt:
+quantile bins report a mean with a t-interval instead of a rate with a
+Clopper-Pearson interval. The data strip component has no
+continuous-response variant (see below), so it’s omitted here.
+
+``` r
+
+mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+
+erglm_data |> 
+  er_plot(aucss, biomarker_change) |> 
+  er_plot_show_model(mod_gaussian) |> 
+  er_plot_show_quantiles() |> 
+  plot()
+```
+
+![](plot_files/figure-html/continuous-1-1.png)
+
+[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
+generalises the same way, comparing observed vs. simulated means rather
+than rates:
+
+``` r
+
+sim_gaussian <- erglm_vpc_sim(mod_gaussian, seed = 3947)
+er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
+```
+
+![](plot_files/figure-html/continuous-2-1.png)
+
+Count (Poisson-style) responses, such as an adverse-event count, are
+auto-detected as `"continuous"` and summarised the same way (bin mean
+plus t-interval) unless you declare `response_type = "count"`
+explicitly:
+
+``` r
+
+mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
+
+erglm_data |> 
+  er_plot(aucss, ae_count) |> 
+  er_plot_show_model(mod_poisson) |> 
+  er_plot_show_quantiles() |> 
+  plot()
+```
+
+![](plot_files/figure-html/continuous-3-1.png)
+
+Declaring `response_type = "count"` swaps the t-interval approximation
+for an exact Poisson interval (bin mean plus \[poisson_interval()\]
+instead of \[t_interval()\]), which never produces a negative lower
+bound – useful for low-count bins, where the t-interval approximation
+can. For `erglm_data`’s own `ae_count`, none of the bin means are low
+enough for this to actually happen, so the two plots above would look
+almost identical if you re-ran the last one with
+`response_type = "count"`. To make the difference concrete, here’s a
+synthetic dataset where the placebo arm has only 2 events among 20
+subjects:
+
+``` r
+
+set.seed(84)
+placebo_counts <- rpois(20, 0.05)
+while (sum(placebo_counts) != 2) placebo_counts <- rpois(20, 0.05)
+
+aucss_dosed <- sort(runif(80, 100, 3000))
+count_dosed <- rpois(80, 0.1 + 0.003 * aucss_dosed)
+
+low_count_data <- data.frame(
+  aucss = c(rep(0, 20), aucss_dosed),
+  ae_count = c(placebo_counts, count_dosed)
+)
+
+mod_low_count <- erglm_model(ae_count ~ aucss, low_count_data, family = poisson())
+```
+
+The default (t-interval) path’s placebo-arm error bar dips visibly below
+zero – a nonsensical negative event rate:
+
+``` r
+
+low_count_data |> 
+  er_plot(aucss, ae_count) |> 
+  er_plot_show_model(mod_low_count) |> 
+  er_plot_show_quantiles() |> 
+  plot() +
+  ggplot2::coord_cartesian(ylim = c(-0.5, 1.5), xlim = c(-50, 800))
+```
+
+![](plot_files/figure-html/count-1-1.png)
+
+    #> Coordinate system already present.
+    #> ℹ Adding new coordinate system, which will replace the existing one.
+
+![](plot_files/figure-html/count-1-2.png)
+
+Declaring `response_type = "count"` keeps the same placebo-arm point
+estimate but replaces the t-interval with an exact Poisson interval,
+which stays non-negative:
+
+``` r
+
+low_count_data |> 
+  er_plot(aucss, ae_count, response_type = "count") |> 
+  er_plot_show_model(mod_low_count) |> 
+  er_plot_show_quantiles() |> 
+  plot() +
+  ggplot2::coord_cartesian(ylim = c(-0.5, 1.5), xlim = c(-50, 800))
+```
+
+![](plot_files/figure-html/count-2-1.png)
+
+    #> Coordinate system already present.
+    #> ℹ Adding new coordinate system, which will replace the existing one.
+
+![](plot_files/figure-html/count-2-2.png)
+
+The same declaration works for
+[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md):
+
+``` r
+
+sim_poisson <- erglm_vpc_sim(mod_poisson, seed = 6142)
+er_vpc_plot(
+  erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
+  response_type = "count"
+)
+```
+
+![](plot_files/figure-html/count-3-1.png)
+
 ## Strip component
+
+The data strip is inherently a binary-response design (responders
+jittered above the exposure line, non-responders below), so
+[`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot.md)
+raises an error for a continuous-response `er_plot` rather than silently
+mis-plotting:
+
+``` r
+
+erglm_data |> 
+  er_plot(aucss, biomarker_change) |> 
+  er_plot_show_model(mod_gaussian) |> 
+  er_plot_show_datastrip()
+#> Error in `.abort_continuous_unsupported()`:
+#> ! `er_plot_show_datastrip()` does not support continuous responses.
+#> ℹ Only binary (0/1, or logical) responses are currently supported by this component.
+#> ℹ No continuous-response variant of this component is currently planned; see PLAN.md.
+```
 
 ## Group component
 
