@@ -315,19 +315,31 @@ criteria are meant to be concrete enough to check off, not aspirational.
   column). `er_plot_show_model()` and `er_plot_show_groups()` are
   unaffected -- they already generalise for free (see above).
 
-**Stage 6 -- tests, vignettes, docs [fixtures done; vignette still open]**
+**Stage 6 -- tests, vignettes, docs [done]**
 - `tests/testthat/helper-data.R` now has both continuous
   (`er_test_mod_gaussian`) and count (`er_test_mod_poisson`) fixtures
   alongside the existing binary ones, guarded the same way
   (`requireNamespace("erglm")`); added while closing out Stage 4.
-- Still open: add/extend a vignette demonstrating a continuous-response
-  exposure-response plot end to end (model + quantiles + VPC; strip
-  omitted per Stage 3).
-- Update `?er_model_interface`, `?er_plot`, and `README.Rmd` examples to
-  show at least one non-binary example, and note the response-type
-  argument.
+- `vignettes/articles/plot.Rmd` gained a "Continuous responses" section
+  (gaussian model + `er_plot_show_quantiles()` + `er_vpc_plot()`) and the
+  "Strip component" section now demonstrates the datastrip's error on a
+  continuous-response `er_plot`, rather than being an empty heading. The
+  stale "this empirical-summary layer currently assumes a binary
+  response" aside on the quantile `conf_level` example (no longer true
+  since Stage 1) was also corrected.
+- `?er_plot`'s `@examples` gained a third example fitting a
+  `gaussian()` `erglm_model()` and running it through
+  `er_plot_show_quantiles()`, alongside the pre-existing binary examples.
+  `?er_plot`'s `@param response_type`/`@details` already documented the
+  response-type behaviour in full (added incrementally in Stages 0-5),
+  so no further changes were needed there. `?er_model_interface` is
+  correctly response-type-agnostic (it documents the model-side
+  contract, not response handling) and needs no changes. `README.Rmd`
+  was left binary-only by design -- it's the package's terse
+  front-door example, and the fuller continuous-response walkthrough now
+  lives in the vignette instead of duplicating it there.
 - Done when: `devtools::check()` is clean and the continuous-response path
-  has test coverage comparable to the binary path.
+  has test coverage comparable to the binary path. Met.
 
 ### Suggested step ordering
 

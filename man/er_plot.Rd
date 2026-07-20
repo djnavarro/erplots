@@ -133,6 +133,15 @@ plt <- erglm_data |>
 
 print(plt)
 plot(plt)
+
+# continuous response: bin means/t-intervals instead of rates/
+# Clopper-Pearson intervals, auto-detected from the response column
+mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_show_model(mod3) |>
+  er_plot_show_quantiles() |>
+  plot()
 }
 
 }

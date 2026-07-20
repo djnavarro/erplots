@@ -115,8 +115,9 @@ erglm_data |>
   plot()
 ```
 
-You can also modify the confidence level for the Clopper-Pearson interval
-(this empirical-summary layer currently assumes a binary response):
+You can also modify the confidence level for the interval around each
+bin's summary. For a binary response this is a Clopper-Pearson interval
+for the response *rate*:
 
 ```{r quantile-2}
 erglm_data |> 
@@ -126,8 +127,62 @@ erglm_data |>
   plot()
 ```
 
+## Continuous responses
+
+`er_plot()` auto-detects whether the response is binary (logical, or
+values entirely in `{0, 1}`) or continuous, and you can override the
+detection with `response_type`. The model component and quantile
+component both adapt: quantile bins report a mean with a t-interval
+instead of a rate with a Clopper-Pearson interval. The data strip
+component has no continuous-response variant (see below), so it's
+omitted here.
+
+```{r continuous-1}
+mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+
+erglm_data |> 
+  er_plot(aucss, biomarker_change) |> 
+  er_plot_show_model(mod_gaussian) |> 
+  er_plot_show_quantiles() |> 
+  plot()
+```
+
+`er_vpc_plot()` generalises the same way, comparing observed vs.
+simulated means rather than rates:
+
+```{r continuous-2}
+sim_gaussian <- erglm_vpc_sim(mod_gaussian, seed = 3947)
+er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
+```
+
+Count (Poisson-style) responses, such as an adverse-event count, are
+auto-detected as `"continuous"` and summarised the same way (bin mean
+plus t-interval), which is a documented approximation rather than an
+exact Poisson interval -- see `PLAN.md` for the rationale:
+
+```{r continuous-3}
+mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
+
+erglm_data |> 
+  er_plot(aucss, ae_count) |> 
+  er_plot_show_model(mod_poisson) |> 
+  er_plot_show_quantiles() |> 
+  plot()
+```
+
 ## Strip component
 
+The data strip is inherently a binary-response design (responders
+jittered above the exposure line, non-responders below), so
+`er_plot_show_datastrip()` raises an error for a continuous-response
+`er_plot` rather than silently mis-plotting:
+
+```{r strip-1, error = TRUE}
+erglm_data |> 
+  er_plot(aucss, biomarker_change) |> 
+  er_plot_show_model(mod_gaussian) |> 
+  er_plot_show_datastrip()
+```
 
 ## Group component
 
