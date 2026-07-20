@@ -5,14 +5,31 @@
 Build exposure-response plots from any model that implements
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 
-- [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
-  [`er_plot_style()`](https://erplots.djnavarro.net/reference/er_plot.md)
-  [`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot.md)
-  [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot.md)
-  [`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot.md)
-  [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot.md)
-  [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot.md)
-  : Builds an exposure-response plot for a fitted model
+- [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) :
+  The exposure-response plotting mini-language
+
+- [`er_plot_style()`](https://erplots.djnavarro.net/reference/er_plot_style.md)
+  :
+
+  Adjust style/labels for an `er_plot` object
+
+- [`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
+  : Add a fitted-model curve/ribbon layer
+
+- [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md)
+  : Add a quantile-binned response summary layer
+
+- [`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot_show_datastrip.md)
+  : Add a raw-data strip layer
+
+- [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
+  : Add a grouped exposure-distribution panel
+
+- [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
+  :
+
+  Build and render an `er_plot` object
+
 - [`build_datastrip_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_group_boxplot()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_group_violin()`](https://erplots.djnavarro.net/reference/er_partial.md)
@@ -21,6 +38,7 @@ Build exposure-response plots from any model that implements
   [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_partial.md)
   : Partial builders for exposure-response plots
+
 - [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
   : Visual predictive check plot for an exposure-response model
 

@@ -288,7 +288,7 @@ er_vpc_plot(
 
 The data strip is inherently a binary-response design (responders
 jittered above the exposure line, non-responders below), so
-[`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot.md)
+[`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot_show_datastrip.md)
 raises an error for a continuous-response `er_plot` rather than silently
 mis-plotting:
 

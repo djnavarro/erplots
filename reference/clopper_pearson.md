@@ -29,7 +29,7 @@ Named numeric vector, with confidence level stored as an attribute
 ## Details
 
 Used by the quantile-binned summary layer (see
-[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot.md))
+[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md))
 to compute empirical response-rate confidence intervals. This assumes a
 binary (0/1) response.
 

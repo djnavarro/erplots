@@ -37,7 +37,7 @@ relationship, rather than a normal approximation. If the total count is
 The count-response analogue of
 [`clopper_pearson()`](https://erplots.djnavarro.net/reference/clopper_pearson.md),
 used by the quantile-binned summary layer (see
-[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot.md))
+[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md))
 and
 [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
 when `response_type = "count"` is explicitly declared. Unlike

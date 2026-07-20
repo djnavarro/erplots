@@ -28,7 +28,7 @@ t-interval – isn't defined for a single observation).
 ## Details
 
 Used by the quantile-binned summary layer (see
-[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot.md))
+[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md))
 and
 [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
 to compute a confidence interval for the mean response within an

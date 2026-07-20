@@ -65,7 +65,7 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>erplots provides a fluent mini-language for building exposure-response plots: model curves/ribbons, quantile-binned response-rate summaries, data strips, and grouped distribution panels. It is model-agnostic: erplots never fits a model itself. Instead, you fit a model with whatever package suits your workflow (e.g. <a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a> for logistic regression), and pass the fitted object to <code><a href="reference/er_plot.html">er_plot_show_model()</a></code>. Any model that implements <code><a href="reference/er_model_interface.html">er_predict()</a></code> can be visualised; implementing <code><a href="reference/er_model_interface.html">er_simulate()</a></code> and <code><a href="reference/er_model_interface.html">er_summary()</a></code> additionally enables uncertainty spaghetti plots/VPCs and summary annotations (e.g. p-values). See <code><a href="reference/er_model_interface.html">?er_model_interface</a></code>.</p>
+<p>erplots provides a fluent mini-language for building exposure-response plots: model curves/ribbons, quantile-binned response-rate summaries, data strips, and grouped distribution panels. It is model-agnostic: erplots never fits a model itself. Instead, you fit a model with whatever package suits your workflow (e.g. <a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a> for logistic regression), and pass the fitted object to <code><a href="reference/er_plot_show_model.html">er_plot_show_model()</a></code>. Any model that implements <code><a href="reference/er_model_interface.html">er_predict()</a></code> can be visualised; implementing <code><a href="reference/er_model_interface.html">er_simulate()</a></code> and <code><a href="reference/er_model_interface.html">er_summary()</a></code> additionally enables uncertainty spaghetti plots/VPCs and summary annotations (e.g. p-values). See <code><a href="reference/er_model_interface.html">?er_model_interface</a></code>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -84,9 +84,9 @@
 <span></span>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/er_plot.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/er_plot.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/er_plot.html">er_plot_show_groups</a></span><span class="op">(</span><span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/er_plot_show_groups.html">er_plot_show_groups</a></span><span class="op">(</span><span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-er-plot-1.png" alt="" width="100%"></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -98,10 +98,10 @@
 <span>   <span class="fu"><a href="reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>   <span class="co"># keep_strata = FALSE needs a model without the stratification</span></span>
 <span>   <span class="co"># variable as a term, so we pass `mod2_marginal` here</span></span>
-<span>   <span class="fu"><a href="reference/er_plot.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod2_marginal</span>, keep_strata <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>   <span class="fu"><a href="reference/er_plot.html">er_plot_show_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>   <span class="fu"><a href="reference/er_plot.html">er_plot_show_datastrip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>   <span class="fu"><a href="reference/er_plot.html">er_plot_show_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">treatment</span><span class="op">)</span>, keep_strata <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>   <span class="fu"><a href="reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod2_marginal</span>, keep_strata <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>   <span class="fu"><a href="reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>   <span class="fu"><a href="reference/er_plot_show_datastrip.html">er_plot_show_datastrip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>   <span class="fu"><a href="reference/er_plot_show_groups.html">er_plot_show_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">treatment</span><span class="op">)</span>, keep_strata <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">plt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;er_plot&gt;</span></span>

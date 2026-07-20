@@ -7,7 +7,7 @@ erplots never fits a model itself. Instead, you fit a model with
 whatever package suits your workflow
 (e.g. [erglm](https://github.com/djnavarro/erglm) for logistic
 regression), and pass the fitted object to
-[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot.md).
+[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md).
 Any model that implements
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 can be visualised; implementing
