@@ -89,6 +89,16 @@
 <span>  <span class="va">style</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">build_quantile_pointrange</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">config</span>,</span>
+<span>  <span class="va">stratify</span>,</span>
+<span>  <span class="va">exposure</span>,</span>
+<span>  <span class="va">response</span>,</span>
+<span>  <span class="va">strata</span>,</span>
+<span>  <span class="va">style</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">build_summary_pvalue</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -139,6 +149,57 @@ supply an x-axis limit that is consistent with the base plot. That
 is, since all component plots use the exposure variable for the
 x-axis, they should use the values stored in <code>exposure$limits</code> tp
 set the x-axis limits.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Things we can have partials for:</p><ul><li><p>model</p></li>
+<li><p>summary</p></li>
+<li><p>quantile</p></li>
+<li><p>data</p></li>
+<li><p>overlay</p></li>
+<li><p>group</p></li>
+</ul><p>Arguments are standardised to allow users to write their own
+as needed</p>
+    </div>
+    <div class="section level2">
+    <h2 id="writing-your-own-builder">Writing your own builder<a class="anchor" aria-label="anchor" href="#writing-your-own-builder"></a></h2>
+
+
+
+<p>Every <code>build_*()</code> function above shares the signature documented in
+<code>@param</code>s, and that signature is a public part of the API, not an
+implementation detail: any function <code>function(data, config, stratify, exposure, response, strata, style)</code> that returns a geom or list of
+geoms can stand in for a built-in builder. This is the officially
+supported way to draw a layer differently from any of the built-in
+<code>style</code> options – e.g. a 2D density instead of a scatter for the data
+overlay, per-panel histograms instead of jittered points for the
+panel-based data layer, or a <code>geom_crossbar()</code> instead of a
+<code>geom_errorbar()</code>/<code>geom_pointrange()</code> for the quantile summary.
+(<code>build_quantile_pointrange()</code> started life as exactly this kind of
+custom builder – it was promoted to a built-in <code>style = "pointrange"</code>
+option once it proved to be a natural, low-risk alternative to
+<code>build_quantile_errorbar()</code>, with no new config requirements.)</p>
+<p>Each <code>er_plot_show_*()</code> function takes a <code>builder</code> argument (and
+<code><a href="er_plot_show_model.html">er_plot_show_model()</a></code> additionally takes <code>summary_builder</code>) for
+exactly this purpose: supplying a function there bypasses the built-in
+<code>style</code> string dispatch entirely, so a custom builder can be plugged
+in without forking the package or reaching into <code>object$part</code>
+internals. For the data layer, <code>style</code> still selects the <em>structural</em>
+family your builder is slotted into – <code>"overlay"</code> (a single call
+merged into the main panel) or <code>"jitter"</code> (one or more panels stacked
+below the base plot, per <code>object$response$type</code>) – while <code>builder</code>
+selects the geoms drawn within that structure. For the other layers
+there is only one structural call site, so <code>style</code> is ignored once
+<code>builder</code> is supplied. See the <code>@examples</code> on <code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>,
+<code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>, and <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> for worked
+custom builders (a dashed model curve, a quantile crossbar, and a
+data-overlay density, respectively).</p>
+<p>A custom builder receives the same pre-computed <code>config</code> a built-in
+builder would have received for that layer (e.g. <code>config$predictions</code>
+for <code>model</code>, <code>config$summary</code> for <code>quantile</code>) – it does not need to
+recompute anything the corresponding <code>.part_*()</code> function already
+derived from <code>data</code>/<code>exposure</code>/<code>response</code>/<code>strata</code>; it only needs to
+turn that <code>config</code> into ggplot2 layers.</p>
 <p>All of the builders above feed a <strong>singleton</strong> layer: <code>model</code>,
 <code>summary</code>, <code>quantile</code>, <code>data</code>, and <code>overlay</code> each occupy a single named
 slot (<code>object$part$model</code>, <code>object$part$data</code>, etc.), so calling the
@@ -165,17 +226,6 @@ needs no such tag: its color aesthetic (when stratified) is always
 strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. See
 <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> for the user-facing version of this rule.</p>
-    </div>
-    <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Things we can have partials for:</p><ul><li><p>model</p></li>
-<li><p>summary</p></li>
-<li><p>quantile</p></li>
-<li><p>data</p></li>
-<li><p>overlay</p></li>
-<li><p>group</p></li>
-</ul><p>Arguments are standardised to allow users to write their own
-as needed</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

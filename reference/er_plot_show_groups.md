@@ -14,6 +14,7 @@ er_plot_show_groups(
   object,
   group_by,
   style = "boxplot",
+  builder = NULL,
   bins = NULL,
   keep_strata = NULL
 )
@@ -33,7 +34,17 @@ er_plot_show_groups(
 - style:
 
   Character string selecting the partial builder: `"boxplot"` (default)
-  or `"violin"`
+  or `"violin"`. Ignored when `builder` is supplied.
+
+- builder:
+
+  Optional function overriding the builder that `style` would otherwise
+  select – the escape hatch documented in
+  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  for plugging in a custom `build_group_*()`-style function without
+  touching package internals. Must accept and use the standard
+  `(data, config, stratify, exposure, response, strata, style)`
+  signature; applied to every grouping variable added by this call.
 
 - bins:
 
@@ -66,7 +77,8 @@ it.
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
 [`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md),
 [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md),
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md),
+[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
 
 ## Examples
 

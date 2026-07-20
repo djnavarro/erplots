@@ -152,6 +152,7 @@ Build exposure-response plots from any model that implements
   [`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_partial.md)
   : Partial builders for exposure-response plots
 

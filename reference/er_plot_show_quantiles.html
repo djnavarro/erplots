@@ -77,6 +77,7 @@ summary/CI method is used dispatches on the plot's <code>response_type</code>
 <span>  <span class="va">object</span>,</span>
 <span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  style <span class="op">=</span> <span class="st">"errorbar"</span>,</span>
+<span>  builder <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bins <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -97,8 +98,20 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
-<dd><p>Character string selecting the partial builder (currently
-only <code>"errorbar"</code>, the default)</p></dd>
+<dd><p>Character string selecting the partial builder:
+<code>"errorbar"</code> (default; point + error bar, via
+<code><a href="er_partial.html">build_quantile_errorbar()</a></code>) or <code>"pointrange"</code> (a single
+<code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>, via <code><a href="er_partial.html">build_quantile_pointrange()</a></code>).
+Ignored when <code>builder</code> is supplied.</p></dd>
+
+
+<dt id="arg-builder">builder<a class="anchor" aria-label="anchor" href="#arg-builder"></a></dt>
+<dd><p>Optional function overriding the builder that <code>style</code>
+would otherwise select – the escape hatch documented in
+<code><a href="er_partial.html">er_partial()</a></code> for plugging in a custom <code>build_quantile_*()</code>-style
+function without touching package internals. Must accept and use the
+standard <code>(data, config, stratify, exposure, response, strata, style)</code> signature; <code>config$summary</code> is the pre-computed per-bin data
+frame (point estimate + CI) to draw.</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
@@ -126,7 +139,8 @@ quantile summary rather than combining bins from both calls.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>,
-<code><a href="er_plot_show_data.html">er_plot_show_data()</a></code>, <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code>, <code><a href="er_vpc_plot.html">er_vpc_plot()</a></code></p></div>
+<code><a href="er_plot_show_data.html">er_plot_show_data()</a></code>, <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code>, <code><a href="er_vpc_plot.html">er_vpc_plot()</a></code>,
+<code><a href="er_partial.html">er_partial()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -157,6 +171,28 @@ quantile summary rather than combining bins from both calls.</p>
 <span class="r-in"><span>  <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span>, response_type <span class="op">=</span> <span class="st">"count"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod4</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">er_plot_show_quantiles</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a pointrange instead of an errorbar</span></span></span>
+<span class="r-in"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot_show_quantiles</span><span class="op">(</span>style <span class="op">=</span> <span class="st">"pointrange"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># plug in a fully custom builder instead of choosing a built-in</span></span></span>
+<span class="r-in"><span><span class="co"># `style`; see `?er_partial` for the full contract</span></span></span>
+<span class="r-in"><span><span class="va">build_quantile_crossbar</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_crossbar</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    data <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">summary</span>,</span></span>
+<span class="r-in"><span>    mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x_mid</span>, y <span class="op">=</span> <span class="va">y_mid</span>, ymin <span class="op">=</span> <span class="va">ci_lower</span>, ymax <span class="op">=</span> <span class="va">ci_upper</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    inherit.aes <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot_show_quantiles</span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_quantile_crossbar</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

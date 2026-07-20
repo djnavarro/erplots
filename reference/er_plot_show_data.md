@@ -27,6 +27,7 @@ er_plot_show_data(
   object,
   keep_strata = NULL,
   style = "overlay",
+  builder = NULL,
   panel = "both"
 )
 ```
@@ -50,10 +51,26 @@ er_plot_show_data(
 
 - style:
 
-  Character string selecting the partial builder: `"overlay"` (default;
-  a scatter in the main panel, at each point's true
-  `(exposure, response)` coordinates) or `"jitter"` (the older
-  panel-based design – see above)
+  Character string selecting the *structural* family: `"overlay"`
+  (default; a single scatter merged into the main panel, at each point's
+  true `(exposure, response)` coordinates) or `"jitter"` (the older
+  panel-based design – see above). This choice is still respected when
+  `builder` is supplied: `style` picks which of the two layouts (single
+  main-panel overlay vs. one-or-more panels stacked below the base plot)
+  your custom builder is slotted into, while `builder` picks the geoms
+  it actually draws.
+
+- builder:
+
+  Optional function overriding the builder that `style` (crossed with
+  the response type, for `style = "jitter"`) would otherwise select –
+  the escape hatch documented in
+  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  for plugging in a custom `build_data_*()`-style function (e.g. a 2D
+  density in the main panel, or per-panel histograms) without touching
+  package internals. Must accept and use the standard
+  `(data, config, stratify, exposure, response, strata, style)`
+  signature.
 
 - panel:
 
@@ -90,7 +107,8 @@ one the model/ quantile layers use) rather than needing one of its own.
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
 [`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md),
 [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md),
-[`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
+[`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md),
+[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
 
 ## Examples
 
@@ -120,6 +138,20 @@ erglm_data |>
   er_plot(aucss, biomarker_change) |>
   er_plot_show_model(mod3) |>
   er_plot_show_data(style = "jitter") |>
+  plot()
+
+# plug in a 2D density in the main panel instead of a scatter; `style`
+# still picks the "overlay" (single main-panel) layout -- see `?er_partial`
+build_data_density <- function(data, config, stratify, exposure, response, strata, style) {
+  ggplot2::geom_density_2d(
+    data = data,
+    mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
+  )
+}
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_show_model(mod3) |>
+  er_plot_show_data(builder = build_data_density) |>
   plot()
 } # }
 ```

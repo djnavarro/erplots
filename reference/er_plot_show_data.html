@@ -98,6 +98,7 @@ partition (there's no binary flag to split on). <code>panel</code> must be
 <span>  <span class="va">object</span>,</span>
 <span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  style <span class="op">=</span> <span class="st">"overlay"</span>,</span>
+<span>  builder <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  panel <span class="op">=</span> <span class="st">"both"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -120,10 +121,23 @@ color aesthetic, for any response type.</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
-<dd><p>Character string selecting the partial builder:
-<code>"overlay"</code> (default; a scatter in the main panel, at each point's
-true <code>(exposure, response)</code> coordinates) or <code>"jitter"</code> (the older
-panel-based design – see above)</p></dd>
+<dd><p>Character string selecting the <em>structural</em> family:
+<code>"overlay"</code> (default; a single scatter merged into the main panel, at
+each point's true <code>(exposure, response)</code> coordinates) or <code>"jitter"</code>
+(the older panel-based design – see above). This choice is still
+respected when <code>builder</code> is supplied: <code>style</code> picks which of the two
+layouts (single main-panel overlay vs. one-or-more panels stacked
+below the base plot) your custom builder is slotted into, while
+<code>builder</code> picks the geoms it actually draws.</p></dd>
+
+
+<dt id="arg-builder">builder<a class="anchor" aria-label="anchor" href="#arg-builder"></a></dt>
+<dd><p>Optional function overriding the builder that <code>style</code>
+(crossed with the response type, for <code>style = "jitter"</code>) would
+otherwise select – the escape hatch documented in <code><a href="er_partial.html">er_partial()</a></code> for
+plugging in a custom <code>build_data_*()</code>-style function (e.g. a 2D
+density in the main panel, or per-panel histograms) without touching
+package internals. Must accept and use the standard <code>(data, config, stratify, exposure, response, strata, style)</code> signature.</p></dd>
 
 
 <dt id="arg-panel">panel<a class="anchor" aria-label="anchor" href="#arg-panel"></a></dt>
@@ -157,7 +171,7 @@ quantile layers use) rather than needing one of its own.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>,
-<code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>, <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code></p></div>
+<code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>, <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code>, <code><a href="er_partial.html">er_partial()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -187,6 +201,20 @@ quantile layers use) rather than needing one of its own.</p>
 <span class="r-in"><span>  <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod3</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">er_plot_show_data</span><span class="op">(</span>style <span class="op">=</span> <span class="st">"jitter"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># plug in a 2D density in the main panel instead of a scatter; `style`</span></span></span>
+<span class="r-in"><span><span class="co"># still picks the "overlay" (single main-panel) layout -- see `?er_partial`</span></span></span>
+<span class="r-in"><span><span class="va">build_data_density</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="external-link">geom_density_2d</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    data <span class="op">=</span> <span class="va">data</span>,</span></span>
+<span class="r-in"><span>    mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">exposure</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">response</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod3</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot_show_data</span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_data_density</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

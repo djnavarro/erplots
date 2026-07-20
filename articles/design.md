@@ -207,6 +207,64 @@ upper/lower panel split for `"binary"` versus
 single response-colored panel (or one per stratum) for
 `"continuous"`/`"count"` – see \[er_plot_show_data()\].
 
+## Extending erplots: writing your own builder
+
+Every layer function delegates the actual drawing to a `build_*()`
+function sharing a common signature –
+`function(data, config, stratify, exposure, response, strata, style)` –
+selected internally by `style` (e.g. `"errorbar"` selects
+[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)).
+That signature is a documented, public part of the API (see
+\[er_partial()\]), and each layer function’s `builder` argument
+([`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
+additionally has `summary_builder`) lets you supply your own function in
+place of whatever `style` would otherwise select – no need to fork the
+package or reach into `object$part` internals:
+
+``` r
+
+build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
+  ggplot2::geom_crossbar(
+    data = config$summary,
+    mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
+    inherit.aes = FALSE
+  )
+}
+
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod) |>
+  er_plot_show_quantiles(builder = build_quantile_crossbar) |>
+  plot()
+```
+
+![](design_files/figure-html/builder-1.png)
+
+A custom builder receives the same pre-computed `config` a built-in
+builder would (e.g. `config$summary` for the quantile layer,
+`config$predictions` for the model layer), so it only needs to turn that
+`config` into ggplot2 layers, not recompute anything.
+
+For the data layer, `style` keeps its structural meaning even when
+`builder` is supplied: `"overlay"` slots your builder into a single call
+merged onto the main panel, while `"jitter"` slots it into one-or-more
+panels stacked below the base plot (per `object$response$type`). The
+other three layers have only one structural call site, so `style` is
+simply ignored once `builder` is supplied.
+
+[`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_partial.md)
+(`style = "pointrange"`, a single `geom_pointrange()` in place of
+[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
+separate point + error bar) started life as exactly this kind of custom
+builder, and was promoted to a built-in `style` option once it proved to
+need no new `config` fields – a reasonable bar to check your own custom
+builders against, if you’re deciding whether to propose one upstream.
+See the `@examples` on \[er_plot_show_model()\],
+\[er_plot_show_quantiles()\], and \[er_plot_show_data()\] for further
+worked custom builders (a dashed model curve and a data-overlay
+scatter), and \[er_partial()\]’s “Writing your own builder” section for
+the full contract.
+
 ## Keeping this article in sync
 
 This article describes the grammar as designed and implemented *today*.

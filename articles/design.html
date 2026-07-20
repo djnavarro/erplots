@@ -318,6 +318,62 @@ per stratum) for <code>"continuous"</code>/<code>"count"</code> – see
 [er_plot_show_data()].</p>
 </div>
 <div class="section level2">
+<h2 id="extending-erplots-writing-your-own-builder">Extending erplots: writing your own builder<a class="anchor" aria-label="anchor" href="#extending-erplots-writing-your-own-builder"></a>
+</h2>
+<p>Every layer function delegates the actual drawing to a
+<code>build_*()</code> function sharing a common signature –
+<code>function(data, config, stratify, exposure, response, strata, style)</code>
+– selected internally by <code>style</code>
+(e.g. <code>"errorbar"</code> selects
+<code><a href="../reference/er_partial.html">build_quantile_errorbar()</a></code>). That signature is a documented,
+public part of the API (see [er_partial()]), and each layer function’s
+<code>builder</code> argument (<code><a href="../reference/er_plot_show_model.html">er_plot_show_model()</a></code>
+additionally has <code>summary_builder</code>) lets you supply your own
+function in place of whatever <code>style</code> would otherwise select
+– no need to fork the package or reach into <code>object$part</code>
+internals:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">build_quantile_crossbar</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_crossbar</a></span><span class="op">(</span></span>
+<span>    data <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">summary</span>,</span>
+<span>    mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x_mid</span>, y <span class="op">=</span> <span class="va">y_mid</span>, ymin <span class="op">=</span> <span class="va">ci_lower</span>, ymax <span class="op">=</span> <span class="va">ci_upper</span><span class="op">)</span>,</span>
+<span>    inherit.aes <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_quantile_crossbar</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="design_files/figure-html/builder-1.png" class="r-plt" alt="" width="700"></p>
+<p>A custom builder receives the same pre-computed <code>config</code> a
+built-in builder would (e.g. <code>config$summary</code> for the
+quantile layer, <code>config$predictions</code> for the model layer), so
+it only needs to turn that <code>config</code> into ggplot2 layers, not
+recompute anything.</p>
+<p>For the data layer, <code>style</code> keeps its structural meaning
+even when <code>builder</code> is supplied: <code>"overlay"</code> slots
+your builder into a single call merged onto the main panel, while
+<code>"jitter"</code> slots it into one-or-more panels stacked below the
+base plot (per <code>object$response$type</code>). The other three
+layers have only one structural call site, so <code>style</code> is
+simply ignored once <code>builder</code> is supplied.</p>
+<p><code><a href="../reference/er_partial.html">build_quantile_pointrange()</a></code>
+(<code>style = "pointrange"</code>, a single
+<code>geom_pointrange()</code> in place of
+<code><a href="../reference/er_partial.html">build_quantile_errorbar()</a></code>’s separate point + error bar)
+started life as exactly this kind of custom builder, and was promoted to
+a built-in <code>style</code> option once it proved to need no new
+<code>config</code> fields – a reasonable bar to check your own custom
+builders against, if you’re deciding whether to propose one upstream.
+See the <code>@examples</code> on [er_plot_show_model()],
+[er_plot_show_quantiles()], and [er_plot_show_data()] for further worked
+custom builders (a dashed model curve and a data-overlay scatter), and
+[er_partial()]’s “Writing your own builder” section for the full
+contract.</p>
+</div>
+<div class="section level2">
 <h2 id="keeping-this-article-in-sync">Keeping this article in sync<a class="anchor" aria-label="anchor" href="#keeping-this-article-in-sync"></a>
 </h2>
 <p>This article describes the grammar as designed and implemented

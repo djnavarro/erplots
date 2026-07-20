@@ -20,6 +20,8 @@ er_plot_show_model(
   model,
   keep_strata = NULL,
   style = "ribbonline",
+  builder = NULL,
+  summary_builder = NULL,
   conf_level = 0.95
 )
 ```
@@ -53,7 +55,25 @@ er_plot_show_model(
   Character string selecting the partial builder: `"ribbonline"`
   (default; mean prediction + confidence ribbon) or `"spaghetti"`
   (simulated draws, via
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+  Ignored when `builder` is supplied.
+
+- builder:
+
+  Optional function overriding the model-curve builder that `style`
+  would otherwise select – the escape hatch documented in
+  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  for plugging in a custom `build_model_*()`-style function without
+  touching package internals. Must accept and use the standard
+  `(data, config, stratify, exposure, response, strata, style)`
+  signature.
+
+- summary_builder:
+
+  Optional function overriding the summary- annotation builder
+  ([`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  by default), using the same standard signature as `builder`. See
+  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
 
 - conf_level:
 
@@ -75,7 +95,8 @@ the previous model layer rather than overlaying two model curves.
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
 [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md),
 [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md),
-[`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
+[`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md),
+[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
 
 ## Examples
 
@@ -86,6 +107,20 @@ mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_show_model(mod) |>
+  plot()
+
+# plug in a custom model-curve builder instead of choosing a built-in
+# `style`; see `?er_partial` for the full contract
+build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
+  ggplot2::geom_line(
+    data = config$predictions,
+    mapping = ggplot2::aes(x = .data[[exposure$name]], y = fit_resp),
+    linetype = "dashed"
+  )
+}
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod, builder = build_model_dashed) |>
   plot()
 } # }
 ```

@@ -65,6 +65,7 @@ the response, so it needs no <code>response_type</code> dispatch.</p>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">group_by</span>,</span>
 <span>  style <span class="op">=</span> <span class="st">"boxplot"</span>,</span>
+<span>  builder <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -85,7 +86,17 @@ plots (a tidyselection of variables)</p></dd>
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Character string selecting the partial builder:
-<code>"boxplot"</code> (default) or <code>"violin"</code></p></dd>
+<code>"boxplot"</code> (default) or <code>"violin"</code>. Ignored when <code>builder</code> is
+supplied.</p></dd>
+
+
+<dt id="arg-builder">builder<a class="anchor" aria-label="anchor" href="#arg-builder"></a></dt>
+<dd><p>Optional function overriding the builder that <code>style</code>
+would otherwise select – the escape hatch documented in
+<code><a href="er_partial.html">er_partial()</a></code> for plugging in a custom <code>build_group_*()</code>-style
+function without touching package internals. Must accept and use the
+standard <code>(data, config, stratify, exposure, response, strata, style)</code> signature; applied to every grouping variable added by this
+call.</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
@@ -113,7 +124,7 @@ rather than replacing it.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>,
-<code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>, <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code></p></div>
+<code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>, <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code>, <code><a href="er_partial.html">er_partial()</a></code></p></div>
     </div>
 
     <div class="section level2">

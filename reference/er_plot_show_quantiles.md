@@ -23,6 +23,7 @@ er_plot_show_quantiles(
   object,
   keep_strata = NULL,
   style = "errorbar",
+  builder = NULL,
   bins = 4,
   conf_level = 0.95
 )
@@ -43,8 +44,25 @@ er_plot_show_quantiles(
 
 - style:
 
-  Character string selecting the partial builder (currently only
-  `"errorbar"`, the default)
+  Character string selecting the partial builder: `"errorbar"` (default;
+  point + error bar, via
+  [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md))
+  or `"pointrange"` (a single
+  [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html),
+  via
+  [`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_partial.md)).
+  Ignored when `builder` is supplied.
+
+- builder:
+
+  Optional function overriding the builder that `style` would otherwise
+  select – the escape hatch documented in
+  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  for plugging in a custom `build_quantile_*()`-style function without
+  touching package internals. Must accept and use the standard
+  `(data, config, stratify, exposure, response, strata, style)`
+  signature; `config$summary` is the pre-computed per-bin data frame
+  (point estimate + CI) to draw.
 
 - bins:
 
@@ -78,7 +96,8 @@ calls.
 [`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md),
 [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md),
 [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md),
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
+[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md),
+[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
 
 ## Examples
 
@@ -109,6 +128,28 @@ erglm_data |>
   er_plot(aucss, ae_count, response_type = "count") |>
   er_plot_show_model(mod4) |>
   er_plot_show_quantiles() |>
+  plot()
+
+# a pointrange instead of an errorbar
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod) |>
+  er_plot_show_quantiles(style = "pointrange") |>
+  plot()
+
+# plug in a fully custom builder instead of choosing a built-in
+# `style`; see `?er_partial` for the full contract
+build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
+  ggplot2::geom_crossbar(
+    data = config$summary,
+    mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
+    inherit.aes = FALSE
+  )
+}
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod) |>
+  er_plot_show_quantiles(builder = build_quantile_crossbar) |>
   plot()
 } # }
 ```
