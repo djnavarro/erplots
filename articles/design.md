@@ -67,7 +67,7 @@ There are currently four layers, each documented on its own help topic:
 |----|----|----|----|
 | Model | \[er_plot_show_model()\] | Fitted curve/ribbon (or spaghetti) plus an optional summary annotation | No |
 | Quantile | \[er_plot_show_quantiles()\] | Exposure-quantile-binned response summary (rate/mean + CI) | Yes |
-| Data | \[er_plot_show_data()\] | Raw observations jittered along exposure | Yes (binary only, for now) |
+| Data | \[er_plot_show_data()\] | Raw observations, by default overlaid on the model panel at their true (exposure, response) coordinates (`style = "overlay"`); or, with `style = "jitter"`, an older panel-based design | Yes |
 | Group | \[er_plot_show_groups()\] | Exposure distribution, boxplot/violin, split by a grouping variable | No |
 
 ## Layers are either singleton or additive
@@ -136,16 +136,37 @@ Each layer’s own `keep_strata` argument controls whether *that* layer
 uses the stratification (default `TRUE` whenever `stratify_by` was set).
 The general rule, in the order a layer actually applies it: **a layer’s
 own encoding takes precedence; stratification adapts to whatever channel
-is left**, defaulting to color/fill. Today, every layer’s own encoding
-leaves color/fill free for strata, so this rule is invisible in practice
-– but it stops being invisible once a layer needs color for something
-else. The data layer is the first anticipated case: a
-continuous-response variant would need color for the response value
-itself, so stratification for that one layer would have to fall back to
-per-stratum facets instead. That variant doesn’t exist yet (see
-`PLAN.md`’s “Continuous-response data strip” section); today’s data
-layer only supports a binary response, and uses color/fill for strata
-like every other layer.
+is left**, defaulting to color/fill.
+
+For most layers, color/fill is always free for strata, so this rule is
+invisible in practice. The data layer is the one exception, and its
+behaviour now depends on `style`:
+
+- `style = "overlay"` (the default,
+  [`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)):
+  color, when mapped at all, always means strata – the response is
+  already shown via y-position, so color/fill is free for stratification
+  like every other layer, and the overlay shares the base plot’s own
+  strata legend with the model/quantile layers.
+- `style = "jitter"` (the older, panel-based design): for a **binary**
+  response,
+  [`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  behaves the same way – color means strata, shared legend. For a
+  **continuous/count** response,
+  [`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
+  color aesthetic is already spoken for by the response value itself, so
+  stratification falls back to one panel per stratum level (each colored
+  by the response) instead of a shared legend. This is the concrete
+  instance of “a layer’s own encoding takes precedence” that motivated
+  the general rule – see `PLAN.md`’s “Continuous-response data strip”
+  section for the design history, and \[er_plot_show_data()\] for the
+  full per-`style` breakdown.
+
+A `config$color_role` tag (`"strata"` or `"response"`, set by
+`.part_data()`) records which meaning applies for a given data-layer
+build, so the composition machinery (`.polish_labels()`/
+`.polish_legends()`) knows whether to treat a builder’s legend as the
+shared strata legend or a standalone response colorbar.
 
 ## Response type changes what a layer summarises, not whether it appears
 
@@ -175,10 +196,16 @@ rationale and the
 where the choice between the t-interval and exact Poisson interval
 visibly matters.
 
-The data layer is the odd one out: rather than adapting its summary
-statistic, it currently only supports `"binary"` responses at all, and
-errors for `"continuous"`/`"count"` rather than silently mis-plotting –
-see \[er_plot_show_data()\].
+The data layer doesn’t compute a summary statistic at all – it just
+plots raw observations – so `response_type` instead changes *how* it’s
+drawn: `style = "overlay"` needs no dispatch (a plain scatter, or a
+small vertical jitter for a binary response’s exactly-0/1 y-values);
+`style = "jitter"` dispatches on it directly, choosing
+[`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
+upper/lower panel split for `"binary"` versus
+[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
+single response-colored panel (or one per stratum) for
+`"continuous"`/`"count"` – see \[er_plot_show_data()\].
 
 ## Keeping this article in sync
 

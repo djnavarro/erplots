@@ -139,6 +139,32 @@ supply an x-axis limit that is consistent with the base plot. That
 is, since all component plots use the exposure variable for the
 x-axis, they should use the values stored in <code>exposure$limits</code> tp
 set the x-axis limits.</p>
+<p>All of the builders above feed a <strong>singleton</strong> layer: <code>model</code>,
+<code>summary</code>, <code>quantile</code>, <code>data</code>, and <code>overlay</code> each occupy a single named
+slot (<code>object$part$model</code>, <code>object$part$data</code>, etc.), so calling the
+corresponding <code>er_plot_show_*()</code> function again overwrites the slot
+rather than combining builders. <code>group</code> (<code>build_group_boxplot()</code>/
+<code>build_group_violin()</code>) is the one <strong>additive</strong> exception – each call
+to <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code> adds another named entry rather than
+replacing the previous one. See <code><a href="er_plot.html">er_plot()</a></code>'s "Layers are either
+singleton or additive" section for the full discussion, including the
+one flagged future exception (an additive <code>model</code> layer, for
+overlaying two fitted curves).</p>
+<p>The <code>data</code> slot has two mutually exclusive builders, selected by
+response type rather than by name: <code>build_data_jitter()</code> for a binary
+response (color, when mapped, always means strata) and
+<code>build_data_color()</code> for a continuous/count response (color always
+means the response value itself). Because <code>build_data_color()</code>'s color
+aesthetic is already spoken for, <code>config$color_role</code> (set by
+<code>.part_data()</code>, consulted by <code>.polish_labels()</code>/<code>.polish_legends()</code> in
+<code>R/er-plot-compose.R</code>) tags which meaning applies – <code>"strata"</code> for
+<code>build_data_jitter()</code>, <code>"response"</code> for <code>build_data_color()</code> – so the
+composition machinery knows whether a builder's legend is the shared
+strata legend or a standalone response colorbar. <code>build_data_overlay()</code>
+needs no such tag: its color aesthetic (when stratified) is always
+strata, since the response is already shown via y-position, so it
+shares the base plot's own strata legend directly. See
+<code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> for the user-facing version of this rule.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
