@@ -33,10 +33,19 @@ build_quantile_errorbar <- function(data, config, stratify, exposure, response, 
 
   if (stratify == TRUE) {
 
+    # different strata share (near-)identical `x_mid` values per exposure
+    # bin (bins are quantile cutpoints of the same exposure variable), so
+    # plotting points/bars/labels at `x_mid` unmodified makes labels for
+    # different strata collide -- see PLAN.md "Stratified quantile labels
+    # can visually overlap". Dodge all three horizontally by a small,
+    # symmetric-around-`x_mid` offset per stratum, sized relative to the
+    # exposure range so it scales sensibly across data sets.
+    summary_dodged <- .dodge_quantile_strata(config$summary, exposure$limits)
+
     point <- ggplot2::geom_point(
-      data = config$summary,
+      data = summary_dodged,
       mapping = ggplot2::aes(
-        x = x_mid, 
+        x = x_dodge, 
         y = y_mid,
         color = .data[["strata"]]
       ),
@@ -46,9 +55,9 @@ build_quantile_errorbar <- function(data, config, stratify, exposure, response, 
     )
     
     bar <- ggplot2::geom_errorbar(
-      data = config$summary,
+      data = summary_dodged,
       mapping = ggplot2::aes(
-        x = x_mid, 
+        x = x_dodge, 
         ymin = ci_lower, 
         ymax = ci_upper,
         color = .data[["strata"]]  
@@ -59,8 +68,13 @@ build_quantile_errorbar <- function(data, config, stratify, exposure, response, 
     )
     
     label <- ggplot2::geom_text(
-      data = config$summary,
-      mapping = ggplot2::aes(x = x_mid, y = y_lbl, label = y_mid_lbl),
+      data = summary_dodged,
+      mapping = ggplot2::aes(
+        x = x_dodge, 
+        y = y_lbl, 
+        label = y_mid_lbl,
+        color = .data[["strata"]]
+      ),
       inherit.aes = FALSE,
       size = 3,
       show.legend = FALSE

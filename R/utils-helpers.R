@@ -222,3 +222,42 @@ cut_quantile <- function(x, n = 4) {
   bin_fct <- factor(bin_num, levels = 1:n, labels = paste0("Q", 1:n)) 
   return(bin_fct)
 }
+
+#' Horizontally dodge stratified quantile-bin summaries
+#'
+#' Different strata share (near-)identical `x_mid` values within an
+#' exposure bin (bins are quantile cutpoints of the shared exposure
+#' variable), so plotting points/error bars/labels at `x_mid` unmodified
+#' makes labels for different strata collide -- see `PLAN.md`,
+#' "Stratified quantile labels can visually overlap". This adds an
+#' `x_dodge` column: `x_mid` plus a small, symmetric-around-`x_mid`,
+#' per-stratum offset, sized relative to `exposure_limits` so it scales
+#' sensibly across data sets and numbers of strata.
+#'
+#' @param summary A quantile summary data frame (`config$summary` from
+#'   `.part_quantile()`), with `x_mid` and `strata` columns.
+#' @param exposure_limits Numeric vector of length 2, the exposure
+#'   variable's `c(min, max)`.
+#' @return `summary` with an added `x_dodge` column.
+#' @noRd
+.dodge_quantile_strata <- function(summary, exposure_limits) {
+
+  strata_levels <- if (is.factor(summary$strata)) {
+    levels(summary$strata)
+  } else {
+    sort(unique(summary$strata))
+  }
+  n_strata <- length(strata_levels)
+
+  # spacing between adjacent strata's offsets, and the width of each
+  # dodged error bar, both as a fixed fraction of the exposure range --
+  # chosen so a two-strata plot keeps the errorbar width unchanged from
+  # the unstratified default (0.025 * range) while still separating the
+  # two strata's centres by twice that
+  step <- 0.05 * (exposure_limits[2] - exposure_limits[1])
+  offsets <- (seq_len(n_strata) - (n_strata + 1) / 2) * step
+  names(offsets) <- strata_levels
+
+  summary$x_dodge <- summary$x_mid + offsets[as.character(summary$strata)]
+  return(summary)
+}

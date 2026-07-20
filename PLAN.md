@@ -410,26 +410,48 @@ left in this plan.
 
 ## Other known issues / follow-ups
 
-### Stratified quantile labels can visually overlap
+### Stratified quantile labels can visually overlap [fixed]
 
-`build_quantile_errorbar()`'s `y_mid_lbl` text geom places each stratum's
-label at its own bin's `x_mid`/`y_lbl`, with no dodging between strata.
-When two strata's `x_mid` values for the same exposure bin land close
-together (the common case, since bins are quantile cutpoints of the same
-exposure variable), their text labels can visually collide -- observed
+`build_quantile_errorbar()`'s `y_mid_lbl` text geom used to place each
+stratum's label at its own bin's `x_mid`/`y_lbl`, with no dodging between
+strata. When two strata's `x_mid` values for the same exposure bin landed
+close together (the common case, since bins are quantile cutpoints of the
+same exposure variable), their text labels visually collided -- observed
 when sanity-checking the Stage 1 continuous-response quantile layer on a
 `sex`-stratified `biomarker_change ~ aucss` plot (Q2/Q3 labels for Male
-vs. Female overlapped). This is not specific to continuous responses --
-the same geometry issue exists for stratified binary quantile plots, it
-was just easier to notice with plain numeric labels. The underlying
-`config$summary` values (means/rates, CIs) are unaffected; this is purely
-a `geom_text()` placement issue.
+vs. Female overlapped). Not specific to continuous responses -- the same
+geometry issue existed for stratified binary quantile plots, it was just
+easier to notice with plain numeric labels. The underlying
+`config$summary` values (means/rates, CIs) were unaffected; this was
+purely a `geom_text()` (and, once dodged, `geom_point()`/
+`geom_errorbar()`) placement issue.
 
-Possible fixes, not yet scoped in detail: nudge/dodge `y_mid_lbl` text
-horizontally per stratum (e.g. via `position_dodge()` or a manual
-per-stratum x-offset proportional to bin width), or drop the in-plot
-numeric labels in favour of a legend-only encoding when `stratify ==
-TRUE`. Low priority relative to the response-type generalisation above;
-revisit once Stages 1-4 land, since Stage 2 (`er_vpc_plot()`) and
-Stage 4 (count responses) will produce more stratified continuous plots
-where this becomes more visible.
+Fixed via the first of the sketched options: a new
+`.dodge_quantile_strata()` helper (`R/utils-helpers.R`) computes a small,
+symmetric-around-`x_mid` per-stratum horizontal offset -- sized as a
+fixed fraction (0.05) of the exposure range, so it scales with both the
+data's exposure scale and the number of strata -- and adds it as an
+`x_dodge` column. `build_quantile_errorbar()`'s stratified branch now
+plots points/error bars/labels at `x_dodge` instead of `x_mid` (and gives
+the label `geom_text()` a `color` aesthetic matching the point/errorbar,
+which it previously lacked, so a dodged label stays visually
+attributable to its stratum). The unstratified branch and
+`.part_quantile()`'s `config$summary` (and its existing column-name
+tests) are untouched -- dodging is computed only at build time, not
+stored on the summary object.
+- Files: `R/utils-helpers.R` (`.dodge_quantile_strata()`),
+  `R/er-plot-partials-quantile.R` (`build_quantile_errorbar()`'s
+  stratified branch), `R/utils-global.R` (`x_dodge` global). Tests:
+  `.dodge_quantile_strata()` unit tests in `test-utils-helpers.R`
+  (symmetric offsets, scales with exposure range, handles non-factor/
+  single-stratum input); `build_quantile_errorbar()` dodge behaviour in
+  `test-er-plot-partials-quantile.R` (distinct `x_dodge` per stratum
+  within a bin, offsets symmetric around `x_mid`, no `x_dodge` column at
+  all when unstratified).
+- Done when: a `sex`-stratified quantile plot (binary or continuous
+  response) no longer has visually-colliding stratum labels, verified via
+  test (distinct `x_dodge` positions per stratum per bin) and visually
+  (`biomarker_change ~ aucss` by `sex`: points/bars/labels now sit at
+  distinct, color-matched x positions per bin rather than stacked at a
+  shared `x_mid`). Met -- `devtools::check()` clean (0/0/0), 285 tests
+  passing (up from 270).

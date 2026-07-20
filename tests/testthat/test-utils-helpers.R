@@ -97,3 +97,34 @@ test_that("poisson_interval returns a named lower/upper vector", {
   expect_named(ci, c("lower", "upper"))
   expect_true(ci["lower"] < ci["upper"])
 })
+
+test_that(".dodge_quantile_strata adds a symmetric, scale-appropriate offset per stratum", {
+  summary <- data.frame(
+    x_mid = c(10, 10, 50, 50),
+    strata = factor(c("Female", "Male", "Female", "Male"), levels = c("Female", "Male"))
+  )
+
+  dodged <- .dodge_quantile_strata(summary, exposure_limits = c(0, 100))
+
+  expect_true("x_dodge" %in% names(dodged))
+  # offsets are symmetric around x_mid within each bin
+  expect_equal(mean(dodged$x_dodge[1:2]) , 10)
+  expect_equal(mean(dodged$x_dodge[3:4]), 50)
+  # the two strata get distinct positions at the same x_mid
+  expect_false(dodged$x_dodge[1] == dodged$x_dodge[2])
+  # offset magnitude scales with the exposure range
+  dodged_wide <- .dodge_quantile_strata(summary, exposure_limits = c(0, 1000))
+  offset_narrow <- dodged$x_dodge[1] - dodged$x_mid[1]
+  offset_wide <- dodged_wide$x_dodge[1] - dodged_wide$x_mid[1]
+  expect_equal(offset_wide, offset_narrow * 10)
+})
+
+test_that(".dodge_quantile_strata handles non-factor strata and a single stratum", {
+  summary_char <- data.frame(x_mid = c(5, 5), strata = c("b", "a"))
+  dodged_char <- .dodge_quantile_strata(summary_char, exposure_limits = c(0, 10))
+  expect_false(dodged_char$x_dodge[1] == dodged_char$x_dodge[2])
+
+  summary_one <- data.frame(x_mid = 5, strata = factor("a"))
+  dodged_one <- .dodge_quantile_strata(summary_one, exposure_limits = c(0, 10))
+  expect_equal(dodged_one$x_dodge, dodged_one$x_mid)
+})
