@@ -157,8 +157,7 @@ er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
 
 Count (Poisson-style) responses, such as an adverse-event count, are
 auto-detected as `"continuous"` and summarised the same way (bin mean
-plus t-interval), which is a documented approximation rather than an
-exact Poisson interval -- see `PLAN.md` for the rationale:
+plus t-interval) unless you declare `response_type = "count"` explicitly:
 
 ```{r continuous-3}
 mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
@@ -168,6 +167,29 @@ erglm_data |>
   er_plot_show_model(mod_poisson) |> 
   er_plot_show_quantiles() |> 
   plot()
+```
+
+Declaring `response_type = "count"` swaps the t-interval approximation
+for an exact Poisson interval (bin mean plus [poisson_interval()]
+instead of [t_interval()]), which never produces a negative lower bound
+-- useful for low-count bins, where the t-interval approximation can:
+
+```{r count-1}
+erglm_data |> 
+  er_plot(aucss, ae_count, response_type = "count") |> 
+  er_plot_show_model(mod_poisson) |> 
+  er_plot_show_quantiles() |> 
+  plot()
+```
+
+The same declaration works for `er_vpc_plot()`:
+
+```{r count-2}
+sim_poisson <- erglm_vpc_sim(mod_poisson, seed = 6142)
+er_vpc_plot(
+  erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
+  response_type = "count"
+)
 ```
 
 ## Strip component

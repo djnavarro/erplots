@@ -16,19 +16,20 @@
 #'   binary (0/1, or logical) or continuous; see `response_type`
 #' @param group_by Variable (unquoted) to stratify predictions
 #' @param conf_level Confidence level
-#' @param response_type One of `"auto"` (default), `"binary"`, or
-#'   `"continuous"`. Governs how the observed-side summary is computed:
-#'   response *rate* with a Clopper-Pearson CI for `"binary"`, bin *mean*
-#'   with a t-interval for `"continuous"` (see [t_interval()]). `"auto"`
-#'   detects from the observed `response` column (entirely in `{0, 1}`,
-#'   or logical, is treated as binary; see [er_plot()]'s
-#'   `response_type` for the same heuristic). There is no separate
-#'   `"count"` type: a count (Poisson-style) response is auto-detected as
-#'   `"continuous"` (counts aren't confined to `{0, 1}`) and summarised
-#'   with the same bin-mean-plus-t-interval approximation used for any
-#'   other continuous response, rather than an exact Poisson interval.
-#'   This is a known simplification -- see `PLAN.md`'s design decision (4)
-#'   for the rationale and the planned fast-follow.
+#' @param response_type One of `"auto"` (default), `"binary"`,
+#'   `"continuous"`, or `"count"`. Governs how the observed-side summary
+#'   is computed: response *rate* with a Clopper-Pearson CI for
+#'   `"binary"`, bin *mean* with a t-interval for `"continuous"` (see
+#'   [t_interval()]), or bin *mean* with an exact Poisson interval for
+#'   `"count"` (see [poisson_interval()]). `"auto"` detects from the
+#'   observed `response` column (entirely in `{0, 1}`, or logical, is
+#'   treated as binary; see [er_plot()]'s `response_type` for the same
+#'   heuristic) and never resolves to `"count"`: a count (Poisson-style)
+#'   response auto-detects as `"continuous"` (counts aren't confined to
+#'   `{0, 1}`) and is summarised with the bin-mean-plus-t-interval
+#'   approximation unless `response_type = "count"` is declared
+#'   explicitly, in which case the exact Poisson interval is used instead
+#'   -- see `PLAN.md`'s design decision (4) for the rationale.
 #'
 #' @returns A ggplot2 object
 #'
@@ -43,12 +44,19 @@
 #' mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 #' sim_gaussian <- erglm_vpc_sim(mod_gaussian)
 #' er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
+#'
+#' mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
+#' sim_poisson <- erglm_vpc_sim(mod_poisson)
+#' er_vpc_plot(
+#'   erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
+#'   response_type = "count"
+#' )
 #' }
 #'
 #' @export
 #' 
 er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.95,
-                         response_type = c("auto", "binary", "continuous")) {
+                         response_type = c("auto", "binary", "continuous", "count")) {
 
   response_type <- match.arg(response_type)
 
@@ -94,7 +102,8 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
   }
 
   # response-type-dispatched label formatter and observed-side summary --
-  # mirrors .part_quantile()'s binary/continuous dispatch (PLAN.md Stage 1)
+  # mirrors .part_quantile()'s binary/continuous/count dispatch (PLAN.md
+  # Stage 1, and the design decision (4) fast-follow for "count")
   if (response_type == "binary") {
     format_y_mid <- scales::label_percent(accuracy = 1)
     smm_obs <- dat |>
@@ -108,6 +117,18 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
         .by = c("Source", dplyr::all_of(grp_var))
       ) |> 
       dplyr::select(-n1, -n0)
+  } else if (response_type == "count") {
+    format_y_mid <- scales::label_number(accuracy = 0.01)
+    smm_obs <- dat |>
+      dplyr::filter(Source == "Observed") |> 
+      dplyr::summarise(
+        n_units = sum(!is.na(.data[[rsp_var]])),
+        y_mid = mean(.data[[rsp_var]], na.rm = TRUE),
+        ci_lower = poisson_interval(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["lower"], 
+        ci_upper = poisson_interval(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["upper"], 
+        .by = c("Source", dplyr::all_of(grp_var))
+      ) |> 
+      dplyr::select(-n_units)
   } else {
     format_y_mid <- scales::label_number(accuracy = 0.01)
     smm_obs <- dat |>

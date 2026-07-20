@@ -58,3 +58,42 @@ test_that("t_interval returns a named lower/upper vector", {
   expect_named(ci, c("lower", "upper"))
   expect_true(ci["lower"] < ci["upper"])
 })
+
+
+test_that("poisson_interval matches stats::poisson.test for a single count", {
+  ci <- poisson_interval(7, 10)
+  ref <- stats::poisson.test(7, 10, conf.level = 0.95)$conf.int
+
+  expect_equal(unname(ci["lower"]), ref[1])
+  expect_equal(unname(ci["upper"]), ref[2])
+})
+
+test_that("poisson_interval brackets the rate and respects conf_level", {
+  ci_95 <- poisson_interval(20, 50, conf_level = 0.95)
+  ci_80 <- poisson_interval(20, 50, conf_level = 0.80)
+
+  rate <- 20 / 50
+  expect_true(ci_95["lower"] <= rate && rate <= ci_95["upper"])
+  expect_equal(attr(ci_95, "conf_level"), 0.95)
+  expect_equal(attr(ci_80, "conf_level"), 0.80)
+
+  width_95 <- ci_95["upper"] - ci_95["lower"]
+  width_80 <- ci_80["upper"] - ci_80["lower"]
+  expect_true(width_80 < width_95)
+})
+
+test_that("poisson_interval sums a vector of counts and never returns a negative lower bound", {
+  ci_vec <- poisson_interval(c(0, 1, 2, 0, 1), n = 5)
+  ci_sum <- poisson_interval(4, n = 5)
+  expect_equal(ci_vec, ci_sum)
+
+  ci_zero <- poisson_interval(0, n = 10)
+  expect_equal(unname(ci_zero["lower"]), 0)
+  expect_true(ci_zero["upper"] >= 0)
+})
+
+test_that("poisson_interval returns a named lower/upper vector", {
+  ci <- poisson_interval(5, 20)
+  expect_named(ci, c("lower", "upper"))
+  expect_true(ci["lower"] < ci["upper"])
+})

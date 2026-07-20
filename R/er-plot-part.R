@@ -89,11 +89,14 @@
     )
 
   # binary response: response *rate* per bin, via a Clopper-Pearson CI.
-  # continuous (and, as an approximation, count) response: bin *mean*, via
-  # a t-interval -- see PLAN.md Stage 1. Label placement (y_lwr_lbl/
-  # y_upr_lbl/y_lbl) is generalised across both branches below rather than
-  # duplicated, using the response's own scale (`object$response$limits`)
-  # in place of the binary-only [0, 1] assumption.
+  # count response, when explicitly declared (`response_type = "count"`):
+  # bin *mean*, via an exact Poisson interval (PLAN.md design decision (4)
+  # fast-follow). continuous (and, when not explicitly declared "count",
+  # an approximation for count) response: bin *mean*, via a t-interval --
+  # see PLAN.md Stage 1. Label placement (y_lwr_lbl/y_upr_lbl/y_lbl) is
+  # generalised across all branches below rather than duplicated, using
+  # the response's own scale (`object$response$limits`) in place of the
+  # binary-only [0, 1] assumption.
   if (object$response$type == "binary") {
     config$summary <- binned |> 
       dplyr::summarise(
@@ -106,6 +109,18 @@
         ci_upper = clopper_pearson(n1, n0 + n1, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
       )
+  } else if (object$response$type == "count") {
+    config$summary <- binned |> 
+      dplyr::summarise(
+        n_units = sum(!is.na(response)),
+        x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
+        y_mid = mean(response, na.rm = TRUE),
+        y_mid_lbl = object$style$format_number(mean(response, na.rm = TRUE)),
+        ci_lower = poisson_interval(sum(response, na.rm = TRUE), n_units, config$conf_level)["lower"], 
+        ci_upper = poisson_interval(sum(response, na.rm = TRUE), n_units, config$conf_level)["upper"],
+        .by = c("exposure_bins", "strata")
+      ) |> 
+      dplyr::select(-n_units)
   } else {
     config$summary <- binned |> 
       dplyr::summarise(

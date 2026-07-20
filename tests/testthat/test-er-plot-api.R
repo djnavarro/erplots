@@ -75,6 +75,17 @@ test_that("er_plot_show_datastrip errors clearly for a continuous response", {
   expect_no_error(er_plot_show_datastrip(plt_binary))
 })
 
+test_that("er_plot_show_datastrip errors clearly for a declared count response", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
+  expect_error(er_plot_show_datastrip(plt), class = "rlang_error")
+  expect_error(
+    er_plot_show_datastrip(plt),
+    regexp = "does not support count responses"
+  )
+})
+
 test_that("er_plot creates an er_plot (all parts)", {
   skip_if_not_installed("erglm")
   expect_no_error(

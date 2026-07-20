@@ -11,7 +11,7 @@ er_vpc_plot(
   response,
   group_by,
   conf_level = 0.95,
-  response_type = c("auto", "binary", "continuous")
+  response_type = c("auto", "binary", "continuous", "count")
 )
 }
 \arguments{
@@ -29,19 +29,20 @@ binary (0/1, or logical) or continuous; see \code{response_type}}
 
 \item{conf_level}{Confidence level}
 
-\item{response_type}{One of \code{"auto"} (default), \code{"binary"}, or
-\code{"continuous"}. Governs how the observed-side summary is computed:
-response \emph{rate} with a Clopper-Pearson CI for \code{"binary"}, bin \emph{mean}
-with a t-interval for \code{"continuous"} (see \code{\link[=t_interval]{t_interval()}}). \code{"auto"}
-detects from the observed \code{response} column (entirely in \verb{\{0, 1\}},
-or logical, is treated as binary; see \code{\link[=er_plot]{er_plot()}}'s
-\code{response_type} for the same heuristic). There is no separate
-\code{"count"} type: a count (Poisson-style) response is auto-detected as
-\code{"continuous"} (counts aren't confined to \verb{\{0, 1\}}) and summarised
-with the same bin-mean-plus-t-interval approximation used for any
-other continuous response, rather than an exact Poisson interval.
-This is a known simplification -- see \code{PLAN.md}'s design decision (4)
-for the rationale and the planned fast-follow.}
+\item{response_type}{One of \code{"auto"} (default), \code{"binary"},
+\code{"continuous"}, or \code{"count"}. Governs how the observed-side summary
+is computed: response \emph{rate} with a Clopper-Pearson CI for
+\code{"binary"}, bin \emph{mean} with a t-interval for \code{"continuous"} (see
+\code{\link[=t_interval]{t_interval()}}), or bin \emph{mean} with an exact Poisson interval for
+\code{"count"} (see \code{\link[=poisson_interval]{poisson_interval()}}). \code{"auto"} detects from the
+observed \code{response} column (entirely in \verb{\{0, 1\}}, or logical, is
+treated as binary; see \code{\link[=er_plot]{er_plot()}}'s \code{response_type} for the same
+heuristic) and never resolves to \code{"count"}: a count (Poisson-style)
+response auto-detects as \code{"continuous"} (counts aren't confined to
+\verb{\{0, 1\}}) and is summarised with the bin-mean-plus-t-interval
+approximation unless \code{response_type = "count"} is declared
+explicitly, in which case the exact Poisson interval is used instead
+-- see \code{PLAN.md}'s design decision (4) for the rationale.}
 }
 \value{
 A ggplot2 object
@@ -65,6 +66,13 @@ er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = sex)
 mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 sim_gaussian <- erglm_vpc_sim(mod_gaussian)
 er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
+
+mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
+sim_poisson <- erglm_vpc_sim(mod_poisson)
+er_vpc_plot(
+  erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
+  response_type = "count"
+)
 }
 
 }

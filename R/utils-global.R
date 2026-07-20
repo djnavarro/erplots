@@ -4,6 +4,7 @@ utils::globalVariables(c(
   "fit_resp",
   "n1",
   "n0",
+  "n_units",
   "x_mid",
   "y_mid",
   ".data",

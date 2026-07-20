@@ -38,6 +38,30 @@ test_that("er_vpc_plot routes a count (Poisson) response through the continuous 
   expect_true(all(smm$ci_lower <= smm$y_mid & smm$y_mid <= smm$ci_upper))
 })
 
+test_that("er_vpc_plot uses an exact Poisson interval when response_type = \"count\" is declared", {
+  skip_if_not_installed("erglm")
+  sim <- erglm::erglm_vpc_sim(er_test_mod_poisson, nsim = 5)
+
+  expect_no_error(
+    er_vpc_plot(
+      er_test_data, sim, aucss, ae_count, group_by = aucss,
+      response_type = "count"
+    )
+  )
+  p <- er_vpc_plot(
+    er_test_data, sim, aucss, ae_count, group_by = aucss,
+    response_type = "count"
+  )
+  expect_true(inherits(p, "ggplot"))
+
+  smm <- p$data
+  expect_true(all(smm$ci_lower <= smm$y_mid & smm$y_mid <= smm$ci_upper))
+  # exact Poisson interval should never go negative, unlike the observed
+  # side's t-interval approximation under the default "continuous" path
+  obs <- smm[smm$Source == "Observed", ]
+  expect_true(all(obs$ci_lower >= 0))
+})
+
 test_that("er_vpc_plot's response_type argument overrides auto-detection", {
   skip_if_not_installed("erglm")
   mod <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())

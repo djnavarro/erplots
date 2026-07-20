@@ -75,6 +75,46 @@ t_interval <- function(x, conf_level = 0.95) {
 }
 
 
+#' Exact Poisson confidence interval for a count rate
+#'
+#' @param x Vector (or sum) of observed counts, e.g. all counts falling in
+#'   one exposure bin
+#' @param n Number of units the counts were accumulated over (e.g. the
+#'   number of observations in the bin); the rate being estimated is
+#'   `sum(x) / n`
+#' @param conf_level Confidence level
+#'
+#' @returns Named numeric vector (`lower`, `upper`) for the rate `sum(x) /
+#'   n`, with confidence level stored as an attribute. Uses the standard
+#'   exact ("Garwood") Poisson interval, derived from the chi-squared/gamma
+#'   relationship, rather than a normal approximation. If the total count
+#'   is 0, the lower bound is 0 (there's no gamma quantile at `shape =
+#'   0`).
+#'
+#' @details The count-response analogue of [clopper_pearson()], used by
+#'   the quantile-binned summary layer (see [er_plot_show_quantiles()])
+#'   and [er_vpc_plot()] when `response_type = "count"` is explicitly
+#'   declared. Unlike [t_interval()] (the default, opt-in-required
+#'   approximation used when a count response auto-detects or is declared
+#'   `"continuous"`), this interval is exact and never produces a
+#'   negative lower bound -- see `PLAN.md` design decision (4) for the
+#'   rationale and history.
+#'
+#' @export
+#' @examples
+#' poisson_interval(3, 10)
+#'
+poisson_interval <- function(x, n, conf_level = 0.95) {
+  total <- sum(x, na.rm = TRUE)
+  alpha <- 1 - conf_level
+  lower <- if (total > 0) stats::qgamma(alpha / 2, shape = total) / n else 0
+  upper <- stats::qgamma(1 - alpha / 2, shape = total + 1) / n
+  ci <- c(lower = lower, upper = upper)
+  attr(ci, "conf_level") <- conf_level
+  return(ci)
+}
+
+
 #' Detect whether a response variable is binary or continuous
 #'
 #' @param x A vector (the response column)
@@ -103,6 +143,9 @@ t_interval <- function(x, conf_level = 0.95) {
 #' continuous responses
 #'
 #' @param fn_name Name of the calling function, used in the error message
+#' @param response_type The offending response type (e.g. `"continuous"`
+#'   or `"count"`), used in the error message. Defaults to `"continuous"`
+#'   for backward compatibility.
 #' @param planned Logical. If `TRUE` (the default), the message frames
 #'   this as a stopgap pending a planned generalisation (see `PLAN.md`,
 #'   "Extend beyond binary responses"). If `FALSE`, the message instead
@@ -114,22 +157,23 @@ t_interval <- function(x, conf_level = 0.95) {
 #'   hardcoded a binary (0/1) response assumption and would otherwise
 #'   silently mis-plot a continuous response. The quantile summary layer
 #'   and `er_vpc_plot()` have since been generalised to support continuous
-#'   responses directly (PLAN.md Stages 1-2) and no longer call this
-#'   helper. `er_plot_show_datastrip()` is the remaining caller: its
-#'   "responders above the line, non-responders below" design is
-#'   inherently binary-response, so (per PLAN.md's Stage 3 design
-#'   decision) no continuous-response variant is currently planned, hence
-#'   `planned = FALSE` there.
+#'   (and, via `response_type = "count"`, exact-Poisson) responses
+#'   directly (PLAN.md Stages 1-2, and the design decision (4)
+#'   fast-follow) and no longer call this helper. `er_plot_show_datastrip()`
+#'   is the remaining caller: its "responders above the line,
+#'   non-responders below" design is inherently binary-response, so (per
+#'   PLAN.md's Stage 3 design decision) no continuous- or count-response
+#'   variant is currently planned, hence `planned = FALSE` there.
 #'
 #' @noRd
-.abort_continuous_unsupported <- function(fn_name, planned = TRUE) {
+.abort_continuous_unsupported <- function(fn_name, response_type = "continuous", planned = TRUE) {
   if (planned) {
     detail <- "See PLAN.md for the planned generalisation to continuous/count responses."
   } else {
     detail <- "No continuous-response variant of this component is currently planned; see PLAN.md."
   }
   rlang::abort(c(
-    paste0("`", fn_name, "()` does not support continuous responses."),
+    paste0("`", fn_name, "()` does not support ", response_type, " responses."),
     "i" = "Only binary (0/1, or logical) responses are currently supported by this component.",
     "i" = detail
   ))

@@ -171,6 +171,30 @@ test_that(".part_quantile routes a count (Poisson) response through the continuo
 })
 
 
+test_that(".part_quantile uses an exact Poisson interval when response_type = \"count\" is declared", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
+  expect_equal(plt$response$type, "count")
+
+  expect_no_error(plt |> er_plot_show_model(er_test_mod_poisson) |> er_plot_show_quantiles())
+  plt <- plt |> er_plot_show_model(er_test_mod_poisson) |> er_plot_show_quantiles()
+
+  smm <- plt$part$quantile$config$summary
+  # same column shape as the continuous path (no n1/n0, no leftover
+  # n_units helper column)
+  expect_named(smm, c(
+    "exposure_bins", "strata",
+    "x_mid", "y_mid", "y_mid_lbl", "ci_lower",
+    "ci_upper", "y_lwr_lbl", "y_upr_lbl", "y_lbl"
+  ))
+  expect_true(all(smm$ci_lower <= smm$y_mid & smm$y_mid <= smm$ci_upper))
+  # the exact Poisson interval, unlike the t-interval approximation,
+  # should never go negative for a non-negative count
+  expect_true(all(smm$ci_lower >= 0))
+})
+
+
 test_that(".part_strip constructs the correct data structure", {
   skip_if_not_installed("erglm")
 

@@ -56,20 +56,20 @@ er_plot_build(object)
 
 \item{stratify_by}{Stratification variable used for color and fill (one variable, unquoted)}
 
-\item{response_type}{One of \code{"auto"} (the default), \code{"binary"}, or
-\code{"continuous"}. Governs response-scale defaults (e.g. axis limits) and,
-eventually, which plot components are valid for the response. When
-\code{"auto"}, the response column is classified as \code{"binary"} if it is
-logical or takes only values in \verb{\{0, 1\}}, and \code{"continuous"} otherwise
--- this means a count (Poisson-style) response, e.g. an adverse-event
-count, is auto-detected as \code{"continuous"}, since counts aren't
-confined to \verb{\{0, 1\}}. There is currently no separate \code{"count"} type:
-count responses are treated as an approximately-continuous quantity
-(bin mean plus a t-interval, rather than an exact Poisson interval)
-wherever response type matters (see \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} and
-\code{\link[=er_vpc_plot]{er_vpc_plot()}} below); this is a known simplification, not a bug --
-see \code{PLAN.md}'s design decision (4) for the rationale and the planned
-fast-follow (an exact Poisson CI path).}
+\item{response_type}{One of \code{"auto"} (the default), \code{"binary"},
+\code{"continuous"}, or \code{"count"}. Governs response-scale defaults (e.g.
+axis limits) and which summary/CI method the quantile and VPC layers
+use. When \code{"auto"}, the response column is classified as \code{"binary"}
+if it is logical or takes only values in \verb{\{0, 1\}}, and \code{"continuous"}
+otherwise -- this means a count (Poisson-style) response, e.g. an
+adverse-event count, auto-detects as \code{"continuous"} (counts aren't
+confined to \verb{\{0, 1\}}) and is summarised as an approximately-continuous
+quantity (bin mean plus a t-interval). \code{"auto"} never resolves to
+\code{"count"}: pass \code{response_type = "count"} explicitly for a genuine
+count response to instead get bin mean plus an \emph{exact} Poisson
+interval (see \code{\link[=poisson_interval]{poisson_interval()}}), which -- unlike the t-interval
+approximation -- never produces a negative lower bound. See
+\code{PLAN.md}'s design decision (4) for the rationale.}
 
 \item{object}{Partially constructed plot (has S3 class \code{er_plot})}
 
@@ -98,18 +98,20 @@ Plot object of class \code{er_plot}
 Builds an exposure-response plot for a fitted model
 }
 \details{
-\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} supports both binary (response
-\emph{rate} with a Clopper-Pearson CI) and continuous (bin \emph{mean} with a
-t-interval) responses; see \code{PLAN.md} for the generalisation history.
-Count responses are routed through the continuous path (see
+\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} supports binary (response \emph{rate}
+with a Clopper-Pearson CI), continuous (bin \emph{mean} with a
+t-interval), and count (bin \emph{mean} with an exact Poisson interval)
+responses; see \code{PLAN.md} for the generalisation history. Count
+responses are routed through the continuous path unless
+\code{response_type = "count"} is declared explicitly (see
 \code{response_type} above). \code{\link[=er_plot_show_datastrip]{er_plot_show_datastrip()}}, by contrast, has
 a design that is inherently about a binary response (responders
 jittered above the exposure line, non-responders below) with no
-obvious continuous analogue. Calling it on an \code{er_plot} whose
-response was classified (or declared) as \code{"continuous"} raises an
-error rather than silently producing an empty/misleading strip; see
-\code{PLAN.md} for the design decision behind omitting a
-continuous-response variant.
+obvious continuous or count analogue. Calling it on an \code{er_plot}
+whose response was classified (or declared) as \code{"continuous"} or
+\code{"count"} raises an error rather than silently producing an
+empty/misleading strip; see \code{PLAN.md} for the design decision behind
+omitting a continuous/count-response variant.
 }
 \examples{
 \dontrun{
@@ -140,6 +142,16 @@ mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 erglm_data |>
   er_plot(aucss, biomarker_change) |>
   er_plot_show_model(mod3) |>
+  er_plot_show_quantiles() |>
+  plot()
+
+# count response: declare response_type = "count" explicitly for an
+# exact Poisson interval instead of the t-interval approximation used
+# by the auto-detected ("continuous") default
+mod4 <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
+erglm_data |>
+  er_plot(aucss, ae_count, response_type = "count") |>
+  er_plot_show_model(mod4) |>
   er_plot_show_quantiles() |>
   plot()
 }

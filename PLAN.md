@@ -129,16 +129,52 @@ debate if new information changes the calculus.
    two packages stay consistent, and it's simpler to implement and
    explain than a bootstrap.
 
-4. **Count responses.** Treat them as "continuous" for v1 (mean ± CI via
-   the same t-interval as (3)), documented as a known approximation.
-   Fast follow, once there's a concrete need: add an exact Poisson CI
-   path (analogous to how the binary path uses an exact Clopper-Pearson
-   interval rather than a normal approximation) -- the machinery for
-   swapping in a response-type-specific interval method already exists
-   once (1)-(3) are in place, so this is a small addition, not a
-   redesign. Not worth building speculatively now given erglm's own v1
-   family scope already treats poisson support as a real but secondary
-   priority.
+4. **Count responses.** [Fast-follow implemented.] v1 (Stage 4) treated
+   them as "continuous" (mean ± CI via the same t-interval as (3)),
+   documented as a known approximation, which remains the *default*
+   behaviour under `response_type = "auto"` (a count response still
+   auto-detects as `"continuous"`, since `.detect_response_type()` was
+   deliberately left unchanged -- see below). The planned fast-follow --
+   an exact Poisson CI path, analogous to how the binary path uses an
+   exact Clopper-Pearson interval rather than a normal approximation --
+   has now been added as a fourth, explicitly opt-in `response_type =
+   "count"` value on `er_plot()`/`er_vpc_plot()`. It swaps the
+   t-interval approximation for [poisson_interval()] (bin mean ± an
+   exact Poisson/Garwood interval via `qgamma()`), which -- unlike the
+   t-interval -- never produces a negative lower bound for a low-count
+   bin. `"auto"` intentionally never resolves to `"count"` (only
+   `"binary"`/`"continuous"`), so this is purely additive: existing
+   auto-detected or explicitly-`"continuous"` count-response code is
+   unaffected, and callers opt in to the exact interval only by naming
+   `response_type = "count"` themselves.
+   - Files: `R/utils-helpers.R` (`poisson_interval()`,
+     `.abort_continuous_unsupported()` gaining a `response_type`
+     parameter so its message names the actual offending type),
+     `R/er-plot-part.R` (`.part_quantile()`'s new `"count"` branch),
+     `R/er-vpc.R` (`er_vpc_plot()`'s new `"count"` branch in `smm_obs`;
+     `smm_sim` needed no changes, as expected), `R/er-plot-api.R`
+     (`er_plot()`'s `match.arg()` choices and
+     `er_plot_show_datastrip()`'s guard, which now also fires -- with an
+     accurate "does not support count responses" message -- for a
+     declared `"count"` response, not just `"continuous"`),
+     `R/utils-global.R` (`n_units` global). Docs: `?er_plot`,
+     `?er_vpc_plot`, `vignettes/articles/plot.Rmd` all updated to
+     describe and demonstrate the new value.
+   - Tests: `poisson_interval()` unit tests in
+     `test-utils-helpers.R` (matches `stats::poisson.test()`, brackets
+     the rate, respects `conf_level`, sums a vector of counts, never
+     negative at zero counts); `response_type = "count"` round-trips
+     added to `test-er-plot-part.R` and `test-er-vpc.R` (asserting
+     `ci_lower >= 0`, unlike the t-interval path); a new
+     `er_plot_show_datastrip()` error-message test for a declared count
+     response in `test-er-plot-api.R`.
+   - Done when: `erglm_model(ae_count ~ aucss, erglm_data, family =
+     poisson())` round-trips through `er_plot_show_quantiles()` and
+     `er_vpc_plot()` with `response_type = "count"` producing a
+     non-negative exact Poisson interval, without disturbing the
+     existing `"auto"`/`"continuous"` count-response behaviour or any
+     other response type. Met -- `devtools::check()` clean (0/0/0),
+     270 tests passing (up from 248).
 
 5. **Coordination with `erglm`.** Superseded -- erglm's continuous/count
    response support has landed (`gaussian`/`Gamma`/`poisson` families,
@@ -283,7 +319,9 @@ criteria are meant to be concrete enough to check off, not aspirational.
   lower bound for low-count bins (e.g. Placebo), which isn't sensible
   for a non-negative count. Not a new bug -- this is the rationale
   behind the noted fast-follow (an exact Poisson CI path), not something
-  to fix in this pass.
+  to fix in this pass. [Fast-follow since implemented: see design
+  decision (4) above -- `response_type = "count"` now gives an exact
+  Poisson interval instead of the t-interval approximation.]
 - The approximation is documented: `?er_plot`'s `response_type` and
   `@details`, and `?er_vpc_plot`'s `response_type`, both explain that
   count responses auto-detect as `"continuous"` and are summarised the
