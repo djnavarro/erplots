@@ -90,7 +90,6 @@ build_model_spaghetti <- function(data, config, stratify, exposure, response, st
         y = .data[["fit_resp"]],
         group = .data[["sim_id"]]
       ),
-      fill = "grey40",
       alpha = .1,
       key_glyph = style$draw_key
     )
@@ -117,7 +116,6 @@ build_model_spaghetti <- function(data, config, stratify, exposure, response, st
         color = .data[[strata$name]],
         group = .data[["sim_id2"]]
       ),
-      fill = "grey40",
       alpha = .25,
       key_glyph = style$draw_key
     )
