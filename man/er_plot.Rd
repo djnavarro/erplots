@@ -39,7 +39,8 @@ An (empty) plot object of class \code{er_plot}
 up a plot by piping it through one or more layer functions --
 \code{\link[=er_plot_show_model]{er_plot_show_model()}} (fitted-model curve/ribbon and summary),
 \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} (exposure-quantile-binned response summary),
-\code{\link[=er_plot_show_data]{er_plot_show_data()}} (a strip depicting the raw data), and/or
+\code{\link[=er_plot_show_data]{er_plot_show_data()}} (raw observations, by default overlaid on the
+model panel), and/or
 \code{\link[=er_plot_show_groups]{er_plot_show_groups()}} (grouped exposure-distribution panels) -- then
 render with \code{plot()}/\code{print()}, or build the ggplot2/patchwork objects
 directly with \code{\link[=er_plot_build]{er_plot_build()}}. \code{er_plot()} never fits a model itself;

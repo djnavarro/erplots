@@ -4,32 +4,46 @@
 \alias{er_plot_show_data}
 \title{Add a raw-data layer}
 \usage{
-er_plot_show_data(object, keep_strata = NULL, style = "jitter", panel = "both")
+er_plot_show_data(
+  object,
+  keep_strata = NULL,
+  style = "overlay",
+  panel = "both"
+)
 }
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_plot})}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. For a
-continuous/count response this produces one panel per stratum level
-(see "Stratification" above) rather than a shared color aesthetic.}
+\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. For \code{style = "jitter"} on a continuous/count response this produces one panel per
+stratum level (see "Stratification" above) rather than a shared
+color aesthetic; for \code{style = "overlay"} it always means a shared
+color aesthetic, for any response type.}
 
-\item{style}{Character string selecting the partial builder (currently
-only \code{"jitter"}, the default)}
+\item{style}{Character string selecting the partial builder:
+\code{"overlay"} (default; a scatter in the main panel, at each point's
+true \verb{(exposure, response)} coordinates) or \code{"jitter"} (the older
+panel-based design -- see above)}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
-default). Only meaningful for a binary response; must be \code{"both"}
-for a continuous/count response (there's no upper/lower partition to
-select from).}
+default). Only meaningful for \code{style = "jitter"} on a binary
+response; must be \code{"both"} for \code{style = "overlay"} (no upper/lower
+partition exists) or for a continuous/count response under \code{style = "jitter"} (there's no upper/lower partition to select from either
+way).}
 }
 \value{
 The input \code{object}, with the data layer added
 }
 \description{
-Adds the data layer: individual observations jittered along the
-exposure axis. Which builder is used dispatches automatically on the
-plot's \code{response_type} (set in \code{\link[=er_plot]{er_plot()}}):
+Adds the data layer: individual observations. By default (\code{style = "overlay"}), points are drawn at their true \verb{(exposure, response)}
+coordinates in the \emph{main} model panel -- a plain scatter for
+continuous/count responses, or a scatter with a small vertical jitter
+for a binary response (whose y-values are exactly 0/1 and would
+otherwise overplot into two solid lines). This works uniformly across
+all three response types, with no response-type dispatch on which
+builder to use. \code{style = "jitter"} instead uses the older, panel-based
+design, which \emph{does} dispatch on \code{response_type} (set in \code{\link[=er_plot]{er_plot()}}):
 \itemize{
 \item \code{"binary"} -- responders (\code{response == 1}) are jittered in an upper
 panel and non-responders (\code{response == 0}) in a lower panel.
@@ -42,13 +56,18 @@ partition (there's no binary flag to split on). \code{panel} must be
 }
 \details{
 This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
-singleton or additive". It's also the one layer whose stratification
-behaviour is a partial exception to "always color/fill" (see
-\code{\link[=er_plot]{er_plot()}}'s "Stratification" section): for a continuous/count
-response, the color aesthetic is already spoken for by the response
-value, so stratification instead produces one panel per stratum level
-(stacked below the base plot, each colored by the response), rather
-than a shared strata legend.
+singleton or additive" -- calling it again (with either style) fully
+replaces the previous data layer. \code{style = "jitter"} is also the one
+case where stratification behaviour is a partial exception to "always
+color/fill" (see \code{\link[=er_plot]{er_plot()}}'s "Stratification" section): for a
+continuous/count response, the color aesthetic is already spoken for
+by the response value, so stratification instead produces one panel
+per stratum level (stacked below the base plot, each colored by the
+response), rather than a shared strata legend. \code{style = "overlay"} has
+no such exception -- its color aesthetic (when stratified) is always
+strata, since the response is already shown via y-position, and it
+shares the base plot's own strata legend (the same one the model/
+quantile layers use) rather than needing one of its own.
 }
 \examples{
 \dontrun{
@@ -61,13 +80,21 @@ erglm_data |>
   er_plot_show_data() |>
   plot()
 
-# continuous response: a single color-encoded panel instead of the
-# binary upper/lower partition
+# continuous response: overlay works the same way, with no
+# response-type-specific styling needed
 mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 erglm_data |>
   er_plot(aucss, biomarker_change) |>
   er_plot_show_model(mod3) |>
   er_plot_show_data() |>
+  plot()
+
+# older panel-based design: a single color-encoded panel below the
+# base plot, instead of an overlay in the main panel
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_show_model(mod3) |>
+  er_plot_show_data(style = "jitter") |>
   plot()
 }
 

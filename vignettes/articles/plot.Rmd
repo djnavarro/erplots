@@ -232,16 +232,104 @@ er_vpc_plot(
 
 ## Data component
 
-The data layer is inherently a binary-response design (responders
-jittered above the exposure line, non-responders below), so
-`er_plot_show_data()` raises an error for a continuous-response
-`er_plot` rather than silently mis-plotting:
+`er_plot_show_data()` adds the raw observations. By default (`style =
+"overlay"`), points are drawn at their true `(exposure, response)`
+coordinates in the *main* model panel -- a plain scatter for a
+continuous/count response, or a scatter with a small vertical jitter for
+a binary response (whose y-values are exactly 0/1 and would otherwise
+overplot into two solid lines). This works the same way for every
+response type, with no special-casing needed:
 
-```{r strip-1, error = TRUE}
+```{r data-overlay-binary}
+erglm_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles() |> 
+  er_plot_show_data() |> 
+  plot()
+```
+
+```{r data-overlay-continuous}
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
   er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_data()
+  er_plot_show_data() |> 
+  plot()
+```
+
+### `style = "overlay"` vs. `style = "jitter"`
+
+`style = "jitter"` is the older, panel-based design: for a binary
+response it splits responders/non-responders into separate jittered
+panels above/below the main plot; for a continuous/count response it
+draws a single panel (or one per stratum level) below the main plot,
+with points colored continuously by the response value instead of split
+into panels. Unlike overlay, its color aesthetic isn't available for
+stratification on a continuous/count response, since the response value
+already claims it.
+
+Building both styles and placing them side by side (via patchwork's `|`
+operator) makes the difference concrete for a binary response:
+
+```{r data-compare-binary, fig.width = 10}
+p_overlay <- erglm_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles() |> 
+  er_plot_show_data(style = "overlay") |> 
+  er_plot_build()
+
+p_jitter <- erglm_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_show_model(mod) |> 
+  er_plot_show_quantiles() |> 
+  er_plot_show_data(style = "jitter") |> 
+  er_plot_build()
+
+p_overlay$output | p_jitter$output
+```
+
+and again for a continuous response, where `style = "jitter"` falls back
+to a single response-colored panel below the model curve rather than an
+overlay on it:
+
+```{r data-compare-continuous, fig.width = 10}
+p_overlay_cont <- erglm_data |> 
+  er_plot(aucss, biomarker_change) |> 
+  er_plot_show_model(mod_gaussian) |> 
+  er_plot_show_data(style = "overlay") |> 
+  er_plot_build()
+
+p_jitter_cont <- erglm_data |> 
+  er_plot(aucss, biomarker_change) |> 
+  er_plot_show_model(mod_gaussian) |> 
+  er_plot_show_data(style = "jitter") |> 
+  er_plot_build()
+
+p_overlay_cont$output | p_jitter_cont$output
+```
+
+Stratification also looks different between the two styles: overlay's
+color aesthetic always means strata and shares the model curve's own
+legend, regardless of response type, whereas jitter's color aesthetic
+means strata only for a binary response (for continuous/count it falls
+back to one titled panel per stratum level, each with its own response
+colorbar):
+
+```{r data-compare-stratified, fig.width = 10}
+p_overlay_strat <- erglm_data |> 
+  er_plot(aucss, ae1, stratify_by = sex) |> 
+  er_plot_show_model(mod_strat) |> 
+  er_plot_show_data(style = "overlay") |> 
+  er_plot_build()
+
+p_jitter_strat <- erglm_data |> 
+  er_plot(aucss, ae1, stratify_by = sex) |> 
+  er_plot_show_model(mod_strat) |> 
+  er_plot_show_data(style = "jitter") |> 
+  er_plot_build()
+
+p_overlay_strat$output | p_jitter_strat$output
 ```
 
 ## Group component

@@ -5,7 +5,8 @@
 #' up a plot by piping it through one or more layer functions --
 #' [er_plot_show_model()] (fitted-model curve/ribbon and summary),
 #' [er_plot_show_quantiles()] (exposure-quantile-binned response summary),
-#' [er_plot_show_data()] (a strip depicting the raw data), and/or
+#' [er_plot_show_data()] (raw observations, by default overlaid on the
+#' model panel), and/or
 #' [er_plot_show_groups()] (grouped exposure-distribution panels) -- then
 #' render with `plot()`/`print()`, or build the ggplot2/patchwork objects
 #' directly with [er_plot_build()]. `er_plot()` never fits a model itself;
@@ -115,6 +116,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
         model    = NULL, 
         quantile = NULL, 
         data     = NULL,
+        overlay  = NULL,
         group    = NULL
       ),
       plot = list(
@@ -355,9 +357,15 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 
 #' Add a raw-data layer
 #'
-#' Adds the data layer: individual observations jittered along the
-#' exposure axis. Which builder is used dispatches automatically on the
-#' plot's `response_type` (set in [er_plot()]):
+#' Adds the data layer: individual observations. By default (`style =
+#' "overlay"`), points are drawn at their true `(exposure, response)`
+#' coordinates in the *main* model panel -- a plain scatter for
+#' continuous/count responses, or a scatter with a small vertical jitter
+#' for a binary response (whose y-values are exactly 0/1 and would
+#' otherwise overplot into two solid lines). This works uniformly across
+#' all three response types, with no response-type dispatch on which
+#' builder to use. `style = "jitter"` instead uses the older, panel-based
+#' design, which *does* dispatch on `response_type` (set in [er_plot()]):
 #' * `"binary"` -- responders (`response == 1`) are jittered in an upper
 #'   panel and non-responders (`response == 0`) in a lower panel.
 #' * `"continuous"`/`"count"` -- a single panel, with points colored
@@ -367,26 +375,37 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #'   `"upper"`/`"lower"` errors, since that partition is binary-specific.
 #'
 #' This layer is **singleton** -- see [er_plot()]'s "Layers are either
-#' singleton or additive". It's also the one layer whose stratification
-#' behaviour is a partial exception to "always color/fill" (see
-#' [er_plot()]'s "Stratification" section): for a continuous/count
-#' response, the color aesthetic is already spoken for by the response
-#' value, so stratification instead produces one panel per stratum level
-#' (stacked below the base plot, each colored by the response), rather
-#' than a shared strata legend.
+#' singleton or additive" -- calling it again (with either style) fully
+#' replaces the previous data layer. `style = "jitter"` is also the one
+#' case where stratification behaviour is a partial exception to "always
+#' color/fill" (see [er_plot()]'s "Stratification" section): for a
+#' continuous/count response, the color aesthetic is already spoken for
+#' by the response value, so stratification instead produces one panel
+#' per stratum level (stacked below the base plot, each colored by the
+#' response), rather than a shared strata legend. `style = "overlay"` has
+#' no such exception -- its color aesthetic (when stratified) is always
+#' strata, since the response is already shown via y-position, and it
+#' shares the base plot's own strata legend (the same one the model/
+#' quantile layers use) rather than needing one of its own.
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`)
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. For a
-#'   continuous/count response this produces one panel per stratum level
-#'   (see "Stratification" above) rather than a shared color aesthetic.
-#' @param style Character string selecting the partial builder (currently
-#'   only `"jitter"`, the default)
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. For `style =
+#'   "jitter"` on a continuous/count response this produces one panel per
+#'   stratum level (see "Stratification" above) rather than a shared
+#'   color aesthetic; for `style = "overlay"` it always means a shared
+#'   color aesthetic, for any response type.
+#' @param style Character string selecting the partial builder:
+#'   `"overlay"` (default; a scatter in the main panel, at each point's
+#'   true `(exposure, response)` coordinates) or `"jitter"` (the older
+#'   panel-based design -- see above)
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
-#'   default). Only meaningful for a binary response; must be `"both"`
-#'   for a continuous/count response (there's no upper/lower partition to
-#'   select from).
+#'   default). Only meaningful for `style = "jitter"` on a binary
+#'   response; must be `"both"` for `style = "overlay"` (no upper/lower
+#'   partition exists) or for a continuous/count response under `style =
+#'   "jitter"` (there's no upper/lower partition to select from either
+#'   way).
 #'
 #' @returns The input `object`, with the data layer added
 #'
@@ -401,13 +420,21 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #'   er_plot_show_data() |>
 #'   plot()
 #'
-#' # continuous response: a single color-encoded panel instead of the
-#' # binary upper/lower partition
+#' # continuous response: overlay works the same way, with no
+#' # response-type-specific styling needed
 #' mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 #' erglm_data |>
 #'   er_plot(aucss, biomarker_change) |>
 #'   er_plot_show_model(mod3) |>
 #'   er_plot_show_data() |>
+#'   plot()
+#'
+#' # older panel-based design: a single color-encoded panel below the
+#' # base plot, instead of an overlay in the main panel
+#' erglm_data |>
+#'   er_plot(aucss, biomarker_change) |>
+#'   er_plot_show_model(mod3) |>
+#'   er_plot_show_data(style = "jitter") |>
 #'   plot()
 #' }
 #'
@@ -415,11 +442,19 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar
 #'   [er_plot_show_quantiles()], [er_plot_show_groups()]
 #'
 #' @export
-er_plot_show_data <- function(object, keep_strata = NULL, style = "jitter", panel = "both") {
+er_plot_show_data <- function(object, keep_strata = NULL, style = "overlay", panel = "both") {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
+  style <- match.arg(style, c("overlay", "jitter"))
 
-  if (object$response$type %in% c("continuous", "count") && panel != "both") {
+  if (style == "overlay" && panel != "both") {
+    rlang::abort(c(
+      "`panel` must be \"both\" for `style = \"overlay\"`.",
+      "i" = "The \"upper\"/\"lower\" partition is specific to `style = \"jitter\"` on a binary response."
+    ))
+  }
+
+  if (style == "jitter" && object$response$type %in% c("continuous", "count") && panel != "both") {
     rlang::abort(c(
       paste0("`panel` must be \"both\" for a ", object$response$type, " response."),
       "i" = "The \"upper\"/\"lower\" two-panel design is specific to binary responses.",
@@ -429,12 +464,21 @@ er_plot_show_data <- function(object, keep_strata = NULL, style = "jitter", pane
 
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
-  object$part$data <- .part_data(
-    object = object,
-    stratify = keep_strata, 
-    style = style,
-    panel = panel
-  )
+  # use `[` (not `$`) to clear the other slot -- `object$part$x <- NULL`
+  # would remove "x" from the list entirely rather than setting it to
+  # NULL, dropping it from `part_set`/`plot_set` in `print.er_plot()`
+  if (style == "overlay") {
+    object$part$overlay <- .part_overlay(object = object, stratify = keep_strata)
+    object$part["data"] <- list(NULL)
+  } else {
+    object$part$data <- .part_data(
+      object = object,
+      stratify = keep_strata, 
+      style = style,
+      panel = panel
+    )
+    object$part["overlay"] <- list(NULL)
+  }
 
   return(object)  
 }
@@ -529,6 +573,7 @@ print.er_plot <- function(x, ...) {
     if (part_set["model"])    cat("    - model:           ", paste(class(x$part$model$config$model), collapse = "/"), "\n", sep = "")
     if (part_set["quantile"]) cat("    - quantile:        ", x$part$quantile$config$n_quantiles, " bins\n", sep = "")
     if (part_set["data"])     cat("    - data:            ", x$part$data$config$style, " ", x$part$data$config$panel, "\n", sep = "")
+    if (part_set["overlay"])  cat("    - overlay:         ", if (x$part$overlay$stratify) "stratified" else "unstratified", "\n", sep = "")
     if (part_set["group"])    cat("    - group:           ", paste(names(x$part$group$config), collapse = ", "), "\n", sep = "")
   } else {
     cat("  plot components: <none>\n")
@@ -578,9 +623,14 @@ er_plot_build <- function(object) {
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   
   # build
-  if (!is.null(object$part$model) | !is.null(object$part$quantile)) object$plot$base <- .build_base_plot(object)
+  if (!is.null(object$part$model) | !is.null(object$part$quantile) | !is.null(object$part$overlay)) {
+    object$plot$base <- .build_base_plot(object)
+  }
   if (!is.null(object$part$data)) object$plot$data <- .build_data_plot(object)
   if (!is.null(object$part$group)) object$plot$group <- .build_group_plot(object)
+  if (!is.null(object$part$overlay)) {
+    object$plot$base <- object$plot$base + .build_overlay_geoms(object)
+  }
 
   # polish
   object$plot <- .polish_margins(object)

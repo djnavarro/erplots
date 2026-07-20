@@ -656,12 +656,82 @@ the current (post-rename) names throughout.
     end-to-end and visually spot-checked (colorbar reads the response
     label; stratum panels are titled "Male"/"Female" with no visual
     overlap).
-- **Stage 7c -- docs/vignette.** `?er_plot_show_data` update (already on
-  its own Rd topic as of the naming-decision rename above, so this is
-  content, not structure); replace `vignettes/articles/plot.Rmd`'s
-  current continuous-response error demo (added in Stage 6) with a real
-  example; update this section's status and design decision (2) once
-  shipped.
+- **Stage 7c -- docs/vignette. [done]** `vignettes/articles/plot.Rmd`'s
+  "Data component" section, which still described the pre-Stage-7 binary-
+  only design (raising an error for a continuous-response `er_plot`,
+  added in Stage 6), was rewritten: it now demonstrates the default
+  `style = "overlay"` on both a binary and a continuous response, then a
+  "`style = \"overlay\"` vs. `style = \"jitter\"`" subsection places
+  `er_plot_build()$output` for each style side by side (via patchwork's
+  `|` operator) for a binary response, a continuous response, and a
+  `sex`-stratified binary response -- covering the color/legend
+  difference between the two styles (overlay: always strata, shared
+  legend with the model curve; jitter: strata for binary, one titled
+  panel per stratum for continuous/count). Superseded by Stage 7d landing
+  first, so this now documents both variants rather than only the
+  panel-based one originally scoped.
+  - Files: `vignettes/articles/plot.Rmd`. No code changes.
+  - Done when: the vignette renders cleanly end to end (`rmarkdown::render()`)
+    with the new chunks included and no stale claims about the data layer
+    being binary-only. Met -- rendered via `devtools::load_all()` +
+    `rmarkdown::render("vignettes/articles/plot.Rmd")` with 0 errors,
+    all three new comparison chunks executing and producing the expected
+    side-by-side plots.
+- **Stage 7d -- `build_data_overlay()` + new default style. [done]**
+  A second, response-type-agnostic alternative to Stage 7b's
+  `build_data_color()`/panel-based design: a single builder
+  (`build_data_overlay()`, `R/er-plot-partials-data.R`) that plots points
+  at their true `(exposure, response)` coordinates directly on the *base*
+  plot, rather than in a separate above/below panel. Unlike
+  `build_data_jitter()`/`build_data_color()`, it needs no
+  `object$response$type` dispatch on *which* builder to use -- only on how
+  much vertical jitter to apply (a small nudge for a binary response,
+  whose y-values are exactly 0/1 and would otherwise overplot into two
+  solid lines; none for continuous/count, whose y-values are already
+  spread out). Its `color` aesthetic (when stratified) is always strata --
+  never `color_role == "response"` -- since y-position already encodes the
+  response; because it's added directly to `object$plot$base` rather than
+  a standalone panel, that color aesthetic shares the base plot's own
+  scale/legend with the model/quantile layers for free, with no
+  `.polish_labels()`/`.polish_legends()` changes needed.
+  - New `object$part$overlay` slot (parallel to `model`/`quantile`/`data`/
+    `group`), built via `.part_overlay()` (`R/er-plot-part.R`) and
+    `.build_overlay_geoms()` (`R/er-plot-build.R`), merged onto
+    `object$plot$base` inside `er_plot_build()` (after `.build_base_plot()`
+    runs, so the base plot's coord/scale exist even if overlay is the only
+    layer added).
+  - `er_plot_show_data()`'s `style` default changed from `"jitter"` to
+    `"overlay"`; `style = "jitter"` still selects the Stage 7a/7b
+    panel-based design unchanged. The two styles are mutually exclusive at
+    the `object$part` level -- setting one clears the other via `object$part["data"]
+    <- list(NULL)`/`object$part["overlay"] <- list(NULL)` (using `[`, not
+    `$`, so the slot name is preserved as `NULL` rather than removed from
+    the list -- the same trick `.part_model()`'s `config$p_value` already
+    relied on; `object$part$x <- NULL` deletes list element `x` entirely,
+    which broke `print.er_plot()`'s `part_set["overlay"]` lookup during
+    implementation). `panel` is not meaningful for `style = "overlay"` and
+    errors if passed as anything other than `"both"`.
+  - Files: `R/er-plot-partials-data.R` (`build_data_overlay()`),
+    `R/er-plot-part.R` (`.part_overlay()`), `R/er-plot-build.R`
+    (`.build_overlay_geoms()`), `R/er-plot-api.R` (`er_plot()`'s `part`
+    list, `er_plot_show_data()`'s style dispatch/docs, `er_plot_build()`'s
+    base-plot guard + overlay merge, `print.er_plot()`'s overlay line),
+    `R/er-plot-partials.R` (`er_partial` shared docs). Tests:
+    `test-er-plot-partials-data.R` (`build_data_overlay()` unit test --
+    binary vs. continuous jitter height, color only when stratified),
+    `test-er-plot-part.R` (`.part_overlay()` structure, mutual exclusivity
+    with `part$data`), `test-er-plot-api.R` (default-style dispatch,
+    style-switching, `panel != "both"` guard, an overlay-only
+    `er_plot_build()` round-trip, and a stratified-overlay-plus-stratified-
+    model round-trip confirming one shared legend). Existing tests that
+    exercised `er_plot_show_data()`'s old default (jitter/color panels)
+    were updated to pass `style = "jitter"` explicitly.
+  - Done when: `devtools::check()` is clean and both a stratified binary
+    model and an unstratified continuous model render an overlay scatter
+    correctly (binary: jittered around 0/1, shared strata legend with the
+    model curves; continuous: plain scatter, no jitter). Met --
+    `devtools::check()`-equivalent `devtools::test()` clean (0 failures,
+    367 passing, up from 325), both cases visually spot-checked.
 
 ## Other known issues / follow-ups
 

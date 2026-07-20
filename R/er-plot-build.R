@@ -51,6 +51,22 @@
   return(data_plots)
 }
 
+.build_overlay_geoms <- function(object) {
+
+  data     <- object$data
+  config   <- object$part$overlay$config
+  stratify <- object$part$overlay$stratify
+  exposure <- object$exposure
+  response <- object$response
+  strata   <- object$strata
+  style    <- object$style
+
+  overlay_geoms <- config$builder(
+    data, config, stratify, exposure, response, strata, style
+  )
+  return(overlay_geoms)
+}
+
 .build_group_plot <- function(object) {
 
   data     <- object$data

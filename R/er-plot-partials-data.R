@@ -52,6 +52,58 @@ build_data_jitter <- function(data, config, stratify, exposure, response, strata
 
 #' @rdname er_partial
 #' @export
+build_data_overlay <- function(data, config, stratify, exposure, response, strata, style) {
+
+  # unlike `build_data_jitter()`/`build_data_color()`, this builder draws
+  # points at their true (exposure, response) coordinates and its output
+  # is meant to be added to the *base* plot (see `.build_overlay_geoms()`
+  # in R/er-plot-build.R), not a standalone above/below panel -- so there's
+  # no response-type dispatch on which points to filter (no binary
+  # upper/lower split) and no `color_role` juggling: color, when mapped at
+  # all, always means strata, since the response is already shown via
+  # y-position.
+  if (stratify == TRUE) {
+    .set_label(data[[strata$name]], strata$label)
+    plot_map <- ggplot2::aes(
+      x = .data[[exposure$name]],
+      y = .data[[response$name]],
+      color = .data[[strata$name]]
+    )
+  } else {
+    plot_map <- ggplot2::aes(
+      x = .data[[exposure$name]],
+      y = .data[[response$name]]
+    )
+  }
+
+  # a binary response's y-values are exactly 0/1, so without jitter points
+  # overplot into two dense horizontal lines; continuous/count responses
+  # need no such nudge, since their y-values are already spread out.
+  jitter_height <- if (config$response_type == "binary") 0.05 else 0
+
+  withr::with_seed( # TODO: setting seed here isn't correct
+    seed = config$seed,
+    code = {
+      geoms <- list(
+        ggplot2::geom_jitter(
+          data = data,
+          mapping = plot_map,
+          width = 0,
+          height = jitter_height,
+          alpha = 0.4,
+          size = 1,
+          key_glyph = style$draw_key
+        )
+      )
+    }
+  )
+
+  return(geoms)
+}
+
+
+#' @rdname er_partial
+#' @export
 build_data_color <- function(data, config, stratify, exposure, response, strata, style) {
 
   # continuous/count-response variant of `build_data_jitter()` -- see

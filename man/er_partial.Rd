@@ -5,6 +5,7 @@
 %   R/er-plot-partials.R
 \name{build_data_jitter}
 \alias{build_data_jitter}
+\alias{build_data_overlay}
 \alias{build_data_color}
 \alias{build_group_boxplot}
 \alias{build_group_violin}
@@ -16,6 +17,8 @@
 \title{Partial builders for exposure-response plots}
 \usage{
 build_data_jitter(data, config, stratify, exposure, response, strata, style)
+
+build_data_overlay(data, config, stratify, exposure, response, strata, style)
 
 build_data_color(data, config, stratify, exposure, response, strata, style)
 
@@ -75,9 +78,10 @@ A geom, or a list of geoms. More precisely, a list of
 objects that can be added to a ggplot2 plot. The expectation is
 that these objects will be added to a partially-constructed plot
 which, at a minimum, already has the base theme applied. For
-"model", "summary", and "quantile", the pieces will be added to
-a plot that already has a coord that sets the axis limits. For
-the "data" and "group" plots, the plot object does not yet
+"model", "summary", "quantile", and "overlay", the pieces will be
+added to a plot that already has a coord that sets the axis limits
+(the base plot; see \code{.build_overlay_geoms()}). For the "data" (jitter/
+color panel) and "group" plots, the plot object does not yet
 have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That
 is, since all component plots use the exposure variable for the
@@ -94,6 +98,7 @@ Things we can have partials for:
 \item summary
 \item quantile
 \item data
+\item overlay
 \item group
 }
 

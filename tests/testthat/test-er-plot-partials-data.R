@@ -61,8 +61,8 @@ test_that("build_data_color returns geom + coord + yscale for a continuous respo
   p1 <- er_plot(er_test_data, aucss, biomarker_change)
   p2 <- er_plot(er_test_data, aucss, biomarker_change, sex)
 
-  p1 <- p1 |> er_plot_show_data()
-  p2 <- p2 |> er_plot_show_data()
+  p1 <- p1 |> er_plot_show_data(style = "jitter")
+  p2 <- p2 |> er_plot_show_data(style = "jitter")
 
   config1 <- p1$part$data$config
   config2 <- p2$part$data$config
@@ -108,4 +108,48 @@ test_that("build_data_color returns geom + coord + yscale for a continuous respo
   # the stratified builder filters to just the requested stratum's rows
   filtered_n <- p2_out[[1]]$data |> nrow()
   expect_equal(filtered_n, sum(er_test_data$sex == config2$panel))
+})
+
+
+test_that("build_data_overlay returns a single geom, jittered only for a binary response", {
+  skip_if_not_installed("erglm")
+
+  p_binary  <- er_plot(er_test_data, aucss, ae1) |> er_plot_show_data()
+  p_bin_str <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_show_data()
+  p_cont    <- er_plot(er_test_data, aucss, biomarker_change) |> er_plot_show_data()
+
+  args <- function(p) {
+    list(
+      data = p$data,
+      config = p$part$overlay$config,
+      stratify = p$part$overlay$stratify,
+      exposure = p$exposure,
+      response = p$response,
+      strata = p$strata,
+      style = p$style
+    )
+  }
+
+  out_binary  <- do.call(build_data_overlay, args(p_binary))
+  out_bin_str <- do.call(build_data_overlay, args(p_bin_str))
+  out_cont    <- do.call(build_data_overlay, args(p_cont))
+
+  expect_length(out_binary, 1)
+  expect_length(out_bin_str, 1)
+  expect_length(out_cont, 1)
+
+  expect_true(inherits(out_binary[[1]], "LayerInstance"))
+  expect_true(inherits(out_bin_str[[1]], "LayerInstance"))
+  expect_true(inherits(out_cont[[1]], "LayerInstance"))
+
+  # binary response: nonzero vertical jitter
+  expect_gt(out_binary[[1]]$position$height, 0)
+  expect_gt(out_bin_str[[1]]$position$height, 0)
+  # continuous response: no jitter
+  expect_equal(out_cont[[1]]$position$height, 0)
+
+  # color aesthetic only present when stratified
+  expect_null(out_binary[[1]]$mapping$colour)
+  expect_false(is.null(out_bin_str[[1]]$mapping$colour))
+  expect_null(out_cont[[1]]$mapping$colour)
 })

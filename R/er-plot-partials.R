@@ -15,6 +15,7 @@
 #' - summary
 #' - quantile
 #' - data
+#' - overlay
 #' - group
 #' 
 #' Arguments are standardised to allow users to write their own 
@@ -24,9 +25,10 @@
 #' objects that can be added to a ggplot2 plot. The expectation is
 #' that these objects will be added to a partially-constructed plot
 #' which, at a minimum, already has the base theme applied. For 
-#' "model", "summary", and "quantile", the pieces will be added to
-#' a plot that already has a coord that sets the axis limits. For
-#' the "data" and "group" plots, the plot object does not yet
+#' "model", "summary", "quantile", and "overlay", the pieces will be
+#' added to a plot that already has a coord that sets the axis limits
+#' (the base plot; see `.build_overlay_geoms()`). For the "data" (jitter/
+#' color panel) and "group" plots, the plot object does not yet
 #' have a coord. The expectation, however, is that the builder will
 #' supply an x-axis limit that is consistent with the base plot. That
 #' is, since all component plots use the exposure variable for the

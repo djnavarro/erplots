@@ -54,45 +54,72 @@ test_that("er_plot_show_data supports a continuous response (single color-encode
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, biomarker_change)
-  expect_no_error(er_plot_show_data(plt))
+  expect_no_error(er_plot_show_data(plt, style = "jitter"))
 
-  plt <- er_plot_show_data(plt)
+  plt <- er_plot_show_data(plt, style = "jitter")
   expect_equal(plt$part$data$config$color_role, "response")
   expect_equal(plt$part$data$config$panels, "data")
 
   # binary response still works, dispatched to build_data_jitter
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
-  expect_no_error(er_plot_show_data(plt_binary))
-  expect_equal((plt_binary |> er_plot_show_data())$part$data$config$color_role, "strata")
+  expect_no_error(er_plot_show_data(plt_binary, style = "jitter"))
+  expect_equal((plt_binary |> er_plot_show_data(style = "jitter"))$part$data$config$color_role, "strata")
 })
 
 test_that("er_plot_show_data supports a declared count response", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_no_error(er_plot_show_data(plt))
-  expect_equal((plt |> er_plot_show_data())$part$data$config$color_role, "response")
+  expect_no_error(er_plot_show_data(plt, style = "jitter"))
+  expect_equal((plt |> er_plot_show_data(style = "jitter"))$part$data$config$color_role, "response")
 })
 
-test_that("er_plot_show_data errors when panel != 'both' for a continuous/count response", {
+test_that("er_plot_show_data's default style is overlay, replacing data/overlay on re-call", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae1)
+
+  plt_overlay <- plt |> er_plot_show_data()
+  expect_false(is.null(plt_overlay$part$overlay))
+  expect_null(plt_overlay$part$data)
+
+  plt_jitter <- plt_overlay |> er_plot_show_data(style = "jitter")
+  expect_false(is.null(plt_jitter$part$data))
+  expect_null(plt_jitter$part$overlay)
+
+  plt_back <- plt_jitter |> er_plot_show_data(style = "overlay")
+  expect_false(is.null(plt_back$part$overlay))
+  expect_null(plt_back$part$data)
+
+  expect_error(er_plot_show_data(plt, style = "nope"))
+})
+
+test_that("er_plot_show_data errors when panel != 'both'", {
   skip_if_not_installed("erglm")
 
   plt_continuous <- er_test_data |> er_plot(aucss, biomarker_change)
   expect_error(
-    er_plot_show_data(plt_continuous, panel = "upper"),
+    er_plot_show_data(plt_continuous, style = "jitter", panel = "upper"),
     regexp = "must be \"both\""
   )
 
   plt_count <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
   expect_error(
-    er_plot_show_data(plt_count, panel = "lower"),
+    er_plot_show_data(plt_count, style = "jitter", panel = "lower"),
     regexp = "must be \"both\""
   )
 
-  # default ("both") and binary responses are unaffected
-  expect_no_error(er_plot_show_data(plt_continuous))
+  # `style = "overlay"` (the default) has no upper/lower partition for
+  # any response type, unlike `style = "jitter"` on a binary response
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
-  expect_no_error(er_plot_show_data(plt_binary, panel = "upper"))
+  expect_error(
+    er_plot_show_data(plt_binary, panel = "upper"),
+    regexp = "must be \"both\""
+  )
+
+  # default ("both") and binary + style = "jitter" are unaffected
+  expect_no_error(er_plot_show_data(plt_continuous))
+  expect_no_error(er_plot_show_data(plt_binary, style = "jitter", panel = "upper"))
 })
 
 test_that("er_plot_show_data produces N stratum panels, each with a response colorbar", {
@@ -102,7 +129,7 @@ test_that("er_plot_show_data produces N stratum panels, each with a response col
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change, sex) |>
     er_plot_show_model(mod3) |>
-    er_plot_show_data()
+    er_plot_show_data(style = "jitter")
 
   expect_no_error(er_plot_build(plt))
   built <- er_plot_build(plt)
@@ -197,14 +224,14 @@ test_that("er_plot_build constructs ggplot2 objects", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data()
+    er_plot_show_data(style = "jitter")
 
   plt3 <- er_test_data |>
     dplyr::mutate(dose = factor(dose)) |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data()  |>
+    er_plot_show_data(style = "jitter")  |>
     er_plot_show_groups(c(treatment, dose))
 
   plt1_built <- er_plot_build(plt1)
@@ -240,14 +267,14 @@ test_that("print method works as expected", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data()
+    er_plot_show_data(style = "jitter")
 
   plt3 <- er_test_data |>
     dplyr::mutate(dose = factor(dose)) |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data()  |>
+    er_plot_show_data(style = "jitter")  |>
     er_plot_show_groups(c(treatment, dose))
 
   print_quiet <- purrr::quietly(print.er_plot)
@@ -279,4 +306,32 @@ test_that("print method works as expected", {
   expect_length(outlines1, 9)
   expect_length(outlines2, 11)
   expect_length(outlines3, 12)
+})
+
+test_that("er_plot_show_data(style = 'overlay') merges into the base plot", {
+  skip_if_not_installed("erglm")
+
+  # overlay as the *only* layer: the base plot must still get built (for
+  # its coord/scale), with no separate object$plot$data panels
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_show_data()
+  expect_no_error(er_plot_build(plt))
+  built <- er_plot_build(plt)
+
+  expect_true(ggplot2::is_ggplot(built$plot$base))
+  expect_null(built$plot$data)
+  expect_equal(length(built$output$layers), 1)
+
+  # stratified overlay shares one legend with a stratified model curve,
+  # both living on the same base plot
+  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  plt_strat <- er_test_data |>
+    er_plot(aucss, ae1, sex) |>
+    er_plot_show_model(mod2) |>
+    er_plot_show_data()
+
+  expect_no_error(er_plot_build(plt_strat))
+  built_strat <- er_plot_build(plt_strat)
+
+  expect_true(ggplot2::is_ggplot(built_strat$output))
+  expect_equal(ggplot2::get_labs(built_strat$output)$colour, plt_strat$strata$label)
 })

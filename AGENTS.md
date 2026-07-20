@@ -23,12 +23,22 @@ quantile summary layer (`er_plot_show_quantiles()`) and `er_vpc_plot()`
 are now fully generalised across all three response types (rate +
 Clopper-Pearson for `"binary"`; mean + t-interval for `"continuous"`;
 mean + exact Poisson interval for `"count"`). The data layer
-(`er_plot_show_data()`, renamed from `er_plot_show_datastrip()`) is the
-one remaining binary-only layer -- it still *errors* (rather than
-silently mis-plot) for `"continuous"`/`"count"` responses, and a
-continuous-response variant (a single color-encoded panel rather than
-the current two-panel jitter strip) is scoped but not yet built -- see
-"Planned work" below.
+(`er_plot_show_data()`, renamed from `er_plot_show_datastrip()`) also
+works for any response type, with no `"continuous"`/`"count"` error path
+left -- see "Planned work" below.
+
+`er_plot_show_data()` offers two mutually exclusive styles: `"overlay"`
+(the default) plots raw observations at their true `(exposure, response)`
+coordinates directly on the model panel -- a single, response-type-agnostic
+builder (`build_data_overlay()`) with a small vertical jitter applied only
+for binary responses, and a `color` aesthetic that's always strata (sharing
+the base plot's own legend) rather than the response value. `"jitter"` is
+the older panel-based design (`build_data_jitter()` for a binary response,
+`build_data_color()` for continuous/count, `object$part$data`) -- for a
+continuous/count response it produces one color-coded panel (or one per
+stratum level) below the base plot instead of an overlay in the main
+panel. The two styles live in separate `object$part` slots (`overlay` vs.
+`data`); setting one via `er_plot_show_data()` clears the other.
 
 The companion package [erglm](https://github.com/djnavarro/erglm)
 (formerly `erlr`) fits GLM-based exposure-response models and implements
@@ -53,22 +63,17 @@ See [PLAN.md](PLAN.md) for scoped-out future development. The original
 continuous/count-response generalisation (PLAN.md Stages 0-6, plus the
 exact-Poisson-interval fast-follow) is done: response-type detection/
 declaration, guard rails, and the substantive generalisation of the
-quantile summary layer and `er_vpc_plot()` have all landed. The
-remaining open item is the **data layer's continuous-response variant**
-(PLAN.md's "Continuous-response data strip" section, Stages 7a-7c): a
-single color-encoded panel (rather than the current binary two-panel
-jitter strip). Stage 7a (generalising the composition machinery from
-fixed `$upper`/`$lower` slots to a named list of panels) is done, and
-the layer has since been renamed `er_plot_show_data()` (from
-`er_plot_show_datastrip()`; internals renamed to match --
-`.part_data()`, `build_data_jitter()`, `object$part/plot$data`). Still
-open: Stage 7b (`build_data_color()`, the `object$response$type`
-dispatch, the `color_role` concept for the data layer's non-strata
-color legend) and Stage 7c (docs/vignette for the new variant). Also
-see PLAN.md's "Mini-language architecture review" section for
-documented-but-unimplemented design notes (singleton/additive layer
-semantics, stratification/color precedence) that inform Stage 7b's
-design.
+quantile summary layer and `er_vpc_plot()` have all landed. The **data
+layer's continuous-response variant** (PLAN.md's "Continuous-response
+data strip" section) is also done, in two forms: Stage 7a/7b's
+panel-based design (`style = "jitter"`, dispatching to
+`build_data_color()` for a continuous/count response) and Stage 7d's
+`build_data_overlay()` (`style = "overlay"`, now the default -- see
+above). Still open: Stage 7c (docs/vignette content for the panel-based
+variant). Also see PLAN.md's "Mini-language architecture review"
+section for documented-but-unimplemented design notes (singleton/
+additive layer semantics, stratification/color precedence) that
+motivated both variants' design.
 
 ## Structure
 

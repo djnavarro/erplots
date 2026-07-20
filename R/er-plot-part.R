@@ -217,6 +217,30 @@
 }
 
 
+# part_overlay ------------------------------------------------------------------
+
+.part_overlay <- function(object, stratify) {
+
+  part_overlay <- list()
+
+  config <- list()
+  config$seed <- 1234L
+
+  # unlike `.part_data()`, there's a single builder regardless of
+  # response type -- `build_data_overlay()` only needs to know the
+  # response type to decide how much vertical jitter to apply (binary
+  # responses get a small nudge so 0/1 points don't overplot into two
+  # solid lines; continuous/count responses get none).
+  config$response_type <- object$response$type
+  config$builder <- build_data_overlay
+
+  part_overlay$stratify <- stratify
+  part_overlay$config <- config
+
+  return(part_overlay)
+}
+
+
 # part_group ------------------------------------------------------------------
 
 .part_group <- function(object, group_cols, stratify, style, bins) {

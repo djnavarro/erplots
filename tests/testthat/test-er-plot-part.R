@@ -201,11 +201,11 @@ test_that(".part_data constructs the correct data structure", {
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
-  expect_no_error(plt1 |> er_plot_show_data())
-  expect_no_error(plt2 |> er_plot_show_data())
+  expect_no_error(plt1 |> er_plot_show_data(style = "jitter"))
+  expect_no_error(plt2 |> er_plot_show_data(style = "jitter"))
 
-  plt1 <- plt1 |> er_plot_show_data()
-  plt2 <- plt2 |> er_plot_show_data()
+  plt1 <- plt1 |> er_plot_show_data(style = "jitter")
+  plt2 <- plt2 |> er_plot_show_data(style = "jitter")
 
   expect_type(plt1$part$data, "list")
   expect_type(plt2$part$data, "list")
@@ -244,11 +244,11 @@ test_that(".part_data dispatches to build_data_color for a continuous response",
   plt1 <- er_test_data |> er_plot(aucss, biomarker_change)
   plt2 <- er_test_data |> er_plot(aucss, biomarker_change, sex)
 
-  expect_no_error(plt1 |> er_plot_show_data())
-  expect_no_error(plt2 |> er_plot_show_data())
+  expect_no_error(plt1 |> er_plot_show_data(style = "jitter"))
+  expect_no_error(plt2 |> er_plot_show_data(style = "jitter"))
 
-  plt1 <- plt1 |> er_plot_show_data()
-  plt2 <- plt2 |> er_plot_show_data()
+  plt1 <- plt1 |> er_plot_show_data(style = "jitter")
+  plt2 <- plt2 |> er_plot_show_data(style = "jitter")
 
   cfg1 <- plt1$part$data$config
   cfg2 <- plt2$part$data$config
@@ -272,8 +272,8 @@ test_that(".part_data routes a count response through build_data_color too", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_no_error(plt |> er_plot_show_data())
-  cfg <- (plt |> er_plot_show_data())$part$data$config
+  expect_no_error(plt |> er_plot_show_data(style = "jitter"))
+  cfg <- (plt |> er_plot_show_data(style = "jitter"))$part$data$config
   expect_identical(cfg$builder, build_data_color)
   expect_equal(cfg$color_role, "response")
   expect_equal(cfg$panels, "data")
@@ -351,4 +351,44 @@ test_that(".part_group constructs the correct data structure", {
   expect_equal(attr(fct1w, "label"), attr(er_test_data$weight, "label"))
   expect_equal(attr(fct2w, "label"), attr(er_test_data$weight, "label"))
   expect_equal(attr(fct1s, "label"), attr(er_test_data$sex, "label"))
+})
+
+
+test_that(".part_overlay constructs the correct data structure", {
+  skip_if_not_installed("erglm")
+
+  plt1 <- er_test_data |> er_plot(aucss, ae1)
+  plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
+  plt3 <- er_test_data |> er_plot(aucss, biomarker_change)
+
+  expect_no_error(plt1 |> er_plot_show_data())
+  expect_no_error(plt2 |> er_plot_show_data())
+  expect_no_error(plt3 |> er_plot_show_data())
+
+  plt1 <- plt1 |> er_plot_show_data()
+  plt2 <- plt2 |> er_plot_show_data()
+  plt3 <- plt3 |> er_plot_show_data()
+
+  expect_type(plt1$part$overlay, "list")
+  expect_type(plt2$part$overlay, "list")
+
+  expect_named(plt1$part$overlay, c("stratify", "config"))
+  expect_named(plt2$part$overlay, c("stratify", "config"))
+
+  expect_equal(plt1$part$overlay$stratify, FALSE)
+  expect_equal(plt2$part$overlay$stratify, TRUE)
+
+  # `style = "overlay"` (the default) is a mutually exclusive alternative
+  # to `style = "jitter"` -- only one of `part$data`/`part$overlay` is
+  # ever non-NULL
+  expect_null(plt1$part$data)
+  expect_null(plt2$part$data)
+
+  cfg1 <- plt1$part$overlay$config
+  cfg3 <- plt3$part$overlay$config
+
+  expect_named(cfg1, c("seed", "response_type", "builder"))
+  expect_identical(cfg1$builder, build_data_overlay)
+  expect_equal(cfg1$response_type, "binary")
+  expect_equal(cfg3$response_type, "continuous")
 })
