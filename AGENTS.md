@@ -59,21 +59,21 @@ for all four families, so no erplots-side changes are needed there.
 
 ## Planned work
 
-See [PLAN.md](PLAN.md) for scoped-out future development. The original
-continuous/count-response generalisation (PLAN.md Stages 0-6, plus the
-exact-Poisson-interval fast-follow) is done: response-type detection/
-declaration, guard rails, and the substantive generalisation of the
-quantile summary layer and `er_vpc_plot()` have all landed. The **data
-layer's continuous-response variant** (PLAN.md's "Continuous-response
-data strip" section) is also done, in two forms: Stage 7a/7b's
-panel-based design (`style = "jitter"`, dispatching to
-`build_data_color()` for a continuous/count response) and Stage 7d's
-`build_data_overlay()` (`style = "overlay"`, now the default -- see
-above). Still open: Stage 7c (docs/vignette content for the panel-based
-variant). Also see PLAN.md's "Mini-language architecture review"
-section for documented-but-unimplemented design notes (singleton/
-additive layer semantics, stratification/color precedence) that
-motivated both variants' design.
+See [PLAN.md](PLAN.md) for a condensed historical record of completed
+design work (rationale kept, implementation narrative trimmed) and a
+short "Open / deferred" list at the end. Everything scoped so far is
+done: the binary→continuous/count response generalisation (response-type
+detection/declaration, the quantile summary layer, `er_vpc_plot()`), the
+data layer's continuous/count-response redesign (`style = "jitter"`'s
+`build_data_color()` and `style = "overlay"`'s `build_data_overlay()`,
+now the default), and the mini-language documentation review (singleton/
+additive layer semantics, the stratification color/facet precedence
+rule, `?er_partial`, `vignettes/articles/design.Rmd`). The only
+genuinely open items are deferred, not scheduled -- see PLAN.md's "Open /
+deferred" section (an additive `model` layer for overlaying two fitted
+curves; whether `build_data_color()` should use a deliberately chosen
+continuous color scale instead of ggplot2's default gradient; a
+quantile-binned rug as a fallback data-layer design).
 
 ## Structure
 
@@ -98,10 +98,10 @@ motivated both variants' design.
   operating on plain observed/simulated data frames.
 - `R/utils-helpers.R`, `R/utils-global.R` -- small internal helpers
   (including the binary-response-only `clopper_pearson()`,
-  `cut_quantile()`, `cut_exposure_quantile()`, the response-type
-  detector `.detect_response_type()`, and the shared guard-rail helper
-  `.abort_continuous_unsupported()`) and `globalVariables()` declarations
-  for NSE.
+  `t_interval()`, `poisson_interval()`, `cut_quantile()`,
+  `cut_exposure_quantile()`, and the response-type detector
+  `.detect_response_type()`) and `globalVariables()` declarations for
+  NSE.
 
 ## Development workflow
 

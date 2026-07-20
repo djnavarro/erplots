@@ -87,6 +87,34 @@ supply an x-axis limit that is consistent with the base plot. That
 is, since all component plots use the exposure variable for the
 x-axis, they should use the values stored in \code{exposure$limits} tp
 set the x-axis limits.
+
+All of the builders above feed a \strong{singleton} layer: \code{model},
+\code{summary}, \code{quantile}, \code{data}, and \code{overlay} each occupy a single named
+slot (\code{object$part$model}, \code{object$part$data}, etc.), so calling the
+corresponding \verb{er_plot_show_*()} function again overwrites the slot
+rather than combining builders. \code{group} (\code{build_group_boxplot()}/
+\code{build_group_violin()}) is the one \strong{additive} exception -- each call
+to \code{er_plot_show_groups()} adds another named entry rather than
+replacing the previous one. See \code{\link[=er_plot]{er_plot()}}'s "Layers are either
+singleton or additive" section for the full discussion, including the
+one flagged future exception (an additive \code{model} layer, for
+overlaying two fitted curves).
+
+The \code{data} slot has two mutually exclusive builders, selected by
+response type rather than by name: \code{build_data_jitter()} for a binary
+response (color, when mapped, always means strata) and
+\code{build_data_color()} for a continuous/count response (color always
+means the response value itself). Because \code{build_data_color()}'s color
+aesthetic is already spoken for, \code{config$color_role} (set by
+\code{.part_data()}, consulted by \code{.polish_labels()}/\code{.polish_legends()} in
+\code{R/er-plot-compose.R}) tags which meaning applies -- \code{"strata"} for
+\code{build_data_jitter()}, \code{"response"} for \code{build_data_color()} -- so the
+composition machinery knows whether a builder's legend is the shared
+strata legend or a standalone response colorbar. \code{build_data_overlay()}
+needs no such tag: its color aesthetic (when stratified) is always
+strata, since the response is already shown via y-position, so it
+shares the base plot's own strata legend directly. See
+\code{\link[=er_plot_show_data]{er_plot_show_data()}} for the user-facing version of this rule.
 }
 \description{
 Partial builders for exposure-response plots
