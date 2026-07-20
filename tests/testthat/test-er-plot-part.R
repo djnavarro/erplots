@@ -201,11 +201,11 @@ test_that(".part_data constructs the correct data structure", {
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
-  expect_no_error(plt1 |> er_plot_show_data(builder = build_data_jitter))
-  expect_no_error(plt2 |> er_plot_show_data(builder = build_data_jitter))
+  expect_no_error(plt1 |> er_plot_show_data(builder = build_data_boxjitter))
+  expect_no_error(plt2 |> er_plot_show_data(builder = build_data_boxjitter))
 
-  plt1 <- plt1 |> er_plot_show_data(builder = build_data_jitter)
-  plt2 <- plt2 |> er_plot_show_data(builder = build_data_jitter)
+  plt1 <- plt1 |> er_plot_show_data(builder = build_data_boxjitter)
+  plt2 <- plt2 |> er_plot_show_data(builder = build_data_boxjitter)
 
   expect_type(plt1$part$data, "list")
   expect_type(plt2$part$data, "list")
@@ -238,23 +238,33 @@ test_that(".part_data constructs the correct data structure", {
 })
 
 
-test_that(".part_data records build_data_color's panel structure for a continuous response", {
+test_that(".part_data records a response-colored panel structure for a continuous response", {
   skip_if_not_installed("erglm")
+
+  # there's no built-in "panel"-layout builder for a continuous/count
+  # response (the older `build_data_color()` was removed once
+  # `build_data_overlay()` covered its typical use case more simply --
+  # see PLAN.md), but `.part_data()`'s response-type dispatch is still
+  # general-purpose and exercised here via a minimal custom builder.
+  stub_panel_builder <- er_layout(
+    function(data, config, stratify, exposure, response, strata, style) list(),
+    layout = "panel"
+  )
 
   plt1 <- er_test_data |> er_plot(aucss, biomarker_change)
   plt2 <- er_test_data |> er_plot(aucss, biomarker_change, sex)
 
-  expect_no_error(plt1 |> er_plot_show_data(builder = build_data_color))
-  expect_no_error(plt2 |> er_plot_show_data(builder = build_data_color))
+  expect_no_error(plt1 |> er_plot_show_data(builder = stub_panel_builder))
+  expect_no_error(plt2 |> er_plot_show_data(builder = stub_panel_builder))
 
-  plt1 <- plt1 |> er_plot_show_data(builder = build_data_color)
-  plt2 <- plt2 |> er_plot_show_data(builder = build_data_color)
+  plt1 <- plt1 |> er_plot_show_data(builder = stub_panel_builder)
+  plt2 <- plt2 |> er_plot_show_data(builder = stub_panel_builder)
 
   cfg1 <- plt1$part$data$config
   cfg2 <- plt2$part$data$config
 
-  expect_identical(cfg1$builder, build_data_color)
-  expect_identical(cfg2$builder, build_data_color)
+  expect_identical(cfg1$builder, stub_panel_builder)
+  expect_identical(cfg2$builder, stub_panel_builder)
   expect_equal(cfg1$color_role, "response")
   expect_equal(cfg2$color_role, "response")
 
@@ -271,10 +281,15 @@ test_that(".part_data records build_data_color's panel structure for a continuou
 test_that(".part_data records the same single-panel structure for a count response", {
   skip_if_not_installed("erglm")
 
+  stub_panel_builder <- er_layout(
+    function(data, config, stratify, exposure, response, strata, style) list(),
+    layout = "panel"
+  )
+
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_no_error(plt |> er_plot_show_data(builder = build_data_color))
-  cfg <- (plt |> er_plot_show_data(builder = build_data_color))$part$data$config
-  expect_identical(cfg$builder, build_data_color)
+  expect_no_error(plt |> er_plot_show_data(builder = stub_panel_builder))
+  cfg <- (plt |> er_plot_show_data(builder = stub_panel_builder))$part$data$config
+  expect_identical(cfg$builder, stub_panel_builder)
   expect_equal(cfg$color_role, "response")
   expect_equal(cfg$panels, "data")
 })

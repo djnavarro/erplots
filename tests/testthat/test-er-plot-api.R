@@ -50,28 +50,42 @@ test_that("er_plot_show_quantiles supports both binary and continuous responses"
   expect_no_error(er_plot_show_quantiles(plt_binary))
 })
 
-test_that("er_plot_show_data supports a continuous response (single color-encoded panel)", {
+test_that("er_plot_show_data's panel layout supports a continuous response (single color-encoded panel)", {
   skip_if_not_installed("erglm")
 
-  plt <- er_test_data |> er_plot(aucss, biomarker_change)
-  expect_no_error(er_plot_show_data(plt, builder = build_data_color))
+  # there's no built-in "panel"-layout builder for a continuous/count
+  # response (see PLAN.md's note on removing `build_data_color()`), but
+  # `.part_data()`'s response-type dispatch is still general-purpose and
+  # exercised here via a minimal custom builder.
+  stub_panel_builder <- er_layout(
+    function(data, config, stratify, exposure, response, strata, style) list(),
+    layout = "panel"
+  )
 
-  plt <- er_plot_show_data(plt, builder = build_data_color)
+  plt <- er_test_data |> er_plot(aucss, biomarker_change)
+  expect_no_error(er_plot_show_data(plt, builder = stub_panel_builder))
+
+  plt <- er_plot_show_data(plt, builder = stub_panel_builder)
   expect_equal(plt$part$data$config$color_role, "response")
   expect_equal(plt$part$data$config$panels, "data")
 
-  # binary response still works, with build_data_jitter
+  # binary response still works, with build_data_boxjitter
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
-  expect_no_error(er_plot_show_data(plt_binary, builder = build_data_jitter))
-  expect_equal((plt_binary |> er_plot_show_data(builder = build_data_jitter))$part$data$config$color_role, "strata")
+  expect_no_error(er_plot_show_data(plt_binary, builder = build_data_boxjitter))
+  expect_equal((plt_binary |> er_plot_show_data(builder = build_data_boxjitter))$part$data$config$color_role, "strata")
 })
 
 test_that("er_plot_show_data supports a declared count response", {
   skip_if_not_installed("erglm")
 
+  stub_panel_builder <- er_layout(
+    function(data, config, stratify, exposure, response, strata, style) list(),
+    layout = "panel"
+  )
+
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_no_error(er_plot_show_data(plt, builder = build_data_color))
-  expect_equal((plt |> er_plot_show_data(builder = build_data_color))$part$data$config$color_role, "response")
+  expect_no_error(er_plot_show_data(plt, builder = stub_panel_builder))
+  expect_equal((plt |> er_plot_show_data(builder = stub_panel_builder))$part$data$config$color_role, "response")
 })
 
 test_that("er_plot_show_data's default builder is build_data_overlay, replacing data/overlay on re-call", {
@@ -83,7 +97,7 @@ test_that("er_plot_show_data's default builder is build_data_overlay, replacing 
   expect_false(is.null(plt_overlay$part$overlay))
   expect_null(plt_overlay$part$data)
 
-  plt_jitter <- plt_overlay |> er_plot_show_data(builder = build_data_jitter)
+  plt_jitter <- plt_overlay |> er_plot_show_data(builder = build_data_boxjitter)
   expect_false(is.null(plt_jitter$part$data))
   expect_null(plt_jitter$part$overlay)
 
@@ -97,39 +111,63 @@ test_that("er_plot_show_data's default builder is build_data_overlay, replacing 
 test_that("er_plot_show_data errors when panel != 'both'", {
   skip_if_not_installed("erglm")
 
+  stub_panel_builder <- er_layout(
+    function(data, config, stratify, exposure, response, strata, style) list(),
+    layout = "panel"
+  )
+
   plt_continuous <- er_test_data |> er_plot(aucss, biomarker_change)
   expect_error(
-    er_plot_show_data(plt_continuous, builder = build_data_color, panel = "upper"),
+    er_plot_show_data(plt_continuous, builder = stub_panel_builder, panel = "upper"),
     regexp = "must be \"both\""
   )
 
   plt_count <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
   expect_error(
-    er_plot_show_data(plt_count, builder = build_data_color, panel = "lower"),
+    er_plot_show_data(plt_count, builder = stub_panel_builder, panel = "lower"),
     regexp = "must be \"both\""
   )
 
   # `build_data_overlay` (the default) has no upper/lower partition for
-  # any response type, unlike `build_data_jitter` on a binary response
+  # any response type, unlike `build_data_boxjitter` on a binary response
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
   expect_error(
     er_plot_show_data(plt_binary, panel = "upper"),
     regexp = "must be \"both\""
   )
 
-  # default ("both") and binary + build_data_jitter are unaffected
+  # default ("both") and binary + build_data_boxjitter are unaffected
   expect_no_error(er_plot_show_data(plt_continuous))
-  expect_no_error(er_plot_show_data(plt_binary, builder = build_data_jitter, panel = "upper"))
+  expect_no_error(er_plot_show_data(plt_binary, builder = build_data_boxjitter, panel = "upper"))
 })
 
 test_that("er_plot_show_data produces N stratum panels, each with a response colorbar", {
   skip_if_not_installed("erglm")
 
+  # there's no built-in "panel"-layout builder for a continuous response
+  # (see PLAN.md's note on removing `build_data_color()`); this custom
+  # builder recreates its color-encoded-panel behaviour to check that
+  # `.part_data()`/`.polish_labels()`'s per-stratum-panel machinery still
+  # works for a response type with no shipped built-in.
+  custom_color_panel_builder <- er_layout(
+    function(data, config, stratify, exposure, response, strata, style) {
+      dat <- if (stratify) data |> dplyr::filter(.data[[strata$name]] == config$panel) else data
+      list(
+        ggplot2::geom_jitter(
+          data = dat,
+          mapping = ggplot2::aes(x = .data[[exposure$name]], y = 0, color = .data[[response$name]]),
+          height = 0.1
+        )
+      )
+    },
+    layout = "panel"
+  )
+
   mod3 <- erglm::erglm_model(biomarker_change ~ aucss + sex, er_test_data, family = gaussian())
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change, sex) |>
     er_plot_show_model(mod3) |>
-    er_plot_show_data(builder = build_data_color)
+    er_plot_show_data(builder = custom_color_panel_builder)
 
   expect_no_error(er_plot_build(plt))
   built <- er_plot_build(plt)
@@ -224,14 +262,14 @@ test_that("er_plot_build constructs ggplot2 objects", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data(builder = build_data_jitter)
+    er_plot_show_data(builder = build_data_boxjitter)
 
   plt3 <- er_test_data |>
     dplyr::mutate(dose = factor(dose)) |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data(builder = build_data_jitter)  |>
+    er_plot_show_data(builder = build_data_boxjitter)  |>
     er_plot_show_groups(c(treatment, dose))
 
   plt1_built <- er_plot_build(plt1)
@@ -267,14 +305,14 @@ test_that("print method works as expected", {
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data(builder = build_data_jitter)
+    er_plot_show_data(builder = build_data_boxjitter)
 
   plt3 <- er_test_data |>
     dplyr::mutate(dose = factor(dose)) |>
     er_plot(aucss, ae1) |>
     er_plot_show_model(er_test_mod1) |>
     er_plot_show_quantiles()  |>
-    er_plot_show_data(builder = build_data_jitter)  |>
+    er_plot_show_data(builder = build_data_boxjitter)  |>
     er_plot_show_groups(c(treatment, dose))
 
   print_quiet <- purrr::quietly(print.er_plot)

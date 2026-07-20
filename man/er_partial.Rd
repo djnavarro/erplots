@@ -3,10 +3,9 @@
 %   R/er-plot-partials-group.R, R/er-plot-partials-model.R,
 %   R/er-plot-partials-quantile.R, R/er-plot-partials-summary.R,
 %   R/er-plot-partials.R
-\name{build_data_jitter}
-\alias{build_data_jitter}
+\name{build_data_boxjitter}
+\alias{build_data_boxjitter}
 \alias{build_data_overlay}
-\alias{build_data_color}
 \alias{build_group_boxplot}
 \alias{build_group_violin}
 \alias{build_model_ribbonline}
@@ -17,11 +16,9 @@
 \alias{er_partial}
 \title{Partial builders for exposure-response plots}
 \usage{
-build_data_jitter(data, config, stratify, exposure, response, strata, style)
+build_data_boxjitter(data, config, stratify, exposure, response, strata, style)
 
 build_data_overlay(data, config, stratify, exposure, response, strata, style)
-
-build_data_color(data, config, stratify, exposure, response, strata, style)
 
 build_group_boxplot(data, config, stratify, exposure, response, strata, style)
 
@@ -91,9 +88,9 @@ that these objects will be added to a partially-constructed plot
 which, at a minimum, already has the base theme applied. For
 "model", "summary", "quantile", and "overlay", the pieces will be
 added to a plot that already has a coord that sets the axis limits
-(the base plot; see \code{.build_overlay_geoms()}). For the "data" (jitter/
-color panel) and "group" plots, the plot object does not yet
-have a coord. The expectation, however, is that the builder will
+(the base plot; see \code{.build_overlay_geoms()}). For the "data"
+(panel-based, e.g. \code{build_data_boxjitter()}) and "group" plots, the
+plot object does not yet have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That
 is, since all component plots use the exposure variable for the
 x-axis, they should use the values stored in \code{exposure$limits} tp
@@ -169,20 +166,20 @@ singleton or additive" section for the full discussion, including the
 one flagged future exception (an additive \code{model} layer, for
 overlaying two fitted curves).
 
-The \code{data} slot has two mutually exclusive builders, selected by
-response type rather than by name: \code{build_data_jitter()} for a binary
-response (color, when mapped, always means strata) and
-\code{build_data_color()} for a continuous/count response (color always
-means the response value itself). Because \code{build_data_color()}'s color
-aesthetic is already spoken for, \code{config$color_role} (set by
-\code{.part_data()}, consulted by \code{.polish_labels()}/\code{.polish_legends()} in
-\code{R/er-plot-compose.R}) tags which meaning applies -- \code{"strata"} for
-\code{build_data_jitter()}, \code{"response"} for \code{build_data_color()} -- so the
-composition machinery knows whether a builder's legend is the shared
-strata legend or a standalone response colorbar. \code{build_data_overlay()}
-needs no such tag: its color aesthetic (when stratified) is always
+The \code{data} slot's default, \code{build_data_overlay()}, needs no
+\code{color_role} tag: its color aesthetic (when stratified) is always
 strata, since the response is already shown via y-position, so it
-shares the base plot's own strata legend directly. See
-\code{\link[=er_plot_show_data]{er_plot_show_data()}} for the user-facing version of this rule.
+shares the base plot's own strata legend directly. \code{config$color_role}
+(set by \code{.part_data()}, consulted by \code{.polish_labels()}/
+\code{.polish_legends()} in \code{R/er-plot-compose.R}) matters for the
+"panel"-layout family instead, where it's \code{"strata"} for a binary
+response (as used by the built-in \code{build_data_boxjitter()}, whose
+color aesthetic still means strata) or \code{"response"} for a
+continuous/count response, where the color channel is already spoken
+for by the response value itself -- there's no built-in
+"panel"-layout builder for that case (the older \code{build_data_color()}
+was removed once \code{build_data_overlay()} covered its typical use case
+more simply), but a custom builder tagged \code{er_layout(builder, "panel")} can still opt into it; see \code{\link[=er_plot_show_data]{er_plot_show_data()}} for the
+user-facing version of this rule.
 }
 

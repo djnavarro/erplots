@@ -287,6 +287,70 @@ existing tests updated to use `builder =` instead of `style =`, plus new
 tests for the missing-layout error path and for `er_layout()`-tagged
 custom builders.
 
+## Completed: removing `build_data_jitter()`/`build_data_color()`, adding `build_data_boxjitter()`
+
+**Motivation.** With `build_data_overlay()` as the default, a review of
+the two older panel-based data builders found neither still earned its
+keep. `build_data_jitter()` (binary response) jittered points around
+`y = 0` in upper/lower panels -- visually almost identical to what
+`build_data_overlay()` already shows merged into the main panel (jittered
+points at their true 0/1 y-position), just relocated to separate panels;
+no use case was found where the panel version showed something the
+overlay didn't. `build_data_color()` (continuous/count response) was
+weaker still: its continuous color-gradient encoding of the response
+value is a harder read than `build_data_overlay()`'s direct y-position
+encoding, and when stratified it *lost* the shared strata legend
+entirely, falling back to one panel per stratum level -- more panels
+*and* a harder-to-read encoding, with no scenario where it clearly won.
+
+**What was done:**
+- Both builders were deleted from `R/er-plot-partials-data.R`.
+- `build_data_boxjitter()` (binary-response only) was added in their
+  place: reuses `build_data_jitter()`'s upper/lower panel filtering
+  (`response == 1`/`response == 0`) verbatim, but overlays the jittered
+  points on a `geom_boxplot()` of the exposure values, so the panel
+  shows the exposure *distribution* conditional on response -- a
+  genuinely different comparison from anything `build_data_overlay()`
+  shows, not a rehash of it. Follows the model layer's fill (box) /
+  color (jitter) split for strata, so `.polish_labels()`/
+  `.polish_legends()` needed no changes.
+- Mapping `y` to the strata factor directly (rather than
+  `position_dodge()`/`position_jitterdodge()`) was required to make
+  stratified boxes/points land in visually distinct rows:
+  `position_jitterdodge()` dodges along the *discrete* axis, which here
+  is y (`orientation = "y"`), but exposure on x is continuous and (almost)
+  never shares an exact value across rows, so ggplot has nothing to dodge
+  against and only warns ("requires non-overlapping x intervals") without
+  actually separating anything. Using the strata factor as `y` directly
+  (the same trick `build_group_boxplot()` uses via `y = lvl`) sidesteps
+  this entirely -- ggplot places each stratum at its own discrete row for
+  free.
+- No continuous/count replacement was added: `build_data_overlay()`
+  already fully covers that case (raw points at their true y-position),
+  so removing `build_data_color()` leaves no gap. `.part_data()`'s
+  response-type dispatch (panels/`panel_position`/`color_role`) was left
+  in place rather than gutted, since it's still usable by a custom
+  `"panel"`-layout builder -- there's just no built-in one for
+  continuous/count today.
+- Docs (`?er_partial`, `?er_plot_show_data`, `?er_layout`) and
+  `vignettes/articles/{plot,design}.Rmd` were updated throughout to
+  describe `build_data_boxjitter()` in place of the two removed
+  functions, including a rewritten `plot.Rmd` comparison section
+  (binary-only now, since there's no continuous panel builtin to compare
+  against `build_data_overlay()`).
+- Tests referencing the removed builders were updated: binary-response
+  cases now use `build_data_boxjitter()`; continuous/count "panel"-layout
+  regression coverage (which used to exercise `build_data_color()`) now
+  uses small inline custom builders tagged `er_layout(builder, "panel")`,
+  since that's the only way to exercise those code paths without a
+  shipped built-in.
+
+**Status:** done. `devtools::check()` clean (0 errors/warnings/notes),
+full test suite passing. Both updated vignettes were also rendered end
+to end (bare `rmarkdown::render()` and a full `pkgdown::build_site()`)
+to visually confirm the new prose and the binary/stratified comparison
+figures look right and legends dedupe correctly.
+
 ## Other completed fixes
 
 - **Stratified quantile labels visually overlapping.** Two strata's
@@ -306,9 +370,12 @@ custom builders.
   possible today since `er_plot_show_model()` is singleton. Real work,
   comparable to the data layer's stratified-legend handling -- deferred
   until a concrete request exists.
-- **Data layer color scale.** Whether `build_data_color()` should use a
-  deliberately chosen continuous scale (e.g. viridis) instead of
-  ggplot2's default gradient -- see "Open questions" above.
-- **Quantile-binned rug** as a fallback data-layer design, if the
-  single-panel continuous color encoding turns out to be hard to read in
-  practice -- see "Design chosen" above.
+- **Data layer color scale / continuous-response panel design.**
+  `build_data_color()` (and its "should this use a deliberately chosen
+  continuous scale like viridis" open question, and the quantile-binned
+  rug fallback noted under "Design chosen" above) was removed -- see
+  "Completed: removing `build_data_jitter()`/`build_data_color()`,
+  adding `build_data_boxjitter()`" above. If a concrete need for a
+  continuous/count "panel"-layout builder resurfaces, these are the
+  design questions to revisit; `.part_data()`'s response-type dispatch
+  for that case is still in place, just with no built-in consumer today.

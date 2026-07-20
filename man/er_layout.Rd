@@ -24,8 +24,8 @@ belongs to -- \code{"overlay"} (a single call merged into the main panel) or
 (\code{.part_overlay()} vs. \code{.part_data()}) just by inspecting the \code{builder}
 it was given, with no separate \code{style}/\code{layout} argument needed. See
 \code{\link[=er_partial]{er_partial()}}'s "Writing your own builder" section for the full
-contract; all three built-in data builders (\code{\link[=build_data_overlay]{build_data_overlay()}},
-\code{\link[=build_data_jitter]{build_data_jitter()}}, \code{\link[=build_data_color]{build_data_color()}}) already carry this tag.
+contract; both built-in data builders (\code{\link[=build_data_overlay]{build_data_overlay()}},
+\code{\link[=build_data_boxjitter]{build_data_boxjitter()}}) already carry this tag.
 }
 \examples{
 build_data_density <- er_layout(

@@ -18,15 +18,15 @@ a shared color aesthetic; for an "overlay"-layout builder it always
 means a shared color aesthetic, for any response type.}
 
 \item{builder}{Function drawing the data layer -- defaults to
-\code{\link[=build_data_overlay]{build_data_overlay()}}. \code{\link[=build_data_jitter]{build_data_jitter()}} (binary response) and
-\code{\link[=build_data_color]{build_data_color()}} (continuous/count response) are the other
-built-in options; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature and tagged
-with \code{\link[=er_layout]{er_layout()}} can be supplied instead -- see \code{\link[=er_partial]{er_partial()}} for
-the full contract, e.g. a 2D density in the main panel, or per-panel
-histograms.}
+\code{\link[=build_data_overlay]{build_data_overlay()}}. \code{\link[=build_data_boxjitter]{build_data_boxjitter()}} (binary response
+only: a boxplot + jittered points per panel) is the other built-in
+option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature and tagged with
+\code{\link[=er_layout]{er_layout()}} can be supplied instead -- see \code{\link[=er_partial]{er_partial()}} for the
+full contract, e.g. a 2D density in the main panel, a continuous/
+count response's color-encoded panel, or per-panel histograms.}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
-default). Only meaningful for \code{\link[=build_data_jitter]{build_data_jitter()}} on a binary
+default). Only meaningful for \code{\link[=build_data_boxjitter]{build_data_boxjitter()}} on a binary
 response; must be \code{"both"} for an "overlay"-layout builder (no
 upper/lower partition exists) or for a continuous/count response
 under a "panel"-layout builder (there's no upper/lower partition to
@@ -41,18 +41,17 @@ continuous/count responses, or a scatter with a small vertical jitter
 for a binary response (whose y-values are exactly 0/1 and would
 otherwise overplot into two solid lines). This works uniformly across
 all three response types, with no response-type dispatch on which
-builder to use. \code{build_data_jitter()}/\code{build_data_color()} instead use
-the older, panel-based design, which \emph{does} dispatch on \code{response_type}
-(set in \code{\link[=er_plot]{er_plot()}}):
-\itemize{
-\item \code{build_data_jitter()} (binary response) -- responders (\code{response == 1}) are jittered in an upper panel and non-responders (\code{response == 0}) in a lower panel.
-\item \code{build_data_color()} (continuous/count response) -- a single panel,
-with points colored continuously by the response value in place of
-the upper/lower partition (there's no binary flag to split on).
-\code{panel} must be \code{"both"} (the default) for these response types --
-passing \code{"upper"}/\code{"lower"} errors, since that partition is
-binary-specific.
-}
+builder to use. \code{build_data_boxjitter()} instead uses the older,
+panel-based design, and is binary-response-only: responders (\code{response == 1}) get a boxplot + jittered points in an upper panel and
+non-responders (\code{response == 0}) get the same in a lower panel, so the
+panel shows the exposure \emph{distribution} conditional on response, not
+just raw points. There is no built-in "panel"-layout builder for a
+continuous/count response -- the older \code{build_data_color()} (a single
+panel with points colored continuously by the response value) was
+removed once \code{build_data_overlay()} turned out to cover its typical
+use case more simply; \code{panel} must be \code{"both"} (the default) for these
+response types regardless of builder, since there's no upper/lower
+partition to select from.
 }
 \details{
 Every data-layer builder declares which of these two \emph{structural}
@@ -62,9 +61,9 @@ below the base plot) -- which \code{er_plot_show_data()} reads off \code{builder
 to decide how to assemble the layer, rather than taking a separate
 argument for it. This makes the pairing structural rather than
 incidental: \code{build_data_overlay()} can never be routed into upper/lower
-panels, and \code{build_data_jitter()}/\code{build_data_color()} can never be
-merged into the main panel. See \code{\link[=er_layout]{er_layout()}} and \code{\link[=er_partial]{er_partial()}} for
-how to tag a custom builder the same way.
+panels, and \code{build_data_boxjitter()} can never be merged into the main
+panel. See \code{\link[=er_layout]{er_layout()}} and \code{\link[=er_partial]{er_partial()}} for how to tag a custom
+builder the same way.
 
 This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
 singleton or additive" -- calling it again (with any builder) fully
@@ -100,12 +99,13 @@ erglm_data |>
   er_plot_show_data() |>
   plot()
 
-# older panel-based design: a single color-encoded panel below the
-# base plot, instead of an overlay in the main panel
+# older panel-based design, binary-response only: a boxplot + jittered
+# points per panel (responders above, non-responders below), instead
+# of an overlay in the main panel
 erglm_data |>
-  er_plot(aucss, biomarker_change) |>
-  er_plot_show_model(mod3) |>
-  er_plot_show_data(builder = build_data_color) |>
+  er_plot(aucss, ae2) |>
+  er_plot_show_model(mod2) |>
+  er_plot_show_data(builder = build_data_boxjitter) |>
   plot()
 
 # plug in a 2D density in the main panel instead of a scatter; tagging

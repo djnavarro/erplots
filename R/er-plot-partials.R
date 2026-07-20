@@ -27,9 +27,9 @@
 #' which, at a minimum, already has the base theme applied. For 
 #' "model", "summary", "quantile", and "overlay", the pieces will be
 #' added to a plot that already has a coord that sets the axis limits
-#' (the base plot; see `.build_overlay_geoms()`). For the "data" (jitter/
-#' color panel) and "group" plots, the plot object does not yet
-#' have a coord. The expectation, however, is that the builder will
+#' (the base plot; see `.build_overlay_geoms()`). For the "data"
+#' (panel-based, e.g. `build_data_boxjitter()`) and "group" plots, the
+#' plot object does not yet have a coord. The expectation, however, is that the builder will
 #' supply an x-axis limit that is consistent with the base plot. That
 #' is, since all component plots use the exposure variable for the
 #' x-axis, they should use the values stored in `exposure$limits` tp
@@ -88,21 +88,22 @@
 #' one flagged future exception (an additive `model` layer, for
 #' overlaying two fitted curves).
 #'
-#' The `data` slot has two mutually exclusive builders, selected by
-#' response type rather than by name: `build_data_jitter()` for a binary
-#' response (color, when mapped, always means strata) and
-#' `build_data_color()` for a continuous/count response (color always
-#' means the response value itself). Because `build_data_color()`'s color
-#' aesthetic is already spoken for, `config$color_role` (set by
-#' `.part_data()`, consulted by `.polish_labels()`/`.polish_legends()` in
-#' `R/er-plot-compose.R`) tags which meaning applies -- `"strata"` for
-#' `build_data_jitter()`, `"response"` for `build_data_color()` -- so the
-#' composition machinery knows whether a builder's legend is the shared
-#' strata legend or a standalone response colorbar. `build_data_overlay()`
-#' needs no such tag: its color aesthetic (when stratified) is always
+#' The `data` slot's default, `build_data_overlay()`, needs no
+#' `color_role` tag: its color aesthetic (when stratified) is always
 #' strata, since the response is already shown via y-position, so it
-#' shares the base plot's own strata legend directly. See
-#' [er_plot_show_data()] for the user-facing version of this rule.
+#' shares the base plot's own strata legend directly. `config$color_role`
+#' (set by `.part_data()`, consulted by `.polish_labels()`/
+#' `.polish_legends()` in `R/er-plot-compose.R`) matters for the
+#' "panel"-layout family instead, where it's `"strata"` for a binary
+#' response (as used by the built-in `build_data_boxjitter()`, whose
+#' color aesthetic still means strata) or `"response"` for a
+#' continuous/count response, where the color channel is already spoken
+#' for by the response value itself -- there's no built-in
+#' "panel"-layout builder for that case (the older `build_data_color()`
+#' was removed once `build_data_overlay()` covered its typical use case
+#' more simply), but a custom builder tagged `er_layout(builder,
+#' "panel")` can still opt into it; see [er_plot_show_data()] for the
+#' user-facing version of this rule.
 #' 
 #' @name er_partial
 #' 
