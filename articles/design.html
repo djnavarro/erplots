@@ -158,9 +158,9 @@ annotation</td>
 <td>Data</td>
 <td>[er_plot_show_data()]</td>
 <td>Raw observations, by default overlaid on the model panel at their
-true (exposure, response) coordinates ([build_data_overlay()]); or, with
-[build_data_jitter()]/[build_data_color()], an older panel-based
-design</td>
+true (exposure, response) coordinates ([build_data_overlay()]); or, for
+a binary response, [build_data_boxjitter()]’s older panel-based boxplot
++ jitter design</td>
 <td>Yes</td>
 </tr>
 <tr class="even">
@@ -243,18 +243,18 @@ strata – the response is already shown via y-position, so color/fill is
 free for stratification like every other layer, and the overlay shares
 the base plot’s own strata legend with the model/quantile layers.</li>
 <li>
-<code><a href="../reference/er_partial.html">build_data_jitter()</a></code>/<code><a href="../reference/er_partial.html">build_data_color()</a></code>
-(the older, panel-based design, <code>"panel"</code>-layout): for a
-<strong>binary</strong> response, <code><a href="../reference/er_partial.html">build_data_jitter()</a></code>
-behaves the same way – color means strata, shared legend. For a
-<strong>continuous/count</strong> response,
-<code><a href="../reference/er_partial.html">build_data_color()</a></code>’s color aesthetic is already spoken for
-by the response value itself, so stratification falls back to one panel
-per stratum level (each colored by the response) instead of a shared
-legend. This is the concrete instance of “a layer’s own encoding takes
-precedence” that motivated the general rule – see <code>PLAN.md</code>’s
-“Continuous-response data strip” section for the design history, and
-[er_plot_show_data()] for the full breakdown.</li>
+<code><a href="../reference/er_partial.html">build_data_boxjitter()</a></code> (the older, panel-based design,
+<code>"panel"</code>-layout, binary-response only): behaves the same way
+as overlay – color/fill means strata, shared legend. There is no
+built-in <code>"panel"</code>-layout builder for a continuous/count
+response today; if one is written, its color aesthetic would typically
+already be spoken for by the response value itself (as the removed
+<code>build_data_color()</code> builder’s was), in which case
+stratification should fall back to one panel per stratum level instead
+of a shared legend – the concrete instance of “a layer’s own encoding
+takes precedence” that motivated the general rule. See
+<code>PLAN.md</code>’s “Continuous-response data strip” section for that
+design history, and [er_plot_show_data()] for the full breakdown.</li>
 </ul>
 <p>A <code>config$color_role</code> tag (<code>"strata"</code> or
 <code>"response"</code>, set by <code>.part_data()</code>) records which
@@ -313,13 +313,11 @@ plots raw observations – so <code>response_type</code> instead changes
 <em>how</em> it’s drawn: <code><a href="../reference/er_partial.html">build_data_overlay()</a></code> (the default)
 needs no dispatch (a plain scatter, or a small vertical jitter for a
 binary response’s exactly-0/1 y-values);
-<code><a href="../reference/er_partial.html">build_data_jitter()</a></code>/<code><a href="../reference/er_partial.html">build_data_color()</a></code>
-dispatch on it directly, with <code><a href="../reference/er_partial.html">build_data_jitter()</a></code> for a
-<code>"binary"</code> response’s upper/lower panel split and
-<code><a href="../reference/er_partial.html">build_data_color()</a></code> for a
-<code>"continuous"</code>/<code>"count"</code> response’s single
-response-colored panel (or one per stratum) – see
-[er_plot_show_data()].</p>
+<code><a href="../reference/er_partial.html">build_data_boxjitter()</a></code> is binary-response only, and uses
+<code>response_type</code> only insofar as
+<code><a href="../reference/er_plot_show_data.html">er_plot_show_data()</a></code> guards against using it on a
+continuous/count response at all (there’s no upper/lower partition to
+split on) – see [er_plot_show_data()].</p>
 </div>
 <div class="section level2">
 <h2 id="extending-erplots-writing-your-own-builder">Extending erplots: writing your own builder<a class="anchor" aria-label="anchor" href="#extending-erplots-writing-your-own-builder"></a>

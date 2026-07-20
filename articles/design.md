@@ -67,7 +67,7 @@ There are currently four layers, each documented on its own help topic:
 |----|----|----|----|
 | Model | \[er_plot_show_model()\] | Fitted curve/ribbon (or spaghetti) plus an optional summary annotation | No |
 | Quantile | \[er_plot_show_quantiles()\] | Exposure-quantile-binned response summary (rate/mean + CI) | Yes |
-| Data | \[er_plot_show_data()\] | Raw observations, by default overlaid on the model panel at their true (exposure, response) coordinates (\[build_data_overlay()\]); or, with \[build_data_jitter()\]/\[build_data_color()\], an older panel-based design | Yes |
+| Data | \[er_plot_show_data()\] | Raw observations, by default overlaid on the model panel at their true (exposure, response) coordinates (\[build_data_overlay()\]); or, for a binary response, \[build_data_boxjitter()\]’s older panel-based boxplot + jitter design | Yes |
 | Group | \[er_plot_show_groups()\] | Exposure distribution, boxplot/violin, split by a grouping variable | No |
 
 ## Layers are either singleton or additive
@@ -150,20 +150,18 @@ to:
   color/fill is free for stratification like every other layer, and the
   overlay shares the base plot’s own strata legend with the
   model/quantile layers.
-- [`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)/[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)
-  (the older, panel-based design, `"panel"`-layout): for a **binary**
-  response,
-  [`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
-  behaves the same way – color means strata, shared legend. For a
-  **continuous/count** response,
-  [`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
-  color aesthetic is already spoken for by the response value itself, so
-  stratification falls back to one panel per stratum level (each colored
-  by the response) instead of a shared legend. This is the concrete
-  instance of “a layer’s own encoding takes precedence” that motivated
-  the general rule – see `PLAN.md`’s “Continuous-response data strip”
-  section for the design history, and \[er_plot_show_data()\] for the
-  full breakdown.
+- [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  (the older, panel-based design, `"panel"`-layout, binary-response
+  only): behaves the same way as overlay – color/fill means strata,
+  shared legend. There is no built-in `"panel"`-layout builder for a
+  continuous/count response today; if one is written, its color
+  aesthetic would typically already be spoken for by the response value
+  itself (as the removed `build_data_color()` builder’s was), in which
+  case stratification should fall back to one panel per stratum level
+  instead of a shared legend – the concrete instance of “a layer’s own
+  encoding takes precedence” that motivated the general rule. See
+  `PLAN.md`’s “Continuous-response data strip” section for that design
+  history, and \[er_plot_show_data()\] for the full breakdown.
 
 A `config$color_role` tag (`"strata"` or `"response"`, set by
 `.part_data()`) records which meaning applies for a given data-layer
@@ -205,13 +203,11 @@ drawn:
 [`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
 (the default) needs no dispatch (a plain scatter, or a small vertical
 jitter for a binary response’s exactly-0/1 y-values);
-[`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)/[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)
-dispatch on it directly, with
-[`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
-for a `"binary"` response’s upper/lower panel split and
-[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)
-for a `"continuous"`/`"count"` response’s single response-colored panel
-(or one per stratum) – see \[er_plot_show_data()\].
+[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+is binary-response only, and uses `response_type` only insofar as
+[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+guards against using it on a continuous/count response at all (there’s
+no upper/lower partition to split on) – see \[er_plot_show_data()\].
 
 ## Extending erplots: writing your own builder
 

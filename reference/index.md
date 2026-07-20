@@ -30,9 +30,8 @@ Build exposure-response plots from any model that implements
 
   Build and render an `er_plot` object
 
-- [`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+- [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
-  [`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_group_boxplot()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_group_violin()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md)

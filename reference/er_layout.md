@@ -8,11 +8,10 @@ can route to the right internal assembly path (`.part_overlay()` vs.
 `.part_data()`) just by inspecting the `builder` it was given, with no
 separate `style`/`layout` argument needed. See
 [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)'s
-"Writing your own builder" section for the full contract; all three
-built-in data builders
+"Writing your own builder" section for the full contract; both built-in
+data builders
 ([`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md),
-[`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md),
-[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md))
+[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md))
 already carry this tag.
 
 ## Usage

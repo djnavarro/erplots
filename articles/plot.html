@@ -312,23 +312,26 @@ special-casing needed:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot_files/figure-html/data-overlay-continuous-1.png" class="r-plt" alt="" width="700"></p>
 <div class="section level3">
-<h3 id="build_data_overlay-vs--build_data_jitterbuild_data_color">
+<h3 id="build_data_overlay-vs--build_data_boxjitter">
 <code>build_data_overlay()</code>
-vs. <code>build_data_jitter()</code>/<code>build_data_color()</code><a class="anchor" aria-label="anchor" href="#build_data_overlay-vs--build_data_jitterbuild_data_color"></a>
+vs. <code>build_data_boxjitter()</code><a class="anchor" aria-label="anchor" href="#build_data_overlay-vs--build_data_boxjitter"></a>
 </h3>
-<p><code><a href="../reference/er_partial.html">build_data_jitter()</a></code> (binary response) and
-<code><a href="../reference/er_partial.html">build_data_color()</a></code> (continuous/count response) are the
-older, panel-based design: for a binary response it splits
-responders/non-responders into separate jittered panels above/below the
-main plot; for a continuous/count response it draws a single panel (or
-one per stratum level) below the main plot, with points colored
-continuously by the response value instead of split into panels. Unlike
-overlay, its color aesthetic isn’t available for stratification on a
-continuous/count response, since the response value already claims it.
-Each builder declares which of these two structural families it belongs
-to via [er_layout()], which is what <code><a href="../reference/er_plot_show_data.html">er_plot_show_data()</a></code>
-uses to decide whether to merge it into the main panel or stack it in
-panels below.</p>
+<p><code><a href="../reference/er_partial.html">build_data_boxjitter()</a></code> is the older, panel-based design,
+and is binary-response only: it splits responders/non-responders into
+separate panels above/below the main plot, each showing a boxplot of the
+exposure values with the raw jittered points layered on top – so the
+panel shows the exposure <em>distribution</em> conditional on response,
+not just individual points. There is no built-in panel-based builder for
+a continuous/count response; <code><a href="../reference/er_partial.html">build_data_overlay()</a></code> (raw
+points at their true <code>(exposure, response)</code> coordinates)
+covers that case, and a custom <code>"panel"</code>-layout builder
+(e.g. a single color-encoded panel) remains possible via [er_layout()]
+if a project needs one – see
+<code>vignettes/articles/design.Rmd</code>’s “Extending erplots”
+section. Each builder declares which of the two structural families it
+belongs to via [er_layout()], which is what
+<code><a href="../reference/er_plot_show_data.html">er_plot_show_data()</a></code> uses to decide whether to merge it into
+the main panel or stack it in panels below.</p>
 <p>Building both side by side (via patchwork’s <code>|</code> operator)
 makes the difference concrete for a binary response:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
@@ -339,53 +342,34 @@ makes the difference concrete for a binary response:</p>
 <span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_build.html">er_plot_build</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">p_jitter</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
+<span><span class="va">p_boxjitter</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_data_jitter</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_data_boxjitter</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_build.html">er_plot_build</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">p_overlay</span><span class="op">$</span><span class="va">output</span> <span class="op">|</span> <span class="va">p_jitter</span><span class="op">$</span><span class="va">output</span></span></code></pre></div>
+<span><span class="va">p_overlay</span><span class="op">$</span><span class="va">output</span> <span class="op">|</span> <span class="va">p_boxjitter</span><span class="op">$</span><span class="va">output</span></span></code></pre></div>
 <p><img src="plot_files/figure-html/data-compare-binary-1.png" class="r-plt" alt="" width="960"></p>
-<p>and again for a continuous response, where
-<code><a href="../reference/er_partial.html">build_data_color()</a></code> falls back to a single response-colored
-panel below the model curve rather than an overlay on it:</p>
+<p>Stratification looks the same for both: color/fill always means
+strata for <code><a href="../reference/er_partial.html">build_data_boxjitter()</a></code> on a binary response,
+sharing the model curve’s own legend, the same way
+<code><a href="../reference/er_partial.html">build_data_overlay()</a></code>’s color aesthetic does for any
+response type:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p_overlay_cont</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_build.html">er_plot_build</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">p_jitter_cont</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_data_color</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_build.html">er_plot_build</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">p_overlay_cont</span><span class="op">$</span><span class="va">output</span> <span class="op">|</span> <span class="va">p_jitter_cont</span><span class="op">$</span><span class="va">output</span></span></code></pre></div>
-<p><img src="plot_files/figure-html/data-compare-continuous-1.png" class="r-plt" alt="" width="960"></p>
-<p>Stratification also looks different between the two: overlay’s color
-aesthetic always means strata and shares the model curve’s own legend,
-regardless of response type, whereas jitter/color’s color aesthetic
-means strata only for a binary response (for continuous/count it falls
-back to one titled panel per stratum level, each with its own response
-colorbar):</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_overlay_strat</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_build.html">er_plot_build</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">p_jitter_strat</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
+<span><span class="va">p_boxjitter_strat</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_data_jitter</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_data_boxjitter</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_build.html">er_plot_build</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">p_overlay_strat</span><span class="op">$</span><span class="va">output</span> <span class="op">|</span> <span class="va">p_jitter_strat</span><span class="op">$</span><span class="va">output</span></span></code></pre></div>
+<span><span class="va">p_overlay_strat</span><span class="op">$</span><span class="va">output</span> <span class="op">|</span> <span class="va">p_boxjitter_strat</span><span class="op">$</span><span class="va">output</span></span></code></pre></div>
 <p><img src="plot_files/figure-html/data-compare-stratified-1.png" class="r-plt" alt="" width="960"></p>
 </div>
 </div>
@@ -393,7 +377,7 @@ colorbar):</p>
 <h2 id="group-component">Group component<a class="anchor" aria-label="anchor" href="#group-component"></a>
 </h2>
 <p>Multiple grouping variables are allowed:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -402,7 +386,7 @@ colorbar):</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot_files/figure-html/group-1-1.png" class="r-plt" alt="" width="700"></p>
 <p>Stratification propagates to the group component:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -412,7 +396,7 @@ colorbar):</p>
 <p><img src="plot_files/figure-html/group-2-1.png" class="r-plt" alt="" width="700"></p>
 <p>The default builder is <code><a href="../reference/er_partial.html">build_group_boxplot()</a></code>, but you
 can also use violin plots with <code><a href="../reference/er_partial.html">build_group_violin()</a></code>:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
