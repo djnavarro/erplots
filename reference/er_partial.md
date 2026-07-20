@@ -7,6 +7,8 @@ Partial builders for exposure-response plots
 ``` r
 build_data_jitter(data, config, stratify, exposure, response, strata, style)
 
+build_data_color(data, config, stratify, exposure, response, strata, style)
+
 build_group_boxplot(data, config, stratify, exposure, response, strata, style)
 
 build_group_violin(data, config, stratify, exposure, response, strata, style)

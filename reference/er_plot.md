@@ -94,9 +94,12 @@ function's `keep_strata` argument controls whether *that* layer actually
 uses the stratification (it defaults to `TRUE` whenever `stratify_by`
 was set, `FALSE` otherwise).
 [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
-is a partial exception to the "always color/fill" rule – see its own
-documentation and `PLAN.md` for why a continuous-response variant of
-that layer would need to fall back to faceting instead.
+is a partial exception to the "always color/fill" rule for a
+continuous/count response: its color aesthetic is already spoken for by
+the response value itself, so stratification falls back to one panel per
+stratum level instead of a shared legend – see its own documentation and
+`PLAN.md` for the general "a layer's own encoding takes precedence" rule
+this follows.
 
 ## Response type
 

@@ -298,10 +298,16 @@ erglm_data |>
   er_plot(aucss, biomarker_change) |> 
   er_plot_show_model(mod_gaussian) |> 
   er_plot_show_data()
-#> Error in `.abort_continuous_unsupported()`:
-#> ! `er_plot_show_data()` does not support continuous responses.
-#> ℹ Only binary (0/1, or logical) responses are currently supported by this component.
-#> ℹ No continuous-response variant of this component is currently planned; see PLAN.md.
+#> <er_plot>
+#>   plot variables:
+#>     - exposure:        aucss
+#>     - response:        biomarker_change
+#>     - stratification:  <none>
+#>   plot components:
+#>     - model:           erglm_model/glm/lm
+#>     - data:            jitter both
+#>   plots built: <none>
+#>   output built: no
 ```
 
 ## Group component

@@ -144,10 +144,13 @@ discrete variable used to split layers by color/fill, with one shared,
 deduplicated legend across the whole composed plot. Each layer
 function's <code>keep_strata</code> argument controls whether <em>that</em> layer
 actually uses the stratification (it defaults to <code>TRUE</code> whenever
-<code>stratify_by</code> was set, <code>FALSE</code> otherwise). <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code>
-is a partial exception to the "always color/fill" rule – see its own
-documentation and <code>PLAN.md</code> for why a continuous-response variant of
-that layer would need to fall back to faceting instead.</p>
+<code>stratify_by</code> was set, <code>FALSE</code> otherwise). <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> is a
+partial exception to the "always color/fill" rule for a
+continuous/count response: its color aesthetic is already spoken for
+by the response value itself, so stratification falls back to one
+panel per stratum level instead of a shared legend – see its own
+documentation and <code>PLAN.md</code> for the general "a layer's own encoding
+takes precedence" rule this follows.</p>
     </div>
     <div class="section level2">
     <h2 id="response-type">Response type<a class="anchor" aria-label="anchor" href="#response-type"></a></h2>
