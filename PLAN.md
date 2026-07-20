@@ -384,13 +384,50 @@ criteria are meant to be concrete enough to check off, not aspirational.
 Stages 0 and 5 first (foundation + guard rails, low risk, unblock safe
 iteration), then 1 → 2 → 3 → 4 in order, then 6 throughout/at the end as
 each stage's tests/docs land alongside it rather than as a single final
-pass. Stages 0-5 are now all done -- the response-type generalisation
-work is complete for its originally-scoped components (quantiles, VPC,
-and a documented/guarded omission for the data strip). Only Stage 6
-(tests/vignettes/docs polish) remains, plus the "other known issues"
-below.
+pass. Stages 0-6 are now all done, and design decision (4)'s exact-
+Poisson-CI fast-follow has also landed -- the response-type
+generalisation work originally scoped here (quantiles, VPC, a
+documented/guarded omission for the data strip, plus the count-response
+fast-follow) is complete. `vignettes/articles/plot.Rmd` was rendered
+end-to-end (`rmarkdown::render()`, after `devtools::install()`ing the
+updated source) and its new/changed sections (continuous quantiles/VPC,
+default vs. `response_type = "count"` quantiles, the datastrip error
+demo) were spot-checked visually; all render and look correct. One
+minor, non-blocking observation from that check: for `erglm_data`'s
+`ae_count ~ aucss` example, none of the default (t-interval) path's
+`ci_lower` values actually go negative, so the vignette's two
+count-response plots (`continuous-3` vs. `count-1`) look nearly
+identical -- the claimed advantage of `response_type = "count"` (never
+producing a negative lower bound) is true in general (and covered by
+`test-utils-helpers.R`'s `poisson_interval()` unit tests) but isn't
+concretely visible in this particular rendering. See "Other known
+issues" below. Remaining open work is limited to that item and the
+stratified-label-overlap item below; there is no other scoped work left
+in this plan.
 
 ## Other known issues / follow-ups
+
+### Vignette's count-response example doesn't visually demonstrate the exact-Poisson-interval advantage
+
+`vignettes/articles/plot.Rmd`'s "Continuous responses" section shows
+`ae_count ~ aucss` quantile plots under both the default (auto-detected
+`"continuous"`, t-interval) and explicit `response_type = "count"`
+(exact Poisson interval) paths, with text claiming the latter "never
+produces a negative lower bound -- useful for low-count bins, where the
+t-interval approximation can." For `erglm_data`'s actual bin means, none
+of the t-interval lower bounds happen to go negative, so the two plots
+render nearly identically and the claimed advantage, while true and
+unit-tested (see `poisson_interval()`'s tests in
+`test-utils-helpers.R`), isn't visible in this specific rendering.
+
+Possible fixes, not yet scoped: pick (or synthesize) an example with a
+genuinely low-count bin where the t-interval lower bound does go
+negative, so the two plots visibly differ; or soften the vignette's
+prose to note the difference is usually subtle for `erglm_data`
+specifically and point readers to the unit tests for a concrete
+negative-bound example instead. Low priority -- the underlying
+implementation and its test coverage are already correct; this is a
+vignette clarity nit, not a code bug.
 
 ### Stratified quantile labels can visually overlap
 
