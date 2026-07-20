@@ -12,11 +12,18 @@
 #' @param sim Simulated data, with the same `exposure`/`response`/`group_by`
 #'   columns as `data`, plus a `sim_id` column identifying each replicate
 #' @param exposure Exposure variable (one variable, unquoted)
-#' @param response Response variable (one variable, unquoted). Must
-#'   currently be binary (0/1, or logical); continuous responses are not
-#'   yet supported and raise an error (see `PLAN.md`)
+#' @param response Response variable (one variable, unquoted). May be
+#'   binary (0/1, or logical) or continuous; see `response_type`
 #' @param group_by Variable (unquoted) to stratify predictions
 #' @param conf_level Confidence level
+#' @param response_type One of `"auto"` (default), `"binary"`, or
+#'   `"continuous"`. Governs how the observed-side summary is computed:
+#'   response *rate* with a Clopper-Pearson CI for `"binary"`, bin *mean*
+#'   with a t-interval for `"continuous"` (see [t_interval()]). `"auto"`
+#'   detects from the observed `response` column (entirely in `{0, 1}`,
+#'   or logical, is treated as binary; see [er_plot()]'s
+#'   `response_type` for the same heuristic). Count responses are
+#'   currently treated as continuous, an approximation noted in `PLAN.md`.
 #'
 #' @returns A ggplot2 object
 #'
@@ -27,18 +34,25 @@
 #' sim <- erglm_vpc_sim(mod)
 #' er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
 #' er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = sex)
+#'
+#' mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+#' sim_gaussian <- erglm_vpc_sim(mod_gaussian)
+#' er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
 #' }
 #'
 #' @export
 #' 
-er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.95) {
+er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.95,
+                         response_type = c("auto", "binary", "continuous")) {
+
+  response_type <- match.arg(response_type)
 
   exp_var <- rlang::as_name(rlang::enquo(exposure))
   rsp_var <- rlang::as_name(rlang::enquo(response))
   grp_var <- rlang::as_name(rlang::enquo(group_by))
 
-  if (identical(.detect_response_type(data[[rsp_var]]), "continuous")) {
-    .abort_continuous_unsupported("er_vpc_plot")
+  if (response_type == "auto") {
+    response_type <- .detect_response_type(data[[rsp_var]])
   }
 
   ll <- list()
@@ -74,19 +88,33 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
     grp_var <- ".quantile"
   }
 
-  percent <- scales::label_percent(accuracy = 1)
-  smm_obs <- dat |>
-    dplyr::filter(Source == "Observed") |> 
-    dplyr::summarise(
-      n1 = sum(.data[[rsp_var]] == 1, na.rm = TRUE),
-      n0 = sum(.data[[rsp_var]] == 0, na.rm = TRUE),
-      y_mid = mean(.data[[rsp_var]], na.rm = TRUE),
-      y_mid_lbl = percent(n1 / (n0 + n1)),
-      ci_lower = clopper_pearson(n1, n0 + n1, conf_level)["lower"], 
-      ci_upper = clopper_pearson(n1, n0 + n1, conf_level)["upper"], 
-      .by = c("Source", dplyr::all_of(grp_var))
-    ) |> 
-    dplyr::select(-n1, -n0)
+  # response-type-dispatched label formatter and observed-side summary --
+  # mirrors .part_quantile()'s binary/continuous dispatch (PLAN.md Stage 1)
+  if (response_type == "binary") {
+    format_y_mid <- scales::label_percent(accuracy = 1)
+    smm_obs <- dat |>
+      dplyr::filter(Source == "Observed") |> 
+      dplyr::summarise(
+        n1 = sum(.data[[rsp_var]] == 1, na.rm = TRUE),
+        n0 = sum(.data[[rsp_var]] == 0, na.rm = TRUE),
+        y_mid = n1 / (n0 + n1),
+        ci_lower = clopper_pearson(n1, n0 + n1, conf_level)["lower"], 
+        ci_upper = clopper_pearson(n1, n0 + n1, conf_level)["upper"], 
+        .by = c("Source", dplyr::all_of(grp_var))
+      ) |> 
+      dplyr::select(-n1, -n0)
+  } else {
+    format_y_mid <- scales::label_number(accuracy = 0.01)
+    smm_obs <- dat |>
+      dplyr::filter(Source == "Observed") |> 
+      dplyr::summarise(
+        y_mid = mean(.data[[rsp_var]], na.rm = TRUE),
+        ci_lower = t_interval(.data[[rsp_var]], conf_level)["lower"], 
+        ci_upper = t_interval(.data[[rsp_var]], conf_level)["upper"], 
+        .by = c("Source", dplyr::all_of(grp_var))
+      )
+  }
+  smm_obs$y_mid_lbl <- format_y_mid(smm_obs$y_mid)
 
   alpha <- (1 - conf_level)/2
   smm_sim <- dat |> 
@@ -97,11 +125,11 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
     ) |> 
     dplyr::summarise(
       y_mid = mean(y, na.rm = TRUE),
-      y_mid_lbl = percent(y_mid),
       ci_lower = stats::quantile(y, probs = alpha, na.rm = TRUE), 
       ci_upper = stats::quantile(y, probs = 1 - alpha, na.rm = TRUE), 
       .by = c("Source", dplyr::all_of(grp_var))
     )
+  smm_sim$y_mid_lbl <- format_y_mid(smm_sim$y_mid)
 
   smm <- dplyr::bind_rows(smm_obs, smm_sim)
   attr(smm[["y_mid"]], "label") <- ll[[rsp_var]]

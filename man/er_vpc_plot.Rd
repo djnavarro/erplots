@@ -4,7 +4,15 @@
 \alias{er_vpc_plot}
 \title{Visual predictive check plot for an exposure-response model}
 \usage{
-er_vpc_plot(data, sim, exposure, response, group_by, conf_level = 0.95)
+er_vpc_plot(
+  data,
+  sim,
+  exposure,
+  response,
+  group_by,
+  conf_level = 0.95,
+  response_type = c("auto", "binary", "continuous")
+)
 }
 \arguments{
 \item{data}{Observed data}
@@ -14,13 +22,21 @@ columns as \code{data}, plus a \code{sim_id} column identifying each replicate}
 
 \item{exposure}{Exposure variable (one variable, unquoted)}
 
-\item{response}{Response variable (one variable, unquoted). Must
-currently be binary (0/1, or logical); continuous responses are not
-yet supported and raise an error (see \code{PLAN.md})}
+\item{response}{Response variable (one variable, unquoted). May be
+binary (0/1, or logical) or continuous; see \code{response_type}}
 
 \item{group_by}{Variable (unquoted) to stratify predictions}
 
 \item{conf_level}{Confidence level}
+
+\item{response_type}{One of \code{"auto"} (default), \code{"binary"}, or
+\code{"continuous"}. Governs how the observed-side summary is computed:
+response \emph{rate} with a Clopper-Pearson CI for \code{"binary"}, bin \emph{mean}
+with a t-interval for \code{"continuous"} (see \code{\link[=t_interval]{t_interval()}}). \code{"auto"}
+detects from the observed \code{response} column (entirely in \verb{\{0, 1\}},
+or logical, is treated as binary; see \code{\link[=er_plot]{er_plot()}}'s
+\code{response_type} for the same heuristic). Count responses are
+currently treated as continuous, an approximation noted in \code{PLAN.md}.}
 }
 \value{
 A ggplot2 object
@@ -40,6 +56,10 @@ mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 sim <- erglm_vpc_sim(mod)
 er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
 er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = sex)
+
+mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+sim_gaussian <- erglm_vpc_sim(mod_gaussian)
+er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
 }
 
 }

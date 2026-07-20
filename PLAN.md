@@ -210,22 +210,31 @@ criteria are meant to be concrete enough to check off, not aspirational.
   `n1`/`n0`) and manually (values in a fresh R session for
   `biomarker_change ~ aucss`).
 
-**Stage 2 -- `er_vpc_plot()`**
-- Apply the same binary/continuous dispatch to `smm_obs` (currently
-  `n1`/`n0` + `clopper_pearson()`) using the Stage 1 helpers, so the two
-  call sites share one implementation rather than duplicating the CI
-  logic. `smm_sim`'s simulation-quantile CI already generalises for free
-  (it's just `mean()`/`quantile()` over simulated draws, no binary
-  assumption).
-- `er_vpc_plot()` currently has no `response_type` input of its own (it's
-  a standalone function, not built on an `er_plot` object) -- add the same
-  `response_type = "auto"` argument with the same detection heuristic,
-  applied to the observed `response` column.
-- Files: `R/er-vpc.R`. Tests: extend `test-er-vpc.R` using
-  `erglm_vpc_sim()` on a gaussian/Gamma model.
+**Stage 2 -- `er_vpc_plot()` [done]**
+- `er_vpc_plot()` now takes a `response_type = c("auto", "binary",
+  "continuous")` argument (same heuristic as `er_plot()`, applied to the
+  observed `response` column since there's no `er_plot` object to read
+  a resolved type from). `smm_obs` dispatches on it: `"binary"` keeps the
+  original `n1`/`n0` + `clopper_pearson()` logic; `"continuous"` computes
+  `mean()` + `t_interval()`, reusing the Stage 1 helper directly (no new
+  CI code needed). `smm_sim`'s simulation-quantile CI needed no changes,
+  as expected -- it's just `mean()`/`quantile()` over simulated draws.
+- The `y_mid_lbl` formatter is also dispatched (`scales::label_percent()`
+  vs. `scales::label_number()`), matching `.part_quantile()`'s
+  `format_percent`/`format_number` split, though note `er_vpc_plot()`'s
+  `y_mid_lbl` column isn't actually plotted anywhere in the current
+  ggplot construction (pre-existing; not touched here).
+- The old unconditional `.abort_continuous_unsupported("er_vpc_plot")`
+  guard is removed now that continuous responses are supported.
+- Files: `R/er-vpc.R`. Tests: extended `test-er-vpc.R` with a continuous
+  case (`er_test_mod_gaussian`/`erglm_vpc_sim()`, asserting CIs bracket
+  their means) and a `response_type` override case (forcing a binary 0/1
+  column through the continuous path). Verified visually too: observed
+  vs. simulated means/CIs for `biomarker_change ~ aucss` overlap sensibly
+  across quantile bins.
 - Done when: `er_vpc_plot()` on continuous observed/simulated data
   produces a sensible mean-based VPC without erroring or silently
-  mis-plotting.
+  mis-plotting. Met.
 
 **Stage 3 -- data strip layer**
 - Per design decision (2) above: omit a continuous-response variant for
@@ -289,6 +298,33 @@ criteria are meant to be concrete enough to check off, not aspirational.
 Stages 0 and 5 first (foundation + guard rails, low risk, unblock safe
 iteration), then 1 → 2 → 3 → 4 in order, then 6 throughout/at the end as
 each stage's tests/docs land alongside it rather than as a single final
-pass. Stages 0, 1, and 5 are now done; next up is Stage 2
-(`er_vpc_plot()`), reusing the same `t_interval()`/binary-continuous
-dispatch pattern for its `smm_obs` summary.
+pass. Stages 0, 1, 2, and 5 are now done; next up is Stage 3 (the data
+strip layer), per design decision (2) above -- making
+`er_plot_show_datastrip()` fail loudly for continuous responses rather
+than designing a continuous-specific replacement.
+
+## Other known issues / follow-ups
+
+### Stratified quantile labels can visually overlap
+
+`build_quantile_errorbar()`'s `y_mid_lbl` text geom places each stratum's
+label at its own bin's `x_mid`/`y_lbl`, with no dodging between strata.
+When two strata's `x_mid` values for the same exposure bin land close
+together (the common case, since bins are quantile cutpoints of the same
+exposure variable), their text labels can visually collide -- observed
+when sanity-checking the Stage 1 continuous-response quantile layer on a
+`sex`-stratified `biomarker_change ~ aucss` plot (Q2/Q3 labels for Male
+vs. Female overlapped). This is not specific to continuous responses --
+the same geometry issue exists for stratified binary quantile plots, it
+was just easier to notice with plain numeric labels. The underlying
+`config$summary` values (means/rates, CIs) are unaffected; this is purely
+a `geom_text()` placement issue.
+
+Possible fixes, not yet scoped in detail: nudge/dodge `y_mid_lbl` text
+horizontally per stratum (e.g. via `position_dodge()` or a manual
+per-stratum x-offset proportional to bin width), or drop the in-plot
+numeric labels in favour of a legend-only encoding when `stratify ==
+TRUE`. Low priority relative to the response-type generalisation above;
+revisit once Stages 1-4 land, since Stage 2 (`er_vpc_plot()`) and
+Stage 4 (count responses) will produce more stratified continuous plots
+where this becomes more visible.
