@@ -112,8 +112,6 @@ erglm_data |>
   er_plot_show_quantiles() |> 
   plot()
 #> Using seed = 3244
-#> Warning in ggplot2::geom_path(data = sim, mapping = ggplot2::aes(x =
-#> .data[[exposure$name]], : Ignoring unknown parameters: `fill`
 ```
 
 ![](plot_files/figure-html/model-1-1.png)
