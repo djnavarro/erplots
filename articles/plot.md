@@ -96,19 +96,24 @@ erglm_data |>
 
 ## Model component
 
-Default is `style = "ribbonline"` but you can also draw spaghetti plots
-to represent parameter uncertainty. Spaghetti plots require the model to
-implement
+The default builder is
+[`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md),
+but you can also draw spaghetti plots to represent parameter uncertainty
+with
+[`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_partial.md).
+Spaghetti plots require the model to implement
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 (erglm’s models do); models that only implement
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-fall back to `"ribbonline"` with a message.
+fall back to
+[`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md)
+with a message.
 
 ``` r
 
 erglm_data |> 
   er_plot(aucss, ae1) |> 
-  er_plot_show_model(mod, style = "spaghetti") |> 
+  er_plot_show_model(mod, builder = build_model_spaghetti) |> 
   er_plot_show_quantiles() |> 
   plot()
 #> Using seed = 3244
@@ -285,10 +290,11 @@ er_vpc_plot(
 ## Data component
 
 [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
-adds the raw observations. By default (`style = "overlay"`), points are
-drawn at their true `(exposure, response)` coordinates in the *main*
-model panel – a plain scatter for a continuous/count response, or a
-scatter with a small vertical jitter for a binary response (whose
+adds the raw observations. By default
+([`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)),
+points are drawn at their true `(exposure, response)` coordinates in the
+*main* model panel – a plain scatter for a continuous/count response, or
+a scatter with a small vertical jitter for a binary response (whose
 y-values are exactly 0/1 and would otherwise overplot into two solid
 lines). This works the same way for every response type, with no
 special-casing needed:
@@ -316,19 +322,26 @@ erglm_data |>
 
 ![](plot_files/figure-html/data-overlay-continuous-1.png)
 
-### `style = "overlay"` vs. `style = "jitter"`
+### `build_data_overlay()` vs. `build_data_jitter()`/`build_data_color()`
 
-`style = "jitter"` is the older, panel-based design: for a binary
-response it splits responders/non-responders into separate jittered
-panels above/below the main plot; for a continuous/count response it
-draws a single panel (or one per stratum level) below the main plot,
-with points colored continuously by the response value instead of split
-into panels. Unlike overlay, its color aesthetic isn’t available for
-stratification on a continuous/count response, since the response value
-already claims it.
+[`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+(binary response) and
+[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)
+(continuous/count response) are the older, panel-based design: for a
+binary response it splits responders/non-responders into separate
+jittered panels above/below the main plot; for a continuous/count
+response it draws a single panel (or one per stratum level) below the
+main plot, with points colored continuously by the response value
+instead of split into panels. Unlike overlay, its color aesthetic isn’t
+available for stratification on a continuous/count response, since the
+response value already claims it. Each builder declares which of these
+two structural families it belongs to via \[er_layout()\], which is what
+[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+uses to decide whether to merge it into the main panel or stack it in
+panels below.
 
-Building both styles and placing them side by side (via patchwork’s `|`
-operator) makes the difference concrete for a binary response:
+Building both side by side (via patchwork’s `|` operator) makes the
+difference concrete for a binary response:
 
 ``` r
 
@@ -336,14 +349,14 @@ p_overlay <- erglm_data |>
   er_plot(aucss, ae1) |> 
   er_plot_show_model(mod) |> 
   er_plot_show_quantiles() |> 
-  er_plot_show_data(style = "overlay") |> 
+  er_plot_show_data() |> 
   er_plot_build()
 
 p_jitter <- erglm_data |> 
   er_plot(aucss, ae1) |> 
   er_plot_show_model(mod) |> 
   er_plot_show_quantiles() |> 
-  er_plot_show_data(style = "jitter") |> 
+  er_plot_show_data(builder = build_data_jitter) |> 
   er_plot_build()
 
 p_overlay$output | p_jitter$output
@@ -351,22 +364,23 @@ p_overlay$output | p_jitter$output
 
 ![](plot_files/figure-html/data-compare-binary-1.png)
 
-and again for a continuous response, where `style = "jitter"` falls back
-to a single response-colored panel below the model curve rather than an
-overlay on it:
+and again for a continuous response, where
+[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)
+falls back to a single response-colored panel below the model curve
+rather than an overlay on it:
 
 ``` r
 
 p_overlay_cont <- erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
   er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_data(style = "overlay") |> 
+  er_plot_show_data() |> 
   er_plot_build()
 
 p_jitter_cont <- erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
   er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_data(style = "jitter") |> 
+  er_plot_show_data(builder = build_data_color) |> 
   er_plot_build()
 
 p_overlay_cont$output | p_jitter_cont$output
@@ -374,9 +388,9 @@ p_overlay_cont$output | p_jitter_cont$output
 
 ![](plot_files/figure-html/data-compare-continuous-1.png)
 
-Stratification also looks different between the two styles: overlay’s
-color aesthetic always means strata and shares the model curve’s own
-legend, regardless of response type, whereas jitter’s color aesthetic
+Stratification also looks different between the two: overlay’s color
+aesthetic always means strata and shares the model curve’s own legend,
+regardless of response type, whereas jitter/color’s color aesthetic
 means strata only for a binary response (for continuous/count it falls
 back to one titled panel per stratum level, each with its own response
 colorbar):
@@ -386,13 +400,13 @@ colorbar):
 p_overlay_strat <- erglm_data |> 
   er_plot(aucss, ae1, stratify_by = sex) |> 
   er_plot_show_model(mod_strat) |> 
-  er_plot_show_data(style = "overlay") |> 
+  er_plot_show_data() |> 
   er_plot_build()
 
 p_jitter_strat <- erglm_data |> 
   er_plot(aucss, ae1, stratify_by = sex) |> 
   er_plot_show_model(mod_strat) |> 
-  er_plot_show_data(style = "jitter") |> 
+  er_plot_show_data(builder = build_data_jitter) |> 
   er_plot_build()
 
 p_overlay_strat$output | p_jitter_strat$output
@@ -430,7 +444,10 @@ erglm_data |>
 
 ![](plot_files/figure-html/group-2-1.png)
 
-The default is `style = "boxplot"` but you can also use violin plots:
+The default builder is
+[`build_group_boxplot()`](https://erplots.djnavarro.net/reference/er_partial.md),
+but you can also use violin plots with
+[`build_group_violin()`](https://erplots.djnavarro.net/reference/er_partial.md):
 
 ``` r
 
@@ -438,7 +455,7 @@ erglm_data |>
   er_plot(aucss, ae1) |> 
   er_plot_show_model(mod) |> 
   er_plot_show_quantiles() |>
-  er_plot_show_groups(group_by = sex, style = "violin") |> 
+  er_plot_show_groups(group_by = sex, builder = build_group_violin) |> 
   plot()
 ```
 

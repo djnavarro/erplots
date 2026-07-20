@@ -22,7 +22,6 @@ the plot's `response_type` (set in
 er_plot_show_quantiles(
   object,
   keep_strata = NULL,
-  style = "errorbar",
   builder = NULL,
   bins = 4,
   conf_level = 0.95
@@ -42,27 +41,20 @@ er_plot_show_quantiles(
   in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
   `FALSE` otherwise
 
-- style:
-
-  Character string selecting the partial builder: `"errorbar"` (default;
-  point + error bar, via
-  [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md))
-  or `"pointrange"` (a single
-  [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html),
-  via
-  [`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_partial.md)).
-  Ignored when `builder` is supplied.
-
 - builder:
 
-  Optional function overriding the builder that `style` would otherwise
-  select – the escape hatch documented in
-  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
-  for plugging in a custom `build_quantile_*()`-style function without
-  touching package internals. Must accept and use the standard
+  Function drawing the quantile summary – defaults to
+  [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  (point + error bar).
+  [`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  (a single
+  [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html))
+  is the other built-in option; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
-  signature; `config$summary` is the pre-computed per-bin data frame
-  (point estimate + CI) to draw.
+  signature can be supplied instead – see
+  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  `config$summary` is the pre-computed per-bin data frame (point
+  estimate + CI) to draw.
 
 - bins:
 
@@ -130,15 +122,14 @@ erglm_data |>
   er_plot_show_quantiles() |>
   plot()
 
-# a pointrange instead of an errorbar
+# a pointrange instead of the default errorbar
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_show_model(mod) |>
-  er_plot_show_quantiles(style = "pointrange") |>
+  er_plot_show_quantiles(builder = build_quantile_pointrange) |>
   plot()
 
-# plug in a fully custom builder instead of choosing a built-in
-# `style`; see `?er_partial` for the full contract
+# plug in a fully custom builder; see `?er_partial` for the full contract
 build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
   ggplot2::geom_crossbar(
     data = config$summary,

@@ -76,7 +76,6 @@ summary/CI method is used dispatches on the plot's <code>response_type</code>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_plot_show_quantiles</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  style <span class="op">=</span> <span class="st">"errorbar"</span>,</span>
 <span>  builder <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bins <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span></span>
@@ -97,21 +96,15 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <code>stratify_by</code> was set in <code><a href="er_plot.html">er_plot()</a></code>, <code>FALSE</code> otherwise</p></dd>
 
 
-<dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
-<dd><p>Character string selecting the partial builder:
-<code>"errorbar"</code> (default; point + error bar, via
-<code><a href="er_partial.html">build_quantile_errorbar()</a></code>) or <code>"pointrange"</code> (a single
-<code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>, via <code><a href="er_partial.html">build_quantile_pointrange()</a></code>).
-Ignored when <code>builder</code> is supplied.</p></dd>
-
-
 <dt id="arg-builder">builder<a class="anchor" aria-label="anchor" href="#arg-builder"></a></dt>
-<dd><p>Optional function overriding the builder that <code>style</code>
-would otherwise select – the escape hatch documented in
-<code><a href="er_partial.html">er_partial()</a></code> for plugging in a custom <code>build_quantile_*()</code>-style
-function without touching package internals. Must accept and use the
-standard <code>(data, config, stratify, exposure, response, strata, style)</code> signature; <code>config$summary</code> is the pre-computed per-bin data
-frame (point estimate + CI) to draw.</p></dd>
+<dd><p>Function drawing the quantile summary – defaults to
+<code><a href="er_partial.html">build_quantile_errorbar()</a></code> (point + error bar).
+<code><a href="er_partial.html">build_quantile_pointrange()</a></code> (a single <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>)
+is the other built-in option; any function matching the standard
+<code>(data, config, stratify, exposure, response, strata, style)</code>
+signature can be supplied instead – see <code><a href="er_partial.html">er_partial()</a></code>.
+<code>config$summary</code> is the pre-computed per-bin data frame (point
+estimate + CI) to draw.</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
@@ -173,15 +166,14 @@ quantile summary rather than combining bins from both calls.</p>
 <span class="r-in"><span>  <span class="fu">er_plot_show_quantiles</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># a pointrange instead of an errorbar</span></span></span>
+<span class="r-in"><span><span class="co"># a pointrange instead of the default errorbar</span></span></span>
 <span class="r-in"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">er_plot_show_quantiles</span><span class="op">(</span>style <span class="op">=</span> <span class="st">"pointrange"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot_show_quantiles</span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_quantile_pointrange</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># plug in a fully custom builder instead of choosing a built-in</span></span></span>
-<span class="r-in"><span><span class="co"># `style`; see `?er_partial` for the full contract</span></span></span>
+<span class="r-in"><span><span class="co"># plug in a fully custom builder; see `?er_partial` for the full contract</span></span></span>
 <span class="r-in"><span><span class="va">build_quantile_crossbar</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_crossbar</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">summary</span>,</span></span>

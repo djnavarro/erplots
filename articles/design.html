@@ -158,8 +158,9 @@ annotation</td>
 <td>Data</td>
 <td>[er_plot_show_data()]</td>
 <td>Raw observations, by default overlaid on the model panel at their
-true (exposure, response) coordinates (<code>style = "overlay"</code>);
-or, with <code>style = "jitter"</code>, an older panel-based design</td>
+true (exposure, response) coordinates ([build_data_overlay()]); or, with
+[build_data_jitter()]/[build_data_color()], an older panel-based
+design</td>
 <td>Yes</td>
 </tr>
 <tr class="even">
@@ -231,17 +232,19 @@ precedence; stratification adapts to whatever channel is left</strong>,
 defaulting to color/fill.</p>
 <p>For most layers, color/fill is always free for strata, so this rule
 is invisible in practice. The data layer is the one exception, and its
-behaviour now depends on <code>style</code>:</p>
+behaviour now depends on which builder is in play, and which
+<em>structural</em> family (declared via [er_layout()]) that builder
+belongs to:</p>
 <ul>
 <li>
-<code>style = "overlay"</code> (the default,
-<code><a href="../reference/er_partial.html">build_data_overlay()</a></code>): color, when mapped at all, always
-means strata – the response is already shown via y-position, so
-color/fill is free for stratification like every other layer, and the
-overlay shares the base plot’s own strata legend with the model/quantile
-layers.</li>
+<code><a href="../reference/er_partial.html">build_data_overlay()</a></code> (the default,
+<code>"overlay"</code>-layout): color, when mapped at all, always means
+strata – the response is already shown via y-position, so color/fill is
+free for stratification like every other layer, and the overlay shares
+the base plot’s own strata legend with the model/quantile layers.</li>
 <li>
-<code>style = "jitter"</code> (the older, panel-based design): for a
+<code><a href="../reference/er_partial.html">build_data_jitter()</a></code>/<code><a href="../reference/er_partial.html">build_data_color()</a></code>
+(the older, panel-based design, <code>"panel"</code>-layout): for a
 <strong>binary</strong> response, <code><a href="../reference/er_partial.html">build_data_jitter()</a></code>
 behaves the same way – color means strata, shared legend. For a
 <strong>continuous/count</strong> response,
@@ -251,8 +254,7 @@ per stratum level (each colored by the response) instead of a shared
 legend. This is the concrete instance of “a layer’s own encoding takes
 precedence” that motivated the general rule – see <code>PLAN.md</code>’s
 “Continuous-response data strip” section for the design history, and
-[er_plot_show_data()] for the full per-<code>style</code>
-breakdown.</li>
+[er_plot_show_data()] for the full breakdown.</li>
 </ul>
 <p>A <code>config$color_role</code> tag (<code>"strata"</code> or
 <code>"response"</code>, set by <code>.part_data()</code>) records which
@@ -308,13 +310,15 @@ for worked examples, including a case where the choice between the
 t-interval and exact Poisson interval visibly matters.</p>
 <p>The data layer doesn’t compute a summary statistic at all – it just
 plots raw observations – so <code>response_type</code> instead changes
-<em>how</em> it’s drawn: <code>style = "overlay"</code> needs no
-dispatch (a plain scatter, or a small vertical jitter for a binary
-response’s exactly-0/1 y-values); <code>style = "jitter"</code>
-dispatches on it directly, choosing <code><a href="../reference/er_partial.html">build_data_jitter()</a></code>’s
-upper/lower panel split for <code>"binary"</code> versus
-<code><a href="../reference/er_partial.html">build_data_color()</a></code>’s single response-colored panel (or one
-per stratum) for <code>"continuous"</code>/<code>"count"</code> – see
+<em>how</em> it’s drawn: <code><a href="../reference/er_partial.html">build_data_overlay()</a></code> (the default)
+needs no dispatch (a plain scatter, or a small vertical jitter for a
+binary response’s exactly-0/1 y-values);
+<code><a href="../reference/er_partial.html">build_data_jitter()</a></code>/<code><a href="../reference/er_partial.html">build_data_color()</a></code>
+dispatch on it directly, with <code><a href="../reference/er_partial.html">build_data_jitter()</a></code> for a
+<code>"binary"</code> response’s upper/lower panel split and
+<code><a href="../reference/er_partial.html">build_data_color()</a></code> for a
+<code>"continuous"</code>/<code>"count"</code> response’s single
+response-colored panel (or one per stratum) – see
 [er_plot_show_data()].</p>
 </div>
 <div class="section level2">
@@ -322,16 +326,15 @@ per stratum) for <code>"continuous"</code>/<code>"count"</code> – see
 </h2>
 <p>Every layer function delegates the actual drawing to a
 <code>build_*()</code> function sharing a common signature –
-<code>function(data, config, stratify, exposure, response, strata, style)</code>
-– selected internally by <code>style</code>
-(e.g. <code>"errorbar"</code> selects
-<code><a href="../reference/er_partial.html">build_quantile_errorbar()</a></code>). That signature is a documented,
-public part of the API (see [er_partial()]), and each layer function’s
-<code>builder</code> argument (<code><a href="../reference/er_plot_show_model.html">er_plot_show_model()</a></code>
-additionally has <code>summary_builder</code>) lets you supply your own
-function in place of whatever <code>style</code> would otherwise select
-– no need to fork the package or reach into <code>object$part</code>
-internals:</p>
+<code>function(data, config, stratify, exposure, response, strata, style)</code>.
+That signature is a documented, public part of the API (see
+[er_partial()]), and each layer function’s <code>builder</code> argument
+(<code><a href="../reference/er_plot_show_model.html">er_plot_show_model()</a></code> additionally has
+<code>summary_builder</code>) defaults to one built-in
+<code>build_*()</code> function (e.g. [er_plot_show_quantiles()]’s
+defaults to <code><a href="../reference/er_partial.html">build_quantile_errorbar()</a></code>) and can be set to
+any other function matching the same signature – no need to fork the
+package or reach into <code>object$part</code> internals:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">build_quantile_crossbar</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_crossbar</a></span><span class="op">(</span></span>
@@ -352,22 +355,25 @@ built-in builder would (e.g. <code>config$summary</code> for the
 quantile layer, <code>config$predictions</code> for the model layer), so
 it only needs to turn that <code>config</code> into ggplot2 layers, not
 recompute anything.</p>
-<p>For the data layer, <code>style</code> keeps its structural meaning
-even when <code>builder</code> is supplied: <code>"overlay"</code> slots
-your builder into a single call merged onto the main panel, while
-<code>"jitter"</code> slots it into one-or-more panels stacked below the
-base plot (per <code>object$response$type</code>). The other three
-layers have only one structural call site, so <code>style</code> is
-simply ignored once <code>builder</code> is supplied.</p>
-<p><code><a href="../reference/er_partial.html">build_quantile_pointrange()</a></code>
-(<code>style = "pointrange"</code>, a single
+<p>For the data layer, a custom <code>builder</code> must also declare
+which <em>structural</em> family it belongs to, via [er_layout()]:
+<code>er_layout(fn, "overlay")</code> slots it into a single call merged
+onto the main panel, while <code>er_layout(fn, "panel")</code> slots it
+into one-or-more panels stacked below the base plot.
+[er_plot_show_data()] reads this tag off <code>builder</code> itself to
+decide how to assemble the layer, rather than taking a separate argument
+for it – so a builder like <code><a href="../reference/er_partial.html">build_data_overlay()</a></code> can never
+accidentally end up routed into upper/lower panels, or vice versa. The
+other three layers have only one structural call site, so no such
+tagging is needed there.</p>
+<p><code><a href="../reference/er_partial.html">build_quantile_pointrange()</a></code> (a single
 <code>geom_pointrange()</code> in place of
 <code><a href="../reference/er_partial.html">build_quantile_errorbar()</a></code>’s separate point + error bar)
 started life as exactly this kind of custom builder, and was promoted to
-a built-in <code>style</code> option once it proved to need no new
-<code>config</code> fields – a reasonable bar to check your own custom
-builders against, if you’re deciding whether to propose one upstream.
-See the <code>@examples</code> on [er_plot_show_model()],
+a built-in option once it proved to need no new <code>config</code>
+fields – a reasonable bar to check your own custom builders against, if
+you’re deciding whether to propose one upstream. See the
+<code>@examples</code> on [er_plot_show_model()],
 [er_plot_show_quantiles()], and [er_plot_show_data()] for further worked
 custom builders (a dashed model curve and a data-overlay scatter), and
 [er_partial()]’s “Writing your own builder” section for the full

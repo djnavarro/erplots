@@ -42,6 +42,9 @@ Build exposure-response plots from any model that implements
   [`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_partial.md)
   : Partial builders for exposure-response plots
 
+- [`er_layout()`](https://erplots.djnavarro.net/reference/er_layout.md)
+  : Declare a data-layer builder's structural layout
+
 - [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
   : Visual predictive check plot for an exposure-response model
 

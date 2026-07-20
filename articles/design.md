@@ -67,7 +67,7 @@ There are currently four layers, each documented on its own help topic:
 |----|----|----|----|
 | Model | \[er_plot_show_model()\] | Fitted curve/ribbon (or spaghetti) plus an optional summary annotation | No |
 | Quantile | \[er_plot_show_quantiles()\] | Exposure-quantile-binned response summary (rate/mean + CI) | Yes |
-| Data | \[er_plot_show_data()\] | Raw observations, by default overlaid on the model panel at their true (exposure, response) coordinates (`style = "overlay"`); or, with `style = "jitter"`, an older panel-based design | Yes |
+| Data | \[er_plot_show_data()\] | Raw observations, by default overlaid on the model panel at their true (exposure, response) coordinates (\[build_data_overlay()\]); or, with \[build_data_jitter()\]/\[build_data_color()\], an older panel-based design | Yes |
 | Group | \[er_plot_show_groups()\] | Exposure distribution, boxplot/violin, split by a grouping variable | No |
 
 ## Layers are either singleton or additive
@@ -140,15 +140,18 @@ is left**, defaulting to color/fill.
 
 For most layers, color/fill is always free for strata, so this rule is
 invisible in practice. The data layer is the one exception, and its
-behaviour now depends on `style`:
+behaviour now depends on which builder is in play, and which
+*structural* family (declared via \[er_layout()\]) that builder belongs
+to:
 
-- `style = "overlay"` (the default,
-  [`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)):
-  color, when mapped at all, always means strata – the response is
-  already shown via y-position, so color/fill is free for stratification
-  like every other layer, and the overlay shares the base plot’s own
-  strata legend with the model/quantile layers.
-- `style = "jitter"` (the older, panel-based design): for a **binary**
+- [`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  (the default, `"overlay"`-layout): color, when mapped at all, always
+  means strata – the response is already shown via y-position, so
+  color/fill is free for stratification like every other layer, and the
+  overlay shares the base plot’s own strata legend with the
+  model/quantile layers.
+- [`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)/[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  (the older, panel-based design, `"panel"`-layout): for a **binary**
   response,
   [`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
   behaves the same way – color means strata, shared legend. For a
@@ -160,7 +163,7 @@ behaviour now depends on `style`:
   instance of “a layer’s own encoding takes precedence” that motivated
   the general rule – see `PLAN.md`’s “Continuous-response data strip”
   section for the design history, and \[er_plot_show_data()\] for the
-  full per-`style` breakdown.
+  full breakdown.
 
 A `config$color_role` tag (`"strata"` or `"response"`, set by
 `.part_data()`) records which meaning applies for a given data-layer
@@ -198,28 +201,31 @@ visibly matters.
 
 The data layer doesn’t compute a summary statistic at all – it just
 plots raw observations – so `response_type` instead changes *how* it’s
-drawn: `style = "overlay"` needs no dispatch (a plain scatter, or a
-small vertical jitter for a binary response’s exactly-0/1 y-values);
-`style = "jitter"` dispatches on it directly, choosing
-[`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
-upper/lower panel split for `"binary"` versus
-[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
-single response-colored panel (or one per stratum) for
-`"continuous"`/`"count"` – see \[er_plot_show_data()\].
+drawn:
+[`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+(the default) needs no dispatch (a plain scatter, or a small vertical
+jitter for a binary response’s exactly-0/1 y-values);
+[`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)/[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)
+dispatch on it directly, with
+[`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+for a `"binary"` response’s upper/lower panel split and
+[`build_data_color()`](https://erplots.djnavarro.net/reference/er_partial.md)
+for a `"continuous"`/`"count"` response’s single response-colored panel
+(or one per stratum) – see \[er_plot_show_data()\].
 
 ## Extending erplots: writing your own builder
 
 Every layer function delegates the actual drawing to a `build_*()`
 function sharing a common signature –
-`function(data, config, stratify, exposure, response, strata, style)` –
-selected internally by `style` (e.g. `"errorbar"` selects
-[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)).
+`function(data, config, stratify, exposure, response, strata, style)`.
 That signature is a documented, public part of the API (see
 \[er_partial()\]), and each layer function’s `builder` argument
 ([`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
-additionally has `summary_builder`) lets you supply your own function in
-place of whatever `style` would otherwise select – no need to fork the
-package or reach into `object$part` internals:
+additionally has `summary_builder`) defaults to one built-in `build_*()`
+function (e.g. \[er_plot_show_quantiles()\]’s defaults to
+[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md))
+and can be set to any other function matching the same signature – no
+need to fork the package or reach into `object$part` internals:
 
 ``` r
 
@@ -245,25 +251,29 @@ builder would (e.g. `config$summary` for the quantile layer,
 `config$predictions` for the model layer), so it only needs to turn that
 `config` into ggplot2 layers, not recompute anything.
 
-For the data layer, `style` keeps its structural meaning even when
-`builder` is supplied: `"overlay"` slots your builder into a single call
-merged onto the main panel, while `"jitter"` slots it into one-or-more
-panels stacked below the base plot (per `object$response$type`). The
-other three layers have only one structural call site, so `style` is
-simply ignored once `builder` is supplied.
+For the data layer, a custom `builder` must also declare which
+*structural* family it belongs to, via \[er_layout()\]:
+`er_layout(fn, "overlay")` slots it into a single call merged onto the
+main panel, while `er_layout(fn, "panel")` slots it into one-or-more
+panels stacked below the base plot. \[er_plot_show_data()\] reads this
+tag off `builder` itself to decide how to assemble the layer, rather
+than taking a separate argument for it – so a builder like
+[`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+can never accidentally end up routed into upper/lower panels, or vice
+versa. The other three layers have only one structural call site, so no
+such tagging is needed there.
 
 [`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_partial.md)
-(`style = "pointrange"`, a single `geom_pointrange()` in place of
+(a single `geom_pointrange()` in place of
 [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
 separate point + error bar) started life as exactly this kind of custom
-builder, and was promoted to a built-in `style` option once it proved to
-need no new `config` fields – a reasonable bar to check your own custom
-builders against, if you’re deciding whether to propose one upstream.
-See the `@examples` on \[er_plot_show_model()\],
-\[er_plot_show_quantiles()\], and \[er_plot_show_data()\] for further
-worked custom builders (a dashed model curve and a data-overlay
-scatter), and \[er_partial()\]’s “Writing your own builder” section for
-the full contract.
+builder, and was promoted to a built-in option once it proved to need no
+new `config` fields – a reasonable bar to check your own custom builders
+against, if you’re deciding whether to propose one upstream. See the
+`@examples` on \[er_plot_show_model()\], \[er_plot_show_quantiles()\],
+and \[er_plot_show_data()\] for further worked custom builders (a dashed
+model curve and a data-overlay scatter), and \[er_partial()\]’s “Writing
+your own builder” section for the full contract.
 
 ## Keeping this article in sync
 

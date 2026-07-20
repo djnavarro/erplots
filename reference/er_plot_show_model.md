@@ -1,9 +1,10 @@
 # Add a fitted-model curve/ribbon layer
 
 Adds the model layer: a fitted exposure-response curve with an
-uncertainty ribbon (`style = "ribbonline"`, via
+uncertainty ribbon (the default, via
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)),
-or a spaghetti plot of simulated draws (`style = "spaghetti"`, via
+or a spaghetti plot of simulated draws
+(`builder = build_model_spaghetti`, via
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)),
 plus an optional summary annotation (e.g. a p-value) via
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
@@ -19,7 +20,6 @@ er_plot_show_model(
   object,
   model,
   keep_strata = NULL,
-  style = "ribbonline",
   builder = NULL,
   summary_builder = NULL,
   conf_level = 0.95
@@ -50,29 +50,25 @@ er_plot_show_model(
   in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
   `FALSE` otherwise
 
-- style:
-
-  Character string selecting the partial builder: `"ribbonline"`
-  (default; mean prediction + confidence ribbon) or `"spaghetti"`
-  (simulated draws, via
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
-  Ignored when `builder` is supplied.
-
 - builder:
 
-  Optional function overriding the model-curve builder that `style`
-  would otherwise select – the escape hatch documented in
-  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
-  for plugging in a custom `build_model_*()`-style function without
-  touching package internals. Must accept and use the standard
+  Function drawing the model curve/ribbon – defaults to
+  [`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  (mean prediction + confidence ribbon).
+  [`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  (simulated draws, via
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
+  is the other built-in option; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
-  signature.
+  signature can be supplied instead – see
+  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
 
 - summary_builder:
 
-  Optional function overriding the summary- annotation builder
-  ([`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_partial.md)
-  by default), using the same standard signature as `builder`. See
+  Function drawing the summary annotation – defaults to
+  [`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  Any function matching the same standard signature as `builder` can be
+  supplied instead. See
   [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
 
 - conf_level:
@@ -109,8 +105,14 @@ erglm_data |>
   er_plot_show_model(mod) |>
   plot()
 
-# plug in a custom model-curve builder instead of choosing a built-in
-# `style`; see `?er_partial` for the full contract
+# a spaghetti plot instead of the default ribbon
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod, builder = build_model_spaghetti) |>
+  plot()
+
+# plug in a fully custom model-curve builder; see `?er_partial` for the
+# full contract
 build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
   ggplot2::geom_line(
     data = config$predictions,

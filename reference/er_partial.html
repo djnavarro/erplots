@@ -171,26 +171,27 @@ as needed</p>
 implementation detail: any function <code>function(data, config, stratify, exposure, response, strata, style)</code> that returns a geom or list of
 geoms can stand in for a built-in builder. This is the officially
 supported way to draw a layer differently from any of the built-in
-<code>style</code> options – e.g. a 2D density instead of a scatter for the data
-overlay, per-panel histograms instead of jittered points for the
+<code>builder</code> options – e.g. a 2D density instead of a scatter for the
+data overlay, per-panel histograms instead of jittered points for the
 panel-based data layer, or a <code>geom_crossbar()</code> instead of a
 <code>geom_errorbar()</code>/<code>geom_pointrange()</code> for the quantile summary.
 (<code>build_quantile_pointrange()</code> started life as exactly this kind of
-custom builder – it was promoted to a built-in <code>style = "pointrange"</code>
-option once it proved to be a natural, low-risk alternative to
-<code>build_quantile_errorbar()</code>, with no new config requirements.)</p>
+custom builder – it was promoted to a built-in option once it proved
+to be a natural, low-risk alternative to <code>build_quantile_errorbar()</code>,
+with no new config requirements.)</p>
 <p>Each <code>er_plot_show_*()</code> function takes a <code>builder</code> argument (and
-<code><a href="er_plot_show_model.html">er_plot_show_model()</a></code> additionally takes <code>summary_builder</code>) for
-exactly this purpose: supplying a function there bypasses the built-in
-<code>style</code> string dispatch entirely, so a custom builder can be plugged
-in without forking the package or reaching into <code>object$part</code>
-internals. For the data layer, <code>style</code> still selects the <em>structural</em>
-family your builder is slotted into – <code>"overlay"</code> (a single call
-merged into the main panel) or <code>"jitter"</code> (one or more panels stacked
-below the base plot, per <code>object$response$type</code>) – while <code>builder</code>
-selects the geoms drawn within that structure. For the other layers
-there is only one structural call site, so <code>style</code> is ignored once
-<code>builder</code> is supplied. See the <code>@examples</code> on <code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>,
+<code><a href="er_plot_show_model.html">er_plot_show_model()</a></code> additionally takes <code>summary_builder</code>) that
+defaults to one built-in <code>build_*()</code> function and can be set to any
+other – built-in or custom – matching the standard signature, with no
+string-based <code>style</code> argument in between: a custom builder can be
+plugged in without forking the package or reaching into <code>object$part</code>
+internals. For the data layer specifically, <code>builder</code> also has to
+declare which <em>structural</em> family it belongs to – a single call
+merged into the main panel, or one or more panels stacked below the
+base plot – via <code><a href="er_layout.html">er_layout()</a></code>, since <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> reads that
+tag off <code>builder</code> to decide how to assemble the layer; the other three
+layers have only one structural call site, so no such tagging is
+needed there. See the <code>@examples</code> on <code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>,
 <code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>, and <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> for worked
 custom builders (a dashed model curve, a quantile crossbar, and a
 data-overlay density, respectively).</p>

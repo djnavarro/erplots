@@ -13,7 +13,6 @@ needs no `response_type` dispatch.
 er_plot_show_groups(
   object,
   group_by,
-  style = "boxplot",
   builder = NULL,
   bins = NULL,
   keep_strata = NULL
@@ -31,20 +30,16 @@ er_plot_show_groups(
   Grouping variables to define groups for distribution plots (a
   tidyselection of variables)
 
-- style:
-
-  Character string selecting the partial builder: `"boxplot"` (default)
-  or `"violin"`. Ignored when `builder` is supplied.
-
 - builder:
 
-  Optional function overriding the builder that `style` would otherwise
-  select – the escape hatch documented in
-  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
-  for plugging in a custom `build_group_*()`-style function without
-  touching package internals. Must accept and use the standard
+  Function drawing each group panel – defaults to
+  [`build_group_boxplot()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  [`build_group_violin()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  is the other built-in option; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
-  signature; applied to every grouping variable added by this call.
+  signature can be supplied instead – see
+  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  Applied to every grouping variable added by this call.
 
 - bins:
 
