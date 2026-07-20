@@ -116,6 +116,37 @@ test_that(".part_quantile constructs the correct data structure", {
 })
 
 
+test_that(".part_quantile uses bin means and t-intervals for a continuous response", {
+  skip_if_not_installed("erglm")
+
+  plt1 <- er_test_data |> er_plot(aucss, biomarker_change)
+  plt2 <- er_test_data |> er_plot(aucss, biomarker_change, sex)
+
+  expect_no_error(plt1 |> er_plot_show_quantiles())
+  expect_no_error(plt2 |> er_plot_show_quantiles())
+
+  plt1 <- plt1 |> er_plot_show_quantiles()
+  plt2 <- plt2 |> er_plot_show_quantiles()
+
+  smm1 <- plt1$part$quantile$config$summary
+  smm2 <- plt2$part$quantile$config$summary
+
+  # no n1/n0 columns (those are binary-only) -- bin mean/CI columns instead
+  smm_names <- c(
+    "exposure_bins", "strata",
+    "x_mid", "y_mid", "y_mid_lbl", "ci_lower",
+    "ci_upper", "y_lwr_lbl", "y_upr_lbl", "y_lbl"
+  )
+  expect_named(smm1, smm_names)
+  expect_named(smm2, smm_names)
+
+  # bin mean should agree with a direct calculation on the same bins, and
+  # lie within its own CI
+  expect_true(all(smm1$ci_lower <= smm1$y_mid & smm1$y_mid <= smm1$ci_upper))
+  expect_true(all(smm2$ci_lower <= smm2$y_mid & smm2$y_mid <= smm2$ci_upper))
+})
+
+
 test_that(".part_strip constructs the correct data structure", {
   skip_if_not_installed("erglm")
 

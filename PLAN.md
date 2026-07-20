@@ -172,33 +172,43 @@ criteria are meant to be concrete enough to check off, not aspirational.
   override), and no other stage needs to touch response-limits logic
   again.
 
-**Stage 1 -- quantile summary layer [t_interval() helper done; dispatch not yet wired in]**
-- Add a small internal dispatch (mirroring the existing `build_*` partial
-  pattern), e.g. `.summarise_quantile_binary()` /
-  `.summarise_quantile_continuous()`, selected via `object$response$type`
-  inside `.part_quantile()`. Binary path keeps today's `n1`/`n0` +
-  `clopper_pearson()` logic unchanged. Continuous path computes
-  `mean()` and a t-interval (`mean ± qt(1 - alpha/2, df = n - 1) *
-  se`), skipping/flagging bins with `n < 2`. Still open.
+**Stage 1 -- quantile summary layer [done]**
+- `.part_quantile()` now dispatches on `object$response$type`: the binary
+  branch keeps the original `n1`/`n0` + `clopper_pearson()` logic
+  unchanged; the continuous branch computes `mean()` and a `t_interval()`
+  CI per bin. Rather than two parallel `.summarise_quantile_*()`
+  implementations duplicating the label-placement math, the dispatch only
+  covers computing `y_mid`/`y_mid_lbl`/`ci_lower`/`ci_upper`; the
+  `y_lwr_lbl`/`y_upr_lbl`/`y_lbl` placement logic was generalised once
+  (using `object$response$limits` for the margin/corner logic instead of
+  a hardcoded `[0, 1]` assumption) and applied to both branches'
+  `config$summary` afterwards.
 - `t_interval()` helper alongside `clopper_pearson()` in
-  `R/utils-helpers.R` for the continuous CI, documented analogously, is
-  landed (with unit tests in `tests/testthat/test-utils-helpers.R`
-  covering agreement with `stats::t.test()`, `conf_level` handling,
-  `NA`-dropping, and the degenerate `n < 2` case, which returns
-  `c(lower = NA, upper = NA)` rather than erroring). Not yet wired into
-  `.part_quantile()`.
-- `build_quantile_errorbar()` itself should need no changes -- it already
-  just consumes `x_mid`/`y_mid`/`ci_lower`/`ci_upper`/`y_mid_lbl` from
-  `config$summary`, and `object$style$format_percent()` labelling should
-  be swapped for a plain numeric label (e.g. `scales::label_number()`) on
-  the continuous path.
-- Files: `R/er-plot-part.R` (`.part_quantile()`), `R/utils-helpers.R`.
-  Tests: extend `test-er-plot-partials-quantile.R` with continuous- and
-  binary-response cases side by side.
+  `R/utils-helpers.R`, with unit tests in
+  `tests/testthat/test-utils-helpers.R`.
+- `object$style$format_number <- scales::label_number(accuracy = 0.01)`
+  added alongside `format_percent`/`format_p` in `er_plot()`, used for
+  the continuous path's `y_mid_lbl`.
+- `build_quantile_errorbar()` needed no changes -- it already just
+  consumes `x_mid`/`y_mid`/`ci_lower`/`ci_upper`/`y_mid_lbl`/`y_lbl` from
+  `config$summary` generically.
+- The `response_type == "continuous"` guard in `er_plot_show_quantiles()`
+  was removed (the `.abort_continuous_unsupported()` call added in Stage
+  5 is now only reachable from `er_plot_show_datastrip()` and
+  `er_vpc_plot()`).
+- Files: `R/er-plot-part.R` (`.part_quantile()`), `R/er-plot-api.R`
+  (`er_plot()`'s `style$format_number`, `er_plot_show_quantiles()`'s
+  guard removal), `R/utils-helpers.R` (`t_interval()`),
+  `R/utils-global.R` (`response` global). Tests: continuous-response
+  cases added to `test-er-plot-part.R`, `test-er-plot-partials-quantile.R`,
+  and `test-er-plot-api.R` (the latter's old "errors clearly" test
+  rewritten to assert support instead).
 - Done when: `er_plot_show_quantiles()` on a gaussian/Gamma `erglm_model`
   produces bin means with sensible t-interval error bars on the
-  response's own scale (verified visually and by checking `config$summary`
-  directly in a test).
+  response's own scale -- verified via `config$summary` in tests (CI
+  brackets the mean; column names match the binary path minus
+  `n1`/`n0`) and manually (values in a fresh R session for
+  `biomarker_change ~ aucss`).
 
 **Stage 2 -- `er_vpc_plot()`**
 - Apply the same binary/continuous dispatch to `smm_obs` (currently
@@ -279,4 +289,6 @@ criteria are meant to be concrete enough to check off, not aspirational.
 Stages 0 and 5 first (foundation + guard rails, low risk, unblock safe
 iteration), then 1 → 2 → 3 → 4 in order, then 6 throughout/at the end as
 each stage's tests/docs land alongside it rather than as a single final
-pass.
+pass. Stages 0, 1, and 5 are now done; next up is Stage 2
+(`er_vpc_plot()`), reusing the same `t_interval()`/binary-continuous
+dispatch pattern for its `smm_obs` summary.

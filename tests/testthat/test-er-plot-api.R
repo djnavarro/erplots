@@ -31,13 +31,21 @@ test_that("er_plot's response_type argument overrides auto-detection", {
   expect_error(er_plot(er_test_data, aucss, ae1, response_type = "nope"))
 })
 
-test_that("er_plot_show_quantiles errors clearly for a continuous response", {
+test_that("er_plot_show_quantiles supports both binary and continuous responses", {
   skip_if_not_installed("erglm")
 
+  # continuous response: bin means with t-interval CIs (PLAN.md Stage 1)
   plt <- er_test_data |> er_plot(aucss, biomarker_change)
-  expect_error(er_plot_show_quantiles(plt), class = "rlang_error")
+  expect_no_error(er_plot_show_quantiles(plt))
 
-  # binary response still works
+  smm <- (plt |> er_plot_show_quantiles())$part$quantile$config$summary
+  expect_named(smm, c(
+    "exposure_bins", "strata", "x_mid", "y_mid", "y_mid_lbl",
+    "ci_lower", "ci_upper", "y_lwr_lbl", "y_upr_lbl", "y_lbl"
+  ))
+  expect_true(all(smm$ci_lower <= smm$y_mid & smm$y_mid <= smm$ci_upper))
+
+  # binary response still works, unchanged
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
   expect_no_error(er_plot_show_quantiles(plt_binary))
 })

@@ -78,7 +78,7 @@
   config$n_quantiles <- bins
   config$conf_level <- conf_level
 
-  config$summary <- object$data |>
+  binned <- object$data |>
     dplyr::mutate(
       response = .data[[object$response$name]],
       exposure_bins = cut_exposure_quantile(
@@ -86,19 +86,51 @@
         n = config$n_quantiles
       ),
       strata = .get_strata_values(.data, object$strata$name)   
-    ) |> 
-    dplyr::summarise(
-      n1 = sum(.data[[object$response$name]] == 1, na.rm = TRUE),
-      n0 = sum(.data[[object$response$name]] == 0, na.rm = TRUE),
-      x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
-      y_mid = n1 / (n0 + n1),
-      y_mid_lbl = object$style$format_percent(n1 / (n0 + n1)),
-      ci_lower = clopper_pearson(n1, n0 + n1, config$conf_level)["lower"], 
-      ci_upper = clopper_pearson(n1, n0 + n1, config$conf_level)["upper"],
-      y_lwr_lbl = ci_lower - 0.05,
-      y_upr_lbl = ci_upper + 0.05,
-      y_lbl = dplyr::if_else(y_lwr_lbl > 1 - y_upr_lbl, y_lwr_lbl, y_upr_lbl),
-      .by = c("exposure_bins", "strata")
+    )
+
+  # binary response: response *rate* per bin, via a Clopper-Pearson CI.
+  # continuous (and, as an approximation, count) response: bin *mean*, via
+  # a t-interval -- see PLAN.md Stage 1. Label placement (y_lwr_lbl/
+  # y_upr_lbl/y_lbl) is generalised across both branches below rather than
+  # duplicated, using the response's own scale (`object$response$limits`)
+  # in place of the binary-only [0, 1] assumption.
+  if (object$response$type == "binary") {
+    config$summary <- binned |> 
+      dplyr::summarise(
+        n1 = sum(response == 1, na.rm = TRUE),
+        n0 = sum(response == 0, na.rm = TRUE),
+        x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
+        y_mid = n1 / (n0 + n1),
+        y_mid_lbl = object$style$format_percent(n1 / (n0 + n1)),
+        ci_lower = clopper_pearson(n1, n0 + n1, config$conf_level)["lower"], 
+        ci_upper = clopper_pearson(n1, n0 + n1, config$conf_level)["upper"],
+        .by = c("exposure_bins", "strata")
+      )
+  } else {
+    config$summary <- binned |> 
+      dplyr::summarise(
+        x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
+        y_mid = mean(response, na.rm = TRUE),
+        y_mid_lbl = object$style$format_number(mean(response, na.rm = TRUE)),
+        ci_lower = t_interval(response, config$conf_level)["lower"], 
+        ci_upper = t_interval(response, config$conf_level)["upper"],
+        .by = c("exposure_bins", "strata")
+      )
+  }
+
+  response_lo <- object$response$limits[1]
+  response_hi <- object$response$limits[2]
+  margin <- 0.05 * (response_hi - response_lo)
+
+  config$summary <- config$summary |> 
+    dplyr::mutate(
+      y_lwr_lbl = ci_lower - margin,
+      y_upr_lbl = ci_upper + margin,
+      y_lbl = dplyr::if_else(
+        (y_lwr_lbl - response_lo) > (response_hi - y_upr_lbl), 
+        y_lwr_lbl, 
+        y_upr_lbl
+      )
     )
   
   if (style == "errorbar") config$builder <- build_quantile_errorbar

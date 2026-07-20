@@ -128,6 +128,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   # stylistic information
   object$style$format_p <- scales::label_pvalue(accuracy = .001, add_p = TRUE)
   object$style$format_percent <- scales::label_percent(accuracy = 1)
+  object$style$format_number <- scales::label_number(accuracy = 0.01)
   object$style$height <- list(base = 6, strip = 2, group = 3) 
   object$style$theme_base <- function() ggplot2::theme_bw()
   object$style$theme_args <- function() {
@@ -183,7 +184,6 @@ er_plot_show_model <- function(object, model, keep_strata = NULL, style = "ribbo
 er_plot_show_quantiles <- function(object, keep_strata = NULL, style = "errorbar", bins = 4, conf_level = 0.95) {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  if (identical(object$response$type, "continuous")) .abort_continuous_unsupported("er_plot_show_quantiles")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
   
   object$part$quantile <- .part_quantile(

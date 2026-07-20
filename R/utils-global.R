@@ -22,5 +22,6 @@ utils::globalVariables(c(
   "y_upr_lbl",
   "y_lbl",
   "y_mid_lbl",
+  "response",
   ":="
 ))
