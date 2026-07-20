@@ -31,7 +31,9 @@ er_vpc_plot(data, sim, exposure, response, group_by, conf_level = 0.95)
 
 - response:
 
-  Response variable (one variable, unquoted). Assumed to be binary (0/1)
+  Response variable (one variable, unquoted). Must currently be binary
+  (0/1, or logical); continuous responses are not yet supported and
+  raise an error (see `PLAN.md`)
 
 - group_by:
 

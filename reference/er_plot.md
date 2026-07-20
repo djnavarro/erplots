@@ -5,7 +5,7 @@ Builds an exposure-response plot for a fitted model
 ## Usage
 
 ``` r
-er_plot(data, exposure, response, stratify_by = NULL)
+er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
 
 er_plot_style(object, labels)
 
@@ -62,6 +62,14 @@ er_plot_build(object)
   Stratification variable used for color and fill (one variable,
   unquoted)
 
+- response_type:
+
+  One of `"auto"` (the default), `"binary"`, or `"continuous"`. Governs
+  response-scale defaults (e.g. axis limits) and, eventually, which plot
+  components are valid for the response. When `"auto"`, the response
+  column is classified as `"binary"` if it is logical or takes only
+  values in `{0, 1}`, and `"continuous"` otherwise.
+
 - object:
 
   Partially constructed plot (has S3 class `er_plot`)
@@ -111,6 +119,15 @@ er_plot_build(object)
 ## Value
 
 Plot object of class `er_plot`
+
+## Details
+
+`er_plot_show_quantiles()` and `er_plot_show_datastrip()` currently only
+support a binary (0/1) response – their underlying summaries assume a
+response *rate*, not a continuous quantity. Calling either on an
+`er_plot` whose response was classified (or declared) as `"continuous"`
+raises an error rather than silently producing a misleading plot; see
+`PLAN.md` for the plan to generalise these components.
 
 ## Examples
 

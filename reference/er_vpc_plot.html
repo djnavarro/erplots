@@ -84,8 +84,9 @@ columns as <code>data</code>, plus a <code>sim_id</code> column identifying each
 
 
 <dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
-<dd><p>Response variable (one variable, unquoted). Assumed to
-be binary (0/1)</p></dd>
+<dd><p>Response variable (one variable, unquoted). Must
+currently be binary (0/1, or logical); continuous responses are not
+yet supported and raise an error (see <code>PLAN.md</code>)</p></dd>
 
 
 <dt id="arg-group-by">group_by<a class="anchor" aria-label="anchor" href="#arg-group-by"></a></dt>
