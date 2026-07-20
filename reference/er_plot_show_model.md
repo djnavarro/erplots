@@ -74,7 +74,7 @@ the previous model layer rather than overlaying two model curves.
 
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
 [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md),
-[`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot_show_datastrip.md),
+[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md),
 [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
 
 ## Examples

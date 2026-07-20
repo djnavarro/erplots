@@ -3,7 +3,7 @@
 up a plot by piping it through one or more layer functions –
 er_plot_show_model() (fitted-model curve/ribbon and summary),
 er_plot_show_quantiles() (exposure-quantile-binned response summary),
-er_plot_show_datastrip() (a strip depicting the raw data), and/or
+er_plot_show_data() (a strip depicting the raw data), and/or
 er_plot_show_groups() (grouped exposure-distribution panels) – then
 render with plot()/print(), or build the ggplot2/patchwork objects
 directly with er_plot_build(). er_plot() never fits a model itself;
@@ -12,7 +12,7 @@ be passed to er_plot_show_model()."><meta property="og:description" content="er_
 up a plot by piping it through one or more layer functions –
 er_plot_show_model() (fitted-model curve/ribbon and summary),
 er_plot_show_quantiles() (exposure-quantile-binned response summary),
-er_plot_show_datastrip() (a strip depicting the raw data), and/or
+er_plot_show_data() (a strip depicting the raw data), and/or
 er_plot_show_groups() (grouped exposure-distribution panels) – then
 render with plot()/print(), or build the ggplot2/patchwork objects
 directly with er_plot_build(). er_plot() never fits a model itself;
@@ -66,7 +66,7 @@ be passed to er_plot_show_model()."></head><body>
 up a plot by piping it through one or more layer functions –
 <code><a href="er_plot_show_model.html">er_plot_show_model()</a></code> (fitted-model curve/ribbon and summary),
 <code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code> (exposure-quantile-binned response summary),
-<code><a href="er_plot_show_datastrip.html">er_plot_show_datastrip()</a></code> (a strip depicting the raw data), and/or
+<code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> (a strip depicting the raw data), and/or
 <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code> (grouped exposure-distribution panels) – then
 render with <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>/<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, or build the ggplot2/patchwork objects
 directly with <code><a href="er_plot_build.html">er_plot_build()</a></code>. <code>er_plot()</code> never fits a model itself;
@@ -124,7 +124,7 @@ approximation – never produces a negative lower bound. See
     <div class="section level2">
     <h2 id="layers-are-either-singleton-or-additive">Layers are either singleton or additive<a class="anchor" aria-label="anchor" href="#layers-are-either-singleton-or-additive"></a></h2>
     <p><code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>, <code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>, and
-<code><a href="er_plot_show_datastrip.html">er_plot_show_datastrip()</a></code> are <strong>singleton</strong>: calling one of them twice
+<code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> are <strong>singleton</strong>: calling one of them twice
 on the same object overwrites the first call's result rather than
 combining the two. <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code> is <strong>additive</strong>: each call
 adds another grouped-distribution panel alongside any already added,
@@ -144,7 +144,7 @@ discrete variable used to split layers by color/fill, with one shared,
 deduplicated legend across the whole composed plot. Each layer
 function's <code>keep_strata</code> argument controls whether <em>that</em> layer
 actually uses the stratification (it defaults to <code>TRUE</code> whenever
-<code>stratify_by</code> was set, <code>FALSE</code> otherwise). <code><a href="er_plot_show_datastrip.html">er_plot_show_datastrip()</a></code>
+<code>stratify_by</code> was set, <code>FALSE</code> otherwise). <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code>
 is a partial exception to the "always color/fill" rule – see its own
 documentation and <code>PLAN.md</code> for why a continuous-response variant of
 that layer would need to fall back to faceting instead.</p>
@@ -161,7 +161,7 @@ statistic.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>, <code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>,
-<code><a href="er_plot_show_datastrip.html">er_plot_show_datastrip()</a></code>, <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code>,
+<code><a href="er_plot_show_data.html">er_plot_show_data()</a></code>, <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code>,
 <code><a href="er_plot_build.html">er_plot_build()</a></code>, <code><a href="er_plot_style.html">er_plot_style()</a></code>, <a href="er_model_interface.html">er_model_interface</a></p></div>
     </div>
 

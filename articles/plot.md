@@ -44,7 +44,7 @@ erglm_data |>
   er_plot(exposure = aucss, response = ae1) |> 
   er_plot_show_model(mod) |> 
   er_plot_show_quantiles() |>
-  er_plot_show_datastrip() |>
+  er_plot_show_data() |>
   er_plot_show_groups(group_by = aucss) |> 
   plot()
 ```
@@ -68,7 +68,7 @@ erglm_data |>
   ) |> 
   er_plot_show_model(mod_strat) |> 
   er_plot_show_quantiles() |> 
-  er_plot_show_datastrip() |>
+  er_plot_show_data() |>
   plot()
 ```
 
@@ -88,7 +88,7 @@ erglm_data |>
   # stratification variable, so we pass the un-stratified `mod` here
   er_plot_show_model(mod, keep_strata = FALSE) |> 
   er_plot_show_quantiles() |> 
-  er_plot_show_datastrip() |>
+  er_plot_show_data() |>
   plot()
 ```
 
@@ -155,7 +155,7 @@ auto-detects whether the response is binary (logical, or values entirely
 in `{0, 1}`) or continuous, and you can override the detection with
 `response_type`. The model component and quantile component both adapt:
 quantile bins report a mean with a t-interval instead of a rate with a
-Clopper-Pearson interval. The data strip component has no
+Clopper-Pearson interval. The data layer component has no
 continuous-response variant (see below), so it’s omitted here.
 
 ``` r
@@ -284,11 +284,11 @@ er_vpc_plot(
 
 ![](plot_files/figure-html/count-3-1.png)
 
-## Strip component
+## Data component
 
-The data strip is inherently a binary-response design (responders
+The data layer is inherently a binary-response design (responders
 jittered above the exposure line, non-responders below), so
-[`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot_show_datastrip.md)
+[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
 raises an error for a continuous-response `er_plot` rather than silently
 mis-plotting:
 
@@ -297,9 +297,9 @@ mis-plotting:
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
   er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_datastrip()
+  er_plot_show_data()
 #> Error in `.abort_continuous_unsupported()`:
-#> ! `er_plot_show_datastrip()` does not support continuous responses.
+#> ! `er_plot_show_data()` does not support continuous responses.
 #> ℹ Only binary (0/1, or logical) responses are currently supported by this component.
 #> ℹ No continuous-response variant of this component is currently planned; see PLAN.md.
 ```

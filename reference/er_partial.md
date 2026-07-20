@@ -5,15 +5,7 @@ Partial builders for exposure-response plots
 ## Usage
 
 ``` r
-build_datastrip_jitter(
-  data,
-  config,
-  stratify,
-  exposure,
-  response,
-  strata,
-  style
-)
+build_data_jitter(data, config, stratify, exposure, response, strata, style)
 
 build_group_boxplot(data, config, stratify, exposure, response, strata, style)
 
@@ -89,8 +81,8 @@ be added to a ggplot2 plot. The expectation is that these objects will
 be added to a partially-constructed plot which, at a minimum, already
 has the base theme applied. For "model", "summary", and "quantile", the
 pieces will be added to a plot that already has a coord that sets the
-axis limits. For the "datastrip" and "group" plots, the plot object does
-not yet have a coord. The expectation, however, is that the builder will
+axis limits. For the "data" and "group" plots, the plot object does not
+yet have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That is,
 since all component plots use the exposure variable for the x-axis, they
 should use the values stored in `exposure$limits` tp set the x-axis
@@ -106,7 +98,7 @@ Things we can have partials for:
 
 - quantile
 
-- datastrip
+- data
 
 - group
 

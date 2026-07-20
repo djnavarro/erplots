@@ -46,7 +46,7 @@ erglm_data |>
       layer functions (piped, any order, any subset):
         er_plot_show_model()
         er_plot_show_quantiles()
-        er_plot_show_datastrip()
+        er_plot_show_data()
         er_plot_show_groups()
           |
           v
@@ -67,15 +67,15 @@ There are currently four layers, each documented on its own help topic:
 |----|----|----|----|
 | Model | \[er_plot_show_model()\] | Fitted curve/ribbon (or spaghetti) plus an optional summary annotation | No |
 | Quantile | \[er_plot_show_quantiles()\] | Exposure-quantile-binned response summary (rate/mean + CI) | Yes |
-| Data strip | \[er_plot_show_datastrip()\] | Raw observations jittered along exposure | Yes (binary only, for now) |
+| Data | \[er_plot_show_data()\] | Raw observations jittered along exposure | Yes (binary only, for now) |
 | Group | \[er_plot_show_groups()\] | Exposure distribution, boxplot/violin, split by a grouping variable | No |
 
 ## Layers are either singleton or additive
 
 Calling a layer function twice on the same object doesn’t always do the
-same thing. The model, quantile, and data-strip layers are
-**singleton**: a second call replaces the first call’s result rather
-than combining the two.
+same thing. The model, quantile, and data layers are **singleton**: a
+second call replaces the first call’s result rather than combining the
+two.
 
 ``` r
 
@@ -126,7 +126,7 @@ erglm_data |>
   er_plot(aucss, ae1, stratify_by = sex) |>
   er_plot_show_model(mod_strat) |>
   er_plot_show_quantiles() |>
-  er_plot_show_datastrip() |>
+  er_plot_show_data() |>
   plot()
 ```
 
@@ -139,12 +139,12 @@ own encoding takes precedence; stratification adapts to whatever channel
 is left**, defaulting to color/fill. Today, every layer’s own encoding
 leaves color/fill free for strata, so this rule is invisible in practice
 – but it stops being invisible once a layer needs color for something
-else. The data strip layer is the first anticipated case: a
+else. The data layer is the first anticipated case: a
 continuous-response variant would need color for the response value
 itself, so stratification for that one layer would have to fall back to
 per-stratum facets instead. That variant doesn’t exist yet (see
 `PLAN.md`’s “Continuous-response data strip” section); today’s data
-strip only supports a binary response, and uses color/fill for strata
+layer only supports a binary response, and uses color/fill for strata
 like every other layer.
 
 ## Response type changes what a layer summarises, not whether it appears
@@ -175,10 +175,10 @@ rationale and the
 where the choice between the t-interval and exact Poisson interval
 visibly matters.
 
-The data strip layer is the odd one out: rather than adapting its
-summary statistic, it currently only supports `"binary"` responses at
-all, and errors for `"continuous"`/`"count"` rather than silently
-mis-plotting – see \[er_plot_show_datastrip()\].
+The data layer is the odd one out: rather than adapting its summary
+statistic, it currently only supports `"binary"` responses at all, and
+errors for `"continuous"`/`"count"` rather than silently mis-plotting –
+see \[er_plot_show_data()\].
 
 ## Keeping this article in sync
 

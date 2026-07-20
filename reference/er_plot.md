@@ -6,7 +6,7 @@ up a plot by piping it through one or more layer functions –
 (fitted-model curve/ribbon and summary),
 [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md)
 (exposure-quantile-binned response summary),
-[`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot_show_datastrip.md)
+[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
 (a strip depicting the raw data), and/or
 [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
 (grouped exposure-distribution panels) – then render with
@@ -71,7 +71,7 @@ An (empty) plot object of class `er_plot`
 [`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md),
 [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md),
 and
-[`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot_show_datastrip.md)
+[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
 are **singleton**: calling one of them twice on the same object
 overwrites the first call's result rather than combining the two.
 [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
@@ -93,7 +93,7 @@ deduplicated legend across the whole composed plot. Each layer
 function's `keep_strata` argument controls whether *that* layer actually
 uses the stratification (it defaults to `TRUE` whenever `stratify_by`
 was set, `FALSE` otherwise).
-[`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot_show_datastrip.md)
+[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
 is a partial exception to the "always color/fill" rule – see its own
 documentation and `PLAN.md` for why a continuous-response variant of
 that layer would need to fall back to faceting instead.
@@ -114,7 +114,7 @@ statistic.
 
 [`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md),
 [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md),
-[`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot_show_datastrip.md),
+[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md),
 [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md),
 [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md),
 [`er_plot_style()`](https://erplots.djnavarro.net/reference/er_plot_style.md),

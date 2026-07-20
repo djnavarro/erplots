@@ -111,7 +111,7 @@ component, and finish with <code><a href="https://rdrr.io/r/graphics/plot.defaul
   layer functions (piped, any order, any subset):
     er_plot_show_model()
     er_plot_show_quantiles()
-    er_plot_show_datastrip()
+    er_plot_show_data()
     er_plot_show_groups()
       |
       v
@@ -155,8 +155,8 @@ annotation</td>
 <td>Yes</td>
 </tr>
 <tr class="odd">
-<td>Data strip</td>
-<td>[er_plot_show_datastrip()]</td>
+<td>Data</td>
+<td>[er_plot_show_data()]</td>
 <td>Raw observations jittered along exposure</td>
 <td>Yes (binary only, for now)</td>
 </tr>
@@ -174,7 +174,7 @@ variable</td>
 <h2 id="layers-are-either-singleton-or-additive">Layers are either singleton or additive<a class="anchor" aria-label="anchor" href="#layers-are-either-singleton-or-additive"></a>
 </h2>
 <p>Calling a layer function twice on the same object doesn’t always do
-the same thing. The model, quantile, and data-strip layers are
+the same thing. The model, quantile, and data layers are
 <strong>singleton</strong>: a second call replaces the first call’s
 result rather than combining the two.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -218,7 +218,7 @@ with one shared, deduplicated legend across the whole composed plot:</p>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_datastrip.html">er_plot_show_datastrip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="design_files/figure-html/stratification-1.png" class="r-plt" alt="" width="700"></p>
 <p>Each layer’s own <code>keep_strata</code> argument controls whether
@@ -229,12 +229,12 @@ precedence; stratification adapts to whatever channel is left</strong>,
 defaulting to color/fill. Today, every layer’s own encoding leaves
 color/fill free for strata, so this rule is invisible in practice – but
 it stops being invisible once a layer needs color for something else.
-The data strip layer is the first anticipated case: a
-continuous-response variant would need color for the response value
-itself, so stratification for that one layer would have to fall back to
-per-stratum facets instead. That variant doesn’t exist yet (see
+The data layer is the first anticipated case: a continuous-response
+variant would need color for the response value itself, so
+stratification for that one layer would have to fall back to per-stratum
+facets instead. That variant doesn’t exist yet (see
 <code>PLAN.md</code>’s “Continuous-response data strip” section);
-today’s data strip only supports a binary response, and uses color/fill
+today’s data layer only supports a binary response, and uses color/fill
 for strata like every other layer.</p>
 </div>
 <div class="section level2">
@@ -281,11 +281,10 @@ approximately-continuous quantity unless
 [er_plot_show_quantiles()] for the full rationale and the <a href="plot.html">Plotting</a> article’s “Continuous responses” section
 for worked examples, including a case where the choice between the
 t-interval and exact Poisson interval visibly matters.</p>
-<p>The data strip layer is the odd one out: rather than adapting its
-summary statistic, it currently only supports <code>"binary"</code>
-responses at all, and errors for
-<code>"continuous"</code>/<code>"count"</code> rather than silently
-mis-plotting – see [er_plot_show_datastrip()].</p>
+<p>The data layer is the odd one out: rather than adapting its summary
+statistic, it currently only supports <code>"binary"</code> responses at
+all, and errors for <code>"continuous"</code>/<code>"count"</code>
+rather than silently mis-plotting – see [er_plot_show_data()].</p>
 </div>
 <div class="section level2">
 <h2 id="keeping-this-article-in-sync">Keeping this article in sync<a class="anchor" aria-label="anchor" href="#keeping-this-article-in-sync"></a>

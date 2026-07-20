@@ -19,8 +19,8 @@ Build exposure-response plots from any model that implements
 - [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md)
   : Add a quantile-binned response summary layer
 
-- [`er_plot_show_datastrip()`](https://erplots.djnavarro.net/reference/er_plot_show_datastrip.md)
-  : Add a raw-data strip layer
+- [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+  : Add a raw-data layer
 
 - [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
   : Add a grouped exposure-distribution panel
@@ -30,7 +30,7 @@ Build exposure-response plots from any model that implements
 
   Build and render an `er_plot` object
 
-- [`build_datastrip_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+- [`build_data_jitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_group_boxplot()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_group_violin()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md)
