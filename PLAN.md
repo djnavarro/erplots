@@ -605,3 +605,223 @@ stored on the summary object.
   distinct, color-matched x positions per bin rather than stacked at a
   shared `x_mid`). Met -- `devtools::check()` clean (0/0/0), 285 tests
   passing (up from 270).
+
+## Mini-language architecture review
+
+### Motivation
+
+The response-type generalisation above (Stages 0-6, done; Stage 7a-7c,
+scoped) forced two things into the open that the mini-language's design
+had never made explicit, because nothing before Stage 7 ever needed to
+notice them:
+
+1. The four layers don't all behave the same way when their
+   `er_plot_show_*()` function is called more than once on the same
+   `er_plot` object -- `er_plot_show_groups()` accumulates, the other
+   three overwrite. This was never documented as a deliberate property.
+2. "Stratification means color/fill, uniformly, with a shared legend" was
+   an implicit assumption baked into `.polish_labels()`/`.polish_legends()`,
+   and it breaks the moment a layer needs color for something other than
+   strata -- exactly the situation the continuous-response data layer
+   (Stage 7) is in.
+
+Rather than patch these ad hoc inside Stage 7's implementation, this
+section names them explicitly, proposes documentation (not code) to
+close the gaps, and settles one terminology question (the "data strip"
+name) that Stage 7 would otherwise have to invent mid-implementation.
+This is a planning-only pass: nothing in this section changes code,
+docs, or names by itself -- it scopes work for later stages, some of
+which piggyback on Stage 7's own implementation PR.
+
+### Naming decision: "data strip" -> "data layer"
+
+Going forward, the layer currently called the "data strip"
+(`er_plot_show_datastrip()`, `.part_strip()`, `build_datastrip_jitter()`,
+`object$part$strip`/`object$plot$strip`) will be called the **data
+layer** in code and docs once it's renamed: `er_plot_show_data()`,
+`.part_data()`, `build_data_jitter()` (binary) /
+`build_data_color()` (continuous/count, per Stage 7b). This matches the
+existing `model`/`quantile`/`group` naming pattern -- all four layers
+named for *what they show*, not how they're drawn -- and "strip" stops
+being an accurate name anyway once a continuous variant exists (a single
+color-coded panel, not two stacked jitter panels).
+
+The rename itself is **not done in this pass**. It's scoped here as a
+checklist for whoever implements it, and it should land as part of Stage
+7's implementation PR rather than as a separate rename PR, to avoid two
+full-package diffs for what's really one unit of work. Symbols/places
+that need to change:
+
+- `er_plot_show_datastrip()` -> `er_plot_show_data()`
+- `.part_strip()` -> `.part_data()`
+- `build_datastrip_jitter()` -> `build_data_jitter()`; new
+  `build_data_color()` per Stage 7b
+- `object$part$strip`, `object$plot$strip` -> `object$part$data`,
+  `object$plot$data`
+- `config$panel` and its `"upper"`/`"lower"`/`"both"` values (binary-only;
+  Stage 7's API-changes section already covers the guard for
+  continuous/count)
+- `object$style$height$strip` -> `object$style$height$data`
+- `print.er_plot()`'s `"strip"` branch and its printed label
+- `.abort_continuous_unsupported()`'s call site (currently
+  `er_plot_show_datastrip()`)
+- Roxygen `@rdname`/`@name` anchors referencing the strip functions,
+  `R/er-plot-partials-datastrip.R`'s filename
+  (-> `R/er-plot-partials-data.R`)
+- `vignettes/articles/plot.Rmd`'s "Strip component" section heading and
+  prose
+- This file's own prose (`PLAN.md`'s "Continuous-response data strip"
+  section title and body)
+
+### Layer composition semantics: singleton vs. additive
+
+Documenting current (undocumented) behavior: `er_plot_show_model()`,
+`er_plot_show_quantiles()`, and `er_plot_show_datastrip()`
+(future `er_plot_show_data()`) are **singleton** -- calling one twice
+overwrites `object$part$<x>`, silently discarding the first call's
+result. `er_plot_show_groups()` is **additive** -- each call's `group_by`
+accumulates into its own named entry, so multiple calls produce multiple
+side-by-side group panels rather than one call replacing another.
+
+Proposed reading: this is intentional, not accidental, and reflects a
+reasonable mental model -- there is only one "the model" and one "the
+quantile summary" per plot, but many legitimate ways to slice the
+exposure distribution by different grouping variables. Recommend
+documenting the distinction explicitly (in `?er_plot`'s `@details`,
+`?er_partial`, and the new vignette material below) rather than changing
+any behavior. This is flagged as an open question below rather than
+assumed, since it's a real design commitment worth confirming rather
+than a docs-only formality.
+
+One related loose end, resolved as future-only rather than left open:
+because `er_plot_show_model()` is singleton, overlaying two model curves
+(e.g. comparing a candidate model against a null/reference model, or an
+Emax fit against a linear one) isn't possible today. Of the three
+singleton layers, this is the one with a genuine plausible use case --
+unlike quantile or data, where calling the same layer twice on the same
+response variable has no obvious distinct meaning (overlaid bin-counts
+or panel subsets would just be visually ambiguous, not informative).
+Recommendation: don't change anything now -- no concrete request exists
+yet, and making `model` additive is real work, comparable to what Stage
+7 is already doing to make the data layer's strata facets legend-aware
+(the model layer would need an analogous per-model legend/label story).
+Mirrors design decision (2)'s original stance on the data strip: leave
+the door open, revisit only if/when a concrete need shows up. Quantile
+and data layers are not expected to ever need this -- only `model` is
+flagged as a plausible future additive layer.
+
+### Stratification vs. the data layer's color channel
+
+Stratification's contract -- never written down explicitly before now --
+is "encode via color/fill, uniformly across layers, with one shared,
+deduplicated legend." The continuous-response data layer (Stage 7) needs
+color for the response value itself, so stratification for that one
+layer has to become vertical faceting (one mini-panel per stratum level)
+instead, per the "Complication: composition machinery assumes two named
+panels" and "Complication: the strip's color legend isn't a strata
+legend" sections above.
+
+That mechanical fix is already fully scoped in Stage 7a/7b (the
+`object$plot$strip` panel-list generalisation, the `config$color_role`
+tag, and `.polish_labels()`/`.polish_legends()` dispatching on it). What
+was missing from that write-up is the one-sentence general framing:
+**a layer's own encoding takes precedence; stratification adapts to
+whatever channel is left, defaulting to color/fill and falling back to
+per-stratum facets when color is already spoken for.** Recording that
+rule once here (and echoing it into Stage 7's docs when it lands) makes
+the data layer's facet fallback read as an instance of a general design
+rule rather than an ad hoc fix invented for one layer.
+
+Per explicit scope decision, this section does **not** extend that rule
+to a general redesign of stratification (multiple stratifying variables,
+continuous strata, or applying the color/facet fallback to other
+layers). Those remain out of scope until a concrete need for them shows
+up, tracked separately if and when that happens.
+
+### Documentation sweep
+
+Two gaps, proposed (not yet written):
+
+- **No conceptual/grammar documentation exists.** `?er_plot` documents
+  parameters; `?er_partial` documents the builder contract;
+  `vignettes/articles/plot.Rmd` is a sequence of worked examples. None of
+  these document the mini-language's grammar as a grammar: what a
+  "layer" is, singleton-vs-additive semantics, how stratification
+  composes with each layer (including the data layer's facet exception
+  above), and how `response_type` changes each layer's summary
+  statistic. Proposal: add a short new vignette article (e.g.
+  `vignettes/articles/design.Rmd`) or a new leading section in
+  `plot.Rmd` covering (a) the four layers and what each shows, (b) the
+  singleton/additive distinction, (c) how `stratify_by` composes with
+  each layer, (d) how `response_type` dispatches within each layer. A
+  small `mermaid` diagram (data -> layers -> build -> compose) may help
+  orient readers.
+- **`?er_plot`'s `@rdname er_plot` groups too much.** `er_plot()`,
+  `er_plot_style()`, `er_plot_show_model()`, `er_plot_show_quantiles()`,
+  `er_plot_show_datastrip()`/(future) `er_plot_show_data()`,
+  `er_plot_show_groups()`, and `er_plot_build()` currently share one Rd
+  page and one shared `@param` list, even though not every parameter
+  applies to every function (`panel` only means something for the data
+  layer; `bins` means different things for quantile vs. group bins).
+  Resolved: split into per-layer Rd topics (`?er_plot_show_model`,
+  `?er_plot_show_quantiles`, etc.), each documenting its own
+  singleton/additive status, response-type dispatch, and layer-specific
+  arguments. Sequencing decision: do this split **before** Stage 7's
+  implementation, not as a later Stage D item -- Stage 7 is about to add
+  a second data-layer builder (`build_data_color()`), a `color_role`
+  concept, and a `panel != "both"` guard that only make sense for that
+  one layer, and writing those into the existing shared page would just
+  create more to untangle later. Splitting first gives Stage 7 a clean,
+  dedicated `?er_plot_show_data` topic to write straight into. Trade-off
+  accepted explicitly: this changes `@rdname er_plot` anchors that users/
+  scripts may reference by topic name, and is a larger docs diff than it
+  looks -- worth it here because of the direction the docs are already
+  heading, but noted so it isn't a surprise.
+
+### Staged roadmap
+
+- **Stage A -- naming decision + rename scoping (docs only).** The "data
+  layer" name and full symbol inventory above are the checklist Stage
+  7's implementation PR should execute against. No renames land in this
+  stage.
+- **Stage A' -- `?er_plot` Rd-page split (docs only, before Stage 7).**
+  Split the shared Rd page into per-layer topics as resolved above.
+  Lands before Stage 7a so the new `er_plot_show_data()` docs (Stage 7)
+  get a dedicated home from the start rather than another round of
+  untangling a shared page. Also documents, per-topic, the
+  singleton/additive status settled in Stage B below and the
+  layer-specific `color_role`/facet behavior from Stage C, once each is
+  written.
+- **Stage B -- document singleton/additive semantics.** Pure docs
+  (now written into the appropriate per-layer topic from Stage A', plus
+  `?er_partial` and the vignette): state that model/quantile/data are
+  singleton and group is additive, and that model-overlay is the one
+  singleton layer flagged as a plausible (but not yet planned) future
+  additive exception -- resolved above, not left open.
+- **Stage C -- document the color/facet precedence rule.** Pure docs:
+  fold the one-sentence general framing above into wherever Stage 7's
+  `color_role` design gets written up (now `?er_plot_show_data` post-
+  Stage A'), so the data layer's facet fallback reads as an instance of
+  a general rule.
+- **Stage D -- conceptual vignette / grammar write-up.** The new
+  vignette section/article above (layers, singleton/additive semantics,
+  stratification composition, response-type dispatch), cross-linking the
+  per-layer Rd topics from Stage A' rather than duplicating their detail.
+
+Sequencing note: Stage A' now precedes Stage 7's implementation (moved
+up from a later, optional item); Stages A, B, and C are prerequisites
+for, or should land alongside, Stage 7's implementation; Stage D can
+happen independently, before or after.
+
+### Resolved questions
+
+- **Singleton/additive scope.** Model, quantile, and data layers stay
+  singleton; group stays additive. Model-overlay (comparing two fitted
+  models on one plot) is the one plausible future exception, explicitly
+  deferred until a concrete need arises -- not planned as part of this
+  review. Quantile and data layers are not expected to need an additive
+  variant.
+- **`?er_plot` Rd-page split.** Yes, and sequenced ahead of Stage 7
+  (Stage A' above) rather than as an independent later item, so Stage
+  7's new data-layer docs land in their own topic rather than the
+  shared page.
