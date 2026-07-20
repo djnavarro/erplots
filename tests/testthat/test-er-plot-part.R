@@ -147,6 +147,30 @@ test_that(".part_quantile uses bin means and t-intervals for a continuous respon
 })
 
 
+test_that(".part_quantile routes a count (Poisson) response through the continuous path", {
+  skip_if_not_installed("erglm")
+
+  # ae_count is a count, not a {0, 1} response -- "auto" must not
+  # misclassify it as binary (PLAN.md Stage 4)
+  plt <- er_test_data |> er_plot(aucss, ae_count)
+  expect_equal(plt$response$type, "continuous")
+
+  expect_no_error(plt |> er_plot_show_model(er_test_mod_poisson) |> er_plot_show_quantiles())
+  plt <- plt |> er_plot_show_model(er_test_mod_poisson) |> er_plot_show_quantiles()
+
+  smm <- plt$part$quantile$config$summary
+  expect_named(smm, c(
+    "exposure_bins", "strata",
+    "x_mid", "y_mid", "y_mid_lbl", "ci_lower",
+    "ci_upper", "y_lwr_lbl", "y_upr_lbl", "y_lbl"
+  ))
+  expect_true(all(smm$ci_lower <= smm$y_mid & smm$y_mid <= smm$ci_upper))
+  # bin means should be non-negative (it's a count), even though the
+  # t-interval approximation can push ci_lower below zero -- a known,
+  # documented limitation, not asserted against here
+})
+
+
 test_that(".part_strip constructs the correct data structure", {
   skip_if_not_installed("erglm")
 

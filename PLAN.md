@@ -268,23 +268,34 @@ criteria are meant to be concrete enough to check off, not aspirational.
 - Revisit a genuine continuous-response strip/rug design later, as a
   separate, independently-scoped item, once there's a concrete use case.
 
-**Stage 4 -- count (Poisson) responses [docs done; round-trip not yet verified]**
-- Route through the `"continuous"` path from Stages 1-2 (mean + t-interval),
-  as agreed in design decision (4). No new code needed beyond ensuring the
-  `"auto"` detection heuristic doesn't misclassify a Poisson count column
-  (it won't, since counts aren't confined to `{0, 1}`).
-- The approximation (t-interval instead of an exact Poisson interval) is
-  now documented: `?er_plot`'s `response_type` and `@details`, and
-  `?er_vpc_plot`'s `response_type`, both explain that count responses
-  auto-detect as `"continuous"` and are summarised the same way as any
-  other continuous response, with a forward pointer to this design
-  decision. Flagged there as a known simplification with a planned
-  fast-follow (an exact Poisson CI path), not part of this pass.
-- Not yet done: an actual round-trip check/test with an
-  `erglm_model(ae_count ~ aucss, erglm_data, family = poisson())` model
-  through `er_plot_show_quantiles()` and `er_vpc_plot()`.
+**Stage 4 -- count (Poisson) responses [done]**
+- Routes through the `"continuous"` path from Stages 1-2 (mean +
+  t-interval), as agreed in design decision (4), with no new dispatch
+  code -- confirmed by round-tripping an actual
+  `erglm_model(ae_count ~ aucss, er_test_data, family = poisson())`
+  model through both `er_plot_show_quantiles()` and `er_vpc_plot()`.
+  `.detect_response_type()` correctly classifies `ae_count` as
+  `"continuous"` (counts aren't confined to `{0, 1}`); bin means track
+  the fitted Poisson curve, and observed/simulated VPC summaries overlap
+  sensibly across quantile bins. Verified visually as well as via test.
+- Confirmed downside of the approximation, exactly as anticipated by
+  design decision (4): the symmetric t-interval can produce a negative
+  lower bound for low-count bins (e.g. Placebo), which isn't sensible
+  for a non-negative count. Not a new bug -- this is the rationale
+  behind the noted fast-follow (an exact Poisson CI path), not something
+  to fix in this pass.
+- The approximation is documented: `?er_plot`'s `response_type` and
+  `@details`, and `?er_vpc_plot`'s `response_type`, both explain that
+  count responses auto-detect as `"continuous"` and are summarised the
+  same way as any other continuous response, with a forward pointer to
+  this design decision.
+- Files: no `R/` changes needed. Tests: added a count-response round-trip
+  test to `test-er-plot-part.R` (`.part_quantile()` via
+  `er_plot_show_quantiles()`) and `test-er-vpc.R` (`er_vpc_plot()`),
+  both using a `poisson()` `erglm_model(ae_count ~ aucss, ...)` fixture.
 - Done when: an `erglm_model(ae_count ~ aucss, erglm_data, family =
   poisson())` model round-trips through Stages 1-3 without special-casing.
+  Met.
 
 **Stage 5 -- guard rails for the interim [done]**
 - Because Stages 1-4 are sequential work, land a defensive check *first*
@@ -304,12 +315,12 @@ criteria are meant to be concrete enough to check off, not aspirational.
   column). `er_plot_show_model()` and `er_plot_show_groups()` are
   unaffected -- they already generalise for free (see above).
 
-**Stage 6 -- tests, vignettes, docs**
-- Update `tests/testthat/helper-data.R` to add continuous/count model
-  fixtures (`er_test_mod_gaussian`, `er_test_mod_poisson`, etc.) alongside
-  the existing binary ones, guarded the same way
-  (`requireNamespace("erglm")`).
-- Add/extend a vignette demonstrating a continuous-response
+**Stage 6 -- tests, vignettes, docs [fixtures done; vignette still open]**
+- `tests/testthat/helper-data.R` now has both continuous
+  (`er_test_mod_gaussian`) and count (`er_test_mod_poisson`) fixtures
+  alongside the existing binary ones, guarded the same way
+  (`requireNamespace("erglm")`); added while closing out Stage 4.
+- Still open: add/extend a vignette demonstrating a continuous-response
   exposure-response plot end to end (model + quantiles + VPC; strip
   omitted per Stage 3).
 - Update `?er_model_interface`, `?er_plot`, and `README.Rmd` examples to
@@ -323,11 +334,11 @@ criteria are meant to be concrete enough to check off, not aspirational.
 Stages 0 and 5 first (foundation + guard rails, low risk, unblock safe
 iteration), then 1 → 2 → 3 → 4 in order, then 6 throughout/at the end as
 each stage's tests/docs land alongside it rather than as a single final
-pass. Stages 0, 1, 2, 3, and 5 are now done; next up is Stage 4 (count/
-Poisson responses), which per design decision (4) needs no new dispatch
-code -- just confirming the `"auto"` heuristic handles a Poisson count
-column correctly and documenting the t-interval-vs-exact-Poisson-CI
-approximation.
+pass. Stages 0-5 are now all done -- the response-type generalisation
+work is complete for its originally-scoped components (quantiles, VPC,
+and a documented/guarded omission for the data strip). Only Stage 6
+(tests/vignettes/docs polish) remains, plus the "other known issues"
+below.
 
 ## Other known issues / follow-ups
 
