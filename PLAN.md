@@ -172,16 +172,21 @@ criteria are meant to be concrete enough to check off, not aspirational.
   override), and no other stage needs to touch response-limits logic
   again.
 
-**Stage 1 -- quantile summary layer**
+**Stage 1 -- quantile summary layer [t_interval() helper done; dispatch not yet wired in]**
 - Add a small internal dispatch (mirroring the existing `build_*` partial
   pattern), e.g. `.summarise_quantile_binary()` /
   `.summarise_quantile_continuous()`, selected via `object$response$type`
   inside `.part_quantile()`. Binary path keeps today's `n1`/`n0` +
   `clopper_pearson()` logic unchanged. Continuous path computes
   `mean()` and a t-interval (`mean ± qt(1 - alpha/2, df = n - 1) *
-  se`), skipping/flagging bins with `n < 2`.
-- Add a `t_interval()` helper alongside `clopper_pearson()` in
-  `R/utils-helpers.R` for the continuous CI, documented analogously.
+  se`), skipping/flagging bins with `n < 2`. Still open.
+- `t_interval()` helper alongside `clopper_pearson()` in
+  `R/utils-helpers.R` for the continuous CI, documented analogously, is
+  landed (with unit tests in `tests/testthat/test-utils-helpers.R`
+  covering agreement with `stats::t.test()`, `conf_level` handling,
+  `NA`-dropping, and the degenerate `n < 2` case, which returns
+  `c(lower = NA, upper = NA)` rather than erroring). Not yet wired into
+  `.part_quantile()`.
 - `build_quantile_errorbar()` itself should need no changes -- it already
   just consumes `x_mid`/`y_mid`/`ci_lower`/`ci_upper`/`y_mid_lbl` from
   `config$summary`, and `object$style$format_percent()` labelling should

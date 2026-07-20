@@ -36,6 +36,45 @@ clopper_pearson <- function(x, n, conf_level = 0.95) {
 }
 
 
+#' t-interval confidence interval for the mean of continuous data
+#'
+#' @param x Numeric vector of observations
+#' @param conf_level Confidence level
+#'
+#' @returns Named numeric vector (`lower`, `upper`), with confidence level
+#'   stored as an attribute. If fewer than 2 non-missing values are
+#'   supplied, returns `c(lower = NA, upper = NA)` (a standard deviation --
+#'   and hence a t-interval -- isn't defined for a single observation).
+#'
+#' @details Used by the quantile-binned summary layer (see
+#'   [er_plot_show_quantiles()]) and `er_vpc_plot()` to compute a
+#'   confidence interval for the mean response within an exposure bin, for
+#'   continuous (and, as an approximation, count) responses. This is the
+#'   continuous-response analogue of [clopper_pearson()]. `NA`s in `x` are
+#'   dropped before computing the interval.
+#'
+#' @export
+#' @examples
+#' t_interval(rnorm(20))
+#'
+t_interval <- function(x, conf_level = 0.95) {
+  x <- x[!is.na(x)]
+  n <- length(x)
+  if (n < 2) {
+    ci <- c(lower = NA_real_, upper = NA_real_)
+    attr(ci, "conf_level") <- conf_level
+    return(ci)
+  }
+  alpha <- 1 - conf_level
+  m <- mean(x)
+  se <- stats::sd(x) / sqrt(n)
+  t_crit <- stats::qt(1 - alpha / 2, df = n - 1)
+  ci <- c(lower = m - t_crit * se, upper = m + t_crit * se)
+  attr(ci, "conf_level") <- conf_level
+  return(ci)
+}
+
+
 #' Detect whether a response variable is binary or continuous
 #'
 #' @param x A vector (the response column)
