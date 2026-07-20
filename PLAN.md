@@ -633,6 +633,19 @@ This is a planning-only pass: nothing in this section changes code,
 docs, or names by itself -- it scopes work for later stages, some of
 which piggyback on Stage 7's own implementation PR.
 
+**The grammar this section describes is now also written up for users**,
+in `vignettes/articles/design.Rmd` (added as Stage D, below) -- the
+layer table, the singleton/additive distinction, the stratification
+color/facet precedence rule, and the response-type dispatch table all
+live there in user-facing form. That article's own closing section says
+explicitly that it must be updated in the same change as any future
+design decision that alters the grammar (a rename, a change to which
+layers are singleton/additive, a new response-type dispatch, etc.) --
+treat this PLAN.md section and that vignette as a pair: whenever this
+section's proposals are implemented or revised, check
+`vignettes/articles/design.Rmd` for staleness at the same time, not as a
+follow-up.
+
 ### Naming decision: "data strip" -> "data layer"
 
 Going forward, the layer currently called the "data strip"
@@ -742,20 +755,25 @@ up, tracked separately if and when that happens.
 
 Two gaps, proposed (not yet written):
 
-- **No conceptual/grammar documentation exists.** `?er_plot` documents
-  parameters; `?er_partial` documents the builder contract;
+- **No conceptual/grammar documentation exists.** [done] `?er_plot`
+  documents parameters; `?er_partial` documents the builder contract;
   `vignettes/articles/plot.Rmd` is a sequence of worked examples. None of
-  these document the mini-language's grammar as a grammar: what a
+  these documented the mini-language's grammar as a grammar: what a
   "layer" is, singleton-vs-additive semantics, how stratification
   composes with each layer (including the data layer's facet exception
   above), and how `response_type` changes each layer's summary
-  statistic. Proposal: add a short new vignette article (e.g.
-  `vignettes/articles/design.Rmd`) or a new leading section in
-  `plot.Rmd` covering (a) the four layers and what each shows, (b) the
-  singleton/additive distinction, (c) how `stratify_by` composes with
-  each layer, (d) how `response_type` dispatches within each layer. A
-  small `mermaid` diagram (data -> layers -> build -> compose) may help
-  orient readers.
+  statistic. Added `vignettes/articles/design.Rmd` (linked from
+  `_pkgdown.yml`'s articles list, alongside `plot.Rmd`), covering (a)
+  the four layers and what each shows (with a `mermaid` diagram, data ->
+  layers -> build -> compose), (b) the singleton/additive distinction
+  with runnable examples, (c) how `stratify_by` composes with each
+  layer including the color/facet precedence rule, (d) how
+  `response_type` dispatches within each layer. Cross-links each layer's
+  own Rd topic (Stage A') rather than duplicating their parameter-level
+  detail, and links back to `plot.Rmd` for fuller worked examples. Its
+  closing section instructs future changes to update it in the same
+  change as any grammar-altering decision -- see this section's
+  cross-reference note above.
 - **`?er_plot`'s `@rdname er_plot` groups too much.** `er_plot()`,
   `er_plot_style()`, `er_plot_show_model()`, `er_plot_show_quantiles()`,
   `er_plot_show_datastrip()`/(future) `er_plot_show_data()`,
@@ -803,10 +821,13 @@ Two gaps, proposed (not yet written):
   `color_role` design gets written up (now `?er_plot_show_data` post-
   Stage A'), so the data layer's facet fallback reads as an instance of
   a general rule.
-- **Stage D -- conceptual vignette / grammar write-up.** The new
-  vignette section/article above (layers, singleton/additive semantics,
+- **Stage D -- conceptual vignette / grammar write-up. [done]**
+  `vignettes/articles/design.Rmd` (layers, singleton/additive semantics,
   stratification composition, response-type dispatch), cross-linking the
   per-layer Rd topics from Stage A' rather than duplicating their detail.
+  Registered in `_pkgdown.yml`. Any future change to the grammar this
+  section describes must update this article in the same change -- see
+  the cross-reference note under "Motivation" above.
 
 Sequencing note: Stage A' now precedes Stage 7's implementation (moved
 up from a later, optional item); Stages A, B, and C are prerequisites

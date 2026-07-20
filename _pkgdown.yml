@@ -31,4 +31,5 @@ articles:
   - title:
     navbar:
     contents:
+      - articles/design
       - articles/plot
