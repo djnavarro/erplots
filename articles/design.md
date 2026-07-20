@@ -1,0 +1,192 @@
+# The plotting grammar
+
+This article is about the *grammar* erplots plots are built from, not
+about any one plot’s mechanics – for worked examples of each layer, see
+the [Plotting](https://erplots.djnavarro.net/articles/plot.md) article.
+If a design choice described here ever changes, this article and
+`PLAN.md`’s “Mini-language architecture review” section should be
+updated together; see the note at the end.
+
+``` r
+
+library(erplots)
+library(erglm)
+```
+
+## Building a plot is composing layers onto an object
+
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
+creates an empty object of class `er_plot`, storing the data and the
+plot’s exposure/response/stratification variables. You then pipe it
+through one or more *layer* functions, each of which adds one visual
+component, and finish with
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`print()`](https://rdrr.io/r/base/print.html)
+(or \[er_plot_build()\] directly):
+
+``` r
+
+mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_model(mod) |>
+  er_plot_show_quantiles() |>
+  er_plot_show_groups(aucss) |>
+  plot()
+```
+
+![](design_files/figure-html/pipeline-1.png)
+
+    observed data
+          |
+          v
+      er_plot()                       -- creates the (empty) object
+          |
+          v
+      layer functions (piped, any order, any subset):
+        er_plot_show_model()
+        er_plot_show_quantiles()
+        er_plot_show_datastrip()
+        er_plot_show_groups()
+          |
+          v
+      er_plot_build()                 -- called for you by plot()/print()
+          |
+          v
+      polish: margins, labels, legends, theme
+          |
+          v
+      compose: patchwork
+          |
+          v
+      rendered plot
+
+There are currently four layers, each documented on its own help topic:
+
+| Layer | Function | Shows | Depends on `response_type`? |
+|----|----|----|----|
+| Model | \[er_plot_show_model()\] | Fitted curve/ribbon (or spaghetti) plus an optional summary annotation | No |
+| Quantile | \[er_plot_show_quantiles()\] | Exposure-quantile-binned response summary (rate/mean + CI) | Yes |
+| Data strip | \[er_plot_show_datastrip()\] | Raw observations jittered along exposure | Yes (binary only, for now) |
+| Group | \[er_plot_show_groups()\] | Exposure distribution, boxplot/violin, split by a grouping variable | No |
+
+## Layers are either singleton or additive
+
+Calling a layer function twice on the same object doesn’t always do the
+same thing. The model, quantile, and data-strip layers are
+**singleton**: a second call replaces the first call’s result rather
+than combining the two.
+
+``` r
+
+plt <- erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_quantiles(bins = 4) |>
+  er_plot_show_quantiles(bins = 8) # overwrites the bins = 4 call
+
+plt$part$quantile$config$n_quantiles # 8, not 4
+#> [1] 8
+```
+
+The group layer is the one exception: it’s **additive**. Each call adds
+another panel alongside any already added, rather than replacing them:
+
+``` r
+
+plt <- erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_show_groups(aucss) |>
+  er_plot_show_groups(treatment) # adds a second panel, doesn't replace the first
+
+names(plt$part$group$config) # both grouping variables are still there
+#> [1] "treatment"
+```
+
+This is a deliberate design choice, not an oversight: there is only one
+“the model” and one “the quantile summary” to show per plot, but many
+legitimate ways to slice the exposure distribution by different grouping
+variables. The one flagged exception to watch for: because the model
+layer is singleton, overlaying two model curves for comparison (e.g. a
+candidate model against a reference model) isn’t currently possible.
+That’s tracked as a plausible future addition, not planned work – see
+`PLAN.md`.
+
+## Stratification composes with layers, usually via color
+
+`stratify_by`, set once in
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
+declares a single discrete variable used to split layers by color/fill,
+with one shared, deduplicated legend across the whole composed plot:
+
+``` r
+
+mod_strat <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
+
+erglm_data |>
+  er_plot(aucss, ae1, stratify_by = sex) |>
+  er_plot_show_model(mod_strat) |>
+  er_plot_show_quantiles() |>
+  er_plot_show_datastrip() |>
+  plot()
+```
+
+![](design_files/figure-html/stratification-1.png)
+
+Each layer’s own `keep_strata` argument controls whether *that* layer
+uses the stratification (default `TRUE` whenever `stratify_by` was set).
+The general rule, in the order a layer actually applies it: **a layer’s
+own encoding takes precedence; stratification adapts to whatever channel
+is left**, defaulting to color/fill. Today, every layer’s own encoding
+leaves color/fill free for strata, so this rule is invisible in practice
+– but it stops being invisible once a layer needs color for something
+else. The data strip layer is the first anticipated case: a
+continuous-response variant would need color for the response value
+itself, so stratification for that one layer would have to fall back to
+per-stratum facets instead. That variant doesn’t exist yet (see
+`PLAN.md`’s “Continuous-response data strip” section); today’s data
+strip only supports a binary response, and uses color/fill for strata
+like every other layer.
+
+## Response type changes what a layer summarises, not whether it appears
+
+`response_type`, also set once in
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
+(`"auto"`, `"binary"`, `"continuous"`, or `"count"`), governs the
+response’s scale and which summary/CI method a response-type-aware layer
+uses. The model and group layers don’t look at the response’s type at
+all – they only consume \[er_predict()\]/\[er_simulate()\] output or the
+exposure variable, respectively. The quantile layer dispatches on it
+directly:
+
+| `response_type` | Bin summary | CI method |
+|----|----|----|
+| `"binary"` | Response rate | Clopper-Pearson (\[clopper_pearson()\]) |
+| `"continuous"` | Mean | t-interval (\[t_interval()\]) |
+| `"count"` | Mean | Exact Poisson interval (\[poisson_interval()\]) |
+
+`"auto"` classifies a response as `"binary"` if it’s logical or confined
+to `{0, 1}`, and `"continuous"` otherwise – so a genuine count response
+auto-detects as `"continuous"` and is summarised as an
+approximately-continuous quantity unless `response_type = "count"` is
+declared explicitly. See \[er_plot_show_quantiles()\] for the full
+rationale and the
+[Plotting](https://erplots.djnavarro.net/articles/plot.md) article’s
+“Continuous responses” section for worked examples, including a case
+where the choice between the t-interval and exact Poisson interval
+visibly matters.
+
+The data strip layer is the odd one out: rather than adapting its
+summary statistic, it currently only supports `"binary"` responses at
+all, and errors for `"continuous"`/`"count"` rather than silently
+mis-plotting – see \[er_plot_show_datastrip()\].
+
+## Keeping this article in sync
+
+This article describes the grammar as designed and implemented *today*.
+Whenever a future change lands that alters any of the above – renaming a
+layer, changing which layers are singleton vs. additive, changing how
+stratification composes with a layer’s own encoding, or adding/removing
+a `response_type` dispatch – update this article in the same change, and
+update the cross-references in `PLAN.md`’s “Mini-language architecture
+review” section (which points here) to match. Treat a design change that
+isn’t reflected here as incomplete.
