@@ -133,7 +133,7 @@ layer:
   shape -- a reasonable bar to check your own custom builders against
   if you're considering proposing one upstream.
 
-## Builder metadata: tagging a builder with `er_builder_layout()`, `er_builder_fill_role()`, `er_builder_y_role()`
+## Builder metadata: tagging a builder with `er_builder_tag()`
 
 The quantile builder above needed nothing beyond the function itself.
 Some builders, though, make a structural or aesthetic choice that the
@@ -143,16 +143,18 @@ calls the builder. Since a builder is "just a function", that
 information can't live in its return value -- composition needs it
 in advance, to decide things like which panel to route the builder's
 output into, or how to title a legend. erplots solves this by letting a
-builder carry metadata as an **attribute on the function itself**, set
-by one of three small wrapper functions. Each wraps a builder and
-returns it back, attribute attached, so they compose naturally with
-assignment:
+builder carry metadata as **attributes on the function itself**, set by
+a single wrapper function, `er_builder_tag()`, with one optional
+argument per piece of metadata (`layout`, `fill_role`, `y_role`). It
+wraps a builder and returns it back, attributes attached, so it
+composes naturally with assignment, and a builder that needs more than
+one tag only needs one call:
 
 ```r
-my_builder <- er_builder_layout(my_builder, "overlay")
+my_builder <- er_builder_tag(my_builder, layout = "overlay")
 ```
 
-### `er_builder_layout()`: which structural family a data-layer builder belongs to
+### `layout`: which structural family a data-layer builder belongs to
 
 The data layer (`er_plot_add_data()`) is the one layer with two
 mutually exclusive structural families a builder can be slotted into:
@@ -168,8 +170,8 @@ mutually exclusive structural families a builder can be slotted into:
 shapes to build (`.part_overlay()` vs. `.part_data()`) *before* it can
 call the builder -- so the layout can't be inferred from what the
 builder returns; it has to be knowable from the builder alone.
-`er_builder_layout(builder, layout)` attaches that information as an
-attribute:
+`er_builder_tag(builder, layout = ...)` attaches that information as an
+attribute, and is the one tag that's mandatory for a data-layer builder:
 
 ```{r layout-attr}
 attr(er_builder_data_overlay, "er_builder_layout")
@@ -191,13 +193,13 @@ erglm_data |>
   plot()
 ```
 
-Tagging it with `er_builder_layout()` fixes that. Here's a complete
+Tagging it with `er_builder_tag()` fixes that. Here's a complete
 custom `"overlay"`-layout data builder -- a 2D density contour in place
 of raw points, useful when there are enough observations that a scatter
 overplots into an unreadable smear:
 
 ```{r layout-custom}
-er_builder_data_density <- er_builder_layout(
+er_builder_data_density <- er_builder_tag(
   function(data, config, stratify, exposure, response, strata, style) {
     ggplot2::geom_density2d(
       data = data,
@@ -215,15 +217,15 @@ erglm_data |>
   plot()
 ```
 
-### `er_builder_fill_role()`: what a builder's `fill` aesthetic means
+### `fill_role`: what a builder's `fill` aesthetic means
 
 On the base plot, `fill` almost always means strata (e.g. a stratified
 model ribbon). `er_builder_data_hex()` -- a built-in `"overlay"`-layout
 data builder for when N is too large for a legible scatter -- is the one
 exception: its `fill` encodes 2D bin density (a continuous scale), not
 strata, so `.polish_labels()` needs to know to title that legend "Count"
-rather than the stratification variable's label. `er_builder_fill_role(builder,
-"density")` records exactly that:
+rather than the stratification variable's label. `er_builder_tag(builder,
+fill_role = "density")` records exactly that:
 
 ```{r fill-role}
 attr(er_builder_data_hex, "er_builder_fill_role")
@@ -237,19 +239,19 @@ erglm_data |>
 
 Note the legend is titled "Count", not the (nonexistent, here) strata
 label -- that's `.polish_labels()` consulting the `"density"` tag. Unlike
-`er_builder_layout()`, `er_builder_fill_role()` is optional: a builder
+`layout`, `fill_role` is optional: a builder
 that doesn't set it is assumed to mean strata whenever it maps `fill`
 at all, which is the right default for every other builder.
 
-### `er_builder_y_role()`: what a builder's y-axis means
+### `y_role`: what a builder's y-axis means
 
 `er_plot_add_groups()`'s default builders (`er_builder_group_boxplot()`,
 `er_builder_group_violin()`) put the *group variable itself* on the
 y-axis -- one categorical row per level -- so the group variable's own
 label is the right axis title. `er_builder_group_histogram()` instead
 needs its y-axis free for counts, moving group levels onto facet strips
-instead; `er_builder_y_role(builder, "count")` tells `.polish_labels()` to
-title the y-axis "Count" rather than the group variable's label:
+instead; `er_builder_tag(builder, y_role = "count")` tells `.polish_labels()`
+to title the y-axis "Count" rather than the group variable's label:
 
 ```{r y-role}
 attr(er_builder_group_histogram, "er_builder_y_role")
@@ -261,31 +263,34 @@ erglm_data |>
   plot()
 ```
 
-Like `er_builder_fill_role()`, this tag is optional -- a group builder
+Like `fill_role`, this tag is optional -- a group builder
 that doesn't set it keeps the old behaviour (group variable's label on
 the y-axis), which is correct for `er_builder_group_boxplot()`/
 `er_builder_group_violin()`.
 
-### Why three separate helpers, not one generic "tag" function
+### One function, three independent arguments
 
-`er_builder_layout()`, `er_builder_fill_role()`, and `er_builder_y_role()`
-all follow the same "wrapper function that attaches an attribute"
-pattern, but are kept as three distinct, narrowly-named functions rather
-than one `er_builder_tag(builder, key, value)`: each corresponds to a
-specific decision a specific piece of composition code needs to make
-(routing for `er_plot_add_data()`, a legend title for
-`.polish_labels()`'s fill logic, an axis title for `.polish_labels()`'s
-group logic), and giving each its own name keeps `?er_partial`'s
-"Writing your own builder" section groundable in concrete examples
-rather than an abstract key-value scheme.
+`layout`, `fill_role`, and `y_role` are all set via the same
+`er_builder_tag()` call rather than three separate wrapper functions.
+Each argument is independent and optional (aside from `layout` being
+mandatory for a data-layer builder specifically -- see above), so a
+builder that needs to declare more than one piece of metadata -- say, a
+custom "overlay"-layout data builder whose `fill` also means something
+other than strata -- can do it in one call:
+
+```r
+my_density_builder <- er_builder_tag(my_density_builder, layout = "overlay", fill_role = "density")
+```
+
+This is exactly what the built-in `er_builder_data_hex()` does.
 
 ## Summary
 
-| Helper | Applies to | Required? | What it controls |
+| Argument | Applies to | Required? | What it controls |
 |---|---|---|---|
-| `er_builder_layout()` | Data-layer builders only | Yes -- errors if missing | `"overlay"` (merged onto the main panel) vs. `"panel"` (stacked panels below) |
-| `er_builder_fill_role()` | Any builder mapping `fill` | No -- defaults to strata | Legend title for a non-strata `fill` aesthetic (e.g. `"density"`) |
-| `er_builder_y_role()` | Group-layer builders only | No -- defaults to the group variable's label | y-axis title when the y-axis isn't the group variable itself (e.g. `"count"`) |
+| `layout` | Data-layer builders only | Yes -- errors if missing | `"overlay"` (merged onto the main panel) vs. `"panel"` (stacked panels below) |
+| `fill_role` | Any builder mapping `fill` | No -- defaults to strata | Legend title for a non-strata `fill` aesthetic (e.g. `"density"`) |
+| `y_role` | Group-layer builders only | No -- defaults to the group variable's label | y-axis title when the y-axis isn't the group variable itself (e.g. `"count"`) |
 
 None of this machinery is needed for a builder that draws a familiar
 idiom in a familiar slot -- the crossbar example above needed no tags at

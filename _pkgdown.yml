@@ -17,8 +17,7 @@ reference:
   desc: Low level functions to draw specific components of an exposure-response plot
 - contents: 
   - er_partial
-  - er_builder_layout
-  - er_builder_role
+  - er_builder_tag
   - er_builder_model
   - er_builder_summary
   - er_builder_quantile

@@ -246,7 +246,7 @@ test_that(".part_data records a response-colored panel structure for a continuou
   # `er_builder_data_overlay()` covered its typical use case more simply --
   # see PLAN.md), but `.part_data()`'s response-type dispatch is still
   # general-purpose and exercised here via a minimal custom builder.
-  stub_panel_builder <- er_builder_layout(
+  stub_panel_builder <- er_builder_tag(
     function(data, config, stratify, exposure, response, strata, style) list(),
     layout = "panel"
   )
@@ -281,7 +281,7 @@ test_that(".part_data records a response-colored panel structure for a continuou
 test_that(".part_data records the same single-panel structure for a count response", {
   skip_if_not_installed("erglm")
 
-  stub_panel_builder <- er_builder_layout(
+  stub_panel_builder <- er_builder_tag(
     function(data, config, stratify, exposure, response, strata, style) list(),
     layout = "panel"
   )

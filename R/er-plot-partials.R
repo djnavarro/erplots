@@ -62,7 +62,7 @@
 #' internals. For the data layer specifically, `builder` also has to
 #' declare which *structural* family it belongs to -- a single call
 #' merged into the main panel, or one or more panels stacked below the
-#' base plot -- via [er_builder_layout()], since [er_plot_add_data()] reads that
+#' base plot -- via [er_builder_tag()], since [er_plot_add_data()] reads that
 #' tag off `builder` to decide how to assemble the layer; the other three
 #' layers have only one structural call site, so no such tagging is
 #' needed there. See the `@examples` on [er_plot_add_model()],
@@ -102,12 +102,12 @@
 #' for by the response value itself -- there's no built-in
 #' "panel"-layout builder for that case (the older `build_data_color()`
 #' was removed once `er_builder_data_overlay()` covered its typical use case
-#' more simply), but a custom builder tagged `er_builder_layout(builder,
-#' "panel")` can still opt into it; see [er_plot_add_data()] for the
-#' user-facing version of this rule.
+#' more simply), but a custom builder tagged `er_builder_tag(builder,
+#' layout = "panel")` can still opt into it; see [er_plot_add_data()] for
+#' the user-facing version of this rule.
 #' 
 #' @name er_partial
 #' @seealso [er_builder_model()], [er_builder_summary()], [er_builder_quantile()],
-#' [er_builder_data()], [er_builder_group()], [er_builder_layout()]
+#' [er_builder_data()], [er_builder_group()], [er_builder_tag()]
 #' 
 NULL

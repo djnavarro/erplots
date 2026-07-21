@@ -174,7 +174,7 @@
   config$seed  <- 1234L
   # `er_plot_add_data()` has already resolved `builder` (and confirmed
   # its layout is "panel") before calling here -- see `?er_partial` for
-  # the `builder`/`er_builder_layout()` escape hatch
+  # the `builder`/`er_builder_tag()` escape hatch
   config$builder <- builder
 
   # `panels` is a named list of panels to build, keyed by panel name, in
@@ -238,7 +238,7 @@
   # responses get a small nudge so 0/1 points don't overplot into two
   # solid lines; continuous/count responses get none). `er_plot_add_data()`
   # has already resolved `builder` (and confirmed its layout is "overlay")
-  # before calling here -- see `?er_partial` for the `builder`/`er_builder_layout()`
+  # before calling here -- see `?er_partial` for the `builder`/`er_builder_tag()`
   # escape hatch.
   config$response_type <- object$response$type
   config$builder <- builder

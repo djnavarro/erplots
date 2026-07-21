@@ -57,7 +57,7 @@ test_that("er_plot_add_data's panel layout supports a continuous response (singl
   # response (see PLAN.md's note on removing `build_data_color()`), but
   # `.part_data()`'s response-type dispatch is still general-purpose and
   # exercised here via a minimal custom builder.
-  stub_panel_builder <- er_builder_layout(
+  stub_panel_builder <- er_builder_tag(
     function(data, config, stratify, exposure, response, strata, style) list(),
     layout = "panel"
   )
@@ -78,7 +78,7 @@ test_that("er_plot_add_data's panel layout supports a continuous response (singl
 test_that("er_plot_add_data supports a declared count response", {
   skip_if_not_installed("erglm")
 
-  stub_panel_builder <- er_builder_layout(
+  stub_panel_builder <- er_builder_tag(
     function(data, config, stratify, exposure, response, strata, style) list(),
     layout = "panel"
   )
@@ -111,7 +111,7 @@ test_that("er_plot_add_data's default builder is er_builder_data_overlay, replac
 test_that("er_plot_add_data errors when panel != 'both'", {
   skip_if_not_installed("erglm")
 
-  stub_panel_builder <- er_builder_layout(
+  stub_panel_builder <- er_builder_tag(
     function(data, config, stratify, exposure, response, strata, style) list(),
     layout = "panel"
   )
@@ -149,7 +149,7 @@ test_that("er_plot_add_data produces N stratum panels, each with a response colo
   # builder recreates its color-encoded-panel behaviour to check that
   # `.part_data()`/`.polish_labels()`'s per-stratum-panel machinery still
   # works for a response type with no shipped built-in.
-  custom_color_panel_builder <- er_builder_layout(
+  custom_color_panel_builder <- er_builder_tag(
     function(data, config, stratify, exposure, response, strata, style) {
       dat <- if (stratify) data |> dplyr::filter(.data[[strata$name]] == config$panel) else data
       list(
@@ -437,14 +437,14 @@ test_that("er_plot_add_quantiles() rejects a non-function builder", {
 test_that("er_plot_add_data() accepts a custom builder for both the overlay and panel structural families", {
   skip_if_not_installed("erglm")
 
-  custom_overlay_builder <- er_builder_layout(function(data, config, stratify, exposure, response, strata, style) {
+  custom_overlay_builder <- er_builder_tag(function(data, config, stratify, exposure, response, strata, style) {
     ggplot2::geom_point(
       data = data,
       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]]),
       shape = 4
     )
   }, layout = "overlay")
-  custom_panel_builder <- er_builder_layout(function(data, config, stratify, exposure, response, strata, style) {
+  custom_panel_builder <- er_builder_tag(function(data, config, stratify, exposure, response, strata, style) {
     ggplot2::geom_histogram(
       data = data,
       mapping = ggplot2::aes(x = .data[[exposure$name]])

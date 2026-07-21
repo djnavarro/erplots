@@ -51,7 +51,7 @@ from one family clears the other slot. There is no built-in
 were both removed once review found neither earned its keep alongside
 `er_builder_data_overlay()`/`er_builder_data_boxjitter()` (see PLAN.md); a custom
 `"panel"`-layout builder for continuous/count remains possible via
-`er_builder_layout()`, since `.part_data()`'s response-type dispatch was left in
+`er_builder_tag()`, since `.part_data()`'s response-type dispatch was left in
 place.
 
 `er_builder_data_hex()` is a second `"overlay"`-layout data builder alongside
@@ -64,9 +64,9 @@ aesthetic already encodes bin density, there's no channel left for
 `color = strata`; when stratified, all strata are pooled into a single
 hex-binned density (with an `rlang::inform()` message noting this)
 rather than partially or misleadingly encoding strata. `er_builder_data_hex()`
-tags itself via `er_builder_fill_role(builder, "density")`, a second
-piece of builder metadata alongside `er_builder_layout()`'s (mirroring
-`er_builder_group_histogram()`'s `er_builder_y_role()` tag), which
+tags itself via `er_builder_tag(builder, layout = "overlay", fill_role =
+"density")` -- both pieces of builder metadata set in the one call
+(mirroring `er_builder_group_histogram()`'s `y_role` tag) -- which
 `.polish_labels()` reads (via the internal `.builder_fill_role()`
 accessor) to title the base
 plot's `fill` legend "Count" rather than the strata label it uses by
@@ -87,15 +87,15 @@ the group variable itself on the y-axis (`y = lvl`, one categorical row
 per level) -- a histogram needs its y-axis free for counts, so
 `er_builder_group_histogram()` puts the group levels on facet strips instead
 (`facet_grid(rows = vars(lvl), switch = "y")`) and tags itself via
-`er_builder_y_role(builder, "count")`, mirroring `er_builder_layout()`'s
-wrapper-function approach for the data layer. `.polish_labels()` reads
-that tag (via the internal `.builder_y_role()` accessor) to title the
-y-axis "Count" rather than the group variable's
+`er_builder_tag(builder, y_role = "count")`, the same consolidated
+setter the data layer's `layout`/`fill_role` tags go through.
+`.polish_labels()` reads that tag (via the internal `.builder_y_role()`
+accessor) to title the y-axis "Count" rather than the group variable's
 own label (which is what it still uses for `er_builder_group_boxplot()`/
 `er_builder_group_violin()`, where the group variable *is* the y-axis);
 builders that don't set the tag keep that old, categorical-label
 behaviour, so this is opt-in rather than a breaking requirement like
-`er_builder_layout()`. Putting the group levels on facet strips also surfaced a
+`layout` is. Putting the group levels on facet strips also surfaced a
 second, unrelated quirk: ggplot2's default text angle for a left-hand
 strip (`switch = "y"`) is rotated 90 degrees, sized to fit the (short)
 row height rather than the (longer) available width, so long `lvl`
@@ -143,14 +143,15 @@ additions stay consistent:
   `er_`-namespaced shared prefix groups every builder together
   (discoverable via autocomplete/`library(help = "erplots")`) while the
   layer name stays the second token, so `er_builder_data_*`,
-  `er_builder_model_*`, etc. are still grep-able as families. The three
-  builder-metadata helpers a custom builder can tag itself with also
-  moved under this prefix: `er_builder_layout()` (was `er_layout()`),
-  `er_builder_fill_role()` (was a raw `attr(builder, "er_data_fill")
-  <- ...)`, and `er_builder_y_role()` (was `attr(builder, "er_group_y")
-  <- ...)`) -- all three now follow the same
-  "wrapper function that attaches an attribute" pattern instead of
-  mixing a wrapper for layout with raw `attr()` calls for the other two.
+  `er_builder_model_*`, etc. are still grep-able as families. The
+  builder-metadata helper(s) a custom builder can tag itself with also
+  moved under this prefix -- originally three separate setters
+  (`er_builder_layout()`, `er_builder_fill_role()`, `er_builder_y_role()`,
+  themselves renamed from `er_layout()` and two raw `attr()` calls,
+  `attr(builder, "er_data_fill") <- ...`/`attr(builder, "er_group_y")
+  <- ...`), later consolidated into one function, `er_builder_tag()`,
+  with `layout`/`fill_role`/`y_role` as independent optional arguments
+  (see "Extensibility" below).
 - **`ci_*()`** -- the confidence-interval helpers (was a `*_interval`
   suffix): `ci_clopper_pearson()` (was `clopper_pearson_interval()`),
   `ci_t()` (was `t_interval()`), `ci_poisson()` (was
@@ -190,9 +191,11 @@ For the data layer specifically, the one thing `style` used to do that
 wasn't just builder selection -- picking the *structural* family a
 builder is slotted into (single call merged into the main panel, vs.
 one-or-more panels stacked below the base plot) -- is now declared *on
-the builder function itself* via `er_builder_layout(builder, layout =
+the builder function itself* via `er_builder_tag(builder, layout =
 c("overlay", "panel"))`, an exported helper that attaches an
-`"er_builder_layout"` attribute. `er_plot_add_data()` reads this tag off
+`"er_builder_layout"` attribute (one of three independent, optional
+attributes `er_builder_tag()` can set in a single call -- see below).
+`er_plot_add_data()` reads this tag off
 whatever `builder` it's given (internal `.builder_layout()`) to decide
 whether to route through `.part_overlay()` or `.part_data()`. Both
 built-in data builders already carry this tag (`er_builder_data_overlay()`:
@@ -204,11 +207,22 @@ value* because `.part_overlay()`/`.part_data()` build different
 `config` shapes before any builder runs, so the layout has to be
 knowable without calling the builder -- see PLAN.md's "removing
 `style`, making `builder` the sole mechanism" section for the full
-rationale. The full, worked-example version of "how to write a custom
-builder" (what `config` contains per layer, and how to use
-`er_builder_layout()`/`er_builder_fill_role()`/`er_builder_y_role()`) now
-lives in its own article, `vignettes/articles/extending.Rmd` -- see
-"Vignette structure" below.
+rationale.
+
+`er_builder_tag(builder, layout = NULL, fill_role = NULL, y_role =
+NULL)` is a single consolidated setter for all three pieces of
+builder self-declared metadata (originally three separate functions --
+see "Naming scheme" above and PLAN.md's "consolidating the
+builder-metadata setters" section for why they were merged). Each
+argument is independent and optional (aside from `layout` being
+mandatory for a data-layer builder specifically); a builder needing
+more than one tag sets them in one call, e.g.
+`er_builder_tag(fn, layout = "overlay", fill_role = "density")`, which
+is what `er_builder_data_hex()` does. The full, worked-example version
+of "how to write a custom builder" (what `config` contains per layer,
+and how to use `er_builder_tag()`'s three arguments) lives in its own
+article, `vignettes/articles/extending.Rmd` -- see "Vignette structure"
+below.
 
 ## Planned work
 
@@ -224,7 +238,7 @@ stratification color/facet precedence rule, `?er_partial`,
 `vignettes/articles/design.Rmd`), formalising the
 `builder`/`summary_builder` escape hatch, removing `style`
 entirely in favor of `builder` alone, with the data layer's structural
-distinction moved onto the builder function itself via `er_builder_layout()`
+distinction moved onto the builder function itself via `er_builder_tag()`
 (see "Extensibility" above) -- including what's now `vignettes/articles/
 extending.Rmd` (originally a section within `design.Rmd`; see "Vignette
 structure" below), which walks through a runnable custom
@@ -246,9 +260,18 @@ a naming-scheme review renamed the pipeline verbs (`er_plot_show_*()` ->
 and the CI helpers (`*_interval()` -> `ci_*()`) -- see "Naming scheme"
 above. This was a straight rename with no deprecation shims (the
 package is GitHub-only/pre-CRAN, so there's no installed user base to
-break silently). Most recently, the plot-grammar article's "Extending
+break silently). The plot-grammar article's "Extending
 erplots" section was split out into its own article -- see "Vignette
-structure" below.
+structure" below. Most recently, those three builder-metadata setters
+were themselves consolidated into a single `er_builder_tag(builder,
+layout = NULL, fill_role = NULL, y_role = NULL)`, since each attribute
+is independent and optional and a builder needing more than one (e.g.
+`er_builder_data_hex()`, which needs `layout` and `fill_role`) had to
+chain two calls under the old design -- see "Extensibility" above and
+PLAN.md's "consolidating the builder-metadata setters" section. An
+optional `layer` attribute (self-declaring which `er_plot_add_*()` a
+builder targets, for informative wrong-layer errors) was discussed
+alongside this but deferred -- see PLAN.md's "Open / deferred" section.
 
 ## Vignette structure
 
@@ -268,13 +291,13 @@ second argument) actually *was*, so `extending.Rmd` now leads with a
 table of what each `.part_*()` function's `config` contains (e.g.
 `config$summary`'s columns for the quantile layer), inspects it
 interactively before writing the crossbar builder, and then adds a
-section on the three builder-metadata helpers
-(`er_builder_layout()`/`er_builder_fill_role()`/`er_builder_y_role()`)
-with a runnable example of each, including the built-in
-`er_builder_data_hex()`/`er_builder_group_histogram()` as worked
-illustrations of `er_builder_fill_role()`/`er_builder_y_role()`
+section on `er_builder_tag()`'s three independent arguments
+(`layout`/`fill_role`/`y_role` -- `layout` mandatory for data-layer
+builders, the other two optional) with a runnable example of each,
+including the built-in `er_builder_data_hex()`/`er_builder_group_histogram()`
+as worked illustrations of `fill_role`/`y_role`
 respectively, and a custom `geom_density2d()`-based data builder as a
-worked illustration of `er_builder_layout()`. `design.Rmd`'s own
+worked illustration of `layout`. `design.Rmd`'s own
 "Extending erplots" section is now just a short pointer into
 `extending.Rmd`. `_pkgdown.yml`'s `articles` list was updated to include
 `articles/extending` after `articles/design`. Keep this split in mind

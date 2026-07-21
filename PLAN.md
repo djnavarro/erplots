@@ -438,6 +438,53 @@ no deprecation shims -- the package is GitHub-only/pre-CRAN.
 **Status:** done, `devtools::check()` clean (0 errors/warnings/notes),
 full test suite passing (452 tests).
 
+## Completed: consolidating the builder-metadata setters into `er_builder_tag()`
+
+**Motivation.** `er_builder_layout()`, `er_builder_fill_role()`, and
+`er_builder_y_role()` each set one attribute on a builder function via
+the same "wrapper function that attaches an attribute" pattern. A
+builder that needed more than one tag (e.g. `er_builder_data_hex()`,
+which needs both `layout` and `fill_role`) had to chain two calls. On
+review, the three-separate-functions design (itself deliberately chosen
+during the naming-scheme review just above, with a documented rationale
+in `vignettes/articles/extending.Rmd`'s "Why three separate helpers, not
+one generic tag function" section) was judged not to earn its keep:
+each attribute is independent and optional (aside from `layout` being
+mandatory for a data-layer builder), so there's no real benefit to
+three names over one function with three optional arguments.
+
+**Decisions made:**
+- `er_builder_layout()`/`er_builder_fill_role()`/`er_builder_y_role()`
+  collapsed into a single `er_builder_tag(builder, layout = NULL,
+  fill_role = NULL, y_role = NULL)`. Each argument independently
+  attaches its corresponding attribute (`"er_builder_layout"`,
+  `"er_builder_fill_role"`, `"er_builder_y_role"` -- the attribute
+  *names* are unchanged, only the setter functions were merged) when
+  non-`NULL`; a builder needing multiple tags now does it in one call,
+  e.g. `er_builder_tag(fn, layout = "overlay", fill_role = "density")`
+  (what `er_builder_data_hex()` does).
+- The internal `.builder_layout()`/`.builder_fill_role()`/
+  `.builder_y_role()` accessors were left untouched -- they just read
+  attributes off a builder and don't care how those attributes were
+  set.
+- No `layer` attribute (an idea raised alongside this one, to let a
+  builder self-declare which `er_plot_add_*()` layer it's meant for, so
+  the wrong-layer case could error informatively) was added in this
+  pass -- deferred, see "Open / deferred" below.
+
+**What changed:** every call site across `R/`, `tests/`, and
+`vignettes/articles/` updated (built-ins:
+`er_builder_data_boxjitter()`/`er_builder_data_overlay()`/
+`er_builder_data_hex()`/`er_builder_group_histogram()`); `NAMESPACE`/
+`man/` regenerated via `devtools::document()` (`er_builder_layout.Rd`/
+`er_builder_role.Rd` deleted, `er_builder_tag.Rd` added);
+`extending.Rmd`'s builder-metadata section rewritten around the single
+function, including replacing its old "why three separate helpers"
+justification with the opposite conclusion. Straight rename, no
+deprecation shims -- consistent with the naming-scheme review above.
+
+**Status:** done, full test suite passing (452 tests).
+
 ## Other completed fixes
 
 - **Stratified quantile labels visually overlapping.** Two strata's
@@ -452,6 +499,16 @@ full test suite passing (452 tests).
 
 ## Open / deferred (no concrete need yet -- not scheduled)
 
+- **A `layer` attribute on `er_builder_tag()`.** Raised alongside the
+  builder-metadata consolidation above: a builder could self-declare
+  which layer it's meant for (`"model"`, `"quantile"`, `"data"`,
+  `"group"`), letting each `er_plot_add_*()` give an informative error
+  if handed a builder tagged for a different layer, rather than
+  whatever failure mode currently results from a mismatched `config`
+  shape. Deferred pending a decision on strictness -- whether `layer`
+  should be checked only when present (matching how the other tags
+  behave) or required outright -- and because it touches every built-in
+  builder, not just the ones that already carry a tag.
 - **Additive model layer.** Overlaying two fitted model curves (e.g. a
   candidate vs. a null/reference model, or Emax vs. linear) isn't
   possible today since `er_plot_add_model()` is singleton. Real work,

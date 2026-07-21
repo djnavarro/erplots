@@ -47,8 +47,8 @@
   # `er_builder_model_ribbonline()`'s ribbon), but an "overlay"-layout data
   # builder can claim `fill` for something else entirely --
   # `er_builder_data_hex()` uses it for bin density, and tags itself with
-  # `er_builder_fill_role(builder, "density")` to say so (mirroring
-  # `er_builder_group_histogram()`'s `er_builder_y_role()` tag). Such a builder can
+  # `er_builder_tag(builder, fill_role = "density")` to say so (mirroring
+  # `er_builder_group_histogram()`'s `y_role` tag). Such a builder can
   # only coexist with other `fill`-mapped layers if they don't map
   # `fill` themselves (a discrete `fill = strata` ribbon and a
   # continuous density `fill` collide as two scales for one aesthetic,
@@ -100,8 +100,8 @@
       # y-axis, so the group variable's own label is the right y-axis
       # title. A histogram-style builder instead needs its y-axis free
       # for counts (with group levels shown via facet strips), and tags
-      # itself with `er_builder_y_role(builder, "count")` to say so -- see
-      # `er_builder_group_histogram()`.
+      # itself with `er_builder_tag(builder, y_role = "count")` to say so --
+      # see `er_builder_group_histogram()`.
       group_builder <- object$part$group$config[[g]]$builder
       y_label <- if (identical(.builder_y_role(group_builder), "count")) {
         "Count"

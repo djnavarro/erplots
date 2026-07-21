@@ -53,18 +53,18 @@ Data layer builders for exposure-response plots
 \details{
 Builders for the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}}), which
 shows the raw observations alongside the fitted curve. Each builder is
-tagged, via \code{\link[=er_builder_layout]{er_builder_layout()}}, with the \emph{structural} family it belongs to:
+tagged, via \code{\link[=er_builder_tag]{er_builder_tag()}}, with the \emph{structural} family it belongs to:
 \code{er_builder_data_overlay()} (the default) and \code{er_builder_data_hex()} use the
 \code{"overlay"} layout, plotting directly on the model panel at the raw
 \verb{(exposure, response)} coordinates (points or, for \code{er_builder_data_hex()},
 a 2D density); \code{er_builder_data_boxjitter()} uses the \code{"panel"} layout
 (binary response only), stacking boxplot-plus-jitter panels for
-responders/non-responders below the base plot. See \code{\link[=er_builder_layout]{er_builder_layout()}} and
+responders/non-responders below the base plot. See \code{\link[=er_builder_tag]{er_builder_tag()}} and
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} for how this tag is used.
 
 See \code{\link[=er_partial]{er_partial()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.
 }
 \seealso{
-\code{\link[=er_partial]{er_partial()}}, \code{\link[=er_builder_layout]{er_builder_layout()}}
+\code{\link[=er_partial]{er_partial()}}, \code{\link[=er_builder_tag]{er_builder_tag()}}
 }

@@ -77,7 +77,7 @@ plugged in without forking the package or reaching into \code{object$part}
 internals. For the data layer specifically, \code{builder} also has to
 declare which \emph{structural} family it belongs to -- a single call
 merged into the main panel, or one or more panels stacked below the
-base plot -- via \code{\link[=er_builder_layout]{er_builder_layout()}}, since \code{\link[=er_plot_add_data]{er_plot_add_data()}} reads that
+base plot -- via \code{\link[=er_builder_tag]{er_builder_tag()}}, since \code{\link[=er_plot_add_data]{er_plot_add_data()}} reads that
 tag off \code{builder} to decide how to assemble the layer; the other three
 layers have only one structural call site, so no such tagging is
 needed there. See the \verb{@examples} on \code{\link[=er_plot_add_model]{er_plot_add_model()}},
@@ -117,11 +117,11 @@ continuous/count response, where the color channel is already spoken
 for by the response value itself -- there's no built-in
 "panel"-layout builder for that case (the older \code{build_data_color()}
 was removed once \code{er_builder_data_overlay()} covered its typical use case
-more simply), but a custom builder tagged \code{er_builder_layout(builder, "panel")} can still opt into it; see \code{\link[=er_plot_add_data]{er_plot_add_data()}} for the
-user-facing version of this rule.
+more simply), but a custom builder tagged \code{er_builder_tag(builder, layout = "panel")} can still opt into it; see \code{\link[=er_plot_add_data]{er_plot_add_data()}} for
+the user-facing version of this rule.
 }
 
 \seealso{
 \code{\link[=er_builder_model]{er_builder_model()}}, \code{\link[=er_builder_summary]{er_builder_summary()}}, \code{\link[=er_builder_quantile]{er_builder_quantile()}},
-\code{\link[=er_builder_data]{er_builder_data()}}, \code{\link[=er_builder_group]{er_builder_group()}}, \code{\link[=er_builder_layout]{er_builder_layout()}}
+\code{\link[=er_builder_data]{er_builder_data()}}, \code{\link[=er_builder_group]{er_builder_group()}}, \code{\link[=er_builder_tag]{er_builder_tag()}}
 }

@@ -21,7 +21,7 @@ means a shared color aesthetic, for any response type.}
 \code{\link[=er_builder_data_overlay]{er_builder_data_overlay()}}. \code{\link[=er_builder_data_boxjitter]{er_builder_data_boxjitter()}} (binary response
 only: a boxplot + jittered points per panel) is the other built-in
 option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature and tagged with
-\code{\link[=er_builder_layout]{er_builder_layout()}} can be supplied instead -- see \code{\link[=er_partial]{er_partial()}} for the
+\code{\link[=er_builder_tag]{er_builder_tag()}} can be supplied instead -- see \code{\link[=er_partial]{er_partial()}} for the
 full contract, e.g. a 2D density in the main panel, a continuous/
 count response's color-encoded panel, or per-panel histograms.}
 
@@ -55,14 +55,14 @@ partition to select from.
 }
 \details{
 Every data-layer builder declares which of these two \emph{structural}
-families it belongs to via \code{\link[=er_builder_layout]{er_builder_layout()}} -- \code{"overlay"} (a single call
+families it belongs to via \code{\link[=er_builder_tag]{er_builder_tag()}} -- \code{"overlay"} (a single call
 merged into the main panel) or \code{"panel"} (one-or-more panels stacked
 below the base plot) -- which \code{er_plot_add_data()} reads off \code{builder}
 to decide how to assemble the layer, rather than taking a separate
 argument for it. This makes the pairing structural rather than
 incidental: \code{er_builder_data_overlay()} can never be routed into upper/lower
 panels, and \code{er_builder_data_boxjitter()} can never be merged into the main
-panel. See \code{\link[=er_builder_layout]{er_builder_layout()}} and \code{\link[=er_partial]{er_partial()}} for how to tag a custom
+panel. See \code{\link[=er_builder_tag]{er_builder_tag()}} and \code{\link[=er_partial]{er_partial()}} for how to tag a custom
 builder the same way.
 
 This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
@@ -109,9 +109,9 @@ erglm_data |>
   plot()
 
 # plug in a 2D density in the main panel instead of a scatter; tagging
-# it "overlay" via `er_builder_layout()` keeps it in the single main-panel
+# it "overlay" via `er_builder_tag()` keeps it in the single main-panel
 # layout -- see `?er_partial`
-build_data_density <- er_builder_layout(
+build_data_density <- er_builder_tag(
   function(data, config, stratify, exposure, response, strata, style) {
     ggplot2::geom_density_2d(
       data = data,

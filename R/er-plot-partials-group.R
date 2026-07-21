@@ -87,9 +87,9 @@ er_builder_group_histogram <- function(data, config, stratify, exposure, respons
     # unlike `er_builder_group_boxplot()`/`er_builder_group_violin()`, a histogram
     # needs its y-axis free for counts, so the group levels (`lvl`) go
     # on facet strips (one row per level) rather than the y-axis itself.
-    # The `er_builder_y_role(builder, "count")` tag below (mirroring
-    # `er_builder_layout()`'s attribute-based approach for the data layer)
-    # tells `.polish_labels()` to title this axis "Count" rather than the
+    # The `er_builder_tag(builder, y_role = "count")` call below (mirroring
+    # `er_builder_tag()`'s `layout` argument for the data layer) tells
+    # `.polish_labels()` to title this axis "Count" rather than the
     # group variable's own label, which is what it uses for
     # `er_builder_group_boxplot()`/`er_builder_group_violin()`, where the
     # group variable *is* the y-axis.
@@ -114,7 +114,7 @@ er_builder_group_histogram <- function(data, config, stratify, exposure, respons
 
   return(geoms)
 }
-er_builder_group_histogram <- er_builder_y_role(er_builder_group_histogram, "count")
+er_builder_group_histogram <- er_builder_tag(er_builder_group_histogram, y_role = "count")
 
 
 #' @rdname er_builder_group

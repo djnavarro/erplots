@@ -416,29 +416,59 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 
 # data --------------------------------------------------------------------
 
-#' Declare a data-layer builder's structural layout
+#' Tag a builder with structural/aesthetic metadata
 #'
-#' Tags a `er_builder_data_*()`-style function with the *structural* family it
-#' belongs to -- `"overlay"` (a single call merged into the main panel) or
-#' `"panel"` (one-or-more panels stacked below the base plot) -- so
-#' [er_plot_add_data()] can route to the right internal assembly path
-#' (`.part_overlay()` vs. `.part_data()`) just by inspecting the `builder`
-#' it was given, with no separate `style`/`layout` argument needed. See
-#' [er_partial()]'s "Writing your own builder" section for the full
-#' contract; both built-in data builders ([er_builder_data_overlay()],
-#' [er_builder_data_boxjitter()]) already carry this tag.
+#' Attaches the self-declared metadata a custom `er_builder_*()`-style
+#' function can carry, in a single call: which *structural* family a
+#' data-layer builder belongs to (`layout`), what a builder's `fill`
+#' aesthetic means when it isn't strata (`fill_role`), and what a
+#' group-layer builder's y-axis means when it isn't the group variable
+#' itself (`y_role`). All three arguments are optional and independent --
+#' pass only the ones a given builder needs, in one call, rather than
+#' chaining separate setters. See [er_partial()]'s "Writing your own
+#' builder" section for the full contract.
+#'
+#' `layout` is the one required tag for a data-layer builder:
+#' [er_plot_add_data()] reads it off `builder` to decide whether to route
+#' through `.part_overlay()` (`"overlay"`: a single call merged into the
+#' main panel, at the observations' true `(exposure, response)`
+#' coordinates) or `.part_data()` (`"panel"`: one-or-more panels stacked
+#' below the base plot), *before* it can call the builder -- so the choice
+#' can't be inferred from the builder's return value. Both built-in data
+#' builders ([er_builder_data_overlay()], [er_builder_data_boxjitter()])
+#' already carry this tag.
+#'
+#' `fill_role` and `y_role` are both optional, read by `.polish_labels()`
+#' to title a legend/axis correctly: `fill_role = "density"` (used by
+#' [er_builder_data_hex()]) says a builder's `fill` aesthetic encodes bin
+#' density rather than strata; `y_role = "count"` (used by
+#' [er_builder_group_histogram()]) says a group-layer builder's y-axis
+#' means counts rather than the group variable itself. A builder that
+#' omits either tag keeps the default behaviour (`fill` means strata;
+#' the y-axis is titled with the group variable's label), which is
+#' correct for most builders.
 #'
 #' @param builder A function matching the standard `er_builder_*()` signature
 #'   (see [er_partial()])
-#' @param layout One of `"overlay"` or `"panel"` -- see [er_plot_add_data()]
-#'   for what each structural family means
+#' @param layout One of `"overlay"` or `"panel"`, or `NULL` (the default) to
+#'   leave this tag unset -- see [er_plot_add_data()] for what each
+#'   structural family means
+#' @param fill_role A string naming what the builder's `fill` aesthetic
+#'   represents (currently only `"density"` is read by `.polish_labels()`,
+#'   but any string is accepted), or `NULL` (the default) to leave this tag
+#'   unset
+#' @param y_role A string naming what the builder's y-axis represents
+#'   (currently only `"count"` is read by `.polish_labels()`), or `NULL`
+#'   (the default) to leave this tag unset
 #'
-#' @returns `builder`, with an `"er_builder_layout"` attribute attached
+#' @returns `builder`, with whichever of the `"er_builder_layout"`/
+#'   `"er_builder_fill_role"`/`"er_builder_y_role"` attributes were
+#'   requested attached
 #'
 #' @seealso [er_plot_add_data()], [er_partial()]
 #'
 #' @examples
-#' build_data_density <- er_builder_layout(
+#' build_data_density <- er_builder_tag(
 #'   function(data, config, stratify, exposure, response, strata, style) {
 #'     ggplot2::geom_density_2d(
 #'       data = data,
@@ -449,10 +479,21 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 #' )
 #'
 #' @export
-er_builder_layout <- function(builder, layout = c("overlay", "panel")) {
+er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NULL) {
   if (!is.function(builder)) rlang::abort("`builder` must be a function")
-  layout <- match.arg(layout)
-  structure(builder, er_builder_layout = layout)
+
+  if (!is.null(layout)) {
+    layout <- match.arg(layout, c("overlay", "panel"))
+    attr(builder, "er_builder_layout") <- layout
+  }
+  if (!is.null(fill_role)) {
+    attr(builder, "er_builder_fill_role") <- fill_role
+  }
+  if (!is.null(y_role)) {
+    attr(builder, "er_builder_y_role") <- y_role
+  }
+
+  builder
 }
 
 #' @noRd
@@ -461,53 +502,11 @@ er_builder_layout <- function(builder, layout = c("overlay", "panel")) {
   if (is.null(layout)) {
     rlang::abort(c(
       "`builder` must declare its structural layout.",
-      "i" = "Wrap a custom data-layer builder with `er_builder_layout(builder, \"overlay\")` or `er_builder_layout(builder, \"panel\")`.",
+      "i" = "Wrap a custom data-layer builder with `er_builder_tag(builder, layout = \"overlay\")` or `er_builder_tag(builder, layout = \"panel\")`.",
       "i" = "The built-in builders (`er_builder_data_overlay()`, `er_builder_data_boxjitter()`) already do this."
     ))
   }
   layout
-}
-
-
-#' Declare a builder's fill/y-axis role
-#'
-#' Companion setters to [er_builder_layout()] for the two other pieces of
-#' builder self-declared metadata in the package: `er_builder_fill_role()`
-#' tags a data-layer builder whose `fill` aesthetic means something other
-#' than strata (currently only `"density"`, used by [er_builder_data_hex()]),
-#' and `er_builder_y_role()` tags a group-layer builder whose y-axis means
-#' something other than the group variable itself (currently only
-#' `"count"`, used by [er_builder_group_histogram()]). Both follow the same
-#' wrapper-function pattern as [er_builder_layout()] rather than requiring
-#' a custom builder author to call `attr()` directly with a hand-typed
-#' string constant.
-#'
-#' @param builder A function matching the standard `er_builder_*()`
-#'   signature (see [er_partial()])
-#' @param role For `er_builder_fill_role()`: currently only `"density"` is
-#'   read by `.polish_labels()`, but any string is accepted. For
-#'   `er_builder_y_role()`: currently only `"count"` is read.
-#'
-#' @returns `builder`, with an `"er_builder_fill_role"`/`"er_builder_y_role"`
-#'   attribute attached
-#'
-#' @seealso [er_builder_layout()], [er_partial()]
-#'
-#' @name er_builder_role
-NULL
-
-#' @rdname er_builder_role
-#' @export
-er_builder_fill_role <- function(builder, role) {
-  if (!is.function(builder)) rlang::abort("`builder` must be a function")
-  structure(builder, er_builder_fill_role = role)
-}
-
-#' @rdname er_builder_role
-#' @export
-er_builder_y_role <- function(builder, role) {
-  if (!is.function(builder)) rlang::abort("`builder` must be a function")
-  structure(builder, er_builder_y_role = role)
 }
 
 #' @noRd
@@ -544,14 +543,14 @@ er_builder_y_role <- function(builder, role) {
 #' partition to select from.
 #'
 #' Every data-layer builder declares which of these two *structural*
-#' families it belongs to via [er_builder_layout()] -- `"overlay"` (a single call
+#' families it belongs to via [er_builder_tag()] -- `"overlay"` (a single call
 #' merged into the main panel) or `"panel"` (one-or-more panels stacked
 #' below the base plot) -- which `er_plot_add_data()` reads off `builder`
 #' to decide how to assemble the layer, rather than taking a separate
 #' argument for it. This makes the pairing structural rather than
 #' incidental: `er_builder_data_overlay()` can never be routed into upper/lower
 #' panels, and `er_builder_data_boxjitter()` can never be merged into the main
-#' panel. See [er_builder_layout()] and [er_partial()] for how to tag a custom
+#' panel. See [er_builder_tag()] and [er_partial()] for how to tag a custom
 #' builder the same way.
 #'
 #' This layer is **singleton** -- see [er_plot()]'s "Layers are either
@@ -581,7 +580,7 @@ er_builder_y_role <- function(builder, role) {
 #'   only: a boxplot + jittered points per panel) is the other built-in
 #'   option; any function matching the standard `(data, config, stratify,
 #'   exposure, response, strata, style)` signature and tagged with
-#'   [er_builder_layout()] can be supplied instead -- see [er_partial()] for the
+#'   [er_builder_tag()] can be supplied instead -- see [er_partial()] for the
 #'   full contract, e.g. a 2D density in the main panel, a continuous/
 #'   count response's color-encoded panel, or per-panel histograms.
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
@@ -623,9 +622,9 @@ er_builder_y_role <- function(builder, role) {
 #'   plot()
 #'
 #' # plug in a 2D density in the main panel instead of a scatter; tagging
-#' # it "overlay" via `er_builder_layout()` keeps it in the single main-panel
+#' # it "overlay" via `er_builder_tag()` keeps it in the single main-panel
 #' # layout -- see `?er_partial`
-#' build_data_density <- er_builder_layout(
+#' build_data_density <- er_builder_tag(
 #'   function(data, config, stratify, exposure, response, strata, style) {
 #'     ggplot2::geom_density_2d(
 #'       data = data,
