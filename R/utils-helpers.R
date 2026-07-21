@@ -145,7 +145,12 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #' @param n Number of bins
 #' @param is_placebo Logical vector indicating placebo samples
 #'
-#' @returns A factor
+#' @returns A factor. `cut_exposure_quantile()`'s result additionally
+#'   carries a `"breaks"` attribute -- the `n + 1` quantile cutpoints
+#'   (excluding placebo) used to form the bins, as computed by
+#'   [stats::quantile()] -- which quantile-layer builders that draw
+#'   bin-boundary separators (e.g. [er_builder_quantile_errorbar_vlines()])
+#'   read back out via `attr(exposure_bins, "breaks")`.
 #'
 #' @name cut_quantile
 #' @examples
@@ -170,6 +175,7 @@ cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL) {
   ))
   exp_quantile <- exp_bin |>
     factor(levels = 0:n, labels = c("Placebo", paste0("Q", 1:n)))  
+  attr(exp_quantile, "breaks") <- breaks
   return(exp_quantile)
 }
 

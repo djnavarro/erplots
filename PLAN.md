@@ -8,6 +8,58 @@ is done; step-by-step implementation narrative (file-by-file diffs, test
 counts, staged PR sequencing) is not, and has been trimmed. See git
 history / PR descriptions for that level of detail if it's ever needed.
 
+## Completed: removing `er_builder_quantile_bar()`, adding `_vlines` quantile builder variants
+
+**Motivation.** On review, `er_builder_quantile_bar()` (bar + error bar)
+didn't earn its keep as a built-in: it's not an idiom that shows up in
+real exposure-response reporting. Meanwhile, drawing a dotted line at
+each quantile-bin boundary -- so a reader can see exactly where one bin
+ends and the next begins without inferring it from point/error-bar
+spacing -- *is* a common real-world annotation, and wasn't available
+from any built-in builder.
+
+**Decisions made:**
+- `er_builder_quantile_bar()` removed outright (no deprecation shim --
+  same rationale as the naming-scheme rename: GitHub-only/pre-CRAN, no
+  installed user base to break silently).
+- `cut_exposure_quantile()` now attaches the `n + 1` quantile cutpoints
+  (excluding placebo) it computes internally as a `"breaks"` attribute
+  on its returned factor, rather than discarding them. `.part_quantile()`
+  reads this back off `exposure_bins` (attributes on a factor column
+  survive a plain `dplyr::mutate()` assignment) into a new
+  `config$breaks` field, so builders can draw boundary separators
+  without recomputing quantiles themselves.
+- Two new builders, `er_builder_quantile_errorbar_vlines()` and
+  `er_builder_quantile_pointrange_vlines()`, are thin wrappers around
+  the existing `er_builder_quantile_errorbar()`/
+  `er_builder_quantile_pointrange()` that prepend a single
+  `geom_vline(xintercept = <interior breaks>, linetype = "dotted")` to
+  the wrapped builder's own geom list (`c(list(vlines), geoms)` --
+  `ggplot2::ggplot_add.NULL` makes a `NULL` vline, when there are no
+  interior boundaries to draw, a silent no-op rather than requiring
+  special-casing). "Interior" breaks drop the overall min/max, since
+  those sit at/beyond the panel's own edges and aren't boundaries a
+  reader would need marked. Implemented as wrappers, not copies, so the
+  two variants can't drift from the builders they're based on.
+- Both new builders are tagged `er_builder_tag(fn, layer = "quantile")`,
+  matching every other built-in quantile builder.
+
+**What changed:** `R/utils-helpers.R` (`cut_exposure_quantile()`'s
+`"breaks"` attribute), `R/er-plot-part.R` (`.part_quantile()`'s
+`config$breaks`), `R/er-plot-builder-quantile.R` (`er_builder_quantile_bar()`
+removed; `.quantile_boundary_vlines()` helper and the two new `_vlines`
+builders added), `R/er-plot-api.R` (`er_plot_add_quantiles()` docs/
+examples), tests in `tests/testthat/test-er-plot-builder-quantile.R`
+(bar tests removed, new tests for `config$breaks` and both `_vlines`
+builders added) and `test-er-plot-part.R`/`test-er-plot-api.R` (updated
+for the new `config$breaks` field and `er_builder_quantile_bar()`'s
+removal), `vignettes/articles/extending.Rmd` (its config-contents table
+and worked example's builder-alternatives list), `NAMESPACE`/`man/`
+regenerated via `devtools::document()`.
+
+**Status:** done, `devtools::check()` clean (0 errors/warnings/notes),
+full test suite passing (471 tests).
+
 ## Completed: generalising beyond binary responses (continuous/count)
 
 **Motivation.** erplots was originally binary-response-only in three

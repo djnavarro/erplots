@@ -17,7 +17,12 @@ cut_quantile(x, n = 4)
 \item{is_placebo}{Logical vector indicating placebo samples}
 }
 \value{
-A factor
+A factor. \code{cut_exposure_quantile()}'s result additionally
+carries a \code{"breaks"} attribute -- the \code{n + 1} quantile cutpoints
+(excluding placebo) used to form the bins, as computed by
+\code{\link[stats:quantile]{stats::quantile()}} -- which quantile-layer builders that draw
+bin-boundary separators (e.g. \code{\link[=er_builder_quantile_errorbar_vlines]{er_builder_quantile_errorbar_vlines()}})
+read back out via \code{attr(exposure_bins, "breaks")}.
 }
 \description{
 Cut a continuous variable into quantiles

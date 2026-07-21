@@ -519,8 +519,9 @@ test_that("built-in builders are tagged with their layer", {
   expect_identical(attr(er_builder_model_spaghetti, "er_builder_layer"), "model")
   expect_identical(attr(er_builder_summary_pvalue, "er_builder_layer"), "summary")
   expect_identical(attr(er_builder_quantile_errorbar, "er_builder_layer"), "quantile")
-  expect_identical(attr(er_builder_quantile_bar, "er_builder_layer"), "quantile")
+  expect_identical(attr(er_builder_quantile_errorbar_vlines, "er_builder_layer"), "quantile")
   expect_identical(attr(er_builder_quantile_pointrange, "er_builder_layer"), "quantile")
+  expect_identical(attr(er_builder_quantile_pointrange_vlines, "er_builder_layer"), "quantile")
   expect_identical(attr(er_builder_data_overlay, "er_builder_layer"), "data")
   expect_identical(attr(er_builder_data_boxjitter, "er_builder_layer"), "data")
   expect_identical(attr(er_builder_data_hex, "er_builder_layer"), "data")
@@ -576,7 +577,7 @@ test_that("er_plot_add_groups() errors informatively for a wrong-layer builder",
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
 
   expect_error(
-    er_plot_add_groups(plt, aucss, builder = er_builder_quantile_bar),
+    er_plot_add_groups(plt, aucss, builder = er_builder_quantile_errorbar),
     "quantile"
   )
   expect_no_error(er_plot_add_groups(plt, aucss, builder = er_builder_group_violin))

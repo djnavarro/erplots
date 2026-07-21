@@ -338,7 +338,11 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #' @param builder Function drawing the quantile summary -- defaults to
 #'   [er_builder_quantile_errorbar()] (point + error bar).
 #'   [er_builder_quantile_pointrange()] (a single [ggplot2::geom_pointrange()])
-#'   is the other built-in option; any function matching the standard
+#'   is another built-in option, as are `_vlines` variants of each
+#'   ([er_builder_quantile_errorbar_vlines()],
+#'   [er_builder_quantile_pointrange_vlines()]) that additionally draw a
+#'   dotted line at each interior quantile-bin boundary; any function
+#'   matching the standard
 #'   `(data, config, stratify, exposure, response, strata, style)`
 #'   signature can be supplied instead -- see [er_builder()].
 #'   `config$summary` is the pre-computed per-bin data frame (point
@@ -384,6 +388,14 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   er_plot(aucss, ae1) |>
 #'   er_plot_add_model(mod) |>
 #'   er_plot_add_quantiles(builder = er_builder_quantile_pointrange) |>
+#'   plot()
+#'
+#' # the default errorbar, with dotted lines marking the quantile-bin
+#' # boundaries
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_add_model(mod) |>
+#'   er_plot_add_quantiles(builder = er_builder_quantile_errorbar_vlines) |>
 #'   plot()
 #'
 #' # plug in a fully custom builder; see `?er_builder` for the full contract

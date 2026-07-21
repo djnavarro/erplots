@@ -90,6 +90,11 @@
       strata = .get_strata_values(.data, object$strata$name)   
     )
 
+  # quantile cutpoints (excluding placebo), for builders that draw
+  # bin-boundary separators (e.g. `er_builder_quantile_errorbar_vlines()`)
+  # -- see `cut_exposure_quantile()`'s `"breaks"` attribute
+  config$breaks <- attr(binned$exposure_bins, "breaks")
+
   # binary response: response *rate* per bin, via a Clopper-Pearson CI.
   # count response, when explicitly declared (`response_type = "count"`):
   # bin *mean*, via an exact Poisson interval (PLAN.md design decision (4)

@@ -3,8 +3,9 @@
 \name{er_builder_quantile}
 \alias{er_builder_quantile}
 \alias{er_builder_quantile_errorbar}
-\alias{er_builder_quantile_bar}
+\alias{er_builder_quantile_errorbar_vlines}
 \alias{er_builder_quantile_pointrange}
+\alias{er_builder_quantile_pointrange_vlines}
 \title{Quantile summary builders for exposure-response plots}
 \usage{
 er_builder_quantile_errorbar(
@@ -17,7 +18,7 @@ er_builder_quantile_errorbar(
   style
 )
 
-er_builder_quantile_bar(
+er_builder_quantile_errorbar_vlines(
   data,
   config,
   stratify,
@@ -28,6 +29,16 @@ er_builder_quantile_bar(
 )
 
 er_builder_quantile_pointrange(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  style
+)
+
+er_builder_quantile_pointrange_vlines(
   data,
   config,
   stratify,
@@ -63,11 +74,17 @@ Builders for the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_p
 which bins exposure into quantile groups and plots a response summary
 (rate, mean, or count-mean, depending on response type) with an
 uncertainty interval per bin: \code{er_builder_quantile_errorbar()} (point plus
-error bar, the default), \code{er_builder_quantile_bar()} (bar plus error bar),
-and \code{er_builder_quantile_pointrange()} (point range). All three are
-tagged \code{er_builder_tag(fn, layer = "quantile")}, so
-\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} errors informatively if handed a builder
-tagged for a different layer.
+error bar, the default) and \code{er_builder_quantile_pointrange()} (point
+range). \code{er_builder_quantile_errorbar_vlines()} and
+\code{er_builder_quantile_pointrange_vlines()} are minor variants of each,
+additionally drawing a dotted \code{\link[ggplot2:geom_vline]{ggplot2::geom_vline()}} at each interior
+quantile cutpoint (i.e. every bin boundary except the exposure
+variable's overall min/max) -- a common way exposure-response bin plots
+are annotated in practice, so that the reader can see exactly where one
+quantile bin ends and the next begins without inferring it from the
+point/error bar spacing alone. All four are tagged
+\code{er_builder_tag(fn, layer = "quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}
+errors informatively if handed a builder tagged for a different layer.
 
 See \code{\link[=er_builder]{er_builder()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.

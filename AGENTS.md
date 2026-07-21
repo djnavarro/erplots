@@ -139,7 +139,8 @@ additions stay consistent:
 - **`er_builder_*()`** -- the pluggable partial-builder functions (was
   `build_*()`), e.g. `er_builder_model_ribbonline()`,
   `er_builder_data_overlay()`, `er_builder_quantile_errorbar()`,
-  `er_builder_group_boxplot()`, `er_builder_summary_pvalue()`. The
+  `er_builder_quantile_errorbar_vlines()`, `er_builder_group_boxplot()`,
+  `er_builder_summary_pvalue()`. The
   `er_`-namespaced shared prefix groups every builder together
   (discoverable via autocomplete/`library(help = "erplots")`) while the
   layer name stays the second token, so `er_builder_data_*`,
@@ -238,6 +239,30 @@ layer's `config` shape. Unlike `layout`, `layer` is entirely optional:
 an untagged builder (including every custom builder written before
 `layer` existed) is simply never checked. All built-in builders across
 all five layers now carry this tag.
+
+## Quantile layer builders
+
+The quantile layer (`er_plot_add_quantiles()`) has two base builders,
+`er_builder_quantile_errorbar()` (point + error bar, the default) and
+`er_builder_quantile_pointrange()`, plus a `_vlines` variant of each --
+`er_builder_quantile_errorbar_vlines()`/
+`er_builder_quantile_pointrange_vlines()` -- that additionally draws a
+dotted `geom_vline()` at every *interior* quantile-bin boundary (i.e.
+every cutpoint except the exposure variable's overall min/max), a
+common real-world exposure-response reporting idiom. The `_vlines`
+variants are thin wrappers around their base builder (prepending a
+single vline geom to the base builder's own return value), not
+independent copies, so they can't drift out of sync with it.
+`cut_exposure_quantile()` attaches the `n + 1` quantile cutpoints it
+computes (excluding placebo) as a `"breaks"` attribute on its returned
+factor; `.part_quantile()` reads this into `config$breaks`, which the
+`_vlines` builders (via the internal `.quantile_boundary_vlines()`
+helper) consume. `er_builder_quantile_bar()` (bar + error bar) was
+removed -- on review it wasn't an idiom that shows up in real
+exposure-response reporting, unlike the `_vlines` pattern -- with no
+deprecation shim (see "Naming scheme" above for why erplots doesn't use
+shims). All four quantile builders are tagged
+`er_builder_tag(fn, layer = "quantile")`.
 
 ## Planned work
 

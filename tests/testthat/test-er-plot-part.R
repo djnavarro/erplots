@@ -89,10 +89,10 @@ test_that(".part_quantile constructs the correct data structure", {
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
 
-  expect_length(cfg1, 4)
-  expect_length(cfg2, 4)
+  expect_length(cfg1, 5)
+  expect_length(cfg2, 5)
 
-  cfg_names <- c("n_quantiles", "conf_level", "summary", "builder")
+  cfg_names <- c("n_quantiles", "conf_level", "breaks", "summary", "builder")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 

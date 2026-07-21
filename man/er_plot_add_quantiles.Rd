@@ -22,7 +22,11 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \item{builder}{Function drawing the quantile summary -- defaults to
 \code{\link[=er_builder_quantile_errorbar]{er_builder_quantile_errorbar()}} (point + error bar).
 \code{\link[=er_builder_quantile_pointrange]{er_builder_quantile_pointrange()}} (a single \code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}})
-is the other built-in option; any function matching the standard
+is another built-in option, as are \verb{_vlines} variants of each
+(\code{\link[=er_builder_quantile_errorbar_vlines]{er_builder_quantile_errorbar_vlines()}},
+\code{\link[=er_builder_quantile_pointrange_vlines]{er_builder_quantile_pointrange_vlines()}}) that additionally draw a
+dotted line at each interior quantile-bin boundary; any function
+matching the standard
 \verb{(data, config, stratify, exposure, response, strata, style)}
 signature can be supplied instead -- see \code{\link[=er_builder]{er_builder()}}.
 \code{config$summary} is the pre-computed per-bin data frame (point
@@ -93,6 +97,14 @@ erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
   er_plot_add_quantiles(builder = er_builder_quantile_pointrange) |>
+  plot()
+
+# the default errorbar, with dotted lines marking the quantile-bin
+# boundaries
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod) |>
+  er_plot_add_quantiles(builder = er_builder_quantile_errorbar_vlines) |>
   plot()
 
 # plug in a fully custom builder; see `?er_builder` for the full contract
