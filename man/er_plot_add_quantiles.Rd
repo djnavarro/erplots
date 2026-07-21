@@ -26,7 +26,9 @@ is the other built-in option; any function matching the standard
 \verb{(data, config, stratify, exposure, response, strata, style)}
 signature can be supplied instead -- see \code{\link[=er_partial]{er_partial()}}.
 \code{config$summary} is the pre-computed per-bin data frame (point
-estimate + CI) to draw.}
+estimate + CI) to draw. If \code{builder} is tagged with a \code{layer} (via
+\code{\link[=er_builder_tag]{er_builder_tag()}}) other than \code{"quantile"}, this errors
+informatively; an untagged builder is never checked.}
 
 \item{bins}{Number of exposure bins (not counting placebo)}
 

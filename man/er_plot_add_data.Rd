@@ -23,7 +23,10 @@ only: a boxplot + jittered points per panel) is the other built-in
 option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature and tagged with
 \code{\link[=er_builder_tag]{er_builder_tag()}} can be supplied instead -- see \code{\link[=er_partial]{er_partial()}} for the
 full contract, e.g. a 2D density in the main panel, a continuous/
-count response's color-encoded panel, or per-panel histograms.}
+count response's color-encoded panel, or per-panel histograms. If
+\code{builder} is tagged with a \code{layer} other than \code{"data"}, this errors
+informatively; an untagged builder is never checked (only \code{layout}
+is a hard requirement).}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
 default). Only meaningful for \code{\link[=er_builder_data_boxjitter]{er_builder_data_boxjitter()}} on a binary

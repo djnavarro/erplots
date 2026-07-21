@@ -22,7 +22,9 @@ plots (a tidyselection of variables)}
 \code{\link[=er_builder_group_boxplot]{er_builder_group_boxplot()}}. \code{\link[=er_builder_group_violin]{er_builder_group_violin()}} is the other
 built-in option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature can be
 supplied instead -- see \code{\link[=er_partial]{er_partial()}}. Applied to every grouping
-variable added by this call.}
+variable added by this call. If \code{builder} is tagged with a \code{layer}
+(via \code{\link[=er_builder_tag]{er_builder_tag()}}) other than \code{"group"}, this errors
+informatively; an untagged builder is never checked.}
 
 \item{bins}{Number of quantile bins used for continuous grouping
 variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default)}

@@ -240,7 +240,11 @@ er_plot_style <- function(object, labels) {
 #' @param summary_builder Function drawing the summary annotation --
 #'   defaults to [er_builder_summary_pvalue()]. Any function matching the same
 #'   standard signature as `builder` can be supplied instead. See
-#'   [er_partial()].
+#'   [er_partial()]. If `builder`/`summary_builder` is tagged with a
+#'   `layer` (via [er_builder_tag()]) other than `"model"`/`"summary"`
+#'   respectively, this errors informatively rather than passing a
+#'   mismatched `config` shape to the builder; an untagged builder is
+#'   never checked.
 #' @param conf_level Confidence level for the prediction ribbon
 #'
 #' @returns The input `object`, with the model layer added
@@ -287,13 +291,18 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
   if (!is.null(summary_builder) && !is.function(summary_builder)) rlang::abort("`summary_builder` must be a function or NULL")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
+  builder <- builder %||% er_builder_model_ribbonline
+  summary_builder <- summary_builder %||% er_builder_summary_pvalue
+  .check_builder_layer(builder, "model", arg = "builder")
+  .check_builder_layer(summary_builder, "summary", arg = "summary_builder")
+
   object$part$model <- .part_model(
     object = object, 
     model = model,
     stratify = keep_strata, 
     conf_level = conf_level,
-    builder = builder %||% er_builder_model_ribbonline,
-    summary_builder = summary_builder %||% er_builder_summary_pvalue
+    builder = builder,
+    summary_builder = summary_builder
   )
   
   return(object)
@@ -333,7 +342,9 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   `(data, config, stratify, exposure, response, strata, style)`
 #'   signature can be supplied instead -- see [er_partial()].
 #'   `config$summary` is the pre-computed per-bin data frame (point
-#'   estimate + CI) to draw.
+#'   estimate + CI) to draw. If `builder` is tagged with a `layer` (via
+#'   [er_builder_tag()]) other than `"quantile"`, this errors
+#'   informatively; an untagged builder is never checked.
 #' @param bins Number of exposure bins (not counting placebo)
 #' @param conf_level Confidence level for the interval
 #'
@@ -401,13 +412,16 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(builder) && !is.function(builder)) rlang::abort("`builder` must be a function or NULL")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
-  
+
+  builder <- builder %||% er_builder_quantile_errorbar
+  .check_builder_layer(builder, "quantile")
+
   object$part$quantile <- .part_quantile(
     object = object,
     stratify = keep_strata,
     bins = bins,
     conf_level = conf_level,
-    builder = builder %||% er_builder_quantile_errorbar
+    builder = builder
   )
   
   return(object)
@@ -421,12 +435,13 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 #' Attaches the self-declared metadata a custom `er_builder_*()`-style
 #' function can carry, in a single call: which *structural* family a
 #' data-layer builder belongs to (`layout`), what a builder's `fill`
-#' aesthetic means when it isn't strata (`fill_role`), and what a
-#' group-layer builder's y-axis means when it isn't the group variable
-#' itself (`y_role`). All three arguments are optional and independent --
-#' pass only the ones a given builder needs, in one call, rather than
-#' chaining separate setters. See [er_partial()]'s "Writing your own
-#' builder" section for the full contract.
+#' aesthetic means when it isn't strata (`fill_role`), what a group-layer
+#' builder's y-axis means when it isn't the group variable itself
+#' (`y_role`), and which layer a builder is meant to be plugged into
+#' (`layer`). All four arguments are optional and independent -- pass
+#' only the ones a given builder needs, in one call, rather than chaining
+#' separate setters. See [er_partial()]'s "Writing your own builder"
+#' section for the full contract.
 #'
 #' `layout` is the one required tag for a data-layer builder:
 #' [er_plot_add_data()] reads it off `builder` to decide whether to route
@@ -448,6 +463,19 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 #' the y-axis is titled with the group variable's label), which is
 #' correct for most builders.
 #'
+#' `layer` is also optional, but unlike `fill_role`/`y_role` it isn't read
+#' for labelling -- it's read by every `er_plot_add_*()` function
+#' (`er_plot_add_model()` checks both `builder` against `"model"` and
+#' `summary_builder` against `"summary"`; `er_plot_add_quantiles()`
+#' against `"quantile"`; `er_plot_add_data()` against `"data"`;
+#' `er_plot_add_groups()` against `"group"`) to catch a builder plugged
+#' into the wrong layer -- e.g. passing a quantile builder to
+#' `er_plot_add_data()` -- with an informative error instead of whatever
+#' failure results from that layer's `config` shape not matching what the
+#' builder expects. All built-in builders carry this tag. A custom
+#' builder that omits it is never checked -- `layer` is opt-in, not a
+#' requirement like `layout` is for a data-layer builder.
+#'
 #' @param builder A function matching the standard `er_builder_*()` signature
 #'   (see [er_partial()])
 #' @param layout One of `"overlay"` or `"panel"`, or `NULL` (the default) to
@@ -460,10 +488,15 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 #' @param y_role A string naming what the builder's y-axis represents
 #'   (currently only `"count"` is read by `.polish_labels()`), or `NULL`
 #'   (the default) to leave this tag unset
+#' @param layer One of `"model"`, `"summary"`, `"quantile"`, `"data"`, or
+#'   `"group"`, naming which `er_plot_add_*()` layer (or, for `"summary"`,
+#'   which argument of [er_plot_add_model()]) the builder is meant to be
+#'   used with, or `NULL` (the default) to leave this tag unset -- see
+#'   "Details"
 #'
 #' @returns `builder`, with whichever of the `"er_builder_layout"`/
-#'   `"er_builder_fill_role"`/`"er_builder_y_role"` attributes were
-#'   requested attached
+#'   `"er_builder_fill_role"`/`"er_builder_y_role"`/`"er_builder_layer"`
+#'   attributes were requested attached
 #'
 #' @seealso [er_plot_add_data()], [er_partial()]
 #'
@@ -475,11 +508,12 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 #'       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
 #'     )
 #'   },
-#'   layout = "overlay"
+#'   layout = "overlay",
+#'   layer = "data"
 #' )
 #'
 #' @export
-er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NULL) {
+er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NULL, layer = NULL) {
   if (!is.function(builder)) rlang::abort("`builder` must be a function")
 
   if (!is.null(layout)) {
@@ -491,6 +525,10 @@ er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NU
   }
   if (!is.null(y_role)) {
     attr(builder, "er_builder_y_role") <- y_role
+  }
+  if (!is.null(layer)) {
+    layer <- match.arg(layer, c("model", "summary", "quantile", "data", "group"))
+    attr(builder, "er_builder_layer") <- layer
   }
 
   builder
@@ -517,6 +555,22 @@ er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NU
 #' @noRd
 .builder_y_role <- function(builder) {
   attr(builder, "er_builder_y_role")
+}
+
+#' @noRd
+.builder_layer <- function(builder) {
+  attr(builder, "er_builder_layer")
+}
+
+#' @noRd
+.check_builder_layer <- function(builder, layer, arg = "builder") {
+  declared <- .builder_layer(builder)
+  if (is.null(declared) || identical(declared, layer)) return(invisible(NULL))
+
+  rlang::abort(c(
+    paste0("`", arg, "` is tagged for the \"", declared, "\" layer, but was passed to a \"", layer, "\" layer function."),
+    "i" = paste0("Use a builder tagged `er_builder_tag(fn, layer = \"", layer, "\")` (or with no `layer` tag at all).")
+  ))
 }
 
 
@@ -582,7 +636,10 @@ er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NU
 #'   exposure, response, strata, style)` signature and tagged with
 #'   [er_builder_tag()] can be supplied instead -- see [er_partial()] for the
 #'   full contract, e.g. a 2D density in the main panel, a continuous/
-#'   count response's color-encoded panel, or per-panel histograms.
+#'   count response's color-encoded panel, or per-panel histograms. If
+#'   `builder` is tagged with a `layer` other than `"data"`, this errors
+#'   informatively; an untagged builder is never checked (only `layout`
+#'   is a hard requirement).
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
 #'   default). Only meaningful for [er_builder_data_boxjitter()] on a binary
 #'   response; must be `"both"` for an "overlay"-layout builder (no
@@ -650,6 +707,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, builder = NULL, panel =
   if (!is.null(builder) && !is.function(builder)) rlang::abort("`builder` must be a function or NULL")
 
   builder <- builder %||% er_builder_data_overlay
+  .check_builder_layer(builder, "data")
   layout <- .builder_layout(builder)
 
   if (layout == "overlay" && panel != "both") {
@@ -712,7 +770,9 @@ er_plot_add_data <- function(object, keep_strata = NULL, builder = NULL, panel =
 #'   built-in option; any function matching the standard `(data, config,
 #'   stratify, exposure, response, strata, style)` signature can be
 #'   supplied instead -- see [er_partial()]. Applied to every grouping
-#'   variable added by this call.
+#'   variable added by this call. If `builder` is tagged with a `layer`
+#'   (via [er_builder_tag()]) other than `"group"`, this errors
+#'   informatively; an untagged builder is never checked.
 #' @param bins Number of quantile bins used for continuous grouping
 #'   variables (`NULL`, the default, uses [cut_quantile()]'s own default)
 #' @param keep_strata Logical, indicating whether this layer should be
@@ -752,12 +812,15 @@ er_plot_add_groups <- function(object, group_by, builder = NULL, bins = NULL, ke
   group_cols <- tidyselect::eval_select(rlang::enquo(group_by), object$data) 
   group_cols <- names(group_cols)
 
+  builder <- builder %||% er_builder_group_boxplot
+  .check_builder_layer(builder, "group")
+
   object$part$group <- .part_group(
     object = object,
     group_cols = group_cols, 
     stratify = keep_strata, 
     bins = bins,
-    builder = builder %||% er_builder_group_boxplot
+    builder = builder
   )
 
   return(object)  

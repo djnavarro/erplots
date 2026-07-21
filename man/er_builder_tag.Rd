@@ -4,7 +4,13 @@
 \alias{er_builder_tag}
 \title{Tag a builder with structural/aesthetic metadata}
 \usage{
-er_builder_tag(builder, layout = NULL, fill_role = NULL, y_role = NULL)
+er_builder_tag(
+  builder,
+  layout = NULL,
+  fill_role = NULL,
+  y_role = NULL,
+  layer = NULL
+)
 }
 \arguments{
 \item{builder}{A function matching the standard \verb{er_builder_*()} signature
@@ -22,22 +28,29 @@ unset}
 \item{y_role}{A string naming what the builder's y-axis represents
 (currently only \code{"count"} is read by \code{.polish_labels()}), or \code{NULL}
 (the default) to leave this tag unset}
+
+\item{layer}{One of \code{"model"}, \code{"summary"}, \code{"quantile"}, \code{"data"}, or
+\code{"group"}, naming which \verb{er_plot_add_*()} layer (or, for \code{"summary"},
+which argument of \code{\link[=er_plot_add_model]{er_plot_add_model()}}) the builder is meant to be
+used with, or \code{NULL} (the default) to leave this tag unset -- see
+"Details"}
 }
 \value{
 \code{builder}, with whichever of the \code{"er_builder_layout"}/
-\code{"er_builder_fill_role"}/\code{"er_builder_y_role"} attributes were
-requested attached
+\code{"er_builder_fill_role"}/\code{"er_builder_y_role"}/\code{"er_builder_layer"}
+attributes were requested attached
 }
 \description{
 Attaches the self-declared metadata a custom \verb{er_builder_*()}-style
 function can carry, in a single call: which \emph{structural} family a
 data-layer builder belongs to (\code{layout}), what a builder's \code{fill}
-aesthetic means when it isn't strata (\code{fill_role}), and what a
-group-layer builder's y-axis means when it isn't the group variable
-itself (\code{y_role}). All three arguments are optional and independent --
-pass only the ones a given builder needs, in one call, rather than
-chaining separate setters. See \code{\link[=er_partial]{er_partial()}}'s "Writing your own
-builder" section for the full contract.
+aesthetic means when it isn't strata (\code{fill_role}), what a group-layer
+builder's y-axis means when it isn't the group variable itself
+(\code{y_role}), and which layer a builder is meant to be plugged into
+(\code{layer}). All four arguments are optional and independent -- pass
+only the ones a given builder needs, in one call, rather than chaining
+separate setters. See \code{\link[=er_partial]{er_partial()}}'s "Writing your own builder"
+section for the full contract.
 }
 \details{
 \code{layout} is the one required tag for a data-layer builder:
@@ -59,6 +72,19 @@ means counts rather than the group variable itself. A builder that
 omits either tag keeps the default behaviour (\code{fill} means strata;
 the y-axis is titled with the group variable's label), which is
 correct for most builders.
+
+\code{layer} is also optional, but unlike \code{fill_role}/\code{y_role} it isn't read
+for labelling -- it's read by every \verb{er_plot_add_*()} function
+(\code{er_plot_add_model()} checks both \code{builder} against \code{"model"} and
+\code{summary_builder} against \code{"summary"}; \code{er_plot_add_quantiles()}
+against \code{"quantile"}; \code{er_plot_add_data()} against \code{"data"};
+\code{er_plot_add_groups()} against \code{"group"}) to catch a builder plugged
+into the wrong layer -- e.g. passing a quantile builder to
+\code{er_plot_add_data()} -- with an informative error instead of whatever
+failure results from that layer's \code{config} shape not matching what the
+builder expects. All built-in builders carry this tag. A custom
+builder that omits it is never checked -- \code{layer} is opt-in, not a
+requirement like \code{layout} is for a data-layer builder.
 }
 \examples{
 build_data_density <- er_builder_tag(
@@ -68,7 +94,8 @@ build_data_density <- er_builder_tag(
       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
     )
   },
-  layout = "overlay"
+  layout = "overlay",
+  layer = "data"
 )
 
 }

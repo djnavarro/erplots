@@ -14,7 +14,10 @@
 #' (rate, mean, or count-mean, depending on response type) with an
 #' uncertainty interval per bin: `er_builder_quantile_errorbar()` (point plus
 #' error bar, the default), `er_builder_quantile_bar()` (bar plus error bar),
-#' and `er_builder_quantile_pointrange()` (point range).
+#' and `er_builder_quantile_pointrange()` (point range). All three are
+#' tagged `er_builder_tag(fn, layer = "quantile")`, so
+#' [er_plot_add_quantiles()] errors informatively if handed a builder
+#' tagged for a different layer.
 #'
 #' See [er_partial()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
@@ -109,6 +112,7 @@ er_builder_quantile_errorbar <- function(data, config, stratify, exposure, respo
   geoms <- list(point, bar, label)
   return(geoms)
 }
+er_builder_quantile_errorbar <- er_builder_tag(er_builder_quantile_errorbar, layer = "quantile")
 
 
 #' @rdname er_builder_quantile
@@ -191,6 +195,7 @@ er_builder_quantile_bar <- function(data, config, stratify, exposure, response, 
   geoms <- list(bar, errbar, label)
   return(geoms)
 }
+er_builder_quantile_bar <- er_builder_tag(er_builder_quantile_bar, layer = "quantile")
 
 
 #' @rdname er_builder_quantile
@@ -251,4 +256,5 @@ er_builder_quantile_pointrange <- function(data, config, stratify, exposure, res
   geoms <- list(range, label)
   return(geoms)
 }
+er_builder_quantile_pointrange <- er_builder_tag(er_builder_quantile_pointrange, layer = "quantile")
 

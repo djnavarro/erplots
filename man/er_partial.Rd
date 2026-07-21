@@ -92,6 +92,19 @@ recompute anything the corresponding \verb{.part_*()} function already
 derived from \code{data}/\code{exposure}/\code{response}/\code{strata}; it only needs to
 turn that \code{config} into ggplot2 layers.
 
+A custom builder can optionally self-declare which layer it's meant
+for via \code{er_builder_tag(builder, layer = ...)} (one of \code{"model"},
+\code{"summary"}, \code{"quantile"}, \code{"data"}, \code{"group"}). Every
+\verb{er_plot_add_*()} function checks a builder's \code{layer} tag, if it has
+one, against the layer it was actually passed to, erroring
+immediately if they disagree -- e.g. passing a builder tagged
+\code{layer = "quantile"} to \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors rather than
+calling the builder with a \code{config} shape it wasn't written for.
+This tag is entirely optional (unlike \code{layout}, which is mandatory
+for a data-layer builder specifically) -- an untagged custom builder
+is simply never checked, so existing custom builders keep working
+unchanged. All built-in builders carry this tag.
+
 All of the builders above feed a \strong{singleton} layer: \code{model},
 \code{summary}, \code{quantile}, \code{data}, and \code{overlay} each occupy a single named
 slot (\code{object$part$model}, \code{object$part$data}, etc.), so calling the

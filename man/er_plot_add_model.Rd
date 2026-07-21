@@ -34,7 +34,11 @@ signature can be supplied instead -- see \code{\link[=er_partial]{er_partial()}}
 \item{summary_builder}{Function drawing the summary annotation --
 defaults to \code{\link[=er_builder_summary_pvalue]{er_builder_summary_pvalue()}}. Any function matching the same
 standard signature as \code{builder} can be supplied instead. See
-\code{\link[=er_partial]{er_partial()}}.}
+\code{\link[=er_partial]{er_partial()}}. If \code{builder}/\code{summary_builder} is tagged with a
+\code{layer} (via \code{\link[=er_builder_tag]{er_builder_tag()}}) other than \code{"model"}/\code{"summary"}
+respectively, this errors informatively rather than passing a
+mismatched \code{config} shape to the builder; an untagged builder is
+never checked.}
 
 \item{conf_level}{Confidence level for the prediction ribbon}
 }

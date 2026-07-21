@@ -16,6 +16,9 @@
 #' The first two put the group levels on the y-axis; `er_builder_group_histogram()`
 #' instead puts them on facet strips and frees the y-axis for counts (see
 #' `Details` in the package's `AGENTS.md`/`PLAN.md` for the rationale).
+#' All three are tagged `er_builder_tag(fn, layer = "group")`, so
+#' [er_plot_add_groups()] errors informatively if handed a builder
+#' tagged for a different layer.
 #'
 #' See [er_partial()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
@@ -59,6 +62,7 @@ er_builder_group_boxplot <- function(data, config, stratify, exposure, response,
 
   return(geoms)
 }
+er_builder_group_boxplot <- er_builder_tag(er_builder_group_boxplot, layer = "group")
 
 
 #' @rdname er_builder_group
@@ -114,7 +118,7 @@ er_builder_group_histogram <- function(data, config, stratify, exposure, respons
 
   return(geoms)
 }
-er_builder_group_histogram <- er_builder_tag(er_builder_group_histogram, y_role = "count")
+er_builder_group_histogram <- er_builder_tag(er_builder_group_histogram, y_role = "count", layer = "group")
 
 
 #' @rdname er_builder_group
@@ -151,3 +155,4 @@ er_builder_group_violin <- function(data, config, stratify, exposure, response, 
 
   return(geoms)
 }
+er_builder_group_violin <- er_builder_tag(er_builder_group_violin, layer = "group")

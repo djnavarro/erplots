@@ -470,7 +470,8 @@ three names over one function with three optional arguments.
 - No `layer` attribute (an idea raised alongside this one, to let a
   builder self-declare which `er_plot_add_*()` layer it's meant for, so
   the wrong-layer case could error informatively) was added in this
-  pass -- deferred, see "Open / deferred" below.
+  pass -- deferred initially, then implemented in the follow-up section
+  just below.
 
 **What changed:** every call site across `R/`, `tests/`, and
 `vignettes/articles/` updated (built-ins:
@@ -484,6 +485,69 @@ justification with the opposite conclusion. Straight rename, no
 deprecation shims -- consistent with the naming-scheme review above.
 
 **Status:** done, full test suite passing (452 tests).
+
+## Completed: adding the optional `layer` attribute
+
+**Motivation.** Deferred in the previous section: `layout` is checked
+structurally (it's mandatory for a data-layer builder, and
+`er_plot_add_data()` reads it to decide which internal assembly path to
+use), but nothing previously caught a builder plugged into the wrong
+*layer* entirely -- e.g. passing a quantile builder to
+`er_plot_add_data()` would call it with the data layer's `config`
+shape, failing with whatever error results from that mismatch (often an
+unhelpful "object not found" from inside the builder) rather than a
+clear message naming the actual problem.
+
+**Decisions made:**
+- `er_builder_tag()` gained a fourth argument, `layer`, one of
+  `"model"`, `"summary"`, `"quantile"`, `"data"`, or `"group"` (`
+  "summary"` covers `er_plot_add_model()`'s `summary_builder` argument
+  specifically, as a slot distinct from that layer's own `builder`).
+  Attaches an `"er_builder_layer"` attribute, following the same
+  optional/independent pattern as `fill_role`/`y_role`.
+- Every `er_plot_add_*()` function now resolves its builder(s) to their
+  default *before* validating (`builder <- builder %||% <default>`,
+  same as before), then calls a new internal `.check_builder_layer(builder,
+  expected_layer, arg = "builder")` helper. If the builder has no
+  `"er_builder_layer"` attribute, the check is a no-op -- `layer` is
+  opt-in, unlike `layout`. If it has one and it disagrees with the
+  layer being added, it errors immediately, naming both the declared
+  and actual layer.
+- All built-in builders across all five layers were tagged with their
+  layer (`er_builder_model_ribbonline()`/`er_builder_model_line()`/
+  `er_builder_model_spaghetti()`: `"model"`; `er_builder_summary_pvalue()`:
+  `"summary"`; `er_builder_quantile_errorbar()`/`er_builder_quantile_bar()`/
+  `er_builder_quantile_pointrange()`: `"quantile"`;
+  `er_builder_data_overlay()`/`er_builder_data_boxjitter()`/
+  `er_builder_data_hex()`: `"data"` (added alongside their existing
+  `layout` tag); `er_builder_group_boxplot()`/`er_builder_group_violin()`/
+  `er_builder_group_histogram()`: `"group"`), so the validation has
+  real effect out of the box rather than only mattering for
+  hand-written custom builders.
+- `layer` was deliberately made optional rather than mandatory (unlike
+  `layout`), to avoid forcing every existing custom builder (written
+  before `layer` existed) to be updated just to keep working -- an
+  untagged builder is simply never checked, in any layer.
+
+**What changed:** `R/er-plot-api.R` (`er_builder_tag()`, `.builder_layer()`,
+`.check_builder_layer()`, and the validation call added to each
+`er_plot_add_*()`); every built-in builder file
+(`R/er-plot-partials-model.R`, `-quantile.R`, `-summary.R`, `-data.R`,
+`-group.R`) tagged its builders with `layer`; new tests in
+`tests/testthat/test-er-plot-api.R` covering the tag itself, each
+built-in builder's tag, the wrong-layer error for each of the four
+`er_plot_add_*()` functions (and `er_plot_add_model()`'s
+`builder`/`summary_builder` pair specifically), and the "untagged
+builder is never checked" case; `?er_builder_tag`, `?er_partial`, and
+each builder-family's own help topic (`?er_builder_model`,
+`?er_builder_quantile`, `?er_builder_summary`, `?er_builder_data`,
+`?er_builder_group`) documented; `vignettes/articles/extending.Rmd`
+gained a `layer` section (with a runnable wrong-layer error example)
+and its summary table gained a fourth row; `NAMESPACE`/`man/`
+regenerated via `devtools::document()`.
+
+**Status:** done, `devtools::check()` clean (0 errors/warnings/notes),
+full test suite passing (478 tests).
 
 ## Other completed fixes
 
@@ -499,16 +563,6 @@ deprecation shims -- consistent with the naming-scheme review above.
 
 ## Open / deferred (no concrete need yet -- not scheduled)
 
-- **A `layer` attribute on `er_builder_tag()`.** Raised alongside the
-  builder-metadata consolidation above: a builder could self-declare
-  which layer it's meant for (`"model"`, `"quantile"`, `"data"`,
-  `"group"`), letting each `er_plot_add_*()` give an informative error
-  if handed a builder tagged for a different layer, rather than
-  whatever failure mode currently results from a mismatched `config`
-  shape. Deferred pending a decision on strictness -- whether `layer`
-  should be checked only when present (matching how the other tags
-  behave) or required outright -- and because it touches every built-in
-  builder, not just the ones that already carry a tag.
 - **Additive model layer.** Overlaying two fitted model curves (e.g. a
   candidate vs. a null/reference model, or Emax vs. linear) isn't
   possible today since `er_plot_add_model()` is singleton. Real work,

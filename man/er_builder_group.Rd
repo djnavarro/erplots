@@ -66,6 +66,9 @@ default), \code{er_builder_group_violin()}, and \code{er_builder_group_histogram
 The first two put the group levels on the y-axis; \code{er_builder_group_histogram()}
 instead puts them on facet strips and frees the y-axis for counts (see
 \code{Details} in the package's \code{AGENTS.md}/\code{PLAN.md} for the rationale).
+All three are tagged \code{er_builder_tag(fn, layer = "group")}, so
+\code{\link[=er_plot_add_groups]{er_plot_add_groups()}} errors informatively if handed a builder
+tagged for a different layer.
 
 See \code{\link[=er_partial]{er_partial()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.

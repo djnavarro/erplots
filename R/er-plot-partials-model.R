@@ -14,7 +14,11 @@
 #' the exposure range: `er_builder_model_ribbonline()` (ribbon plus line, the
 #' default), `er_builder_model_line()` (line only, no ribbon), and
 #' `er_builder_model_spaghetti()` (a spaghetti plot of simulated draws, for
-#' models that implement [er_simulate()]).
+#' models that implement [er_simulate()]). All three are tagged
+#' `er_builder_tag(fn, layer = "model")`, so [er_plot_add_model()]
+#' errors informatively if handed one of these swapped into the
+#' `summary_builder` argument, or a builder tagged for a different layer
+#' entirely.
 #'
 #' See [er_partial()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
@@ -83,8 +87,7 @@ er_builder_model_ribbonline <- function(data, config, stratify, exposure, respon
   geoms <- list(model_ribbon, model_line)
   return(geoms)
 }
-
-
+er_builder_model_ribbonline <- er_builder_tag(er_builder_model_ribbonline, layer = "model")
 
 
 #' @rdname er_builder_model
@@ -121,6 +124,7 @@ er_builder_model_line <- function(data, config, stratify, exposure, response, st
   geoms <- list(model_line)
   return(geoms)
 }
+er_builder_model_line <- er_builder_tag(er_builder_model_line, layer = "model")
 
 
 #' @rdname er_builder_model
@@ -196,3 +200,4 @@ er_builder_model_spaghetti <- function(data, config, stratify, exposure, respons
   geoms <- list(model_spaghetti, model_line)
   return(geoms)
 }
+er_builder_model_spaghetti <- er_builder_tag(er_builder_model_spaghetti, layer = "model")

@@ -41,7 +41,9 @@ Builders for the \code{summary_builder} argument of
 \code{\link[=er_plot_add_model]{er_plot_add_model()}}, which annotate the model panel with a summary
 statistic rather than drawing the curve itself: \code{er_builder_summary_pvalue()}
 (the default) places a formatted p-value in whichever corner of the
-panel is furthest from the data.
+panel is furthest from the data. It's tagged \code{er_builder_tag(fn, layer = "summary")}, so \code{\link[=er_plot_add_model]{er_plot_add_model()}} errors informatively if it's
+passed as \code{builder} (the curve/ribbon argument) rather than
+\code{summary_builder}.
 
 See \code{\link[=er_partial]{er_partial()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.

@@ -60,7 +60,9 @@ tagged, via \code{\link[=er_builder_tag]{er_builder_tag()}}, with the \emph{stru
 a 2D density); \code{er_builder_data_boxjitter()} uses the \code{"panel"} layout
 (binary response only), stacking boxplot-plus-jitter panels for
 responders/non-responders below the base plot. See \code{\link[=er_builder_tag]{er_builder_tag()}} and
-\code{\link[=er_plot_add_data]{er_plot_add_data()}} for how this tag is used.
+\code{\link[=er_plot_add_data]{er_plot_add_data()}} for how this tag is used. All three built-in
+data builders are also tagged \code{layer = "data"}, so \code{\link[=er_plot_add_data]{er_plot_add_data()}}
+errors informatively if handed a builder tagged for a different layer.
 
 See \code{\link[=er_partial]{er_partial()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.

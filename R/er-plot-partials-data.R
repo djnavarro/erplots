@@ -18,7 +18,9 @@
 #' a 2D density); `er_builder_data_boxjitter()` uses the `"panel"` layout
 #' (binary response only), stacking boxplot-plus-jitter panels for
 #' responders/non-responders below the base plot. See [er_builder_tag()] and
-#' [er_plot_add_data()] for how this tag is used.
+#' [er_plot_add_data()] for how this tag is used. All three built-in
+#' data builders are also tagged `layer = "data"`, so [er_plot_add_data()]
+#' errors informatively if handed a builder tagged for a different layer.
 #'
 #' See [er_partial()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
@@ -116,7 +118,7 @@ er_builder_data_boxjitter <- er_builder_tag(function(data, config, stratify, exp
   )
 
   return(geoms)
-}, layout = "panel")
+}, layout = "panel", layer = "data")
 
 
 #' @rdname er_builder_data
@@ -168,7 +170,7 @@ er_builder_data_overlay <- er_builder_tag(function(data, config, stratify, expos
   )
 
   return(geoms)
-}, layout = "overlay")
+}, layout = "overlay", layer = "data")
 
 
 #' @rdname er_builder_data
@@ -220,4 +222,4 @@ er_builder_data_hex <- er_builder_tag(function(data, config, stratify, exposure,
   )
 
   return(geoms)
-}, layout = "overlay", fill_role = "density")
+}, layout = "overlay", fill_role = "density", layer = "data")

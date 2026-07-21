@@ -64,7 +64,11 @@ draws the fitted curve (and, where applicable, its uncertainty) over
 the exposure range: \code{er_builder_model_ribbonline()} (ribbon plus line, the
 default), \code{er_builder_model_line()} (line only, no ribbon), and
 \code{er_builder_model_spaghetti()} (a spaghetti plot of simulated draws, for
-models that implement \code{\link[=er_simulate]{er_simulate()}}).
+models that implement \code{\link[=er_simulate]{er_simulate()}}). All three are tagged
+\code{er_builder_tag(fn, layer = "model")}, so \code{\link[=er_plot_add_model]{er_plot_add_model()}}
+errors informatively if handed one of these swapped into the
+\code{summary_builder} argument, or a builder tagged for a different layer
+entirely.
 
 See \code{\link[=er_partial]{er_partial()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.

@@ -77,6 +77,19 @@
 #' derived from `data`/`exposure`/`response`/`strata`; it only needs to
 #' turn that `config` into ggplot2 layers.
 #'
+#' A custom builder can optionally self-declare which layer it's meant
+#' for via `er_builder_tag(builder, layer = ...)` (one of `"model"`,
+#' `"summary"`, `"quantile"`, `"data"`, `"group"`). Every
+#' `er_plot_add_*()` function checks a builder's `layer` tag, if it has
+#' one, against the layer it was actually passed to, erroring
+#' immediately if they disagree -- e.g. passing a builder tagged
+#' `layer = "quantile"` to [er_plot_add_data()] errors rather than
+#' calling the builder with a `config` shape it wasn't written for.
+#' This tag is entirely optional (unlike `layout`, which is mandatory
+#' for a data-layer builder specifically) -- an untagged custom builder
+#' is simply never checked, so existing custom builders keep working
+#' unchanged. All built-in builders carry this tag.
+#'
 #' All of the builders above feed a **singleton** layer: `model`,
 #' `summary`, `quantile`, `data`, and `overlay` each occupy a single named
 #' slot (`object$part$model`, `object$part$data`, etc.), so calling the

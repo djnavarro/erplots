@@ -268,10 +268,48 @@ that doesn't set it keeps the old behaviour (group variable's label on
 the y-axis), which is correct for `er_builder_group_boxplot()`/
 `er_builder_group_violin()`.
 
-### One function, three independent arguments
+### `layer`: which `er_plot_add_*()` a builder is meant for
 
-`layout`, `fill_role`, and `y_role` are all set via the same
-`er_builder_tag()` call rather than three separate wrapper functions.
+`layout`, `fill_role`, and `y_role` all feed the *composition*
+machinery -- deciding where a builder's output goes, or how to title a
+legend/axis once it's drawn. `layer` is different: it's read by the
+`er_plot_add_*()` functions themselves, *before* they call the builder
+at all, purely to catch a builder plugged into the wrong slot. Every
+built-in builder declares it -- `er_builder_quantile_errorbar()` is
+tagged `layer = "quantile"`, `er_builder_group_violin()` is tagged
+`layer = "group"`, and so on for all five layers (`"model"`,
+`"summary"`, `"quantile"`, `"data"`, `"group"` -- `"summary"` covers
+[er_plot_add_model()]'s `summary_builder` argument specifically, since
+it's a different slot from `builder` on that same layer function).
+Passing a builder tagged for one layer into a different layer's
+`er_plot_add_*()` call errors immediately, naming both the layer the
+builder was tagged for and the layer it was actually passed to:
+
+```{r layer-error, error = TRUE}
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod) |>
+  er_plot_add_data(builder = er_builder_quantile_errorbar)
+```
+
+```{r layer-attr}
+attr(er_builder_quantile_errorbar, "er_builder_layer")
+```
+
+Unlike `layout`, `layer` is entirely optional -- a custom builder that
+omits it is simply never checked, regardless of which
+`er_plot_add_*()` it's passed to (this is also true of a builder tagged
+for one layer's `summary_builder`-style secondary argument if that
+layer doesn't have one; there's currently only `"summary"`, specific to
+[er_plot_add_model()]). This means existing custom builders written
+before `layer` existed keep working unchanged; tagging one is purely a
+way to get an earlier, more specific error if it's ever passed to the
+wrong place by mistake.
+
+### One function, four independent arguments
+
+`layout`, `fill_role`, `y_role`, and `layer` are all set via the same
+`er_builder_tag()` call rather than four separate wrapper functions.
 Each argument is independent and optional (aside from `layout` being
 mandatory for a data-layer builder specifically -- see above), so a
 builder that needs to declare more than one piece of metadata -- say, a
@@ -279,10 +317,16 @@ custom "overlay"-layout data builder whose `fill` also means something
 other than strata -- can do it in one call:
 
 ```r
-my_density_builder <- er_builder_tag(my_density_builder, layout = "overlay", fill_role = "density")
+my_density_builder <- er_builder_tag(
+  my_density_builder,
+  layout = "overlay",
+  fill_role = "density",
+  layer = "data"
+)
 ```
 
-This is exactly what the built-in `er_builder_data_hex()` does.
+This is close to what the built-in `er_builder_data_hex()` does (it
+sets `layout`, `fill_role`, and `layer` together).
 
 ## Summary
 
@@ -291,6 +335,7 @@ This is exactly what the built-in `er_builder_data_hex()` does.
 | `layout` | Data-layer builders only | Yes -- errors if missing | `"overlay"` (merged onto the main panel) vs. `"panel"` (stacked panels below) |
 | `fill_role` | Any builder mapping `fill` | No -- defaults to strata | Legend title for a non-strata `fill` aesthetic (e.g. `"density"`) |
 | `y_role` | Group-layer builders only | No -- defaults to the group variable's label | y-axis title when the y-axis isn't the group variable itself (e.g. `"count"`) |
+| `layer` | Any builder | No -- unchecked if unset | Which `er_plot_add_*()` (or `summary_builder`) the builder is meant for; mismatches error immediately |
 
 None of this machinery is needed for a builder that draws a familiar
 idiom in a familiar slot -- the crossbar example above needed no tags at

@@ -210,19 +210,34 @@ knowable without calling the builder -- see PLAN.md's "removing
 rationale.
 
 `er_builder_tag(builder, layout = NULL, fill_role = NULL, y_role =
-NULL)` is a single consolidated setter for all three pieces of
-builder self-declared metadata (originally three separate functions --
-see "Naming scheme" above and PLAN.md's "consolidating the
-builder-metadata setters" section for why they were merged). Each
-argument is independent and optional (aside from `layout` being
-mandatory for a data-layer builder specifically); a builder needing
-more than one tag sets them in one call, e.g.
-`er_builder_tag(fn, layout = "overlay", fill_role = "density")`, which
-is what `er_builder_data_hex()` does. The full, worked-example version
-of "how to write a custom builder" (what `config` contains per layer,
-and how to use `er_builder_tag()`'s three arguments) lives in its own
-article, `vignettes/articles/extending.Rmd` -- see "Vignette structure"
-below.
+NULL, layer = NULL)` is a single consolidated setter for all four
+pieces of builder self-declared metadata (`layout`/`fill_role`/`y_role`
+were originally three separate functions -- see "Naming scheme" above
+and PLAN.md's "consolidating the builder-metadata setters" section for
+why they were merged; `layer` was added afterward). Each argument is
+independent and optional (aside from `layout` being mandatory for a
+data-layer builder specifically); a builder needing more than one tag
+sets them in one call, e.g. `er_builder_tag(fn, layout = "overlay",
+fill_role = "density", layer = "data")`, which is close to what
+`er_builder_data_hex()` does. The full, worked-example version of "how
+to write a custom builder" (what `config` contains per layer, and how
+to use `er_builder_tag()`'s four arguments) lives in its own article,
+`vignettes/articles/extending.Rmd` -- see "Vignette structure" below.
+
+`layer` (one of `"model"`, `"summary"`, `"quantile"`, `"data"`,
+`"group"`) is checked, not just stored: every `er_plot_add_*()`
+function (`er_plot_add_model()` checks `builder` against `"model"` and
+`summary_builder` against `"summary"`; `er_plot_add_quantiles()`
+against `"quantile"`; `er_plot_add_data()` against `"data"`;
+`er_plot_add_groups()` against `"group"`) reads a builder's `layer` tag,
+if it has one (via the internal `.check_builder_layer()` helper), and
+errors immediately, naming both the tagged and actual layer, if they
+disagree -- e.g. passing `er_builder_quantile_errorbar` to
+`er_plot_add_data()` errors rather than calling it with the data
+layer's `config` shape. Unlike `layout`, `layer` is entirely optional:
+an untagged builder (including every custom builder written before
+`layer` existed) is simply never checked. All built-in builders across
+all five layers now carry this tag.
 
 ## Planned work
 
@@ -268,10 +283,14 @@ layout = NULL, fill_role = NULL, y_role = NULL)`, since each attribute
 is independent and optional and a builder needing more than one (e.g.
 `er_builder_data_hex()`, which needs `layout` and `fill_role`) had to
 chain two calls under the old design -- see "Extensibility" above and
-PLAN.md's "consolidating the builder-metadata setters" section. An
-optional `layer` attribute (self-declaring which `er_plot_add_*()` a
-builder targets, for informative wrong-layer errors) was discussed
-alongside this but deferred -- see PLAN.md's "Open / deferred" section.
+PLAN.md's "consolidating the builder-metadata setters" section. Most
+recently, the optional `layer` attribute discussed alongside that
+consolidation (and initially deferred) was implemented: every built-in
+builder is now tagged with the layer it belongs to, and every
+`er_plot_add_*()` function checks a builder's `layer` tag against the
+layer it was actually passed to, if the tag is present -- see
+"Extensibility" above and PLAN.md's "adding the optional `layer`
+attribute" section.
 
 ## Vignette structure
 
@@ -291,20 +310,22 @@ second argument) actually *was*, so `extending.Rmd` now leads with a
 table of what each `.part_*()` function's `config` contains (e.g.
 `config$summary`'s columns for the quantile layer), inspects it
 interactively before writing the crossbar builder, and then adds a
-section on `er_builder_tag()`'s three independent arguments
-(`layout`/`fill_role`/`y_role` -- `layout` mandatory for data-layer
-builders, the other two optional) with a runnable example of each,
-including the built-in `er_builder_data_hex()`/`er_builder_group_histogram()`
-as worked illustrations of `fill_role`/`y_role`
-respectively, and a custom `geom_density2d()`-based data builder as a
-worked illustration of `layout`. `design.Rmd`'s own
-"Extending erplots" section is now just a short pointer into
-`extending.Rmd`. `_pkgdown.yml`'s `articles` list was updated to include
-`articles/extending` after `articles/design`. Keep this split in mind
-if `design.Rmd`'s grammar changes in a way that affects builders (e.g. a
-new builder-metadata helper, or a change to what a `.part_*()` function
-puts in `config`) -- that detail belongs in `extending.Rmd`, not back in
-`design.Rmd`.
+section on `er_builder_tag()`'s four independent arguments
+(`layout`/`fill_role`/`y_role`/`layer` -- `layout` mandatory for
+data-layer builders, the other three optional) with a runnable example
+of each, including the built-in
+`er_builder_data_hex()`/`er_builder_group_histogram()` as worked
+illustrations of `fill_role`/`y_role` respectively, a custom
+`geom_density2d()`-based data builder as a worked illustration of
+`layout`, and a runnable wrong-layer error (a quantile builder passed
+to `er_plot_add_data()`) as a worked illustration of `layer`.
+`design.Rmd`'s own "Extending erplots" section is now just a short
+pointer into `extending.Rmd`. `_pkgdown.yml`'s `articles` list was
+updated to include `articles/extending` after `articles/design`. Keep
+this split in mind if `design.Rmd`'s grammar changes in a way that
+affects builders (e.g. a new builder-metadata helper, or a change to
+what a `.part_*()` function puts in `config`) -- that detail belongs in
+`extending.Rmd`, not back in `design.Rmd`.
 
 ## Structure
 

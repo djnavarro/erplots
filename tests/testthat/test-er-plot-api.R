@@ -503,3 +503,91 @@ test_that("er_plot_add_groups() rejects a non-function builder", {
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
   expect_error(er_plot_add_groups(plt, aucss, builder = "not a function"))
 })
+
+test_that("er_builder_tag() attaches a layer attribute, validated against a fixed set", {
+  fn <- function(data, config, stratify, exposure, response, strata, style) list()
+
+  tagged <- er_builder_tag(fn, layer = "quantile")
+  expect_identical(attr(tagged, "er_builder_layer"), "quantile")
+
+  expect_error(er_builder_tag(fn, layer = "not_a_layer"))
+})
+
+test_that("built-in builders are tagged with their layer", {
+  expect_identical(attr(er_builder_model_ribbonline, "er_builder_layer"), "model")
+  expect_identical(attr(er_builder_model_line, "er_builder_layer"), "model")
+  expect_identical(attr(er_builder_model_spaghetti, "er_builder_layer"), "model")
+  expect_identical(attr(er_builder_summary_pvalue, "er_builder_layer"), "summary")
+  expect_identical(attr(er_builder_quantile_errorbar, "er_builder_layer"), "quantile")
+  expect_identical(attr(er_builder_quantile_bar, "er_builder_layer"), "quantile")
+  expect_identical(attr(er_builder_quantile_pointrange, "er_builder_layer"), "quantile")
+  expect_identical(attr(er_builder_data_overlay, "er_builder_layer"), "data")
+  expect_identical(attr(er_builder_data_boxjitter, "er_builder_layer"), "data")
+  expect_identical(attr(er_builder_data_hex, "er_builder_layer"), "data")
+  expect_identical(attr(er_builder_group_boxplot, "er_builder_layer"), "group")
+  expect_identical(attr(er_builder_group_violin, "er_builder_layer"), "group")
+  expect_identical(attr(er_builder_group_histogram, "er_builder_layer"), "group")
+})
+
+test_that("er_plot_add_model() errors informatively for a wrong-layer builder/summary_builder", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae1)
+
+  expect_error(
+    er_plot_add_model(plt, er_test_mod1, builder = er_builder_quantile_errorbar),
+    "quantile"
+  )
+  expect_error(
+    er_plot_add_model(plt, er_test_mod1, summary_builder = er_builder_group_boxplot),
+    "group"
+  )
+  # a builder tagged for the right layer (or no layer at all) is unaffected
+  expect_no_error(er_plot_add_model(plt, er_test_mod1, builder = er_builder_model_line))
+})
+
+test_that("er_plot_add_quantiles() errors informatively for a wrong-layer builder", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
+
+  expect_error(
+    er_plot_add_quantiles(plt, builder = er_builder_data_overlay),
+    "data"
+  )
+  expect_no_error(er_plot_add_quantiles(plt, builder = er_builder_quantile_pointrange))
+})
+
+test_that("er_plot_add_data() errors informatively for a wrong-layer builder", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
+
+  expect_error(
+    er_plot_add_data(plt, builder = er_builder_group_boxplot),
+    "group"
+  )
+  expect_no_error(er_plot_add_data(plt, builder = er_builder_data_boxjitter))
+})
+
+test_that("er_plot_add_groups() errors informatively for a wrong-layer builder", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
+
+  expect_error(
+    er_plot_add_groups(plt, aucss, builder = er_builder_quantile_bar),
+    "quantile"
+  )
+  expect_no_error(er_plot_add_groups(plt, aucss, builder = er_builder_group_violin))
+})
+
+test_that("a builder with no `layer` tag is never checked, in any layer", {
+  skip_if_not_installed("erglm")
+
+  untagged <- function(data, config, stratify, exposure, response, strata, style) list()
+  plt <- er_test_data |> er_plot(aucss, ae1)
+
+  expect_no_error(er_plot_add_model(plt, er_test_mod1, builder = untagged, summary_builder = untagged))
+  expect_no_error(er_plot_add_quantiles(er_plot_add_model(plt, er_test_mod1), builder = untagged))
+})
