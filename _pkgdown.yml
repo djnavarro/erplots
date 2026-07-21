@@ -16,7 +16,7 @@ reference:
 - title: Plot builder functions
   desc: Low level functions to draw specific components of an exposure-response plot
 - contents: 
-  - er_partial
+  - er_builder
   - er_builder_tag
   - er_builder_model
   - er_builder_summary

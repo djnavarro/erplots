@@ -20,13 +20,13 @@
 #' [er_plot_add_groups()] errors informatively if handed a builder
 #' tagged for a different layer.
 #'
-#' See [er_partial()] for the shared builder interface these functions
+#' See [er_builder()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
 #'
-#' @returns A geom, or a list of geoms; see [er_partial()].
+#' @returns A geom, or a list of geoms; see [er_builder()].
 #'
 #' @name er_builder_group
-#' @seealso [er_partial()]
+#' @seealso [er_builder()]
 NULL
 
 #' @rdname er_builder_group

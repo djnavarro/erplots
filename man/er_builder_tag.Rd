@@ -14,7 +14,7 @@ er_builder_tag(
 }
 \arguments{
 \item{builder}{A function matching the standard \verb{er_builder_*()} signature
-(see \code{\link[=er_partial]{er_partial()}})}
+(see \code{\link[=er_builder]{er_builder()}})}
 
 \item{layout}{One of \code{"overlay"} or \code{"panel"}, or \code{NULL} (the default) to
 leave this tag unset -- see \code{\link[=er_plot_add_data]{er_plot_add_data()}} for what each
@@ -49,7 +49,7 @@ builder's y-axis means when it isn't the group variable itself
 (\code{y_role}), and which layer a builder is meant to be plugged into
 (\code{layer}). All four arguments are optional and independent -- pass
 only the ones a given builder needs, in one call, rather than chaining
-separate setters. See \code{\link[=er_partial]{er_partial()}}'s "Writing your own builder"
+separate setters. See \code{\link[=er_builder]{er_builder()}}'s "Writing your own builder"
 section for the full contract.
 }
 \details{
@@ -100,5 +100,5 @@ build_data_density <- er_builder_tag(
 
 }
 \seealso{
-\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_partial]{er_partial()}}
+\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_builder]{er_builder()}}
 }

@@ -20,13 +20,13 @@
 #' `summary_builder` argument, or a builder tagged for a different layer
 #' entirely.
 #'
-#' See [er_partial()] for the shared builder interface these functions
+#' See [er_builder()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
 #'
-#' @returns A geom, or a list of geoms; see [er_partial()].
+#' @returns A geom, or a list of geoms; see [er_builder()].
 #'
 #' @name er_builder_model
-#' @seealso [er_partial()]
+#' @seealso [er_builder()]
 NULL
 
 #' @rdname er_builder_model

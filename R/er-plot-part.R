@@ -56,7 +56,7 @@
     unlist()  
 
   # `builder`/`summary_builder` are the escape hatch documented in
-  # `?er_partial`: any function matching the standard `er_builder_*()`
+  # `?er_builder`: any function matching the standard `er_builder_*()`
   # signature can be plugged in without touching package internals.
   # `er_plot_add_model()` has already resolved a default when the
   # caller didn't supply one, so both are always functions here.
@@ -150,7 +150,7 @@
       )
     )
   
-  # see `?er_partial` for the `builder` escape hatch; `er_plot_add_quantiles()`
+  # see `?er_builder` for the `builder` escape hatch; `er_plot_add_quantiles()`
   # has already resolved a default when the caller didn't supply one
   config$builder <- builder
 
@@ -173,7 +173,7 @@
   config$panel <- panel
   config$seed  <- 1234L
   # `er_plot_add_data()` has already resolved `builder` (and confirmed
-  # its layout is "panel") before calling here -- see `?er_partial` for
+  # its layout is "panel") before calling here -- see `?er_builder` for
   # the `builder`/`er_builder_tag()` escape hatch
   config$builder <- builder
 
@@ -238,7 +238,7 @@
   # responses get a small nudge so 0/1 points don't overplot into two
   # solid lines; continuous/count responses get none). `er_plot_add_data()`
   # has already resolved `builder` (and confirmed its layout is "overlay")
-  # before calling here -- see `?er_partial` for the `builder`/`er_builder_tag()`
+  # before calling here -- see `?er_builder` for the `builder`/`er_builder_tag()`
   # escape hatch.
   config$response_type <- object$response$type
   config$builder <- builder
@@ -261,7 +261,7 @@
   for(g in group_cols) {
 
     config <- list()
-    # see `?er_partial` for the `builder` escape hatch; `er_plot_add_groups()`
+    # see `?er_builder` for the `builder` escape hatch; `er_plot_add_groups()`
     # has already resolved a default when the caller didn't supply one
     config$builder <- builder
 

@@ -24,7 +24,7 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{\link[=er_builder_quantile_pointrange]{er_builder_quantile_pointrange()}} (a single \code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}})
 is the other built-in option; any function matching the standard
 \verb{(data, config, stratify, exposure, response, strata, style)}
-signature can be supplied instead -- see \code{\link[=er_partial]{er_partial()}}.
+signature can be supplied instead -- see \code{\link[=er_builder]{er_builder()}}.
 \code{config$summary} is the pre-computed per-bin data frame (point
 estimate + CI) to draw. If \code{builder} is tagged with a \code{layer} (via
 \code{\link[=er_builder_tag]{er_builder_tag()}}) other than \code{"quantile"}, this errors
@@ -95,7 +95,7 @@ erglm_data |>
   er_plot_add_quantiles(builder = er_builder_quantile_pointrange) |>
   plot()
 
-# plug in a fully custom builder; see `?er_partial` for the full contract
+# plug in a fully custom builder; see `?er_builder` for the full contract
 build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
   ggplot2::geom_crossbar(
     data = config$summary,
@@ -114,5 +114,5 @@ erglm_data |>
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_add_model]{er_plot_add_model()}},
 \code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, \code{\link[=er_vpc_plot]{er_vpc_plot()}},
-\code{\link[=er_partial]{er_partial()}}
+\code{\link[=er_builder]{er_builder()}}
 }

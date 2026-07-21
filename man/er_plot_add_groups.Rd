@@ -21,7 +21,7 @@ plots (a tidyselection of variables)}
 \item{builder}{Function drawing each group panel -- defaults to
 \code{\link[=er_builder_group_boxplot]{er_builder_group_boxplot()}}. \code{\link[=er_builder_group_violin]{er_builder_group_violin()}} is the other
 built-in option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature can be
-supplied instead -- see \code{\link[=er_partial]{er_partial()}}. Applied to every grouping
+supplied instead -- see \code{\link[=er_builder]{er_builder()}}. Applied to every grouping
 variable added by this call. If \code{builder} is tagged with a \code{layer}
 (via \code{\link[=er_builder_tag]{er_builder_tag()}}) other than \code{"group"}, this errors
 informatively; an untagged builder is never checked.}
@@ -71,5 +71,5 @@ erglm_data |>
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_add_model]{er_plot_add_model()}},
-\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, \code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_partial]{er_partial()}}
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, \code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_builder]{er_builder()}}
 }

@@ -1,5 +1,5 @@
 
-#' Partial builders for exposure-response plots
+#' Builder functions for exposure-response plots
 #'
 #' @param data The original data frame
 #' @param config Configuration for the specific plot
@@ -10,7 +10,7 @@
 #' @param style Style components
 #'
 #' @details This page documents the shared interface all `er_builder_*()`
-#' partial builders implement. The builders themselves are documented on
+#' builders implement. The builders themselves are documented on
 #' their own family-specific pages, one per layer:
 #'
 #' - [er_builder_model()] -- the `model` layer ([er_plot_add_model()])
@@ -24,7 +24,7 @@
 #' 
 #' @returns A geom, or a list of geoms. More precisely, a list of
 #' objects that can be added to a ggplot2 plot. The expectation is
-#' that these objects will be added to a partially-constructed plot
+#' that these objects will be added to a partially constructed plot
 #' which, at a minimum, already has the base theme applied. For 
 #' "model", "summary", "quantile", and "overlay", the pieces will be
 #' added to a plot that already has a coord that sets the axis limits
@@ -119,7 +119,7 @@
 #' layout = "panel")` can still opt into it; see [er_plot_add_data()] for
 #' the user-facing version of this rule.
 #' 
-#' @name er_partial
+#' @name er_builder
 #' @seealso [er_builder_model()], [er_builder_summary()], [er_builder_quantile()],
 #' [er_builder_data()], [er_builder_group()], [er_builder_tag()]
 #' 

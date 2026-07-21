@@ -29,12 +29,12 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{\link[=er_builder_model_spaghetti]{er_builder_model_spaghetti()}} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}}) is
 the other built-in option; any function matching the standard
 \verb{(data, config, stratify, exposure, response, strata, style)}
-signature can be supplied instead -- see \code{\link[=er_partial]{er_partial()}}.}
+signature can be supplied instead -- see \code{\link[=er_builder]{er_builder()}}.}
 
 \item{summary_builder}{Function drawing the summary annotation --
 defaults to \code{\link[=er_builder_summary_pvalue]{er_builder_summary_pvalue()}}. Any function matching the same
 standard signature as \code{builder} can be supplied instead. See
-\code{\link[=er_partial]{er_partial()}}. If \code{builder}/\code{summary_builder} is tagged with a
+\code{\link[=er_builder]{er_builder()}}. If \code{builder}/\code{summary_builder} is tagged with a
 \code{layer} (via \code{\link[=er_builder_tag]{er_builder_tag()}}) other than \code{"model"}/\code{"summary"}
 respectively, this errors informatively rather than passing a
 mismatched \code{config} shape to the builder; an untagged builder is
@@ -74,7 +74,7 @@ erglm_data |>
   er_plot_add_model(mod, builder = er_builder_model_spaghetti) |>
   plot()
 
-# plug in a fully custom model-curve builder; see `?er_partial` for the
+# plug in a fully custom model-curve builder; see `?er_builder` for the
 # full contract
 build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
   ggplot2::geom_line(
@@ -92,5 +92,5 @@ erglm_data |>
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}},
-\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, \code{\link[=er_partial]{er_partial()}}
+\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, \code{\link[=er_builder]{er_builder()}}
 }

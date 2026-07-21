@@ -46,7 +46,7 @@ function(data, config, stratify, exposure, response, strata, style)
 
 The function returns a geom, or a list of geoms/other objects that can
 be added to a ggplot2 plot -- nothing more. This signature is documented
-as public API on `?er_partial`, alongside each layer's own
+as public API on `?er_builder`, alongside each layer's own
 `er_builder_*()` family page (`?er_builder_model`, `?er_builder_quantile`,
 etc.).
 
@@ -342,6 +342,6 @@ idiom in a familiar slot -- the crossbar example above needed no tags at
 all. It exists for the less common case where a builder changes
 *where* its output goes, or *what* one of its aesthetics represents,
 and the rest of the plot needs to be told so it can label things
-correctly. See `?er_partial` for the full public-API contract, and
+correctly. See `?er_builder` for the full public-API contract, and
 [the plot grammar article](design.html) for how these layers fit
 together more broadly.

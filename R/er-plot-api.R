@@ -236,11 +236,11 @@ er_plot_style <- function(object, labels) {
 #'   [er_builder_model_spaghetti()] (simulated draws, via [er_simulate()]) is
 #'   the other built-in option; any function matching the standard
 #'   `(data, config, stratify, exposure, response, strata, style)`
-#'   signature can be supplied instead -- see [er_partial()].
+#'   signature can be supplied instead -- see [er_builder()].
 #' @param summary_builder Function drawing the summary annotation --
 #'   defaults to [er_builder_summary_pvalue()]. Any function matching the same
 #'   standard signature as `builder` can be supplied instead. See
-#'   [er_partial()]. If `builder`/`summary_builder` is tagged with a
+#'   [er_builder()]. If `builder`/`summary_builder` is tagged with a
 #'   `layer` (via [er_builder_tag()]) other than `"model"`/`"summary"`
 #'   respectively, this errors informatively rather than passing a
 #'   mismatched `config` shape to the builder; an untagged builder is
@@ -264,7 +264,7 @@ er_plot_style <- function(object, labels) {
 #'   er_plot_add_model(mod, builder = er_builder_model_spaghetti) |>
 #'   plot()
 #'
-#' # plug in a fully custom model-curve builder; see `?er_partial` for the
+#' # plug in a fully custom model-curve builder; see `?er_builder` for the
 #' # full contract
 #' build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
 #'   ggplot2::geom_line(
@@ -280,7 +280,7 @@ er_plot_style <- function(object, labels) {
 #' }
 #'
 #' @seealso [er_plot()], [er_plot_add_quantiles()],
-#'   [er_plot_add_data()], [er_plot_add_groups()], [er_partial()]
+#'   [er_plot_add_data()], [er_plot_add_groups()], [er_builder()]
 #'
 #' @export
 er_plot_add_model <- function(object, model, keep_strata = NULL,
@@ -340,7 +340,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   [er_builder_quantile_pointrange()] (a single [ggplot2::geom_pointrange()])
 #'   is the other built-in option; any function matching the standard
 #'   `(data, config, stratify, exposure, response, strata, style)`
-#'   signature can be supplied instead -- see [er_partial()].
+#'   signature can be supplied instead -- see [er_builder()].
 #'   `config$summary` is the pre-computed per-bin data frame (point
 #'   estimate + CI) to draw. If `builder` is tagged with a `layer` (via
 #'   [er_builder_tag()]) other than `"quantile"`, this errors
@@ -386,7 +386,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   er_plot_add_quantiles(builder = er_builder_quantile_pointrange) |>
 #'   plot()
 #'
-#' # plug in a fully custom builder; see `?er_partial` for the full contract
+#' # plug in a fully custom builder; see `?er_builder` for the full contract
 #' build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
 #'   ggplot2::geom_crossbar(
 #'     data = config$summary,
@@ -403,7 +403,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'
 #' @seealso [er_plot()], [er_plot_add_model()],
 #'   [er_plot_add_data()], [er_plot_add_groups()], [er_vpc_plot()],
-#'   [er_partial()]
+#'   [er_builder()]
 #'
 #' @export
 er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
@@ -440,7 +440,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 #' (`y_role`), and which layer a builder is meant to be plugged into
 #' (`layer`). All four arguments are optional and independent -- pass
 #' only the ones a given builder needs, in one call, rather than chaining
-#' separate setters. See [er_partial()]'s "Writing your own builder"
+#' separate setters. See [er_builder()]'s "Writing your own builder"
 #' section for the full contract.
 #'
 #' `layout` is the one required tag for a data-layer builder:
@@ -477,7 +477,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 #' requirement like `layout` is for a data-layer builder.
 #'
 #' @param builder A function matching the standard `er_builder_*()` signature
-#'   (see [er_partial()])
+#'   (see [er_builder()])
 #' @param layout One of `"overlay"` or `"panel"`, or `NULL` (the default) to
 #'   leave this tag unset -- see [er_plot_add_data()] for what each
 #'   structural family means
@@ -498,7 +498,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 #'   `"er_builder_fill_role"`/`"er_builder_y_role"`/`"er_builder_layer"`
 #'   attributes were requested attached
 #'
-#' @seealso [er_plot_add_data()], [er_partial()]
+#' @seealso [er_plot_add_data()], [er_builder()]
 #'
 #' @examples
 #' build_data_density <- er_builder_tag(
@@ -604,7 +604,7 @@ er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NU
 #' argument for it. This makes the pairing structural rather than
 #' incidental: `er_builder_data_overlay()` can never be routed into upper/lower
 #' panels, and `er_builder_data_boxjitter()` can never be merged into the main
-#' panel. See [er_builder_tag()] and [er_partial()] for how to tag a custom
+#' panel. See [er_builder_tag()] and [er_builder()] for how to tag a custom
 #' builder the same way.
 #'
 #' This layer is **singleton** -- see [er_plot()]'s "Layers are either
@@ -634,7 +634,7 @@ er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NU
 #'   only: a boxplot + jittered points per panel) is the other built-in
 #'   option; any function matching the standard `(data, config, stratify,
 #'   exposure, response, strata, style)` signature and tagged with
-#'   [er_builder_tag()] can be supplied instead -- see [er_partial()] for the
+#'   [er_builder_tag()] can be supplied instead -- see [er_builder()] for the
 #'   full contract, e.g. a 2D density in the main panel, a continuous/
 #'   count response's color-encoded panel, or per-panel histograms. If
 #'   `builder` is tagged with a `layer` other than `"data"`, this errors
@@ -680,7 +680,7 @@ er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NU
 #'
 #' # plug in a 2D density in the main panel instead of a scatter; tagging
 #' # it "overlay" via `er_builder_tag()` keeps it in the single main-panel
-#' # layout -- see `?er_partial`
+#' # layout -- see `?er_builder`
 #' build_data_density <- er_builder_tag(
 #'   function(data, config, stratify, exposure, response, strata, style) {
 #'     ggplot2::geom_density_2d(
@@ -698,7 +698,7 @@ er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NU
 #' }
 #'
 #' @seealso [er_plot()], [er_plot_add_model()],
-#'   [er_plot_add_quantiles()], [er_plot_add_groups()], [er_partial()]
+#'   [er_plot_add_quantiles()], [er_plot_add_groups()], [er_builder()]
 #'
 #' @export
 er_plot_add_data <- function(object, keep_strata = NULL, builder = NULL, panel = "both") {
@@ -769,7 +769,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, builder = NULL, panel =
 #'   [er_builder_group_boxplot()]. [er_builder_group_violin()] is the other
 #'   built-in option; any function matching the standard `(data, config,
 #'   stratify, exposure, response, strata, style)` signature can be
-#'   supplied instead -- see [er_partial()]. Applied to every grouping
+#'   supplied instead -- see [er_builder()]. Applied to every grouping
 #'   variable added by this call. If `builder` is tagged with a `layer`
 #'   (via [er_builder_tag()]) other than `"group"`, this errors
 #'   informatively; an untagged builder is never checked.
@@ -801,7 +801,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, builder = NULL, panel =
 #' }
 #'
 #' @seealso [er_plot()], [er_plot_add_model()],
-#'   [er_plot_add_quantiles()], [er_plot_add_data()], [er_partial()]
+#'   [er_plot_add_quantiles()], [er_plot_add_data()], [er_builder()]
 #'
 #' @export
 er_plot_add_groups <- function(object, group_by, builder = NULL, bins = NULL, keep_strata = NULL) {

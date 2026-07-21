@@ -22,13 +22,13 @@
 #' data builders are also tagged `layer = "data"`, so [er_plot_add_data()]
 #' errors informatively if handed a builder tagged for a different layer.
 #'
-#' See [er_partial()] for the shared builder interface these functions
+#' See [er_builder()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
 #'
-#' @returns A geom, or a list of geoms; see [er_partial()].
+#' @returns A geom, or a list of geoms; see [er_builder()].
 #'
 #' @name er_builder_data
-#' @seealso [er_partial()], [er_builder_tag()]
+#' @seealso [er_builder()], [er_builder_tag()]
 NULL
 
 #' @rdname er_builder_data
@@ -185,7 +185,7 @@ er_builder_data_hex <- er_builder_tag(function(data, config, stratify, exposure,
   # `er_builder_data_overlay()` there's no channel left for a `color = strata`
   # mapping; when stratified, all strata are pooled into a single
   # hex-binned density rather than partially or misleadingly encoding
-  # strata (see `?er_partial`'s "a layer's own encoding takes precedence"
+  # strata (see `?er_builder`'s "a layer's own encoding takes precedence"
   # rule). A stratum-faceted hexbin remains possible via a custom
   # builder, but isn't attempted here.
   #
