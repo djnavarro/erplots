@@ -44,7 +44,7 @@
     </div>
 
     <div class="section level2">
-      <h2 id="plot">Plot<a class="anchor" aria-label="anchor" href="#plot"></a></h2>
+      <h2 id="exposure-response-plots">Exposure-response plots<a class="anchor" aria-label="anchor" href="#exposure-response-plots"></a></h2>
 
       <div class="section-desc"><p>Build exposure-response plots from any model that implements <code><a href="../reference/er_model_interface.html">er_predict()</a></code></p></div>
 
@@ -59,13 +59,6 @@
 
         </dt>
         <dd>The exposure-response plotting mini-language</dd>
-
-        <dt>
-
-          <code><a href="er_plot_style.html">er_plot_style()</a></code>
-
-        </dt>
-        <dd>Adjust style/labels for an <code>er_plot</code> object</dd>
 
         <dt>
 
@@ -97,12 +90,28 @@
 
         <dt>
 
+          <code><a href="er_plot_style.html">er_plot_style()</a></code>
+
+        </dt>
+        <dd>Adjust style/labels for an <code>er_plot</code> object</dd>
+
+        <dt>
+
           <code><a href="er_plot_build.html">er_plot_build()</a></code>
 
         </dt>
         <dd>Build and render an <code>er_plot</code> object</dd>
+      </dl></div><div class="section level2">
+      <h2 id="plot-builder-functions">Plot builder functions<a class="anchor" aria-label="anchor" href="#plot-builder-functions"></a></h2>
 
-        <dt>
+      <div class="section-desc"><p>Low level functions to draw specific components of an exposure-response plot</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
 
           <code><a href="er_partial.html">build_data_boxjitter()</a></code> <code><a href="er_partial.html">build_data_overlay()</a></code> <code><a href="er_partial.html">build_data_hex()</a></code> <code><a href="er_partial.html">build_group_boxplot()</a></code> <code><a href="er_partial.html">build_group_histogram()</a></code> <code><a href="er_partial.html">build_group_violin()</a></code> <code><a href="er_partial.html">build_model_ribbonline()</a></code> <code><a href="er_partial.html">build_model_line()</a></code> <code><a href="er_partial.html">build_model_spaghetti()</a></code> <code><a href="er_partial.html">build_quantile_errorbar()</a></code> <code><a href="er_partial.html">build_quantile_bar()</a></code> <code><a href="er_partial.html">build_quantile_pointrange()</a></code> <code><a href="er_partial.html">build_summary_pvalue()</a></code>
 
@@ -115,13 +124,6 @@
 
         </dt>
         <dd>Declare a data-layer builder's structural layout</dd>
-
-        <dt>
-
-          <code><a href="er_vpc_plot.html">er_vpc_plot()</a></code>
-
-        </dt>
-        <dd>Visual predictive check plot for an exposure-response model</dd>
       </dl></div><div class="section level2">
       <h2 id="model-interface">Model interface<a class="anchor" aria-label="anchor" href="#model-interface"></a></h2>
 
@@ -150,17 +152,17 @@
 
       <dl><dt>
 
+          <code><a href="er_vpc_plot.html">er_vpc_plot()</a></code>
+
+        </dt>
+        <dd>Visual predictive check plot for an exposure-response model</dd>
+
+        <dt>
+
           <code><a href="clopper_pearson_interval.html">clopper_pearson_interval()</a></code>
 
         </dt>
         <dd>Clopper-Pearson confidence interval for binary data</dd>
-
-        <dt>
-
-          <code><a href="cut_quantile.html">cut_exposure_quantile()</a></code> <code><a href="cut_quantile.html">cut_quantile()</a></code>
-
-        </dt>
-        <dd>Cut a continuous variable into quantiles</dd>
 
         <dt>
 
@@ -175,6 +177,13 @@
 
         </dt>
         <dd>t-interval confidence interval for the mean of continuous data</dd>
+
+        <dt>
+
+          <code><a href="cut_quantile.html">cut_exposure_quantile()</a></code> <code><a href="cut_quantile.html">cut_quantile()</a></code>
+
+        </dt>
+        <dd>Cut a continuous variable into quantiles</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
