@@ -9,7 +9,19 @@ build_data_boxjitter(data, config, stratify, exposure, response, strata, style)
 
 build_data_overlay(data, config, stratify, exposure, response, strata, style)
 
+build_data_hex(data, config, stratify, exposure, response, strata, style)
+
 build_group_boxplot(data, config, stratify, exposure, response, strata, style)
+
+build_group_histogram(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  style
+)
 
 build_group_violin(data, config, stratify, exposure, response, strata, style)
 
@@ -22,6 +34,8 @@ build_model_ribbonline(
   strata,
   style
 )
+
+build_model_line(data, config, stratify, exposure, response, strata, style)
 
 build_model_spaghetti(
   data,
@@ -42,6 +56,8 @@ build_quantile_errorbar(
   strata,
   style
 )
+
+build_quantile_bar(data, config, stratify, exposure, response, strata, style)
 
 build_quantile_pointrange(
   data,

@@ -32,11 +32,15 @@ Build exposure-response plots from any model that implements
 
 - [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_data_hex()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_group_boxplot()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_group_histogram()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_group_violin()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_model_line()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_quantile_bar()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_partial.md)
   [`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_partial.md)
   : Partial builders for exposure-response plots
