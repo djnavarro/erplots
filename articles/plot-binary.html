@@ -230,11 +230,10 @@ builder for a continuous/count response;
 <code><a href="../reference/er_builder_data.html">er_builder_data_overlay()</a></code> (raw points at their true
 <code>(exposure, response)</code> coordinates, shown in the <a href="plot-continuous.html#data-component">continuous</a> and <a href="plot-count.html#data-component">count</a> articles) covers that
 case there, and a custom <code>"panel"</code>-layout builder (e.g. a
-single color-encoded panel) remains possible via [er_builder_layout()]
-if a project needs one – see
-<code>vignettes/articles/design.Rmd</code>’s “Extending erplots”
-section. Each builder declares which of the two structural families it
-belongs to via [er_builder_layout()], which is what
+single color-encoded panel) remains possible via [er_builder_tag()] if a
+project needs one – see <code>vignettes/articles/design.Rmd</code>’s
+“Extending erplots” section. Each builder declares which of the two
+structural families it belongs to via [er_builder_tag()], which is what
 <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> uses to decide whether to merge it into
 the main panel or stack it in panels below.</p>
 <p>Building both side by side (via patchwork’s <code>|</code> operator)

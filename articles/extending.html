@@ -298,9 +298,8 @@ you’re considering proposing one upstream.</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="builder-metadata-tagging-a-builder-with-er_builder_layout-er_builder_fill_role-er_builder_y_role">Builder metadata: tagging a builder with
-<code>er_builder_layout()</code>, <code>er_builder_fill_role()</code>,
-<code>er_builder_y_role()</code><a class="anchor" aria-label="anchor" href="#builder-metadata-tagging-a-builder-with-er_builder_layout-er_builder_fill_role-er_builder_y_role"></a>
+<h2 id="builder-metadata-tagging-a-builder-with-er_builder_tag">Builder metadata: tagging a builder with
+<code>er_builder_tag()</code><a class="anchor" aria-label="anchor" href="#builder-metadata-tagging-a-builder-with-er_builder_tag"></a>
 </h2>
 <p>The quantile builder above needed nothing beyond the function itself.
 Some builders, though, make a structural or aesthetic choice that the
@@ -310,16 +309,19 @@ about <em>before</em> it calls the builder. Since a builder is “just a
 function”, that information can’t live in its return value – composition
 needs it in advance, to decide things like which panel to route the
 builder’s output into, or how to title a legend. erplots solves this by
-letting a builder carry metadata as an <strong>attribute on the function
-itself</strong>, set by one of three small wrapper functions. Each wraps
-a builder and returns it back, attribute attached, so they compose
-naturally with assignment:</p>
+letting a builder carry metadata as <strong>attributes on the function
+itself</strong>, set by a single wrapper function,
+<code><a href="../reference/er_builder_tag.html">er_builder_tag()</a></code>, with one optional argument per piece of
+metadata (<code>layout</code>, <code>fill_role</code>,
+<code>y_role</code>). It wraps a builder and returns it back, attributes
+attached, so it composes naturally with assignment, and a builder that
+needs more than one tag only needs one call:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">my_builder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_builder_layout.html">er_builder_layout</a></span><span class="op">(</span><span class="va">my_builder</span>, <span class="st">"overlay"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">my_builder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_builder_tag.html">er_builder_tag</a></span><span class="op">(</span><span class="va">my_builder</span>, layout <span class="op">=</span> <span class="st">"overlay"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="er_builder_layout-which-structural-family-a-data-layer-builder-belongs-to">
-<code>er_builder_layout()</code>: which structural family a
-data-layer builder belongs to<a class="anchor" aria-label="anchor" href="#er_builder_layout-which-structural-family-a-data-layer-builder-belongs-to"></a>
+<h3 id="layout-which-structural-family-a-data-layer-builder-belongs-to">
+<code>layout</code>: which structural family a data-layer builder
+belongs to<a class="anchor" aria-label="anchor" href="#layout-which-structural-family-a-data-layer-builder-belongs-to"></a>
 </h3>
 <p>The data layer (<code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code>) is the one layer
 with two mutually exclusive structural families a builder can be slotted
@@ -341,8 +343,9 @@ boxplot+jitter design, does).</li>
 vs. <code>.part_data()</code>) <em>before</em> it can call the builder –
 so the layout can’t be inferred from what the builder returns; it has to
 be knowable from the builder alone.
-<code>er_builder_layout(builder, layout)</code> attaches that
-information as an attribute:</p>
+<code>er_builder_tag(builder, layout = ...)</code> attaches that
+information as an attribute, and is the one tag that’s mandatory for a
+data-layer builder:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">er_builder_data_overlay</span>, <span class="st">"er_builder_layout"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "overlay"</span></span>
@@ -362,14 +365,14 @@ wrong structural slot:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `.builder_layout()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> `builder` must declare its structural layout.</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Wrap a custom data-layer builder with `er_builder_layout(builder, "overlay")` or `er_builder_layout(builder, "panel")`.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Wrap a custom data-layer builder with `er_builder_tag(builder, layout = "overlay")` or `er_builder_tag(builder, layout = "panel")`.</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> The built-in builders (`er_builder_data_overlay()`, `er_builder_data_boxjitter()`) already do this.</span></span></code></pre></div>
-<p>Tagging it with <code><a href="../reference/er_builder_layout.html">er_builder_layout()</a></code> fixes that. Here’s a
+<p>Tagging it with <code><a href="../reference/er_builder_tag.html">er_builder_tag()</a></code> fixes that. Here’s a
 complete custom <code>"overlay"</code>-layout data builder – a 2D
 density contour in place of raw points, useful when there are enough
 observations that a scatter overplots into an unreadable smear:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">er_builder_data_density</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_builder_layout.html">er_builder_layout</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">er_builder_data_density</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_builder_tag.html">er_builder_tag</a></span><span class="op">(</span></span>
 <span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="external-link">geom_density2d</a></span><span class="op">(</span></span>
 <span>      data <span class="op">=</span> <span class="va">data</span>,</span>
@@ -388,9 +391,9 @@ observations that a scatter overplots into an unreadable smear:</p>
 <p><img src="extending_files/figure-html/layout-custom-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
-<h3 id="er_builder_fill_role-what-a-builders-fill-aesthetic-means">
-<code>er_builder_fill_role()</code>: what a builder’s
-<code>fill</code> aesthetic means<a class="anchor" aria-label="anchor" href="#er_builder_fill_role-what-a-builders-fill-aesthetic-means"></a>
+<h3 id="fill_role-what-a-builders-fill-aesthetic-means">
+<code>fill_role</code>: what a builder’s <code>fill</code> aesthetic
+means<a class="anchor" aria-label="anchor" href="#fill_role-what-a-builders-fill-aesthetic-means"></a>
 </h3>
 <p>On the base plot, <code>fill</code> almost always means strata
 (e.g. a stratified model ribbon). <code><a href="../reference/er_builder_data.html">er_builder_data_hex()</a></code> – a
@@ -399,8 +402,8 @@ large for a legible scatter – is the one exception: its
 <code>fill</code> encodes 2D bin density (a continuous scale), not
 strata, so <code>.polish_labels()</code> needs to know to title that
 legend “Count” rather than the stratification variable’s label.
-<code>er_builder_fill_role(builder, "density")</code> records exactly
-that:</p>
+<code>er_builder_tag(builder, fill_role = "density")</code> records
+exactly that:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">er_builder_data_hex</span>, <span class="st">"er_builder_fill_role"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "density"</span></span>
@@ -413,14 +416,14 @@ that:</p>
 <p><img src="extending_files/figure-html/fill-role-1.png" class="r-plt" alt="" width="700"></p>
 <p>Note the legend is titled “Count”, not the (nonexistent, here) strata
 label – that’s <code>.polish_labels()</code> consulting the
-<code>"density"</code> tag. Unlike <code><a href="../reference/er_builder_layout.html">er_builder_layout()</a></code>,
-<code><a href="../reference/er_builder_role.html">er_builder_fill_role()</a></code> is optional: a builder that doesn’t
-set it is assumed to mean strata whenever it maps <code>fill</code> at
-all, which is the right default for every other builder.</p>
+<code>"density"</code> tag. Unlike <code>layout</code>,
+<code>fill_role</code> is optional: a builder that doesn’t set it is
+assumed to mean strata whenever it maps <code>fill</code> at all, which
+is the right default for every other builder.</p>
 </div>
 <div class="section level3">
-<h3 id="er_builder_y_role-what-a-builders-y-axis-means">
-<code>er_builder_y_role()</code>: what a builder’s y-axis means<a class="anchor" aria-label="anchor" href="#er_builder_y_role-what-a-builders-y-axis-means"></a>
+<h3 id="y_role-what-a-builders-y-axis-means">
+<code>y_role</code>: what a builder’s y-axis means<a class="anchor" aria-label="anchor" href="#y_role-what-a-builders-y-axis-means"></a>
 </h3>
 <p><code><a href="../reference/er_plot_add_groups.html">er_plot_add_groups()</a></code>’s default builders
 (<code><a href="../reference/er_builder_group.html">er_builder_group_boxplot()</a></code>,
@@ -429,7 +432,7 @@ itself</em> on the y-axis – one categorical row per level – so the group
 variable’s own label is the right axis title.
 <code><a href="../reference/er_builder_group.html">er_builder_group_histogram()</a></code> instead needs its y-axis free
 for counts, moving group levels onto facet strips instead;
-<code>er_builder_y_role(builder, "count")</code> tells
+<code>er_builder_tag(builder, y_role = "count")</code> tells
 <code>.polish_labels()</code> to title the y-axis “Count” rather than
 the group variable’s label:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -442,28 +445,79 @@ the group variable’s label:</p>
 <span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="va">treatment</span>, builder <span class="op">=</span> <span class="va">er_builder_group_histogram</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="extending_files/figure-html/y-role-1.png" class="r-plt" alt="" width="700"></p>
-<p>Like <code><a href="../reference/er_builder_role.html">er_builder_fill_role()</a></code>, this tag is optional – a
-group builder that doesn’t set it keeps the old behaviour (group
-variable’s label on the y-axis), which is correct for
+<p>Like <code>fill_role</code>, this tag is optional – a group builder
+that doesn’t set it keeps the old behaviour (group variable’s label on
+the y-axis), which is correct for
 <code><a href="../reference/er_builder_group.html">er_builder_group_boxplot()</a></code>/
 <code><a href="../reference/er_builder_group.html">er_builder_group_violin()</a></code>.</p>
 </div>
 <div class="section level3">
-<h3 id="why-three-separate-helpers-not-one-generic-tag-function">Why three separate helpers, not one generic “tag” function<a class="anchor" aria-label="anchor" href="#why-three-separate-helpers-not-one-generic-tag-function"></a>
+<h3 id="layer-which-er_plot_add_-a-builder-is-meant-for">
+<code>layer</code>: which <code>er_plot_add_*()</code> a builder is
+meant for<a class="anchor" aria-label="anchor" href="#layer-which-er_plot_add_-a-builder-is-meant-for"></a>
 </h3>
-<p><code><a href="../reference/er_builder_layout.html">er_builder_layout()</a></code>,
-<code><a href="../reference/er_builder_role.html">er_builder_fill_role()</a></code>, and
-<code><a href="../reference/er_builder_role.html">er_builder_y_role()</a></code> all follow the same “wrapper function
-that attaches an attribute” pattern, but are kept as three distinct,
-narrowly-named functions rather than one
-<code>er_builder_tag(builder, key, value)</code>: each corresponds to a
-specific decision a specific piece of composition code needs to make
-(routing for <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code>, a legend title for
-<code>.polish_labels()</code>’s fill logic, an axis title for
-<code>.polish_labels()</code>’s group logic), and giving each its own
-name keeps <code><a href="../reference/er_partial.html">?er_partial</a></code>’s “Writing your own builder” section
-groundable in concrete examples rather than an abstract key-value
-scheme.</p>
+<p><code>layout</code>, <code>fill_role</code>, and <code>y_role</code>
+all feed the <em>composition</em> machinery – deciding where a builder’s
+output goes, or how to title a legend/axis once it’s drawn.
+<code>layer</code> is different: it’s read by the
+<code>er_plot_add_*()</code> functions themselves, <em>before</em> they
+call the builder at all, purely to catch a builder plugged into the
+wrong slot. Every built-in builder declares it –
+<code><a href="../reference/er_builder_quantile.html">er_builder_quantile_errorbar()</a></code> is tagged
+<code>layer = "quantile"</code>, <code><a href="../reference/er_builder_group.html">er_builder_group_violin()</a></code>
+is tagged <code>layer = "group"</code>, and so on for all five layers
+(<code>"model"</code>, <code>"summary"</code>, <code>"quantile"</code>,
+<code>"data"</code>, <code>"group"</code> – <code>"summary"</code>
+covers [er_plot_add_model()]’s <code>summary_builder</code> argument
+specifically, since it’s a different slot from <code>builder</code> on
+that same layer function). Passing a builder tagged for one layer into a
+different layer’s <code>er_plot_add_*()</code> call errors immediately,
+naming both the layer the builder was tagged for and the layer it was
+actually passed to:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span>builder <span class="op">=</span> <span class="va">er_builder_quantile_errorbar</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `.check_builder_layer()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> `builder` is tagged for the "quantile" layer, but was passed to a "data" layer function.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Use a builder tagged `er_builder_tag(fn, layer = "data")` (or with no `layer` tag at all).</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">er_builder_quantile_errorbar</span>, <span class="st">"er_builder_layer"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "quantile"</span></span></code></pre></div>
+<p>Unlike <code>layout</code>, <code>layer</code> is entirely optional –
+a custom builder that omits it is simply never checked, regardless of
+which <code>er_plot_add_*()</code> it’s passed to (this is also true of
+a builder tagged for one layer’s <code>summary_builder</code>-style
+secondary argument if that layer doesn’t have one; there’s currently
+only <code>"summary"</code>, specific to [er_plot_add_model()]). This
+means existing custom builders written before <code>layer</code> existed
+keep working unchanged; tagging one is purely a way to get an earlier,
+more specific error if it’s ever passed to the wrong place by
+mistake.</p>
+</div>
+<div class="section level3">
+<h3 id="one-function-four-independent-arguments">One function, four independent arguments<a class="anchor" aria-label="anchor" href="#one-function-four-independent-arguments"></a>
+</h3>
+<p><code>layout</code>, <code>fill_role</code>, <code>y_role</code>, and
+<code>layer</code> are all set via the same
+<code><a href="../reference/er_builder_tag.html">er_builder_tag()</a></code> call rather than four separate wrapper
+functions. Each argument is independent and optional (aside from
+<code>layout</code> being mandatory for a data-layer builder
+specifically – see above), so a builder that needs to declare more than
+one piece of metadata – say, a custom “overlay”-layout data builder
+whose <code>fill</code> also means something other than strata – can do
+it in one call:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_density_builder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_builder_tag.html">er_builder_tag</a></span><span class="op">(</span></span>
+<span>  <span class="va">my_density_builder</span>,</span>
+<span>  layout <span class="op">=</span> <span class="st">"overlay"</span>,</span>
+<span>  fill_role <span class="op">=</span> <span class="st">"density"</span>,</span>
+<span>  layer <span class="op">=</span> <span class="st">"data"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>This is close to what the built-in <code><a href="../reference/er_builder_data.html">er_builder_data_hex()</a></code>
+does (it sets <code>layout</code>, <code>fill_role</code>, and
+<code>layer</code> together).</p>
 </div>
 </div>
 <div class="section level2">
@@ -477,14 +531,14 @@ scheme.</p>
 <col width="25%">
 </colgroup>
 <thead><tr class="header">
-<th>Helper</th>
+<th>Argument</th>
 <th>Applies to</th>
 <th>Required?</th>
 <th>What it controls</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code><a href="../reference/er_builder_layout.html">er_builder_layout()</a></code></td>
+<td><code>layout</code></td>
 <td>Data-layer builders only</td>
 <td>Yes – errors if missing</td>
 <td>
@@ -492,7 +546,7 @@ scheme.</p>
 vs. <code>"panel"</code> (stacked panels below)</td>
 </tr>
 <tr class="even">
-<td><code><a href="../reference/er_builder_role.html">er_builder_fill_role()</a></code></td>
+<td><code>fill_role</code></td>
 <td>Any builder mapping <code>fill</code>
 </td>
 <td>No – defaults to strata</td>
@@ -500,11 +554,18 @@ vs. <code>"panel"</code> (stacked panels below)</td>
 (e.g. <code>"density"</code>)</td>
 </tr>
 <tr class="odd">
-<td><code><a href="../reference/er_builder_role.html">er_builder_y_role()</a></code></td>
+<td><code>y_role</code></td>
 <td>Group-layer builders only</td>
 <td>No – defaults to the group variable’s label</td>
 <td>y-axis title when the y-axis isn’t the group variable itself
 (e.g. <code>"count"</code>)</td>
+</tr>
+<tr class="even">
+<td><code>layer</code></td>
+<td>Any builder</td>
+<td>No – unchecked if unset</td>
+<td>Which <code>er_plot_add_*()</code> (or <code>summary_builder</code>)
+the builder is meant for; mismatches error immediately</td>
 </tr>
 </tbody>
 </table>

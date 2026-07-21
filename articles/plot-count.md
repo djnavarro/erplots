@@ -198,8 +198,9 @@ There’s no built-in panel-based alternative for a count response –
 [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#er_builder_data_overlay-vs--er_builder_data_boxjitter)
 article) is binary-only. If you need a panel-based builder here, you can
-write a custom one and tag it with `er_builder_layout(fn, "panel")` –
-see `design.Rmd`’s “Extending erplots” section.
+write a custom one and tag it with
+`er_builder_tag(fn, layout = "panel")` – see `design.Rmd`’s “Extending
+erplots” section.
 
 ## Group component
 

@@ -81,7 +81,10 @@ default), `er_builder_group_violin()`, and
 `er_builder_group_histogram()`. The first two put the group levels on
 the y-axis; `er_builder_group_histogram()` instead puts them on facet
 strips and frees the y-axis for counts (see `Details` in the package's
-`AGENTS.md`/`PLAN.md` for the rationale).
+`AGENTS.md`/`PLAN.md` for the rationale). All three are tagged
+`er_builder_tag(fn, layer = "group")`, so
+[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
+errors informatively if handed a builder tagged for a different layer.
 
 See
 [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)

@@ -107,7 +107,9 @@ is the other built-in option; any function matching the standard
 <code>(data, config, stratify, exposure, response, strata, style)</code>
 signature can be supplied instead – see <code><a href="er_partial.html">er_partial()</a></code>.
 <code>config$summary</code> is the pre-computed per-bin data frame (point
-estimate + CI) to draw.</p></dd>
+estimate + CI) to draw. If <code>builder</code> is tagged with a <code>layer</code> (via
+<code><a href="er_builder_tag.html">er_builder_tag()</a></code>) other than <code>"quantile"</code>, this errors
+informatively; an untagged builder is never checked.</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>

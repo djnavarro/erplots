@@ -113,7 +113,11 @@ signature can be supplied instead – see <code><a href="er_partial.html">er_par
 <dd><p>Function drawing the summary annotation –
 defaults to <code><a href="er_builder_summary.html">er_builder_summary_pvalue()</a></code>. Any function matching the same
 standard signature as <code>builder</code> can be supplied instead. See
-<code><a href="er_partial.html">er_partial()</a></code>.</p></dd>
+<code><a href="er_partial.html">er_partial()</a></code>. If <code>builder</code>/<code>summary_builder</code> is tagged with a
+<code>layer</code> (via <code><a href="er_builder_tag.html">er_builder_tag()</a></code>) other than <code>"model"</code>/<code>"summary"</code>
+respectively, this errors informatively rather than passing a
+mismatched <code>config</code> shape to the builder; an untagged builder is
+never checked.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>

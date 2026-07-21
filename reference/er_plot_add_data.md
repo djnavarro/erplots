@@ -54,12 +54,14 @@ er_plot_add_data(object, keep_strata = NULL, builder = NULL, panel = "both")
   other built-in option; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
   signature and tagged with
-  [`er_builder_layout()`](https://erplots.djnavarro.net/reference/er_builder_layout.md)
+  [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
   can be supplied instead – see
   [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
   for the full contract, e.g. a 2D density in the main panel, a
   continuous/ count response's color-encoded panel, or per-panel
-  histograms.
+  histograms. If `builder` is tagged with a `layer` other than `"data"`,
+  this errors informatively; an untagged builder is never checked (only
+  `layout` is a hard requirement).
 
 - panel:
 
@@ -79,7 +81,7 @@ The input `object`, with the data layer added
 
 Every data-layer builder declares which of these two *structural*
 families it belongs to via
-[`er_builder_layout()`](https://erplots.djnavarro.net/reference/er_builder_layout.md)
+[`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
 – `"overlay"` (a single call merged into the main panel) or `"panel"`
 (one-or-more panels stacked below the base plot) – which
 `er_plot_add_data()` reads off `builder` to decide how to assemble the
@@ -89,7 +91,7 @@ pairing structural rather than incidental:
 can never be routed into upper/lower panels, and
 [`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
 can never be merged into the main panel. See
-[`er_builder_layout()`](https://erplots.djnavarro.net/reference/er_builder_layout.md)
+[`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
 and
 [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
 for how to tag a custom builder the same way.
@@ -151,9 +153,9 @@ erglm_data |>
   plot()
 
 # plug in a 2D density in the main panel instead of a scatter; tagging
-# it "overlay" via `er_builder_layout()` keeps it in the single main-panel
+# it "overlay" via `er_builder_tag()` keeps it in the single main-panel
 # layout -- see `?er_partial`
-build_data_density <- er_builder_layout(
+build_data_density <- er_builder_tag(
   function(data, config, stratify, exposure, response, strata, style) {
     ggplot2::geom_density_2d(
       data = data,

@@ -126,7 +126,11 @@ draws the fitted curve (and, where applicable, its uncertainty) over
 the exposure range: <code>er_builder_model_ribbonline()</code> (ribbon plus line, the
 default), <code>er_builder_model_line()</code> (line only, no ribbon), and
 <code>er_builder_model_spaghetti()</code> (a spaghetti plot of simulated draws, for
-models that implement <code><a href="er_model_interface.html">er_simulate()</a></code>).</p>
+models that implement <code><a href="er_model_interface.html">er_simulate()</a></code>). All three are tagged
+<code>er_builder_tag(fn, layer = "model")</code>, so <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>
+errors informatively if handed one of these swapped into the
+<code>summary_builder</code> argument, or a builder tagged for a different layer
+entirely.</p>
 <p>See <code><a href="er_partial.html">er_partial()</a></code> for the shared builder interface these functions
 implement, including how to write a custom builder of your own.</p>
     </div>

@@ -146,7 +146,7 @@ is left**, defaulting to color/fill.
 For most layers, color/fill is always free for strata, so this rule is
 invisible in practice. The data layer is the one exception, and its
 behaviour now depends on which builder is in play, and which
-*structural* family (declared via \[er_builder_layout()\]) that builder
+*structural* family (declared via \[er_builder_tag()\]) that builder
 belongs to:
 
 - [`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
@@ -227,14 +227,13 @@ That signature is a documented, public part of the API (see
 matching the same signature – no need to fork the package or reach into
 `object$part` internals. For the data layer specifically, a custom
 builder must additionally declare which *structural* family it belongs
-to via \[er_builder_layout()\].
+to via \[er_builder_tag()\].
 
 Writing a custom builder in detail – including what `config` actually
-contains for each layer, a worked crossbar example, and the three
-builder-metadata helpers (\[er_builder_layout()\],
-\[er_builder_fill_role()\], \[er_builder_y_role()\]) a builder can use
-to tag itself for the composition machinery – is its own article:
-[Extending erplots: writing your own
+contains for each layer, a worked crossbar example, and
+\[er_builder_tag()\], the single helper a builder can use to declare its
+`layout`/`fill_role`/`y_role` metadata for the composition machinery –
+is its own article: [Extending erplots: writing your own
 builder](https://erplots.djnavarro.net/articles/extending.md).
 
 ## Keeping this article in sync

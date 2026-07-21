@@ -79,7 +79,10 @@ which bins exposure into quantile groups and plots a response summary
 (rate, mean, or count-mean, depending on response type) with an
 uncertainty interval per bin: `er_builder_quantile_errorbar()` (point
 plus error bar, the default), `er_builder_quantile_bar()` (bar plus
-error bar), and `er_builder_quantile_pointrange()` (point range).
+error bar), and `er_builder_quantile_pointrange()` (point range). All
+three are tagged `er_builder_tag(fn, layer = "quantile")`, so
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
+errors informatively if handed a builder tagged for a different layer.
 
 See
 [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)

@@ -58,7 +58,10 @@ Builders for the `summary_builder` argument of
 which annotate the model panel with a summary statistic rather than
 drawing the curve itself: `er_builder_summary_pvalue()` (the default)
 places a formatted p-value in whichever corner of the panel is furthest
-from the data.
+from the data. It's tagged `er_builder_tag(fn, layer = "summary")`, so
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+errors informatively if it's passed as `builder` (the curve/ribbon
+argument) rather than `summary_builder`.
 
 See
 [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)

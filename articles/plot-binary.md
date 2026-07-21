@@ -201,10 +201,10 @@ and
 [count](https://erplots.djnavarro.net/articles/plot-count.html#data-component)
 articles) covers that case there, and a custom `"panel"`-layout builder
 (e.g. a single color-encoded panel) remains possible via
-\[er_builder_layout()\] if a project needs one – see
+\[er_builder_tag()\] if a project needs one – see
 `vignettes/articles/design.Rmd`’s “Extending erplots” section. Each
 builder declares which of the two structural families it belongs to via
-\[er_builder_layout()\], which is what
+\[er_builder_tag()\], which is what
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 uses to decide whether to merge it into the main panel or stack it in
 panels below.

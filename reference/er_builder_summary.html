@@ -105,7 +105,9 @@
 <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>, which annotate the model panel with a summary
 statistic rather than drawing the curve itself: <code>er_builder_summary_pvalue()</code>
 (the default) places a formatted p-value in whichever corner of the
-panel is furthest from the data.</p>
+panel is furthest from the data. It's tagged <code>er_builder_tag(fn, layer = "summary")</code>, so <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> errors informatively if it's
+passed as <code>builder</code> (the curve/ribbon argument) rather than
+<code>summary_builder</code>.</p>
 <p>See <code><a href="er_partial.html">er_partial()</a></code> for the shared builder interface these functions
 implement, including how to write a custom builder of your own.</p>
     </div>

@@ -70,6 +70,11 @@ er_plot_add_model(
   Any function matching the same standard signature as `builder` can be
   supplied instead. See
   [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  If `builder`/`summary_builder` is tagged with a `layer` (via
+  [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md))
+  other than `"model"`/`"summary"` respectively, this errors
+  informatively rather than passing a mismatched `config` shape to the
+  builder; an untagged builder is never checked.
 
 - conf_level:
 

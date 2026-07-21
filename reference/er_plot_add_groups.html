@@ -91,7 +91,9 @@ plots (a tidyselection of variables)</p></dd>
 <code><a href="er_builder_group.html">er_builder_group_boxplot()</a></code>. <code><a href="er_builder_group.html">er_builder_group_violin()</a></code> is the other
 built-in option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, style)</code> signature can be
 supplied instead – see <code><a href="er_partial.html">er_partial()</a></code>. Applied to every grouping
-variable added by this call.</p></dd>
+variable added by this call. If <code>builder</code> is tagged with a <code>layer</code>
+(via <code><a href="er_builder_tag.html">er_builder_tag()</a></code>) other than <code>"group"</code>, this errors
+informatively; an untagged builder is never checked.</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>

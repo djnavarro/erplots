@@ -39,7 +39,11 @@ er_plot_add_groups(
   `(data, config, stratify, exposure, response, strata, style)`
   signature can be supplied instead – see
   [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
-  Applied to every grouping variable added by this call.
+  Applied to every grouping variable added by this call. If `builder` is
+  tagged with a `layer` (via
+  [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md))
+  other than `"group"`, this errors informatively; an untagged builder
+  is never checked.
 
 - bins:
 

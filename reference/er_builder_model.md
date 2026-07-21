@@ -81,6 +81,11 @@ line, the default), `er_builder_model_line()` (line only, no ribbon),
 and `er_builder_model_spaghetti()` (a spaghetti plot of simulated draws,
 for models that implement
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+All three are tagged `er_builder_tag(fn, layer = "model")`, so
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+errors informatively if handed one of these swapped into the
+`summary_builder` argument, or a builder tagged for a different layer
+entirely.
 
 See
 [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)

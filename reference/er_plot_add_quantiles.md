@@ -54,7 +54,10 @@ er_plot_add_quantiles(
   signature can be supplied instead – see
   [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
   `config$summary` is the pre-computed per-bin data frame (point
-  estimate + CI) to draw.
+  estimate + CI) to draw. If `builder` is tagged with a `layer` (via
+  [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md))
+  other than `"quantile"`, this errors informatively; an untagged
+  builder is never checked.
 
 - bins:
 

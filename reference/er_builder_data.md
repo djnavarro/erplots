@@ -69,7 +69,7 @@ Builders for the `data` layer
 ([`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)),
 which shows the raw observations alongside the fitted curve. Each
 builder is tagged, via
-[`er_builder_layout()`](https://erplots.djnavarro.net/reference/er_builder_layout.md),
+[`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md),
 with the *structural* family it belongs to: `er_builder_data_overlay()`
 (the default) and `er_builder_data_hex()` use the `"overlay"` layout,
 plotting directly on the model panel at the raw `(exposure, response)`
@@ -77,10 +77,13 @@ coordinates (points or, for `er_builder_data_hex()`, a 2D density);
 `er_builder_data_boxjitter()` uses the `"panel"` layout (binary response
 only), stacking boxplot-plus-jitter panels for responders/non-responders
 below the base plot. See
-[`er_builder_layout()`](https://erplots.djnavarro.net/reference/er_builder_layout.md)
+[`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
 and
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-for how this tag is used.
+for how this tag is used. All three built-in data builders are also
+tagged `layer = "data"`, so
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
+errors informatively if handed a builder tagged for a different layer.
 
 See
 [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
@@ -90,4 +93,4 @@ how to write a custom builder of your own.
 ## See also
 
 [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md),
-[`er_builder_layout()`](https://erplots.djnavarro.net/reference/er_builder_layout.md)
+[`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)

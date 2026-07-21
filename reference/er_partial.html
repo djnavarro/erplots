@@ -138,7 +138,7 @@ plugged in without forking the package or reaching into <code>object$part</code>
 internals. For the data layer specifically, <code>builder</code> also has to
 declare which <em>structural</em> family it belongs to – a single call
 merged into the main panel, or one or more panels stacked below the
-base plot – via <code><a href="er_builder_layout.html">er_builder_layout()</a></code>, since <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> reads that
+base plot – via <code><a href="er_builder_tag.html">er_builder_tag()</a></code>, since <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> reads that
 tag off <code>builder</code> to decide how to assemble the layer; the other three
 layers have only one structural call site, so no such tagging is
 needed there. See the <code>@examples</code> on <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>,
@@ -151,6 +151,18 @@ for <code>model</code>, <code>config$summary</code> for <code>quantile</code>) �
 recompute anything the corresponding <code>.part_*()</code> function already
 derived from <code>data</code>/<code>exposure</code>/<code>response</code>/<code>strata</code>; it only needs to
 turn that <code>config</code> into ggplot2 layers.</p>
+<p>A custom builder can optionally self-declare which layer it's meant
+for via <code>er_builder_tag(builder, layer = ...)</code> (one of <code>"model"</code>,
+<code>"summary"</code>, <code>"quantile"</code>, <code>"data"</code>, <code>"group"</code>). Every
+<code>er_plot_add_*()</code> function checks a builder's <code>layer</code> tag, if it has
+one, against the layer it was actually passed to, erroring
+immediately if they disagree – e.g. passing a builder tagged
+<code>layer = "quantile"</code> to <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> errors rather than
+calling the builder with a <code>config</code> shape it wasn't written for.
+This tag is entirely optional (unlike <code>layout</code>, which is mandatory
+for a data-layer builder specifically) – an untagged custom builder
+is simply never checked, so existing custom builders keep working
+unchanged. All built-in builders carry this tag.</p>
 <p>All of the builders above feed a <strong>singleton</strong> layer: <code>model</code>,
 <code>summary</code>, <code>quantile</code>, <code>data</code>, and <code>overlay</code> each occupy a single named
 slot (<code>object$part$model</code>, <code>object$part$data</code>, etc.), so calling the
@@ -175,13 +187,13 @@ continuous/count response, where the color channel is already spoken
 for by the response value itself – there's no built-in
 "panel"-layout builder for that case (the older <code>build_data_color()</code>
 was removed once <code><a href="er_builder_data.html">er_builder_data_overlay()</a></code> covered its typical use case
-more simply), but a custom builder tagged <code>er_builder_layout(builder, "panel")</code> can still opt into it; see <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for the
-user-facing version of this rule.</p>
+more simply), but a custom builder tagged <code>er_builder_tag(builder, layout = "panel")</code> can still opt into it; see <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for
+the user-facing version of this rule.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_builder_model.html">er_builder_model()</a></code>, <code><a href="er_builder_summary.html">er_builder_summary()</a></code>, <code><a href="er_builder_quantile.html">er_builder_quantile()</a></code>,
-<code><a href="er_builder_data.html">er_builder_data()</a></code>, <code><a href="er_builder_group.html">er_builder_group()</a></code>, <code><a href="er_builder_layout.html">er_builder_layout()</a></code></p></div>
+<code><a href="er_builder_data.html">er_builder_data()</a></code>, <code><a href="er_builder_group.html">er_builder_group()</a></code>, <code><a href="er_builder_tag.html">er_builder_tag()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

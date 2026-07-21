@@ -115,20 +115,22 @@
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Builders for the <code>data</code> layer (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>), which
 shows the raw observations alongside the fitted curve. Each builder is
-tagged, via <code><a href="er_builder_layout.html">er_builder_layout()</a></code>, with the <em>structural</em> family it belongs to:
+tagged, via <code><a href="er_builder_tag.html">er_builder_tag()</a></code>, with the <em>structural</em> family it belongs to:
 <code>er_builder_data_overlay()</code> (the default) and <code>er_builder_data_hex()</code> use the
 <code>"overlay"</code> layout, plotting directly on the model panel at the raw
 <code>(exposure, response)</code> coordinates (points or, for <code>er_builder_data_hex()</code>,
 a 2D density); <code>er_builder_data_boxjitter()</code> uses the <code>"panel"</code> layout
 (binary response only), stacking boxplot-plus-jitter panels for
-responders/non-responders below the base plot. See <code><a href="er_builder_layout.html">er_builder_layout()</a></code> and
-<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for how this tag is used.</p>
+responders/non-responders below the base plot. See <code><a href="er_builder_tag.html">er_builder_tag()</a></code> and
+<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for how this tag is used. All three built-in
+data builders are also tagged <code>layer = "data"</code>, so <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>
+errors informatively if handed a builder tagged for a different layer.</p>
 <p>See <code><a href="er_partial.html">er_partial()</a></code> for the shared builder interface these functions
 implement, including how to write a custom builder of your own.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="er_partial.html">er_partial()</a></code>, <code><a href="er_builder_layout.html">er_builder_layout()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="er_partial.html">er_partial()</a></code>, <code><a href="er_builder_tag.html">er_builder_tag()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

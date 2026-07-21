@@ -127,7 +127,10 @@ treatment arm) below the main panel: <code>er_builder_group_boxplot()</code> (th
 default), <code>er_builder_group_violin()</code>, and <code>er_builder_group_histogram()</code>.
 The first two put the group levels on the y-axis; <code>er_builder_group_histogram()</code>
 instead puts them on facet strips and frees the y-axis for counts (see
-<code>Details</code> in the package's <code>AGENTS.md</code>/<code>PLAN.md</code> for the rationale).</p>
+<code>Details</code> in the package's <code>AGENTS.md</code>/<code>PLAN.md</code> for the rationale).
+All three are tagged <code>er_builder_tag(fn, layer = "group")</code>, so
+<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> errors informatively if handed a builder
+tagged for a different layer.</p>
 <p>See <code><a href="er_partial.html">er_partial()</a></code> for the shared builder interface these functions
 implement, including how to write a custom builder of your own.</p>
     </div>
