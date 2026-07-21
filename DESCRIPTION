@@ -27,6 +27,7 @@ Suggests:
     erglm,
     hexbin,
     knitr,
+    MASS,
     rmarkdown,
     testthat (>= 3.0.0)
 URL: https://github.com/djnavarro/erplots, https://erplots.djnavarro.net/
