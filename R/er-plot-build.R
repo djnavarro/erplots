@@ -71,7 +71,6 @@
 
   data     <- object$data
   config   <- object$part$group$config
-  stratify <- object$part$group$stratify
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
@@ -79,10 +78,13 @@
 
   group_plots <- list()
   for(g in names(config)) {
+    # each group's own `stratify` (set when it was added via
+    # `er_plot_add_groups()`) rather than a single shared value, since
+    # different calls may have used different `keep_strata` settings
     group_plots[[g]] <- ggplot2::ggplot() + 
       style$theme_base() +
       config[[g]]$builder(
-        data, config[[g]], stratify, exposure, response, strata, style
+        data, config[[g]], config[[g]]$stratify, exposure, response, strata, style
       )
   }
   

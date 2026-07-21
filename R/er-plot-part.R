@@ -259,6 +259,24 @@
 
 .part_group <- function(object, group_cols, stratify, bins, builder) {
 
+  # grouping by the plot's own stratification variable while also
+  # keeping strata (`stratify == TRUE`) bakes the same column name into
+  # `config$groupings` twice (`c(g, object$strata$name)`), which makes
+  # the `dplyr::left_join()` below fail with "Join columns in `x` must
+  # be unique" -- catch it here with a message that names the actual
+  # problem, rather than letting the join error surface uninformatively
+  if (stratify && !is.null(object$strata$name) && any(group_cols %in% object$strata$name)) {
+    offenders <- group_cols[group_cols %in% object$strata$name]
+    rlang::abort(c(
+      "`group_by` cannot include the plot's own stratification variable when `keep_strata = TRUE`.",
+      "x" = paste0(
+        "`", paste(offenders, collapse = "`, `"), "` is already used to stratify this plot ",
+        "(see `stratify_by` in `er_plot()`)."
+      ),
+      "i" = "Set `keep_strata = FALSE` in `er_plot_add_groups()`, or group by a different variable."
+    ))
+  }
+
   part_group <- list()
   part_group$stratify <- stratify
   part_group$config <- list()
@@ -299,6 +317,12 @@
     # store the variable names used for grouping
     if (stratify)  config$groupings <- c(g, object$strata$name)
     if (!stratify) config$groupings <- g
+
+    # `er_plot_add_groups()` is additive -- each call may pass a different
+    # `keep_strata`, so `stratify` is baked into each group's own config
+    # (rather than only the shared `part_group$stratify` used pre-additivity)
+    # and `.build_group_plot()` reads it from here per group
+    config$stratify <- stratify
 
     # store information about the y-axis variable
     config$y <- .plot_variable(

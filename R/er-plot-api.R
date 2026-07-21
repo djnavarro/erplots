@@ -789,7 +789,11 @@ er_plot_add_data <- function(object, keep_strata = NULL, builder = NULL, panel =
 #'   variables (`NULL`, the default, uses [cut_quantile()]'s own default)
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. Errors if
+#'   `TRUE` and `group_by` is itself the plot's stratification
+#'   variable, since that would mean grouping and stratifying by the
+#'   same column at once; pass `keep_strata = FALSE` for that grouping
+#'   variable instead
 #'
 #' @returns The input `object`, with a group panel added
 #'
@@ -827,12 +831,31 @@ er_plot_add_groups <- function(object, group_by, builder = NULL, bins = NULL, ke
   builder <- builder %||% er_builder_group_boxplot
   .check_builder_layer(builder, "group")
 
-  object$part$group <- .part_group(
+  new_group <- .part_group(
     object = object,
     group_cols = group_cols, 
     stratify = keep_strata, 
     bins = bins,
     builder = builder
+  )
+
+  # additive: merge into any existing group panels rather than replacing
+  # them (`modifyList()` so re-adding the same grouping variable still
+  # replaces just that one panel, in insertion order for new names)
+  if (is.null(object$part$group)) {
+    object$part$group <- new_group
+  } else {
+    object$part$group$config <- utils::modifyList(
+      object$part$group$config, 
+      new_group$config
+    )
+  }
+  # kept only for `.polish_legends()`'s part-level strata-legend dedup:
+  # TRUE if *any* group panel (across all `er_plot_add_groups()` calls)
+  # is stratified, since per-panel stratification is now read from each
+  # group's own `config[[g]]$stratify` (see `.build_group_plot()`)
+  object$part$group$stratify <- any(
+    purrr::map_lgl(object$part$group$config, \(cfg) cfg$stratify)
   )
 
   return(object)  

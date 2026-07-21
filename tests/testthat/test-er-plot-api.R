@@ -225,6 +225,96 @@ test_that("er_plot creates an er_plot (all parts, all strata)", {
   expect_s3_class(plt, "er_plot")
 })
 
+test_that("er_plot_add_groups errors when grouping by the stratification variable with keep_strata = TRUE", {
+  skip_if_not_installed("erglm")
+
+  # regression test: grouping by the same variable used for
+  # stratification while keeping strata bakes that column name into
+  # `config$groupings` twice, which used to surface as an opaque
+  # "Join columns in `x` must be unique" error from dplyr::left_join()
+  plt <- er_test_data |>
+    er_plot(aucss, ae1, treatment) |>
+    er_plot_add_model(er_test_mod1)
+
+  expect_error(
+    er_plot_add_groups(plt, treatment, keep_strata = TRUE),
+    "stratification variable"
+  )
+
+  # keep_strata = FALSE for that same variable is fine
+  expect_no_error(er_plot_add_groups(plt, treatment, keep_strata = FALSE))
+
+  # grouping by a *different* variable with keep_strata = TRUE is unaffected
+  expect_no_error(er_plot_add_groups(plt, aucss, keep_strata = TRUE))
+})
+
+test_that("er_plot_add_groups is additive across repeated calls", {
+  skip_if_not_installed("erglm")
+
+  # regression test: er_plot_add_groups() used to overwrite
+  # object$part$group on each call instead of merging into it, so a
+  # second call silently dropped the first group panel
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_groups(aucss) |>
+    er_plot_add_groups(treatment)
+
+  expect_named(plt$part$group$config, c(".aucss_quantile", "treatment"))
+
+  built <- er_plot_build(plt)
+  expect_named(built$plot$group, c(".aucss_quantile", "treatment"))
+  expect_no_error(plot(plt))
+
+  # re-adding the same grouping variable replaces just that one panel,
+  # in place, rather than duplicating it
+  plt2 <- plt |> er_plot_add_groups(aucss, builder = er_builder_group_violin)
+  expect_named(plt2$part$group$config, c(".aucss_quantile", "treatment"))
+  expect_identical(plt2$part$group$config[[".aucss_quantile"]]$builder, er_builder_group_violin)
+})
+
+test_that("er_plot_add_groups honors per-call keep_strata when mixed", {
+  skip_if_not_installed("erglm")
+
+  # regression test: `stratify` used to be stored once for the whole
+  # `part$group` and shared by every panel at build time, so mixing
+  # `keep_strata = TRUE`/`FALSE` across calls applied the wrong flag to
+  # at least one panel (and could error if a panel built without a
+  # strata column was then asked to map `fill`/`colour` to it)
+  plt <- er_test_data |>
+    dplyr::mutate(dose = factor(dose)) |>
+    er_plot(aucss, ae1, sex) |>
+    er_plot_add_model(er_test_mod2) |>
+    er_plot_add_groups(aucss, keep_strata = FALSE) |>
+    er_plot_add_groups(dose, keep_strata = TRUE)
+
+  expect_false(plt$part$group$config[[".aucss_quantile"]]$stratify)
+  expect_true(plt$part$group$config[["dose"]]$stratify)
+
+  # the unstratified panel's data/groupings should have no strata column
+  expect_identical(plt$part$group$config[[".aucss_quantile"]]$groupings, ".aucss_quantile")
+  expect_false("sex" %in% names(plt$part$group$config[[".aucss_quantile"]]$data))
+
+  # the stratified panel's data/groupings should include the strata column
+  expect_identical(plt$part$group$config[["dose"]]$groupings, c("dose", "sex"))
+  expect_true("sex" %in% names(plt$part$group$config[["dose"]]$data))
+
+  # top-level flag (used only for cross-panel strata-legend dedup) is
+  # TRUE because at least one panel is stratified
+  expect_true(plt$part$group$stratify)
+
+  expect_no_error(er_plot_build(plt))
+  built <- er_plot_build(plt)
+
+  # the unstratified panel has no fill/colour legend; the stratified one does
+  unstratified_labs <- ggplot2::get_labs(built$plot$group[[".aucss_quantile"]])
+  stratified_labs   <- ggplot2::get_labs(built$plot$group[["dose"]])
+  expect_null(unstratified_labs$fill)
+  expect_equal(stratified_labs$fill, plt$strata$label)
+
+  expect_no_error(plot(plt))
+})
+
 test_that("er_plot_build does not error", {
   skip_if_not_installed("erglm")
 

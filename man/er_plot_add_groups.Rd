@@ -31,7 +31,11 @@ variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantil
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise}
+\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. Errors if
+\code{TRUE} and \code{group_by} is itself the plot's stratification
+variable, since that would mean grouping and stratifying by the
+same column at once; pass \code{keep_strata = FALSE} for that grouping
+variable instead}
 }
 \value{
 The input \code{object}, with a group panel added
