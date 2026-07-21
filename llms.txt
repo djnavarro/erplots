@@ -70,7 +70,7 @@ print(plt)
 #>   plot components:
 #>     - model:           erglm_model/glm/lm
 #>     - quantile:        3 bins
-#>     - data:            jitter both
+#>     - overlay:         stratified
 #>     - group:           .aucss_quantile, treatment
 #>   plots built: <none>
 #>   output built: no
