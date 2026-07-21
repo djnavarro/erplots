@@ -38,6 +38,7 @@
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting: continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting: count responses</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">The plotting grammar</a></li>
+    <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots: writing your own builder</a></li>
   </ul>
 </li>
       </ul>
@@ -78,10 +79,11 @@
     
 <p>This article is about the <em>grammar</em> erplots plots are built
 from, not about any one plot’s mechanics – for worked examples of each
-layer, see the <a href="plot-binary.html">binary</a>, <a href="plot-continuous.html">continuous</a>, and <a href="plot-count.html">count</a> response articles. If a design choice
-described here ever changes, this article and <code>PLAN.md</code>’s
-“Mini-language architecture review” section should be updated together;
-see the note at the end.</p>
+layer, see the <a href="plot-binary.html">binary</a>, <a href="plot-continuous.html">continuous</a>, and <a href="plot-count.html">count</a> response articles; for writing a custom
+builder in detail, see <a href="extending.html">Extending erplots</a>.
+If a design choice described here ever changes, this article and
+<code>PLAN.md</code>’s “Mini-language architecture review” section
+should be updated together; see the note at the end.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>
@@ -331,60 +333,23 @@ split on) – see [er_plot_add_data()].</p>
 <h2 id="extending-erplots-writing-your-own-builder">Extending erplots: writing your own builder<a class="anchor" aria-label="anchor" href="#extending-erplots-writing-your-own-builder"></a>
 </h2>
 <p>Every layer function delegates the actual drawing to a
-<code>build_*()</code> function sharing a common signature –
+<code>builder</code> argument (<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>
+additionally has <code>summary_builder</code>) sharing a common
+signature –
 <code>function(data, config, stratify, exposure, response, strata, style)</code>.
 That signature is a documented, public part of the API (see
-[er_partial()]), and each layer function’s <code>builder</code> argument
-(<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code> additionally has
-<code>summary_builder</code>) defaults to one built-in
-<code>build_*()</code> function (e.g. [er_plot_add_quantiles()]’s
-defaults to <code><a href="../reference/er_builder_quantile.html">er_builder_quantile_errorbar()</a></code>) and can be set
-to any other function matching the same signature – no need to fork the
-package or reach into <code>object$part</code> internals:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">build_quantile_crossbar</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_crossbar</a></span><span class="op">(</span></span>
-<span>    data <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">summary</span>,</span>
-<span>    mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x_mid</span>, y <span class="op">=</span> <span class="va">y_mid</span>, ymin <span class="op">=</span> <span class="va">ci_lower</span>, ymax <span class="op">=</span> <span class="va">ci_upper</span><span class="op">)</span>,</span>
-<span>    inherit.aes <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>builder <span class="op">=</span> <span class="va">build_quantile_crossbar</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="design_files/figure-html/builder-1.png" class="r-plt" alt="" width="700"></p>
-<p>A custom builder receives the same pre-computed <code>config</code> a
-built-in builder would (e.g. <code>config$summary</code> for the
-quantile layer, <code>config$predictions</code> for the model layer), so
-it only needs to turn that <code>config</code> into ggplot2 layers, not
-recompute anything.</p>
-<p>For the data layer, a custom <code>builder</code> must also declare
-which <em>structural</em> family it belongs to, via
-[er_builder_layout()]: <code>er_builder_layout(fn, "overlay")</code>
-slots it into a single call merged onto the main panel, while
-<code>er_builder_layout(fn, "panel")</code> slots it into one-or-more
-panels stacked below the base plot. [er_plot_add_data()] reads this tag
-off <code>builder</code> itself to decide how to assemble the layer,
-rather than taking a separate argument for it – so a builder like
-<code><a href="../reference/er_builder_data.html">er_builder_data_overlay()</a></code> can never accidentally end up
-routed into upper/lower panels, or vice versa. The other three layers
-have only one structural call site, so no such tagging is needed
-there.</p>
-<p><code><a href="../reference/er_builder_quantile.html">er_builder_quantile_pointrange()</a></code> (a single
-<code>geom_pointrange()</code> in place of
-<code><a href="../reference/er_builder_quantile.html">er_builder_quantile_errorbar()</a></code>’s separate point + error
-bar) started life as exactly this kind of custom builder, and was
-promoted to a built-in option once it proved to need no new
-<code>config</code> fields – a reasonable bar to check your own custom
-builders against, if you’re deciding whether to propose one upstream.
-See the <code>@examples</code> on [er_plot_add_model()],
-[er_plot_add_quantiles()], and [er_plot_add_data()] for further worked
-custom builders (a dashed model curve and a data-overlay scatter), and
-[er_partial()]’s “Writing your own builder” section for the full
-contract.</p>
+[er_partial()]), each layer’s <code>builder</code> defaults to one
+built-in <code>er_builder_*()</code> function, and it can be set to any
+other function matching the same signature – no need to fork the package
+or reach into <code>object$part</code> internals. For the data layer
+specifically, a custom builder must additionally declare which
+<em>structural</em> family it belongs to via [er_builder_layout()].</p>
+<p>Writing a custom builder in detail – including what
+<code>config</code> actually contains for each layer, a worked crossbar
+example, and the three builder-metadata helpers ([er_builder_layout()],
+[er_builder_fill_role()], [er_builder_y_role()]) a builder can use to
+tag itself for the composition machinery – is its own article: <a href="extending.html">Extending erplots: writing your own
+builder</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="keeping-this-article-in-sync">Keeping this article in sync<a class="anchor" aria-label="anchor" href="#keeping-this-article-in-sync"></a>

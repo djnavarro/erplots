@@ -5,9 +5,12 @@ about any one plot’s mechanics – for worked examples of each layer, see
 the [binary](https://erplots.djnavarro.net/articles/plot-binary.md),
 [continuous](https://erplots.djnavarro.net/articles/plot-continuous.md),
 and [count](https://erplots.djnavarro.net/articles/plot-count.md)
-response articles. If a design choice described here ever changes, this
-article and `PLAN.md`’s “Mini-language architecture review” section
-should be updated together; see the note at the end.
+response articles; for writing a custom builder in detail, see
+[Extending
+erplots](https://erplots.djnavarro.net/articles/extending.md). If a
+design choice described here ever changes, this article and `PLAN.md`’s
+“Mini-language architecture review” section should be updated together;
+see the note at the end.
 
 ``` r
 
@@ -213,66 +216,26 @@ no upper/lower partition to split on) – see \[er_plot_add_data()\].
 
 ## Extending erplots: writing your own builder
 
-Every layer function delegates the actual drawing to a `build_*()`
-function sharing a common signature –
+Every layer function delegates the actual drawing to a `builder`
+argument
+([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+additionally has `summary_builder`) sharing a common signature –
 `function(data, config, stratify, exposure, response, strata, style)`.
 That signature is a documented, public part of the API (see
-\[er_partial()\]), and each layer function’s `builder` argument
-([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-additionally has `summary_builder`) defaults to one built-in `build_*()`
-function (e.g. \[er_plot_add_quantiles()\]’s defaults to
-[`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md))
-and can be set to any other function matching the same signature – no
-need to fork the package or reach into `object$part` internals:
+\[er_partial()\]), each layer’s `builder` defaults to one built-in
+`er_builder_*()` function, and it can be set to any other function
+matching the same signature – no need to fork the package or reach into
+`object$part` internals. For the data layer specifically, a custom
+builder must additionally declare which *structural* family it belongs
+to via \[er_builder_layout()\].
 
-``` r
-
-build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
-  ggplot2::geom_crossbar(
-    data = config$summary,
-    mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
-    inherit.aes = FALSE
-  )
-}
-
-erglm_data |>
-  er_plot(aucss, ae1) |>
-  er_plot_add_model(mod) |>
-  er_plot_add_quantiles(builder = build_quantile_crossbar) |>
-  plot()
-```
-
-![](design_files/figure-html/builder-1.png)
-
-A custom builder receives the same pre-computed `config` a built-in
-builder would (e.g. `config$summary` for the quantile layer,
-`config$predictions` for the model layer), so it only needs to turn that
-`config` into ggplot2 layers, not recompute anything.
-
-For the data layer, a custom `builder` must also declare which
-*structural* family it belongs to, via \[er_builder_layout()\]:
-`er_builder_layout(fn, "overlay")` slots it into a single call merged
-onto the main panel, while `er_builder_layout(fn, "panel")` slots it
-into one-or-more panels stacked below the base plot.
-\[er_plot_add_data()\] reads this tag off `builder` itself to decide how
-to assemble the layer, rather than taking a separate argument for it –
-so a builder like
-[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
-can never accidentally end up routed into upper/lower panels, or vice
-versa. The other three layers have only one structural call site, so no
-such tagging is needed there.
-
-[`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
-(a single `geom_pointrange()` in place of
-[`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)’s
-separate point + error bar) started life as exactly this kind of custom
-builder, and was promoted to a built-in option once it proved to need no
-new `config` fields – a reasonable bar to check your own custom builders
-against, if you’re deciding whether to propose one upstream. See the
-`@examples` on \[er_plot_add_model()\], \[er_plot_add_quantiles()\], and
-\[er_plot_add_data()\] for further worked custom builders (a dashed
-model curve and a data-overlay scatter), and \[er_partial()\]’s “Writing
-your own builder” section for the full contract.
+Writing a custom builder in detail – including what `config` actually
+contains for each layer, a worked crossbar example, and the three
+builder-metadata helpers (\[er_builder_layout()\],
+\[er_builder_fill_role()\], \[er_builder_y_role()\]) a builder can use
+to tag itself for the composition machinery – is its own article:
+[Extending erplots: writing your own
+builder](https://erplots.djnavarro.net/articles/extending.md).
 
 ## Keeping this article in sync
 
