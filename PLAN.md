@@ -16,7 +16,7 @@ curve/ribbon and group panel layers were always response-type-agnostic.
 Once `erglm` gained `gaussian`/`Gamma`/`poisson` family support and
 matching example columns (`biomarker_change`, `ae_count`, `ae_duration`
 alongside `ae1`/`ae2`), this stopped being hypothetical: fitting a
-gaussian model and piping it into `er_plot_show_quantiles()` silently
+gaussian model and piping it into `er_plot_add_quantiles()` silently
 mis-plotted (error bars pinned to y = 0/1) rather than erroring.
 
 **Decisions made:**
@@ -31,7 +31,7 @@ mis-plotted (error bars pinned to y = 0/1) rather than erroring.
 - Count responses default to being treated as `"continuous"` (mean +
   t-interval) even under `"auto"`, documented as a known approximation;
   `response_type = "count"` is an explicit opt-in fast-follow that swaps
-  in an exact Poisson/Garwood interval (`poisson_interval()`), which
+  in an exact Poisson/Garwood interval (`ci_poisson()`), which
   (unlike the t-interval) never produces a negative lower bound for a
   low-count bin.
 - The data strip (`er_plot_show_datastrip()`, as it was named then) was
@@ -42,7 +42,7 @@ mis-plotted (error bars pinned to y = 0/1) rather than erroring.
 
 **What changed:** `er_plot()` response-type detection/storage and
 scale-aware corner-distance placement for the model layer's p-value
-label; `.part_quantile()`/`build_quantile_errorbar()` dispatch on
+label; `.part_quantile()`/`er_builder_quantile_errorbar()` dispatch on
 response type (rate+Clopper-Pearson / mean+t-interval / mean+exact-
 Poisson); `er_vpc_plot()` gained the same dispatch for its observed-side
 summary; a shared `.abort_continuous_unsupported()` guard was added
@@ -69,7 +69,7 @@ case; this section is that revisit.
 
 **Naming decision (landed ahead of the redesign):** "data strip" ->
 "data layer" throughout (`er_plot_show_datastrip()` ->
-`er_plot_show_data()`, `.part_strip()` -> `.part_data()`,
+`er_plot_add_data()`, `.part_strip()` -> `.part_data()`,
 `build_datastrip_jitter()` -> `build_data_jitter()`,
 `object$part/plot$strip` -> `$data`, etc.), matching the existing
 `model`/`quantile`/`group` "named for what it shows" convention.
@@ -85,12 +85,12 @@ pass for using more vertical space, but noted as a reasonable fallback
 if the color encoding proves hard to read in practice).
 
 **A second, now-default design was added alongside it:** rather than a
-separate panel, `build_data_overlay()` plots raw points directly on the
+separate panel, `er_builder_data_overlay()` plots raw points directly on the
 *base* model panel at their true `(exposure, response)` coordinates --
 response-type-agnostic (only the amount of jitter differs: a small
 vertical nudge for binary 0/1 values, none otherwise), and its `color`
 aesthetic (when stratified) is always strata, sharing the base plot's
-own legend. `er_plot_show_data()`'s `style` argument defaults to
+own legend. `er_plot_add_data()`'s `style` argument defaults to
 `"overlay"`; `style = "jitter"` selects the older panel-based design.
 The two styles are mutually exclusive (`object$part$data` vs.
 `object$part$overlay`).
@@ -109,7 +109,7 @@ The two styles are mutually exclusive (`object$part$data` vs.
   standalone response colorbar -- consulted instead of inferring
   meaning from `stratify` alone.
 - This generalises to a one-sentence rule, now documented in
-  `?er_plot`'s "Stratification" section, `?er_plot_show_data`,
+  `?er_plot`'s "Stratification" section, `?er_plot_add_data`,
   `?er_partial`, and `vignettes/articles/design.Rmd`: **a layer's own
   encoding takes precedence; stratification adapts to whatever channel
   is left**, defaulting to color/fill and falling back to per-stratum
@@ -118,7 +118,7 @@ The two styles are mutually exclusive (`object$part$data` vs.
   fallback.
 
 **Status:** done -- composition refactor, `build_data_color()` +
-dispatch, `build_data_overlay()` + new default style, and vignette
+dispatch, `er_builder_data_overlay()` + new default style, and vignette
 updates (the then-combined `plot.Rmd`'s "Data component" section covered
 both styles side by side; that content now lives in
 `plot-binary.Rmd`/`plot-continuous.Rmd`/`plot-count.Rmd`, see "Completed:
@@ -151,12 +151,12 @@ color for something else (see the data layer's `color_role` above).
 **What was done:**
 - `?er_plot` gained dedicated "Layers are either singleton or additive"
   and "Stratification" sections; every per-layer Rd topic
-  (`er_plot_show_model`/`_quantiles`/`_data`/`_groups`) states its own
+  (`er_plot_add_model`/`_quantiles`/`_data`/`_groups`) states its own
   singleton-vs-additive status and cross-references them.
 - `?er_partial` (the shared `build_*()` builder-contract topic) gained
   the same singleton/additive framing plus a `color_role` explanation
   covering all three data-layer builders
-  (`build_data_jitter()`/`build_data_color()`/`build_data_overlay()`) --
+  (`build_data_jitter()`/`build_data_color()`/`er_builder_data_overlay()`) --
   this was the one place the framing hadn't yet landed; closed by adding
   it to the shared roxygen block in `R/er-plot-partials.R` and
   regenerating `man/er_partial.Rd`.
@@ -198,7 +198,7 @@ anywhere.
 
 **What was done:**
 - Every `er_plot_show_*()` function gained a `builder` argument
-  (`er_plot_show_model()` additionally gained `summary_builder`) that
+  (`er_plot_add_model()` additionally gained `summary_builder`) that
   gets threaded through to the corresponding `.part_*()` function and
   assigned into `config$builder` in place of the `style`-string dispatch,
   with validation (`builder` must be a function or `NULL`; an
@@ -222,12 +222,12 @@ anywhere.
 - `vignettes/articles/design.Rmd` gained an "Extending erplots: writing
   your own builder" section (runnable custom-quantile-builder example,
   cross-referencing `?er_partial` and the per-layer examples).
-- `build_quantile_pointrange()` (a single `geom_pointrange()` in place of
-  `build_quantile_errorbar()`'s separate point + error bar) started as a
+- `er_builder_quantile_pointrange()` (a single `geom_pointrange()` in place of
+  `er_builder_quantile_errorbar()`'s separate point + error bar) started as a
   hypothetical example of the escape hatch and was promoted to a
-  built-in `er_plot_show_quantiles(style = "pointrange")` option, since
+  built-in `er_plot_add_quantiles(style = "pointrange")` option, since
   it needed no new `config` fields beyond what `.part_quantile()`
-  already computes for `build_quantile_errorbar()` -- a template for
+  already computes for `er_builder_quantile_errorbar()` -- a template for
   deciding whether a custom builder is worth proposing upstream.
 
 **Status:** done. `devtools::check()` clean; new tests cover the
@@ -246,32 +246,32 @@ one-or-more panels stacked below the base plot), which is not itself a
 builder-selection concern. Having both `style` and `builder` arguments
 doing overlapping jobs was inelegant, and for the data layer, nothing
 stopped a user from pairing a builder with the wrong structural `style`
-(e.g. `build_data_overlay()` with `style = "jitter"`) even though that
+(e.g. `er_builder_data_overlay()` with `style = "jitter"`) even though that
 combination was never sensible.
 
 **What was done:**
-- `style` was removed entirely from `er_plot_show_model()`,
-  `er_plot_show_quantiles()`, `er_plot_show_data()`, and
-  `er_plot_show_groups()`. Each now has a `builder` argument that
-  defaults to one built-in `build_*()` function (`build_model_ribbonline()`,
-  `build_quantile_errorbar()`, `build_data_overlay()`,
-  `build_group_boxplot()`) and can be set to any other function matching
+- `style` was removed entirely from `er_plot_add_model()`,
+  `er_plot_add_quantiles()`, `er_plot_add_data()`, and
+  `er_plot_add_groups()`. Each now has a `builder` argument that
+  defaults to one built-in `build_*()` function (`er_builder_model_ribbonline()`,
+  `er_builder_quantile_errorbar()`, `er_builder_data_overlay()`,
+  `er_builder_group_boxplot()`) and can be set to any other function matching
   the standard signature -- built-in or custom. `summary_builder`
-  (`er_plot_show_model()` only) similarly defaults to
-  `build_summary_pvalue()`.
+  (`er_plot_add_model()` only) similarly defaults to
+  `er_builder_summary_pvalue()`.
 - For the data layer specifically, the structural distinction that
   `style` used to carry (`"overlay"` vs. `"jitter"`) is now declared
   *on the builder function itself*, via a new exported helper,
-  `er_layout(builder, layout = c("overlay", "panel"))`, which attaches
-  an `"er_layout"` attribute. `er_plot_show_data()` reads this tag off
+  `er_builder_layout(builder, layout = c("overlay", "panel"))`, which attaches
+  an `"er_builder_layout"` attribute. `er_plot_add_data()` reads this tag off
   whatever `builder` it's given (`.builder_layout()`) to decide whether
   to route through `.part_overlay()` (single call merged into the main
   panel) or `.part_data()` (one-or-more panels stacked below the base
   plot), with no separate argument needed. All three built-in data
-  builders (`build_data_overlay()`: `"overlay"`; `build_data_jitter()`/
+  builders (`er_builder_data_overlay()`: `"overlay"`; `build_data_jitter()`/
   `build_data_color()`: `"panel"`) carry this tag; a custom data-layer
   builder that omits it now errors immediately and informatively at
-  `er_plot_show_data()` call time, rather than silently ending up in the
+  `er_plot_add_data()` call time, rather than silently ending up in the
   wrong structural slot.
 - This was chosen over the alternative of encoding layout in a
   builder's *return value* instead of on the function itself, because
@@ -286,38 +286,38 @@ combination was never sensible.
   function's own Rd topic, `vignettes/articles/design.Rmd`'s "Extending
   erplots" section, and the then-combined `vignettes/articles/plot.Rmd`
   were all updated to describe `builder`-only dispatch (no more `style`
-  strings) and, for the data layer, the `er_layout()` tagging
+  strings) and, for the data layer, the `er_builder_layout()` tagging
   requirement.
 
 **Status:** done. `devtools::check()` clean (0 errors/warnings/notes);
 existing tests updated to use `builder =` instead of `style =`, plus new
-tests for the missing-layout error path and for `er_layout()`-tagged
+tests for the missing-layout error path and for `er_builder_layout()`-tagged
 custom builders.
 
-## Completed: removing `build_data_jitter()`/`build_data_color()`, adding `build_data_boxjitter()`
+## Completed: removing `build_data_jitter()`/`build_data_color()`, adding `er_builder_data_boxjitter()`
 
-**Motivation.** With `build_data_overlay()` as the default, a review of
+**Motivation.** With `er_builder_data_overlay()` as the default, a review of
 the two older panel-based data builders found neither still earned its
 keep. `build_data_jitter()` (binary response) jittered points around
 `y = 0` in upper/lower panels -- visually almost identical to what
-`build_data_overlay()` already shows merged into the main panel (jittered
+`er_builder_data_overlay()` already shows merged into the main panel (jittered
 points at their true 0/1 y-position), just relocated to separate panels;
 no use case was found where the panel version showed something the
 overlay didn't. `build_data_color()` (continuous/count response) was
 weaker still: its continuous color-gradient encoding of the response
-value is a harder read than `build_data_overlay()`'s direct y-position
+value is a harder read than `er_builder_data_overlay()`'s direct y-position
 encoding, and when stratified it *lost* the shared strata legend
 entirely, falling back to one panel per stratum level -- more panels
 *and* a harder-to-read encoding, with no scenario where it clearly won.
 
 **What was done:**
 - Both builders were deleted from `R/er-plot-partials-data.R`.
-- `build_data_boxjitter()` (binary-response only) was added in their
+- `er_builder_data_boxjitter()` (binary-response only) was added in their
   place: reuses `build_data_jitter()`'s upper/lower panel filtering
   (`response == 1`/`response == 0`) verbatim, but overlays the jittered
   points on a `geom_boxplot()` of the exposure values, so the panel
   shows the exposure *distribution* conditional on response -- a
-  genuinely different comparison from anything `build_data_overlay()`
+  genuinely different comparison from anything `er_builder_data_overlay()`
   shows, not a rehash of it. Follows the model layer's fill (box) /
   color (jitter) split for strata, so `.polish_labels()`/
   `.polish_legends()` needed no changes.
@@ -329,28 +329,28 @@ entirely, falling back to one panel per stratum level -- more panels
   never shares an exact value across rows, so ggplot has nothing to dodge
   against and only warns ("requires non-overlapping x intervals") without
   actually separating anything. Using the strata factor as `y` directly
-  (the same trick `build_group_boxplot()` uses via `y = lvl`) sidesteps
+  (the same trick `er_builder_group_boxplot()` uses via `y = lvl`) sidesteps
   this entirely -- ggplot places each stratum at its own discrete row for
   free.
-- No continuous/count replacement was added: `build_data_overlay()`
+- No continuous/count replacement was added: `er_builder_data_overlay()`
   already fully covers that case (raw points at their true y-position),
   so removing `build_data_color()` leaves no gap. `.part_data()`'s
   response-type dispatch (panels/`panel_position`/`color_role`) was left
   in place rather than gutted, since it's still usable by a custom
   `"panel"`-layout builder -- there's just no built-in one for
   continuous/count today.
-- Docs (`?er_partial`, `?er_plot_show_data`, `?er_layout`) and
+- Docs (`?er_partial`, `?er_plot_add_data`, `?er_builder_layout`) and
   `vignettes/articles/{plot,design}.Rmd` (the then-combined `plot.Rmd`)
-  were updated throughout to describe `build_data_boxjitter()` in place
+  were updated throughout to describe `er_builder_data_boxjitter()` in place
   of the two removed functions, including a rewritten comparison section
   (binary-only now, since there's no continuous panel builtin to compare
-  against `build_data_overlay()`). That section now lives in
+  against `er_builder_data_overlay()`). That section now lives in
   `plot-binary.Rmd` -- see "Completed: splitting the plotting vignette by
   response type" below.
 - Tests referencing the removed builders were updated: binary-response
-  cases now use `build_data_boxjitter()`; continuous/count "panel"-layout
+  cases now use `er_builder_data_boxjitter()`; continuous/count "panel"-layout
   regression coverage (which used to exercise `build_data_color()`) now
-  uses small inline custom builders tagged `er_layout(builder, "panel")`,
+  uses small inline custom builders tagged `er_builder_layout(builder, "panel")`,
   since that's the only way to exercise those code paths without a
   shipped built-in.
 
@@ -374,12 +374,12 @@ the two vignettes overlapped in places rather than cleanly separating
 covering the same skeleton (fit model, define plot, stratify, model
 component, quantile component, data component, group component, VPC
 plot) with response-type-specific detail where it matters (Clopper-
-Pearson vs. t-interval vs. exact Poisson interval; `build_data_boxjitter()`
-vs. `build_data_overlay()`-only). To avoid tripling the maintenance
+Pearson vs. t-interval vs. exact Poisson interval; `er_builder_data_boxjitter()`
+vs. `er_builder_data_overlay()`-only). To avoid tripling the maintenance
 burden for the two layers that are genuinely response-type-agnostic
 (model, group), `plot-binary.Rmd` carries the full worked treatment of
-those two (including `build_model_spaghetti()` and
-`build_group_violin()`), and the continuous/count articles show only
+those two (including `er_builder_model_spaghetti()` and
+`er_builder_group_violin()`), and the continuous/count articles show only
 default usage with a link back to `plot-binary.Rmd`. A binary-response
 VPC example was added to `plot-binary.Rmd` for parallelism, since the
 continuous/count articles already had one. `design.Rmd` needed no
@@ -390,11 +390,59 @@ articles nav was reordered to binary/continuous/count/design.
 
 **Status:** done.
 
+## Completed: naming-scheme review
+
+**Motivation.** A review of the package's function-naming conventions
+flagged three inconsistencies: the pipeline verb `er_plot_show_*()`
+described rendering ("show") when it actually only appends to a
+declarative spec; the `build_*()` partial-builder prefix didn't signal
+"pluggable strategy function" the way e.g. ggplot2's `geom_*`/`scale_*`
+families do, and read as a generic, collision-prone name; and the
+confidence-interval helpers (`clopper_pearson_interval()`, `t_interval()`,
+`poisson_interval()`) used an inconsistent `*_interval` suffix instead of
+a prefix, unlike every other family in the package.
+
+**Decisions made:**
+- `er_plot_show_*()` -> `er_plot_add_*()` (verb fix; `er_plot()`,
+  `er_plot_style()`, `er_plot_build()` unaffected).
+- `build_*()` -> `er_builder_*()` (shared, `er_`-namespaced prefix,
+  chosen over a per-layer prefix like `er_model_*()`/`er_data_*()`
+  because it keeps "these are all interchangeable builder-strategy
+  functions" legible as one family in autocomplete/`library(help =)`,
+  at the cost of slightly longer names). The builder-metadata helpers
+  moved under the same prefix for consistency: `er_layout()` ->
+  `er_builder_layout()`; the two attribute tags that used to be set via
+  raw `attr()` calls (`er_data_fill`, `er_group_y`) gained proper setter
+  functions, `er_builder_fill_role()`/`er_builder_y_role()`, mirroring
+  `er_builder_layout()`'s wrapper-function pattern instead of requiring
+  a custom builder author to poke `attr()` with a hand-typed string.
+- `clopper_pearson_interval()`/`t_interval()`/`poisson_interval()` ->
+  `ci_clopper_pearson()`/`ci_t()`/`ci_poisson()`. `ci_*()` was chosen
+  over `confint_*()` specifically to avoid echoing `stats::confint()`'s
+  name (a generic with a very different calling convention) despite
+  `confint_*()` being more explicit on first read.
+
+**What changed:** every occurrence renamed across `R/`, `tests/`,
+`vignettes/articles/`, `README.Rmd`, `AGENTS.md`; `NAMESPACE`/`man/`
+regenerated via `devtools::document()`. Internal (dot-prefixed) helpers
+were deliberately left alone, including the `.build_*()` assembly
+helpers in `R/er-plot-build.R` -- renaming the public prefix away from
+`build_*` incidentally resolved the pre-existing ambiguity between those
+and the public builders, with no rename needed on the internal side.
+Historical mentions of already-removed functions (`build_data_jitter()`,
+`build_data_color()`, `build_datastrip_jitter()`) were left under their
+old names elsewhere in this document, since they were removed under the
+old naming scheme and never existed under the new one. Straight rename,
+no deprecation shims -- the package is GitHub-only/pre-CRAN.
+
+**Status:** done, `devtools::check()` clean (0 errors/warnings/notes),
+full test suite passing (452 tests).
+
 ## Other completed fixes
 
 - **Stratified quantile labels visually overlapping.** Two strata's
   labels for the same exposure bin could land on top of each other in
-  `build_quantile_errorbar()` (noticed on a `sex`-stratified continuous
+  `er_builder_quantile_errorbar()` (noticed on a `sex`-stratified continuous
   quantile plot, but not specific to continuous responses). Fixed via
   `.dodge_quantile_strata()`, a small symmetric-around-`x_mid` per-
   stratum horizontal offset sized as a fixed fraction of the exposure
@@ -406,7 +454,7 @@ articles nav was reordered to binary/continuous/count/design.
 
 - **Additive model layer.** Overlaying two fitted model curves (e.g. a
   candidate vs. a null/reference model, or Emax vs. linear) isn't
-  possible today since `er_plot_show_model()` is singleton. Real work,
+  possible today since `er_plot_add_model()` is singleton. Real work,
   comparable to the data layer's stratified-legend handling -- deferred
   until a concrete request exists.
 - **Data layer color scale / continuous-response panel design.**
@@ -414,7 +462,7 @@ articles nav was reordered to binary/continuous/count/design.
   continuous scale like viridis" open question, and the quantile-binned
   rug fallback noted under "Design chosen" above) was removed -- see
   "Completed: removing `build_data_jitter()`/`build_data_color()`,
-  adding `build_data_boxjitter()`" above. If a concrete need for a
+  adding `er_builder_data_boxjitter()`" above. If a concrete need for a
   continuous/count "panel"-layout builder resurfaces, these are the
   design questions to revisit; `.part_data()`'s response-type dispatch
   for that case is still in place, just with no built-in consumer today.

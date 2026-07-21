@@ -7,22 +7,23 @@ reference:
   desc: Build exposure-response plots from any model that implements `er_predict()`
 - contents:
   - er_plot
-  - er_plot_show_model
-  - er_plot_show_quantiles
-  - er_plot_show_data
-  - er_plot_show_groups
+  - er_plot_add_model
+  - er_plot_add_quantiles
+  - er_plot_add_data
+  - er_plot_add_groups
   - er_plot_style
   - er_plot_build
 - title: Plot builder functions
   desc: Low level functions to draw specific components of an exposure-response plot
 - contents: 
   - er_partial
-  - er_layout
-  - build_model
-  - build_summary
-  - build_quantile
-  - build_data
-  - build_group
+  - er_builder_layout
+  - er_builder_role
+  - er_builder_model
+  - er_builder_summary
+  - er_builder_quantile
+  - er_builder_data
+  - er_builder_group
 - title: Model interface
   desc: The generics a model must (or may) implement to work with erplots
 - contents:
@@ -31,9 +32,9 @@ reference:
   desc: Other functions and objects
 - contents:
   - er_vpc_plot
-  - clopper_pearson_interval
-  - poisson_interval
-  - t_interval
+  - ci_clopper_pearson
+  - ci_poisson
+  - ci_t
   - cut_quantile
 
 articles:

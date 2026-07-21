@@ -20,8 +20,8 @@
 #'   `"continuous"`, or `"count"`. Governs how the observed-side summary
 #'   is computed: response *rate* with a Clopper-Pearson CI for
 #'   `"binary"`, bin *mean* with a t-interval for `"continuous"` (see
-#'   [t_interval()]), or bin *mean* with an exact Poisson interval for
-#'   `"count"` (see [poisson_interval()]). `"auto"` detects from the
+#'   [ci_t()]), or bin *mean* with an exact Poisson interval for
+#'   `"count"` (see [ci_poisson()]). `"auto"` detects from the
 #'   observed `response` column (entirely in `{0, 1}`, or logical, is
 #'   treated as binary; see [er_plot()]'s `response_type` for the same
 #'   heuristic) and never resolves to `"count"`: a count (Poisson-style)
@@ -112,8 +112,8 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
         n1 = sum(.data[[rsp_var]] == 1, na.rm = TRUE),
         n0 = sum(.data[[rsp_var]] == 0, na.rm = TRUE),
         y_mid = n1 / (n0 + n1),
-        ci_lower = clopper_pearson_interval(n1, n0 + n1, conf_level)["lower"], 
-        ci_upper = clopper_pearson_interval(n1, n0 + n1, conf_level)["upper"], 
+        ci_lower = ci_clopper_pearson(n1, n0 + n1, conf_level)["lower"], 
+        ci_upper = ci_clopper_pearson(n1, n0 + n1, conf_level)["upper"], 
         .by = c("Source", dplyr::all_of(grp_var))
       ) |> 
       dplyr::select(-n1, -n0)
@@ -124,8 +124,8 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
       dplyr::summarise(
         n_units = sum(!is.na(.data[[rsp_var]])),
         y_mid = mean(.data[[rsp_var]], na.rm = TRUE),
-        ci_lower = poisson_interval(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["lower"], 
-        ci_upper = poisson_interval(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["upper"], 
+        ci_lower = ci_poisson(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["lower"], 
+        ci_upper = ci_poisson(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["upper"], 
         .by = c("Source", dplyr::all_of(grp_var))
       ) |> 
       dplyr::select(-n_units)
@@ -135,8 +135,8 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
       dplyr::filter(Source == "Observed") |> 
       dplyr::summarise(
         y_mid = mean(.data[[rsp_var]], na.rm = TRUE),
-        ci_lower = t_interval(.data[[rsp_var]], conf_level)["lower"], 
-        ci_upper = t_interval(.data[[rsp_var]], conf_level)["upper"], 
+        ci_lower = ci_t(.data[[rsp_var]], conf_level)["lower"], 
+        ci_upper = ci_t(.data[[rsp_var]], conf_level)["upper"], 
         .by = c("Source", dplyr::all_of(grp_var))
       )
   }

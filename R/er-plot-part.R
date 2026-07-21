@@ -56,9 +56,9 @@
     unlist()  
 
   # `builder`/`summary_builder` are the escape hatch documented in
-  # `?er_partial`: any function matching the standard `build_*()`
+  # `?er_partial`: any function matching the standard `er_builder_*()`
   # signature can be plugged in without touching package internals.
-  # `er_plot_show_model()` has already resolved a default when the
+  # `er_plot_add_model()` has already resolved a default when the
   # caller didn't supply one, so both are always functions here.
   config$builder <- list(model = builder, summary = summary_builder)
 
@@ -107,8 +107,8 @@
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = n1 / (n0 + n1),
         y_mid_lbl = object$style$format_percent(n1 / (n0 + n1)),
-        ci_lower = clopper_pearson_interval(n1, n0 + n1, config$conf_level)["lower"], 
-        ci_upper = clopper_pearson_interval(n1, n0 + n1, config$conf_level)["upper"],
+        ci_lower = ci_clopper_pearson(n1, n0 + n1, config$conf_level)["lower"], 
+        ci_upper = ci_clopper_pearson(n1, n0 + n1, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
       )
   } else if (object$response$type == "count") {
@@ -118,8 +118,8 @@
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = mean(response, na.rm = TRUE),
         y_mid_lbl = object$style$format_number(mean(response, na.rm = TRUE)),
-        ci_lower = poisson_interval(sum(response, na.rm = TRUE), n_units, config$conf_level)["lower"], 
-        ci_upper = poisson_interval(sum(response, na.rm = TRUE), n_units, config$conf_level)["upper"],
+        ci_lower = ci_poisson(sum(response, na.rm = TRUE), n_units, config$conf_level)["lower"], 
+        ci_upper = ci_poisson(sum(response, na.rm = TRUE), n_units, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
       ) |> 
       dplyr::select(-n_units)
@@ -129,8 +129,8 @@
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = mean(response, na.rm = TRUE),
         y_mid_lbl = object$style$format_number(mean(response, na.rm = TRUE)),
-        ci_lower = t_interval(response, config$conf_level)["lower"], 
-        ci_upper = t_interval(response, config$conf_level)["upper"],
+        ci_lower = ci_t(response, config$conf_level)["lower"], 
+        ci_upper = ci_t(response, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
       )
   }
@@ -150,7 +150,7 @@
       )
     )
   
-  # see `?er_partial` for the `builder` escape hatch; `er_plot_show_quantiles()`
+  # see `?er_partial` for the `builder` escape hatch; `er_plot_add_quantiles()`
   # has already resolved a default when the caller didn't supply one
   config$builder <- builder
 
@@ -172,9 +172,9 @@
   config$layout <- "panel"
   config$panel <- panel
   config$seed  <- 1234L
-  # `er_plot_show_data()` has already resolved `builder` (and confirmed
+  # `er_plot_add_data()` has already resolved `builder` (and confirmed
   # its layout is "panel") before calling here -- see `?er_partial` for
-  # the `builder`/`er_layout()` escape hatch
+  # the `builder`/`er_builder_layout()` escape hatch
   config$builder <- builder
 
   # `panels` is a named list of panels to build, keyed by panel name, in
@@ -200,7 +200,7 @@
   } else {
     # continuous/count response: a single panel, points colored
     # continuously by the response value, in place of the binary
-    # upper/lower partition -- `er_plot_show_data()` guards `panel` to
+    # upper/lower partition -- `er_plot_add_data()` guards `panel` to
     # "both" for this response type, since there's no upper/lower
     # partition to select from. When stratified, the color channel is
     # already spoken for by the response, so stratification becomes one
@@ -233,12 +233,12 @@
   config$seed <- 1234L
 
   # unlike `.part_data()`, there's a single builder regardless of
-  # response type -- `build_data_overlay()` only needs to know the
+  # response type -- `er_builder_data_overlay()` only needs to know the
   # response type to decide how much vertical jitter to apply (binary
   # responses get a small nudge so 0/1 points don't overplot into two
-  # solid lines; continuous/count responses get none). `er_plot_show_data()`
+  # solid lines; continuous/count responses get none). `er_plot_add_data()`
   # has already resolved `builder` (and confirmed its layout is "overlay")
-  # before calling here -- see `?er_partial` for the `builder`/`er_layout()`
+  # before calling here -- see `?er_partial` for the `builder`/`er_builder_layout()`
   # escape hatch.
   config$response_type <- object$response$type
   config$builder <- builder
@@ -261,7 +261,7 @@
   for(g in group_cols) {
 
     config <- list()
-    # see `?er_partial` for the `builder` escape hatch; `er_plot_show_groups()`
+    # see `?er_partial` for the `builder` escape hatch; `er_plot_add_groups()`
     # has already resolved a default when the caller didn't supply one
     config$builder <- builder
 

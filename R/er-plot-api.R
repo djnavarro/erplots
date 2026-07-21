@@ -3,23 +3,23 @@
 #'
 #' `er_plot()` creates an (empty) plot object of S3 class `er_plot`. Build
 #' up a plot by piping it through one or more layer functions --
-#' [er_plot_show_model()] (fitted-model curve/ribbon and summary),
-#' [er_plot_show_quantiles()] (exposure-quantile-binned response summary),
-#' [er_plot_show_data()] (raw observations, by default overlaid on the
+#' [er_plot_add_model()] (fitted-model curve/ribbon and summary),
+#' [er_plot_add_quantiles()] (exposure-quantile-binned response summary),
+#' [er_plot_add_data()] (raw observations, by default overlaid on the
 #' model panel), and/or
-#' [er_plot_show_groups()] (grouped exposure-distribution panels) -- then
+#' [er_plot_add_groups()] (grouped exposure-distribution panels) -- then
 #' render with `plot()`/`print()`, or build the ggplot2/patchwork objects
 #' directly with [er_plot_build()]. `er_plot()` never fits a model itself;
 #' any model implementing the small interface in [er_model_interface] can
-#' be passed to [er_plot_show_model()].
+#' be passed to [er_plot_add_model()].
 #'
 #' @details
 #' # Layers are either singleton or additive
 #'
-#' [er_plot_show_model()], [er_plot_show_quantiles()], and
-#' [er_plot_show_data()] are **singleton**: calling one of them twice
+#' [er_plot_add_model()], [er_plot_add_quantiles()], and
+#' [er_plot_add_data()] are **singleton**: calling one of them twice
 #' on the same object overwrites the first call's result rather than
-#' combining the two. [er_plot_show_groups()] is **additive**: each call
+#' combining the two. [er_plot_add_groups()] is **additive**: each call
 #' adds another grouped-distribution panel alongside any already added,
 #' rather than replacing them. This asymmetry is deliberate, not
 #' accidental -- there is only one "the model" and one "the quantile
@@ -37,7 +37,7 @@
 #' deduplicated legend across the whole composed plot. Each layer
 #' function's `keep_strata` argument controls whether *that* layer
 #' actually uses the stratification (it defaults to `TRUE` whenever
-#' `stratify_by` was set, `FALSE` otherwise). [er_plot_show_data()] is a
+#' `stratify_by` was set, `FALSE` otherwise). [er_plot_add_data()] is a
 #' partial exception to the "always color/fill" rule for a
 #' continuous/count response: its color aesthetic is already spoken for
 #' by the response value itself, so stratification falls back to one
@@ -49,8 +49,8 @@
 #'
 #' `response_type` (set once, here in `er_plot()`) governs the response's
 #' scale (`object$response$limits`) and which summary/CI method
-#' [er_plot_show_quantiles()] and [er_vpc_plot()] use; see the
-#' `response_type` parameter below and [er_plot_show_quantiles()]'s own
+#' [er_plot_add_quantiles()] and [er_vpc_plot()] use; see the
+#' `response_type` parameter below and [er_plot_add_quantiles()]'s own
 #' documentation for the specifics of each response type's summary
 #' statistic.
 #'
@@ -70,7 +70,7 @@
 #'   quantity (bin mean plus a t-interval). `"auto"` never resolves to
 #'   `"count"`: pass `response_type = "count"` explicitly for a genuine
 #'   count response to instead get bin mean plus an *exact* Poisson
-#'   interval (see [poisson_interval()]), which -- unlike the t-interval
+#'   interval (see [ci_poisson()]), which -- unlike the t-interval
 #'   approximation -- never produces a negative lower bound. See
 #'   `PLAN.md`'s design decision (4) for the rationale.
 #'
@@ -83,14 +83,14 @@
 #'
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
-#'   er_plot_show_model(mod) |>
-#'   er_plot_show_quantiles() |>
-#'   er_plot_show_groups(aucss) |>
+#'   er_plot_add_model(mod) |>
+#'   er_plot_add_quantiles() |>
+#'   er_plot_add_groups(aucss) |>
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot_show_model()], [er_plot_show_quantiles()],
-#'   [er_plot_show_data()], [er_plot_show_groups()],
+#' @seealso [er_plot_add_model()], [er_plot_add_quantiles()],
+#'   [er_plot_add_data()], [er_plot_add_groups()],
 #'   [er_plot_build()], [er_plot_style()], [er_model_interface]
 #'
 #' @name er_plot
@@ -214,7 +214,7 @@ er_plot_style <- function(object, labels) {
 #'
 #' Adds the model layer: a fitted exposure-response curve with an
 #' uncertainty ribbon (the default, via [er_predict()]), or a spaghetti
-#' plot of simulated draws (`builder = build_model_spaghetti`, via
+#' plot of simulated draws (`builder = er_builder_model_spaghetti`, via
 #' [er_simulate()]), plus an optional summary annotation (e.g. a p-value)
 #' via [er_summary()] when the layer isn't stratified. This layer needs no
 #' `response_type` dispatch -- it only ever consumes [er_predict()]'s
@@ -232,13 +232,13 @@ er_plot_style <- function(object, labels) {
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
 #' @param builder Function drawing the model curve/ribbon -- defaults to
-#'   [build_model_ribbonline()] (mean prediction + confidence ribbon).
-#'   [build_model_spaghetti()] (simulated draws, via [er_simulate()]) is
+#'   [er_builder_model_ribbonline()] (mean prediction + confidence ribbon).
+#'   [er_builder_model_spaghetti()] (simulated draws, via [er_simulate()]) is
 #'   the other built-in option; any function matching the standard
 #'   `(data, config, stratify, exposure, response, strata, style)`
 #'   signature can be supplied instead -- see [er_partial()].
 #' @param summary_builder Function drawing the summary annotation --
-#'   defaults to [build_summary_pvalue()]. Any function matching the same
+#'   defaults to [er_builder_summary_pvalue()]. Any function matching the same
 #'   standard signature as `builder` can be supplied instead. See
 #'   [er_partial()].
 #' @param conf_level Confidence level for the prediction ribbon
@@ -251,13 +251,13 @@ er_plot_style <- function(object, labels) {
 #' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
-#'   er_plot_show_model(mod) |>
+#'   er_plot_add_model(mod) |>
 #'   plot()
 #'
 #' # a spaghetti plot instead of the default ribbon
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
-#'   er_plot_show_model(mod, builder = build_model_spaghetti) |>
+#'   er_plot_add_model(mod, builder = er_builder_model_spaghetti) |>
 #'   plot()
 #'
 #' # plug in a fully custom model-curve builder; see `?er_partial` for the
@@ -271,15 +271,15 @@ er_plot_style <- function(object, labels) {
 #' }
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
-#'   er_plot_show_model(mod, builder = build_model_dashed) |>
+#'   er_plot_add_model(mod, builder = build_model_dashed) |>
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot()], [er_plot_show_quantiles()],
-#'   [er_plot_show_data()], [er_plot_show_groups()], [er_partial()]
+#' @seealso [er_plot()], [er_plot_add_quantiles()],
+#'   [er_plot_add_data()], [er_plot_add_groups()], [er_partial()]
 #'
 #' @export
-er_plot_show_model <- function(object, model, keep_strata = NULL,
+er_plot_add_model <- function(object, model, keep_strata = NULL,
                                 builder = NULL, summary_builder = NULL, conf_level = 0.95) {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
@@ -292,8 +292,8 @@ er_plot_show_model <- function(object, model, keep_strata = NULL,
     model = model,
     stratify = keep_strata, 
     conf_level = conf_level,
-    builder = builder %||% build_model_ribbonline,
-    summary_builder = summary_builder %||% build_summary_pvalue
+    builder = builder %||% er_builder_model_ribbonline,
+    summary_builder = summary_builder %||% er_builder_summary_pvalue
   )
   
   return(object)
@@ -309,9 +309,9 @@ er_plot_show_model <- function(object, model, keep_strata = NULL,
 #' summarised with a point estimate and confidence interval. Which
 #' summary/CI method is used dispatches on the plot's `response_type`
 #' (set in [er_plot()]):
-#' * `"binary"` -- response *rate*, with a Clopper-Pearson interval (see [clopper_pearson_interval()])
-#' * `"continuous"` -- bin *mean*, with a t-interval (see [t_interval()])
-#' * `"count"` -- bin *mean*, with an exact Poisson interval (see [poisson_interval()])
+#' * `"binary"` -- response *rate*, with a Clopper-Pearson interval (see [ci_clopper_pearson()])
+#' * `"continuous"` -- bin *mean*, with a t-interval (see [ci_t()])
+#' * `"count"` -- bin *mean*, with an exact Poisson interval (see [ci_poisson()])
 #'
 #' Count responses auto-detect as `"continuous"` (see [er_plot()]'s
 #' `response_type` parameter) and are summarised the same way as any other
@@ -327,8 +327,8 @@ er_plot_show_model <- function(object, model, keep_strata = NULL,
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
 #' @param builder Function drawing the quantile summary -- defaults to
-#'   [build_quantile_errorbar()] (point + error bar).
-#'   [build_quantile_pointrange()] (a single [ggplot2::geom_pointrange()])
+#'   [er_builder_quantile_errorbar()] (point + error bar).
+#'   [er_builder_quantile_pointrange()] (a single [ggplot2::geom_pointrange()])
 #'   is the other built-in option; any function matching the standard
 #'   `(data, config, stratify, exposure, response, strata, style)`
 #'   signature can be supplied instead -- see [er_partial()].
@@ -345,8 +345,8 @@ er_plot_show_model <- function(object, model, keep_strata = NULL,
 #' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
-#'   er_plot_show_model(mod) |>
-#'   er_plot_show_quantiles() |>
+#'   er_plot_add_model(mod) |>
+#'   er_plot_add_quantiles() |>
 #'   plot()
 #'
 #' # continuous response: bin means/t-intervals instead of rates/
@@ -354,8 +354,8 @@ er_plot_show_model <- function(object, model, keep_strata = NULL,
 #' mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 #' erglm_data |>
 #'   er_plot(aucss, biomarker_change) |>
-#'   er_plot_show_model(mod3) |>
-#'   er_plot_show_quantiles() |>
+#'   er_plot_add_model(mod3) |>
+#'   er_plot_add_quantiles() |>
 #'   plot()
 #'
 #' # count response: declare response_type = "count" explicitly for an
@@ -364,15 +364,15 @@ er_plot_show_model <- function(object, model, keep_strata = NULL,
 #' mod4 <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
 #' erglm_data |>
 #'   er_plot(aucss, ae_count, response_type = "count") |>
-#'   er_plot_show_model(mod4) |>
-#'   er_plot_show_quantiles() |>
+#'   er_plot_add_model(mod4) |>
+#'   er_plot_add_quantiles() |>
 #'   plot()
 #'
 #' # a pointrange instead of the default errorbar
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
-#'   er_plot_show_model(mod) |>
-#'   er_plot_show_quantiles(builder = build_quantile_pointrange) |>
+#'   er_plot_add_model(mod) |>
+#'   er_plot_add_quantiles(builder = er_builder_quantile_pointrange) |>
 #'   plot()
 #'
 #' # plug in a fully custom builder; see `?er_partial` for the full contract
@@ -385,17 +385,17 @@ er_plot_show_model <- function(object, model, keep_strata = NULL,
 #' }
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
-#'   er_plot_show_model(mod) |>
-#'   er_plot_show_quantiles(builder = build_quantile_crossbar) |>
+#'   er_plot_add_model(mod) |>
+#'   er_plot_add_quantiles(builder = build_quantile_crossbar) |>
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot()], [er_plot_show_model()],
-#'   [er_plot_show_data()], [er_plot_show_groups()], [er_vpc_plot()],
+#' @seealso [er_plot()], [er_plot_add_model()],
+#'   [er_plot_add_data()], [er_plot_add_groups()], [er_vpc_plot()],
 #'   [er_partial()]
 #'
 #' @export
-er_plot_show_quantiles <- function(object, keep_strata = NULL, builder = NULL,
+er_plot_add_quantiles <- function(object, keep_strata = NULL, builder = NULL,
                                     bins = 4, conf_level = 0.95) {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
@@ -407,7 +407,7 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, builder = NULL,
     stratify = keep_strata,
     bins = bins,
     conf_level = conf_level,
-    builder = builder %||% build_quantile_errorbar
+    builder = builder %||% er_builder_quantile_errorbar
   )
   
   return(object)
@@ -418,27 +418,27 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 
 #' Declare a data-layer builder's structural layout
 #'
-#' Tags a `build_data_*()`-style function with the *structural* family it
+#' Tags a `er_builder_data_*()`-style function with the *structural* family it
 #' belongs to -- `"overlay"` (a single call merged into the main panel) or
 #' `"panel"` (one-or-more panels stacked below the base plot) -- so
-#' [er_plot_show_data()] can route to the right internal assembly path
+#' [er_plot_add_data()] can route to the right internal assembly path
 #' (`.part_overlay()` vs. `.part_data()`) just by inspecting the `builder`
 #' it was given, with no separate `style`/`layout` argument needed. See
 #' [er_partial()]'s "Writing your own builder" section for the full
-#' contract; both built-in data builders ([build_data_overlay()],
-#' [build_data_boxjitter()]) already carry this tag.
+#' contract; both built-in data builders ([er_builder_data_overlay()],
+#' [er_builder_data_boxjitter()]) already carry this tag.
 #'
-#' @param builder A function matching the standard `build_*()` signature
+#' @param builder A function matching the standard `er_builder_*()` signature
 #'   (see [er_partial()])
-#' @param layout One of `"overlay"` or `"panel"` -- see [er_plot_show_data()]
+#' @param layout One of `"overlay"` or `"panel"` -- see [er_plot_add_data()]
 #'   for what each structural family means
 #'
-#' @returns `builder`, with an `"er_layout"` attribute attached
+#' @returns `builder`, with an `"er_builder_layout"` attribute attached
 #'
-#' @seealso [er_plot_show_data()], [er_partial()]
+#' @seealso [er_plot_add_data()], [er_partial()]
 #'
 #' @examples
-#' build_data_density <- er_layout(
+#' build_data_density <- er_builder_layout(
 #'   function(data, config, stratify, exposure, response, strata, style) {
 #'     ggplot2::geom_density_2d(
 #'       data = data,
@@ -449,36 +449,88 @@ er_plot_show_quantiles <- function(object, keep_strata = NULL, builder = NULL,
 #' )
 #'
 #' @export
-er_layout <- function(builder, layout = c("overlay", "panel")) {
+er_builder_layout <- function(builder, layout = c("overlay", "panel")) {
   if (!is.function(builder)) rlang::abort("`builder` must be a function")
   layout <- match.arg(layout)
-  structure(builder, er_layout = layout)
+  structure(builder, er_builder_layout = layout)
 }
 
 #' @noRd
 .builder_layout <- function(builder) {
-  layout <- attr(builder, "er_layout")
+  layout <- attr(builder, "er_builder_layout")
   if (is.null(layout)) {
     rlang::abort(c(
       "`builder` must declare its structural layout.",
-      "i" = "Wrap a custom data-layer builder with `er_layout(builder, \"overlay\")` or `er_layout(builder, \"panel\")`.",
-      "i" = "The built-in builders (`build_data_overlay()`, `build_data_boxjitter()`) already do this."
+      "i" = "Wrap a custom data-layer builder with `er_builder_layout(builder, \"overlay\")` or `er_builder_layout(builder, \"panel\")`.",
+      "i" = "The built-in builders (`er_builder_data_overlay()`, `er_builder_data_boxjitter()`) already do this."
     ))
   }
   layout
 }
 
 
+#' Declare a builder's fill/y-axis role
+#'
+#' Companion setters to [er_builder_layout()] for the two other pieces of
+#' builder self-declared metadata in the package: `er_builder_fill_role()`
+#' tags a data-layer builder whose `fill` aesthetic means something other
+#' than strata (currently only `"density"`, used by [er_builder_data_hex()]),
+#' and `er_builder_y_role()` tags a group-layer builder whose y-axis means
+#' something other than the group variable itself (currently only
+#' `"count"`, used by [er_builder_group_histogram()]). Both follow the same
+#' wrapper-function pattern as [er_builder_layout()] rather than requiring
+#' a custom builder author to call `attr()` directly with a hand-typed
+#' string constant.
+#'
+#' @param builder A function matching the standard `er_builder_*()`
+#'   signature (see [er_partial()])
+#' @param role For `er_builder_fill_role()`: currently only `"density"` is
+#'   read by `.polish_labels()`, but any string is accepted. For
+#'   `er_builder_y_role()`: currently only `"count"` is read.
+#'
+#' @returns `builder`, with an `"er_builder_fill_role"`/`"er_builder_y_role"`
+#'   attribute attached
+#'
+#' @seealso [er_builder_layout()], [er_partial()]
+#'
+#' @name er_builder_role
+NULL
+
+#' @rdname er_builder_role
+#' @export
+er_builder_fill_role <- function(builder, role) {
+  if (!is.function(builder)) rlang::abort("`builder` must be a function")
+  structure(builder, er_builder_fill_role = role)
+}
+
+#' @rdname er_builder_role
+#' @export
+er_builder_y_role <- function(builder, role) {
+  if (!is.function(builder)) rlang::abort("`builder` must be a function")
+  structure(builder, er_builder_y_role = role)
+}
+
+#' @noRd
+.builder_fill_role <- function(builder) {
+  attr(builder, "er_builder_fill_role")
+}
+
+#' @noRd
+.builder_y_role <- function(builder) {
+  attr(builder, "er_builder_y_role")
+}
+
+
 #' Add a raw-data layer
 #'
 #' Adds the data layer: individual observations. By default (`builder =
-#' build_data_overlay`), points are drawn at their true `(exposure,
+#' er_builder_data_overlay`), points are drawn at their true `(exposure,
 #' response)` coordinates in the *main* model panel -- a plain scatter for
 #' continuous/count responses, or a scatter with a small vertical jitter
 #' for a binary response (whose y-values are exactly 0/1 and would
 #' otherwise overplot into two solid lines). This works uniformly across
 #' all three response types, with no response-type dispatch on which
-#' builder to use. `build_data_boxjitter()` instead uses the older,
+#' builder to use. `er_builder_data_boxjitter()` instead uses the older,
 #' panel-based design, and is binary-response-only: responders (`response
 #' == 1`) get a boxplot + jittered points in an upper panel and
 #' non-responders (`response == 0`) get the same in a lower panel, so the
@@ -486,20 +538,20 @@ er_layout <- function(builder, layout = c("overlay", "panel")) {
 #' just raw points. There is no built-in "panel"-layout builder for a
 #' continuous/count response -- the older `build_data_color()` (a single
 #' panel with points colored continuously by the response value) was
-#' removed once `build_data_overlay()` turned out to cover its typical
+#' removed once `er_builder_data_overlay()` turned out to cover its typical
 #' use case more simply; `panel` must be `"both"` (the default) for these
 #' response types regardless of builder, since there's no upper/lower
 #' partition to select from.
 #'
 #' Every data-layer builder declares which of these two *structural*
-#' families it belongs to via [er_layout()] -- `"overlay"` (a single call
+#' families it belongs to via [er_builder_layout()] -- `"overlay"` (a single call
 #' merged into the main panel) or `"panel"` (one-or-more panels stacked
-#' below the base plot) -- which `er_plot_show_data()` reads off `builder`
+#' below the base plot) -- which `er_plot_add_data()` reads off `builder`
 #' to decide how to assemble the layer, rather than taking a separate
 #' argument for it. This makes the pairing structural rather than
-#' incidental: `build_data_overlay()` can never be routed into upper/lower
-#' panels, and `build_data_boxjitter()` can never be merged into the main
-#' panel. See [er_layout()] and [er_partial()] for how to tag a custom
+#' incidental: `er_builder_data_overlay()` can never be routed into upper/lower
+#' panels, and `er_builder_data_boxjitter()` can never be merged into the main
+#' panel. See [er_builder_layout()] and [er_partial()] for how to tag a custom
 #' builder the same way.
 #'
 #' This layer is **singleton** -- see [er_plot()]'s "Layers are either
@@ -525,15 +577,15 @@ er_layout <- function(builder, layout = c("overlay", "panel")) {
 #'   a shared color aesthetic; for an "overlay"-layout builder it always
 #'   means a shared color aesthetic, for any response type.
 #' @param builder Function drawing the data layer -- defaults to
-#'   [build_data_overlay()]. [build_data_boxjitter()] (binary response
+#'   [er_builder_data_overlay()]. [er_builder_data_boxjitter()] (binary response
 #'   only: a boxplot + jittered points per panel) is the other built-in
 #'   option; any function matching the standard `(data, config, stratify,
 #'   exposure, response, strata, style)` signature and tagged with
-#'   [er_layout()] can be supplied instead -- see [er_partial()] for the
+#'   [er_builder_layout()] can be supplied instead -- see [er_partial()] for the
 #'   full contract, e.g. a 2D density in the main panel, a continuous/
 #'   count response's color-encoded panel, or per-panel histograms.
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
-#'   default). Only meaningful for [build_data_boxjitter()] on a binary
+#'   default). Only meaningful for [er_builder_data_boxjitter()] on a binary
 #'   response; must be `"both"` for an "overlay"-layout builder (no
 #'   upper/lower partition exists) or for a continuous/count response
 #'   under a "panel"-layout builder (there's no upper/lower partition to
@@ -547,9 +599,9 @@ er_layout <- function(builder, layout = c("overlay", "panel")) {
 #' mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 #' erglm_data |>
 #'   er_plot(aucss, ae2, stratify_by = sex) |>
-#'   er_plot_show_model(mod2, keep_strata = FALSE) |>
-#'   er_plot_show_quantiles() |>
-#'   er_plot_show_data() |>
+#'   er_plot_add_model(mod2, keep_strata = FALSE) |>
+#'   er_plot_add_quantiles() |>
+#'   er_plot_add_data() |>
 #'   plot()
 #'
 #' # continuous response: overlay works the same way, with no
@@ -557,8 +609,8 @@ er_layout <- function(builder, layout = c("overlay", "panel")) {
 #' mod3 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 #' erglm_data |>
 #'   er_plot(aucss, biomarker_change) |>
-#'   er_plot_show_model(mod3) |>
-#'   er_plot_show_data() |>
+#'   er_plot_add_model(mod3) |>
+#'   er_plot_add_data() |>
 #'   plot()
 #'
 #' # older panel-based design, binary-response only: a boxplot + jittered
@@ -566,14 +618,14 @@ er_layout <- function(builder, layout = c("overlay", "panel")) {
 #' # of an overlay in the main panel
 #' erglm_data |>
 #'   er_plot(aucss, ae2) |>
-#'   er_plot_show_model(mod2) |>
-#'   er_plot_show_data(builder = build_data_boxjitter) |>
+#'   er_plot_add_model(mod2) |>
+#'   er_plot_add_data(builder = er_builder_data_boxjitter) |>
 #'   plot()
 #'
 #' # plug in a 2D density in the main panel instead of a scatter; tagging
-#' # it "overlay" via `er_layout()` keeps it in the single main-panel
+#' # it "overlay" via `er_builder_layout()` keeps it in the single main-panel
 #' # layout -- see `?er_partial`
-#' build_data_density <- er_layout(
+#' build_data_density <- er_builder_layout(
 #'   function(data, config, stratify, exposure, response, strata, style) {
 #'     ggplot2::geom_density_2d(
 #'       data = data,
@@ -584,21 +636,21 @@ er_layout <- function(builder, layout = c("overlay", "panel")) {
 #' )
 #' erglm_data |>
 #'   er_plot(aucss, biomarker_change) |>
-#'   er_plot_show_model(mod3) |>
-#'   er_plot_show_data(builder = build_data_density) |>
+#'   er_plot_add_model(mod3) |>
+#'   er_plot_add_data(builder = build_data_density) |>
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot()], [er_plot_show_model()],
-#'   [er_plot_show_quantiles()], [er_plot_show_groups()], [er_partial()]
+#' @seealso [er_plot()], [er_plot_add_model()],
+#'   [er_plot_add_quantiles()], [er_plot_add_groups()], [er_partial()]
 #'
 #' @export
-er_plot_show_data <- function(object, keep_strata = NULL, builder = NULL, panel = "both") {
+er_plot_add_data <- function(object, keep_strata = NULL, builder = NULL, panel = "both") {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(builder) && !is.function(builder)) rlang::abort("`builder` must be a function or NULL")
 
-  builder <- builder %||% build_data_overlay
+  builder <- builder %||% er_builder_data_overlay
   layout <- .builder_layout(builder)
 
   if (layout == "overlay" && panel != "both") {
@@ -657,7 +709,7 @@ er_plot_show_data <- function(object, keep_strata = NULL, builder = NULL, panel 
 #' @param group_by Grouping variables to define groups for distribution
 #'   plots (a tidyselection of variables)
 #' @param builder Function drawing each group panel -- defaults to
-#'   [build_group_boxplot()]. [build_group_violin()] is the other
+#'   [er_builder_group_boxplot()]. [er_builder_group_violin()] is the other
 #'   built-in option; any function matching the standard `(data, config,
 #'   stratify, exposure, response, strata, style)` signature can be
 #'   supplied instead -- see [er_partial()]. Applied to every grouping
@@ -676,24 +728,24 @@ er_plot_show_data <- function(object, keep_strata = NULL, builder = NULL, panel 
 #' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
-#'   er_plot_show_model(mod) |>
-#'   er_plot_show_groups(aucss) |>
+#'   er_plot_add_model(mod) |>
+#'   er_plot_add_groups(aucss) |>
 #'   plot()
 #'
 #' # additive: a second call adds a second panel rather than replacing the first
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
-#'   er_plot_show_model(mod) |>
-#'   er_plot_show_groups(aucss) |>
-#'   er_plot_show_groups(treatment) |>
+#'   er_plot_add_model(mod) |>
+#'   er_plot_add_groups(aucss) |>
+#'   er_plot_add_groups(treatment) |>
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot()], [er_plot_show_model()],
-#'   [er_plot_show_quantiles()], [er_plot_show_data()], [er_partial()]
+#' @seealso [er_plot()], [er_plot_add_model()],
+#'   [er_plot_add_quantiles()], [er_plot_add_data()], [er_partial()]
 #'
 #' @export
-er_plot_show_groups <- function(object, group_by, builder = NULL, bins = NULL, keep_strata = NULL) {
+er_plot_add_groups <- function(object, group_by, builder = NULL, bins = NULL, keep_strata = NULL) {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(builder) && !is.function(builder)) rlang::abort("`builder` must be a function or NULL")
@@ -706,7 +758,7 @@ er_plot_show_groups <- function(object, group_by, builder = NULL, bins = NULL, k
     group_cols = group_cols, 
     stratify = keep_strata, 
     bins = bins,
-    builder = builder %||% build_group_boxplot
+    builder = builder %||% er_builder_group_boxplot
   )
 
   return(object)  

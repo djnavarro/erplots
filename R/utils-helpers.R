@@ -18,15 +18,15 @@
 #'
 #' @returns Named numeric vector, with confidence level stored as an attribute
 #'
-#' @details Used by the quantile-binned summary layer (see [er_plot_show_quantiles()])
+#' @details Used by the quantile-binned summary layer (see [er_plot_add_quantiles()])
 #' to compute empirical response-rate confidence intervals. This assumes a
 #' binary (0/1) response.
 #'
 #' @export
 #' @examples
-#' clopper_pearson_interval(1, 10)
+#' ci_clopper_pearson(1, 10)
 #' 
-clopper_pearson_interval <- function(x, n, conf_level = 0.95) {
+ci_clopper_pearson <- function(x, n, conf_level = 0.95) {
   alpha <- 1 - conf_level
   lower <- if (x > 0) stats::qbeta(alpha/2, x, n - x + 1) else 0
   upper <- if (x < n) stats::qbeta(1 - alpha/2, x + 1, n - x) else 1
@@ -47,17 +47,17 @@ clopper_pearson_interval <- function(x, n, conf_level = 0.95) {
 #'   and hence a t-interval -- isn't defined for a single observation).
 #'
 #' @details Used by the quantile-binned summary layer (see
-#'   [er_plot_show_quantiles()]) and `er_vpc_plot()` to compute a
+#'   [er_plot_add_quantiles()]) and `er_vpc_plot()` to compute a
 #'   confidence interval for the mean response within an exposure bin, for
 #'   continuous (and, as an approximation, count) responses. This is the
-#'   continuous-response analogue of [clopper_pearson_interval()]. `NA`s in `x` are
+#'   continuous-response analogue of [ci_clopper_pearson()]. `NA`s in `x` are
 #'   dropped before computing the interval.
 #'
 #' @export
 #' @examples
-#' t_interval(rnorm(20))
+#' ci_t(rnorm(20))
 #'
-t_interval <- function(x, conf_level = 0.95) {
+ci_t <- function(x, conf_level = 0.95) {
   x <- x[!is.na(x)]
   n <- length(x)
   if (n < 2) {
@@ -91,10 +91,10 @@ t_interval <- function(x, conf_level = 0.95) {
 #'   is 0, the lower bound is 0 (there's no gamma quantile at `shape =
 #'   0`).
 #'
-#' @details The count-response analogue of [clopper_pearson_interval()], used by
-#'   the quantile-binned summary layer (see [er_plot_show_quantiles()])
+#' @details The count-response analogue of [ci_clopper_pearson()], used by
+#'   the quantile-binned summary layer (see [er_plot_add_quantiles()])
 #'   and [er_vpc_plot()] when `response_type = "count"` is explicitly
-#'   declared. Unlike [t_interval()] (the default, opt-in-required
+#'   declared. Unlike [ci_t()] (the default, opt-in-required
 #'   approximation used when a count response auto-detects or is declared
 #'   `"continuous"`), this interval is exact and never produces a
 #'   negative lower bound -- see `PLAN.md` design decision (4) for the
@@ -102,9 +102,9 @@ t_interval <- function(x, conf_level = 0.95) {
 #'
 #' @export
 #' @examples
-#' poisson_interval(3, 10)
+#' ci_poisson(3, 10)
 #'
-poisson_interval <- function(x, n, conf_level = 0.95) {
+ci_poisson <- function(x, n, conf_level = 0.95) {
   total <- sum(x, na.rm = TRUE)
   alpha <- 1 - conf_level
   lower <- if (total > 0) stats::qgamma(alpha / 2, shape = total) / n else 0

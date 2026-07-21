@@ -17,24 +17,27 @@ given: logical or values entirely in `{0, 1}` → `"binary"`, else
 `"continuous"`; `"auto"` never resolves to `"count"` -- that must be
 declared explicitly), stored on `object$response$type`/
 `object$response$limits`. The model curve/ribbon
-(`er_plot_show_model()`) and group panel (`er_plot_show_groups()`)
+(`er_plot_add_model()`) and group panel (`er_plot_add_groups()`)
 layers work for any response type with no dispatch needed. The
-quantile summary layer (`er_plot_show_quantiles()`) and `er_vpc_plot()`
+quantile summary layer (`er_plot_add_quantiles()`) and `er_vpc_plot()`
 are now fully generalised across all three response types (rate +
 Clopper-Pearson for `"binary"`; mean + t-interval for `"continuous"`;
 mean + exact Poisson interval for `"count"`). The data layer
-(`er_plot_show_data()`, renamed from `er_plot_show_datastrip()`) also
+(`er_plot_add_data()`, renamed from `er_plot_show_datastrip()`) also
 works for any response type, with no `"continuous"`/`"count"` error path
-left -- see "Planned work" below.
+left -- see "Planned work" below. (`er_plot_add_data()` went through two
+renames: `er_plot_show_datastrip()` -> `er_plot_show_data()` -> its
+current name, the latter as part of the naming-scheme review described
+in "Extensibility" below.)
 
-`er_plot_show_data()` offers two mutually exclusive structural families,
+`er_plot_add_data()` offers two mutually exclusive structural families,
 selected by which `builder` function is passed in (no separate style
-argument -- see "Extensibility" below): the default, `build_data_overlay()`,
+argument -- see "Extensibility" below): the default, `er_builder_data_overlay()`,
 plots raw observations at their true `(exposure, response)` coordinates
 directly on the model panel -- a single, response-type-agnostic builder
 with a small vertical jitter applied only for binary responses, and a
 `color` aesthetic that's always strata (sharing the base plot's own
-legend) rather than the response value. `build_data_boxjitter()`
+legend) rather than the response value. `er_builder_data_boxjitter()`
 (binary-response only) is the older panel-based design (`object$part$data`)
 -- a boxplot of the exposure values with jittered points layered on top,
 in upper (responders)/lower (non-responders) panels, showing the exposure
@@ -46,13 +49,13 @@ from one family clears the other slot. There is no built-in
 `"panel"`-layout builder for a continuous/count response -- the older
 `build_data_jitter()` (binary) and `build_data_color()` (continuous/count)
 were both removed once review found neither earned its keep alongside
-`build_data_overlay()`/`build_data_boxjitter()` (see PLAN.md); a custom
+`er_builder_data_overlay()`/`er_builder_data_boxjitter()` (see PLAN.md); a custom
 `"panel"`-layout builder for continuous/count remains possible via
-`er_layout()`, since `.part_data()`'s response-type dispatch was left in
+`er_builder_layout()`, since `.part_data()`'s response-type dispatch was left in
 place.
 
-`build_data_hex()` is a second `"overlay"`-layout data builder alongside
-`build_data_overlay()`: a `geom_hex()`-based 2D density, for when N is
+`er_builder_data_hex()` is a second `"overlay"`-layout data builder alongside
+`er_builder_data_overlay()`: a `geom_hex()`-based 2D density, for when N is
 large enough that raw points overplot into an unreadable smear (most
 useful for continuous/count responses, whose y-values are spread out
 rather than piled at 0/1). It requires the `hexbin` package (`Suggests`,
@@ -60,41 +63,44 @@ guarded with `rlang::check_installed()`). Because `geom_hex()`'s `fill`
 aesthetic already encodes bin density, there's no channel left for
 `color = strata`; when stratified, all strata are pooled into a single
 hex-binned density (with an `rlang::inform()` message noting this)
-rather than partially or misleadingly encoding strata. `build_data_hex()`
-tags itself `attr(builder, "er_data_fill") <- "density"`, a second
-attribute alongside `er_layout()`'s (mirroring `build_group_histogram()`'s
-`er_group_y` tag), which `.polish_labels()` reads to title the base
+rather than partially or misleadingly encoding strata. `er_builder_data_hex()`
+tags itself via `er_builder_fill_role(builder, "density")`, a second
+piece of builder metadata alongside `er_builder_layout()`'s (mirroring
+`er_builder_group_histogram()`'s `er_builder_y_role()` tag), which
+`.polish_labels()` reads (via the internal `.builder_fill_role()`
+accessor) to title the base
 plot's `fill` legend "Count" rather than the strata label it uses by
-default. This only matters when `build_data_hex()`'s `fill` is the sole
-`fill` mapping on the base plot: a stratified `build_model_ribbonline()`
+default. This only matters when `er_builder_data_hex()`'s `fill` is the sole
+`fill` mapping on the base plot: a stratified `er_builder_model_ribbonline()`
 also maps `fill = strata` (discrete) on its ribbon, and ggplot2 can't
-reconcile that with `build_data_hex()`'s continuous density `fill` on
+reconcile that with `er_builder_data_hex()`'s continuous density `fill` on
 the same aesthetic -- it errors ("Continuous value supplied to a
 discrete scale") rather than silently misrendering. This is a genuine
 ggplot2 limitation, not fixable from inside the builder; pair a
-stratified `build_data_hex()` plot with a model builder that doesn't map
-`fill`, e.g. `build_model_line()` (color only).
+stratified `er_builder_data_hex()` plot with a model builder that doesn't map
+`fill`, e.g. `er_builder_model_line()` (color only).
 
-The group panel layer (`er_plot_show_groups()`) has a third built-in
-builder, `build_group_histogram()`, alongside `build_group_boxplot()`
-(the default) and `build_group_violin()`. Unlike those two -- which put
+The group panel layer (`er_plot_add_groups()`) has a third built-in
+builder, `er_builder_group_histogram()`, alongside `er_builder_group_boxplot()`
+(the default) and `er_builder_group_violin()`. Unlike those two -- which put
 the group variable itself on the y-axis (`y = lvl`, one categorical row
 per level) -- a histogram needs its y-axis free for counts, so
-`build_group_histogram()` puts the group levels on facet strips instead
-(`facet_grid(rows = vars(lvl), switch = "y")`) and tags itself
-`attr(builder, "er_group_y") <- "count"`, mirroring `er_layout()`'s
-attribute-based approach for the data layer. `.polish_labels()` reads
-that tag to title the y-axis "Count" rather than the group variable's
-own label (which is what it still uses for `build_group_boxplot()`/
-`build_group_violin()`, where the group variable *is* the y-axis);
+`er_builder_group_histogram()` puts the group levels on facet strips instead
+(`facet_grid(rows = vars(lvl), switch = "y")`) and tags itself via
+`er_builder_y_role(builder, "count")`, mirroring `er_builder_layout()`'s
+wrapper-function approach for the data layer. `.polish_labels()` reads
+that tag (via the internal `.builder_y_role()` accessor) to title the
+y-axis "Count" rather than the group variable's
+own label (which is what it still uses for `er_builder_group_boxplot()`/
+`er_builder_group_violin()`, where the group variable *is* the y-axis);
 builders that don't set the tag keep that old, categorical-label
 behaviour, so this is opt-in rather than a breaking requirement like
-`er_layout()`. Putting the group levels on facet strips also surfaced a
+`er_builder_layout()`. Putting the group levels on facet strips also surfaced a
 second, unrelated quirk: ggplot2's default text angle for a left-hand
 strip (`switch = "y"`) is rotated 90 degrees, sized to fit the (short)
 row height rather than the (longer) available width, so long `lvl`
 labels like `"Placebo (N=100)"` were getting clipped vertically.
-`build_group_histogram()` works around this with `theme(strip.text.y.left
+`er_builder_group_histogram()` works around this with `theme(strip.text.y.left
 = element_text(angle = 0, hjust = 0))`, rotating the text back to
 horizontal so the strip auto-expands to fit the full label.
 
@@ -115,26 +121,68 @@ continuous (`biomarker_change`, `ae_duration`) response columns in
 `er_summary()` methods erglm registers for its model objects are correct
 for all four families, so no erplots-side changes are needed there.
 
+## Naming scheme
+
+A naming-scheme review (prompted by the `build_*` prefix reading as
+unintuitive, and the CI helpers using an inconsistent suffix) settled on
+four families, each with its own prefix, documented here so future
+additions stay consistent:
+
+- **`er_plot_add_*()`** -- the pipeline verbs that add a layer to an
+  `er_plot` spec (`er_plot_add_model()`, `er_plot_add_quantiles()`,
+  `er_plot_add_data()`, `er_plot_add_groups()`). Renamed from
+  `er_plot_show_*()`: "add" more accurately signals "append to the spec"
+  than "show" does, since nothing is actually drawn until
+  `er_plot_build()`/`print()`/`plot()`. `er_plot()`, `er_plot_style()`,
+  and `er_plot_build()` keep the bare `er_plot_*` name -- they aren't
+  layer-adders.
+- **`er_builder_*()`** -- the pluggable partial-builder functions (was
+  `build_*()`), e.g. `er_builder_model_ribbonline()`,
+  `er_builder_data_overlay()`, `er_builder_quantile_errorbar()`,
+  `er_builder_group_boxplot()`, `er_builder_summary_pvalue()`. The
+  `er_`-namespaced shared prefix groups every builder together
+  (discoverable via autocomplete/`library(help = "erplots")`) while the
+  layer name stays the second token, so `er_builder_data_*`,
+  `er_builder_model_*`, etc. are still grep-able as families. The three
+  builder-metadata helpers a custom builder can tag itself with also
+  moved under this prefix: `er_builder_layout()` (was `er_layout()`),
+  `er_builder_fill_role()` (was a raw `attr(builder, "er_data_fill")
+  <- ...)`, and `er_builder_y_role()` (was `attr(builder, "er_group_y")
+  <- ...)`) -- all three now follow the same
+  "wrapper function that attaches an attribute" pattern instead of
+  mixing a wrapper for layout with raw `attr()` calls for the other two.
+- **`ci_*()`** -- the confidence-interval helpers (was a `*_interval`
+  suffix): `ci_clopper_pearson()` (was `clopper_pearson_interval()`),
+  `ci_t()` (was `t_interval()`), `ci_poisson()` (was
+  `poisson_interval()`). Chosen over `confint_*()` to avoid echoing
+  `stats::confint()`'s very different calling convention.
+- Internal (dot-prefixed) helpers were mostly left alone: `.part_*()`,
+  `.polish_*()`, `.get_*()`/`.set_*()` keep their existing names, and the
+  internal `.build_*()` assembly helpers in `R/er-plot-build.R` (e.g.
+  `.build_model_geoms()`) no longer risk being confused with the public
+  builder family now that the public prefix is `er_builder_*` rather
+  than `build_*`.
+
 ## Extensibility: `builder` is the sole mechanism (no `style` argument)
 
-Every `er_plot_show_*()` function (`er_plot_show_model()`,
-`er_plot_show_quantiles()`, `er_plot_show_data()`, `er_plot_show_groups()`)
-takes a `builder` argument (`er_plot_show_model()` additionally takes
-`summary_builder`) that defaults to one built-in `build_*()` function
-(`build_model_ribbonline()`, `build_quantile_errorbar()`,
-`build_data_overlay()`, `build_group_boxplot()`; `summary_builder`
-defaults to `build_summary_pvalue()`) and can be set to any other
-function matching the standard `build_*()` signature
+Every `er_plot_add_*()` function (`er_plot_add_model()`,
+`er_plot_add_quantiles()`, `er_plot_add_data()`, `er_plot_add_groups()`)
+takes a `builder` argument (`er_plot_add_model()` additionally takes
+`summary_builder`) that defaults to one built-in `er_builder_*()` function
+(`er_builder_model_ribbonline()`, `er_builder_quantile_errorbar()`,
+`er_builder_data_overlay()`, `er_builder_group_boxplot()`; `summary_builder`
+defaults to `er_builder_summary_pvalue()`) and can be set to any other
+function matching the standard `er_builder_*()` signature
 (`function(data, config, stratify, exposure, response, strata, style)`)
--- built-in (e.g. `build_model_spaghetti()`, `build_model_line()`,
-`build_quantile_pointrange()`, `build_quantile_bar()`,
-`build_data_boxjitter()`, `build_data_hex()`, `build_group_violin()`,
-`build_group_histogram()`) or
+-- built-in (e.g. `er_builder_model_spaghetti()`, `er_builder_model_line()`,
+`er_builder_quantile_pointrange()`, `er_builder_quantile_bar()`,
+`er_builder_data_boxjitter()`, `er_builder_data_hex()`, `er_builder_group_violin()`,
+`er_builder_group_histogram()`) or
 fully custom (e.g. a `geom_crossbar()`-based quantile builder, or a
 density/histogram-based data-layer builder instead of a scatter). There
 used to be a separate `style` string argument alongside `builder`, but
 it was redundant for three of the four layers (pure sugar for choosing a
-default `build_*()` function) and has been removed; `builder` is now the
+default `er_builder_*()` function) and has been removed; `builder` is now the
 only mechanism, documented in `?er_partial`'s "Writing your own builder"
 section.
 
@@ -142,13 +190,13 @@ For the data layer specifically, the one thing `style` used to do that
 wasn't just builder selection -- picking the *structural* family a
 builder is slotted into (single call merged into the main panel, vs.
 one-or-more panels stacked below the base plot) -- is now declared *on
-the builder function itself* via `er_layout(builder, layout =
+the builder function itself* via `er_builder_layout(builder, layout =
 c("overlay", "panel"))`, an exported helper that attaches an
-`"er_layout"` attribute. `er_plot_show_data()` reads this tag off
+`"er_builder_layout"` attribute. `er_plot_add_data()` reads this tag off
 whatever `builder` it's given (internal `.builder_layout()`) to decide
 whether to route through `.part_overlay()` or `.part_data()`. Both
-built-in data builders already carry this tag (`build_data_overlay()`:
-`"overlay"`; `build_data_boxjitter()`: `"panel"`); a
+built-in data builders already carry this tag (`er_builder_data_overlay()`:
+`"overlay"`; `er_builder_data_boxjitter()`: `"panel"`); a
 custom data-layer builder that omits it errors immediately and
 informatively, rather than silently landing in the wrong structural
 slot. This was chosen over encoding layout in a builder's *return
@@ -166,34 +214,42 @@ short "Open / deferred" list at the end. Everything scoped so far is
 done: the binary→continuous/count response generalisation (response-type
 detection/declaration, the quantile summary layer, `er_vpc_plot()`), the
 data layer's continuous/count-response redesign (`build_data_color()`
-and `build_data_overlay()`, the latter now the default), the mini-language
+and `er_builder_data_overlay()`, the latter now the default), the mini-language
 documentation review (singleton/additive layer semantics, the
 stratification color/facet precedence rule, `?er_partial`,
 `vignettes/articles/design.Rmd`), formalising the
 `builder`/`summary_builder` escape hatch, removing `style`
 entirely in favor of `builder` alone, with the data layer's structural
-distinction moved onto the builder function itself via `er_layout()`
+distinction moved onto the builder function itself via `er_builder_layout()`
 (see "Extensibility" above) -- including `vignettes/articles/design.Rmd`'s
 "Extending erplots" section, which walks through a runnable custom
 quantile builder -- and then, on review, removing `build_data_jitter()`/
-`build_data_color()` in favor of `build_data_boxjitter()` (see
+`build_data_color()` in favor of `er_builder_data_boxjitter()` (see
 "Extensibility" above and PLAN.md), since neither of the removed
-builders earned its keep once `build_data_overlay()` existed as the
+builders earned its keep once `er_builder_data_overlay()` existed as the
 default. The only genuinely open items are deferred, not scheduled --
 see PLAN.md's "Open / deferred" section (an additive `model` layer for
 overlaying two fitted curves; whether a future continuous/count
 `"panel"`-layout builder should use a deliberately chosen continuous
 color scale instead of ggplot2's default gradient, and whether it
 should be a quantile-binned rug instead of a color-encoded scatter --
-both deferred along with `build_data_color()`'s removal).
+both deferred along with `build_data_color()`'s removal). Most recently,
+a naming-scheme review renamed the pipeline verbs (`er_plot_show_*()` ->
+`er_plot_add_*()`), the partial builders and their metadata helpers
+(`build_*()` -> `er_builder_*()`; `er_layout()`/`er_data_fill`/`er_group_y`
+-> `er_builder_layout()`/`er_builder_fill_role()`/`er_builder_y_role()`),
+and the CI helpers (`*_interval()` -> `ci_*()`) -- see "Naming scheme"
+above. This was a straight rename with no deprecation shims (the
+package is GitHub-only/pre-CRAN, so there's no installed user base to
+break silently).
 
 ## Structure
 
 - `R/er-generics.R` -- the model interface: `er_predict()`,
   `er_simulate()`, `er_summary()` generics and their default methods.
 - `R/er-plot-api.R` -- the public plot-building API: `er_plot()`,
-  `er_plot_show_model()`, `er_plot_show_quantiles()`,
-  `er_plot_show_data()`, `er_plot_show_groups()`, `er_plot_build()`,
+  `er_plot_add_model()`, `er_plot_add_quantiles()`,
+  `er_plot_add_data()`, `er_plot_add_groups()`, `er_plot_build()`,
   plus `print`/`plot` methods for the `er_plot` S3 class. Each layer
   function (except `er_plot()` itself) has its own dedicated Rd topic
   (no shared `@rdname`).
@@ -203,14 +259,14 @@ both deferred along with `build_data_color()`'s removal).
 - `R/er-plot-build.R`, `R/er-plot-compose.R` -- internal plotting/layout
   machinery that turns parts into ggplot2 objects and composes them with
   patchwork.
-- `R/er-plot-partials-*.R` -- the pluggable `build_*()` partial builders
+- `R/er-plot-partials-*.R` -- the pluggable `er_builder_*()` partial builders
   (one file per component: model, summary, quantile, data, group).
   See `?er_partial` for the interface these builders share.
 - `R/er-vpc.R` -- `er_vpc_plot()`, a model-agnostic VPC-style plot
   operating on plain observed/simulated data frames.
 - `R/utils-helpers.R`, `R/utils-global.R` -- small internal helpers
-  (including the binary-response-only `clopper_pearson_interval()`,
-  `t_interval()`, `poisson_interval()`, `cut_quantile()`,
+  (including the binary-response-only `ci_clopper_pearson()`,
+  `ci_t()`, `ci_poisson()`, `cut_quantile()`,
   `cut_exposure_quantile()`, and the response-type detector
   `.detect_response_type()`) and `globalVariables()` declarations for
   NSE.
@@ -234,8 +290,12 @@ both deferred along with `build_data_color()`'s removal).
 - Use the base R pipe (`|>`), not the magrittr pipe.
 - Follow the existing tidyverse-style conventions (dplyr/tibble/rlang/
   ggplot2/patchwork) already used throughout.
-- Public API functions are prefixed `er_`; partial builders are prefixed
-  `build_`; internal helpers are prefixed with `.`.
+- Naming families (see "Naming scheme" above for the full rationale):
+  pipeline layer-adders are `er_plot_add_*()` (verbs); partial builders
+  are `er_builder_*()` (noun phrases naming the visual idiom, with the
+  layer name as the second token); confidence-interval helpers are
+  `ci_*()` (noun phrases naming the statistical method); internal
+  helpers are prefixed with `.`.
 - Never call a model-fitting function from this package. If a plot
   component needs something from the model, add or extend a generic in
   `R/er-generics.R` instead of reaching into model internals.

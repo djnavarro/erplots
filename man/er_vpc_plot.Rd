@@ -33,8 +33,8 @@ binary (0/1, or logical) or continuous; see \code{response_type}}
 \code{"continuous"}, or \code{"count"}. Governs how the observed-side summary
 is computed: response \emph{rate} with a Clopper-Pearson CI for
 \code{"binary"}, bin \emph{mean} with a t-interval for \code{"continuous"} (see
-\code{\link[=t_interval]{t_interval()}}), or bin \emph{mean} with an exact Poisson interval for
-\code{"count"} (see \code{\link[=poisson_interval]{poisson_interval()}}). \code{"auto"} detects from the
+\code{\link[=ci_t]{ci_t()}}), or bin \emph{mean} with an exact Poisson interval for
+\code{"count"} (see \code{\link[=ci_poisson]{ci_poisson()}}). \code{"auto"} detects from the
 observed \code{response} column (entirely in \verb{\{0, 1\}}, or logical, is
 treated as binary; see \code{\link[=er_plot]{er_plot()}}'s \code{response_type} for the same
 heuristic) and never resolves to \code{"count"}: a count (Poisson-style)

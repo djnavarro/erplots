@@ -38,8 +38,8 @@ detection with `response_type`. `biomarker_change` auto-detects as
 ```{r basic-plot-1}
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_quantiles() |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_quantiles() |> 
   plot()
 ```
 
@@ -58,9 +58,9 @@ mod_gaussian_sex <- erglm_model(
 
 erglm_data |> 
   er_plot(aucss, biomarker_change, stratify_by = sex) |> 
-  er_plot_show_model(mod_gaussian_sex) |> 
-  er_plot_show_quantiles() |> 
-  er_plot_show_data() |>
+  er_plot_add_model(mod_gaussian_sex) |> 
+  er_plot_add_quantiles() |> 
+  er_plot_add_data() |>
   plot()
 ```
 
@@ -70,14 +70,14 @@ The model layer doesn't look at `response_type` at all -- it only
 consumes [er_predict()]/[er_simulate()] output -- so it works exactly the
 same way as for a binary response. See the
 [binary responses](plot-binary.html#model-component) article for
-`build_model_spaghetti()` and the parameter-uncertainty rationale behind
+`er_builder_model_spaghetti()` and the parameter-uncertainty rationale behind
 it; the default builder is used here:
 
 ```{r model-1}
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_quantiles() |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_quantiles() |> 
   plot()
 ```
 
@@ -90,8 +90,8 @@ Clopper-Pearson interval:
 ```{r quantile-1}
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_quantiles(bins = 6, conf_level = .8) |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_quantiles(bins = 6, conf_level = .8) |> 
   plot()
 ```
 
@@ -103,25 +103,25 @@ declaration that fixes it.
 
 ## Data component
 
-`er_plot_show_data()` adds the raw observations at their true `(exposure,
-response)` coordinates via `build_data_overlay()`, the default and only
+`er_plot_add_data()` adds the raw observations at their true `(exposure,
+response)` coordinates via `er_builder_data_overlay()`, the default and only
 built-in builder for a continuous response -- no jitter is needed, since
 the response isn't confined to 0/1:
 
 ```{r data-overlay-continuous}
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_data() |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_data() |> 
   plot()
 ```
 
 There's no built-in panel-based alternative for a continuous response --
-`build_data_boxjitter()` (the older, panel-based responders/non-responders
-design covered in the [binary responses](plot-binary.html#build_data_overlay-vs--build_data_boxjitter)
+`er_builder_data_boxjitter()` (the older, panel-based responders/non-responders
+design covered in the [binary responses](plot-binary.html#er_builder_data_overlay-vs--er_builder_data_boxjitter)
 article) is binary-only. If you need a panel-based builder here (e.g. a
 single color-encoded panel), you can write a custom one and tag it with
-`er_layout(fn, "panel")` -- see `design.Rmd`'s "Extending erplots" section.
+`er_builder_layout(fn, "panel")` -- see `design.Rmd`'s "Extending erplots" section.
 
 ## Group component
 
@@ -129,15 +129,15 @@ The group layer doesn't look at `response_type` at all -- it only
 consumes the exposure variable -- so it works exactly the same way as for
 a binary response. See the
 [binary responses](plot-binary.html#group-component) article for
-multiple grouping variables and `build_group_violin()`; the default
+multiple grouping variables and `er_builder_group_violin()`; the default
 builder and a single grouping variable are shown here:
 
 ```{r group-1}
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_quantiles() |>
-  er_plot_show_groups(group_by = aucss) |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_quantiles() |>
+  er_plot_add_groups(group_by = aucss) |> 
   plot()
 ```
 

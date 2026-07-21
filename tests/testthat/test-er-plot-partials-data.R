@@ -1,14 +1,14 @@
-test_that("build_data_boxjitter returns box + jitter + coord + yscale", {
+test_that("er_builder_data_boxjitter returns box + jitter + coord + yscale", {
   skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  expect_no_error(p1 |> er_plot_show_data(builder = build_data_boxjitter))
-  expect_no_error(p2 |> er_plot_show_data(builder = build_data_boxjitter))
+  expect_no_error(p1 |> er_plot_add_data(builder = er_builder_data_boxjitter))
+  expect_no_error(p2 |> er_plot_add_data(builder = er_builder_data_boxjitter))
 
-  p1 <- p1 |> er_plot_show_data(builder = build_data_boxjitter)
-  p2 <- p2 |> er_plot_show_data(builder = build_data_boxjitter)
+  p1 <- p1 |> er_plot_add_data(builder = er_builder_data_boxjitter)
+  p2 <- p2 |> er_plot_add_data(builder = er_builder_data_boxjitter)
 
   config1 <- p1$part$data$config
   config2 <- p2$part$data$config
@@ -35,11 +35,11 @@ test_that("build_data_boxjitter returns box + jitter + coord + yscale", {
     style = p2$style
   )
 
-  expect_no_error(do.call(build_data_boxjitter, args1))
-  expect_no_error(do.call(build_data_boxjitter, args2))
+  expect_no_error(do.call(er_builder_data_boxjitter, args1))
+  expect_no_error(do.call(er_builder_data_boxjitter, args2))
 
-  p1_out <- do.call(build_data_boxjitter, args1)
-  p2_out <- do.call(build_data_boxjitter, args2)
+  p1_out <- do.call(er_builder_data_boxjitter, args1)
+  p2_out <- do.call(er_builder_data_boxjitter, args2)
 
   # boxplot + jitter + coord + yscale
   expect_length(p1_out, 4)
@@ -67,12 +67,12 @@ test_that("build_data_boxjitter returns box + jitter + coord + yscale", {
 })
 
 
-test_that("build_data_overlay returns a single geom, jittered only for a binary response", {
+test_that("er_builder_data_overlay returns a single geom, jittered only for a binary response", {
   skip_if_not_installed("erglm")
 
-  p_binary  <- er_plot(er_test_data, aucss, ae1) |> er_plot_show_data()
-  p_bin_str <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_show_data()
-  p_cont    <- er_plot(er_test_data, aucss, biomarker_change) |> er_plot_show_data()
+  p_binary  <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_data()
+  p_bin_str <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_add_data()
+  p_cont    <- er_plot(er_test_data, aucss, biomarker_change) |> er_plot_add_data()
 
   args <- function(p) {
     list(
@@ -86,9 +86,9 @@ test_that("build_data_overlay returns a single geom, jittered only for a binary 
     )
   }
 
-  out_binary  <- do.call(build_data_overlay, args(p_binary))
-  out_bin_str <- do.call(build_data_overlay, args(p_bin_str))
-  out_cont    <- do.call(build_data_overlay, args(p_cont))
+  out_binary  <- do.call(er_builder_data_overlay, args(p_binary))
+  out_bin_str <- do.call(er_builder_data_overlay, args(p_bin_str))
+  out_cont    <- do.call(er_builder_data_overlay, args(p_cont))
 
   expect_length(out_binary, 1)
   expect_length(out_bin_str, 1)
@@ -111,14 +111,14 @@ test_that("build_data_overlay returns a single geom, jittered only for a binary 
 })
 
 
-test_that("build_data_hex returns a single hex geom for any response type", {
+test_that("er_builder_data_hex returns a single hex geom for any response type", {
   skip_if_not_installed("erglm")
   skip_if_not_installed("hexbin")
 
   p_binary <- er_plot(er_test_data, aucss, ae1) |>
-    er_plot_show_data(builder = build_data_hex)
+    er_plot_add_data(builder = er_builder_data_hex)
   p_cont <- er_plot(er_test_data, aucss, biomarker_change) |>
-    er_plot_show_data(builder = build_data_hex)
+    er_plot_add_data(builder = er_builder_data_hex)
 
   args <- function(p) {
     list(
@@ -132,8 +132,8 @@ test_that("build_data_hex returns a single hex geom for any response type", {
     )
   }
 
-  out_binary <- do.call(build_data_hex, args(p_binary))
-  out_cont <- do.call(build_data_hex, args(p_cont))
+  out_binary <- do.call(er_builder_data_hex, args(p_binary))
+  out_cont <- do.call(er_builder_data_hex, args(p_cont))
 
   expect_length(out_binary, 1)
   expect_length(out_cont, 1)
@@ -142,12 +142,12 @@ test_that("build_data_hex returns a single hex geom for any response type", {
   expect_identical(class(out_cont[[1]]$geom)[1], "GeomHex")
 })
 
-test_that("build_data_hex informs (not warns/errors) that strata aren't encoded", {
+test_that("er_builder_data_hex informs (not warns/errors) that strata aren't encoded", {
   skip_if_not_installed("erglm")
   skip_if_not_installed("hexbin")
 
   p_strat <- er_plot(er_test_data, aucss, biomarker_change, sex) |>
-    er_plot_show_data(builder = build_data_hex)
+    er_plot_add_data(builder = er_builder_data_hex)
 
   args <- list(
     data = p_strat$data,
@@ -159,20 +159,20 @@ test_that("build_data_hex informs (not warns/errors) that strata aren't encoded"
     style = p_strat$style
   )
 
-  expect_message(do.call(build_data_hex, args))
-  out <- suppressMessages(do.call(build_data_hex, args))
+  expect_message(do.call(er_builder_data_hex, args))
+  out <- suppressMessages(do.call(er_builder_data_hex, args))
   expect_null(out[[1]]$mapping$colour)
   expect_null(out[[1]]$mapping$fill)
 })
 
-test_that("er_plot_show_data() builds and renders with builder = build_data_hex", {
+test_that("er_plot_add_data() builds and renders with builder = er_builder_data_hex", {
   skip_if_not_installed("erglm")
   skip_if_not_installed("hexbin")
 
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change) |>
-    er_plot_show_model(er_test_mod_gaussian) |>
-    er_plot_show_data(builder = build_data_hex)
+    er_plot_add_model(er_test_mod_gaussian) |>
+    er_plot_add_data(builder = er_builder_data_hex)
 
   expect_no_error(er_plot_build(plt))
 })

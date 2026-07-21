@@ -10,8 +10,8 @@
 #' @param style Style components
 #'
 #' @details Builders for the `summary_builder` argument of
-#' [er_plot_show_model()], which annotate the model panel with a summary
-#' statistic rather than drawing the curve itself: `build_summary_pvalue()`
+#' [er_plot_add_model()], which annotate the model panel with a summary
+#' statistic rather than drawing the curve itself: `er_builder_summary_pvalue()`
 #' (the default) places a formatted p-value in whichever corner of the
 #' panel is furthest from the data.
 #'
@@ -20,13 +20,13 @@
 #'
 #' @returns A geom, or a list of geoms; see [er_partial()].
 #'
-#' @name build_summary
+#' @name er_builder_summary
 #' @seealso [er_partial()]
 NULL
 
-#' @rdname build_summary
+#' @rdname er_builder_summary
 #' @export
-build_summary_pvalue <- function(data, config, stratify, exposure, response, strata, style) {
+er_builder_summary_pvalue <- function(data, config, stratify, exposure, response, strata, style) {
 
   if (is.null(config$p_value)) return(list())
 

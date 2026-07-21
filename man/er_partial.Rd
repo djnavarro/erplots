@@ -26,7 +26,7 @@ which, at a minimum, already has the base theme applied. For
 "model", "summary", "quantile", and "overlay", the pieces will be
 added to a plot that already has a coord that sets the axis limits
 (the base plot; see \code{.build_overlay_geoms()}). For the "data"
-(panel-based, e.g. \code{build_data_boxjitter()}) and "group" plots, the
+(panel-based, e.g. \code{er_builder_data_boxjitter()}) and "group" plots, the
 plot object does not yet have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That
 is, since all component plots use the exposure variable for the
@@ -37,15 +37,15 @@ set the x-axis limits.
 Partial builders for exposure-response plots
 }
 \details{
-This page documents the shared interface all \verb{build_*()}
+This page documents the shared interface all \verb{er_builder_*()}
 partial builders implement. The builders themselves are documented on
 their own family-specific pages, one per layer:
 \itemize{
-\item \code{\link[=build_model]{build_model()}} -- the \code{model} layer (\code{\link[=er_plot_show_model]{er_plot_show_model()}})
-\item \code{\link[=build_summary]{build_summary()}} -- the \code{summary_builder} argument of \code{\link[=er_plot_show_model]{er_plot_show_model()}}
-\item \code{\link[=build_quantile]{build_quantile()}} -- the \code{quantile} layer (\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}})
-\item \code{\link[=build_data]{build_data()}} -- the \code{data} layer (\code{\link[=er_plot_show_data]{er_plot_show_data()}})
-\item \code{\link[=build_group]{build_group()}} -- the \code{group} layer (\code{\link[=er_plot_show_groups]{er_plot_show_groups()}})
+\item \code{\link[=er_builder_model]{er_builder_model()}} -- the \code{model} layer (\code{\link[=er_plot_add_model]{er_plot_add_model()}})
+\item \code{\link[=er_builder_summary]{er_builder_summary()}} -- the \code{summary_builder} argument of \code{\link[=er_plot_add_model]{er_plot_add_model()}}
+\item \code{\link[=er_builder_quantile]{er_builder_quantile()}} -- the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}})
+\item \code{\link[=er_builder_data]{er_builder_data()}} -- the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}})
+\item \code{\link[=er_builder_group]{er_builder_group()}} -- the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}})
 }
 
 Arguments are standardised to allow users to write their own
@@ -54,7 +54,7 @@ as needed
 \section{Writing your own builder}{
 
 
-Every \verb{build_*()} function above shares the signature documented in
+Every \verb{er_builder_*()} function above shares the signature documented in
 \verb{@param}s, and that signature is a public part of the API, not an
 implementation detail: any function \verb{function(data, config, stratify, exposure, response, strata, style)} that returns a geom or list of
 geoms can stand in for a built-in builder. This is the officially
@@ -63,25 +63,25 @@ supported way to draw a layer differently from any of the built-in
 data overlay, per-panel histograms instead of jittered points for the
 panel-based data layer, or a \code{geom_crossbar()} instead of a
 \code{geom_errorbar()}/\code{geom_pointrange()} for the quantile summary.
-(\code{build_quantile_pointrange()} started life as exactly this kind of
+(\code{er_builder_quantile_pointrange()} started life as exactly this kind of
 custom builder -- it was promoted to a built-in option once it proved
-to be a natural, low-risk alternative to \code{build_quantile_errorbar()},
+to be a natural, low-risk alternative to \code{er_builder_quantile_errorbar()},
 with no new config requirements.)
 
 Each \verb{er_plot_show_*()} function takes a \code{builder} argument (and
-\code{er_plot_show_model()} additionally takes \code{summary_builder}) that
-defaults to one built-in \verb{build_*()} function and can be set to any
+\code{er_plot_add_model()} additionally takes \code{summary_builder}) that
+defaults to one built-in \verb{er_builder_*()} function and can be set to any
 other -- built-in or custom -- matching the standard signature, with no
 string-based \code{style} argument in between: a custom builder can be
 plugged in without forking the package or reaching into \code{object$part}
 internals. For the data layer specifically, \code{builder} also has to
 declare which \emph{structural} family it belongs to -- a single call
 merged into the main panel, or one or more panels stacked below the
-base plot -- via \code{\link[=er_layout]{er_layout()}}, since \code{\link[=er_plot_show_data]{er_plot_show_data()}} reads that
+base plot -- via \code{\link[=er_builder_layout]{er_builder_layout()}}, since \code{\link[=er_plot_add_data]{er_plot_add_data()}} reads that
 tag off \code{builder} to decide how to assemble the layer; the other three
 layers have only one structural call site, so no such tagging is
-needed there. See the \verb{@examples} on \code{\link[=er_plot_show_model]{er_plot_show_model()}},
-\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, and \code{\link[=er_plot_show_data]{er_plot_show_data()}} for worked
+needed there. See the \verb{@examples} on \code{\link[=er_plot_add_model]{er_plot_add_model()}},
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, and \code{\link[=er_plot_add_data]{er_plot_add_data()}} for worked
 custom builders (a dashed model curve, a quantile crossbar, and a
 data-overlay density, respectively).
 
@@ -96,32 +96,32 @@ All of the builders above feed a \strong{singleton} layer: \code{model},
 \code{summary}, \code{quantile}, \code{data}, and \code{overlay} each occupy a single named
 slot (\code{object$part$model}, \code{object$part$data}, etc.), so calling the
 corresponding \verb{er_plot_show_*()} function again overwrites the slot
-rather than combining builders. \code{group} (\code{build_group_boxplot()}/
-\code{build_group_violin()}) is the one \strong{additive} exception -- each call
-to \code{er_plot_show_groups()} adds another named entry rather than
+rather than combining builders. \code{group} (\code{er_builder_group_boxplot()}/
+\code{er_builder_group_violin()}) is the one \strong{additive} exception -- each call
+to \code{er_plot_add_groups()} adds another named entry rather than
 replacing the previous one. See \code{\link[=er_plot]{er_plot()}}'s "Layers are either
 singleton or additive" section for the full discussion, including the
 one flagged future exception (an additive \code{model} layer, for
 overlaying two fitted curves).
 
-The \code{data} slot's default, \code{build_data_overlay()}, needs no
+The \code{data} slot's default, \code{er_builder_data_overlay()}, needs no
 \code{color_role} tag: its color aesthetic (when stratified) is always
 strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. \code{config$color_role}
 (set by \code{.part_data()}, consulted by \code{.polish_labels()}/
 \code{.polish_legends()} in \code{R/er-plot-compose.R}) matters for the
 "panel"-layout family instead, where it's \code{"strata"} for a binary
-response (as used by the built-in \code{build_data_boxjitter()}, whose
+response (as used by the built-in \code{er_builder_data_boxjitter()}, whose
 color aesthetic still means strata) or \code{"response"} for a
 continuous/count response, where the color channel is already spoken
 for by the response value itself -- there's no built-in
 "panel"-layout builder for that case (the older \code{build_data_color()}
-was removed once \code{build_data_overlay()} covered its typical use case
-more simply), but a custom builder tagged \code{er_layout(builder, "panel")} can still opt into it; see \code{\link[=er_plot_show_data]{er_plot_show_data()}} for the
+was removed once \code{er_builder_data_overlay()} covered its typical use case
+more simply), but a custom builder tagged \code{er_builder_layout(builder, "panel")} can still opt into it; see \code{\link[=er_plot_add_data]{er_plot_add_data()}} for the
 user-facing version of this rule.
 }
 
 \seealso{
-\code{\link[=build_model]{build_model()}}, \code{\link[=build_summary]{build_summary()}}, \code{\link[=build_quantile]{build_quantile()}},
-\code{\link[=build_data]{build_data()}}, \code{\link[=build_group]{build_group()}}, \code{\link[=er_layout]{er_layout()}}
+\code{\link[=er_builder_model]{er_builder_model()}}, \code{\link[=er_builder_summary]{er_builder_summary()}}, \code{\link[=er_builder_quantile]{er_builder_quantile()}},
+\code{\link[=er_builder_data]{er_builder_data()}}, \code{\link[=er_builder_group]{er_builder_group()}}, \code{\link[=er_builder_layout]{er_builder_layout()}}
 }

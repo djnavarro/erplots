@@ -9,25 +9,25 @@
 #' @param strata Stratification variable
 #' @param style Style components
 #'
-#' @details Builders for the `quantile` layer ([er_plot_show_quantiles()]),
+#' @details Builders for the `quantile` layer ([er_plot_add_quantiles()]),
 #' which bins exposure into quantile groups and plots a response summary
 #' (rate, mean, or count-mean, depending on response type) with an
-#' uncertainty interval per bin: `build_quantile_errorbar()` (point plus
-#' error bar, the default), `build_quantile_bar()` (bar plus error bar),
-#' and `build_quantile_pointrange()` (point range).
+#' uncertainty interval per bin: `er_builder_quantile_errorbar()` (point plus
+#' error bar, the default), `er_builder_quantile_bar()` (bar plus error bar),
+#' and `er_builder_quantile_pointrange()` (point range).
 #'
 #' See [er_partial()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
 #'
 #' @returns A geom, or a list of geoms; see [er_partial()].
 #'
-#' @name build_quantile
+#' @name er_builder_quantile
 #' @seealso [er_partial()]
 NULL
 
-#' @rdname build_quantile
+#' @rdname er_builder_quantile
 #' @export
-build_quantile_errorbar <- function(data, config, stratify, exposure, response, strata, style) {
+er_builder_quantile_errorbar <- function(data, config, stratify, exposure, response, strata, style) {
 
   if (stratify == FALSE) {
 
@@ -111,9 +111,9 @@ build_quantile_errorbar <- function(data, config, stratify, exposure, response, 
 }
 
 
-#' @rdname build_quantile
+#' @rdname er_builder_quantile
 #' @export
-build_quantile_bar <- function(data, config, stratify, exposure, response, strata, style) {
+er_builder_quantile_bar <- function(data, config, stratify, exposure, response, strata, style) {
 
   if (stratify == FALSE) {
 
@@ -144,7 +144,7 @@ build_quantile_bar <- function(data, config, stratify, exposure, response, strat
 
   if (stratify == TRUE) {
 
-    # see `build_quantile_errorbar()` for why strata are dodged
+    # see `er_builder_quantile_errorbar()` for why strata are dodged
     # horizontally before plotting
     summary_dodged <- .dodge_quantile_strata(config$summary, exposure$limits)
 
@@ -193,9 +193,9 @@ build_quantile_bar <- function(data, config, stratify, exposure, response, strat
 }
 
 
-#' @rdname build_quantile
+#' @rdname er_builder_quantile
 #' @export
-build_quantile_pointrange <- function(data, config, stratify, exposure, response, strata, style) {
+er_builder_quantile_pointrange <- function(data, config, stratify, exposure, response, strata, style) {
 
   if (stratify == FALSE) {
 
@@ -217,7 +217,7 @@ build_quantile_pointrange <- function(data, config, stratify, exposure, response
 
   if (stratify == TRUE) {
 
-    # see `build_quantile_errorbar()` for why strata are dodged
+    # see `er_builder_quantile_errorbar()` for why strata are dodged
     # horizontally before plotting
     summary_dodged <- .dodge_quantile_strata(config$summary, exposure$limits)
 

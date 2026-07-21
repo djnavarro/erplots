@@ -40,8 +40,8 @@ declare `response_type = "count"` explicitly.
 ```{r basic-plot-1}
 erglm_data |> 
   er_plot(aucss, ae_count) |> 
-  er_plot_show_model(mod_poisson) |> 
-  er_plot_show_quantiles() |> 
+  er_plot_add_model(mod_poisson) |> 
+  er_plot_add_quantiles() |> 
   plot()
 ```
 
@@ -60,9 +60,9 @@ mod_poisson_sex <- erglm_model(
 
 erglm_data |> 
   er_plot(aucss, ae_count, stratify_by = sex) |> 
-  er_plot_show_model(mod_poisson_sex) |> 
-  er_plot_show_quantiles() |> 
-  er_plot_show_data() |>
+  er_plot_add_model(mod_poisson_sex) |> 
+  er_plot_add_quantiles() |> 
+  er_plot_add_data() |>
   plot()
 ```
 
@@ -72,13 +72,13 @@ The model layer doesn't look at `response_type` at all -- it only
 consumes [er_predict()]/[er_simulate()] output -- so it works exactly the
 same way as for a binary response. See the
 [binary responses](plot-binary.html#model-component) article for
-`build_model_spaghetti()`; the default builder is used here:
+`er_builder_model_spaghetti()`; the default builder is used here:
 
 ```{r model-1}
 erglm_data |> 
   er_plot(aucss, ae_count) |> 
-  er_plot_show_model(mod_poisson) |> 
-  er_plot_show_quantiles() |> 
+  er_plot_add_model(mod_poisson) |> 
+  er_plot_add_quantiles() |> 
   plot()
 ```
 
@@ -90,14 +90,14 @@ continuous response is -- bin mean plus t-interval:
 ```{r quantile-1}
 erglm_data |> 
   er_plot(aucss, ae_count) |> 
-  er_plot_show_model(mod_poisson) |> 
-  er_plot_show_quantiles() |> 
+  er_plot_add_model(mod_poisson) |> 
+  er_plot_add_quantiles() |> 
   plot()
 ```
 
 Declaring `response_type = "count"` swaps the t-interval approximation
-for an exact Poisson interval (bin mean plus [poisson_interval()]
-instead of [t_interval()]), which never produces a negative lower bound
+for an exact Poisson interval (bin mean plus [ci_poisson()]
+instead of [ci_t()]), which never produces a negative lower bound
 -- useful for low-count bins, where the t-interval approximation can. For
 `erglm_data`'s own `ae_count`, none of the bin means are low enough for
 this to actually happen, so the two plots above would look almost
@@ -127,8 +127,8 @@ zero -- a nonsensical negative event rate:
 ```{r count-1}
 low_count_data |> 
   er_plot(aucss, ae_count) |> 
-  er_plot_show_model(mod_low_count) |> 
-  er_plot_show_quantiles() |> 
+  er_plot_add_model(mod_low_count) |> 
+  er_plot_add_quantiles() |> 
   plot() +
   ggplot2::coord_cartesian(ylim = c(-0.5, 1.5), xlim = c(-50, 800))
 ```
@@ -140,32 +140,32 @@ which stays non-negative:
 ```{r count-2}
 low_count_data |> 
   er_plot(aucss, ae_count, response_type = "count") |> 
-  er_plot_show_model(mod_low_count) |> 
-  er_plot_show_quantiles() |> 
+  er_plot_add_model(mod_low_count) |> 
+  er_plot_add_quantiles() |> 
   plot() +
   ggplot2::coord_cartesian(ylim = c(-0.5, 1.5), xlim = c(-50, 800))
 ```
 
 ## Data component
 
-`er_plot_show_data()` adds the raw observations at their true `(exposure,
-response)` coordinates via `build_data_overlay()`, the default and only
+`er_plot_add_data()` adds the raw observations at their true `(exposure,
+response)` coordinates via `er_builder_data_overlay()`, the default and only
 built-in builder for a count response -- no jitter is needed, since the
 response isn't confined to 0/1:
 
 ```{r data-overlay-count}
 erglm_data |> 
   er_plot(aucss, ae_count) |> 
-  er_plot_show_model(mod_poisson) |> 
-  er_plot_show_data() |> 
+  er_plot_add_model(mod_poisson) |> 
+  er_plot_add_data() |> 
   plot()
 ```
 
 There's no built-in panel-based alternative for a count response --
-`build_data_boxjitter()` (the older, panel-based responders/non-responders
-design covered in the [binary responses](plot-binary.html#build_data_overlay-vs--build_data_boxjitter)
+`er_builder_data_boxjitter()` (the older, panel-based responders/non-responders
+design covered in the [binary responses](plot-binary.html#er_builder_data_overlay-vs--er_builder_data_boxjitter)
 article) is binary-only. If you need a panel-based builder here, you can
-write a custom one and tag it with `er_layout(fn, "panel")` -- see
+write a custom one and tag it with `er_builder_layout(fn, "panel")` -- see
 `design.Rmd`'s "Extending erplots" section.
 
 ## Group component
@@ -174,15 +174,15 @@ The group layer doesn't look at `response_type` at all -- it only
 consumes the exposure variable -- so it works exactly the same way as for
 a binary response. See the
 [binary responses](plot-binary.html#group-component) article for
-multiple grouping variables and `build_group_violin()`; the default
+multiple grouping variables and `er_builder_group_violin()`; the default
 builder and a single grouping variable are shown here:
 
 ```{r group-1}
 erglm_data |> 
   er_plot(aucss, ae_count) |> 
-  er_plot_show_model(mod_poisson) |> 
-  er_plot_show_quantiles() |>
-  er_plot_show_groups(group_by = aucss) |> 
+  er_plot_add_model(mod_poisson) |> 
+  er_plot_add_quantiles() |>
+  er_plot_add_groups(group_by = aucss) |> 
   plot()
 ```
 

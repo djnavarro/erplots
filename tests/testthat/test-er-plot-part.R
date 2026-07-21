@@ -12,7 +12,7 @@ test_that(".part_model's corner_distance normalises y for a continuous response"
 
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change) |>
-    er_plot_show_model(er_test_mod_gaussian)
+    er_plot_add_model(er_test_mod_gaussian)
 
   cfg <- plt$part$model$config
   expect_true(all(cfg$corner_distance >= 0))
@@ -29,11 +29,11 @@ test_that(".part_model constructs the correct data structure", {
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
-  expect_no_error(plt1 |> er_plot_show_model(er_test_mod1))
-  expect_no_error(plt2 |> er_plot_show_model(mod2))
+  expect_no_error(plt1 |> er_plot_add_model(er_test_mod1))
+  expect_no_error(plt2 |> er_plot_add_model(mod2))
 
-  plt1 <- plt1 |> er_plot_show_model(er_test_mod1)
-  plt2 <- plt2 |> er_plot_show_model(mod2)
+  plt1 <- plt1 |> er_plot_add_model(er_test_mod1)
+  plt2 <- plt2 |> er_plot_add_model(mod2)
 
   expect_type(plt1$part$model, "list")
   expect_type(plt2$part$model, "list")
@@ -68,11 +68,11 @@ test_that(".part_quantile constructs the correct data structure", {
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
-  expect_no_error(plt1 |> er_plot_show_quantiles())
-  expect_no_error(plt2 |> er_plot_show_quantiles())
+  expect_no_error(plt1 |> er_plot_add_quantiles())
+  expect_no_error(plt2 |> er_plot_add_quantiles())
 
-  plt1 <- plt1 |> er_plot_show_quantiles()
-  plt2 <- plt2 |> er_plot_show_quantiles()
+  plt1 <- plt1 |> er_plot_add_quantiles()
+  plt2 <- plt2 |> er_plot_add_quantiles()
 
   expect_type(plt1$part$quantile, "list")
   expect_type(plt2$part$quantile, "list")
@@ -122,11 +122,11 @@ test_that(".part_quantile uses bin means and t-intervals for a continuous respon
   plt1 <- er_test_data |> er_plot(aucss, biomarker_change)
   plt2 <- er_test_data |> er_plot(aucss, biomarker_change, sex)
 
-  expect_no_error(plt1 |> er_plot_show_quantiles())
-  expect_no_error(plt2 |> er_plot_show_quantiles())
+  expect_no_error(plt1 |> er_plot_add_quantiles())
+  expect_no_error(plt2 |> er_plot_add_quantiles())
 
-  plt1 <- plt1 |> er_plot_show_quantiles()
-  plt2 <- plt2 |> er_plot_show_quantiles()
+  plt1 <- plt1 |> er_plot_add_quantiles()
+  plt2 <- plt2 |> er_plot_add_quantiles()
 
   smm1 <- plt1$part$quantile$config$summary
   smm2 <- plt2$part$quantile$config$summary
@@ -155,8 +155,8 @@ test_that(".part_quantile routes a count (Poisson) response through the continuo
   plt <- er_test_data |> er_plot(aucss, ae_count)
   expect_equal(plt$response$type, "continuous")
 
-  expect_no_error(plt |> er_plot_show_model(er_test_mod_poisson) |> er_plot_show_quantiles())
-  plt <- plt |> er_plot_show_model(er_test_mod_poisson) |> er_plot_show_quantiles()
+  expect_no_error(plt |> er_plot_add_model(er_test_mod_poisson) |> er_plot_add_quantiles())
+  plt <- plt |> er_plot_add_model(er_test_mod_poisson) |> er_plot_add_quantiles()
 
   smm <- plt$part$quantile$config$summary
   expect_named(smm, c(
@@ -177,8 +177,8 @@ test_that(".part_quantile uses an exact Poisson interval when response_type = \"
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
   expect_equal(plt$response$type, "count")
 
-  expect_no_error(plt |> er_plot_show_model(er_test_mod_poisson) |> er_plot_show_quantiles())
-  plt <- plt |> er_plot_show_model(er_test_mod_poisson) |> er_plot_show_quantiles()
+  expect_no_error(plt |> er_plot_add_model(er_test_mod_poisson) |> er_plot_add_quantiles())
+  plt <- plt |> er_plot_add_model(er_test_mod_poisson) |> er_plot_add_quantiles()
 
   smm <- plt$part$quantile$config$summary
   # same column shape as the continuous path (no n1/n0, no leftover
@@ -201,11 +201,11 @@ test_that(".part_data constructs the correct data structure", {
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
-  expect_no_error(plt1 |> er_plot_show_data(builder = build_data_boxjitter))
-  expect_no_error(plt2 |> er_plot_show_data(builder = build_data_boxjitter))
+  expect_no_error(plt1 |> er_plot_add_data(builder = er_builder_data_boxjitter))
+  expect_no_error(plt2 |> er_plot_add_data(builder = er_builder_data_boxjitter))
 
-  plt1 <- plt1 |> er_plot_show_data(builder = build_data_boxjitter)
-  plt2 <- plt2 |> er_plot_show_data(builder = build_data_boxjitter)
+  plt1 <- plt1 |> er_plot_add_data(builder = er_builder_data_boxjitter)
+  plt2 <- plt2 |> er_plot_add_data(builder = er_builder_data_boxjitter)
 
   expect_type(plt1$part$data, "list")
   expect_type(plt2$part$data, "list")
@@ -243,10 +243,10 @@ test_that(".part_data records a response-colored panel structure for a continuou
 
   # there's no built-in "panel"-layout builder for a continuous/count
   # response (the older `build_data_color()` was removed once
-  # `build_data_overlay()` covered its typical use case more simply --
+  # `er_builder_data_overlay()` covered its typical use case more simply --
   # see PLAN.md), but `.part_data()`'s response-type dispatch is still
   # general-purpose and exercised here via a minimal custom builder.
-  stub_panel_builder <- er_layout(
+  stub_panel_builder <- er_builder_layout(
     function(data, config, stratify, exposure, response, strata, style) list(),
     layout = "panel"
   )
@@ -254,11 +254,11 @@ test_that(".part_data records a response-colored panel structure for a continuou
   plt1 <- er_test_data |> er_plot(aucss, biomarker_change)
   plt2 <- er_test_data |> er_plot(aucss, biomarker_change, sex)
 
-  expect_no_error(plt1 |> er_plot_show_data(builder = stub_panel_builder))
-  expect_no_error(plt2 |> er_plot_show_data(builder = stub_panel_builder))
+  expect_no_error(plt1 |> er_plot_add_data(builder = stub_panel_builder))
+  expect_no_error(plt2 |> er_plot_add_data(builder = stub_panel_builder))
 
-  plt1 <- plt1 |> er_plot_show_data(builder = stub_panel_builder)
-  plt2 <- plt2 |> er_plot_show_data(builder = stub_panel_builder)
+  plt1 <- plt1 |> er_plot_add_data(builder = stub_panel_builder)
+  plt2 <- plt2 |> er_plot_add_data(builder = stub_panel_builder)
 
   cfg1 <- plt1$part$data$config
   cfg2 <- plt2$part$data$config
@@ -281,14 +281,14 @@ test_that(".part_data records a response-colored panel structure for a continuou
 test_that(".part_data records the same single-panel structure for a count response", {
   skip_if_not_installed("erglm")
 
-  stub_panel_builder <- er_layout(
+  stub_panel_builder <- er_builder_layout(
     function(data, config, stratify, exposure, response, strata, style) list(),
     layout = "panel"
   )
 
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_no_error(plt |> er_plot_show_data(builder = stub_panel_builder))
-  cfg <- (plt |> er_plot_show_data(builder = stub_panel_builder))$part$data$config
+  expect_no_error(plt |> er_plot_add_data(builder = stub_panel_builder))
+  cfg <- (plt |> er_plot_add_data(builder = stub_panel_builder))$part$data$config
   expect_identical(cfg$builder, stub_panel_builder)
   expect_equal(cfg$color_role, "response")
   expect_equal(cfg$panels, "data")
@@ -301,17 +301,17 @@ test_that(".part_group constructs the correct data structure", {
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
-  expect_no_error(plt1 |> er_plot_show_groups(aucss))
-  expect_no_error(plt2 |> er_plot_show_groups(aucss))
-  expect_no_error(plt1 |> er_plot_show_groups(weight))
-  expect_no_error(plt2 |> er_plot_show_groups(weight))
-  expect_no_error(plt1 |> er_plot_show_groups(sex))
+  expect_no_error(plt1 |> er_plot_add_groups(aucss))
+  expect_no_error(plt2 |> er_plot_add_groups(aucss))
+  expect_no_error(plt1 |> er_plot_add_groups(weight))
+  expect_no_error(plt2 |> er_plot_add_groups(weight))
+  expect_no_error(plt1 |> er_plot_add_groups(sex))
 
-  plt1a <- plt1 |> er_plot_show_groups(aucss)
-  plt2a <- plt2 |> er_plot_show_groups(aucss)
-  plt1w <- plt1 |> er_plot_show_groups(weight)
-  plt2w <- plt2 |> er_plot_show_groups(weight)
-  plt1s <- plt1 |> er_plot_show_groups(sex)
+  plt1a <- plt1 |> er_plot_add_groups(aucss)
+  plt2a <- plt2 |> er_plot_add_groups(aucss)
+  plt1w <- plt1 |> er_plot_add_groups(weight)
+  plt2w <- plt2 |> er_plot_add_groups(weight)
+  plt1s <- plt1 |> er_plot_add_groups(sex)
 
   expect_type(plt1a$part$group, "list")
   expect_type(plt2a$part$group, "list")
@@ -376,13 +376,13 @@ test_that(".part_overlay constructs the correct data structure", {
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
   plt3 <- er_test_data |> er_plot(aucss, biomarker_change)
 
-  expect_no_error(plt1 |> er_plot_show_data())
-  expect_no_error(plt2 |> er_plot_show_data())
-  expect_no_error(plt3 |> er_plot_show_data())
+  expect_no_error(plt1 |> er_plot_add_data())
+  expect_no_error(plt2 |> er_plot_add_data())
+  expect_no_error(plt3 |> er_plot_add_data())
 
-  plt1 <- plt1 |> er_plot_show_data()
-  plt2 <- plt2 |> er_plot_show_data()
-  plt3 <- plt3 |> er_plot_show_data()
+  plt1 <- plt1 |> er_plot_add_data()
+  plt2 <- plt2 |> er_plot_add_data()
+  plt3 <- plt3 |> er_plot_add_data()
 
   expect_type(plt1$part$overlay, "list")
   expect_type(plt2$part$overlay, "list")
@@ -403,7 +403,7 @@ test_that(".part_overlay constructs the correct data structure", {
   cfg3 <- plt3$part$overlay$config
 
   expect_named(cfg1, c("seed", "response_type", "builder"))
-  expect_identical(cfg1$builder, build_data_overlay)
+  expect_identical(cfg1$builder, er_builder_data_overlay)
   expect_equal(cfg1$response_type, "binary")
   expect_equal(cfg3$response_type, "continuous")
 })

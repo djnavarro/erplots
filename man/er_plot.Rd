@@ -27,7 +27,7 @@ confined to \verb{\{0, 1\}}) and is summarised as an approximately-continuous
 quantity (bin mean plus a t-interval). \code{"auto"} never resolves to
 \code{"count"}: pass \code{response_type = "count"} explicitly for a genuine
 count response to instead get bin mean plus an \emph{exact} Poisson
-interval (see \code{\link[=poisson_interval]{poisson_interval()}}), which -- unlike the t-interval
+interval (see \code{\link[=ci_poisson]{ci_poisson()}}), which -- unlike the t-interval
 approximation -- never produces a negative lower bound. See
 \code{PLAN.md}'s design decision (4) for the rationale.}
 }
@@ -37,21 +37,21 @@ An (empty) plot object of class \code{er_plot}
 \description{
 \code{er_plot()} creates an (empty) plot object of S3 class \code{er_plot}. Build
 up a plot by piping it through one or more layer functions --
-\code{\link[=er_plot_show_model]{er_plot_show_model()}} (fitted-model curve/ribbon and summary),
-\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} (exposure-quantile-binned response summary),
-\code{\link[=er_plot_show_data]{er_plot_show_data()}} (raw observations, by default overlaid on the
+\code{\link[=er_plot_add_model]{er_plot_add_model()}} (fitted-model curve/ribbon and summary),
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} (exposure-quantile-binned response summary),
+\code{\link[=er_plot_add_data]{er_plot_add_data()}} (raw observations, by default overlaid on the
 model panel), and/or
-\code{\link[=er_plot_show_groups]{er_plot_show_groups()}} (grouped exposure-distribution panels) -- then
+\code{\link[=er_plot_add_groups]{er_plot_add_groups()}} (grouped exposure-distribution panels) -- then
 render with \code{plot()}/\code{print()}, or build the ggplot2/patchwork objects
 directly with \code{\link[=er_plot_build]{er_plot_build()}}. \code{er_plot()} never fits a model itself;
 any model implementing the small interface in \link{er_model_interface} can
-be passed to \code{\link[=er_plot_show_model]{er_plot_show_model()}}.
+be passed to \code{\link[=er_plot_add_model]{er_plot_add_model()}}.
 }
 \section{Layers are either singleton or additive}{
-\code{\link[=er_plot_show_model]{er_plot_show_model()}}, \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}, and
-\code{\link[=er_plot_show_data]{er_plot_show_data()}} are \strong{singleton}: calling one of them twice
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, and
+\code{\link[=er_plot_add_data]{er_plot_add_data()}} are \strong{singleton}: calling one of them twice
 on the same object overwrites the first call's result rather than
-combining the two. \code{\link[=er_plot_show_groups]{er_plot_show_groups()}} is \strong{additive}: each call
+combining the two. \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} is \strong{additive}: each call
 adds another grouped-distribution panel alongside any already added,
 rather than replacing them. This asymmetry is deliberate, not
 accidental -- there is only one "the model" and one "the quantile
@@ -69,7 +69,7 @@ discrete variable used to split layers by color/fill, with one shared,
 deduplicated legend across the whole composed plot. Each layer
 function's \code{keep_strata} argument controls whether \emph{that} layer
 actually uses the stratification (it defaults to \code{TRUE} whenever
-\code{stratify_by} was set, \code{FALSE} otherwise). \code{\link[=er_plot_show_data]{er_plot_show_data()}} is a
+\code{stratify_by} was set, \code{FALSE} otherwise). \code{\link[=er_plot_add_data]{er_plot_add_data()}} is a
 partial exception to the "always color/fill" rule for a
 continuous/count response: its color aesthetic is already spoken for
 by the response value itself, so stratification falls back to one
@@ -81,8 +81,8 @@ takes precedence" rule this follows.
 \section{Response type}{
 \code{response_type} (set once, here in \code{er_plot()}) governs the response's
 scale (\code{object$response$limits}) and which summary/CI method
-\code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}} and \code{\link[=er_vpc_plot]{er_vpc_plot()}} use; see the
-\code{response_type} parameter below and \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}}'s own
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} and \code{\link[=er_vpc_plot]{er_vpc_plot()}} use; see the
+\code{response_type} parameter below and \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}'s own
 documentation for the specifics of each response type's summary
 statistic.
 }
@@ -94,15 +94,15 @@ mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_show_model(mod) |>
-  er_plot_show_quantiles() |>
-  er_plot_show_groups(aucss) |>
+  er_plot_add_model(mod) |>
+  er_plot_add_quantiles() |>
+  er_plot_add_groups(aucss) |>
   plot()
 }
 
 }
 \seealso{
-\code{\link[=er_plot_show_model]{er_plot_show_model()}}, \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}},
-\code{\link[=er_plot_show_data]{er_plot_show_data()}}, \code{\link[=er_plot_show_groups]{er_plot_show_groups()}},
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}},
+\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}},
 \code{\link[=er_plot_build]{er_plot_build()}}, \code{\link[=er_plot_style]{er_plot_style()}}, \link{er_model_interface}
 }

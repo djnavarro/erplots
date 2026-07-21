@@ -46,7 +46,7 @@ The default method returns \code{NULL}.
 \code{erplots} draws exposure-response plots from \emph{any} fitted model that
 implements this small interface, rather than assuming a particular model
 class (e.g. a logistic regression \code{glm}). To make a model usable with
-\code{\link[=er_plot_show_model]{er_plot_show_model()}} and friends, implement at least a method for
+\code{\link[=er_plot_add_model]{er_plot_add_model()}} and friends, implement at least a method for
 \code{\link[=er_predict]{er_predict()}}. Implementing \code{\link[=er_simulate]{er_simulate()}} additionally enables
 simulation-based visualisations (e.g. spaghetti plots, VPCs); implementing
 \code{\link[=er_summary]{er_summary()}} enables annotations such as p-value labels.

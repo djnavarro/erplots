@@ -9,11 +9,11 @@
 #' @param strata Stratification variable
 #' @param style Style components
 #'
-#' @details Builders for the `model` layer ([er_plot_show_model()]), which
+#' @details Builders for the `model` layer ([er_plot_add_model()]), which
 #' draws the fitted curve (and, where applicable, its uncertainty) over
-#' the exposure range: `build_model_ribbonline()` (ribbon plus line, the
-#' default), `build_model_line()` (line only, no ribbon), and
-#' `build_model_spaghetti()` (a spaghetti plot of simulated draws, for
+#' the exposure range: `er_builder_model_ribbonline()` (ribbon plus line, the
+#' default), `er_builder_model_line()` (line only, no ribbon), and
+#' `er_builder_model_spaghetti()` (a spaghetti plot of simulated draws, for
 #' models that implement [er_simulate()]).
 #'
 #' See [er_partial()] for the shared builder interface these functions
@@ -21,13 +21,13 @@
 #'
 #' @returns A geom, or a list of geoms; see [er_partial()].
 #'
-#' @name build_model
+#' @name er_builder_model
 #' @seealso [er_partial()]
 NULL
 
-#' @rdname build_model
+#' @rdname er_builder_model
 #' @export
-build_model_ribbonline <- function(data, config, stratify, exposure, response, strata, style) {
+er_builder_model_ribbonline <- function(data, config, stratify, exposure, response, strata, style) {
 
   if (stratify == FALSE) {
 
@@ -87,9 +87,9 @@ build_model_ribbonline <- function(data, config, stratify, exposure, response, s
 
 
 
-#' @rdname build_model
+#' @rdname er_builder_model
 #' @export
-build_model_line <- function(data, config, stratify, exposure, response, strata, style) {
+er_builder_model_line <- function(data, config, stratify, exposure, response, strata, style) {
 
   if (stratify == FALSE) {
 
@@ -123,9 +123,9 @@ build_model_line <- function(data, config, stratify, exposure, response, strata,
 }
 
 
-#' @rdname build_model
+#' @rdname er_builder_model
 #' @export
-build_model_spaghetti <- function(data, config, stratify, exposure, response, strata, style) {
+er_builder_model_spaghetti <- function(data, config, stratify, exposure, response, strata, style) {
 
   newdata <- config$predictions |> 
     dplyr::select(dplyr::all_of(c(exposure$name, strata$name))) |> 
@@ -139,7 +139,7 @@ build_model_spaghetti <- function(data, config, stratify, exposure, response, st
       paste(class(config$model), collapse = "/"),
       ">; falling back to `style = \"ribbonline\"`."
     ))
-    return(build_model_ribbonline(data, config, stratify, exposure, response, strata, style))
+    return(er_builder_model_ribbonline(data, config, stratify, exposure, response, strata, style))
   }
 
   if (stratify == FALSE) {
