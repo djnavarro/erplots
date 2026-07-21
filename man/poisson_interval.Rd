@@ -26,7 +26,7 @@ is 0, the lower bound is 0 (there's no gamma quantile at \code{shape = 0}).
 Exact Poisson confidence interval for a count rate
 }
 \details{
-The count-response analogue of \code{\link[=clopper_pearson]{clopper_pearson()}}, used by
+The count-response analogue of \code{\link[=clopper_pearson_interval]{clopper_pearson_interval()}}, used by
 the quantile-binned summary layer (see \code{\link[=er_plot_show_quantiles]{er_plot_show_quantiles()}})
 and \code{\link[=er_vpc_plot]{er_vpc_plot()}} when \code{response_type = "count"} is explicitly
 declared. Unlike \code{\link[=t_interval]{t_interval()}} (the default, opt-in-required

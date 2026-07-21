@@ -23,7 +23,7 @@ reference:
 - title: Other
   desc: Other functions and objects
 - contents:
-  - clopper_pearson
+  - clopper_pearson_interval
   - cut_quantile
   - poisson_interval
   - t_interval

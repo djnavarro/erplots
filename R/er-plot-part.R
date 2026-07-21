@@ -107,8 +107,8 @@
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = n1 / (n0 + n1),
         y_mid_lbl = object$style$format_percent(n1 / (n0 + n1)),
-        ci_lower = clopper_pearson(n1, n0 + n1, config$conf_level)["lower"], 
-        ci_upper = clopper_pearson(n1, n0 + n1, config$conf_level)["upper"],
+        ci_lower = clopper_pearson_interval(n1, n0 + n1, config$conf_level)["lower"], 
+        ci_upper = clopper_pearson_interval(n1, n0 + n1, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
       )
   } else if (object$response$type == "count") {

@@ -112,8 +112,8 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
         n1 = sum(.data[[rsp_var]] == 1, na.rm = TRUE),
         n0 = sum(.data[[rsp_var]] == 0, na.rm = TRUE),
         y_mid = n1 / (n0 + n1),
-        ci_lower = clopper_pearson(n1, n0 + n1, conf_level)["lower"], 
-        ci_upper = clopper_pearson(n1, n0 + n1, conf_level)["upper"], 
+        ci_lower = clopper_pearson_interval(n1, n0 + n1, conf_level)["lower"], 
+        ci_upper = clopper_pearson_interval(n1, n0 + n1, conf_level)["upper"], 
         .by = c("Source", dplyr::all_of(grp_var))
       ) |> 
       dplyr::select(-n1, -n0)

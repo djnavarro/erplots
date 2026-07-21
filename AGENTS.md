@@ -160,7 +160,7 @@ both deferred along with `build_data_color()`'s removal).
 - `R/er-vpc.R` -- `er_vpc_plot()`, a model-agnostic VPC-style plot
   operating on plain observed/simulated data frames.
 - `R/utils-helpers.R`, `R/utils-global.R` -- small internal helpers
-  (including the binary-response-only `clopper_pearson()`,
+  (including the binary-response-only `clopper_pearson_interval()`,
   `t_interval()`, `poisson_interval()`, `cut_quantile()`,
   `cut_exposure_quantile()`, and the response-type detector
   `.detect_response_type()`) and `globalVariables()` declarations for

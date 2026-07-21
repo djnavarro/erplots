@@ -42,7 +42,7 @@ summarised with a point estimate and confidence interval. Which
 summary/CI method is used dispatches on the plot's \code{response_type}
 (set in \code{\link[=er_plot]{er_plot()}}):
 \itemize{
-\item \code{"binary"} -- response \emph{rate}, with a Clopper-Pearson interval (see \code{\link[=clopper_pearson]{clopper_pearson()}})
+\item \code{"binary"} -- response \emph{rate}, with a Clopper-Pearson interval (see \code{\link[=clopper_pearson_interval]{clopper_pearson_interval()}})
 \item \code{"continuous"} -- bin \emph{mean}, with a t-interval (see \code{\link[=t_interval]{t_interval()}})
 \item \code{"count"} -- bin \emph{mean}, with an exact Poisson interval (see \code{\link[=poisson_interval]{poisson_interval()}})
 }

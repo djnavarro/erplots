@@ -309,7 +309,7 @@ er_plot_show_model <- function(object, model, keep_strata = NULL,
 #' summarised with a point estimate and confidence interval. Which
 #' summary/CI method is used dispatches on the plot's `response_type`
 #' (set in [er_plot()]):
-#' * `"binary"` -- response *rate*, with a Clopper-Pearson interval (see [clopper_pearson()])
+#' * `"binary"` -- response *rate*, with a Clopper-Pearson interval (see [clopper_pearson_interval()])
 #' * `"continuous"` -- bin *mean*, with a t-interval (see [t_interval()])
 #' * `"count"` -- bin *mean*, with an exact Poisson interval (see [poisson_interval()])
 #'

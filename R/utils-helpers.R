@@ -24,9 +24,9 @@
 #'
 #' @export
 #' @examples
-#' clopper_pearson(1, 10)
+#' clopper_pearson_interval(1, 10)
 #' 
-clopper_pearson <- function(x, n, conf_level = 0.95) {
+clopper_pearson_interval <- function(x, n, conf_level = 0.95) {
   alpha <- 1 - conf_level
   lower <- if (x > 0) stats::qbeta(alpha/2, x, n - x + 1) else 0
   upper <- if (x < n) stats::qbeta(1 - alpha/2, x + 1, n - x) else 1
@@ -50,7 +50,7 @@ clopper_pearson <- function(x, n, conf_level = 0.95) {
 #'   [er_plot_show_quantiles()]) and `er_vpc_plot()` to compute a
 #'   confidence interval for the mean response within an exposure bin, for
 #'   continuous (and, as an approximation, count) responses. This is the
-#'   continuous-response analogue of [clopper_pearson()]. `NA`s in `x` are
+#'   continuous-response analogue of [clopper_pearson_interval()]. `NA`s in `x` are
 #'   dropped before computing the interval.
 #'
 #' @export
@@ -91,7 +91,7 @@ t_interval <- function(x, conf_level = 0.95) {
 #'   is 0, the lower bound is 0 (there's no gamma quantile at `shape =
 #'   0`).
 #'
-#' @details The count-response analogue of [clopper_pearson()], used by
+#' @details The count-response analogue of [clopper_pearson_interval()], used by
 #'   the quantile-binned summary layer (see [er_plot_show_quantiles()])
 #'   and [er_vpc_plot()] when `response_type = "count"` is explicitly
 #'   declared. Unlike [t_interval()] (the default, opt-in-required
