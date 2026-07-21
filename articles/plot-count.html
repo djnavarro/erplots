@@ -105,8 +105,8 @@ continuous response is (bin mean plus t-interval) unless you declare
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/basic-plot-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
@@ -124,9 +124,9 @@ specific components with <code>keep_strata = FALSE</code>.</p>
 <span></span>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_poisson_sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson_sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/stratification-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
@@ -136,13 +136,13 @@ specific components with <code>keep_strata = FALSE</code>.</p>
 <p>The model layer doesn’t look at <code>response_type</code> at all –
 it only consumes [er_predict()]/[er_simulate()] output – so it works
 exactly the same way as for a binary response. See the <a href="plot-binary.html#model-component">binary responses</a> article for
-<code><a href="../reference/build_model.html">build_model_spaghetti()</a></code>; the default builder is used
+<code><a href="../reference/er_builder_model.html">er_builder_model_spaghetti()</a></code>; the default builder is used
 here:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/model-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
@@ -154,14 +154,14 @@ continuous response is – bin mean plus t-interval:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/quantile-1-1.png" class="r-plt" alt="" width="700"></p>
 <p>Declaring <code>response_type = "count"</code> swaps the t-interval
 approximation for an exact Poisson interval (bin mean plus
-[poisson_interval()] instead of [t_interval()]), which never produces a
-negative lower bound – useful for low-count bins, where the t-interval
+[ci_poisson()] instead of [ci_t()]), which never produces a negative
+lower bound – useful for low-count bins, where the t-interval
 approximation can. For <code>erglm_data</code>’s own
 <code>ae_count</code>, none of the bin means are low enough for this to
 actually happen, so the two plots above would look almost identical if
@@ -187,8 +187,8 @@ below zero – a nonsensical negative event rate:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">low_count_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_low_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_low_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">1.5</span><span class="op">)</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">50</span>, <span class="fl">800</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/count-1-1.png" class="r-plt" alt="" width="700"></p>
@@ -201,8 +201,8 @@ Poisson interval, which stays non-negative:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">low_count_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span>, response_type <span class="op">=</span> <span class="st">"count"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_low_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_low_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">1.5</span><span class="op">)</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">50</span>, <span class="fl">800</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/count-2-1.png" class="r-plt" alt="" width="700"></p>
@@ -213,25 +213,25 @@ Poisson interval, which stays non-negative:</p>
 <div class="section level2">
 <h2 id="data-component">Data component<a class="anchor" aria-label="anchor" href="#data-component"></a>
 </h2>
-<p><code><a href="../reference/er_plot_show_data.html">er_plot_show_data()</a></code> adds the raw observations at their
+<p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> adds the raw observations at their
 true <code>(exposure, response)</code> coordinates via
-<code><a href="../reference/build_data.html">build_data_overlay()</a></code>, the default and only built-in builder
-for a count response – no jitter is needed, since the response isn’t
-confined to 0/1:</p>
+<code><a href="../reference/er_builder_data.html">er_builder_data_overlay()</a></code>, the default and only built-in
+builder for a count response – no jitter is needed, since the response
+isn’t confined to 0/1:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/data-overlay-count-1.png" class="r-plt" alt="" width="700"></p>
 <p>There’s no built-in panel-based alternative for a count response –
-<code><a href="../reference/build_data.html">build_data_boxjitter()</a></code> (the older, panel-based
-responders/non-responders design covered in the <a href="plot-binary.html#build_data_overlay-vs--build_data_boxjitter">binary
+<code><a href="../reference/er_builder_data.html">er_builder_data_boxjitter()</a></code> (the older, panel-based
+responders/non-responders design covered in the <a href="plot-binary.html#er_builder_data_overlay-vs--er_builder_data_boxjitter">binary
 responses</a> article) is binary-only. If you need a panel-based builder
 here, you can write a custom one and tag it with
-<code>er_layout(fn, "panel")</code> – see <code>design.Rmd</code>’s
-“Extending erplots” section.</p>
+<code>er_builder_layout(fn, "panel")</code> – see
+<code>design.Rmd</code>’s “Extending erplots” section.</p>
 </div>
 <div class="section level2">
 <h2 id="group-component">Group component<a class="anchor" aria-label="anchor" href="#group-component"></a>
@@ -239,14 +239,14 @@ here, you can write a custom one and tag it with
 <p>The group layer doesn’t look at <code>response_type</code> at all –
 it only consumes the exposure variable – so it works exactly the same
 way as for a binary response. See the <a href="plot-binary.html#group-component">binary responses</a> article for
-multiple grouping variables and <code><a href="../reference/build_group.html">build_group_violin()</a></code>; the
-default builder and a single grouping variable are shown here:</p>
+multiple grouping variables and <code><a href="../reference/er_builder_group.html">er_builder_group_violin()</a></code>;
+the default builder and a single grouping variable are shown here:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_groups.html">er_plot_show_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/group-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>

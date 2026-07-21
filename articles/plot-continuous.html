@@ -102,8 +102,8 @@ you can override the detection with <code>response_type</code>.
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-continuous_files/figure-html/basic-plot-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
@@ -121,9 +121,9 @@ specific components with <code>keep_strata = FALSE</code>.</p>
 <span></span>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_gaussian_sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_gaussian_sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-continuous_files/figure-html/stratification-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
@@ -133,13 +133,13 @@ specific components with <code>keep_strata = FALSE</code>.</p>
 <p>The model layer doesn’t look at <code>response_type</code> at all –
 it only consumes [er_predict()]/[er_simulate()] output – so it works
 exactly the same way as for a binary response. See the <a href="plot-binary.html#model-component">binary responses</a> article for
-<code><a href="../reference/build_model.html">build_model_spaghetti()</a></code> and the parameter-uncertainty
+<code><a href="../reference/er_builder_model.html">er_builder_model_spaghetti()</a></code> and the parameter-uncertainty
 rationale behind it; the default builder is used here:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-continuous_files/figure-html/model-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
@@ -152,8 +152,8 @@ than a rate with a Clopper-Pearson interval:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">6</span>, conf_level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">6</span>, conf_level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-continuous_files/figure-html/quantile-1-1.png" class="r-plt" alt="" width="700"></p>
 <p>The t-interval is a reasonable default for a genuinely continuous
@@ -165,24 +165,24 @@ t-interval approximation can misbehave (a negative lower bound), and the
 <div class="section level2">
 <h2 id="data-component">Data component<a class="anchor" aria-label="anchor" href="#data-component"></a>
 </h2>
-<p><code><a href="../reference/er_plot_show_data.html">er_plot_show_data()</a></code> adds the raw observations at their
+<p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> adds the raw observations at their
 true <code>(exposure, response)</code> coordinates via
-<code><a href="../reference/build_data.html">build_data_overlay()</a></code>, the default and only built-in builder
-for a continuous response – no jitter is needed, since the response
-isn’t confined to 0/1:</p>
+<code><a href="../reference/er_builder_data.html">er_builder_data_overlay()</a></code>, the default and only built-in
+builder for a continuous response – no jitter is needed, since the
+response isn’t confined to 0/1:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_data.html">er_plot_show_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-continuous_files/figure-html/data-overlay-continuous-1.png" class="r-plt" alt="" width="700"></p>
 <p>There’s no built-in panel-based alternative for a continuous response
-– <code><a href="../reference/build_data.html">build_data_boxjitter()</a></code> (the older, panel-based
-responders/non-responders design covered in the <a href="plot-binary.html#build_data_overlay-vs--build_data_boxjitter">binary
+– <code><a href="../reference/er_builder_data.html">er_builder_data_boxjitter()</a></code> (the older, panel-based
+responders/non-responders design covered in the <a href="plot-binary.html#er_builder_data_overlay-vs--er_builder_data_boxjitter">binary
 responses</a> article) is binary-only. If you need a panel-based builder
 here (e.g. a single color-encoded panel), you can write a custom one and
-tag it with <code>er_layout(fn, "panel")</code> – see
+tag it with <code>er_builder_layout(fn, "panel")</code> – see
 <code>design.Rmd</code>’s “Extending erplots” section.</p>
 </div>
 <div class="section level2">
@@ -191,14 +191,14 @@ tag it with <code>er_layout(fn, "panel")</code> – see
 <p>The group layer doesn’t look at <code>response_type</code> at all –
 it only consumes the exposure variable – so it works exactly the same
 way as for a binary response. See the <a href="plot-binary.html#group-component">binary responses</a> article for
-multiple grouping variables and <code><a href="../reference/build_group.html">build_group_violin()</a></code>; the
-default builder and a single grouping variable are shown here:</p>
+multiple grouping variables and <code><a href="../reference/er_builder_group.html">er_builder_group_violin()</a></code>;
+the default builder and a single grouping variable are shown here:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_model.html">er_plot_show_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_quantiles.html">er_plot_show_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_show_groups.html">er_plot_show_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-continuous_files/figure-html/group-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>

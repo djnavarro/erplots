@@ -7,7 +7,7 @@ erplots never fits a model itself. Instead, you fit a model with
 whatever package suits your workflow
 (e.g. [erglm](https://github.com/djnavarro/erglm) for logistic
 regression), and pass the fitted object to
-[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md).
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md).
 Any model that implements
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 can be visualised; implementing
@@ -38,9 +38,9 @@ mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 
 erglm_data |> 
   er_plot(aucss, ae1) |> 
-  er_plot_show_model(mod) |> 
-  er_plot_show_quantiles() |> 
-  er_plot_show_groups(aucss) |> 
+  er_plot_add_model(mod) |> 
+  er_plot_add_quantiles() |> 
+  er_plot_add_groups(aucss) |> 
   plot()
 ```
 
@@ -56,10 +56,10 @@ plt <- erglm_data |>
    er_plot(aucss, ae2, stratify_by = sex) |> 
    # keep_strata = FALSE needs a model without the stratification
    # variable as a term, so we pass `mod2_marginal` here
-   er_plot_show_model(mod2_marginal, keep_strata = FALSE) |> 
-   er_plot_show_quantiles(bins = 3) |> 
-   er_plot_show_data() |> 
-   er_plot_show_groups(group_by = c(aucss, treatment), keep_strata = FALSE)
+   er_plot_add_model(mod2_marginal, keep_strata = FALSE) |> 
+   er_plot_add_quantiles(bins = 3) |> 
+   er_plot_add_data() |> 
+   er_plot_add_groups(group_by = c(aucss, treatment), keep_strata = FALSE)
 
 print(plt)
 #> <er_plot>

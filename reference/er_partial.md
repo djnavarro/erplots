@@ -41,7 +41,7 @@ has the base theme applied. For "model", "summary", "quantile", and
 "overlay", the pieces will be added to a plot that already has a coord
 that sets the axis limits (the base plot; see `.build_overlay_geoms()`).
 For the "data" (panel-based, e.g.
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md))
+[`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md))
 and "group" plots, the plot object does not yet have a coord. The
 expectation, however, is that the builder will supply an x-axis limit
 that is consistent with the base plot. That is, since all component
@@ -50,35 +50,35 @@ values stored in `exposure$limits` tp set the x-axis limits.
 
 ## Details
 
-This page documents the shared interface all `build_*()` partial
+This page documents the shared interface all `er_builder_*()` partial
 builders implement. The builders themselves are documented on their own
 family-specific pages, one per layer:
 
-- [`build_model()`](https://erplots.djnavarro.net/reference/build_model.md)
+- [`er_builder_model()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
   – the `model` layer
-  ([`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md))
+  ([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md))
 
-- [`build_summary()`](https://erplots.djnavarro.net/reference/build_summary.md)
+- [`er_builder_summary()`](https://erplots.djnavarro.net/reference/er_builder_summary.md)
   – the `summary_builder` argument of
-  [`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
+  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 
-- [`build_quantile()`](https://erplots.djnavarro.net/reference/build_quantile.md)
+- [`er_builder_quantile()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
   – the `quantile` layer
-  ([`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md))
+  ([`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md))
 
-- [`build_data()`](https://erplots.djnavarro.net/reference/build_data.md)
+- [`er_builder_data()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
   – the `data` layer
-  ([`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md))
+  ([`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md))
 
-- [`build_group()`](https://erplots.djnavarro.net/reference/build_group.md)
+- [`er_builder_group()`](https://erplots.djnavarro.net/reference/er_builder_group.md)
   – the `group` layer
-  ([`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md))
+  ([`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md))
 
 Arguments are standardised to allow users to write their own as needed
 
 ## Writing your own builder
 
-Every `build_*()` function above shares the signature documented in
+Every `er_builder_*()` function above shares the signature documented in
 `@param`s, and that signature is a public part of the API, not an
 implementation detail: any function
 `function(data, config, stratify, exposure, response, strata, style)`
@@ -89,33 +89,33 @@ density instead of a scatter for the data overlay, per-panel histograms
 instead of jittered points for the panel-based data layer, or a
 `geom_crossbar()` instead of a `geom_errorbar()`/`geom_pointrange()` for
 the quantile summary.
-([`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/build_quantile.md)
+([`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
 started life as exactly this kind of custom builder – it was promoted to
 a built-in option once it proved to be a natural, low-risk alternative
 to
-[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/build_quantile.md),
+[`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md),
 with no new config requirements.)
 
 Each `er_plot_show_*()` function takes a `builder` argument (and
-[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 additionally takes `summary_builder`) that defaults to one built-in
-`build_*()` function and can be set to any other – built-in or custom –
-matching the standard signature, with no string-based `style` argument
-in between: a custom builder can be plugged in without forking the
-package or reaching into `object$part` internals. For the data layer
+`er_builder_*()` function and can be set to any other – built-in or
+custom – matching the standard signature, with no string-based `style`
+argument in between: a custom builder can be plugged in without forking
+the package or reaching into `object$part` internals. For the data layer
 specifically, `builder` also has to declare which *structural* family it
 belongs to – a single call merged into the main panel, or one or more
 panels stacked below the base plot – via
-[`er_layout()`](https://erplots.djnavarro.net/reference/er_layout.md),
+[`er_builder_layout()`](https://erplots.djnavarro.net/reference/er_builder_layout.md),
 since
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 reads that tag off `builder` to decide how to assemble the layer; the
 other three layers have only one structural call site, so no such
 tagging is needed there. See the `@examples` on
-[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md),
-[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md),
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 and
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 for worked custom builders (a dashed model curve, a quantile crossbar,
 and a data-overlay density, respectively).
 
@@ -131,10 +131,10 @@ All of the builders above feed a **singleton** layer: `model`,
 slot (`object$part$model`, `object$part$data`, etc.), so calling the
 corresponding `er_plot_show_*()` function again overwrites the slot
 rather than combining builders. `group`
-([`build_group_boxplot()`](https://erplots.djnavarro.net/reference/build_group.md)/
-[`build_group_violin()`](https://erplots.djnavarro.net/reference/build_group.md))
+([`er_builder_group_boxplot()`](https://erplots.djnavarro.net/reference/er_builder_group.md)/
+[`er_builder_group_violin()`](https://erplots.djnavarro.net/reference/er_builder_group.md))
 is the one **additive** exception – each call to
-[`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
+[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
 adds another named entry rather than replacing the previous one. See
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
 "Layers are either singleton or additive" section for the full
@@ -142,7 +142,7 @@ discussion, including the one flagged future exception (an additive
 `model` layer, for overlaying two fitted curves).
 
 The `data` slot's default,
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md),
+[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md),
 needs no `color_role` tag: its color aesthetic (when stratified) is
 always strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. `config$color_role`
@@ -150,22 +150,22 @@ shares the base plot's own strata legend directly. `config$color_role`
 `.polish_legends()` in `R/er-plot-compose.R`) matters for the
 "panel"-layout family instead, where it's `"strata"` for a binary
 response (as used by the built-in
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md),
+[`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md),
 whose color aesthetic still means strata) or `"response"` for a
 continuous/count response, where the color channel is already spoken for
 by the response value itself – there's no built-in "panel"-layout
 builder for that case (the older `build_data_color()` was removed once
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
+[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
 covered its typical use case more simply), but a custom builder tagged
-`er_layout(builder, "panel")` can still opt into it; see
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+`er_builder_layout(builder, "panel")` can still opt into it; see
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 for the user-facing version of this rule.
 
 ## See also
 
-[`build_model()`](https://erplots.djnavarro.net/reference/build_model.md),
-[`build_summary()`](https://erplots.djnavarro.net/reference/build_summary.md),
-[`build_quantile()`](https://erplots.djnavarro.net/reference/build_quantile.md),
-[`build_data()`](https://erplots.djnavarro.net/reference/build_data.md),
-[`build_group()`](https://erplots.djnavarro.net/reference/build_group.md),
-[`er_layout()`](https://erplots.djnavarro.net/reference/er_layout.md)
+[`er_builder_model()`](https://erplots.djnavarro.net/reference/er_builder_model.md),
+[`er_builder_summary()`](https://erplots.djnavarro.net/reference/er_builder_summary.md),
+[`er_builder_quantile()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md),
+[`er_builder_data()`](https://erplots.djnavarro.net/reference/er_builder_data.md),
+[`er_builder_group()`](https://erplots.djnavarro.net/reference/er_builder_group.md),
+[`er_builder_layout()`](https://erplots.djnavarro.net/reference/er_builder_layout.md)

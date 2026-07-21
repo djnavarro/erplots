@@ -2,13 +2,13 @@
 
 `er_plot()` creates an (empty) plot object of S3 class `er_plot`. Build
 up a plot by piping it through one or more layer functions –
-[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 (fitted-model curve/ribbon and summary),
-[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md)
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 (exposure-quantile-binned response summary),
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 (raw observations, by default overlaid on the model panel), and/or
-[`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
+[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
 (grouped exposure-distribution panels) – then render with
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`print()`](https://rdrr.io/r/base/print.html),
 or build the ggplot2/patchwork objects directly with
@@ -17,7 +17,7 @@ or build the ggplot2/patchwork objects directly with
 interface in
 [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)
 can be passed to
-[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md).
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md).
 
 ## Usage
 
@@ -57,7 +57,7 @@ er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
   (bin mean plus a t-interval). `"auto"` never resolves to `"count"`:
   pass `response_type = "count"` explicitly for a genuine count response
   to instead get bin mean plus an *exact* Poisson interval (see
-  [`poisson_interval()`](https://erplots.djnavarro.net/reference/poisson_interval.md)),
+  [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)),
   which – unlike the t-interval approximation – never produces a
   negative lower bound. See `PLAN.md`'s design decision (4) for the
   rationale.
@@ -68,13 +68,13 @@ An (empty) plot object of class `er_plot`
 
 ## Layers are either singleton or additive
 
-[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md),
-[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md),
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 and
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 are **singleton**: calling one of them twice on the same object
 overwrites the first call's result rather than combining the two.
-[`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
+[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
 is **additive**: each call adds another grouped-distribution panel
 alongside any already added, rather than replacing them. This asymmetry
 is deliberate, not accidental – there is only one "the model" and one
@@ -93,7 +93,7 @@ deduplicated legend across the whole composed plot. Each layer
 function's `keep_strata` argument controls whether *that* layer actually
 uses the stratification (it defaults to `TRUE` whenever `stratify_by`
 was set, `FALSE` otherwise).
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 is a partial exception to the "always color/fill" rule for a
 continuous/count response: its color aesthetic is already spoken for by
 the response value itself, so stratification falls back to one panel per
@@ -105,20 +105,20 @@ this follows.
 
 `response_type` (set once, here in `er_plot()`) governs the response's
 scale (`object$response$limits`) and which summary/CI method
-[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md)
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 and
 [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
 use; see the `response_type` parameter below and
-[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md)'s
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)'s
 own documentation for the specifics of each response type's summary
 statistic.
 
 ## See also
 
-[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md),
-[`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md),
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md),
-[`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md),
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
+[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
 [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md),
 [`er_plot_style()`](https://erplots.djnavarro.net/reference/er_plot_style.md),
 [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)
@@ -132,9 +132,9 @@ mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_show_model(mod) |>
-  er_plot_show_quantiles() |>
-  er_plot_show_groups(aucss) |>
+  er_plot_add_model(mod) |>
+  er_plot_add_quantiles() |>
+  er_plot_add_groups(aucss) |>
   plot()
 } # }
 ```

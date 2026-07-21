@@ -91,7 +91,7 @@ which, at a minimum, already has the base theme applied. For
 "model", "summary", "quantile", and "overlay", the pieces will be
 added to a plot that already has a coord that sets the axis limits
 (the base plot; see <code>.build_overlay_geoms()</code>). For the "data"
-(panel-based, e.g. <code><a href="build_data.html">build_data_boxjitter()</a></code>) and "group" plots, the
+(panel-based, e.g. <code><a href="er_builder_data.html">er_builder_data_boxjitter()</a></code>) and "group" plots, the
 plot object does not yet have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That
 is, since all component plots use the exposure variable for the
@@ -100,13 +100,13 @@ set the x-axis limits.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This page documents the shared interface all <code>build_*()</code>
+    <p>This page documents the shared interface all <code>er_builder_*()</code>
 partial builders implement. The builders themselves are documented on
-their own family-specific pages, one per layer:</p><ul><li><p><code><a href="build_model.html">build_model()</a></code> – the <code>model</code> layer (<code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>)</p></li>
-<li><p><code><a href="build_summary.html">build_summary()</a></code> – the <code>summary_builder</code> argument of <code><a href="er_plot_show_model.html">er_plot_show_model()</a></code></p></li>
-<li><p><code><a href="build_quantile.html">build_quantile()</a></code> – the <code>quantile</code> layer (<code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>)</p></li>
-<li><p><code><a href="build_data.html">build_data()</a></code> – the <code>data</code> layer (<code><a href="er_plot_show_data.html">er_plot_show_data()</a></code>)</p></li>
-<li><p><code><a href="build_group.html">build_group()</a></code> – the <code>group</code> layer (<code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code>)</p></li>
+their own family-specific pages, one per layer:</p><ul><li><p><code><a href="er_builder_model.html">er_builder_model()</a></code> – the <code>model</code> layer (<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>)</p></li>
+<li><p><code><a href="er_builder_summary.html">er_builder_summary()</a></code> – the <code>summary_builder</code> argument of <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code></p></li>
+<li><p><code><a href="er_builder_quantile.html">er_builder_quantile()</a></code> – the <code>quantile</code> layer (<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>)</p></li>
+<li><p><code><a href="er_builder_data.html">er_builder_data()</a></code> – the <code>data</code> layer (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>)</p></li>
+<li><p><code><a href="er_builder_group.html">er_builder_group()</a></code> – the <code>group</code> layer (<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>)</p></li>
 </ul><p>Arguments are standardised to allow users to write their own
 as needed</p>
     </div>
@@ -115,7 +115,7 @@ as needed</p>
 
 
 
-<p>Every <code>build_*()</code> function above shares the signature documented in
+<p>Every <code>er_builder_*()</code> function above shares the signature documented in
 <code>@param</code>s, and that signature is a public part of the API, not an
 implementation detail: any function <code>function(data, config, stratify, exposure, response, strata, style)</code> that returns a geom or list of
 geoms can stand in for a built-in builder. This is the officially
@@ -124,24 +124,24 @@ supported way to draw a layer differently from any of the built-in
 data overlay, per-panel histograms instead of jittered points for the
 panel-based data layer, or a <code>geom_crossbar()</code> instead of a
 <code>geom_errorbar()</code>/<code>geom_pointrange()</code> for the quantile summary.
-(<code><a href="build_quantile.html">build_quantile_pointrange()</a></code> started life as exactly this kind of
+(<code><a href="er_builder_quantile.html">er_builder_quantile_pointrange()</a></code> started life as exactly this kind of
 custom builder – it was promoted to a built-in option once it proved
-to be a natural, low-risk alternative to <code><a href="build_quantile.html">build_quantile_errorbar()</a></code>,
+to be a natural, low-risk alternative to <code><a href="er_builder_quantile.html">er_builder_quantile_errorbar()</a></code>,
 with no new config requirements.)</p>
 <p>Each <code>er_plot_show_*()</code> function takes a <code>builder</code> argument (and
-<code><a href="er_plot_show_model.html">er_plot_show_model()</a></code> additionally takes <code>summary_builder</code>) that
-defaults to one built-in <code>build_*()</code> function and can be set to any
+<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> additionally takes <code>summary_builder</code>) that
+defaults to one built-in <code>er_builder_*()</code> function and can be set to any
 other – built-in or custom – matching the standard signature, with no
 string-based <code>style</code> argument in between: a custom builder can be
 plugged in without forking the package or reaching into <code>object$part</code>
 internals. For the data layer specifically, <code>builder</code> also has to
 declare which <em>structural</em> family it belongs to – a single call
 merged into the main panel, or one or more panels stacked below the
-base plot – via <code><a href="er_layout.html">er_layout()</a></code>, since <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> reads that
+base plot – via <code><a href="er_builder_layout.html">er_builder_layout()</a></code>, since <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> reads that
 tag off <code>builder</code> to decide how to assemble the layer; the other three
 layers have only one structural call site, so no such tagging is
-needed there. See the <code>@examples</code> on <code><a href="er_plot_show_model.html">er_plot_show_model()</a></code>,
-<code><a href="er_plot_show_quantiles.html">er_plot_show_quantiles()</a></code>, and <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> for worked
+needed there. See the <code>@examples</code> on <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>,
+<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, and <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for worked
 custom builders (a dashed model curve, a quantile crossbar, and a
 data-overlay density, respectively).</p>
 <p>A custom builder receives the same pre-computed <code>config</code> a built-in
@@ -154,33 +154,33 @@ turn that <code>config</code> into ggplot2 layers.</p>
 <code>summary</code>, <code>quantile</code>, <code>data</code>, and <code>overlay</code> each occupy a single named
 slot (<code>object$part$model</code>, <code>object$part$data</code>, etc.), so calling the
 corresponding <code>er_plot_show_*()</code> function again overwrites the slot
-rather than combining builders. <code>group</code> (<code><a href="build_group.html">build_group_boxplot()</a></code>/
-<code><a href="build_group.html">build_group_violin()</a></code>) is the one <strong>additive</strong> exception – each call
-to <code><a href="er_plot_show_groups.html">er_plot_show_groups()</a></code> adds another named entry rather than
+rather than combining builders. <code>group</code> (<code><a href="er_builder_group.html">er_builder_group_boxplot()</a></code>/
+<code><a href="er_builder_group.html">er_builder_group_violin()</a></code>) is the one <strong>additive</strong> exception – each call
+to <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> adds another named entry rather than
 replacing the previous one. See <code><a href="er_plot.html">er_plot()</a></code>'s "Layers are either
 singleton or additive" section for the full discussion, including the
 one flagged future exception (an additive <code>model</code> layer, for
 overlaying two fitted curves).</p>
-<p>The <code>data</code> slot's default, <code><a href="build_data.html">build_data_overlay()</a></code>, needs no
+<p>The <code>data</code> slot's default, <code><a href="er_builder_data.html">er_builder_data_overlay()</a></code>, needs no
 <code>color_role</code> tag: its color aesthetic (when stratified) is always
 strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. <code>config$color_role</code>
 (set by <code>.part_data()</code>, consulted by <code>.polish_labels()</code>/
 <code>.polish_legends()</code> in <code>R/er-plot-compose.R</code>) matters for the
 "panel"-layout family instead, where it's <code>"strata"</code> for a binary
-response (as used by the built-in <code><a href="build_data.html">build_data_boxjitter()</a></code>, whose
+response (as used by the built-in <code><a href="er_builder_data.html">er_builder_data_boxjitter()</a></code>, whose
 color aesthetic still means strata) or <code>"response"</code> for a
 continuous/count response, where the color channel is already spoken
 for by the response value itself – there's no built-in
 "panel"-layout builder for that case (the older <code>build_data_color()</code>
-was removed once <code><a href="build_data.html">build_data_overlay()</a></code> covered its typical use case
-more simply), but a custom builder tagged <code>er_layout(builder, "panel")</code> can still opt into it; see <code><a href="er_plot_show_data.html">er_plot_show_data()</a></code> for the
+was removed once <code><a href="er_builder_data.html">er_builder_data_overlay()</a></code> covered its typical use case
+more simply), but a custom builder tagged <code>er_builder_layout(builder, "panel")</code> can still opt into it; see <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for the
 user-facing version of this rule.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="build_model.html">build_model()</a></code>, <code><a href="build_summary.html">build_summary()</a></code>, <code><a href="build_quantile.html">build_quantile()</a></code>,
-<code><a href="build_data.html">build_data()</a></code>, <code><a href="build_group.html">build_group()</a></code>, <code><a href="er_layout.html">er_layout()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="er_builder_model.html">er_builder_model()</a></code>, <code><a href="er_builder_summary.html">er_builder_summary()</a></code>, <code><a href="er_builder_quantile.html">er_builder_quantile()</a></code>,
+<code><a href="er_builder_data.html">er_builder_data()</a></code>, <code><a href="er_builder_group.html">er_builder_group()</a></code>, <code><a href="er_builder_layout.html">er_builder_layout()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

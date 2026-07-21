@@ -3,7 +3,7 @@
 `erplots` draws exposure-response plots from *any* fitted model that
 implements this small interface, rather than assuming a particular model
 class (e.g. a logistic regression `glm`). To make a model usable with
-[`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 and friends, implement at least a method for `er_predict()`.
 Implementing `er_simulate()` additionally enables simulation-based
 visualisations (e.g. spaghetti plots, VPCs); implementing `er_summary()`

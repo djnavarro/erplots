@@ -32,8 +32,8 @@ in `{0, 1}`) or continuous, and you can override the detection with
 
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_quantiles() |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_quantiles() |> 
   plot()
 ```
 
@@ -55,9 +55,9 @@ mod_gaussian_sex <- erglm_model(
 
 erglm_data |> 
   er_plot(aucss, biomarker_change, stratify_by = sex) |> 
-  er_plot_show_model(mod_gaussian_sex) |> 
-  er_plot_show_quantiles() |> 
-  er_plot_show_data() |>
+  er_plot_add_model(mod_gaussian_sex) |> 
+  er_plot_add_quantiles() |> 
+  er_plot_add_data() |>
   plot()
 ```
 
@@ -70,7 +70,7 @@ consumes \[er_predict()\]/\[er_simulate()\] output – so it works exactly
 the same way as for a binary response. See the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#model-component)
 article for
-[`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/build_model.md)
+[`er_builder_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
 and the parameter-uncertainty rationale behind it; the default builder
 is used here:
 
@@ -78,8 +78,8 @@ is used here:
 
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_quantiles() |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_quantiles() |> 
   plot()
 ```
 
@@ -95,8 +95,8 @@ Clopper-Pearson interval:
 
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_quantiles(bins = 6, conf_level = .8) |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_quantiles(bins = 6, conf_level = .8) |> 
   plot()
 ```
 
@@ -111,10 +111,10 @@ can misbehave (a negative lower bound), and the
 
 ## Data component
 
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 adds the raw observations at their true `(exposure, response)`
 coordinates via
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md),
+[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md),
 the default and only built-in builder for a continuous response – no
 jitter is needed, since the response isn’t confined to 0/1:
 
@@ -122,22 +122,22 @@ jitter is needed, since the response isn’t confined to 0/1:
 
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_data() |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_data() |> 
   plot()
 ```
 
 ![](plot-continuous_files/figure-html/data-overlay-continuous-1.png)
 
 There’s no built-in panel-based alternative for a continuous response –
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
+[`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
 (the older, panel-based responders/non-responders design covered in the
 [binary
-responses](https://erplots.djnavarro.net/articles/plot-binary.html#build_data_overlay-vs--build_data_boxjitter)
+responses](https://erplots.djnavarro.net/articles/plot-binary.html#er_builder_data_overlay-vs--er_builder_data_boxjitter)
 article) is binary-only. If you need a panel-based builder here (e.g. a
 single color-encoded panel), you can write a custom one and tag it with
-`er_layout(fn, "panel")` – see `design.Rmd`’s “Extending erplots”
-section.
+`er_builder_layout(fn, "panel")` – see `design.Rmd`’s “Extending
+erplots” section.
 
 ## Group component
 
@@ -146,16 +146,16 @@ consumes the exposure variable – so it works exactly the same way as for
 a binary response. See the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#group-component)
 article for multiple grouping variables and
-[`build_group_violin()`](https://erplots.djnavarro.net/reference/build_group.md);
+[`er_builder_group_violin()`](https://erplots.djnavarro.net/reference/er_builder_group.md);
 the default builder and a single grouping variable are shown here:
 
 ``` r
 
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_quantiles() |>
-  er_plot_show_groups(group_by = aucss) |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_quantiles() |>
+  er_plot_add_groups(group_by = aucss) |> 
   plot()
 ```
 

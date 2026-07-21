@@ -8,16 +8,16 @@ Build exposure-response plots from any model that implements
 - [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) :
   The exposure-response plotting mini-language
 
-- [`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
+- [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
   : Add a fitted-model curve/ribbon layer
 
-- [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md)
+- [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
   : Add a quantile-binned response summary layer
 
-- [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+- [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
   : Add a raw-data layer
 
-- [`er_plot_show_groups()`](https://erplots.djnavarro.net/reference/er_plot_show_groups.md)
+- [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
   : Add a grouped exposure-distribution panel
 
 - [`er_plot_style()`](https://erplots.djnavarro.net/reference/er_plot_style.md)
@@ -37,25 +37,28 @@ plot
 
 - [`er_partial`](https://erplots.djnavarro.net/reference/er_partial.md)
   : Partial builders for exposure-response plots
-- [`er_layout()`](https://erplots.djnavarro.net/reference/er_layout.md)
+- [`er_builder_layout()`](https://erplots.djnavarro.net/reference/er_builder_layout.md)
   : Declare a data-layer builder's structural layout
-- [`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/build_model.md)
-  [`build_model_line()`](https://erplots.djnavarro.net/reference/build_model.md)
-  [`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/build_model.md)
+- [`er_builder_fill_role()`](https://erplots.djnavarro.net/reference/er_builder_role.md)
+  [`er_builder_y_role()`](https://erplots.djnavarro.net/reference/er_builder_role.md)
+  : Declare a builder's fill/y-axis role
+- [`er_builder_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
+  [`er_builder_model_line()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
+  [`er_builder_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
   : Model curve builders for exposure-response plots
-- [`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/build_summary.md)
+- [`er_builder_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_builder_summary.md)
   : Summary annotation builders for exposure-response plots
-- [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/build_quantile.md)
-  [`build_quantile_bar()`](https://erplots.djnavarro.net/reference/build_quantile.md)
-  [`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/build_quantile.md)
+- [`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
+  [`er_builder_quantile_bar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
+  [`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
   : Quantile summary builders for exposure-response plots
-- [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
-  [`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
-  [`build_data_hex()`](https://erplots.djnavarro.net/reference/build_data.md)
+- [`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+  [`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+  [`er_builder_data_hex()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
   : Data layer builders for exposure-response plots
-- [`build_group_boxplot()`](https://erplots.djnavarro.net/reference/build_group.md)
-  [`build_group_histogram()`](https://erplots.djnavarro.net/reference/build_group.md)
-  [`build_group_violin()`](https://erplots.djnavarro.net/reference/build_group.md)
+- [`er_builder_group_boxplot()`](https://erplots.djnavarro.net/reference/er_builder_group.md)
+  [`er_builder_group_histogram()`](https://erplots.djnavarro.net/reference/er_builder_group.md)
+  [`er_builder_group_violin()`](https://erplots.djnavarro.net/reference/er_builder_group.md)
   : Group panel builders for exposure-response plots
 
 ## Model interface
@@ -73,12 +76,12 @@ Other functions and objects
 
 - [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
   : Visual predictive check plot for an exposure-response model
-- [`clopper_pearson_interval()`](https://erplots.djnavarro.net/reference/clopper_pearson_interval.md)
+- [`ci_clopper_pearson()`](https://erplots.djnavarro.net/reference/ci_clopper_pearson.md)
   : Clopper-Pearson confidence interval for binary data
-- [`poisson_interval()`](https://erplots.djnavarro.net/reference/poisson_interval.md)
+- [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)
   : Exact Poisson confidence interval for a count rate
-- [`t_interval()`](https://erplots.djnavarro.net/reference/t_interval.md)
-  : t-interval confidence interval for the mean of continuous data
+- [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md) :
+  t-interval confidence interval for the mean of continuous data
 - [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   : Cut a continuous variable into quantiles

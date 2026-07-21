@@ -81,16 +81,16 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cut_quantile</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] Q1 Q3 Q1 Q2 Q3 Q4 Q1 Q2 Q2 Q2 Q1 Q4 Q4 Q1 Q3 Q1 Q1 Q2 Q3 Q1 Q3 Q3 Q1 Q4 Q4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [26] Q2 Q1 Q2 Q1 Q1 Q4 Q3 Q3 Q4 Q3 Q2 Q1 Q2 Q2 Q4 Q2 Q1 Q2 Q2 Q3 Q4 Q2 Q3 Q3 Q1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [51] Q4 Q2 Q2 Q2 Q2 Q3 Q1 Q4 Q1 Q3 Q4 Q1 Q4 Q2 Q1 Q1 Q4 Q3 Q3 Q1 Q1 Q3 Q4 Q3 Q4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [76] Q3 Q3 Q2 Q3 Q2 Q4 Q4 Q4 Q3 Q1 Q4 Q1 Q2 Q3 Q1 Q3 Q4 Q4 Q2 Q3 Q4 Q2 Q4 Q4 Q2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] Q3 Q3 Q1 Q4 Q4 Q2 Q1 Q2 Q1 Q1 Q4 Q3 Q3 Q4 Q2 Q2 Q1 Q2 Q2 Q4 Q2 Q1 Q2 Q2 Q3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [26] Q4 Q2 Q3 Q3 Q1 Q4 Q2 Q2 Q2 Q2 Q3 Q1 Q4 Q2 Q3 Q4 Q1 Q4 Q2 Q1 Q1 Q4 Q3 Q3 Q1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [51] Q1 Q3 Q4 Q3 Q4 Q3 Q3 Q2 Q3 Q2 Q4 Q4 Q4 Q3 Q1 Q4 Q1 Q2 Q3 Q2 Q3 Q4 Q4 Q2 Q3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [76] Q4 Q2 Q4 Q4 Q2 Q2 Q1 Q1 Q1 Q1 Q1 Q1 Q1 Q3 Q4 Q2 Q1 Q3 Q1 Q3 Q4 Q3 Q1 Q3 Q4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: Q1 Q2 Q3 Q4</span>
 <span class="r-in"><span><span class="fu">cut_exposure_quantile</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] Q4 Q2 Q4 Q1 Q3 Q3 Q4 Q2 Q1 Q2 Q3 Q3 Q4 Q4 Q2 Q4 Q2 Q1 Q2 Q3 Q2 Q2 Q4 Q3 Q4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [26] Q1 Q3 Q1 Q3 Q4 Q3 Q1 Q1 Q4 Q1 Q1 Q4 Q2 Q2 Q3 Q1 Q3 Q1 Q2 Q2 Q4 Q1 Q3 Q1 Q4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [51] Q3 Q1 Q1 Q1 Q1 Q2 Q4 Q4 Q2 Q1 Q3 Q3 Q3 Q2 Q4 Q3 Q3 Q1 Q2 Q4 Q4 Q2 Q4 Q1 Q4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [76] Q2 Q3 Q1 Q1 Q1 Q4 Q4 Q3 Q3 Q2 Q3 Q4 Q1 Q2 Q2 Q2 Q3 Q3 Q1 Q2 Q4 Q2 Q3 Q4 Q2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] Q2 Q2 Q4 Q3 Q4 Q1 Q3 Q1 Q3 Q4 Q3 Q1 Q1 Q4 Q1 Q1 Q4 Q2 Q2 Q3 Q1 Q3 Q1 Q2 Q2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [26] Q4 Q1 Q3 Q1 Q4 Q3 Q1 Q1 Q1 Q1 Q2 Q4 Q4 Q2 Q1 Q3 Q3 Q4 Q1 Q4 Q3 Q3 Q1 Q2 Q4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [51] Q4 Q2 Q4 Q1 Q4 Q2 Q3 Q1 Q1 Q1 Q4 Q4 Q3 Q2 Q2 Q4 Q4 Q1 Q2 Q2 Q2 Q3 Q3 Q1 Q2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [76] Q4 Q2 Q3 Q4 Q2 Q2 Q3 Q3 Q3 Q4 Q3 Q3 Q2 Q1 Q3 Q1 Q4 Q2 Q2 Q3 Q4 Q2 Q4 Q2 Q3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: Placebo Q1 Q2 Q3 Q4</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

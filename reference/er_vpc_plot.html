@@ -112,8 +112,8 @@ binary (0/1, or logical) or continuous; see <code>response_type</code></p></dd>
 <code>"continuous"</code>, or <code>"count"</code>. Governs how the observed-side summary
 is computed: response <em>rate</em> with a Clopper-Pearson CI for
 <code>"binary"</code>, bin <em>mean</em> with a t-interval for <code>"continuous"</code> (see
-<code><a href="t_interval.html">t_interval()</a></code>), or bin <em>mean</em> with an exact Poisson interval for
-<code>"count"</code> (see <code><a href="poisson_interval.html">poisson_interval()</a></code>). <code>"auto"</code> detects from the
+<code><a href="ci_t.html">ci_t()</a></code>), or bin <em>mean</em> with an exact Poisson interval for
+<code>"count"</code> (see <code><a href="ci_poisson.html">ci_poisson()</a></code>). <code>"auto"</code> detects from the
 observed <code>response</code> column (entirely in <code>{0, 1}</code>, or logical, is
 treated as binary; see <code><a href="er_plot.html">er_plot()</a></code>'s <code>response_type</code> for the same
 heuristic) and never resolves to <code>"count"</code>: a count (Poisson-style)

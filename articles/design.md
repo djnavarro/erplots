@@ -31,9 +31,9 @@ mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_show_model(mod) |>
-  er_plot_show_quantiles() |>
-  er_plot_show_groups(aucss) |>
+  er_plot_add_model(mod) |>
+  er_plot_add_quantiles() |>
+  er_plot_add_groups(aucss) |>
   plot()
 ```
 
@@ -46,10 +46,10 @@ erglm_data |>
           |
           v
       layer functions (piped, any order, any subset):
-        er_plot_show_model()
-        er_plot_show_quantiles()
-        er_plot_show_data()
-        er_plot_show_groups()
+        er_plot_add_model()
+        er_plot_add_quantiles()
+        er_plot_add_data()
+        er_plot_add_groups()
           |
           v
       er_plot_build()                 -- called for you by plot()/print()
@@ -67,10 +67,10 @@ There are currently four layers, each documented on its own help topic:
 
 | Layer | Function | Shows | Depends on `response_type`? |
 |----|----|----|----|
-| Model | \[er_plot_show_model()\] | Fitted curve/ribbon (or spaghetti) plus an optional summary annotation | No |
-| Quantile | \[er_plot_show_quantiles()\] | Exposure-quantile-binned response summary (rate/mean + CI) | Yes |
-| Data | \[er_plot_show_data()\] | Raw observations, by default overlaid on the model panel at their true (exposure, response) coordinates (\[build_data_overlay()\]); or, for a binary response, \[build_data_boxjitter()\]’s older panel-based boxplot + jitter design | Yes |
-| Group | \[er_plot_show_groups()\] | Exposure distribution, boxplot/violin, split by a grouping variable | No |
+| Model | \[er_plot_add_model()\] | Fitted curve/ribbon (or spaghetti) plus an optional summary annotation | No |
+| Quantile | \[er_plot_add_quantiles()\] | Exposure-quantile-binned response summary (rate/mean + CI) | Yes |
+| Data | \[er_plot_add_data()\] | Raw observations, by default overlaid on the model panel at their true (exposure, response) coordinates (\[er_builder_data_overlay()\]); or, for a binary response, \[er_builder_data_boxjitter()\]’s older panel-based boxplot + jitter design | Yes |
+| Group | \[er_plot_add_groups()\] | Exposure distribution, boxplot/violin, split by a grouping variable | No |
 
 ## Layers are either singleton or additive
 
@@ -83,8 +83,8 @@ two.
 
 plt <- erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_show_quantiles(bins = 4) |>
-  er_plot_show_quantiles(bins = 8) # overwrites the bins = 4 call
+  er_plot_add_quantiles(bins = 4) |>
+  er_plot_add_quantiles(bins = 8) # overwrites the bins = 4 call
 
 plt$part$quantile$config$n_quantiles # 8, not 4
 #> [1] 8
@@ -97,8 +97,8 @@ another panel alongside any already added, rather than replacing them:
 
 plt <- erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_show_groups(aucss) |>
-  er_plot_show_groups(treatment) # adds a second panel, doesn't replace the first
+  er_plot_add_groups(aucss) |>
+  er_plot_add_groups(treatment) # adds a second panel, doesn't replace the first
 
 names(plt$part$group$config) # both grouping variables are still there
 #> [1] "treatment"
@@ -126,9 +126,9 @@ mod_strat <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
 
 erglm_data |>
   er_plot(aucss, ae1, stratify_by = sex) |>
-  er_plot_show_model(mod_strat) |>
-  er_plot_show_quantiles() |>
-  er_plot_show_data() |>
+  er_plot_add_model(mod_strat) |>
+  er_plot_add_quantiles() |>
+  er_plot_add_data() |>
   plot()
 ```
 
@@ -143,16 +143,16 @@ is left**, defaulting to color/fill.
 For most layers, color/fill is always free for strata, so this rule is
 invisible in practice. The data layer is the one exception, and its
 behaviour now depends on which builder is in play, and which
-*structural* family (declared via \[er_layout()\]) that builder belongs
-to:
+*structural* family (declared via \[er_builder_layout()\]) that builder
+belongs to:
 
-- [`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
+- [`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
   (the default, `"overlay"`-layout): color, when mapped at all, always
   means strata – the response is already shown via y-position, so
   color/fill is free for stratification like every other layer, and the
   overlay shares the base plot’s own strata legend with the
   model/quantile layers.
-- [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
+- [`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
   (the older, panel-based design, `"panel"`-layout, binary-response
   only): behaves the same way as overlay – color/fill means strata,
   shared legend. There is no built-in `"panel"`-layout builder for a
@@ -163,7 +163,7 @@ to:
   instead of a shared legend – the concrete instance of “a layer’s own
   encoding takes precedence” that motivated the general rule. See
   `PLAN.md`’s “Continuous-response data strip” section for that design
-  history, and \[er_plot_show_data()\] for the full breakdown.
+  history, and \[er_plot_add_data()\] for the full breakdown.
 
 A `config$color_role` tag (`"strata"` or `"response"`, set by
 `.part_data()`) records which meaning applies for a given data-layer
@@ -182,17 +182,17 @@ all – they only consume \[er_predict()\]/\[er_simulate()\] output or the
 exposure variable, respectively. The quantile layer dispatches on it
 directly:
 
-| `response_type` | Bin summary | CI method |
-|----|----|----|
-| `"binary"` | Response rate | Clopper-Pearson (\[clopper_pearson_interval()\]) |
-| `"continuous"` | Mean | t-interval (\[t_interval()\]) |
-| `"count"` | Mean | Exact Poisson interval (\[poisson_interval()\]) |
+| `response_type` | Bin summary   | CI method                                  |
+|-----------------|---------------|--------------------------------------------|
+| `"binary"`      | Response rate | Clopper-Pearson (\[ci_clopper_pearson()\]) |
+| `"continuous"`  | Mean          | t-interval (\[ci_t()\])                    |
+| `"count"`       | Mean          | Exact Poisson interval (\[ci_poisson()\])  |
 
 `"auto"` classifies a response as `"binary"` if it’s logical or confined
 to `{0, 1}`, and `"continuous"` otherwise – so a genuine count response
 auto-detects as `"continuous"` and is summarised as an
 approximately-continuous quantity unless `response_type = "count"` is
-declared explicitly. See \[er_plot_show_quantiles()\] for the full
+declared explicitly. See \[er_plot_add_quantiles()\] for the full
 rationale and the [count
 responses](https://erplots.djnavarro.net/articles/plot-count.md)
 article’s “Quantile component” section for a worked example, including a
@@ -202,14 +202,14 @@ visibly matters.
 The data layer doesn’t compute a summary statistic at all – it just
 plots raw observations – so `response_type` instead changes *how* it’s
 drawn:
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
+[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
 (the default) needs no dispatch (a plain scatter, or a small vertical
 jitter for a binary response’s exactly-0/1 y-values);
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
+[`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
 is binary-response only, and uses `response_type` only insofar as
-[`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 guards against using it on a continuous/count response at all (there’s
-no upper/lower partition to split on) – see \[er_plot_show_data()\].
+no upper/lower partition to split on) – see \[er_plot_add_data()\].
 
 ## Extending erplots: writing your own builder
 
@@ -218,10 +218,10 @@ function sharing a common signature –
 `function(data, config, stratify, exposure, response, strata, style)`.
 That signature is a documented, public part of the API (see
 \[er_partial()\]), and each layer function’s `builder` argument
-([`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
+([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 additionally has `summary_builder`) defaults to one built-in `build_*()`
-function (e.g. \[er_plot_show_quantiles()\]’s defaults to
-[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/build_quantile.md))
+function (e.g. \[er_plot_add_quantiles()\]’s defaults to
+[`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md))
 and can be set to any other function matching the same signature – no
 need to fork the package or reach into `object$part` internals:
 
@@ -237,8 +237,8 @@ build_quantile_crossbar <- function(data, config, stratify, exposure, response, 
 
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_show_model(mod) |>
-  er_plot_show_quantiles(builder = build_quantile_crossbar) |>
+  er_plot_add_model(mod) |>
+  er_plot_add_quantiles(builder = build_quantile_crossbar) |>
   plot()
 ```
 
@@ -250,26 +250,27 @@ builder would (e.g. `config$summary` for the quantile layer,
 `config` into ggplot2 layers, not recompute anything.
 
 For the data layer, a custom `builder` must also declare which
-*structural* family it belongs to, via \[er_layout()\]:
-`er_layout(fn, "overlay")` slots it into a single call merged onto the
-main panel, while `er_layout(fn, "panel")` slots it into one-or-more
-panels stacked below the base plot. \[er_plot_show_data()\] reads this
-tag off `builder` itself to decide how to assemble the layer, rather
-than taking a separate argument for it – so a builder like
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
+*structural* family it belongs to, via \[er_builder_layout()\]:
+`er_builder_layout(fn, "overlay")` slots it into a single call merged
+onto the main panel, while `er_builder_layout(fn, "panel")` slots it
+into one-or-more panels stacked below the base plot.
+\[er_plot_add_data()\] reads this tag off `builder` itself to decide how
+to assemble the layer, rather than taking a separate argument for it –
+so a builder like
+[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
 can never accidentally end up routed into upper/lower panels, or vice
 versa. The other three layers have only one structural call site, so no
 such tagging is needed there.
 
-[`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/build_quantile.md)
+[`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
 (a single `geom_pointrange()` in place of
-[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/build_quantile.md)’s
+[`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)’s
 separate point + error bar) started life as exactly this kind of custom
 builder, and was promoted to a built-in option once it proved to need no
 new `config` fields – a reasonable bar to check your own custom builders
 against, if you’re deciding whether to propose one upstream. See the
-`@examples` on \[er_plot_show_model()\], \[er_plot_show_quantiles()\],
-and \[er_plot_show_data()\] for further worked custom builders (a dashed
+`@examples` on \[er_plot_add_model()\], \[er_plot_add_quantiles()\], and
+\[er_plot_add_data()\] for further worked custom builders (a dashed
 model curve and a data-overlay scatter), and \[er_partial()\]’s “Writing
 your own builder” section for the full contract.
 

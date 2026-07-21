@@ -56,9 +56,9 @@ er_vpc_plot(
   Governs how the observed-side summary is computed: response *rate*
   with a Clopper-Pearson CI for `"binary"`, bin *mean* with a t-interval
   for `"continuous"` (see
-  [`t_interval()`](https://erplots.djnavarro.net/reference/t_interval.md)),
-  or bin *mean* with an exact Poisson interval for `"count"` (see
-  [`poisson_interval()`](https://erplots.djnavarro.net/reference/poisson_interval.md)).
+  [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md)), or bin
+  *mean* with an exact Poisson interval for `"count"` (see
+  [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)).
   `"auto"` detects from the observed `response` column (entirely in
   `{0, 1}`, or logical, is treated as binary; see
   [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
