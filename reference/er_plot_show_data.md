@@ -8,7 +8,7 @@ vertical jitter for a binary response (whose y-values are exactly 0/1
 and would otherwise overplot into two solid lines). This works uniformly
 across all three response types, with no response-type dispatch on which
 builder to use.
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
 instead uses the older, panel-based design, and is binary-response-only:
 responders (`response == 1`) get a boxplot + jittered points in an upper
 panel and non-responders (`response == 0`) get the same in a lower
@@ -17,7 +17,7 @@ response, not just raw points. There is no built-in "panel"-layout
 builder for a continuous/count response – the older `build_data_color()`
 (a single panel with points colored continuously by the response value)
 was removed once
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
 turned out to cover its typical use case more simply; `panel` must be
 `"both"` (the default) for these response types regardless of builder,
 since there's no upper/lower partition to select from.
@@ -48,8 +48,8 @@ er_plot_show_data(object, keep_strata = NULL, builder = NULL, panel = "both")
 - builder:
 
   Function drawing the data layer – defaults to
-  [`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md).
-  [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md).
+  [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
   (binary response only: a boxplot + jittered points per panel) is the
   other built-in option; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
@@ -65,7 +65,7 @@ er_plot_show_data(object, keep_strata = NULL, builder = NULL, panel = "both")
 
   Character string: `"upper"`, `"lower"`, or `"both"` (the default).
   Only meaningful for
-  [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
   on a binary response; must be `"both"` for an "overlay"-layout builder
   (no upper/lower partition exists) or for a continuous/count response
   under a "panel"-layout builder (there's no upper/lower partition to
@@ -85,9 +85,9 @@ families it belongs to via
 `er_plot_show_data()` reads off `builder` to decide how to assemble the
 layer, rather than taking a separate argument for it. This makes the
 pairing structural rather than incidental:
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
 can never be routed into upper/lower panels, and
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
 can never be merged into the main panel. See
 [`er_layout()`](https://erplots.djnavarro.net/reference/er_layout.md)
 and

@@ -10,8 +10,8 @@ separate `style`/`layout` argument needed. See
 [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)'s
 "Writing your own builder" section for the full contract; both built-in
 data builders
-([`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md),
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md))
+([`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md),
+[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md))
 already carry this tag.
 
 ## Usage

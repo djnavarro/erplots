@@ -44,9 +44,9 @@ er_plot_show_quantiles(
 - builder:
 
   Function drawing the quantile summary – defaults to
-  [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/build_quantile.md)
   (point + error bar).
-  [`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/build_quantile.md)
   (a single
   [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html))
   is the other built-in option; any function matching the standard

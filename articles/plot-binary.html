@@ -155,12 +155,12 @@ model that includes the stratification variable as a term:</p>
 <div class="section level2">
 <h2 id="model-component">Model component<a class="anchor" aria-label="anchor" href="#model-component"></a>
 </h2>
-<p>The default builder is <code><a href="../reference/er_partial.html">build_model_ribbonline()</a></code>, but you
+<p>The default builder is <code><a href="../reference/build_model.html">build_model_ribbonline()</a></code>, but you
 can also draw spaghetti plots to represent parameter uncertainty with
-<code><a href="../reference/er_partial.html">build_model_spaghetti()</a></code>. Spaghetti plots require the model
+<code><a href="../reference/build_model.html">build_model_spaghetti()</a></code>. Spaghetti plots require the model
 to implement <code><a href="../reference/er_model_interface.html">er_simulate()</a></code> (erglm’s models do); models that
 only implement <code><a href="../reference/er_model_interface.html">er_predict()</a></code> fall back to
-<code><a href="../reference/er_partial.html">build_model_ribbonline()</a></code> with a message. This layer doesn’t
+<code><a href="../reference/build_model.html">build_model_ribbonline()</a></code> with a message. This layer doesn’t
 look at <code>response_type</code> at all – it only consumes
 [er_predict()]/[er_simulate()] output – so everything in this section
 applies unchanged to continuous and count responses too.</p>
@@ -201,7 +201,7 @@ response types.</p>
 <h2 id="data-component">Data component<a class="anchor" aria-label="anchor" href="#data-component"></a>
 </h2>
 <p><code><a href="../reference/er_plot_show_data.html">er_plot_show_data()</a></code> adds the raw observations. By
-default (<code><a href="../reference/er_partial.html">build_data_overlay()</a></code>), points are drawn at their
+default (<code><a href="../reference/build_data.html">build_data_overlay()</a></code>), points are drawn at their
 true <code>(exposure, response)</code> coordinates in the <em>main</em>
 model panel – for a binary response this is a scatter with a small
 vertical jitter, since the y-values are exactly 0/1 and would otherwise
@@ -219,13 +219,13 @@ overplot into two solid lines:</p>
 <code>build_data_overlay()</code>
 vs. <code>build_data_boxjitter()</code><a class="anchor" aria-label="anchor" href="#build_data_overlay-vs--build_data_boxjitter"></a>
 </h3>
-<p><code><a href="../reference/er_partial.html">build_data_boxjitter()</a></code> is the older, panel-based design,
+<p><code><a href="../reference/build_data.html">build_data_boxjitter()</a></code> is the older, panel-based design,
 and is binary-response only: it splits responders/non-responders into
 separate panels above/below the main plot, each showing a boxplot of the
 exposure values with the raw jittered points layered on top – so the
 panel shows the exposure <em>distribution</em> conditional on response,
 not just individual points. There is no built-in panel-based builder for
-a continuous/count response; <code><a href="../reference/er_partial.html">build_data_overlay()</a></code> (raw
+a continuous/count response; <code><a href="../reference/build_data.html">build_data_overlay()</a></code> (raw
 points at their true <code>(exposure, response)</code> coordinates,
 shown in the <a href="plot-continuous.html#data-component">continuous</a> and <a href="plot-count.html#data-component">count</a> articles) covers that
 case there, and a custom <code>"panel"</code>-layout builder (e.g. a
@@ -255,8 +255,8 @@ makes the difference concrete:</p>
 <span><span class="va">p_overlay</span><span class="op">$</span><span class="va">output</span> <span class="op">|</span> <span class="va">p_boxjitter</span><span class="op">$</span><span class="va">output</span></span></code></pre></div>
 <p><img src="plot-binary_files/figure-html/data-compare-binary-1.png" class="r-plt" alt="" width="960"></p>
 <p>Stratification looks the same for both: color/fill always means
-strata for <code><a href="../reference/er_partial.html">build_data_boxjitter()</a></code>, sharing the model
-curve’s own legend, the same way <code><a href="../reference/er_partial.html">build_data_overlay()</a></code>’s
+strata for <code><a href="../reference/build_data.html">build_data_boxjitter()</a></code>, sharing the model
+curve’s own legend, the same way <code><a href="../reference/build_data.html">build_data_overlay()</a></code>’s
 color aesthetic does for any response type:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_overlay_strat</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
@@ -299,8 +299,8 @@ unchanged to continuous and count responses too.</p>
 <span>  <span class="fu"><a href="../reference/er_plot_show_groups.html">er_plot_show_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-binary_files/figure-html/group-2-1.png" class="r-plt" alt="" width="700"></p>
-<p>The default builder is <code><a href="../reference/er_partial.html">build_group_boxplot()</a></code>, but you
-can also use violin plots with <code><a href="../reference/er_partial.html">build_group_violin()</a></code>:</p>
+<p>The default builder is <code><a href="../reference/build_group.html">build_group_boxplot()</a></code>, but you
+can also use violin plots with <code><a href="../reference/build_group.html">build_group_violin()</a></code>:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>

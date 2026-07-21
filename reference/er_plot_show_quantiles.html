@@ -100,8 +100,8 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 
 <dt id="arg-builder">builder<a class="anchor" aria-label="anchor" href="#arg-builder"></a></dt>
 <dd><p>Function drawing the quantile summary – defaults to
-<code><a href="er_partial.html">build_quantile_errorbar()</a></code> (point + error bar).
-<code><a href="er_partial.html">build_quantile_pointrange()</a></code> (a single <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>)
+<code><a href="build_quantile.html">build_quantile_errorbar()</a></code> (point + error bar).
+<code><a href="build_quantile.html">build_quantile_pointrange()</a></code> (a single <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>)
 is the other built-in option; any function matching the standard
 <code>(data, config, stratify, exposure, response, strata, style)</code>
 signature can be supplied instead – see <code><a href="er_partial.html">er_partial()</a></code>.

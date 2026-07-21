@@ -239,13 +239,13 @@ behaviour now depends on which builder is in play, and which
 belongs to:</p>
 <ul>
 <li>
-<code><a href="../reference/er_partial.html">build_data_overlay()</a></code> (the default,
+<code><a href="../reference/build_data.html">build_data_overlay()</a></code> (the default,
 <code>"overlay"</code>-layout): color, when mapped at all, always means
 strata – the response is already shown via y-position, so color/fill is
 free for stratification like every other layer, and the overlay shares
 the base plot’s own strata legend with the model/quantile layers.</li>
 <li>
-<code><a href="../reference/er_partial.html">build_data_boxjitter()</a></code> (the older, panel-based design,
+<code><a href="../reference/build_data.html">build_data_boxjitter()</a></code> (the older, panel-based design,
 <code>"panel"</code>-layout, binary-response only): behaves the same way
 as overlay – color/fill means strata, shared legend. There is no
 built-in <code>"panel"</code>-layout builder for a continuous/count
@@ -318,10 +318,10 @@ choice between the t-interval and exact Poisson interval visibly
 matters.</p>
 <p>The data layer doesn’t compute a summary statistic at all – it just
 plots raw observations – so <code>response_type</code> instead changes
-<em>how</em> it’s drawn: <code><a href="../reference/er_partial.html">build_data_overlay()</a></code> (the default)
+<em>how</em> it’s drawn: <code><a href="../reference/build_data.html">build_data_overlay()</a></code> (the default)
 needs no dispatch (a plain scatter, or a small vertical jitter for a
 binary response’s exactly-0/1 y-values);
-<code><a href="../reference/er_partial.html">build_data_boxjitter()</a></code> is binary-response only, and uses
+<code><a href="../reference/build_data.html">build_data_boxjitter()</a></code> is binary-response only, and uses
 <code>response_type</code> only insofar as
 <code><a href="../reference/er_plot_show_data.html">er_plot_show_data()</a></code> guards against using it on a
 continuous/count response at all (there’s no upper/lower partition to
@@ -338,7 +338,7 @@ That signature is a documented, public part of the API (see
 (<code><a href="../reference/er_plot_show_model.html">er_plot_show_model()</a></code> additionally has
 <code>summary_builder</code>) defaults to one built-in
 <code>build_*()</code> function (e.g. [er_plot_show_quantiles()]’s
-defaults to <code><a href="../reference/er_partial.html">build_quantile_errorbar()</a></code>) and can be set to
+defaults to <code><a href="../reference/build_quantile.html">build_quantile_errorbar()</a></code>) and can be set to
 any other function matching the same signature – no need to fork the
 package or reach into <code>object$part</code> internals:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -368,13 +368,13 @@ onto the main panel, while <code>er_layout(fn, "panel")</code> slots it
 into one-or-more panels stacked below the base plot.
 [er_plot_show_data()] reads this tag off <code>builder</code> itself to
 decide how to assemble the layer, rather than taking a separate argument
-for it – so a builder like <code><a href="../reference/er_partial.html">build_data_overlay()</a></code> can never
+for it – so a builder like <code><a href="../reference/build_data.html">build_data_overlay()</a></code> can never
 accidentally end up routed into upper/lower panels, or vice versa. The
 other three layers have only one structural call site, so no such
 tagging is needed there.</p>
-<p><code><a href="../reference/er_partial.html">build_quantile_pointrange()</a></code> (a single
+<p><code><a href="../reference/build_quantile.html">build_quantile_pointrange()</a></code> (a single
 <code>geom_pointrange()</code> in place of
-<code><a href="../reference/er_partial.html">build_quantile_errorbar()</a></code>’s separate point + error bar)
+<code><a href="../reference/build_quantile.html">build_quantile_errorbar()</a></code>’s separate point + error bar)
 started life as exactly this kind of custom builder, and was promoted to
 a built-in option once it proved to need no new <code>config</code>
 fields – a reasonable bar to check your own custom builders against, if

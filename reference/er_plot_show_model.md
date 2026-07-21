@@ -53,9 +53,9 @@ er_plot_show_model(
 - builder:
 
   Function drawing the model curve/ribbon – defaults to
-  [`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/build_model.md)
   (mean prediction + confidence ribbon).
-  [`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/build_model.md)
   (simulated draws, via
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
   is the other built-in option; any function matching the standard
@@ -66,7 +66,7 @@ er_plot_show_model(
 - summary_builder:
 
   Function drawing the summary annotation – defaults to
-  [`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  [`build_summary_pvalue()`](https://erplots.djnavarro.net/reference/build_summary.md).
   Any function matching the same standard signature as `builder` can be
   supplied instead. See
   [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).

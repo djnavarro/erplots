@@ -146,13 +146,13 @@ behaviour now depends on which builder is in play, and which
 *structural* family (declared via \[er_layout()\]) that builder belongs
 to:
 
-- [`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+- [`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
   (the default, `"overlay"`-layout): color, when mapped at all, always
   means strata – the response is already shown via y-position, so
   color/fill is free for stratification like every other layer, and the
   overlay shares the base plot’s own strata legend with the
   model/quantile layers.
-- [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+- [`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
   (the older, panel-based design, `"panel"`-layout, binary-response
   only): behaves the same way as overlay – color/fill means strata,
   shared legend. There is no built-in `"panel"`-layout builder for a
@@ -202,10 +202,10 @@ visibly matters.
 The data layer doesn’t compute a summary statistic at all – it just
 plots raw observations – so `response_type` instead changes *how* it’s
 drawn:
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
 (the default) needs no dispatch (a plain scatter, or a small vertical
 jitter for a binary response’s exactly-0/1 y-values);
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
 is binary-response only, and uses `response_type` only insofar as
 [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
 guards against using it on a continuous/count response at all (there’s
@@ -221,7 +221,7 @@ That signature is a documented, public part of the API (see
 ([`er_plot_show_model()`](https://erplots.djnavarro.net/reference/er_plot_show_model.md)
 additionally has `summary_builder`) defaults to one built-in `build_*()`
 function (e.g. \[er_plot_show_quantiles()\]’s defaults to
-[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md))
+[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/build_quantile.md))
 and can be set to any other function matching the same signature – no
 need to fork the package or reach into `object$part` internals:
 
@@ -256,14 +256,14 @@ main panel, while `er_layout(fn, "panel")` slots it into one-or-more
 panels stacked below the base plot. \[er_plot_show_data()\] reads this
 tag off `builder` itself to decide how to assemble the layer, rather
 than taking a separate argument for it – so a builder like
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
 can never accidentally end up routed into upper/lower panels, or vice
 versa. The other three layers have only one structural call site, so no
 such tagging is needed there.
 
-[`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_quantile_pointrange()`](https://erplots.djnavarro.net/reference/build_quantile.md)
 (a single `geom_pointrange()` in place of
-[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
+[`build_quantile_errorbar()`](https://erplots.djnavarro.net/reference/build_quantile.md)’s
 separate point + error bar) started life as exactly this kind of custom
 builder, and was promoted to a built-in option once it proved to need no
 new `config` fields – a reasonable bar to check your own custom builders

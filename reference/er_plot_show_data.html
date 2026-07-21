@@ -81,14 +81,14 @@ continuous/count responses, or a scatter with a small vertical jitter
 for a binary response (whose y-values are exactly 0/1 and would
 otherwise overplot into two solid lines). This works uniformly across
 all three response types, with no response-type dispatch on which
-builder to use. <code><a href="er_partial.html">build_data_boxjitter()</a></code> instead uses the older,
+builder to use. <code><a href="build_data.html">build_data_boxjitter()</a></code> instead uses the older,
 panel-based design, and is binary-response-only: responders (<code>response == 1</code>) get a boxplot + jittered points in an upper panel and
 non-responders (<code>response == 0</code>) get the same in a lower panel, so the
 panel shows the exposure <em>distribution</em> conditional on response, not
 just raw points. There is no built-in "panel"-layout builder for a
 continuous/count response – the older <code>build_data_color()</code> (a single
 panel with points colored continuously by the response value) was
-removed once <code><a href="er_partial.html">build_data_overlay()</a></code> turned out to cover its typical
+removed once <code><a href="build_data.html">build_data_overlay()</a></code> turned out to cover its typical
 use case more simply; <code>panel</code> must be <code>"both"</code> (the default) for these
 response types regardless of builder, since there's no upper/lower
 partition to select from.</p>
@@ -119,7 +119,7 @@ means a shared color aesthetic, for any response type.</p></dd>
 
 <dt id="arg-builder">builder<a class="anchor" aria-label="anchor" href="#arg-builder"></a></dt>
 <dd><p>Function drawing the data layer – defaults to
-<code><a href="er_partial.html">build_data_overlay()</a></code>. <code><a href="er_partial.html">build_data_boxjitter()</a></code> (binary response
+<code><a href="build_data.html">build_data_overlay()</a></code>. <code><a href="build_data.html">build_data_boxjitter()</a></code> (binary response
 only: a boxplot + jittered points per panel) is the other built-in
 option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, style)</code> signature and tagged with
 <code><a href="er_layout.html">er_layout()</a></code> can be supplied instead – see <code><a href="er_partial.html">er_partial()</a></code> for the
@@ -129,7 +129,7 @@ count response's color-encoded panel, or per-panel histograms.</p></dd>
 
 <dt id="arg-panel">panel<a class="anchor" aria-label="anchor" href="#arg-panel"></a></dt>
 <dd><p>Character string: <code>"upper"</code>, <code>"lower"</code>, or <code>"both"</code> (the
-default). Only meaningful for <code><a href="er_partial.html">build_data_boxjitter()</a></code> on a binary
+default). Only meaningful for <code><a href="build_data.html">build_data_boxjitter()</a></code> on a binary
 response; must be <code>"both"</code> for an "overlay"-layout builder (no
 upper/lower partition exists) or for a continuous/count response
 under a "panel"-layout builder (there's no upper/lower partition to
@@ -148,8 +148,8 @@ merged into the main panel) or <code>"panel"</code> (one-or-more panels stacked
 below the base plot) – which <code>er_plot_show_data()</code> reads off <code>builder</code>
 to decide how to assemble the layer, rather than taking a separate
 argument for it. This makes the pairing structural rather than
-incidental: <code><a href="er_partial.html">build_data_overlay()</a></code> can never be routed into upper/lower
-panels, and <code><a href="er_partial.html">build_data_boxjitter()</a></code> can never be merged into the main
+incidental: <code><a href="build_data.html">build_data_overlay()</a></code> can never be routed into upper/lower
+panels, and <code><a href="build_data.html">build_data_boxjitter()</a></code> can never be merged into the main
 panel. See <code><a href="er_layout.html">er_layout()</a></code> and <code><a href="er_partial.html">er_partial()</a></code> for how to tag a custom
 builder the same way.</p>
 <p>This layer is <strong>singleton</strong> – see <code><a href="er_plot.html">er_plot()</a></code>'s "Layers are either

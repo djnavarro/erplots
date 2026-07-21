@@ -33,8 +33,8 @@ er_plot_show_groups(
 - builder:
 
   Function drawing each group panel – defaults to
-  [`build_group_boxplot()`](https://erplots.djnavarro.net/reference/er_partial.md).
-  [`build_group_violin()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`build_group_boxplot()`](https://erplots.djnavarro.net/reference/build_group.md).
+  [`build_group_violin()`](https://erplots.djnavarro.net/reference/build_group.md)
   is the other built-in option; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
   signature can be supplied instead – see

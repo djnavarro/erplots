@@ -100,16 +100,16 @@ erglm_data |>
 ## Model component
 
 The default builder is
-[`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md),
+[`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/build_model.md),
 but you can also draw spaghetti plots to represent parameter uncertainty
 with
-[`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_partial.md).
+[`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/build_model.md).
 Spaghetti plots require the model to implement
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 (erglm’s models do); models that only implement
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 fall back to
-[`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_model_ribbonline()`](https://erplots.djnavarro.net/reference/build_model.md)
 with a message. This layer doesn’t look at `response_type` at all – it
 only consumes \[er_predict()\]/\[er_simulate()\] output – so everything
 in this section applies unchanged to continuous and count responses too.
@@ -165,7 +165,7 @@ erglm_data |>
 
 [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
 adds the raw observations. By default
-([`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)),
+([`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)),
 points are drawn at their true `(exposure, response)` coordinates in the
 *main* model panel – for a binary response this is a scatter with a
 small vertical jitter, since the y-values are exactly 0/1 and would
@@ -185,7 +185,7 @@ erglm_data |>
 
 ### `build_data_overlay()` vs. `build_data_boxjitter()`
 
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
 is the older, panel-based design, and is binary-response only: it splits
 responders/non-responders into separate panels above/below the main
 plot, each showing a boxplot of the exposure values with the raw
@@ -193,7 +193,7 @@ jittered points layered on top – so the panel shows the exposure
 *distribution* conditional on response, not just individual points.
 There is no built-in panel-based builder for a continuous/count
 response;
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)
 (raw points at their true `(exposure, response)` coordinates, shown in
 the
 [continuous](https://erplots.djnavarro.net/articles/plot-continuous.html#data-component)
@@ -234,9 +234,9 @@ p_overlay$output | p_boxjitter$output
 
 Stratification looks the same for both: color/fill always means strata
 for
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md),
+[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md),
 sharing the model curve’s own legend, the same way
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md)’s
+[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md)’s
 color aesthetic does for any response type:
 
 ``` r
@@ -292,9 +292,9 @@ erglm_data |>
 ![](plot-binary_files/figure-html/group-2-1.png)
 
 The default builder is
-[`build_group_boxplot()`](https://erplots.djnavarro.net/reference/er_partial.md),
+[`build_group_boxplot()`](https://erplots.djnavarro.net/reference/build_group.md),
 but you can also use violin plots with
-[`build_group_violin()`](https://erplots.djnavarro.net/reference/er_partial.md):
+[`build_group_violin()`](https://erplots.djnavarro.net/reference/build_group.md):
 
 ``` r
 

@@ -101,8 +101,8 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 
 <dt id="arg-builder">builder<a class="anchor" aria-label="anchor" href="#arg-builder"></a></dt>
 <dd><p>Function drawing the model curve/ribbon – defaults to
-<code><a href="er_partial.html">build_model_ribbonline()</a></code> (mean prediction + confidence ribbon).
-<code><a href="er_partial.html">build_model_spaghetti()</a></code> (simulated draws, via <code><a href="er_model_interface.html">er_simulate()</a></code>) is
+<code><a href="build_model.html">build_model_ribbonline()</a></code> (mean prediction + confidence ribbon).
+<code><a href="build_model.html">build_model_spaghetti()</a></code> (simulated draws, via <code><a href="er_model_interface.html">er_simulate()</a></code>) is
 the other built-in option; any function matching the standard
 <code>(data, config, stratify, exposure, response, strata, style)</code>
 signature can be supplied instead – see <code><a href="er_partial.html">er_partial()</a></code>.</p></dd>
@@ -110,7 +110,7 @@ signature can be supplied instead – see <code><a href="er_partial.html">er_par
 
 <dt id="arg-summary-builder">summary_builder<a class="anchor" aria-label="anchor" href="#arg-summary-builder"></a></dt>
 <dd><p>Function drawing the summary annotation –
-defaults to <code><a href="er_partial.html">build_summary_pvalue()</a></code>. Any function matching the same
+defaults to <code><a href="build_summary.html">build_summary_pvalue()</a></code>. Any function matching the same
 standard signature as <code>builder</code> can be supplied instead. See
 <code><a href="er_partial.html">er_partial()</a></code>.</p></dd>
 

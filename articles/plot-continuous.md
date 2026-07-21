@@ -70,7 +70,7 @@ consumes \[er_predict()\]/\[er_simulate()\] output – so it works exactly
 the same way as for a binary response. See the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#model-component)
 article for
-[`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_model_spaghetti()`](https://erplots.djnavarro.net/reference/build_model.md)
 and the parameter-uncertainty rationale behind it; the default builder
 is used here:
 
@@ -114,7 +114,7 @@ can misbehave (a negative lower bound), and the
 [`er_plot_show_data()`](https://erplots.djnavarro.net/reference/er_plot_show_data.md)
 adds the raw observations at their true `(exposure, response)`
 coordinates via
-[`build_data_overlay()`](https://erplots.djnavarro.net/reference/er_partial.md),
+[`build_data_overlay()`](https://erplots.djnavarro.net/reference/build_data.md),
 the default and only built-in builder for a continuous response – no
 jitter is needed, since the response isn’t confined to 0/1:
 
@@ -130,7 +130,7 @@ erglm_data |>
 ![](plot-continuous_files/figure-html/data-overlay-continuous-1.png)
 
 There’s no built-in panel-based alternative for a continuous response –
-[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`build_data_boxjitter()`](https://erplots.djnavarro.net/reference/build_data.md)
 (the older, panel-based responders/non-responders design covered in the
 [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#build_data_overlay-vs--build_data_boxjitter)
@@ -146,7 +146,7 @@ consumes the exposure variable – so it works exactly the same way as for
 a binary response. See the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#group-component)
 article for multiple grouping variables and
-[`build_group_violin()`](https://erplots.djnavarro.net/reference/er_partial.md);
+[`build_group_violin()`](https://erplots.djnavarro.net/reference/build_group.md);
 the default builder and a single grouping variable are shown here:
 
 ``` r
