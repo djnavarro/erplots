@@ -1,5 +1,5 @@
 ---
-title: "Plotting"
+title: "Plotting: binary responses"
 ---
 
 ```{r, include = FALSE}
@@ -9,9 +9,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-erplots draws exposure-response plots from *any* model that implements the
-[er_model_interface]. This article uses logistic regression models fitted
-with erglm, but the plotting code itself has no knowledge of `glm()`.
+erplots draws exposure-response plots from *any* model that implements
+[er_model_interface]. This article uses a logistic regression model
+fitted with erglm, but the plotting code itself has no knowledge of
+`glm()`. It's the most detailed of the three response-type articles
+(binary/continuous/count); the continuous and count articles link back
+here for the model and group components, which work identically
+regardless of response type.
 
 ```{r setup}
 library(erplots)
@@ -95,6 +99,9 @@ spaghetti plots to represent parameter uncertainty with
 `build_model_spaghetti()`. Spaghetti plots require the model to
 implement `er_simulate()` (erglm's models do); models that only implement
 `er_predict()` fall back to `build_model_ribbonline()` with a message.
+This layer doesn't look at `response_type` at all -- it only consumes
+[er_predict()]/[er_simulate()] output -- so everything in this section
+applies unchanged to continuous and count responses too.
 
 ```{r model-1}
 erglm_data |> 
@@ -118,7 +125,11 @@ erglm_data |>
 
 You can also modify the confidence level for the interval around each
 bin's summary. For a binary response this is a Clopper-Pearson interval
-for the response *rate*:
+for the response *rate*; see the
+[continuous](plot-continuous.html#quantile-component) and
+[count](plot-count.html#quantile-component) articles for how this layer
+adapts its summary statistic and interval method to those response
+types.
 
 ```{r quantile-2}
 erglm_data |> 
@@ -128,132 +139,19 @@ erglm_data |>
   plot()
 ```
 
-## Continuous responses
-
-`er_plot()` auto-detects whether the response is binary (logical, or
-values entirely in `{0, 1}`) or continuous, and you can override the
-detection with `response_type`. The model component and quantile
-component both adapt: quantile bins report a mean with a t-interval
-instead of a rate with a Clopper-Pearson interval. The data layer
-component has no continuous-response variant (see below), so it's
-omitted here.
-
-```{r continuous-1}
-mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
-
-erglm_data |> 
-  er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
-  er_plot_show_quantiles() |> 
-  plot()
-```
-
-`er_vpc_plot()` generalises the same way, comparing observed vs.
-simulated means rather than rates:
-
-```{r continuous-2}
-sim_gaussian <- erglm_vpc_sim(mod_gaussian, seed = 3947)
-er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
-```
-
-Count (Poisson-style) responses, such as an adverse-event count, are
-auto-detected as `"continuous"` and summarised the same way (bin mean
-plus t-interval) unless you declare `response_type = "count"` explicitly:
-
-```{r continuous-3}
-mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
-
-erglm_data |> 
-  er_plot(aucss, ae_count) |> 
-  er_plot_show_model(mod_poisson) |> 
-  er_plot_show_quantiles() |> 
-  plot()
-```
-
-Declaring `response_type = "count"` swaps the t-interval approximation
-for an exact Poisson interval (bin mean plus [poisson_interval()]
-instead of [t_interval()]), which never produces a negative lower bound
--- useful for low-count bins, where the t-interval approximation can. For
-`erglm_data`'s own `ae_count`, none of the bin means are low enough for
-this to actually happen, so the two plots above would look almost
-identical if you re-ran the last one with `response_type = "count"`. To
-make the difference concrete, here's a synthetic dataset where the
-placebo arm has only 2 events among 20 subjects:
-
-```{r count-synthetic}
-set.seed(84)
-placebo_counts <- rpois(20, 0.05)
-while (sum(placebo_counts) != 2) placebo_counts <- rpois(20, 0.05)
-
-aucss_dosed <- sort(runif(80, 100, 3000))
-count_dosed <- rpois(80, 0.1 + 0.003 * aucss_dosed)
-
-low_count_data <- data.frame(
-  aucss = c(rep(0, 20), aucss_dosed),
-  ae_count = c(placebo_counts, count_dosed)
-)
-
-mod_low_count <- erglm_model(ae_count ~ aucss, low_count_data, family = poisson())
-```
-
-The default (t-interval) path's placebo-arm error bar dips visibly below
-zero -- a nonsensical negative event rate:
-
-```{r count-1}
-low_count_data |> 
-  er_plot(aucss, ae_count) |> 
-  er_plot_show_model(mod_low_count) |> 
-  er_plot_show_quantiles() |> 
-  plot() +
-  ggplot2::coord_cartesian(ylim = c(-0.5, 1.5), xlim = c(-50, 800))
-```
-
-Declaring `response_type = "count"` keeps the same placebo-arm point
-estimate but replaces the t-interval with an exact Poisson interval,
-which stays non-negative:
-
-```{r count-2}
-low_count_data |> 
-  er_plot(aucss, ae_count, response_type = "count") |> 
-  er_plot_show_model(mod_low_count) |> 
-  er_plot_show_quantiles() |> 
-  plot() +
-  ggplot2::coord_cartesian(ylim = c(-0.5, 1.5), xlim = c(-50, 800))
-```
-
-The same declaration works for `er_vpc_plot()`:
-
-```{r count-3}
-sim_poisson <- erglm_vpc_sim(mod_poisson, seed = 6142)
-er_vpc_plot(
-  erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
-  response_type = "count"
-)
-```
-
 ## Data component
 
 `er_plot_show_data()` adds the raw observations. By default
 (`build_data_overlay()`), points are drawn at their true `(exposure,
-response)` coordinates in the *main* model panel -- a plain scatter for a
-continuous/count response, or a scatter with a small vertical jitter for
-a binary response (whose y-values are exactly 0/1 and would otherwise
-overplot into two solid lines). This works the same way for every
-response type, with no special-casing needed:
+response)` coordinates in the *main* model panel -- for a binary response
+this is a scatter with a small vertical jitter, since the y-values are
+exactly 0/1 and would otherwise overplot into two solid lines:
 
 ```{r data-overlay-binary}
 erglm_data |> 
   er_plot(aucss, ae1) |> 
   er_plot_show_model(mod) |> 
   er_plot_show_quantiles() |> 
-  er_plot_show_data() |> 
-  plot()
-```
-
-```{r data-overlay-continuous}
-erglm_data |> 
-  er_plot(aucss, biomarker_change) |> 
-  er_plot_show_model(mod_gaussian) |> 
   er_plot_show_data() |> 
   plot()
 ```
@@ -267,16 +165,19 @@ exposure values with the raw jittered points layered on top -- so the
 panel shows the exposure *distribution* conditional on response, not
 just individual points. There is no built-in panel-based builder for a
 continuous/count response; `build_data_overlay()` (raw points at their
-true `(exposure, response)` coordinates) covers that case, and a custom
-`"panel"`-layout builder (e.g. a single color-encoded panel) remains
-possible via [er_layout()] if a project needs one -- see
-`vignettes/articles/design.Rmd`'s "Extending erplots" section. Each
-builder declares which of the two structural families it belongs to via
-[er_layout()], which is what `er_plot_show_data()` uses to decide
-whether to merge it into the main panel or stack it in panels below.
+true `(exposure, response)` coordinates, shown in the
+[continuous](plot-continuous.html#data-component) and
+[count](plot-count.html#data-component) articles) covers that case
+there, and a custom `"panel"`-layout builder (e.g. a single
+color-encoded panel) remains possible via [er_layout()] if a project
+needs one -- see `vignettes/articles/design.Rmd`'s "Extending erplots"
+section. Each builder declares which of the two structural families it
+belongs to via [er_layout()], which is what `er_plot_show_data()` uses
+to decide whether to merge it into the main panel or stack it in panels
+below.
 
 Building both side by side (via patchwork's `|` operator) makes the
-difference concrete for a binary response:
+difference concrete:
 
 ```{r data-compare-binary, fig.width = 10}
 p_overlay <- erglm_data |> 
@@ -297,9 +198,9 @@ p_overlay$output | p_boxjitter$output
 ```
 
 Stratification looks the same for both: color/fill always means strata
-for `build_data_boxjitter()` on a binary response, sharing the model
-curve's own legend, the same way `build_data_overlay()`'s color
-aesthetic does for any response type:
+for `build_data_boxjitter()`, sharing the model curve's own legend, the
+same way `build_data_overlay()`'s color aesthetic does for any response
+type:
 
 ```{r data-compare-stratified, fig.width = 10}
 p_overlay_strat <- erglm_data |> 
@@ -319,7 +220,10 @@ p_overlay_strat$output | p_boxjitter_strat$output
 
 ## Group component
 
-Multiple grouping variables are allowed:
+Multiple grouping variables are allowed. Like the model component, this
+layer doesn't look at `response_type` at all -- it only consumes the
+exposure variable -- so everything in this section applies unchanged to
+continuous and count responses too.
 
 ```{r group-1}
 erglm_data |> 
@@ -352,3 +256,20 @@ erglm_data |>
   er_plot_show_groups(group_by = sex, builder = build_group_violin) |> 
   plot()
 ```
+
+## VPC plot
+
+`er_vpc_plot()` is a model-agnostic VPC-style plot that compares observed
+data against model-simulated data, operating on plain data frames rather
+than an `er_plot` object. For a binary response it compares observed vs.
+simulated response *rates*:
+
+```{r vpc-1}
+sim_binary <- erglm_vpc_sim(mod, seed = 5218)
+er_vpc_plot(erglm_data, sim_binary, aucss, ae1, group_by = aucss)
+```
+
+See the [continuous](plot-continuous.html#vpc-plot) and
+[count](plot-count.html#vpc-plot) articles for how this generalises to
+means (with a t-interval or exact Poisson interval, respectively) for
+those response types.

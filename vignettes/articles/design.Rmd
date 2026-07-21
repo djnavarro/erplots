@@ -11,9 +11,11 @@ knitr::opts_chunk$set(
 
 This article is about the *grammar* erplots plots are built from, not
 about any one plot's mechanics -- for worked examples of each layer, see
-the [Plotting](plot.html) article. If a design choice described here
-ever changes, this article and `PLAN.md`'s "Mini-language architecture
-review" section should be updated together; see the note at the end.
+the [binary](plot-binary.html), [continuous](plot-continuous.html), and
+[count](plot-count.html) response articles. If a design choice described
+here ever changes, this article and `PLAN.md`'s "Mini-language
+architecture review" section should be updated together; see the note at
+the end.
 
 ```{r setup}
 library(erplots)
@@ -184,9 +186,10 @@ to `{0, 1}`, and `"continuous"` otherwise -- so a genuine count response
 auto-detects as `"continuous"` and is summarised as an
 approximately-continuous quantity unless `response_type = "count"` is
 declared explicitly. See [er_plot_show_quantiles()] for the full
-rationale and the [Plotting](plot.html) article's "Continuous responses"
-section for worked examples, including a case where the choice between
-the t-interval and exact Poisson interval visibly matters.
+rationale and the [count responses](plot-count.html) article's "Quantile
+component" section for a worked example, including a case where the
+choice between the t-interval and exact Poisson interval visibly
+matters.
 
 The data layer doesn't compute a summary statistic at all -- it just
 plots raw observations -- so `response_type` instead changes *how* it's

@@ -53,10 +53,13 @@ as that layer was generalised (it now has no callers -- see below).
 **Status:** done, `devtools::check()` clean, full test coverage
 including continuous/count fixtures (`er_test_mod_gaussian`,
 `er_test_mod_poisson` in `tests/testthat/helper-data.R`),
-`vignettes/articles/plot.Rmd`'s "Continuous responses" section
+`vignettes/articles/plot-count.Rmd`'s "Quantile component" section
 (including a synthetic low-count example demonstrating the t-interval's
 negative-lower-bound failure mode vs. the exact Poisson interval's
-non-negative one).
+non-negative one). (At the time this landed, the worked example lived in
+a single combined `plot.Rmd`, later split into per-response-type
+articles -- see "Completed: splitting the plotting vignette by response
+type" below.)
 
 ## Completed: continuous-response data layer (redesign + rename)
 
@@ -116,8 +119,11 @@ The two styles are mutually exclusive (`object$part$data` vs.
 
 **Status:** done -- composition refactor, `build_data_color()` +
 dispatch, `build_data_overlay()` + new default style, and vignette
-updates (`plot.Rmd`'s "Data component" section covers both styles side
-by side) all landed. `devtools::check()` clean throughout.
+updates (the then-combined `plot.Rmd`'s "Data component" section covered
+both styles side by side; that content now lives in
+`plot-binary.Rmd`/`plot-continuous.Rmd`/`plot-count.Rmd`, see "Completed:
+splitting the plotting vignette by response type" below) all landed.
+`devtools::check()` clean throughout.
 
 **Open questions, not yet decided (flagging, not blocking):**
 - **Color scale.** Every other builder in this package relies on
@@ -278,9 +284,10 @@ combination was never sensible.
   the data layer alone.
 - `?er_partial`'s "Writing your own builder" section, each layer
   function's own Rd topic, `vignettes/articles/design.Rmd`'s "Extending
-  erplots" section, and `vignettes/articles/plot.Rmd` were all updated
-  to describe `builder`-only dispatch (no more `style` strings) and,
-  for the data layer, the `er_layout()` tagging requirement.
+  erplots" section, and the then-combined `vignettes/articles/plot.Rmd`
+  were all updated to describe `builder`-only dispatch (no more `style`
+  strings) and, for the data layer, the `er_layout()` tagging
+  requirement.
 
 **Status:** done. `devtools::check()` clean (0 errors/warnings/notes);
 existing tests updated to use `builder =` instead of `style =`, plus new
@@ -333,11 +340,13 @@ entirely, falling back to one panel per stratum level -- more panels
   `"panel"`-layout builder -- there's just no built-in one for
   continuous/count today.
 - Docs (`?er_partial`, `?er_plot_show_data`, `?er_layout`) and
-  `vignettes/articles/{plot,design}.Rmd` were updated throughout to
-  describe `build_data_boxjitter()` in place of the two removed
-  functions, including a rewritten `plot.Rmd` comparison section
+  `vignettes/articles/{plot,design}.Rmd` (the then-combined `plot.Rmd`)
+  were updated throughout to describe `build_data_boxjitter()` in place
+  of the two removed functions, including a rewritten comparison section
   (binary-only now, since there's no continuous panel builtin to compare
-  against `build_data_overlay()`).
+  against `build_data_overlay()`). That section now lives in
+  `plot-binary.Rmd` -- see "Completed: splitting the plotting vignette by
+  response type" below.
 - Tests referencing the removed builders were updated: binary-response
   cases now use `build_data_boxjitter()`; continuous/count "panel"-layout
   regression coverage (which used to exercise `build_data_color()`) now
@@ -350,6 +359,36 @@ full test suite passing. Both updated vignettes were also rendered end
 to end (bare `rmarkdown::render()` and a full `pkgdown::build_site()`)
 to visually confirm the new prose and the binary/stratified comparison
 figures look right and legends dedupe correctly.
+
+## Completed: splitting the plotting vignette by response type
+
+**Motivation.** The single combined `plot.Rmd` had no clear division of
+responsibility from `design.Rmd`: response-type-agnostic content (model
+component, group component) sat alongside response-type-specific content
+(quantile CI method, data-layer builder choice) in one long article, and
+the two vignettes overlapped in places rather than cleanly separating
+"how do I plot this kind of response" from "how does the grammar work".
+
+**What was done:** `plot.Rmd` was replaced by three parallel articles --
+`plot-binary.Rmd`, `plot-continuous.Rmd`, `plot-count.Rmd` -- each
+covering the same skeleton (fit model, define plot, stratify, model
+component, quantile component, data component, group component, VPC
+plot) with response-type-specific detail where it matters (Clopper-
+Pearson vs. t-interval vs. exact Poisson interval; `build_data_boxjitter()`
+vs. `build_data_overlay()`-only). To avoid tripling the maintenance
+burden for the two layers that are genuinely response-type-agnostic
+(model, group), `plot-binary.Rmd` carries the full worked treatment of
+those two (including `build_model_spaghetti()` and
+`build_group_violin()`), and the continuous/count articles show only
+default usage with a link back to `plot-binary.Rmd`. A binary-response
+VPC example was added to `plot-binary.Rmd` for parallelism, since the
+continuous/count articles already had one. `design.Rmd` needed no
+structural change -- it already only contained grammar/architecture
+content, not usage tutorials -- just cross-reference fixes to point at
+the three new articles instead of the old combined one. `_pkgdown.yml`'s
+articles nav was reordered to binary/continuous/count/design.
+
+**Status:** done.
 
 ## Other completed fixes
 
