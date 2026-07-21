@@ -15,7 +15,7 @@ er_builder_quantile_errorbar(
   style
 )
 
-er_builder_quantile_bar(
+er_builder_quantile_errorbar_vlines(
   data,
   config,
   stratify,
@@ -26,6 +26,16 @@ er_builder_quantile_bar(
 )
 
 er_builder_quantile_pointrange(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  style
+)
+
+er_builder_quantile_pointrange_vlines(
   data,
   config,
   stratify,
@@ -78,9 +88,17 @@ Builders for the `quantile` layer
 which bins exposure into quantile groups and plots a response summary
 (rate, mean, or count-mean, depending on response type) with an
 uncertainty interval per bin: `er_builder_quantile_errorbar()` (point
-plus error bar, the default), `er_builder_quantile_bar()` (bar plus
-error bar), and `er_builder_quantile_pointrange()` (point range). All
-three are tagged `er_builder_tag(fn, layer = "quantile")`, so
+plus error bar, the default) and `er_builder_quantile_pointrange()`
+(point range). `er_builder_quantile_errorbar_vlines()` and
+`er_builder_quantile_pointrange_vlines()` are minor variants of each,
+additionally drawing a dotted
+[`ggplot2::geom_vline()`](https://ggplot2.tidyverse.org/reference/geom_abline.html)
+at each interior quantile cutpoint (i.e. every bin boundary except the
+exposure variable's overall min/max) – a common way exposure-response
+bin plots are annotated in practice, so that the reader can see exactly
+where one quantile bin ends and the next begins without inferring it
+from the point/error bar spacing alone. All four are tagged
+`er_builder_tag(fn, layer = "quantile")`, so
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 errors informatively if handed a builder tagged for a different layer.
 

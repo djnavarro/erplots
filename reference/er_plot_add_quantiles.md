@@ -49,7 +49,11 @@ er_plot_add_quantiles(
   [`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
   (a single
   [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html))
-  is the other built-in option; any function matching the standard
+  is another built-in option, as are `_vlines` variants of each
+  ([`er_builder_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md),
+  [`er_builder_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md))
+  that additionally draw a dotted line at each interior quantile-bin
+  boundary; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
   signature can be supplied instead – see
   [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
@@ -130,6 +134,14 @@ erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
   er_plot_add_quantiles(builder = er_builder_quantile_pointrange) |>
+  plot()
+
+# the default errorbar, with dotted lines marking the quantile-bin
+# boundaries
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod) |>
+  er_plot_add_quantiles(builder = er_builder_quantile_errorbar_vlines) |>
   plot()
 
 # plug in a fully custom builder; see `?er_builder` for the full contract

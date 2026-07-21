@@ -61,7 +61,7 @@ re-bin, re-summarise, or re-fit anything itself. Concretely:
 | Layer | `.part_*()` | Key `config` field | Contents |
 |----|----|----|----|
 | Model | `.part_model()` | `config$predictions` | One row per exposure grid point, with `fit_resp`, `ci_lower`, `ci_upper` (from [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)) |
-| Quantile | `.part_quantile()` | `config$summary` | One row per exposure-quantile bin (× stratum), with `x_mid`, `y_mid`, `ci_lower`, `ci_upper`, plus label-placement columns |
+| Quantile | `.part_quantile()` | `config$summary` | One row per exposure-quantile bin (× stratum), with `x_mid`, `y_mid`, `ci_lower`, `ci_upper`, plus label-placement columns. `config$breaks` also holds the `n + 1` quantile cutpoints themselves (from [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)), which [`er_builder_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)/[`er_builder_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md) use to draw bin-boundary separators |
 | Data | `.part_data()`/`.part_overlay()` | (none extra) | The builder mostly works from `data` directly, since this layer draws raw observations rather than a summary |
 | Group | `.part_group()` | `config[[group_var]]$data`, `config[[group_var]]$counts` | The subset of `data` for that grouping variable, joined to per-group sample-size labels |
 
@@ -70,12 +70,13 @@ re-bin, re-summarise, or re-fit anything itself. Concretely:
 Suppose the built-in
 [`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
 (point + error bar) and
-[`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)/[`er_builder_quantile_bar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
-alternatives all feel like the wrong idiom, and you’d rather draw the
-per-bin summary as a `geom_crossbar()`. First, look at what
-`config$summary` actually contains, by building the quantile part on its
-own and inspecting it – this is the step a custom builder’s author does
-once, by hand, before writing the builder:
+[`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
+alternatives (and their bin-boundary-annotated `_vlines` variants) all
+feel like the wrong idiom, and you’d rather draw the per-bin summary as
+a `geom_crossbar()`. First, look at what `config$summary` actually
+contains, by building the quantile part on its own and inspecting it –
+this is the step a custom builder’s author does once, by hand, before
+writing the builder:
 
 ``` r
 

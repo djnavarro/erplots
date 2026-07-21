@@ -160,8 +160,9 @@ plot
 - [`er_builder_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_builder_summary.md)
   : Summary annotation builders for exposure-response plots
 - [`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
-  [`er_builder_quantile_bar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
+  [`er_builder_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
   [`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
+  [`er_builder_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
   : Quantile summary builders for exposure-response plots
 - [`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
   [`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)

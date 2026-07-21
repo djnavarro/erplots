@@ -190,7 +190,11 @@ itself. Concretely:</p>
 <td><code>config$summary</code></td>
 <td>One row per exposure-quantile bin (× stratum), with
 <code>x_mid</code>, <code>y_mid</code>, <code>ci_lower</code>,
-<code>ci_upper</code>, plus label-placement columns</td>
+<code>ci_upper</code>, plus label-placement columns.
+<code>config$breaks</code> also holds the <code>n + 1</code> quantile
+cutpoints themselves (from <code><a href="../reference/cut_quantile.html">cut_exposure_quantile()</a></code>), which
+<code><a href="../reference/er_builder_quantile.html">er_builder_quantile_errorbar_vlines()</a></code>/<code><a href="../reference/er_builder_quantile.html">er_builder_quantile_pointrange_vlines()</a></code>
+use to draw bin-boundary separators</td>
 </tr>
 <tr class="odd">
 <td>Data</td>
@@ -219,9 +223,9 @@ to per-group sample-size labels</td>
 <h2 id="worked-example-a-custom-quantile-builder">Worked example: a custom quantile builder<a class="anchor" aria-label="anchor" href="#worked-example-a-custom-quantile-builder"></a>
 </h2>
 <p>Suppose the built-in <code><a href="../reference/er_builder_quantile.html">er_builder_quantile_errorbar()</a></code>
-(point + error bar) and
-<code><a href="../reference/er_builder_quantile.html">er_builder_quantile_pointrange()</a></code>/<code><a href="../reference/er_builder_quantile.html">er_builder_quantile_bar()</a></code>
-alternatives all feel like the wrong idiom, and you’d rather draw the
+(point + error bar) and <code><a href="../reference/er_builder_quantile.html">er_builder_quantile_pointrange()</a></code>
+alternatives (and their bin-boundary-annotated <code>_vlines</code>
+variants) all feel like the wrong idiom, and you’d rather draw the
 per-bin summary as a <code>geom_crossbar()</code>. First, look at what
 <code>config$summary</code> actually contains, by building the quantile
 part on its own and inspecting it – this is the step a custom builder’s

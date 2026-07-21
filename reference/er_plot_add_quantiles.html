@@ -103,7 +103,11 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <dd><p>Function drawing the quantile summary – defaults to
 <code><a href="er_builder_quantile.html">er_builder_quantile_errorbar()</a></code> (point + error bar).
 <code><a href="er_builder_quantile.html">er_builder_quantile_pointrange()</a></code> (a single <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>)
-is the other built-in option; any function matching the standard
+is another built-in option, as are <code>_vlines</code> variants of each
+(<code><a href="er_builder_quantile.html">er_builder_quantile_errorbar_vlines()</a></code>,
+<code><a href="er_builder_quantile.html">er_builder_quantile_pointrange_vlines()</a></code>) that additionally draw a
+dotted line at each interior quantile-bin boundary; any function
+matching the standard
 <code>(data, config, stratify, exposure, response, strata, style)</code>
 signature can be supplied instead – see <code><a href="er_builder.html">er_builder()</a></code>.
 <code>config$summary</code> is the pre-computed per-bin data frame (point
@@ -176,6 +180,14 @@ quantile summary rather than combining bins from both calls.</p>
 <span class="r-in"><span>  <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">er_plot_add_quantiles</span><span class="op">(</span>builder <span class="op">=</span> <span class="va">er_builder_quantile_pointrange</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># the default errorbar, with dotted lines marking the quantile-bin</span></span></span>
+<span class="r-in"><span><span class="co"># boundaries</span></span></span>
+<span class="r-in"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_plot_add_quantiles</span><span class="op">(</span>builder <span class="op">=</span> <span class="va">er_builder_quantile_errorbar_vlines</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># plug in a fully custom builder; see `?er_builder` for the full contract</span></span></span>
