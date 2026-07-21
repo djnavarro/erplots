@@ -60,7 +60,7 @@ singleton or additive" -- so calling it twice replaces the previous
 model layer rather than overlaying two model curves.
 }
 \examples{
-\dontrun{
+if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 erglm_data |>

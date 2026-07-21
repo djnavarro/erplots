@@ -64,7 +64,7 @@ singleton or additive" -- so calling it twice replaces the previous
 quantile summary rather than combining bins from both calls.
 }
 \examples{
-\dontrun{
+if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 erglm_data |>

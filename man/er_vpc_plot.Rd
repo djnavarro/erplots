@@ -56,7 +56,7 @@ column identifying each replicate (see e.g. \code{erglm::erglm_vpc_sim()} for on
 way to generate such simulations from a fitted model).
 }
 \examples{
-\dontrun{
+if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 sim <- erglm_vpc_sim(mod)

@@ -77,7 +77,7 @@
 #' @returns An (empty) plot object of class `er_plot`
 #'
 #' @examples
-#' \dontrun{
+#' if (requireNamespace("erglm", quietly = TRUE)) {
 #' library(erglm)
 #' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 #'
@@ -250,7 +250,7 @@ er_plot_style <- function(object, labels) {
 #' @returns The input `object`, with the model layer added
 #'
 #' @examples
-#' \dontrun{
+#' if (requireNamespace("erglm", quietly = TRUE)) {
 #' library(erglm)
 #' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 #' erglm_data |>
@@ -355,7 +355,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #' @returns The input `object`, with the quantile layer added
 #'
 #' @examples
-#' \dontrun{
+#' if (requireNamespace("erglm", quietly = TRUE)) {
 #' library(erglm)
 #' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 #' erglm_data |>
@@ -662,12 +662,12 @@ er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NU
 #' @returns The input `object`, with the data layer added
 #'
 #' @examples
-#' \dontrun{
+#' if (requireNamespace("erglm", quietly = TRUE)) {
 #' library(erglm)
 #' mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 #' erglm_data |>
 #'   er_plot(aucss, ae2, stratify_by = sex) |>
-#'   er_plot_add_model(mod2, keep_strata = FALSE) |>
+#'   er_plot_add_model(mod2) |>
 #'   er_plot_add_quantiles() |>
 #'   er_plot_add_data() |>
 #'   plot()
@@ -685,7 +685,7 @@ er_builder_tag <- function(builder, layout = NULL, fill_role = NULL, y_role = NU
 #' # points per panel (responders above, non-responders below), instead
 #' # of an overlay in the main panel
 #' erglm_data |>
-#'   er_plot(aucss, ae2) |>
+#'   er_plot(aucss, ae2, stratify_by = sex) |>
 #'   er_plot_add_model(mod2) |>
 #'   er_plot_add_data(builder = er_builder_data_boxjitter) |>
 #'   plot()
@@ -794,7 +794,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, builder = NULL, panel =
 #' @returns The input `object`, with a group panel added
 #'
 #' @examples
-#' \dontrun{
+#' if (requireNamespace("erglm", quietly = TRUE)) {
 #' library(erglm)
 #' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 #' erglm_data |>

@@ -50,7 +50,7 @@ adds another panel alongside any already added by a previous call,
 rather than replacing it.
 }
 \examples{
-\dontrun{
+if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 erglm_data |>

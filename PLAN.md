@@ -8,6 +8,79 @@ is done; step-by-step implementation narrative (file-by-file diffs, test
 counts, staged PR sequencing) is not, and has been trimmed. See git
 history / PR descriptions for that level of detail if it's ever needed.
 
+## High priority: `keep_strata = FALSE` / missing-covariate `newdata` can crash `er_predict()`
+
+**Discovered while** converting the roxygen `@examples` blocks across
+`R/er-plot-api.R`/`R/er-vpc.R` from `\dontrun{}` to
+`if (requireNamespace("erglm", quietly = TRUE)) { ... }` (so examples
+actually run on the pkgdown site whenever `erglm` is installed, instead
+of never being executed at all). Running the examples for real surfaced
+a latent bug that `\dontrun{}` had been silently hiding since at least
+the continuous/count generalisation work above.
+
+**The bug.** `.part_model()`'s `.get_model_predictions()` builds the
+prediction `newdata` it hands to `er_predict()` from *only* the exposure
+variable (a length-300 grid) plus, if `stratify = TRUE`, a cross-join
+against the strata variable's levels -- it has no way to know what other
+covariates a given fitted model's formula actually contains, since
+erplots never fits models and is deliberately model-agnostic. This is
+fine as long as the model's `er_predict()` method can cope with a
+`newdata` that's missing a covariate from its formula (e.g. by filling
+in a reference/mean level itself). `erglm`'s current
+`er_predict.erglm_model()` does not: it calls `stats::predict(object,
+newdata, ...)` directly with no fallback, so `predict.glm()` errors
+(`object 'sex' not found` for a model fit with `sex` as a covariate)
+the moment `newdata` doesn't include every covariate the formula
+references.
+
+**Where this bites concretely.** Any `er_plot_add_model(mod)` call where
+`mod`'s formula includes a covariate that either (a) isn't the plot's
+`stratify_by` variable at all, or (b) *is* `stratify_by`, but
+`keep_strata` resolves to `FALSE` for that call (either explicitly, or
+implicitly because `er_plot()` was built without `stratify_by` in the
+first place). Two of the `@examples` blocks in `er_plot_add_data()`'s
+docs hit exactly this (fixed for now by making sure every example
+plotting `mod2` -- fit as `ae2 ~ aucss + sex` -- always stratifies by
+`sex`), but the underlying gap is general: **any** user who fits a model
+with covariates beyond the exposure variable and calls
+`er_plot_add_model(mod, keep_strata = FALSE)`, or omits `stratify_by`
+from `er_plot()` altogether, will currently hit this same crash for any
+model implementation (not just erglm's) that doesn't defensively handle
+an incomplete `newdata`.
+
+**What needs deciding, roughly in priority order:**
+1. **Whose responsibility is it to fill in missing covariates -- erplots
+   or the model's `er_predict()` method?** The model interface
+   (`?er_model_interface`) is currently silent on this. If it's the
+   model's job, that needs to be stated explicitly in
+   `?er_model_interface`'s contract, and `erglm::er_predict.erglm_model()`
+   needs a fix (fill unreferenced covariates with a reference level --
+   first level, for factors; mean, for numerics -- before calling
+   `predict()`). If it's erplots' job instead, `.get_model_predictions()`
+   needs to learn what covariates a fitted model actually has (e.g. via
+   `stats::terms()`/`all.vars()` on some formula the model interface
+   would need to expose) and fill them in from `object$data` before
+   calling `er_predict()` -- a bigger, more invasive change given the
+   "never reach into model internals" principle in `AGENTS.md`.
+2. **Should this fail loudly instead, by design?** An alternative to
+   (1) is deciding that `er_plot_add_model(mod, keep_strata = FALSE)`
+   on a model with extra covariates is simply not a supported
+   combination, and should error *immediately and informatively* at
+   `er_plot_add_model()` call time (before ever calling `er_predict()`)
+   rather than crashing deep inside a model's `predict()` call with a
+   confusing "object not found"-style error. This is a much smaller
+   change (erplots-side only), but only papers over the crash rather
+   than making the combination actually work.
+3. Whichever of (1)/(2) is chosen, add regression test coverage:
+   currently no test in `tests/testthat/` exercises a model fit with
+   a non-exposure, non-strata covariate under `keep_strata = FALSE` (or
+   under no `stratify_by` at all) -- this whole class of bug was invisible
+   to the test suite as well as to `\dontrun{}`-skipped examples.
+
+**Status:** not started. Tracked here as high priority because it's a
+crash (not a cosmetic/mis-plot issue) reachable through ordinary,
+documented usage, and it was only found by accident.
+
 ## Completed: removing `er_builder_quantile_bar()`, adding `_vlines` quantile builder variants
 
 **Motivation.** On review, `er_builder_quantile_bar()` (bar + error bar)

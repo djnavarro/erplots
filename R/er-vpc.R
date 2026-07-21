@@ -34,7 +34,7 @@
 #' @returns A ggplot2 object
 #'
 #' @examples
-#' \dontrun{
+#' if (requireNamespace("erglm", quietly = TRUE)) {
 #' library(erglm)
 #' mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 #' sim <- erglm_vpc_sim(mod)

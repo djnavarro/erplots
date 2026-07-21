@@ -83,12 +83,12 @@ and it shares the base plot's own strata legend (the same one the
 model/quantile layers use) rather than needing one of its own.
 }
 \examples{
-\dontrun{
+if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 erglm_data |>
   er_plot(aucss, ae2, stratify_by = sex) |>
-  er_plot_add_model(mod2, keep_strata = FALSE) |>
+  er_plot_add_model(mod2) |>
   er_plot_add_quantiles() |>
   er_plot_add_data() |>
   plot()
@@ -106,7 +106,7 @@ erglm_data |>
 # points per panel (responders above, non-responders below), instead
 # of an overlay in the main panel
 erglm_data |>
-  er_plot(aucss, ae2) |>
+  er_plot(aucss, ae2, stratify_by = sex) |>
   er_plot_add_model(mod2) |>
   er_plot_add_data(builder = er_builder_data_boxjitter) |>
   plot()
