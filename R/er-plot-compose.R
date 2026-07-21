@@ -42,7 +42,25 @@
     y = object$response$label
   )
   ll <- names(ggplot2::get_labs(p$base))
-  if ("fill" %in% ll) p$base <- p$base + ggplot2::labs(fill = object$strata$label)
+
+  # `fill` on the base plot almost always means strata (e.g.
+  # `build_model_ribbonline()`'s ribbon), but an "overlay"-layout data
+  # builder can claim `fill` for something else entirely --
+  # `build_data_hex()` uses it for bin density, and tags itself
+  # `attr(builder, "er_data_fill") <- "density"` to say so (mirroring
+  # `build_group_histogram()`'s `er_group_y` tag). Such a builder can
+  # only coexist with other `fill`-mapped layers if they don't map
+  # `fill` themselves (a discrete `fill = strata` ribbon and a
+  # continuous density `fill` collide as two scales for one aesthetic,
+  # and ggplot2 errors) -- so if `fill` is present at all alongside a
+  # density-tagged overlay builder, it's safe to assume the density is
+  # the sole source and label it accordingly rather than as strata.
+  overlay_builder <- object$part$overlay$config$builder
+  fill_is_density <- identical(attr(overlay_builder, "er_data_fill"), "density")
+
+  if ("fill" %in% ll) {
+    p$base <- p$base + ggplot2::labs(fill = if (fill_is_density) "Count" else object$strata$label)
+  }
   if ("colour" %in% ll) p$base <- p$base + ggplot2::labs(color = object$strata$label)
 
   # the data layer's `colour` aesthetic means strata everywhere except
@@ -77,9 +95,22 @@
 
   if (!is.null(p$group)) {
     for(g in names(p$group)) {
+      # most group builders (e.g. `build_group_boxplot()`/
+      # `build_group_violin()`) put the group variable itself on the
+      # y-axis, so the group variable's own label is the right y-axis
+      # title. A histogram-style builder instead needs its y-axis free
+      # for counts (with group levels shown via facet strips), and tags
+      # itself `attr(builder, "er_group_y") <- "count"` to say so -- see
+      # `build_group_histogram()`.
+      group_builder <- object$part$group$config[[g]]$builder
+      y_label <- if (identical(attr(group_builder, "er_group_y"), "count")) {
+        "Count"
+      } else {
+        object$part$group$config[[g]]$y$label
+      }
       p$group[[g]] <- p$group[[g]] + ggplot2::labs(
         x = object$exposure$label,
-        y = object$part$group$config[[g]]$y$label
+        y = y_label
       )
       ll <- names(ggplot2::get_labs(p$group[[g]]))
       if ("fill" %in% ll) p$group[[g]] <- p$group[[g]] + ggplot2::labs(fill = object$strata$label)

@@ -51,6 +51,53 @@ were both removed once review found neither earned its keep alongside
 `er_layout()`, since `.part_data()`'s response-type dispatch was left in
 place.
 
+`build_data_hex()` is a second `"overlay"`-layout data builder alongside
+`build_data_overlay()`: a `geom_hex()`-based 2D density, for when N is
+large enough that raw points overplot into an unreadable smear (most
+useful for continuous/count responses, whose y-values are spread out
+rather than piled at 0/1). It requires the `hexbin` package (`Suggests`,
+guarded with `rlang::check_installed()`). Because `geom_hex()`'s `fill`
+aesthetic already encodes bin density, there's no channel left for
+`color = strata`; when stratified, all strata are pooled into a single
+hex-binned density (with an `rlang::inform()` message noting this)
+rather than partially or misleadingly encoding strata. `build_data_hex()`
+tags itself `attr(builder, "er_data_fill") <- "density"`, a second
+attribute alongside `er_layout()`'s (mirroring `build_group_histogram()`'s
+`er_group_y` tag), which `.polish_labels()` reads to title the base
+plot's `fill` legend "Count" rather than the strata label it uses by
+default. This only matters when `build_data_hex()`'s `fill` is the sole
+`fill` mapping on the base plot: a stratified `build_model_ribbonline()`
+also maps `fill = strata` (discrete) on its ribbon, and ggplot2 can't
+reconcile that with `build_data_hex()`'s continuous density `fill` on
+the same aesthetic -- it errors ("Continuous value supplied to a
+discrete scale") rather than silently misrendering. This is a genuine
+ggplot2 limitation, not fixable from inside the builder; pair a
+stratified `build_data_hex()` plot with a model builder that doesn't map
+`fill`, e.g. `build_model_line()` (color only).
+
+The group panel layer (`er_plot_show_groups()`) has a third built-in
+builder, `build_group_histogram()`, alongside `build_group_boxplot()`
+(the default) and `build_group_violin()`. Unlike those two -- which put
+the group variable itself on the y-axis (`y = lvl`, one categorical row
+per level) -- a histogram needs its y-axis free for counts, so
+`build_group_histogram()` puts the group levels on facet strips instead
+(`facet_grid(rows = vars(lvl), switch = "y")`) and tags itself
+`attr(builder, "er_group_y") <- "count"`, mirroring `er_layout()`'s
+attribute-based approach for the data layer. `.polish_labels()` reads
+that tag to title the y-axis "Count" rather than the group variable's
+own label (which is what it still uses for `build_group_boxplot()`/
+`build_group_violin()`, where the group variable *is* the y-axis);
+builders that don't set the tag keep that old, categorical-label
+behaviour, so this is opt-in rather than a breaking requirement like
+`er_layout()`. Putting the group levels on facet strips also surfaced a
+second, unrelated quirk: ggplot2's default text angle for a left-hand
+strip (`switch = "y"`) is rotated 90 degrees, sized to fit the (short)
+row height rather than the (longer) available width, so long `lvl`
+labels like `"Placebo (N=100)"` were getting clipped vertically.
+`build_group_histogram()` works around this with `theme(strip.text.y.left
+= element_text(angle = 0, hjust = 0))`, rotating the text back to
+horizontal so the strip auto-expands to fit the full label.
+
 The companion package [erglm](https://github.com/djnavarro/erglm)
 (formerly `erlr`) fits GLM-based exposure-response models and implements
 this package's generics for its model objects. erplots has no hard
@@ -79,8 +126,10 @@ takes a `builder` argument (`er_plot_show_model()` additionally takes
 defaults to `build_summary_pvalue()`) and can be set to any other
 function matching the standard `build_*()` signature
 (`function(data, config, stratify, exposure, response, strata, style)`)
--- built-in (e.g. `build_model_spaghetti()`, `build_quantile_pointrange()`,
-`build_data_boxjitter()`, `build_group_violin()`) or
+-- built-in (e.g. `build_model_spaghetti()`, `build_model_line()`,
+`build_quantile_pointrange()`, `build_quantile_bar()`,
+`build_data_boxjitter()`, `build_data_hex()`, `build_group_violin()`,
+`build_group_histogram()`) or
 fully custom (e.g. a `geom_crossbar()`-based quantile builder, or a
 density/histogram-based data-layer builder instead of a scatter). There
 used to be a separate `style` string argument alongside `builder`, but

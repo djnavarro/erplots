@@ -6,11 +6,15 @@
 \name{build_data_boxjitter}
 \alias{build_data_boxjitter}
 \alias{build_data_overlay}
+\alias{build_data_hex}
 \alias{build_group_boxplot}
+\alias{build_group_histogram}
 \alias{build_group_violin}
 \alias{build_model_ribbonline}
+\alias{build_model_line}
 \alias{build_model_spaghetti}
 \alias{build_quantile_errorbar}
+\alias{build_quantile_bar}
 \alias{build_quantile_pointrange}
 \alias{build_summary_pvalue}
 \alias{er_partial}
@@ -20,7 +24,19 @@ build_data_boxjitter(data, config, stratify, exposure, response, strata, style)
 
 build_data_overlay(data, config, stratify, exposure, response, strata, style)
 
+build_data_hex(data, config, stratify, exposure, response, strata, style)
+
 build_group_boxplot(data, config, stratify, exposure, response, strata, style)
+
+build_group_histogram(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  style
+)
 
 build_group_violin(data, config, stratify, exposure, response, strata, style)
 
@@ -33,6 +49,8 @@ build_model_ribbonline(
   strata,
   style
 )
+
+build_model_line(data, config, stratify, exposure, response, strata, style)
 
 build_model_spaghetti(
   data,
@@ -53,6 +71,8 @@ build_quantile_errorbar(
   strata,
   style
 )
+
+build_quantile_bar(data, config, stratify, exposure, response, strata, style)
 
 build_quantile_pointrange(
   data,

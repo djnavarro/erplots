@@ -25,6 +25,7 @@ Imports:
     withr
 Suggests: 
     erglm,
+    hexbin,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)

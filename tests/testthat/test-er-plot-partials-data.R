@@ -109,3 +109,70 @@ test_that("build_data_overlay returns a single geom, jittered only for a binary 
   expect_false(is.null(out_bin_str[[1]]$mapping$colour))
   expect_null(out_cont[[1]]$mapping$colour)
 })
+
+
+test_that("build_data_hex returns a single hex geom for any response type", {
+  skip_if_not_installed("erglm")
+  skip_if_not_installed("hexbin")
+
+  p_binary <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_show_data(builder = build_data_hex)
+  p_cont <- er_plot(er_test_data, aucss, biomarker_change) |>
+    er_plot_show_data(builder = build_data_hex)
+
+  args <- function(p) {
+    list(
+      data = p$data,
+      config = p$part$overlay$config,
+      stratify = p$part$overlay$stratify,
+      exposure = p$exposure,
+      response = p$response,
+      strata = p$strata,
+      style = p$style
+    )
+  }
+
+  out_binary <- do.call(build_data_hex, args(p_binary))
+  out_cont <- do.call(build_data_hex, args(p_cont))
+
+  expect_length(out_binary, 1)
+  expect_length(out_cont, 1)
+  expect_true(inherits(out_binary[[1]], "LayerInstance"))
+  expect_true(inherits(out_cont[[1]], "LayerInstance"))
+  expect_identical(class(out_cont[[1]]$geom)[1], "GeomHex")
+})
+
+test_that("build_data_hex informs (not warns/errors) that strata aren't encoded", {
+  skip_if_not_installed("erglm")
+  skip_if_not_installed("hexbin")
+
+  p_strat <- er_plot(er_test_data, aucss, biomarker_change, sex) |>
+    er_plot_show_data(builder = build_data_hex)
+
+  args <- list(
+    data = p_strat$data,
+    config = p_strat$part$overlay$config,
+    stratify = p_strat$part$overlay$stratify,
+    exposure = p_strat$exposure,
+    response = p_strat$response,
+    strata = p_strat$strata,
+    style = p_strat$style
+  )
+
+  expect_message(do.call(build_data_hex, args))
+  out <- suppressMessages(do.call(build_data_hex, args))
+  expect_null(out[[1]]$mapping$colour)
+  expect_null(out[[1]]$mapping$fill)
+})
+
+test_that("er_plot_show_data() builds and renders with builder = build_data_hex", {
+  skip_if_not_installed("erglm")
+  skip_if_not_installed("hexbin")
+
+  plt <- er_test_data |>
+    er_plot(aucss, biomarker_change) |>
+    er_plot_show_model(er_test_mod_gaussian) |>
+    er_plot_show_data(builder = build_data_hex)
+
+  expect_no_error(er_plot_build(plt))
+})

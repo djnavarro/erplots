@@ -64,6 +64,42 @@ build_model_ribbonline <- function(data, config, stratify, exposure, response, s
 
 #' @rdname er_partial
 #' @export
+build_model_line <- function(data, config, stratify, exposure, response, strata, style) {
+
+  if (stratify == FALSE) {
+
+    model_line <- ggplot2::geom_path(
+      data = config$predictions,
+      mapping = ggplot2::aes(
+        x = .data[[exposure$name]],
+        y = fit_resp
+      ),
+      linewidth = 1,
+      key_glyph = style$draw_key
+    )
+  }
+
+  if (stratify == TRUE) {
+
+    model_line <- ggplot2::geom_path(
+      data = config$predictions,
+      mapping = ggplot2::aes(
+        x = .data[[exposure$name]],
+        y = fit_resp,
+        color = .data[[strata$name]]
+      ),
+      linewidth = 1,
+      key_glyph = style$draw_key
+    )
+  }
+
+  geoms <- list(model_line)
+  return(geoms)
+}
+
+
+#' @rdname er_partial
+#' @export
 build_model_spaghetti <- function(data, config, stratify, exposure, response, strata, style) {
 
   newdata <- config$predictions |> 

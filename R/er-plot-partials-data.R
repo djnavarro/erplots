@@ -139,3 +139,56 @@ build_data_overlay <- er_layout(function(data, config, stratify, exposure, respo
 
   return(geoms)
 }, layout = "overlay")
+
+
+#' @rdname er_partial
+#' @export
+build_data_hex <- er_layout(function(data, config, stratify, exposure, response, strata, style) {
+
+  # a 2D-binned density alternative to `build_data_overlay()`'s raw
+  # scatter, for when N is large enough that individual points overplot
+  # into an unreadable smear -- most useful for continuous/count
+  # responses (where y-values are spread out rather than piled at 0/1).
+  # `geom_hex()`'s fill aesthetic already encodes bin density, so unlike
+  # `build_data_overlay()` there's no channel left for a `color = strata`
+  # mapping; when stratified, all strata are pooled into a single
+  # hex-binned density rather than partially or misleadingly encoding
+  # strata (see `?er_partial`'s "a layer's own encoding takes precedence"
+  # rule). A stratum-faceted hexbin remains possible via a custom
+  # builder, but isn't attempted here.
+  #
+  # Because this builder's `fill` is continuous (density) rather than
+  # discrete (strata), it can't share the base plot's `fill` aesthetic
+  # with a stratified `build_model_ribbonline()` (whose ribbon maps
+  # `fill = strata`, discrete) -- ggplot2 errors ("Continuous value
+  # supplied to a discrete scale") if both are combined. Pair a
+  # stratified plot using `build_data_hex()` with a model builder that
+  # doesn't map `fill`, e.g. `build_model_line()` (color only). The
+  # `attr(builder, "er_data_fill") <- "density"` tag below tells
+  # `.polish_labels()` to title the (sole) `fill` legend "Count" rather
+  # than the strata label it uses by default.
+  rlang::check_installed("hexbin", reason = "for `build_data_hex()`'s `geom_hex()`.")
+
+  if (stratify == TRUE) {
+    rlang::inform(paste0(
+      "`build_data_hex()` does not encode `strata` -- its fill aesthetic ",
+      "already encodes point density, so all strata are pooled into a ",
+      "single hex-binned density."
+    ))
+  }
+
+  geoms <- list(
+    ggplot2::geom_hex(
+      data = data,
+      mapping = ggplot2::aes(
+        x = .data[[exposure$name]],
+        y = .data[[response$name]]
+      ),
+      bins = 30,
+      key_glyph = style$draw_key
+    )
+  )
+
+  return(geoms)
+}, layout = "overlay")
+attr(build_data_hex, "er_data_fill") <- "density"
