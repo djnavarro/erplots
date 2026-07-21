@@ -222,7 +222,7 @@ argument
 additionally has `summary_builder`) sharing a common signature –
 `function(data, config, stratify, exposure, response, strata, style)`.
 That signature is a documented, public part of the API (see
-\[er_partial()\]), each layer’s `builder` defaults to one built-in
+\[er_builder()\]), each layer’s `builder` defaults to one built-in
 `er_builder_*()` function, and it can be set to any other function
 matching the same signature – no need to fork the package or reach into
 `object$part` internals. For the data layer specifically, a custom

@@ -9,7 +9,7 @@ builder's y-axis means when it isn't the group variable itself
 (`layer`). All four arguments are optional and independent – pass only
 the ones a given builder needs, in one call, rather than chaining
 separate setters. See
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)'s
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)'s
 "Writing your own builder" section for the full contract.
 
 ## Usage
@@ -29,7 +29,7 @@ er_builder_tag(
 - builder:
 
   A function matching the standard `er_builder_*()` signature (see
-  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md))
+  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md))
 
 - layout:
 
@@ -112,7 +112,7 @@ for a data-layer builder.
 ## See also
 
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 
 ## Examples
 

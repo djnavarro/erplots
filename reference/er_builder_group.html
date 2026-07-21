@@ -42,7 +42,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Group panel builders for exposure-response plots</h1>
-      <small class="dont-index">Source: <a href="https://github.com/djnavarro/erplots/blob/main/R/er-plot-partials-group.R" class="external-link"><code>R/er-plot-partials-group.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/djnavarro/erplots/blob/main/R/er-plot-builder-group.R" class="external-link"><code>R/er-plot-builder-group.R</code></a></small>
       <div class="d-none name"><code>er_builder_group.Rd</code></div>
     </div>
 
@@ -117,7 +117,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A geom, or a list of geoms; see <code><a href="er_partial.html">er_partial()</a></code>.</p>
+    <p>A geom, or a list of geoms; see <code><a href="er_builder.html">er_builder()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -131,12 +131,12 @@ instead puts them on facet strips and frees the y-axis for counts (see
 All three are tagged <code>er_builder_tag(fn, layer = "group")</code>, so
 <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> errors informatively if handed a builder
 tagged for a different layer.</p>
-<p>See <code><a href="er_partial.html">er_partial()</a></code> for the shared builder interface these functions
+<p>See <code><a href="er_builder.html">er_builder()</a></code> for the shared builder interface these functions
 implement, including how to write a custom builder of your own.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="er_partial.html">er_partial()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="er_builder.html">er_builder()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

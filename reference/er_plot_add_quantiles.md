@@ -52,7 +52,7 @@ er_plot_add_quantiles(
   is the other built-in option; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
   signature can be supplied instead – see
-  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
   `config$summary` is the pre-computed per-bin data frame (point
   estimate + CI) to draw. If `builder` is tagged with a `layer` (via
   [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md))
@@ -92,7 +92,7 @@ calls.
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
 [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md),
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 
 ## Examples
 
@@ -132,7 +132,7 @@ erglm_data |>
   er_plot_add_quantiles(builder = er_builder_quantile_pointrange) |>
   plot()
 
-# plug in a fully custom builder; see `?er_partial` for the full contract
+# plug in a fully custom builder; see `?er_builder` for the full contract
 build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
   ggplot2::geom_crossbar(
     data = config$summary,

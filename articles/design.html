@@ -338,7 +338,7 @@ additionally has <code>summary_builder</code>) sharing a common
 signature –
 <code>function(data, config, stratify, exposure, response, strata, style)</code>.
 That signature is a documented, public part of the API (see
-[er_partial()]), each layer’s <code>builder</code> defaults to one
+[er_builder()]), each layer’s <code>builder</code> defaults to one
 built-in <code>er_builder_*()</code> function, and it can be set to any
 other function matching the same signature – no need to fork the package
 or reach into <code>object$part</code> internals. For the data layer

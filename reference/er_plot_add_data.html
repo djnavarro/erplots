@@ -123,7 +123,7 @@ means a shared color aesthetic, for any response type.</p></dd>
 <code><a href="er_builder_data.html">er_builder_data_overlay()</a></code>. <code><a href="er_builder_data.html">er_builder_data_boxjitter()</a></code> (binary response
 only: a boxplot + jittered points per panel) is the other built-in
 option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, style)</code> signature and tagged with
-<code><a href="er_builder_tag.html">er_builder_tag()</a></code> can be supplied instead – see <code><a href="er_partial.html">er_partial()</a></code> for the
+<code><a href="er_builder_tag.html">er_builder_tag()</a></code> can be supplied instead – see <code><a href="er_builder.html">er_builder()</a></code> for the
 full contract, e.g. a 2D density in the main panel, a continuous/
 count response's color-encoded panel, or per-panel histograms. If
 <code>builder</code> is tagged with a <code>layer</code> other than <code>"data"</code>, this errors
@@ -154,7 +154,7 @@ to decide how to assemble the layer, rather than taking a separate
 argument for it. This makes the pairing structural rather than
 incidental: <code><a href="er_builder_data.html">er_builder_data_overlay()</a></code> can never be routed into upper/lower
 panels, and <code><a href="er_builder_data.html">er_builder_data_boxjitter()</a></code> can never be merged into the main
-panel. See <code><a href="er_builder_tag.html">er_builder_tag()</a></code> and <code><a href="er_partial.html">er_partial()</a></code> for how to tag a custom
+panel. See <code><a href="er_builder_tag.html">er_builder_tag()</a></code> and <code><a href="er_builder.html">er_builder()</a></code> for how to tag a custom
 builder the same way.</p>
 <p>This layer is <strong>singleton</strong> – see <code><a href="er_plot.html">er_plot()</a></code>'s "Layers are either
 singleton or additive" – calling it again (with any builder) fully
@@ -173,7 +173,7 @@ model/quantile layers use) rather than needing one of its own.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>,
-<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>, <code><a href="er_partial.html">er_partial()</a></code></p></div>
+<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>, <code><a href="er_builder.html">er_builder()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -208,7 +208,7 @@ model/quantile layers use) rather than needing one of its own.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># plug in a 2D density in the main panel instead of a scatter; tagging</span></span></span>
 <span class="r-in"><span><span class="co"># it "overlay" via `er_builder_tag()` keeps it in the single main-panel</span></span></span>
-<span class="r-in"><span><span class="co"># layout -- see `?er_partial`</span></span></span>
+<span class="r-in"><span><span class="co"># layout -- see `?er_builder`</span></span></span>
 <span class="r-in"><span><span class="va">build_data_density</span> <span class="op">&lt;-</span> <span class="fu"><a href="er_builder_tag.html">er_builder_tag</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="external-link">geom_density_2d</a></span><span class="op">(</span></span></span>

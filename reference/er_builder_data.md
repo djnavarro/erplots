@@ -61,7 +61,7 @@ er_builder_data_hex(data, config, stratify, exposure, response, strata, style)
 ## Value
 
 A geom, or a list of geoms; see
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
 
 ## Details
 
@@ -86,11 +86,11 @@ tagged `layer = "data"`, so
 errors informatively if handed a builder tagged for a different layer.
 
 See
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 for the shared builder interface these functions implement, including
 how to write a custom builder of your own.
 
 ## See also
 
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md),
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md),
 [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)

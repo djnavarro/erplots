@@ -149,8 +149,8 @@ Build exposure-response plots from any model that implements
 Low level functions to draw specific components of an exposure-response
 plot
 
-- [`er_partial`](https://erplots.djnavarro.net/reference/er_partial.md)
-  : Partial builders for exposure-response plots
+- [`er_builder`](https://erplots.djnavarro.net/reference/er_builder.md)
+  : Builder functions for exposure-response plots
 - [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
   : Tag a builder with structural/aesthetic metadata
 - [`er_builder_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_builder_model.md)

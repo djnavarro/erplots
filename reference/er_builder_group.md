@@ -69,7 +69,7 @@ er_builder_group_violin(
 ## Value
 
 A geom, or a list of geoms; see
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
 
 ## Details
 
@@ -87,10 +87,10 @@ strips and frees the y-axis for counts (see `Details` in the package's
 errors informatively if handed a builder tagged for a different layer.
 
 See
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 for the shared builder interface these functions implement, including
 how to write a custom builder of your own.
 
 ## See also
 
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)

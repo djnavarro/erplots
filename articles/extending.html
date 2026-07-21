@@ -144,7 +144,7 @@ stratification variables declared in <code><a href="../reference/er_plot.html">e
 </table>
 <p>The function returns a geom, or a list of geoms/other objects that
 can be added to a ggplot2 plot – nothing more. This signature is
-documented as public API on <code><a href="../reference/er_partial.html">?er_partial</a></code>, alongside each
+documented as public API on <code><a href="../reference/er_builder.html">?er_builder</a></code>, alongside each
 layer’s own <code>er_builder_*()</code> family page
 (<code><a href="../reference/er_builder_model.html">?er_builder_model</a></code>, <code><a href="../reference/er_builder_quantile.html">?er_builder_quantile</a></code>,
 etc.).</p>
@@ -574,7 +574,7 @@ idiom in a familiar slot – the crossbar example above needed no tags at
 all. It exists for the less common case where a builder changes
 <em>where</em> its output goes, or <em>what</em> one of its aesthetics
 represents, and the rest of the plot needs to be told so it can label
-things correctly. See <code><a href="../reference/er_partial.html">?er_partial</a></code> for the full public-API
+things correctly. See <code><a href="../reference/er_builder.html">?er_builder</a></code> for the full public-API
 contract, and <a href="design.html">the plot grammar article</a> for how
 these layers fit together more broadly.</p>
 </div>

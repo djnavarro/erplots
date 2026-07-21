@@ -106,14 +106,14 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <code><a href="er_builder_model.html">er_builder_model_spaghetti()</a></code> (simulated draws, via <code><a href="er_model_interface.html">er_simulate()</a></code>) is
 the other built-in option; any function matching the standard
 <code>(data, config, stratify, exposure, response, strata, style)</code>
-signature can be supplied instead – see <code><a href="er_partial.html">er_partial()</a></code>.</p></dd>
+signature can be supplied instead – see <code><a href="er_builder.html">er_builder()</a></code>.</p></dd>
 
 
 <dt id="arg-summary-builder">summary_builder<a class="anchor" aria-label="anchor" href="#arg-summary-builder"></a></dt>
 <dd><p>Function drawing the summary annotation –
 defaults to <code><a href="er_builder_summary.html">er_builder_summary_pvalue()</a></code>. Any function matching the same
 standard signature as <code>builder</code> can be supplied instead. See
-<code><a href="er_partial.html">er_partial()</a></code>. If <code>builder</code>/<code>summary_builder</code> is tagged with a
+<code><a href="er_builder.html">er_builder()</a></code>. If <code>builder</code>/<code>summary_builder</code> is tagged with a
 <code>layer</code> (via <code><a href="er_builder_tag.html">er_builder_tag()</a></code>) other than <code>"model"</code>/<code>"summary"</code>
 respectively, this errors informatively rather than passing a
 mismatched <code>config</code> shape to the builder; an untagged builder is
@@ -137,7 +137,7 @@ model layer rather than overlaying two model curves.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>,
-<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>, <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>, <code><a href="er_partial.html">er_partial()</a></code></p></div>
+<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>, <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>, <code><a href="er_builder.html">er_builder()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -156,7 +156,7 @@ model layer rather than overlaying two model curves.</p>
 <span class="r-in"><span>  <span class="fu">er_plot_add_model</span><span class="op">(</span><span class="va">mod</span>, builder <span class="op">=</span> <span class="va">er_builder_model_spaghetti</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># plug in a fully custom model-curve builder; see `?er_partial` for the</span></span></span>
+<span class="r-in"><span><span class="co"># plug in a fully custom model-curve builder; see `?er_builder` for the</span></span></span>
 <span class="r-in"><span><span class="co"># full contract</span></span></span>
 <span class="r-in"><span><span class="va">build_model_dashed</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">style</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span></span></span>

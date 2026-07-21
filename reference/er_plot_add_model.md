@@ -61,7 +61,7 @@ er_plot_add_model(
   is the other built-in option; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
   signature can be supplied instead – see
-  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
 
 - summary_builder:
 
@@ -69,7 +69,7 @@ er_plot_add_model(
   [`er_builder_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_builder_summary.md).
   Any function matching the same standard signature as `builder` can be
   supplied instead. See
-  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
   If `builder`/`summary_builder` is tagged with a `layer` (via
   [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md))
   other than `"model"`/`"summary"` respectively, this errors
@@ -97,7 +97,7 @@ the previous model layer rather than overlaying two model curves.
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 
 ## Examples
 
@@ -116,7 +116,7 @@ erglm_data |>
   er_plot_add_model(mod, builder = er_builder_model_spaghetti) |>
   plot()
 
-# plug in a fully custom model-curve builder; see `?er_partial` for the
+# plug in a fully custom model-curve builder; see `?er_builder` for the
 # full contract
 build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
   ggplot2::geom_line(

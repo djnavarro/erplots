@@ -56,7 +56,7 @@ er_plot_add_data(object, keep_strata = NULL, builder = NULL, panel = "both")
   signature and tagged with
   [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
   can be supplied instead – see
-  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
   for the full contract, e.g. a 2D density in the main panel, a
   continuous/ count response's color-encoded panel, or per-panel
   histograms. If `builder` is tagged with a `layer` other than `"data"`,
@@ -93,7 +93,7 @@ can never be routed into upper/lower panels, and
 can never be merged into the main panel. See
 [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
 and
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 for how to tag a custom builder the same way.
 
 This layer is **singleton** – see
@@ -119,7 +119,7 @@ own.
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 
 ## Examples
 
@@ -154,7 +154,7 @@ erglm_data |>
 
 # plug in a 2D density in the main panel instead of a scatter; tagging
 # it "overlay" via `er_builder_tag()` keeps it in the single main-panel
-# layout -- see `?er_partial`
+# layout -- see `?er_builder`
 build_data_density <- er_builder_tag(
   function(data, config, stratify, exposure, response, strata, style) {
     ggplot2::geom_density_2d(

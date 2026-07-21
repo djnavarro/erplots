@@ -38,7 +38,7 @@ er_plot_add_groups(
   is the other built-in option; any function matching the standard
   `(data, config, stratify, exposure, response, strata, style)`
   signature can be supplied instead – see
-  [`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
   Applied to every grouping variable added by this call. If `builder` is
   tagged with a `layer` (via
   [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md))
@@ -77,7 +77,7 @@ it.
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 
 ## Examples
 

@@ -49,7 +49,7 @@ er_builder_summary_pvalue(
 ## Value
 
 A geom, or a list of geoms; see
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
 
 ## Details
 
@@ -64,10 +64,10 @@ errors informatively if it's passed as `builder` (the curve/ribbon
 argument) rather than `summary_builder`.
 
 See
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 for the shared builder interface these functions implement, including
 how to write a custom builder of your own.
 
 ## See also
 
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)

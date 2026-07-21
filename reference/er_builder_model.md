@@ -69,7 +69,7 @@ er_builder_model_spaghetti(
 ## Value
 
 A geom, or a list of geoms; see
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md).
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
 
 ## Details
 
@@ -88,10 +88,10 @@ errors informatively if handed one of these swapped into the
 entirely.
 
 See
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
 for the shared builder interface these functions implement, including
 how to write a custom builder of your own.
 
 ## See also
 
-[`er_partial()`](https://erplots.djnavarro.net/reference/er_partial.md)
+[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
