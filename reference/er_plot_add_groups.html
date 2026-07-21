@@ -104,7 +104,11 @@ variables (<code>NULL</code>, the default, uses <code><a href="cut_quantile.html
 <dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
 <dd><p>Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to <code>TRUE</code> if
-<code>stratify_by</code> was set in <code><a href="er_plot.html">er_plot()</a></code>, <code>FALSE</code> otherwise</p></dd>
+<code>stratify_by</code> was set in <code><a href="er_plot.html">er_plot()</a></code>, <code>FALSE</code> otherwise. Errors if
+<code>TRUE</code> and <code>group_by</code> is itself the plot's stratification
+variable, since that would mean grouping and stratifying by the
+same column at once; pass <code>keep_strata = FALSE</code> for that grouping
+variable instead</p></dd>
 
 </dl></div>
     <div class="section level2">

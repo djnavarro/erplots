@@ -57,7 +57,10 @@ er_plot_add_groups(
   Logical, indicating whether this layer should be split by the plot's
   stratification variable; defaults to `TRUE` if `stratify_by` was set
   in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-  `FALSE` otherwise
+  `FALSE` otherwise. Errors if `TRUE` and `group_by` is itself the
+  plot's stratification variable, since that would mean grouping and
+  stratifying by the same column at once; pass `keep_strata = FALSE` for
+  that grouping variable instead
 
 ## Value
 

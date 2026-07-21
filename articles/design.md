@@ -104,7 +104,7 @@ plt <- erglm_data |>
   er_plot_add_groups(treatment) # adds a second panel, doesn't replace the first
 
 names(plt$part$group$config) # both grouping variables are still there
-#> [1] "treatment"
+#> [1] ".aucss_quantile" "treatment"
 ```
 
 This is a deliberate design choice, not an oversight: there is only one

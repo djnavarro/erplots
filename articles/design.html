@@ -202,7 +202,7 @@ replacing them:</p>
 <span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">treatment</span><span class="op">)</span> <span class="co"># adds a second panel, doesn't replace the first</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">plt</span><span class="op">$</span><span class="va">part</span><span class="op">$</span><span class="va">group</span><span class="op">$</span><span class="va">config</span><span class="op">)</span> <span class="co"># both grouping variables are still there</span></span>
-<span><span class="co">#&gt; [1] "treatment"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] ".aucss_quantile" "treatment"</span></span></code></pre></div>
 <p>This is a deliberate design choice, not an oversight: there is only
 one “the model” and one “the quantile summary” to show per plot, but
 many legitimate ways to slice the exposure distribution by different
