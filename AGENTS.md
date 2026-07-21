@@ -204,7 +204,11 @@ value* because `.part_overlay()`/`.part_data()` build different
 `config` shapes before any builder runs, so the layout has to be
 knowable without calling the builder -- see PLAN.md's "removing
 `style`, making `builder` the sole mechanism" section for the full
-rationale.
+rationale. The full, worked-example version of "how to write a custom
+builder" (what `config` contains per layer, and how to use
+`er_builder_layout()`/`er_builder_fill_role()`/`er_builder_y_role()`) now
+lives in its own article, `vignettes/articles/extending.Rmd` -- see
+"Vignette structure" below.
 
 ## Planned work
 
@@ -221,8 +225,9 @@ stratification color/facet precedence rule, `?er_partial`,
 `builder`/`summary_builder` escape hatch, removing `style`
 entirely in favor of `builder` alone, with the data layer's structural
 distinction moved onto the builder function itself via `er_builder_layout()`
-(see "Extensibility" above) -- including `vignettes/articles/design.Rmd`'s
-"Extending erplots" section, which walks through a runnable custom
+(see "Extensibility" above) -- including what's now `vignettes/articles/
+extending.Rmd` (originally a section within `design.Rmd`; see "Vignette
+structure" below), which walks through a runnable custom
 quantile builder -- and then, on review, removing `build_data_jitter()`/
 `build_data_color()` in favor of `er_builder_data_boxjitter()` (see
 "Extensibility" above and PLAN.md), since neither of the removed
@@ -241,7 +246,42 @@ a naming-scheme review renamed the pipeline verbs (`er_plot_show_*()` ->
 and the CI helpers (`*_interval()` -> `ci_*()`) -- see "Naming scheme"
 above. This was a straight rename with no deprecation shims (the
 package is GitHub-only/pre-CRAN, so there's no installed user base to
-break silently).
+break silently). Most recently, the plot-grammar article's "Extending
+erplots" section was split out into its own article -- see "Vignette
+structure" below.
+
+## Vignette structure
+
+`vignettes/articles/` (pkgdown-only, not shipped -- see "Development
+workflow" below) holds five articles: `plot-binary.Rmd`,
+`plot-continuous.Rmd`, and `plot-count.Rmd` (worked examples of each
+layer, one per response type; binary is the most detailed, the other
+two link back to it for the response-type-agnostic model/group
+components); `design.Rmd` ("The plotting grammar" -- the singleton/
+additive layer distinction, the stratification color/facet precedence
+rule, and the response-type dispatch table); and `extending.Rmd`
+("Extending erplots: writing your own builder"). The last one used to
+be a section inside `design.Rmd`, but was split out into its own
+article because it needed to grow -- the original version's illustrative
+`build_quantile_crossbar()` example didn't explain what `config` (its
+second argument) actually *was*, so `extending.Rmd` now leads with a
+table of what each `.part_*()` function's `config` contains (e.g.
+`config$summary`'s columns for the quantile layer), inspects it
+interactively before writing the crossbar builder, and then adds a
+section on the three builder-metadata helpers
+(`er_builder_layout()`/`er_builder_fill_role()`/`er_builder_y_role()`)
+with a runnable example of each, including the built-in
+`er_builder_data_hex()`/`er_builder_group_histogram()` as worked
+illustrations of `er_builder_fill_role()`/`er_builder_y_role()`
+respectively, and a custom `geom_density2d()`-based data builder as a
+worked illustration of `er_builder_layout()`. `design.Rmd`'s own
+"Extending erplots" section is now just a short pointer into
+`extending.Rmd`. `_pkgdown.yml`'s `articles` list was updated to include
+`articles/extending` after `articles/design`. Keep this split in mind
+if `design.Rmd`'s grammar changes in a way that affects builders (e.g. a
+new builder-metadata helper, or a change to what a `.part_*()` function
+puts in `config`) -- that detail belongs in `extending.Rmd`, not back in
+`design.Rmd`.
 
 ## Structure
 
