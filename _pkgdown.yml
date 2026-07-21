@@ -18,6 +18,11 @@ reference:
 - contents: 
   - er_partial
   - er_layout
+  - build_model
+  - build_summary
+  - build_quantile
+  - build_data
+  - build_group
 - title: Model interface
   desc: The generics a model must (or may) implement to work with erplots
 - contents:

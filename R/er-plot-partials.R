@@ -9,15 +9,16 @@
 #' @param strata Stratification variable
 #' @param style Style components
 #'
-#' @details Things we can have partials for:
-#' 
-#' - model
-#' - summary
-#' - quantile
-#' - data
-#' - overlay
-#' - group
-#' 
+#' @details This page documents the shared interface all `build_*()`
+#' partial builders implement. The builders themselves are documented on
+#' their own family-specific pages, one per layer:
+#'
+#' - [build_model()] -- the `model` layer ([er_plot_show_model()])
+#' - [build_summary()] -- the `summary_builder` argument of [er_plot_show_model()]
+#' - [build_quantile()] -- the `quantile` layer ([er_plot_show_quantiles()])
+#' - [build_data()] -- the `data` layer ([er_plot_show_data()])
+#' - [build_group()] -- the `group` layer ([er_plot_show_groups()])
+#'
 #' Arguments are standardised to allow users to write their own 
 #' as needed
 #' 
@@ -106,5 +107,7 @@
 #' user-facing version of this rule.
 #' 
 #' @name er_partial
+#' @seealso [build_model()], [build_summary()], [build_quantile()],
+#' [build_data()], [build_group()], [er_layout()]
 #' 
 NULL

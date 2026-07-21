@@ -1,5 +1,35 @@
 
-#' @rdname er_partial
+#' Data layer builders for exposure-response plots
+#'
+#' @param data The original data frame
+#' @param config Configuration for the specific plot
+#' @param stratify Logical indicating whether to stratify
+#' @param exposure Exposure variable
+#' @param response Response variable
+#' @param strata Stratification variable
+#' @param style Style components
+#'
+#' @details Builders for the `data` layer ([er_plot_show_data()]), which
+#' shows the raw observations alongside the fitted curve. Each builder is
+#' tagged, via [er_layout()], with the *structural* family it belongs to:
+#' `build_data_overlay()` (the default) and `build_data_hex()` use the
+#' `"overlay"` layout, plotting directly on the model panel at the raw
+#' `(exposure, response)` coordinates (points or, for `build_data_hex()`,
+#' a 2D density); `build_data_boxjitter()` uses the `"panel"` layout
+#' (binary response only), stacking boxplot-plus-jitter panels for
+#' responders/non-responders below the base plot. See [er_layout()] and
+#' [er_plot_show_data()] for how this tag is used.
+#'
+#' See [er_partial()] for the shared builder interface these functions
+#' implement, including how to write a custom builder of your own.
+#'
+#' @returns A geom, or a list of geoms; see [er_partial()].
+#'
+#' @name build_data
+#' @seealso [er_partial()], [er_layout()]
+NULL
+
+#' @rdname build_data
 #' @export
 build_data_boxjitter <- er_layout(function(data, config, stratify, exposure, response, strata, style) {
 
@@ -89,7 +119,7 @@ build_data_boxjitter <- er_layout(function(data, config, stratify, exposure, res
 }, layout = "panel")
 
 
-#' @rdname er_partial
+#' @rdname build_data
 #' @export
 build_data_overlay <- er_layout(function(data, config, stratify, exposure, response, strata, style) {
 
@@ -141,7 +171,7 @@ build_data_overlay <- er_layout(function(data, config, stratify, exposure, respo
 }, layout = "overlay")
 
 
-#' @rdname er_partial
+#' @rdname build_data
 #' @export
 build_data_hex <- er_layout(function(data, config, stratify, exposure, response, strata, style) {
 

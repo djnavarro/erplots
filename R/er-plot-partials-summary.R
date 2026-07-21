@@ -1,5 +1,30 @@
 
-#' @rdname er_partial
+#' Summary annotation builders for exposure-response plots
+#'
+#' @param data The original data frame
+#' @param config Configuration for the specific plot
+#' @param stratify Logical indicating whether to stratify
+#' @param exposure Exposure variable
+#' @param response Response variable
+#' @param strata Stratification variable
+#' @param style Style components
+#'
+#' @details Builders for the `summary_builder` argument of
+#' [er_plot_show_model()], which annotate the model panel with a summary
+#' statistic rather than drawing the curve itself: `build_summary_pvalue()`
+#' (the default) places a formatted p-value in whichever corner of the
+#' panel is furthest from the data.
+#'
+#' See [er_partial()] for the shared builder interface these functions
+#' implement, including how to write a custom builder of your own.
+#'
+#' @returns A geom, or a list of geoms; see [er_partial()].
+#'
+#' @name build_summary
+#' @seealso [er_partial()]
+NULL
+
+#' @rdname build_summary
 #' @export
 build_summary_pvalue <- function(data, config, stratify, exposure, response, strata, style) {
 

@@ -1,6 +1,31 @@
 
+#' Quantile summary builders for exposure-response plots
+#'
+#' @param data The original data frame
+#' @param config Configuration for the specific plot
+#' @param stratify Logical indicating whether to stratify
+#' @param exposure Exposure variable
+#' @param response Response variable
+#' @param strata Stratification variable
+#' @param style Style components
+#'
+#' @details Builders for the `quantile` layer ([er_plot_show_quantiles()]),
+#' which bins exposure into quantile groups and plots a response summary
+#' (rate, mean, or count-mean, depending on response type) with an
+#' uncertainty interval per bin: `build_quantile_errorbar()` (point plus
+#' error bar, the default), `build_quantile_bar()` (bar plus error bar),
+#' and `build_quantile_pointrange()` (point range).
+#'
+#' See [er_partial()] for the shared builder interface these functions
+#' implement, including how to write a custom builder of your own.
+#'
+#' @returns A geom, or a list of geoms; see [er_partial()].
+#'
+#' @name build_quantile
+#' @seealso [er_partial()]
+NULL
 
-#' @rdname er_partial
+#' @rdname build_quantile
 #' @export
 build_quantile_errorbar <- function(data, config, stratify, exposure, response, strata, style) {
 
@@ -86,7 +111,7 @@ build_quantile_errorbar <- function(data, config, stratify, exposure, response, 
 }
 
 
-#' @rdname er_partial
+#' @rdname build_quantile
 #' @export
 build_quantile_bar <- function(data, config, stratify, exposure, response, strata, style) {
 
@@ -168,7 +193,7 @@ build_quantile_bar <- function(data, config, stratify, exposure, response, strat
 }
 
 
-#' @rdname er_partial
+#' @rdname build_quantile
 #' @export
 build_quantile_pointrange <- function(data, config, stratify, exposure, response, strata, style) {
 

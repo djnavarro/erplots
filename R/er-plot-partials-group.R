@@ -1,6 +1,32 @@
 
+#' Group panel builders for exposure-response plots
+#'
+#' @param data The original data frame
+#' @param config Configuration for the specific plot
+#' @param stratify Logical indicating whether to stratify
+#' @param exposure Exposure variable
+#' @param response Response variable
+#' @param strata Stratification variable
+#' @param style Style components
+#'
+#' @details Builders for the `group` layer ([er_plot_show_groups()]),
+#' which draws the exposure distribution for a grouping variable (e.g.
+#' treatment arm) below the main panel: `build_group_boxplot()` (the
+#' default), `build_group_violin()`, and `build_group_histogram()`.
+#' The first two put the group levels on the y-axis; `build_group_histogram()`
+#' instead puts them on facet strips and frees the y-axis for counts (see
+#' `Details` in the package's `AGENTS.md`/`PLAN.md` for the rationale).
+#'
+#' See [er_partial()] for the shared builder interface these functions
+#' implement, including how to write a custom builder of your own.
+#'
+#' @returns A geom, or a list of geoms; see [er_partial()].
+#'
+#' @name build_group
+#' @seealso [er_partial()]
+NULL
 
-#' @rdname er_partial
+#' @rdname build_group
 #' @export
 build_group_boxplot <- function(data, config, stratify, exposure, response, strata, style) {
 
@@ -35,7 +61,7 @@ build_group_boxplot <- function(data, config, stratify, exposure, response, stra
 }
 
 
-#' @rdname er_partial
+#' @rdname build_group
 #' @export
 build_group_histogram <- function(data, config, stratify, exposure, response, strata, style) {
 
@@ -90,7 +116,7 @@ build_group_histogram <- function(data, config, stratify, exposure, response, st
 attr(build_group_histogram, "er_group_y") <- "count"
 
 
-#' @rdname er_partial
+#' @rdname build_group
 #' @export
 build_group_violin <- function(data, config, stratify, exposure, response, strata, style) {
 

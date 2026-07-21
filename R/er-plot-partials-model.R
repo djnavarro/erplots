@@ -1,6 +1,31 @@
 
+#' Model curve builders for exposure-response plots
+#'
+#' @param data The original data frame
+#' @param config Configuration for the specific plot
+#' @param stratify Logical indicating whether to stratify
+#' @param exposure Exposure variable
+#' @param response Response variable
+#' @param strata Stratification variable
+#' @param style Style components
+#'
+#' @details Builders for the `model` layer ([er_plot_show_model()]), which
+#' draws the fitted curve (and, where applicable, its uncertainty) over
+#' the exposure range: `build_model_ribbonline()` (ribbon plus line, the
+#' default), `build_model_line()` (line only, no ribbon), and
+#' `build_model_spaghetti()` (a spaghetti plot of simulated draws, for
+#' models that implement [er_simulate()]).
+#'
+#' See [er_partial()] for the shared builder interface these functions
+#' implement, including how to write a custom builder of your own.
+#'
+#' @returns A geom, or a list of geoms; see [er_partial()].
+#'
+#' @name build_model
+#' @seealso [er_partial()]
+NULL
 
-#' @rdname er_partial
+#' @rdname build_model
 #' @export
 build_model_ribbonline <- function(data, config, stratify, exposure, response, strata, style) {
 
@@ -62,7 +87,7 @@ build_model_ribbonline <- function(data, config, stratify, exposure, response, s
 
 
 
-#' @rdname er_partial
+#' @rdname build_model
 #' @export
 build_model_line <- function(data, config, stratify, exposure, response, strata, style) {
 
@@ -98,7 +123,7 @@ build_model_line <- function(data, config, stratify, exposure, response, strata,
 }
 
 
-#' @rdname er_partial
+#' @rdname build_model
 #' @export
 build_model_spaghetti <- function(data, config, stratify, exposure, response, strata, style) {
 
