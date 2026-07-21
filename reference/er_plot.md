@@ -126,7 +126,7 @@ statistic.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 
@@ -136,5 +136,6 @@ erglm_data |>
   er_plot_add_quantiles() |>
   er_plot_add_groups(aucss) |>
   plot()
-} # }
+}
+
 ```

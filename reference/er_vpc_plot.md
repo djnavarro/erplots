@@ -77,7 +77,7 @@ A ggplot2 object
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 sim <- erglm_vpc_sim(mod)
@@ -94,5 +94,9 @@ er_vpc_plot(
   erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
   response_type = "count"
 )
-} # }
+}
+#> Using seed = 4289
+#> Using seed = 5993
+#> Using seed = 9248
+
 ```

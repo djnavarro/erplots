@@ -102,7 +102,7 @@ the previous model layer rather than overlaying two model curves.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 erglm_data |>
@@ -129,5 +129,9 @@ erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod, builder = build_model_dashed) |>
   plot()
-} # }
+}
+
+#> Using seed = 4188
+
+
 ```
