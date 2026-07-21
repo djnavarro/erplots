@@ -3,19 +3,21 @@ template:
   package: waeponwifestre
 
 reference:
-- title: Plot
+- title: Exposure-response plots
   desc: Build exposure-response plots from any model that implements `er_predict()`
 - contents:
   - er_plot
-  - er_plot_style
   - er_plot_show_model
   - er_plot_show_quantiles
   - er_plot_show_data
   - er_plot_show_groups
+  - er_plot_style
   - er_plot_build
+- title: Plot builder functions
+  desc: Low level functions to draw specific components of an exposure-response plot
+- contents: 
   - er_partial
   - er_layout
-  - er_vpc_plot
 - title: Model interface
   desc: The generics a model must (or may) implement to work with erplots
 - contents:
@@ -23,10 +25,11 @@ reference:
 - title: Other
   desc: Other functions and objects
 - contents:
+  - er_vpc_plot
   - clopper_pearson_interval
-  - cut_quantile
   - poisson_interval
   - t_interval
+  - cut_quantile
 
 articles:
   - title:
