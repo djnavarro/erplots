@@ -4,7 +4,7 @@ cut_exposure_quantile()) and, within each bin, the response is
 summarised with a point estimate and confidence interval. Which
 summary/CI method is used dispatches on the plot's response_type
 (set in er_plot()):
-&quot;binary&quot; – response rate, with a Clopper-Pearson interval (see clopper_pearson())
+&quot;binary&quot; – response rate, with a Clopper-Pearson interval (see clopper_pearson_interval())
 &quot;continuous&quot; – bin mean, with a t-interval (see t_interval())
 &quot;count&quot; – bin mean, with an exact Poisson interval (see poisson_interval())
 
@@ -13,7 +13,7 @@ cut_exposure_quantile()) and, within each bin, the response is
 summarised with a point estimate and confidence interval. Which
 summary/CI method is used dispatches on the plot's response_type
 (set in er_plot()):
-&quot;binary&quot; – response rate, with a Clopper-Pearson interval (see clopper_pearson())
+&quot;binary&quot; – response rate, with a Clopper-Pearson interval (see clopper_pearson_interval())
 &quot;continuous&quot; – bin mean, with a t-interval (see t_interval())
 &quot;count&quot; – bin mean, with an exact Poisson interval (see poisson_interval())
 
@@ -66,7 +66,7 @@ summary/CI method is used dispatches on the plot's response_type
 <code><a href="cut_quantile.html">cut_exposure_quantile()</a></code>) and, within each bin, the response is
 summarised with a point estimate and confidence interval. Which
 summary/CI method is used dispatches on the plot's <code>response_type</code>
-(set in <code><a href="er_plot.html">er_plot()</a></code>):</p><ul><li><p><code>"binary"</code> – response <em>rate</em>, with a Clopper-Pearson interval (see <code><a href="clopper_pearson.html">clopper_pearson()</a></code>)</p></li>
+(set in <code><a href="er_plot.html">er_plot()</a></code>):</p><ul><li><p><code>"binary"</code> – response <em>rate</em>, with a Clopper-Pearson interval (see <code><a href="clopper_pearson_interval.html">clopper_pearson_interval()</a></code>)</p></li>
 <li><p><code>"continuous"</code> – bin <em>mean</em>, with a t-interval (see <code><a href="t_interval.html">t_interval()</a></code>)</p></li>
 <li><p><code>"count"</code> – bin <em>mean</em>, with an exact Poisson interval (see <code><a href="poisson_interval.html">poisson_interval()</a></code>)</p></li>
 </ul></div>

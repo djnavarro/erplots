@@ -34,7 +34,7 @@ and
 to compute a confidence interval for the mean response within an
 exposure bin, for continuous (and, as an approximation, count)
 responses. This is the continuous-response analogue of
-[`clopper_pearson()`](https://erplots.djnavarro.net/reference/clopper_pearson.md).
+[`clopper_pearson_interval()`](https://erplots.djnavarro.net/reference/clopper_pearson_interval.md).
 `NA`s in `x` are dropped before computing the interval.
 
 ## Examples

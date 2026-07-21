@@ -8,7 +8,7 @@ the plot's `response_type` (set in
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)):
 
 - `"binary"` – response *rate*, with a Clopper-Pearson interval (see
-  [`clopper_pearson()`](https://erplots.djnavarro.net/reference/clopper_pearson.md))
+  [`clopper_pearson_interval()`](https://erplots.djnavarro.net/reference/clopper_pearson_interval.md))
 
 - `"continuous"` – bin *mean*, with a t-interval (see
   [`t_interval()`](https://erplots.djnavarro.net/reference/t_interval.md))

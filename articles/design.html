@@ -276,6 +276,11 @@ layers don’t look at the response’s type at all – they only consume
 [er_predict()]/[er_simulate()] output or the exposure variable,
 respectively. The quantile layer dispatches on it directly:</p>
 <table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
 <thead><tr class="header">
 <th><code>response_type</code></th>
 <th>Bin summary</th>
@@ -285,7 +290,7 @@ respectively. The quantile layer dispatches on it directly:</p>
 <tr class="odd">
 <td><code>"binary"</code></td>
 <td>Response rate</td>
-<td>Clopper-Pearson ([clopper_pearson()])</td>
+<td>Clopper-Pearson ([clopper_pearson_interval()])</td>
 </tr>
 <tr class="even">
 <td><code>"continuous"</code></td>

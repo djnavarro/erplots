@@ -35,7 +35,7 @@ relationship, rather than a normal approximation. If the total count is
 ## Details
 
 The count-response analogue of
-[`clopper_pearson()`](https://erplots.djnavarro.net/reference/clopper_pearson.md),
+[`clopper_pearson_interval()`](https://erplots.djnavarro.net/reference/clopper_pearson_interval.md),
 used by the quantile-binned summary layer (see
 [`er_plot_show_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_show_quantiles.md))
 and

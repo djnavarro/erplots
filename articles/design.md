@@ -182,7 +182,7 @@ directly:
 
 | `response_type` | Bin summary | CI method |
 |----|----|----|
-| `"binary"` | Response rate | Clopper-Pearson (\[clopper_pearson()\]) |
+| `"binary"` | Response rate | Clopper-Pearson (\[clopper_pearson_interval()\]) |
 | `"continuous"` | Mean | t-interval (\[t_interval()\]) |
 | `"count"` | Mean | Exact Poisson interval (\[poisson_interval()\]) |
 

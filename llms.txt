@@ -174,7 +174,7 @@ The generics a model must (or may) implement to work with erplots
 
 Other functions and objects
 
-- [`clopper_pearson()`](https://erplots.djnavarro.net/reference/clopper_pearson.md)
+- [`clopper_pearson_interval()`](https://erplots.djnavarro.net/reference/clopper_pearson_interval.md)
   : Clopper-Pearson confidence interval for binary data
 - [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
