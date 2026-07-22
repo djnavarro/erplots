@@ -196,3 +196,60 @@ er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
 ```
 
 ![](plot-continuous_files/figure-html/vpc-1-1.png)
+
+## A second model package: emaxnls
+
+Everything above uses erglm’s GLM-based models. To underline that
+erplots genuinely doesn’t know or care which package fitted the model,
+here’s the same pipeline driven by an Emax (sigmoidal dose-response)
+model fitted with [emaxnls](https://emaxnls.djnavarro.net/), which
+registers its own
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+methods:
+
+``` r
+
+library(emaxnls)
+```
+
+``` r
+
+mod_emax <- emax_nls(
+  structural_model = rsp_1 ~ exp_1,
+  covariate_model  = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
+  data             = emax_df
+)
+```
+
+``` r
+
+emax_df |> 
+  er_plot(exp_1, rsp_1) |> 
+  er_plot_add_model(mod_emax) |> 
+  er_plot_add_summary(model = mod_emax, style = er_style_summary_coefficients) |> 
+  er_plot_add_quantiles() |> 
+  er_plot_add_data() |> 
+  plot()
+```
+
+![](plot-continuous_files/figure-html/emaxnls-plot-1.png)
+
+[`er_style_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+is used here instead of the default
+[`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+because an Emax model has no single privileged coefficient to headline –
+`er_summary.emaxnls()` reports `p_value = NULL` and returns one row per
+parameter (`E0`, `Emax`, `logEC50`) in `coefficients` instead.
+
+emaxnls also implements the interface for
+[`emax_logistic()`](https://emaxnls.djnavarro.net/reference/emax_logistic.html)
+models (binary responses): an `emaxlogistic` object carries class
+`c("emaxlogistic", "emaxnls")`, so it dispatches to the same
+`er_predict.emaxnls()`/`er_simulate.emaxnls()`/`er_summary.emaxnls()`
+methods via S3 inheritance, which branch internally to keep predictions
+in `[0, 1]` and report `r_squared = NA` (rather than a meaningless
+value) in
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+`glance`. See the [binary
+responses](https://erplots.djnavarro.net/articles/plot-binary.md)
+article for that response type in general.

@@ -231,6 +231,50 @@ than rates:</p>
 <span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span><span class="va">erglm_data</span>, <span class="va">sim_gaussian</span>, <span class="va">aucss</span>, <span class="va">biomarker_change</span>, group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-continuous_files/figure-html/vpc-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
+<div class="section level2">
+<h2 id="a-second-model-package-emaxnls">A second model package: emaxnls<a class="anchor" aria-label="anchor" href="#a-second-model-package-emaxnls"></a>
+</h2>
+<p>Everything above uses erglm’s GLM-based models. To underline that
+erplots genuinely doesn’t know or care which package fitted the model,
+here’s the same pipeline driven by an Emax (sigmoidal dose-response)
+model fitted with <a href="https://emaxnls.djnavarro.net/" class="external-link">emaxnls</a>,
+which registers its own
+<code><a href="../reference/er_model_interface.html">er_predict()</a></code>/<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/<code><a href="../reference/er_model_interface.html">er_summary()</a></code>
+methods:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/emaxnls" class="external-link">emaxnls</a></span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mod_emax</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://emaxnls.djnavarro.net/reference/emax_nls.html" class="external-link">emax_nls</a></span><span class="op">(</span></span>
+<span>  structural_model <span class="op">=</span> <span class="va">rsp_1</span> <span class="op">~</span> <span class="va">exp_1</span>,</span>
+<span>  covariate_model  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">E0</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">Emax</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">logEC50</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  data             <span class="op">=</span> <span class="va">emax_df</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">exp_1</span>, <span class="va">rsp_1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_emax</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod_emax</span>, style <span class="op">=</span> <span class="va">er_style_summary_coefficients</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-continuous_files/figure-html/emaxnls-plot-1.png" class="r-plt" alt="" width="700"></p>
+<p><code><a href="../reference/er_style_summary.html">er_style_summary_coefficients()</a></code> is used here instead of
+the default <code><a href="../reference/er_style_summary.html">er_style_summary_pvalue()</a></code> because an Emax model
+has no single privileged coefficient to headline –
+<code>er_summary.emaxnls()</code> reports <code>p_value = NULL</code>
+and returns one row per parameter (<code>E0</code>, <code>Emax</code>,
+<code>logEC50</code>) in <code>coefficients</code> instead.</p>
+<p>emaxnls also implements the interface for
+<code><a href="https://emaxnls.djnavarro.net/reference/emax_logistic.html" class="external-link">emax_logistic()</a></code> models (binary responses): an
+<code>emaxlogistic</code> object carries class
+<code>c("emaxlogistic", "emaxnls")</code>, so it dispatches to the same
+<code>er_predict.emaxnls()</code>/<code>er_simulate.emaxnls()</code>/<code>er_summary.emaxnls()</code>
+methods via S3 inheritance, which branch internally to keep predictions
+in <code>[0, 1]</code> and report <code>r_squared = NA</code> (rather
+than a meaningless value) in <code><a href="../reference/er_model_interface.html">er_summary()</a></code>’s
+<code>glance</code>. See the <a href="plot-binary.html">binary
+responses</a> article for that response type in general.</p>
+</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
