@@ -7,31 +7,31 @@
 #' @param exposure Exposure variable
 #' @param response Response variable
 #' @param strata Stratification variable
-#' @param style Style components
+#' @param theme Theme components
 #'
 #' @details Builders for the `group` layer ([er_plot_add_groups()]),
 #' which draws the exposure distribution for a grouping variable (e.g.
-#' treatment arm) below the main panel: `er_builder_group_boxplot()` (the
-#' default), `er_builder_group_violin()`, and `er_builder_group_histogram()`.
-#' The first two put the group levels on the y-axis; `er_builder_group_histogram()`
+#' treatment arm) below the main panel: `er_style_group_boxplot()` (the
+#' default), `er_style_group_violin()`, and `er_style_group_histogram()`.
+#' The first two put the group levels on the y-axis; `er_style_group_histogram()`
 #' instead puts them on facet strips and frees the y-axis for counts (see
 #' `Details` in the package's `AGENTS.md`/`PLAN.md` for the rationale).
-#' All three are tagged `er_builder_tag(fn, layer = "group")`, so
+#' All three are tagged `er_style_tag(fn, layer = "group")`, so
 #' [er_plot_add_groups()] errors informatively if handed a builder
 #' tagged for a different layer.
 #'
-#' See [er_builder()] for the shared builder interface these functions
+#' See [er_style()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
 #'
-#' @returns A geom, or a list of geoms; see [er_builder()].
+#' @returns A geom, or a list of geoms; see [er_style()].
 #'
-#' @name er_builder_group
-#' @seealso [er_builder()]
+#' @name er_style_group
+#' @seealso [er_style()]
 NULL
 
-#' @rdname er_builder_group
+#' @rdname er_style_group
 #' @export
-er_builder_group_boxplot <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_group_boxplot <- function(data, config, stratify, exposure, response, strata, theme) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(
@@ -52,7 +52,7 @@ er_builder_group_boxplot <- function(data, config, stratify, exposure, response,
       data = config$data,
       mapping = plot_map,
       alpha = .5, 
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     ),
     ggplot2::coord_cartesian(
       xlim = exposure$limits, 
@@ -62,12 +62,12 @@ er_builder_group_boxplot <- function(data, config, stratify, exposure, response,
 
   return(geoms)
 }
-er_builder_group_boxplot <- er_builder_tag(er_builder_group_boxplot, layer = "group")
+er_style_group_boxplot <- er_style_tag(er_style_group_boxplot, layer = "group")
 
 
-#' @rdname er_builder_group
+#' @rdname er_style_group
 #' @export
-er_builder_group_histogram <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_group_histogram <- function(data, config, stratify, exposure, response, strata, theme) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(x = .data[[exposure$name]])
@@ -86,16 +86,16 @@ er_builder_group_histogram <- function(data, config, stratify, exposure, respons
       bins = 30,
       alpha = if (stratify) .5 else .8,
       position = if (stratify) "identity" else "stack",
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     ),
-    # unlike `er_builder_group_boxplot()`/`er_builder_group_violin()`, a histogram
+    # unlike `er_style_group_boxplot()`/`er_style_group_violin()`, a histogram
     # needs its y-axis free for counts, so the group levels (`lvl`) go
     # on facet strips (one row per level) rather than the y-axis itself.
-    # The `er_builder_tag(builder, y_role = "count")` call below (mirroring
-    # `er_builder_tag()`'s `layout` argument for the data layer) tells
+    # The `er_style_tag(builder, y_role = "count")` call below (mirroring
+    # `er_style_tag()`'s `layout` argument for the data layer) tells
     # `.polish_labels()` to title this axis "Count" rather than the
     # group variable's own label, which is what it uses for
-    # `er_builder_group_boxplot()`/`er_builder_group_violin()`, where the
+    # `er_style_group_boxplot()`/`er_style_group_violin()`, where the
     # group variable *is* the y-axis.
     ggplot2::facet_grid(
       rows = ggplot2::vars(lvl), 
@@ -118,12 +118,12 @@ er_builder_group_histogram <- function(data, config, stratify, exposure, respons
 
   return(geoms)
 }
-er_builder_group_histogram <- er_builder_tag(er_builder_group_histogram, y_role = "count", layer = "group")
+er_style_group_histogram <- er_style_tag(er_style_group_histogram, y_role = "count", layer = "group")
 
 
-#' @rdname er_builder_group
+#' @rdname er_style_group
 #' @export
-er_builder_group_violin <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_group_violin <- function(data, config, stratify, exposure, response, strata, theme) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(
@@ -145,7 +145,7 @@ er_builder_group_violin <- function(data, config, stratify, exposure, response, 
       mapping = plot_map,
       quantile.linetype = "solid",
       alpha = 0.5, 
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     ),
     ggplot2::coord_cartesian(
       xlim = exposure$limits, 
@@ -155,4 +155,4 @@ er_builder_group_violin <- function(data, config, stratify, exposure, response, 
 
   return(geoms)
 }
-er_builder_group_violin <- er_builder_tag(er_builder_group_violin, layer = "group")
+er_style_group_violin <- er_style_tag(er_style_group_violin, layer = "group")

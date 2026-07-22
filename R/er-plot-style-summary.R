@@ -7,34 +7,34 @@
 #' @param exposure Exposure variable
 #' @param response Response variable
 #' @param strata Stratification variable
-#' @param style Style components
+#' @param theme Theme components
 #'
-#' @details Builders for the `summary_builder` argument of
+#' @details Builders for the `summary_style` argument of
 #' [er_plot_add_model()], which annotate the model panel with a summary
-#' statistic rather than drawing the curve itself: `er_builder_summary_pvalue()`
+#' statistic rather than drawing the curve itself: `er_style_summary_pvalue()`
 #' (the default) places a formatted p-value in whichever corner of the
-#' panel is furthest from the data. It's tagged `er_builder_tag(fn, layer
+#' panel is furthest from the data. It's tagged `er_style_tag(fn, layer
 #' = "summary")`, so [er_plot_add_model()] errors informatively if it's
-#' passed as `builder` (the curve/ribbon argument) rather than
-#' `summary_builder`.
+#' passed as `style` (the curve/ribbon argument) rather than
+#' `summary_style`.
 #'
-#' See [er_builder()] for the shared builder interface these functions
+#' See [er_style()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
 #'
-#' @returns A geom, or a list of geoms; see [er_builder()].
+#' @returns A geom, or a list of geoms; see [er_style()].
 #'
-#' @name er_builder_summary
-#' @seealso [er_builder()]
+#' @name er_style_summary
+#' @seealso [er_style()]
 NULL
 
-#' @rdname er_builder_summary
+#' @rdname er_style_summary
 #' @export
-er_builder_summary_pvalue <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_summary_pvalue <- function(data, config, stratify, exposure, response, strata, theme) {
 
   if (is.null(config$p_value)) return(list())
 
   corner <- names(sort(config$corner_distance)[4])
-  summary_data <- tibble::tibble(lbl = style$format_p(config$p_value))
+  summary_data <- tibble::tibble(lbl = theme$format_p(config$p_value))
 
   if (corner == "top_left") {
     geoms <- ggplot2::geom_label(
@@ -70,4 +70,4 @@ er_builder_summary_pvalue <- function(data, config, stratify, exposure, response
   
   return(geoms)
 }
-er_builder_summary_pvalue <- er_builder_tag(er_builder_summary_pvalue, layer = "summary")
+er_style_summary_pvalue <- er_style_tag(er_style_summary_pvalue, layer = "summary")

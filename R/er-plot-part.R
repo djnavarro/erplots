@@ -1,7 +1,7 @@
 
 # part_model ------------------------------------------------------------------
 
-.part_model <- function(object, model, stratify, conf_level, builder, summary_builder) {
+.part_model <- function(object, model, stratify, conf_level, style, summary_style) {
   
   part_model <- list()
   config <- list()
@@ -55,12 +55,12 @@
     ) |> 
     unlist()  
 
-  # `builder`/`summary_builder` are the escape hatch documented in
-  # `?er_builder`: any function matching the standard `er_builder_*()`
+  # `style`/`summary_style` are the escape hatch documented in
+  # `?er_style`: any function matching the standard `er_style_*()`
   # signature can be plugged in without touching package internals.
   # `er_plot_add_model()` has already resolved a default when the
   # caller didn't supply one, so both are always functions here.
-  config$builder <- list(model = builder, summary = summary_builder)
+  config$style <- list(model = style, summary = summary_style)
 
   # store and return
   part_model$stratify <- stratify
@@ -72,7 +72,7 @@
 
 # part_quantile ---------------------------------------------------------------
 
-.part_quantile <- function(object, stratify, bins, conf_level, builder) {
+.part_quantile <- function(object, stratify, bins, conf_level, style) {
 
   part_quantile <- list()
   config <- list()
@@ -91,7 +91,7 @@
     )
 
   # quantile cutpoints (excluding placebo), for builders that draw
-  # bin-boundary separators (e.g. `er_builder_quantile_errorbar_vlines()`)
+  # bin-boundary separators (e.g. `er_style_quantile_errorbar_vlines()`)
   # -- see `cut_exposure_quantile()`'s `"breaks"` attribute
   config$breaks <- attr(binned$exposure_bins, "breaks")
 
@@ -111,7 +111,7 @@
         n0 = sum(response == 0, na.rm = TRUE),
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = n1 / (n0 + n1),
-        y_mid_lbl = object$style$format_percent(n1 / (n0 + n1)),
+        y_mid_lbl = object$theme$format_percent(n1 / (n0 + n1)),
         ci_lower = ci_clopper_pearson(n1, n0 + n1, config$conf_level)["lower"], 
         ci_upper = ci_clopper_pearson(n1, n0 + n1, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
@@ -122,7 +122,7 @@
         n_units = sum(!is.na(response)),
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = mean(response, na.rm = TRUE),
-        y_mid_lbl = object$style$format_number(mean(response, na.rm = TRUE)),
+        y_mid_lbl = object$theme$format_number(mean(response, na.rm = TRUE)),
         ci_lower = ci_poisson(sum(response, na.rm = TRUE), n_units, config$conf_level)["lower"], 
         ci_upper = ci_poisson(sum(response, na.rm = TRUE), n_units, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
@@ -133,7 +133,7 @@
       dplyr::summarise(
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = mean(response, na.rm = TRUE),
-        y_mid_lbl = object$style$format_number(mean(response, na.rm = TRUE)),
+        y_mid_lbl = object$theme$format_number(mean(response, na.rm = TRUE)),
         ci_lower = ci_t(response, config$conf_level)["lower"], 
         ci_upper = ci_t(response, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
@@ -155,9 +155,9 @@
       )
     )
   
-  # see `?er_builder` for the `builder` escape hatch; `er_plot_add_quantiles()`
+  # see `?er_style` for the `style` escape hatch; `er_plot_add_quantiles()`
   # has already resolved a default when the caller didn't supply one
-  config$builder <- builder
+  config$style <- style
 
   # store and return
   part_quantile$stratify <- stratify
@@ -169,7 +169,7 @@
 
 # part_data -------------------------------------------------------------------
 
-.part_data <- function(object, stratify, panel, builder) {
+.part_data <- function(object, stratify, panel, style) {
 
   part_data <- list()
   
@@ -177,10 +177,10 @@
   config$layout <- "panel"
   config$panel <- panel
   config$seed  <- 1234L
-  # `er_plot_add_data()` has already resolved `builder` (and confirmed
-  # its layout is "panel") before calling here -- see `?er_builder` for
-  # the `builder`/`er_builder_tag()` escape hatch
-  config$builder <- builder
+  # `er_plot_add_data()` has already resolved `style` (and confirmed
+  # its layout is "panel") before calling here -- see `?er_style` for
+  # the `style`/`er_style_tag()` escape hatch
+  config$style <- style
 
   # `panels` is a named list of panels to build, keyed by panel name, in
   # build order; `panel_position` records where each named panel sits
@@ -230,7 +230,7 @@
 
 # part_overlay ------------------------------------------------------------------
 
-.part_overlay <- function(object, stratify, builder) {
+.part_overlay <- function(object, stratify, style) {
 
   part_overlay <- list()
 
@@ -238,15 +238,15 @@
   config$seed <- 1234L
 
   # unlike `.part_data()`, there's a single builder regardless of
-  # response type -- `er_builder_data_overlay()` only needs to know the
+  # response type -- `er_style_data_overlay()` only needs to know the
   # response type to decide how much vertical jitter to apply (binary
   # responses get a small nudge so 0/1 points don't overplot into two
   # solid lines; continuous/count responses get none). `er_plot_add_data()`
-  # has already resolved `builder` (and confirmed its layout is "overlay")
-  # before calling here -- see `?er_builder` for the `builder`/`er_builder_tag()`
+  # has already resolved `style` (and confirmed its layout is "overlay")
+  # before calling here -- see `?er_style` for the `style`/`er_style_tag()`
   # escape hatch.
   config$response_type <- object$response$type
-  config$builder <- builder
+  config$style <- style
 
   part_overlay$stratify <- stratify
   part_overlay$config <- config
@@ -257,7 +257,7 @@
 
 # part_group ------------------------------------------------------------------
 
-.part_group <- function(object, group_cols, stratify, bins, builder) {
+.part_group <- function(object, group_cols, stratify, bins, style) {
 
   # grouping by the plot's own stratification variable while also
   # keeping strata (`stratify == TRUE`) bakes the same column name into
@@ -284,9 +284,9 @@
   for(g in group_cols) {
 
     config <- list()
-    # see `?er_builder` for the `builder` escape hatch; `er_plot_add_groups()`
+    # see `?er_style` for the `style` escape hatch; `er_plot_add_groups()`
     # has already resolved a default when the caller didn't supply one
-    config$builder <- builder
+    config$style <- style
 
     # data 
     dat <- object$data

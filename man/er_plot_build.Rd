@@ -14,7 +14,7 @@ The input \code{object}, with \code{object$plot} (per-layer ggplot2
 objects) and \code{object$output} (the final composed plot) populated
 }
 \description{
-Assembles whichever layers have been added (via the \verb{er_plot_show_*()}
+Assembles whichever layers have been added (via the \verb{er_plot_add_*()}
 functions) into ggplot2 objects, applies shared theming and legend
 deduplication across layers, and composes the final output with
 patchwork. Usually invoked indirectly, via \code{plot()}/\code{print()} on an

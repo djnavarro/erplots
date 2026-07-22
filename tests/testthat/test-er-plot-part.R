@@ -55,7 +55,7 @@ test_that(".part_model constructs the correct data structure", {
 
   cfg_names <- c(
     "model", "conf_level", "predictions", "p_value",
-    "corner_distance", "builder"
+    "corner_distance", "style"
   )
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
@@ -92,7 +92,7 @@ test_that(".part_quantile constructs the correct data structure", {
   expect_length(cfg1, 5)
   expect_length(cfg2, 5)
 
-  cfg_names <- c("n_quantiles", "conf_level", "breaks", "summary", "builder")
+  cfg_names <- c("n_quantiles", "conf_level", "breaks", "summary", "style")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 
@@ -201,11 +201,11 @@ test_that(".part_data constructs the correct data structure", {
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
-  expect_no_error(plt1 |> er_plot_add_data(builder = er_builder_data_boxjitter))
-  expect_no_error(plt2 |> er_plot_add_data(builder = er_builder_data_boxjitter))
+  expect_no_error(plt1 |> er_plot_add_data(style = er_style_data_boxjitter))
+  expect_no_error(plt2 |> er_plot_add_data(style = er_style_data_boxjitter))
 
-  plt1 <- plt1 |> er_plot_add_data(builder = er_builder_data_boxjitter)
-  plt2 <- plt2 |> er_plot_add_data(builder = er_builder_data_boxjitter)
+  plt1 <- plt1 |> er_plot_add_data(style = er_style_data_boxjitter)
+  plt2 <- plt2 |> er_plot_add_data(style = er_style_data_boxjitter)
 
   expect_type(plt1$part$data, "list")
   expect_type(plt2$part$data, "list")
@@ -225,7 +225,7 @@ test_that(".part_data constructs the correct data structure", {
   expect_length(cfg1, 7)
   expect_length(cfg2, 7)
 
-  cfg_names <- c("layout", "panel", "seed", "builder", "color_role", "panels", "panel_position")
+  cfg_names <- c("layout", "panel", "seed", "style", "color_role", "panels", "panel_position")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 
@@ -241,30 +241,30 @@ test_that(".part_data constructs the correct data structure", {
 test_that(".part_data records a response-colored panel structure for a continuous response", {
   skip_if_not_installed("erglm")
 
-  # there's no built-in "panel"-layout builder for a continuous/count
+  # there's no built-in "panel"-layout style for a continuous/count
   # response (the older `build_data_color()` was removed once
-  # `er_builder_data_overlay()` covered its typical use case more simply --
+  # `er_style_data_overlay()` covered its typical use case more simply --
   # see PLAN.md), but `.part_data()`'s response-type dispatch is still
-  # general-purpose and exercised here via a minimal custom builder.
-  stub_panel_builder <- er_builder_tag(
-    function(data, config, stratify, exposure, response, strata, style) list(),
+  # general-purpose and exercised here via a minimal custom style.
+  stub_panel_builder <- er_style_tag(
+    function(data, config, stratify, exposure, response, strata, theme) list(),
     layout = "panel"
   )
 
   plt1 <- er_test_data |> er_plot(aucss, biomarker_change)
   plt2 <- er_test_data |> er_plot(aucss, biomarker_change, sex)
 
-  expect_no_error(plt1 |> er_plot_add_data(builder = stub_panel_builder))
-  expect_no_error(plt2 |> er_plot_add_data(builder = stub_panel_builder))
+  expect_no_error(plt1 |> er_plot_add_data(style = stub_panel_builder))
+  expect_no_error(plt2 |> er_plot_add_data(style = stub_panel_builder))
 
-  plt1 <- plt1 |> er_plot_add_data(builder = stub_panel_builder)
-  plt2 <- plt2 |> er_plot_add_data(builder = stub_panel_builder)
+  plt1 <- plt1 |> er_plot_add_data(style = stub_panel_builder)
+  plt2 <- plt2 |> er_plot_add_data(style = stub_panel_builder)
 
   cfg1 <- plt1$part$data$config
   cfg2 <- plt2$part$data$config
 
-  expect_identical(cfg1$builder, stub_panel_builder)
-  expect_identical(cfg2$builder, stub_panel_builder)
+  expect_identical(cfg1$style, stub_panel_builder)
+  expect_identical(cfg2$style, stub_panel_builder)
   expect_equal(cfg1$color_role, "response")
   expect_equal(cfg2$color_role, "response")
 
@@ -281,15 +281,15 @@ test_that(".part_data records a response-colored panel structure for a continuou
 test_that(".part_data records the same single-panel structure for a count response", {
   skip_if_not_installed("erglm")
 
-  stub_panel_builder <- er_builder_tag(
-    function(data, config, stratify, exposure, response, strata, style) list(),
+  stub_panel_builder <- er_style_tag(
+    function(data, config, stratify, exposure, response, strata, theme) list(),
     layout = "panel"
   )
 
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
-  expect_no_error(plt |> er_plot_add_data(builder = stub_panel_builder))
-  cfg <- (plt |> er_plot_add_data(builder = stub_panel_builder))$part$data$config
-  expect_identical(cfg$builder, stub_panel_builder)
+  expect_no_error(plt |> er_plot_add_data(style = stub_panel_builder))
+  cfg <- (plt |> er_plot_add_data(style = stub_panel_builder))$part$data$config
+  expect_identical(cfg$style, stub_panel_builder)
   expect_equal(cfg$color_role, "response")
   expect_equal(cfg$panels, "data")
 })
@@ -393,8 +393,8 @@ test_that(".part_overlay constructs the correct data structure", {
   expect_equal(plt1$part$overlay$stratify, FALSE)
   expect_equal(plt2$part$overlay$stratify, TRUE)
 
-  # an "overlay"-layout builder (the default) is a mutually exclusive
-  # alternative to a "panel"-layout builder -- only one of
+  # an "overlay"-layout style (the default) is a mutually exclusive
+  # alternative to a "panel"-layout style -- only one of
   # `part$data`/`part$overlay` is ever non-NULL
   expect_null(plt1$part$data)
   expect_null(plt2$part$data)
@@ -402,8 +402,8 @@ test_that(".part_overlay constructs the correct data structure", {
   cfg1 <- plt1$part$overlay$config
   cfg3 <- plt3$part$overlay$config
 
-  expect_named(cfg1, c("seed", "response_type", "builder"))
-  expect_identical(cfg1$builder, er_builder_data_overlay)
+  expect_named(cfg1, c("seed", "response_type", "style"))
+  expect_identical(cfg1$style, er_style_data_overlay)
   expect_equal(cfg1$response_type, "binary")
   expect_equal(cfg3$response_type, "continuous")
 })

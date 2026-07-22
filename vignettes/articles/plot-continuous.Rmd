@@ -70,7 +70,7 @@ The model layer doesn't look at `response_type` at all -- it only
 consumes [er_predict()]/[er_simulate()] output -- so it works exactly the
 same way as for a binary response. See the
 [binary responses](plot-binary.html#model-component) article for
-`er_builder_model_spaghetti()` and the parameter-uncertainty rationale behind
+`er_style_model_spaghetti()` and the parameter-uncertainty rationale behind
 it; the default builder is used here:
 
 ```{r model-1}
@@ -104,7 +104,7 @@ declaration that fixes it.
 ## Data component
 
 `er_plot_add_data()` adds the raw observations at their true `(exposure,
-response)` coordinates via `er_builder_data_overlay()`, the default and only
+response)` coordinates via `er_style_data_overlay()`, the default and only
 built-in builder for a continuous response -- no jitter is needed, since
 the response isn't confined to 0/1:
 
@@ -117,11 +117,11 @@ erglm_data |>
 ```
 
 There's no built-in panel-based alternative for a continuous response --
-`er_builder_data_boxjitter()` (the older, panel-based responders/non-responders
-design covered in the [binary responses](plot-binary.html#er_builder_data_overlay-vs--er_builder_data_boxjitter)
+`er_style_data_boxjitter()` (the older, panel-based responders/non-responders
+design covered in the [binary responses](plot-binary.html#er_style_data_overlay-vs--er_style_data_boxjitter)
 article) is binary-only. If you need a panel-based builder here (e.g. a
 single color-encoded panel), you can write a custom one and tag it with
-`er_builder_tag(fn, layout = "panel")` -- see `design.Rmd`'s "Extending erplots" section.
+`er_style_tag(fn, layout = "panel")` -- see `design.Rmd`'s "Extending erplots" section.
 
 ## Group component
 
@@ -129,7 +129,7 @@ The group layer doesn't look at `response_type` at all -- it only
 consumes the exposure variable -- so it works exactly the same way as for
 a binary response. See the
 [binary responses](plot-binary.html#group-component) article for
-multiple grouping variables and `er_builder_group_violin()`; the default
+multiple grouping variables and `er_style_group_violin()`; the default
 builder and a single grouping variable are shown here:
 
 ```{r group-1}

@@ -104,5 +104,5 @@ erglm_data |>
 \seealso{
 \code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}},
 \code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}},
-\code{\link[=er_plot_build]{er_plot_build()}}, \code{\link[=er_plot_style]{er_plot_style()}}, \link{er_model_interface}
+\code{\link[=er_plot_build]{er_plot_build()}}, \code{\link[=er_plot_theme]{er_plot_theme()}}, \link{er_model_interface}
 }

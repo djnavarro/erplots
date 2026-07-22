@@ -1,4 +1,4 @@
-test_that("er_builder_model_ribbonline returns 2 geoms", {
+test_that("er_style_model_ribbonline returns 2 geoms", {
   skip_if_not_installed("erglm")
   mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
@@ -18,7 +18,7 @@ test_that("er_builder_model_ribbonline returns 2 geoms", {
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
   args2 <- list(
     data = p2$data,
@@ -27,14 +27,14 @@ test_that("er_builder_model_ribbonline returns 2 geoms", {
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
-    style = p2$style
+    theme = p2$theme
   )
 
-  expect_no_error(do.call(er_builder_model_ribbonline, args1))
-  expect_no_error(do.call(er_builder_model_ribbonline, args2))
+  expect_no_error(do.call(er_style_model_ribbonline, args1))
+  expect_no_error(do.call(er_style_model_ribbonline, args2))
 
-  p1_out <- do.call(er_builder_model_ribbonline, args1)
-  p2_out <- do.call(er_builder_model_ribbonline, args2)
+  p1_out <- do.call(er_style_model_ribbonline, args1)
+  p2_out <- do.call(er_style_model_ribbonline, args2)
 
   expect_length(p1_out, 2)
   expect_length(p2_out, 2)
@@ -47,18 +47,18 @@ test_that("er_builder_model_ribbonline returns 2 geoms", {
 })
 
 
-test_that("er_builder_model_line returns 1 geom", {
+test_that("er_style_model_line returns 1 geom", {
   skip_if_not_installed("erglm")
   mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  expect_no_error(p1 |> er_plot_add_model(er_test_mod1, builder = er_builder_model_line))
-  expect_no_error(p2 |> er_plot_add_model(mod2, builder = er_builder_model_line))
+  expect_no_error(p1 |> er_plot_add_model(er_test_mod1, style = er_style_model_line))
+  expect_no_error(p2 |> er_plot_add_model(mod2, style = er_style_model_line))
 
-  p1 <- p1 |> er_plot_add_model(er_test_mod1, builder = er_builder_model_line)
-  p2 <- p2 |> er_plot_add_model(mod2, builder = er_builder_model_line)
+  p1 <- p1 |> er_plot_add_model(er_test_mod1, style = er_style_model_line)
+  p2 <- p2 |> er_plot_add_model(mod2, style = er_style_model_line)
 
   args1 <- list(
     data = p1$data,
@@ -67,7 +67,7 @@ test_that("er_builder_model_line returns 1 geom", {
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
   args2 <- list(
     data = p2$data,
@@ -76,14 +76,14 @@ test_that("er_builder_model_line returns 1 geom", {
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
-    style = p2$style
+    theme = p2$theme
   )
 
-  expect_no_error(do.call(er_builder_model_line, args1))
-  expect_no_error(do.call(er_builder_model_line, args2))
+  expect_no_error(do.call(er_style_model_line, args1))
+  expect_no_error(do.call(er_style_model_line, args2))
 
-  p1_out <- do.call(er_builder_model_line, args1)
-  p2_out <- do.call(er_builder_model_line, args2)
+  p1_out <- do.call(er_style_model_line, args1)
+  p2_out <- do.call(er_style_model_line, args2)
 
   expect_length(p1_out, 1)
   expect_length(p2_out, 1)
@@ -93,18 +93,18 @@ test_that("er_builder_model_line returns 1 geom", {
 })
 
 
-test_that("er_builder_model_spaghetti returns 2 geoms", {
+test_that("er_style_model_spaghetti returns 2 geoms", {
   skip_if_not_installed("erglm")
   mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  expect_no_error(p1 |> er_plot_add_model(er_test_mod1, builder = er_builder_model_spaghetti))
-  expect_no_error(p2 |> er_plot_add_model(mod2, builder = er_builder_model_spaghetti))
+  expect_no_error(p1 |> er_plot_add_model(er_test_mod1, style = er_style_model_spaghetti))
+  expect_no_error(p2 |> er_plot_add_model(mod2, style = er_style_model_spaghetti))
 
-  p1 <- p1 |> er_plot_add_model(er_test_mod1, builder = er_builder_model_spaghetti)
-  p2 <- p2 |> er_plot_add_model(mod2, builder = er_builder_model_spaghetti)
+  p1 <- p1 |> er_plot_add_model(er_test_mod1, style = er_style_model_spaghetti)
+  p2 <- p2 |> er_plot_add_model(mod2, style = er_style_model_spaghetti)
 
   args1 <- list(
     data = p1$data,
@@ -113,7 +113,7 @@ test_that("er_builder_model_spaghetti returns 2 geoms", {
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
   args2 <- list(
     data = p2$data,
@@ -122,14 +122,14 @@ test_that("er_builder_model_spaghetti returns 2 geoms", {
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
-    style = p2$style
+    theme = p2$theme
   )
 
-  expect_no_error(do.call(er_builder_model_spaghetti, args1))
-  expect_no_error(do.call(er_builder_model_spaghetti, args2))
+  expect_no_error(do.call(er_style_model_spaghetti, args1))
+  expect_no_error(do.call(er_style_model_spaghetti, args2))
 
-  p1_out <- do.call(er_builder_model_spaghetti, args1)
-  p2_out <- do.call(er_builder_model_spaghetti, args2)
+  p1_out <- do.call(er_style_model_spaghetti, args1)
+  p2_out <- do.call(er_style_model_spaghetti, args2)
 
   expect_length(p1_out, 2)
   expect_length(p2_out, 2)
@@ -141,15 +141,15 @@ test_that("er_builder_model_spaghetti returns 2 geoms", {
   expect_true(inherits(p2_out[[2]], "LayerInstance"))
 })
 
-test_that("er_builder_model_spaghetti does not warn about unused fill aesthetic", {
+test_that("er_style_model_spaghetti does not warn about unused fill aesthetic", {
   skip_if_not_installed("erglm")
   mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  p1 <- p1 |> er_plot_add_model(er_test_mod1, builder = er_builder_model_spaghetti)
-  p2 <- p2 |> er_plot_add_model(mod2, builder = er_builder_model_spaghetti)
+  p1 <- p1 |> er_plot_add_model(er_test_mod1, style = er_style_model_spaghetti)
+  p2 <- p2 |> er_plot_add_model(mod2, style = er_style_model_spaghetti)
 
   args1 <- list(
     data = p1$data,
@@ -158,7 +158,7 @@ test_that("er_builder_model_spaghetti does not warn about unused fill aesthetic"
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
   args2 <- list(
     data = p2$data,
@@ -167,11 +167,11 @@ test_that("er_builder_model_spaghetti does not warn about unused fill aesthetic"
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
-    style = p2$style
+    theme = p2$theme
   )
 
-  expect_no_warning(do.call(er_builder_model_spaghetti, args1))
-  expect_no_warning(do.call(er_builder_model_spaghetti, args2))
+  expect_no_warning(do.call(er_style_model_spaghetti, args1))
+  expect_no_warning(do.call(er_style_model_spaghetti, args2))
 
   # Also check at render time, since `fill` being unused by `geom_path()`
   # would otherwise surface as a warning during `ggplot_build()`.
@@ -179,7 +179,7 @@ test_that("er_builder_model_spaghetti does not warn about unused fill aesthetic"
   expect_no_warning(plot(p2))
 })
 
-test_that("er_builder_model_spaghetti falls back to ribbonline when er_simulate is unavailable", {
+test_that("er_style_model_spaghetti falls back to ribbonline when er_simulate is unavailable", {
   skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_model(er_test_mod1)
@@ -194,10 +194,10 @@ test_that("er_builder_model_spaghetti falls back to ribbonline when er_simulate 
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
 
-  expect_message(p1_out <- do.call(er_builder_model_spaghetti, args1))
+  expect_message(p1_out <- do.call(er_style_model_spaghetti, args1))
   expect_length(p1_out, 2)
   expect_true(inherits(p1_out[[1]], "LayerInstance"))
 })

@@ -11,18 +11,18 @@ reference:
   - er_plot_add_quantiles
   - er_plot_add_data
   - er_plot_add_groups
-  - er_plot_style
+  - er_plot_theme
   - er_plot_build
 - title: Plot builder functions
   desc: Low level functions to draw specific components of an exposure-response plot
 - contents: 
-  - er_builder
-  - er_builder_tag
-  - er_builder_model
-  - er_builder_summary
-  - er_builder_quantile
-  - er_builder_data
-  - er_builder_group
+  - er_style
+  - er_style_tag
+  - er_style_model
+  - er_style_summary
+  - er_style_quantile
+  - er_style_data
+  - er_style_group
 - title: Model interface
   desc: The generics a model must (or may) implement to work with erplots
 - contents:

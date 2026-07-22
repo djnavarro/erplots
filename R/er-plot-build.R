@@ -4,7 +4,7 @@
 .build_base_plot <- function(object) {
 
   base <- ggplot2::ggplot() +
-    object$style$theme_base() +
+    object$theme$theme_base() +
     ggplot2::scale_y_continuous(
       oob = scales::oob_keep, 
       expand = ggplot2::expansion(mult = .01, add = 0)
@@ -34,7 +34,7 @@
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
-  style    <- object$style
+  theme    <- object$theme
 
   data_plots <- list()
 
@@ -42,9 +42,9 @@
     panel_config <- config
     panel_config$panel <- panel_name
     data_plots[[panel_name]] <- ggplot2::ggplot() +
-      style$theme_base() +
-      panel_config$builder(
-        data, panel_config, stratify, exposure, response, strata, style
+      theme$theme_base() +
+      panel_config$style(
+        data, panel_config, stratify, exposure, response, strata, theme
       )
   }
 
@@ -59,10 +59,10 @@
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
-  style    <- object$style
+  theme    <- object$theme
 
-  overlay_geoms <- config$builder(
-    data, config, stratify, exposure, response, strata, style
+  overlay_geoms <- config$style(
+    data, config, stratify, exposure, response, strata, theme
   )
   return(overlay_geoms)
 }
@@ -74,7 +74,7 @@
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
-  style    <- object$style
+  theme    <- object$theme
 
   group_plots <- list()
   for(g in names(config)) {
@@ -82,9 +82,9 @@
     # `er_plot_add_groups()`) rather than a single shared value, since
     # different calls may have used different `keep_strata` settings
     group_plots[[g]] <- ggplot2::ggplot() + 
-      style$theme_base() +
-      config[[g]]$builder(
-        data, config[[g]], config[[g]]$stratify, exposure, response, strata, style
+      theme$theme_base() +
+      config[[g]]$style(
+        data, config[[g]], config[[g]]$stratify, exposure, response, strata, theme
       )
   }
   
@@ -99,10 +99,10 @@
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
-  style    <- object$style
+  theme    <- object$theme
 
-  model_geoms <- config$builder$model(
-    data, config, stratify, exposure, response, strata, style
+  model_geoms <- config$style$model(
+    data, config, stratify, exposure, response, strata, theme
   )
   return(model_geoms)
 }
@@ -115,10 +115,10 @@
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
-  style    <- object$style
+  theme    <- object$theme
 
-  summary_geoms <- config$builder$summary(
-    data, config, stratify, exposure, response, strata, style
+  summary_geoms <- config$style$summary(
+    data, config, stratify, exposure, response, strata, theme
   )
   return(summary_geoms)
   
@@ -132,10 +132,10 @@
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
-  style    <- object$style
+  theme    <- object$theme
 
-  quantile_geoms <- config$builder(
-    data, config, stratify, exposure, response, strata, style
+  quantile_geoms <- config$style(
+    data, config, stratify, exposure, response, strata, theme
   )
   return(quantile_geoms)
 }

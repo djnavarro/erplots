@@ -81,6 +81,66 @@ an incomplete `newdata`.
 crash (not a cosmetic/mis-plot issue) reachable through ordinary,
 documented usage, and it was only found by accident.
 
+## Completed: second naming-scheme review -- `builder`/`style` -> `style`/`theme`
+
+**Motivation.** `builder` (and `summary_builder`) read as developer-facing
+vocabulary -- "which function builds this layer" -- rather than the
+plot-design vocabulary a user thinks in when choosing between, say,
+`er_builder_data_overlay()` and `er_builder_data_boxjitter()`. `style`
+was judged the better user-facing word for that choice.
+
+**The collision this surfaced.** `style` wasn't free to reuse: every
+builder's own signature already had a *different*, unrelated `style`
+parameter, carrying theming state (`theme_base()`, `draw_key`,
+`format_percent()`, etc.) sourced from `object$style` and set via
+`er_plot_style()`. Reusing `style` for builder-selection without
+addressing this would have meant three unrelated things sharing one
+name. Resolved in two phases, judging the *existing* internal usage to
+be the one that was arguably mis-named, rather than picking a different
+word for the new builder-selection argument:
+1. `object$style` -> `object$theme`, `er_plot_style()` ->
+   `er_plot_theme()` (still a no-op placeholder), and every builder's
+   own last parameter renamed `style` -> `theme`.
+2. `builder`/`summary_builder` -> `style`/`summary_style` on all four
+   `er_plot_add_*()` functions; the entire `er_builder_*()` function
+   family (18 built-ins) -> `er_style_*()`; `er_builder_tag()` ->
+   `er_style_tag()`; its attributes/internal readers followed suit
+   (`"er_builder_layout"` -> `"er_style_layout"`, `.builder_layout()` ->
+   `.style_layout()`, `.check_builder_layer()` -> `.check_style_layer()`,
+   etc.).
+
+**What changed:** every occurrence renamed across `R/` (including
+renaming the builder source files themselves, `R/er-plot-builder*.R` ->
+`R/er-plot-style*.R`), `tests/testthat/` (including
+`test-er-plot-builder-*.R` -> `test-er-plot-style-*.R`), and
+`vignettes/articles/`; `NAMESPACE`/`man/` regenerated via
+`devtools::document()`. One deliberate scoping choice, consistent with
+how the first naming-scheme review (below) treated the word "build":
+"builder" was *not* purged as an English word -- prose that just
+describes "a function you write to build geoms" (e.g. "a custom
+builder", the `?er_style` topic's own "Writing your own builder"
+section heading) was left alone, since it reads naturally and isn't an
+identifier. Only actual API symbols were renamed. Straight rename, no
+deprecation shims -- same rationale as every other rename in this
+document (GitHub-only/pre-CRAN, no installed user base to break
+silently).
+
+**Read the rest of this document with that in mind.** Every section
+below this one predates this rename and was written under the old
+`builder`/`er_builder_*()`/`style`-as-theming vocabulary (the same
+historical-accuracy convention already applied to old removed-function
+names in "Completed: naming-scheme review" further down) -- read
+`builder`/`summary_builder` there as what's now `style`/`summary_style`,
+`er_builder_*()` as `er_style_*()`, and a bare theming `style` as
+`theme`. See `AGENTS.md`'s "Naming scheme" section for the
+user-facing, currently-accurate version of this vocabulary.
+
+**Status:** done, `devtools::check()` clean (0 errors/warnings/notes),
+full test suite passing (490 tests), and all five
+`vignettes/articles/*.Rmd` files re-rendered end-to-end via
+`rmarkdown::render()` with no errors and no leftover old-identifier
+references in the output.
+
 ## Completed: removing `er_builder_quantile_bar()`, adding `_vlines` quantile builder variants
 
 **Motivation.** On review, `er_builder_quantile_bar()` (bar + error bar)

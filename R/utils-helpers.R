@@ -149,7 +149,7 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #'   carries a `"breaks"` attribute -- the `n + 1` quantile cutpoints
 #'   (excluding placebo) used to form the bins, as computed by
 #'   [stats::quantile()] -- which quantile-layer builders that draw
-#'   bin-boundary separators (e.g. [er_builder_quantile_errorbar_vlines()])
+#'   bin-boundary separators (e.g. [er_style_quantile_errorbar_vlines()])
 #'   read back out via `attr(exposure_bins, "breaks")`.
 #'
 #' @name cut_quantile

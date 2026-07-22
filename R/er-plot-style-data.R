@@ -7,33 +7,33 @@
 #' @param exposure Exposure variable
 #' @param response Response variable
 #' @param strata Stratification variable
-#' @param style Style components
+#' @param theme Theme components
 #'
 #' @details Builders for the `data` layer ([er_plot_add_data()]), which
 #' shows the raw observations alongside the fitted curve. Each builder is
-#' tagged, via [er_builder_tag()], with the *structural* family it belongs to:
-#' `er_builder_data_overlay()` (the default) and `er_builder_data_hex()` use the
+#' tagged, via [er_style_tag()], with the *structural* family it belongs to:
+#' `er_style_data_overlay()` (the default) and `er_style_data_hex()` use the
 #' `"overlay"` layout, plotting directly on the model panel at the raw
-#' `(exposure, response)` coordinates (points or, for `er_builder_data_hex()`,
-#' a 2D density); `er_builder_data_boxjitter()` uses the `"panel"` layout
+#' `(exposure, response)` coordinates (points or, for `er_style_data_hex()`,
+#' a 2D density); `er_style_data_boxjitter()` uses the `"panel"` layout
 #' (binary response only), stacking boxplot-plus-jitter panels for
-#' responders/non-responders below the base plot. See [er_builder_tag()] and
+#' responders/non-responders below the base plot. See [er_style_tag()] and
 #' [er_plot_add_data()] for how this tag is used. All three built-in
 #' data builders are also tagged `layer = "data"`, so [er_plot_add_data()]
 #' errors informatively if handed a builder tagged for a different layer.
 #'
-#' See [er_builder()] for the shared builder interface these functions
+#' See [er_style()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
 #'
-#' @returns A geom, or a list of geoms; see [er_builder()].
+#' @returns A geom, or a list of geoms; see [er_style()].
 #'
-#' @name er_builder_data
-#' @seealso [er_builder()], [er_builder_tag()]
+#' @name er_style_data
+#' @seealso [er_style()], [er_style_tag()]
 NULL
 
-#' @rdname er_builder_data
+#' @rdname er_style_data
 #' @export
-er_builder_data_boxjitter <- er_builder_tag(function(data, config, stratify, exposure, response, strata, style) {
+er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme) {
 
   # binary-response-only panel builder: filters to responders (upper
   # panel, response == 1) or non-responders (lower panel, response == 0),
@@ -42,8 +42,8 @@ er_builder_data_boxjitter <- er_builder_tag(function(data, config, stratify, exp
   # on response (not just raw points) -- see PLAN.md's "Data layer
   # panel-based builders" section for why this replaced the older
   # `build_data_jitter()`, whose typical use case turned out to be
-  # covered already by `er_builder_data_overlay()`. Follows the same fill
-  # (box) / color (jitter) split for strata that `er_builder_model_ribbonline()`
+  # covered already by `er_style_data_overlay()`. Follows the same fill
+  # (box) / color (jitter) split for strata that `er_style_model_ribbonline()`
   # uses for ribbon/line, so `.polish_labels()`/`.polish_legends()` need
   # no special-casing.
   if (config$panel == "upper") dat <- data |> dplyr::filter(.data[[response$name]] == 1)
@@ -55,7 +55,7 @@ er_builder_data_boxjitter <- er_builder_tag(function(data, config, stratify, exp
   # across rows, so ggplot has nothing sensible to dodge against and warns
   # ("requires non-overlapping x intervals"). Mapping y to the strata
   # factor directly sidesteps this: ggplot places each stratum at its own
-  # discrete row automatically (the same trick `er_builder_group_boxplot()`
+  # discrete row automatically (the same trick `er_style_group_boxplot()`
   # uses via `y = lvl`), and `geom_jitter()`'s usual height-jitter spreads
   # points within that row without needing any dodge machinery.
   if (stratify == TRUE) {
@@ -93,7 +93,7 @@ er_builder_data_boxjitter <- er_builder_tag(function(data, config, stratify, exp
           width = 0.6,
           alpha = 0.4,
           outlier.shape = NA, # raw points are already shown via the jitter layer
-          key_glyph = style$draw_key
+          key_glyph = theme$draw_key
         ),
         ggplot2::geom_jitter(
           data = dat,
@@ -102,7 +102,7 @@ er_builder_data_boxjitter <- er_builder_tag(function(data, config, stratify, exp
           height = if (stratify) 0.3 else 0.15,
           size = 1,
           alpha = 0.6,
-          key_glyph = style$draw_key
+          key_glyph = theme$draw_key
         ),
         ggplot2::coord_cartesian(
           xlim = exposure$limits,
@@ -121,11 +121,11 @@ er_builder_data_boxjitter <- er_builder_tag(function(data, config, stratify, exp
 }, layout = "panel", layer = "data")
 
 
-#' @rdname er_builder_data
+#' @rdname er_style_data
 #' @export
-er_builder_data_overlay <- er_builder_tag(function(data, config, stratify, exposure, response, strata, style) {
+er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme) {
 
-  # unlike `er_builder_data_boxjitter()`, this builder draws points at their
+  # unlike `er_style_data_boxjitter()`, this builder draws points at their
   # true (exposure, response) coordinates and its output is meant to be
   # added to the *base* plot (see `.build_overlay_geoms()` in
   # R/er-plot-build.R), not a standalone above/below panel -- so there's
@@ -163,7 +163,7 @@ er_builder_data_overlay <- er_builder_tag(function(data, config, stratify, expos
           height = jitter_height,
           alpha = 0.4,
           size = 1,
-          key_glyph = style$draw_key
+          key_glyph = theme$draw_key
         )
       )
     }
@@ -173,37 +173,37 @@ er_builder_data_overlay <- er_builder_tag(function(data, config, stratify, expos
 }, layout = "overlay", layer = "data")
 
 
-#' @rdname er_builder_data
+#' @rdname er_style_data
 #' @export
-er_builder_data_hex <- er_builder_tag(function(data, config, stratify, exposure, response, strata, style) {
+er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme) {
 
-  # a 2D-binned density alternative to `er_builder_data_overlay()`'s raw
+  # a 2D-binned density alternative to `er_style_data_overlay()`'s raw
   # scatter, for when N is large enough that individual points overplot
   # into an unreadable smear -- most useful for continuous/count
   # responses (where y-values are spread out rather than piled at 0/1).
   # `geom_hex()`'s fill aesthetic already encodes bin density, so unlike
-  # `er_builder_data_overlay()` there's no channel left for a `color = strata`
+  # `er_style_data_overlay()` there's no channel left for a `color = strata`
   # mapping; when stratified, all strata are pooled into a single
   # hex-binned density rather than partially or misleadingly encoding
-  # strata (see `?er_builder`'s "a layer's own encoding takes precedence"
+  # strata (see `?er_style`'s "a layer's own encoding takes precedence"
   # rule). A stratum-faceted hexbin remains possible via a custom
   # builder, but isn't attempted here.
   #
   # Because this builder's `fill` is continuous (density) rather than
   # discrete (strata), it can't share the base plot's `fill` aesthetic
-  # with a stratified `er_builder_model_ribbonline()` (whose ribbon maps
+  # with a stratified `er_style_model_ribbonline()` (whose ribbon maps
   # `fill = strata`, discrete) -- ggplot2 errors ("Continuous value
   # supplied to a discrete scale") if both are combined. Pair a
-  # stratified plot using `er_builder_data_hex()` with a model builder that
-  # doesn't map `fill`, e.g. `er_builder_model_line()` (color only). The
+  # stratified plot using `er_style_data_hex()` with a model builder that
+  # doesn't map `fill`, e.g. `er_style_model_line()` (color only). The
   # `fill_role = "density"` tag below tells `.polish_labels()` to title
   # the (sole) `fill` legend "Count" rather than the strata label it uses
   # by default.
-  rlang::check_installed("hexbin", reason = "for `er_builder_data_hex()`'s `geom_hex()`.")
+  rlang::check_installed("hexbin", reason = "for `er_style_data_hex()`'s `geom_hex()`.")
 
   if (stratify == TRUE) {
     rlang::inform(paste0(
-      "`er_builder_data_hex()` does not encode `strata` -- its fill aesthetic ",
+      "`er_style_data_hex()` does not encode `strata` -- its fill aesthetic ",
       "already encodes point density, so all strata are pooled into a ",
       "single hex-binned density."
     ))
@@ -217,7 +217,7 @@ er_builder_data_hex <- er_builder_tag(function(data, config, stratify, exposure,
         y = .data[[response$name]]
       ),
       bins = 30,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
   )
 

@@ -8,8 +8,8 @@ er_plot_add_model(
   object,
   model,
   keep_strata = NULL,
-  builder = NULL,
-  summary_builder = NULL,
+  style = NULL,
+  summary_style = NULL,
   conf_level = 0.95
 )
 }
@@ -24,18 +24,18 @@ enables additional visualisations (see \link{er_model_interface})}
 split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise}
 
-\item{builder}{Function drawing the model curve/ribbon -- defaults to
-\code{\link[=er_builder_model_ribbonline]{er_builder_model_ribbonline()}} (mean prediction + confidence ribbon).
-\code{\link[=er_builder_model_spaghetti]{er_builder_model_spaghetti()}} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}}) is
+\item{style}{Function drawing the model curve/ribbon -- defaults to
+\code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}} (mean prediction + confidence ribbon).
+\code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}}) is
 the other built-in option; any function matching the standard
-\verb{(data, config, stratify, exposure, response, strata, style)}
-signature can be supplied instead -- see \code{\link[=er_builder]{er_builder()}}.}
+\verb{(data, config, stratify, exposure, response, strata, theme)}
+signature can be supplied instead -- see \code{\link[=er_style]{er_style()}}.}
 
-\item{summary_builder}{Function drawing the summary annotation --
-defaults to \code{\link[=er_builder_summary_pvalue]{er_builder_summary_pvalue()}}. Any function matching the same
-standard signature as \code{builder} can be supplied instead. See
-\code{\link[=er_builder]{er_builder()}}. If \code{builder}/\code{summary_builder} is tagged with a
-\code{layer} (via \code{\link[=er_builder_tag]{er_builder_tag()}}) other than \code{"model"}/\code{"summary"}
+\item{summary_style}{Function drawing the summary annotation --
+defaults to \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}. Any function matching the same
+standard signature as \code{style} can be supplied instead. See
+\code{\link[=er_style]{er_style()}}. If \code{style}/\code{summary_style} is tagged with a
+\code{layer} (via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"model"}/\code{"summary"}
 respectively, this errors informatively rather than passing a
 mismatched \code{config} shape to the builder; an untagged builder is
 never checked.}
@@ -48,7 +48,7 @@ The input \code{object}, with the model layer added
 \description{
 Adds the model layer: a fitted exposure-response curve with an
 uncertainty ribbon (the default, via \code{\link[=er_predict]{er_predict()}}), or a spaghetti
-plot of simulated draws (\code{builder = er_builder_model_spaghetti}, via
+plot of simulated draws (\code{style = er_style_model_spaghetti}, via
 \code{\link[=er_simulate]{er_simulate()}}), plus an optional summary annotation (e.g. a p-value)
 via \code{\link[=er_summary]{er_summary()}} when the layer isn't stratified. This layer needs no
 \code{response_type} dispatch -- it only ever consumes \code{\link[=er_predict]{er_predict()}}'s
@@ -71,12 +71,12 @@ erglm_data |>
 # a spaghetti plot instead of the default ribbon
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_add_model(mod, builder = er_builder_model_spaghetti) |>
+  er_plot_add_model(mod, style = er_style_model_spaghetti) |>
   plot()
 
-# plug in a fully custom model-curve builder; see `?er_builder` for the
+# plug in a fully custom model-curve builder; see `?er_style` for the
 # full contract
-build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
+build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme) {
   ggplot2::geom_line(
     data = config$predictions,
     mapping = ggplot2::aes(x = .data[[exposure$name]], y = fit_resp),
@@ -85,12 +85,12 @@ build_model_dashed <- function(data, config, stratify, exposure, response, strat
 }
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_add_model(mod, builder = build_model_dashed) |>
+  er_plot_add_model(mod, style = build_model_dashed) |>
   plot()
 }
 
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}},
-\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, \code{\link[=er_builder]{er_builder()}}
+\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, \code{\link[=er_style]{er_style()}}
 }

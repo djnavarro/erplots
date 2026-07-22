@@ -1,4 +1,4 @@
-test_that("er_builder_quantile_errorbar returns 3 geoms", {
+test_that("er_style_quantile_errorbar returns 3 geoms", {
   skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1)
@@ -17,7 +17,7 @@ test_that("er_builder_quantile_errorbar returns 3 geoms", {
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
   args2 <- list(
     data = p2$data,
@@ -26,14 +26,14 @@ test_that("er_builder_quantile_errorbar returns 3 geoms", {
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
-    style = p2$style
+    theme = p2$theme
   )
 
-  expect_no_error(do.call(er_builder_quantile_errorbar, args1))
-  expect_no_error(do.call(er_builder_quantile_errorbar, args2))
+  expect_no_error(do.call(er_style_quantile_errorbar, args1))
+  expect_no_error(do.call(er_style_quantile_errorbar, args2))
 
-  p1_out <- do.call(er_builder_quantile_errorbar, args1)
-  p2_out <- do.call(er_builder_quantile_errorbar, args2)
+  p1_out <- do.call(er_style_quantile_errorbar, args1)
+  p2_out <- do.call(er_style_quantile_errorbar, args2)
 
   expect_length(p1_out, 3)
   expect_length(p2_out, 3)
@@ -47,7 +47,7 @@ test_that("er_builder_quantile_errorbar returns 3 geoms", {
   expect_true(inherits(p2_out[[3]], "LayerInstance"))
 })
 
-test_that("er_builder_quantile_errorbar dodges stratified points/bars/labels horizontally", {
+test_that("er_style_quantile_errorbar dodges stratified points/bars/labels horizontally", {
   skip_if_not_installed("erglm")
 
   p2 <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_add_quantiles()
@@ -59,10 +59,10 @@ test_that("er_builder_quantile_errorbar dodges stratified points/bars/labels hor
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
-    style = p2$style
+    theme = p2$theme
   )
 
-  p2_out <- do.call(er_builder_quantile_errorbar, args2)
+  p2_out <- do.call(er_style_quantile_errorbar, args2)
 
   point_data <- p2_out[[1]]$data
   bar_data   <- p2_out[[2]]$data
@@ -88,7 +88,7 @@ test_that("er_builder_quantile_errorbar dodges stratified points/bars/labels hor
   expect_equal(point_data$y_mid, p2$part$quantile$config$summary$y_mid)
 })
 
-test_that("er_builder_quantile_errorbar leaves x unmodified (no x_dodge column) when unstratified", {
+test_that("er_style_quantile_errorbar leaves x unmodified (no x_dodge column) when unstratified", {
   skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles()
@@ -100,14 +100,14 @@ test_that("er_builder_quantile_errorbar leaves x unmodified (no x_dodge column) 
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
 
-  p1_out <- do.call(er_builder_quantile_errorbar, args1)
+  p1_out <- do.call(er_style_quantile_errorbar, args1)
   expect_false("x_dodge" %in% names(p1_out[[1]]$data))
 })
 
-test_that("er_builder_quantile_errorbar returns 3 geoms for a continuous response", {
+test_that("er_style_quantile_errorbar returns 3 geoms for a continuous response", {
   skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, biomarker_change)
@@ -126,7 +126,7 @@ test_that("er_builder_quantile_errorbar returns 3 geoms for a continuous respons
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
   args2 <- list(
     data = p2$data,
@@ -135,11 +135,11 @@ test_that("er_builder_quantile_errorbar returns 3 geoms for a continuous respons
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
-    style = p2$style
+    theme = p2$theme
   )
 
-  p1_out <- do.call(er_builder_quantile_errorbar, args1)
-  p2_out <- do.call(er_builder_quantile_errorbar, args2)
+  p1_out <- do.call(er_style_quantile_errorbar, args1)
+  p2_out <- do.call(er_style_quantile_errorbar, args2)
 
   expect_length(p1_out, 3)
   expect_length(p2_out, 3)
@@ -154,20 +154,20 @@ test_that("er_builder_quantile_errorbar returns 3 geoms for a continuous respons
 })
 
 
-test_that("er_builder_quantile_pointrange returns 2 geoms", {
+test_that("er_style_quantile_pointrange returns 2 geoms", {
   skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
-  expect_no_error(p1 |> er_plot_add_quantiles(builder = er_builder_quantile_pointrange))
-  expect_no_error(p2 |> er_plot_add_quantiles(builder = er_builder_quantile_pointrange))
+  expect_no_error(p1 |> er_plot_add_quantiles(style = er_style_quantile_pointrange))
+  expect_no_error(p2 |> er_plot_add_quantiles(style = er_style_quantile_pointrange))
 
-  p1 <- p1 |> er_plot_add_quantiles(builder = er_builder_quantile_pointrange)
-  p2 <- p2 |> er_plot_add_quantiles(builder = er_builder_quantile_pointrange)
+  p1 <- p1 |> er_plot_add_quantiles(style = er_style_quantile_pointrange)
+  p2 <- p2 |> er_plot_add_quantiles(style = er_style_quantile_pointrange)
 
-  expect_identical(p1$part$quantile$config$builder, er_builder_quantile_pointrange)
-  expect_identical(p2$part$quantile$config$builder, er_builder_quantile_pointrange)
+  expect_identical(p1$part$quantile$config$style, er_style_quantile_pointrange)
+  expect_identical(p2$part$quantile$config$style, er_style_quantile_pointrange)
 
   args1 <- list(
     data = p1$data,
@@ -176,7 +176,7 @@ test_that("er_builder_quantile_pointrange returns 2 geoms", {
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
   args2 <- list(
     data = p2$data,
@@ -185,14 +185,14 @@ test_that("er_builder_quantile_pointrange returns 2 geoms", {
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
-    style = p2$style
+    theme = p2$theme
   )
 
-  expect_no_error(do.call(er_builder_quantile_pointrange, args1))
-  expect_no_error(do.call(er_builder_quantile_pointrange, args2))
+  expect_no_error(do.call(er_style_quantile_pointrange, args1))
+  expect_no_error(do.call(er_style_quantile_pointrange, args2))
 
-  p1_out <- do.call(er_builder_quantile_pointrange, args1)
-  p2_out <- do.call(er_builder_quantile_pointrange, args2)
+  p1_out <- do.call(er_style_quantile_pointrange, args1)
+  p2_out <- do.call(er_style_quantile_pointrange, args2)
 
   expect_length(p1_out, 2)
   expect_length(p2_out, 2)
@@ -204,13 +204,13 @@ test_that("er_builder_quantile_pointrange returns 2 geoms", {
   expect_true(inherits(p2_out[[2]], "LayerInstance"))
 })
 
-test_that("er_plot_add_quantiles() builds and renders with builder = er_builder_quantile_pointrange", {
+test_that("er_plot_add_quantiles() builds and renders with style = er_style_quantile_pointrange", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
-    er_plot_add_quantiles(builder = er_builder_quantile_pointrange)
+    er_plot_add_quantiles(style = er_style_quantile_pointrange)
 
   expect_no_error(er_plot_build(plt))
 })
@@ -226,7 +226,7 @@ test_that(".part_quantile() stores interior quantile breaks in config$breaks", {
   expect_true(all(diff(breaks) >= 0))
 })
 
-test_that("er_builder_quantile_errorbar_vlines adds a geom_vline at interior breaks", {
+test_that("er_style_quantile_errorbar_vlines adds a geom_vline at interior breaks", {
   skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
@@ -238,11 +238,11 @@ test_that("er_builder_quantile_errorbar_vlines adds a geom_vline at interior bre
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
 
-  expect_no_error(do.call(er_builder_quantile_errorbar_vlines, args1))
-  p1_out <- do.call(er_builder_quantile_errorbar_vlines, args1)
+  expect_no_error(do.call(er_style_quantile_errorbar_vlines, args1))
+  p1_out <- do.call(er_style_quantile_errorbar_vlines, args1)
 
   # vline, point, bar, label
   expect_length(p1_out, 4)
@@ -254,7 +254,7 @@ test_that("er_builder_quantile_errorbar_vlines adds a geom_vline at interior bre
   expect_equal(p1_out[[1]]$data$x, interior_breaks)
 })
 
-test_that("er_builder_quantile_pointrange_vlines adds a geom_vline at interior breaks", {
+test_that("er_style_quantile_pointrange_vlines adds a geom_vline at interior breaks", {
   skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
@@ -266,11 +266,11 @@ test_that("er_builder_quantile_pointrange_vlines adds a geom_vline at interior b
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
-    style = p1$style
+    theme = p1$theme
   )
 
-  expect_no_error(do.call(er_builder_quantile_pointrange_vlines, args1))
-  p1_out <- do.call(er_builder_quantile_pointrange_vlines, args1)
+  expect_no_error(do.call(er_style_quantile_pointrange_vlines, args1))
+  p1_out <- do.call(er_style_quantile_pointrange_vlines, args1)
 
   # vline, pointrange, label
   expect_length(p1_out, 3)
@@ -284,12 +284,12 @@ test_that("er_plot_add_quantiles() builds and renders with the _vlines builders"
   plt1 <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
-    er_plot_add_quantiles(builder = er_builder_quantile_errorbar_vlines)
+    er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines)
   expect_no_error(er_plot_build(plt1))
 
   plt2 <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
-    er_plot_add_quantiles(builder = er_builder_quantile_pointrange_vlines)
+    er_plot_add_quantiles(style = er_style_quantile_pointrange_vlines)
   expect_no_error(er_plot_build(plt2))
 })

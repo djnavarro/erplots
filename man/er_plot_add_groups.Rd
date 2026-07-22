@@ -7,7 +7,7 @@
 er_plot_add_groups(
   object,
   group_by,
-  builder = NULL,
+  style = NULL,
   bins = NULL,
   keep_strata = NULL
 )
@@ -18,12 +18,12 @@ er_plot_add_groups(
 \item{group_by}{Grouping variables to define groups for distribution
 plots (a tidyselection of variables)}
 
-\item{builder}{Function drawing each group panel -- defaults to
-\code{\link[=er_builder_group_boxplot]{er_builder_group_boxplot()}}. \code{\link[=er_builder_group_violin]{er_builder_group_violin()}} is the other
-built-in option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, style)} signature can be
-supplied instead -- see \code{\link[=er_builder]{er_builder()}}. Applied to every grouping
-variable added by this call. If \code{builder} is tagged with a \code{layer}
-(via \code{\link[=er_builder_tag]{er_builder_tag()}}) other than \code{"group"}, this errors
+\item{style}{Function drawing each group panel -- defaults to
+\code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}}. \code{\link[=er_style_group_violin]{er_style_group_violin()}} is the other
+built-in option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, theme)} signature can be
+supplied instead -- see \code{\link[=er_style]{er_style()}}. Applied to every grouping
+variable added by this call. If \code{style} is tagged with a \code{layer}
+(via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"group"}, this errors
 informatively; an untagged builder is never checked.}
 
 \item{bins}{Number of quantile bins used for continuous grouping
@@ -75,5 +75,5 @@ erglm_data |>
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_add_model]{er_plot_add_model()}},
-\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, \code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_builder]{er_builder()}}
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, \code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_style]{er_style()}}
 }

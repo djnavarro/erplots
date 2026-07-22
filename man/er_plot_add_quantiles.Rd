@@ -7,7 +7,7 @@
 er_plot_add_quantiles(
   object,
   keep_strata = NULL,
-  builder = NULL,
+  style = NULL,
   bins = 4,
   conf_level = 0.95
 )
@@ -19,19 +19,19 @@ er_plot_add_quantiles(
 split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise}
 
-\item{builder}{Function drawing the quantile summary -- defaults to
-\code{\link[=er_builder_quantile_errorbar]{er_builder_quantile_errorbar()}} (point + error bar).
-\code{\link[=er_builder_quantile_pointrange]{er_builder_quantile_pointrange()}} (a single \code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}})
+\item{style}{Function drawing the quantile summary -- defaults to
+\code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar).
+\code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}} (a single \code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}})
 is another built-in option, as are \verb{_vlines} variants of each
-(\code{\link[=er_builder_quantile_errorbar_vlines]{er_builder_quantile_errorbar_vlines()}},
-\code{\link[=er_builder_quantile_pointrange_vlines]{er_builder_quantile_pointrange_vlines()}}) that additionally draw a
+(\code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}},
+\code{\link[=er_style_quantile_pointrange_vlines]{er_style_quantile_pointrange_vlines()}}) that additionally draw a
 dotted line at each interior quantile-bin boundary; any function
 matching the standard
-\verb{(data, config, stratify, exposure, response, strata, style)}
-signature can be supplied instead -- see \code{\link[=er_builder]{er_builder()}}.
+\verb{(data, config, stratify, exposure, response, strata, theme)}
+signature can be supplied instead -- see \code{\link[=er_style]{er_style()}}.
 \code{config$summary} is the pre-computed per-bin data frame (point
-estimate + CI) to draw. If \code{builder} is tagged with a \code{layer} (via
-\code{\link[=er_builder_tag]{er_builder_tag()}}) other than \code{"quantile"}, this errors
+estimate + CI) to draw. If \code{style} is tagged with a \code{layer} (via
+\code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"quantile"}, this errors
 informatively; an untagged builder is never checked.}
 
 \item{bins}{Number of exposure bins (not counting placebo)}
@@ -96,7 +96,7 @@ erglm_data |>
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
-  er_plot_add_quantiles(builder = er_builder_quantile_pointrange) |>
+  er_plot_add_quantiles(style = er_style_quantile_pointrange) |>
   plot()
 
 # the default errorbar, with dotted lines marking the quantile-bin
@@ -104,11 +104,11 @@ erglm_data |>
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
-  er_plot_add_quantiles(builder = er_builder_quantile_errorbar_vlines) |>
+  er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines) |>
   plot()
 
-# plug in a fully custom builder; see `?er_builder` for the full contract
-build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
+# plug in a fully custom builder; see `?er_style` for the full contract
+build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, theme) {
   ggplot2::geom_crossbar(
     data = config$summary,
     mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
@@ -118,7 +118,7 @@ build_quantile_crossbar <- function(data, config, stratify, exposure, response, 
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
-  er_plot_add_quantiles(builder = build_quantile_crossbar) |>
+  er_plot_add_quantiles(style = build_quantile_crossbar) |>
   plot()
 }
 
@@ -126,5 +126,5 @@ erglm_data |>
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_add_model]{er_plot_add_model()}},
 \code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, \code{\link[=er_vpc_plot]{er_vpc_plot()}},
-\code{\link[=er_builder]{er_builder()}}
+\code{\link[=er_style]{er_style()}}
 }

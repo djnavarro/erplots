@@ -7,31 +7,31 @@
 #' @param exposure Exposure variable
 #' @param response Response variable
 #' @param strata Stratification variable
-#' @param style Style components
+#' @param theme Theme components
 #'
 #' @details Builders for the `model` layer ([er_plot_add_model()]), which
 #' draws the fitted curve (and, where applicable, its uncertainty) over
-#' the exposure range: `er_builder_model_ribbonline()` (ribbon plus line, the
-#' default), `er_builder_model_line()` (line only, no ribbon), and
-#' `er_builder_model_spaghetti()` (a spaghetti plot of simulated draws, for
+#' the exposure range: `er_style_model_ribbonline()` (ribbon plus line, the
+#' default), `er_style_model_line()` (line only, no ribbon), and
+#' `er_style_model_spaghetti()` (a spaghetti plot of simulated draws, for
 #' models that implement [er_simulate()]). All three are tagged
-#' `er_builder_tag(fn, layer = "model")`, so [er_plot_add_model()]
+#' `er_style_tag(fn, layer = "model")`, so [er_plot_add_model()]
 #' errors informatively if handed one of these swapped into the
-#' `summary_builder` argument, or a builder tagged for a different layer
+#' `summary_style` argument, or a builder tagged for a different layer
 #' entirely.
 #'
-#' See [er_builder()] for the shared builder interface these functions
+#' See [er_style()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
 #'
-#' @returns A geom, or a list of geoms; see [er_builder()].
+#' @returns A geom, or a list of geoms; see [er_style()].
 #'
-#' @name er_builder_model
-#' @seealso [er_builder()]
+#' @name er_style_model
+#' @seealso [er_style()]
 NULL
 
-#' @rdname er_builder_model
+#' @rdname er_style_model
 #' @export
-er_builder_model_ribbonline <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_model_ribbonline <- function(data, config, stratify, exposure, response, strata, theme) {
 
   if (stratify == FALSE) {
 
@@ -44,7 +44,7 @@ er_builder_model_ribbonline <- function(data, config, stratify, exposure, respon
       ),
       fill = "grey40",
       alpha = .25,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
 
     model_line <- ggplot2::geom_path(
@@ -54,7 +54,7 @@ er_builder_model_ribbonline <- function(data, config, stratify, exposure, respon
         y = fit_resp
       ),
       linewidth = 1,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
   }
 
@@ -69,7 +69,7 @@ er_builder_model_ribbonline <- function(data, config, stratify, exposure, respon
         ymax = ci_upper
       ),
       alpha = .25,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
 
     model_line <- ggplot2::geom_path(
@@ -80,19 +80,19 @@ er_builder_model_ribbonline <- function(data, config, stratify, exposure, respon
         color = .data[[strata$name]]
       ),
       linewidth = 1,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )    
   }
   
   geoms <- list(model_ribbon, model_line)
   return(geoms)
 }
-er_builder_model_ribbonline <- er_builder_tag(er_builder_model_ribbonline, layer = "model")
+er_style_model_ribbonline <- er_style_tag(er_style_model_ribbonline, layer = "model")
 
 
-#' @rdname er_builder_model
+#' @rdname er_style_model
 #' @export
-er_builder_model_line <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_model_line <- function(data, config, stratify, exposure, response, strata, theme) {
 
   if (stratify == FALSE) {
 
@@ -103,7 +103,7 @@ er_builder_model_line <- function(data, config, stratify, exposure, response, st
         y = fit_resp
       ),
       linewidth = 1,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
   }
 
@@ -117,19 +117,19 @@ er_builder_model_line <- function(data, config, stratify, exposure, response, st
         color = .data[[strata$name]]
       ),
       linewidth = 1,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
   }
 
   geoms <- list(model_line)
   return(geoms)
 }
-er_builder_model_line <- er_builder_tag(er_builder_model_line, layer = "model")
+er_style_model_line <- er_style_tag(er_style_model_line, layer = "model")
 
 
-#' @rdname er_builder_model
+#' @rdname er_style_model
 #' @export
-er_builder_model_spaghetti <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_model_spaghetti <- function(data, config, stratify, exposure, response, strata, theme) {
 
   newdata <- config$predictions |> 
     dplyr::select(dplyr::all_of(c(exposure$name, strata$name))) |> 
@@ -141,9 +141,9 @@ er_builder_model_spaghetti <- function(data, config, stratify, exposure, respons
     rlang::inform(paste0(
       "`er_simulate()` is not implemented for objects of class <",
       paste(class(config$model), collapse = "/"),
-      ">; falling back to `style = \"ribbonline\"`."
+      ">; falling back to `style = er_style_model_ribbonline`."
     ))
-    return(er_builder_model_ribbonline(data, config, stratify, exposure, response, strata, style))
+    return(er_style_model_ribbonline(data, config, stratify, exposure, response, strata, theme))
   }
 
   if (stratify == FALSE) {
@@ -156,7 +156,7 @@ er_builder_model_spaghetti <- function(data, config, stratify, exposure, respons
         group = .data[["sim_id"]]
       ),
       alpha = .1,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
 
     model_line <- ggplot2::geom_path(
@@ -166,7 +166,7 @@ er_builder_model_spaghetti <- function(data, config, stratify, exposure, respons
         y = fit_resp
       ),
       linewidth = 1,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
   }
 
@@ -182,7 +182,7 @@ er_builder_model_spaghetti <- function(data, config, stratify, exposure, respons
         group = .data[["sim_id2"]]
       ),
       alpha = .25,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
 
     model_line <- ggplot2::geom_path(
@@ -193,11 +193,11 @@ er_builder_model_spaghetti <- function(data, config, stratify, exposure, respons
         color = .data[[strata$name]]
       ),
       linewidth = 1,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )    
   }
   
   geoms <- list(model_spaghetti, model_line)
   return(geoms)
 }
-er_builder_model_spaghetti <- er_builder_tag(er_builder_model_spaghetti, layer = "model")
+er_style_model_spaghetti <- er_style_tag(er_style_model_spaghetti, layer = "model")

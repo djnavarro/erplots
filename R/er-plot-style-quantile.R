@@ -7,31 +7,31 @@
 #' @param exposure Exposure variable
 #' @param response Response variable
 #' @param strata Stratification variable
-#' @param style Style components
+#' @param theme Theme components
 #'
 #' @details Builders for the `quantile` layer ([er_plot_add_quantiles()]),
 #' which bins exposure into quantile groups and plots a response summary
 #' (rate, mean, or count-mean, depending on response type) with an
-#' uncertainty interval per bin: `er_builder_quantile_errorbar()` (point plus
-#' error bar, the default) and `er_builder_quantile_pointrange()` (point
-#' range). `er_builder_quantile_errorbar_vlines()` and
-#' `er_builder_quantile_pointrange_vlines()` are minor variants of each,
+#' uncertainty interval per bin: `er_style_quantile_errorbar()` (point plus
+#' error bar, the default) and `er_style_quantile_pointrange()` (point
+#' range). `er_style_quantile_errorbar_vlines()` and
+#' `er_style_quantile_pointrange_vlines()` are minor variants of each,
 #' additionally drawing a dotted [ggplot2::geom_vline()] at each interior
 #' quantile cutpoint (i.e. every bin boundary except the exposure
 #' variable's overall min/max) -- a common way exposure-response bin plots
 #' are annotated in practice, so that the reader can see exactly where one
 #' quantile bin ends and the next begins without inferring it from the
 #' point/error bar spacing alone. All four are tagged
-#' `er_builder_tag(fn, layer = "quantile")`, so [er_plot_add_quantiles()]
+#' `er_style_tag(fn, layer = "quantile")`, so [er_plot_add_quantiles()]
 #' errors informatively if handed a builder tagged for a different layer.
 #'
-#' See [er_builder()] for the shared builder interface these functions
+#' See [er_style()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
 #'
-#' @returns A geom, or a list of geoms; see [er_builder()].
+#' @returns A geom, or a list of geoms; see [er_style()].
 #'
-#' @name er_builder_quantile
-#' @seealso [er_builder()]
+#' @name er_style_quantile
+#' @seealso [er_style()]
 NULL
 
 #' Dotted vertical lines at interior quantile-bin boundaries
@@ -61,9 +61,9 @@ NULL
   )
 }
 
-#' @rdname er_builder_quantile
+#' @rdname er_style_quantile
 #' @export
-er_builder_quantile_errorbar <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_quantile_errorbar <- function(data, config, stratify, exposure, response, strata, theme) {
 
   if (stratify == FALSE) {
 
@@ -72,7 +72,7 @@ er_builder_quantile_errorbar <- function(data, config, stratify, exposure, respo
       mapping = ggplot2::aes(x = x_mid, y = y_mid),
       inherit.aes = FALSE,
       size = 2,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
 
     bar <- ggplot2::geom_errorbar(
@@ -80,7 +80,7 @@ er_builder_quantile_errorbar <- function(data, config, stratify, exposure, respo
       mapping = ggplot2::aes(x = x_mid, ymin = ci_lower, ymax = ci_upper),
       width = 0.025 * (exposure$limits[2] - exposure$limits[1]),
       inherit.aes = FALSE,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
 
     label <- ggplot2::geom_text(
@@ -112,7 +112,7 @@ er_builder_quantile_errorbar <- function(data, config, stratify, exposure, respo
       ),
       inherit.aes = FALSE,
       size = 2,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
     
     bar <- ggplot2::geom_errorbar(
@@ -125,7 +125,7 @@ er_builder_quantile_errorbar <- function(data, config, stratify, exposure, respo
       ),
       inherit.aes = FALSE,
       width = 0.025 * (exposure$limits[2] - exposure$limits[1]),
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
     
     label <- ggplot2::geom_text(
@@ -145,22 +145,22 @@ er_builder_quantile_errorbar <- function(data, config, stratify, exposure, respo
   geoms <- list(point, bar, label)
   return(geoms)
 }
-er_builder_quantile_errorbar <- er_builder_tag(er_builder_quantile_errorbar, layer = "quantile")
+er_style_quantile_errorbar <- er_style_tag(er_style_quantile_errorbar, layer = "quantile")
 
 
-#' @rdname er_builder_quantile
+#' @rdname er_style_quantile
 #' @export
-er_builder_quantile_errorbar_vlines <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_quantile_errorbar_vlines <- function(data, config, stratify, exposure, response, strata, theme) {
   vlines <- .quantile_boundary_vlines(config, exposure)
-  geoms <- er_builder_quantile_errorbar(data, config, stratify, exposure, response, strata, style)
+  geoms <- er_style_quantile_errorbar(data, config, stratify, exposure, response, strata, theme)
   c(list(vlines), geoms)
 }
-er_builder_quantile_errorbar_vlines <- er_builder_tag(er_builder_quantile_errorbar_vlines, layer = "quantile")
+er_style_quantile_errorbar_vlines <- er_style_tag(er_style_quantile_errorbar_vlines, layer = "quantile")
 
 
-#' @rdname er_builder_quantile
+#' @rdname er_style_quantile
 #' @export
-er_builder_quantile_pointrange <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_quantile_pointrange <- function(data, config, stratify, exposure, response, strata, theme) {
 
   if (stratify == FALSE) {
 
@@ -168,7 +168,7 @@ er_builder_quantile_pointrange <- function(data, config, stratify, exposure, res
       data = config$summary,
       mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
       inherit.aes = FALSE,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
 
     label <- ggplot2::geom_text(
@@ -182,7 +182,7 @@ er_builder_quantile_pointrange <- function(data, config, stratify, exposure, res
 
   if (stratify == TRUE) {
 
-    # see `er_builder_quantile_errorbar()` for why strata are dodged
+    # see `er_style_quantile_errorbar()` for why strata are dodged
     # horizontally before plotting
     summary_dodged <- .dodge_quantile_strata(config$summary, exposure$limits)
 
@@ -196,7 +196,7 @@ er_builder_quantile_pointrange <- function(data, config, stratify, exposure, res
         color = .data[["strata"]]
       ),
       inherit.aes = FALSE,
-      key_glyph = style$draw_key
+      key_glyph = theme$draw_key
     )
 
     label <- ggplot2::geom_text(
@@ -216,15 +216,14 @@ er_builder_quantile_pointrange <- function(data, config, stratify, exposure, res
   geoms <- list(range, label)
   return(geoms)
 }
-er_builder_quantile_pointrange <- er_builder_tag(er_builder_quantile_pointrange, layer = "quantile")
+er_style_quantile_pointrange <- er_style_tag(er_style_quantile_pointrange, layer = "quantile")
 
 
-#' @rdname er_builder_quantile
+#' @rdname er_style_quantile
 #' @export
-er_builder_quantile_pointrange_vlines <- function(data, config, stratify, exposure, response, strata, style) {
+er_style_quantile_pointrange_vlines <- function(data, config, stratify, exposure, response, strata, theme) {
   vlines <- .quantile_boundary_vlines(config, exposure)
-  geoms <- er_builder_quantile_pointrange(data, config, stratify, exposure, response, strata, style)
+  geoms <- er_style_quantile_pointrange(data, config, stratify, exposure, response, strata, theme)
   c(list(vlines), geoms)
 }
-er_builder_quantile_pointrange_vlines <- er_builder_tag(er_builder_quantile_pointrange_vlines, layer = "quantile")
-
+er_style_quantile_pointrange_vlines <- er_style_tag(er_style_quantile_pointrange_vlines, layer = "quantile")
