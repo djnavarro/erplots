@@ -126,6 +126,73 @@ erglm_data |>
 
 ![](plot-binary_files/figure-html/model-1-1.png)
 
+## Summary layer
+
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
+annotates the base panel with a statistic derived from the model (or,
+for
+[`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md),
+purely descriptive of the raw data) – see \[er_model_interface\] for
+what a model’s own \[er_summary()\] method can return. The default
+builder,
+[`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md),
+draws whatever headline p-value the model reports, in whichever corner
+is furthest from the observed data:
+
+``` r
+
+erglm_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_add_model(mod) |> 
+  er_plot_add_summary(model = mod) |> 
+  plot()
+```
+
+![](plot-binary_files/figure-html/summary-pvalue-1.png)
+
+[`er_style_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+draws a different kind of annotation – goodness-of-fit rather than a
+p-value – built from a curated, compact subset of
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+`glance` field (`N`, `AIC`, `BIC`, `R²`, whichever are present and
+non-`NA`). erglm’s own models don’t populate `glance` yet, so this
+example defines a small demonstration method on the spot purely to show
+the display idiom – a real model package would do this once, in its own
+`er_summary.<class>()` method, the same way erglm already does for
+`p_value`:
+
+``` r
+
+er_summary.erglm_model_glance_demo <- function(model, ...) {
+  list(glance = tibble::tibble(
+    n = stats::nobs(model),
+    aic = stats::AIC(model),
+    bic = stats::BIC(model)
+  ))
+}
+registerS3method("er_summary", "erglm_model_glance_demo", er_summary.erglm_model_glance_demo)
+
+mod_glance_demo <- mod
+class(mod_glance_demo) <- c("erglm_model_glance_demo", class(mod_glance_demo))
+
+erglm_data |> 
+  er_plot(aucss, ae1) |> 
+  er_plot_add_model(mod) |> 
+  er_plot_add_summary(model = mod_glance_demo, style = er_style_summary_gof) |> 
+  plot()
+```
+
+![](plot-binary_files/figure-html/summary-gof-1.png)
+
+[`er_style_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+(one line per model parameter, for models with no single privileged
+p-value) and
+[`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+(a model-agnostic observation count) are two further builders for this
+layer – see
+[`?er_style_summary`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+for all four.
+
 ## Quantile layer
 
 You can modify the number of bins:

@@ -162,6 +162,8 @@ plot
   : Model curve builders for exposure-response plots
 - [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
   [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+  [`er_style_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+  [`er_style_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
   : Summary annotation builders for exposure-response plots
 - [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
   [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)

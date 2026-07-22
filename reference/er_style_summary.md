@@ -26,6 +26,28 @@ er_style_summary_n(
   theme,
   ...
 )
+
+er_style_summary_coefficients(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
+
+er_style_summary_gof(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
 ```
 
 ## Arguments
@@ -88,7 +110,21 @@ describe multiple curves). `er_style_summary_n()` is a model-agnostic
 alternative: it always draws, showing the total number of observations
 (or, when stratified, one count per stratum level) – demonstrating that
 a summary annotation doesn't have to originate from a fitted model at
-all. Both are tagged `er_style_tag(fn, layer = "summary")`, so
+all. `er_style_summary_coefficients()` draws one line per row of the
+model's `coefficients` table (see
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)'s
+`coefficients` field), useful for models with several parameters and no
+single privileged p-value (e.g. a multi-parameter nonlinear model); it
+draws nothing if `coefficients` wasn't supplied, or if the layer is
+stratified. `er_style_summary_gof()` draws a single-line,
+comma-separated goodness-of-fit annotation from the model's `glance`
+field (see
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
+– a curated subset (`N`, `AIC`, `BIC`, `R\u00b2`) rather than every
+reserved `glance` column, showing only whichever of those four are
+actually present and non-`NA`; it draws nothing if none of them are
+available, or if the layer is stratified. All four builders are tagged
+`er_style_tag(fn, layer = "summary")`, so
 [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
 errors informatively if a builder tagged for a different layer is passed
 to it instead.

@@ -208,14 +208,18 @@ itself. Concretely:</p>
 <td>Summary</td>
 <td><code>.layer_summary()</code></td>
 <td>
-<code>config$p_value</code>,
+<code>config$summary</code>, <code>config$p_value</code>,
 <code>config$corner_distance</code>
 </td>
 <td>
-<code>p_value</code> is <code>NULL</code> unless a
-<code>model</code> was supplied to <code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code>
-(from <code><a href="../reference/er_model_interface.html">er_summary()</a></code>); <code>corner_distance</code> is a
-named vector of four minimum distances
+<code>config$summary</code> is the full, raw return value of
+<code><a href="../reference/er_model_interface.html">er_summary()</a></code> (<code>NULL</code> unless a <code>model</code>
+was supplied) – see <code><a href="../reference/er_model_interface.html">?er_model_interface</a></code> for its
+<code>p_value</code>/<code>coefficients</code>/<code>glance</code>
+contract; <code>config$p_value</code> is that same list’s
+<code>p_value</code> field, extracted separately since
+<code><a href="../reference/er_style_summary.html">er_style_summary_pvalue()</a></code> reads it directly;
+<code>corner_distance</code> is a named vector of four minimum distances
 (<code>top_left</code>/<code>top_right</code>/<code>bottom_left</code>/<code>bottom_right</code>),
 computed from <code>data</code>’s raw <code>(exposure, response)</code>
 points rescaled onto <code>[0, 1]</code>, used to place a label away

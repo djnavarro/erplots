@@ -114,6 +114,7 @@ and finish with <code><a href="https://rdrr.io/r/graphics/plot.default.html" cla
       v
   layer functions (piped, any order, any subset):
     er_plot_add_model()
+    er_plot_add_summary()
     er_plot_add_quantiles()
     er_plot_add_data()
     er_plot_add_groups()
@@ -155,8 +156,10 @@ topic:</p>
 <td>Summary</td>
 <td>[er_plot_add_summary()]</td>
 <td>A corner-placed annotation – a model-derived p-value
-([er_style_summary_pvalue()]) or a purely descriptive count
-([er_style_summary_n()]), neither requiring the model layer to also be
+([er_style_summary_pvalue()]), a per-parameter coefficient table
+([er_style_summary_coefficients()]), a goodness-of-fit summary
+([er_style_summary_gof()]), or a purely descriptive count
+([er_style_summary_n()]) – none requiring the model layer to also be
 present</td>
 <td>No</td>
 </tr>

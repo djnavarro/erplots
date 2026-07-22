@@ -114,8 +114,8 @@ plot – via
 since
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 reads that tag off `style` to decide how to assemble the layer; the
-other three layers have only one structural call site, so no such
-tagging is needed there. See the `@examples` on
+other four layers have only one structural call site, so no such tagging
+is needed there. See the `@examples` on
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 and

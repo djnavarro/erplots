@@ -175,10 +175,63 @@ applies unchanged to continuous and count responses too.</p>
 <p><img src="plot-binary_files/figure-html/model-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
+<h2 id="summary-layer">Summary layer<a class="anchor" aria-label="anchor" href="#summary-layer"></a>
+</h2>
+<p><code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code> annotates the base panel with a
+statistic derived from the model (or, for
+<code><a href="../reference/er_style_summary.html">er_style_summary_n()</a></code>, purely descriptive of the raw data) –
+see [er_model_interface] for what a model’s own [er_summary()] method
+can return. The default builder, <code><a href="../reference/er_style_summary.html">er_style_summary_pvalue()</a></code>,
+draws whatever headline p-value the model reports, in whichever corner
+is furthest from the observed data:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-binary_files/figure-html/summary-pvalue-1.png" class="r-plt" alt="" width="700"></p>
+<p><code><a href="../reference/er_style_summary.html">er_style_summary_gof()</a></code> draws a different kind of
+annotation – goodness-of-fit rather than a p-value – built from a
+curated, compact subset of <code><a href="../reference/er_model_interface.html">er_summary()</a></code>’s
+<code>glance</code> field (<code>N</code>, <code>AIC</code>,
+<code>BIC</code>, <code>R²</code>, whichever are present and
+non-<code>NA</code>). erglm’s own models don’t populate
+<code>glance</code> yet, so this example defines a small demonstration
+method on the spot purely to show the display idiom – a real model
+package would do this once, in its own
+<code>er_summary.&lt;class&gt;()</code> method, the same way erglm
+already does for <code>p_value</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">er_summary.erglm_model_glance_demo</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>glance <span class="op">=</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>    n <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/nobs.html" class="external-link">nobs</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span>,</span>
+<span>    aic <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span>,</span>
+<span>    bic <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">registerS3method</a></span><span class="op">(</span><span class="st">"er_summary"</span>, <span class="st">"erglm_model_glance_demo"</span>, <span class="va">er_summary.erglm_model_glance_demo</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mod_glance_demo</span> <span class="op">&lt;-</span> <span class="va">mod</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">mod_glance_demo</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"erglm_model_glance_demo"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">mod_glance_demo</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod_glance_demo</span>, style <span class="op">=</span> <span class="va">er_style_summary_gof</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-binary_files/figure-html/summary-gof-1.png" class="r-plt" alt="" width="700"></p>
+<p><code><a href="../reference/er_style_summary.html">er_style_summary_coefficients()</a></code> (one line per model
+parameter, for models with no single privileged p-value) and
+<code><a href="../reference/er_style_summary.html">er_style_summary_n()</a></code> (a model-agnostic observation count)
+are two further builders for this layer – see
+<code><a href="../reference/er_style_summary.html">?er_style_summary</a></code> for all four.</p>
+</div>
+<div class="section level2">
 <h2 id="quantile-layer">Quantile layer<a class="anchor" aria-label="anchor" href="#quantile-layer"></a>
 </h2>
 <p>You can modify the number of bins:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -190,7 +243,7 @@ bin’s summary. For a binary response this is a Clopper-Pearson interval
 for the response <em>rate</em>; see the <a href="plot-continuous.html#quantile-layer">continuous</a> and <a href="plot-count.html#quantile-layer">count</a> articles for how this
 layer adapts its summary statistic and interval method to those response
 types.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -207,7 +260,7 @@ types.</p>
 panel – for a binary response this is a scatter with a small vertical
 jitter, since the y-values are exactly 0/1 and would otherwise overplot
 into two solid lines:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -238,7 +291,7 @@ families it belongs to via [er_style_tag()], which is what
 the main panel or stack it in panels below.</p>
 <p>Building both side by side (via patchwork’s <code>|</code> operator)
 makes the difference concrete:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_overlay</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -259,7 +312,7 @@ makes the difference concrete:</p>
 strata for <code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code>, sharing the model
 curve’s own legend, the same way <code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>’s
 color aesthetic does for any response type:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_overlay_strat</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -283,7 +336,7 @@ color aesthetic does for any response type:</p>
 layer doesn’t look at <code>response_type</code> at all – it only
 consumes the exposure variable – so everything in this section applies
 unchanged to continuous and count responses too.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -292,7 +345,7 @@ unchanged to continuous and count responses too.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-binary_files/figure-html/group-1-1.png" class="r-plt" alt="" width="700"></p>
 <p>Stratification propagates to the group layer:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -302,7 +355,7 @@ unchanged to continuous and count responses too.</p>
 <p><img src="plot-binary_files/figure-html/group-2-1.png" class="r-plt" alt="" width="700"></p>
 <p>The default builder is <code><a href="../reference/er_style_group.html">er_style_group_boxplot()</a></code>, but you
 can also use violin plots with <code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -318,7 +371,7 @@ can also use violin plots with <code><a href="../reference/er_style_group.html">
 compares observed data against model-simulated data, operating on plain
 data frames rather than an <code>er_plot</code> object. For a binary
 response it compares observed vs. simulated response <em>rates</em>:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_binary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_vpc_sim.html" class="external-link">erglm_vpc_sim</a></span><span class="op">(</span><span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">5218</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span><span class="va">erglm_data</span>, <span class="va">sim_binary</span>, <span class="va">aucss</span>, <span class="va">ae1</span>, group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-binary_files/figure-html/vpc-1-1.png" class="r-plt" alt="" width="700"></p>

@@ -77,7 +77,7 @@ The input `object`, with a group panel added
 
 ## Details
 
-Unlike the other three layers, this one is **additive** – see
+Unlike the other four layers, this one is **additive** – see
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
 "Layers are either singleton or additive" – each call adds another panel
 alongside any already added by a previous call, rather than replacing

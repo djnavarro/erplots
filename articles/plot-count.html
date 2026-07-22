@@ -147,11 +147,28 @@ here:</p>
 <p><img src="plot-count_files/figure-html/model-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
+<h2 id="summary-layer">Summary layer<a class="anchor" aria-label="anchor" href="#summary-layer"></a>
+</h2>
+<p>The summary layer doesn’t look at <code>response_type</code> at all
+either – it only consumes whatever the model’s own [er_summary()] method
+returns – so it works exactly the same way as for a binary response. See
+the <a href="plot-binary.html#summary-layer">binary responses</a>
+article for <code><a href="../reference/er_style_summary.html">er_style_summary_gof()</a></code> and the full
+four-builder set; the default builder is used here:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-count_files/figure-html/summary-1-1.png" class="r-plt" alt="" width="700"></p>
+</div>
+<div class="section level2">
 <h2 id="quantile-layer">Quantile layer<a class="anchor" aria-label="anchor" href="#quantile-layer"></a>
 </h2>
 <p>Under auto-detection, a count response is summarised the same way a
 continuous response is – bin mean plus t-interval:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -168,7 +185,7 @@ actually happen, so the two plots above would look almost identical if
 you re-ran the last one with <code>response_type = "count"</code>. To
 make the difference concrete, here’s a synthetic dataset where the
 placebo arm has only 2 events among 20 subjects:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">84</span><span class="op">)</span></span>
 <span><span class="va">placebo_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="kw">while</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">placebo_counts</span><span class="op">)</span> <span class="op">!=</span> <span class="fl">2</span><span class="op">)</span> <span class="va">placebo_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">0.05</span><span class="op">)</span></span>
@@ -184,7 +201,7 @@ placebo arm has only 2 events among 20 subjects:</p>
 <span><span class="va">mod_low_count</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae_count</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">low_count_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The default (t-interval) path’s placebo-arm error bar dips visibly
 below zero – a nonsensical negative event rate:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">low_count_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_low_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -198,7 +215,7 @@ below zero – a nonsensical negative event rate:</p>
 <p>Declaring <code>response_type = "count"</code> keeps the same
 placebo-arm point estimate but replaces the t-interval with an exact
 Poisson interval, which stays non-negative:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">low_count_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span>, response_type <span class="op">=</span> <span class="st">"count"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_low_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -218,7 +235,7 @@ true <code>(exposure, response)</code> coordinates via
 <code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>, the default and only built-in
 builder for a count response – no jitter is needed, since the response
 isn’t confined to 0/1:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -241,7 +258,7 @@ it only consumes the exposure variable – so it works exactly the same
 way as for a binary response. See the <a href="plot-binary.html#group-layer">binary responses</a> article for
 multiple grouping variables and <code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code>;
 the default builder and a single grouping variable are shown here:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_poisson</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -257,7 +274,7 @@ the default builder and a single grouping variable are shown here:</p>
 <code>response_type = "count"</code> declaration as
 <code><a href="../reference/er_plot.html">er_plot()</a></code>, swapping in the exact Poisson interval for the
 observed-side summary:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_poisson</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_vpc_sim.html" class="external-link">erglm_vpc_sim</a></span><span class="op">(</span><span class="va">mod_poisson</span>, seed <span class="op">=</span> <span class="fl">6142</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">erglm_data</span>, <span class="va">sim_poisson</span>, <span class="va">aucss</span>, <span class="va">ae_count</span>, group_by <span class="op">=</span> <span class="va">aucss</span>,</span>

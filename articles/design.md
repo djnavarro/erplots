@@ -50,6 +50,7 @@ erglm_data |>
           v
       layer functions (piped, any order, any subset):
         er_plot_add_model()
+        er_plot_add_summary()
         er_plot_add_quantiles()
         er_plot_add_data()
         er_plot_add_groups()
@@ -71,7 +72,7 @@ There are currently five layers, each documented on its own help topic:
 | Layer | Function | Shows | Depends on `response_type`? |
 |----|----|----|----|
 | Model | \[er_plot_add_model()\] | Fitted curve/ribbon (or spaghetti) | No |
-| Summary | \[er_plot_add_summary()\] | A corner-placed annotation – a model-derived p-value (\[er_style_summary_pvalue()\]) or a purely descriptive count (\[er_style_summary_n()\]), neither requiring the model layer to also be present | No |
+| Summary | \[er_plot_add_summary()\] | A corner-placed annotation – a model-derived p-value (\[er_style_summary_pvalue()\]), a per-parameter coefficient table (\[er_style_summary_coefficients()\]), a goodness-of-fit summary (\[er_style_summary_gof()\]), or a purely descriptive count (\[er_style_summary_n()\]) – none requiring the model layer to also be present | No |
 | Quantile | \[er_plot_add_quantiles()\] | Exposure-quantile-binned response summary (rate/mean + CI) | Yes |
 | Data | \[er_plot_add_data()\] | Raw observations, by default overlaid on the model panel at their true (exposure, response) coordinates (\[er_style_data_overlay()\]); or, for a binary response, \[er_style_data_boxjitter()\]’s older panel-based boxplot + jitter design | Yes |
 | Group | \[er_plot_add_groups()\] | Exposure distribution, boxplot/violin, split by a grouping variable | No |

@@ -117,9 +117,34 @@ simulation-based visualisations (e.g. spaghetti plots, VPCs); implementing
 simulation-based visualisation should not implement a method; the
 default method returns <code>NULL</code>; callers should treat a <code>NULL</code> result
 as "not available" rather than an error.</p></li>
-<li><p><code>er_summary()</code> returns a named list of scalar summary statistics (for
-example <code>list(p_value = 0.013)</code>), or <code>NULL</code> if nothing is available.
-The default method returns <code>NULL</code>.</p></li>
+<li><p><code>er_summary()</code> returns <code>NULL</code> (nothing available – the default method's
+behaviour), or a named list with any of the following independently
+optional keys. Unrecognized keys are permitted and ignored by built-in
+builders, giving a model package room to stash extra fields for its own
+custom builders.</p><ul><li><p><code>p_value</code>: a single headline p-value (or <code>NULL</code>) for "the" exposure
+effect, when the model has one unambiguous candidate (e.g. a GLM's
+exposure coefficient). A model with no single privileged parameter
+(e.g. a multi-parameter nonlinear Emax model, with separate <code>E0</code>/
+<code>Emax</code>/<code>EC50</code>/<code>Hill</code> terms and no obviously "the" effect) should
+return <code>NULL</code> here rather than picking an arbitrary term –
+<code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code> already treats <code>NULL</code> as "nothing to
+show".</p></li>
+<li><p><code>coefficients</code>: a tibble/data frame with one row per model parameter,
+for builders (e.g. <code><a href="er_style_summary.html">er_style_summary_coefficients()</a></code>) that display
+more than a single p-value. Columns follow this package's snake_case
+convention rather than <code>broom::tidy()</code>'s dotted names:
+<code>term</code> (required), <code>label</code> (optional display name, falls back to
+<code>term</code>), <code>estimate</code> (required), and optional <code>std_error</code>,
+<code>statistic</code>, <code>p_value</code>, <code>conf_low</code>, <code>conf_high</code> (each <code>NA</code> if not
+computed/meaningful). <code>NULL</code> if not available.</p></li>
+<li><p><code>glance</code>: a single-row tibble/data frame of model-level
+goodness-of-fit, <code>broom::glance()</code>-style: optional <code>n</code>,
+<code>df_residual</code>, <code>logLik</code>, <code>aic</code>, <code>bic</code>, <code>deviance</code>, <code>r_squared</code>
+(<code>NA</code> where not meaningful, e.g. non-Gaussian models),
+<code>converged</code>. Reserved for future builders; no built-in builder
+currently consumes it. <code>NULL</code> if not available.</p></li>
+</ul><p>This is purely additive: a method that only ever returns
+<code>list(p_value = ...)</code> (as above) continues to work unchanged.</p></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
