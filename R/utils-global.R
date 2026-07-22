@@ -25,5 +25,6 @@ utils::globalVariables(c(
   "y_lbl",
   "y_mid_lbl",
   "response",
+  "strata_value",
   ":="
 ))

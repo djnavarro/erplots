@@ -467,7 +467,7 @@ test_that("er_plot_add_data() with the default er_style_data_overlay merges into
 
 # style escape hatch ---------------------------------------------------------
 
-test_that("er_plot_add_model() accepts a custom style/summary_style", {
+test_that("er_plot_add_model() accepts a custom style", {
   skip_if_not_installed("erglm")
 
   custom_model_builder <- function(data, config, stratify, exposure, response, strata, theme) {
@@ -477,17 +477,67 @@ test_that("er_plot_add_model() accepts a custom style/summary_style", {
       linetype = "dashed"
     )
   }
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1, style = custom_model_builder)
+
+  expect_identical(plt$layer$model$config$style, custom_model_builder)
+  expect_no_error(er_plot_build(plt))
+})
+
+test_that("er_plot_add_summary() accepts a custom style", {
+  skip_if_not_installed("erglm")
+
   custom_summary_builder <- function(data, config, stratify, exposure, response, strata, theme) {
     list()
   }
 
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_model(er_test_mod1, style = custom_model_builder, summary_style = custom_summary_builder)
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_summary(model = er_test_mod1, style = custom_summary_builder)
 
-  expect_identical(plt$layer$model$config$style$model, custom_model_builder)
-  expect_identical(plt$layer$model$config$style$summary, custom_summary_builder)
+  expect_identical(plt$layer$summary$config$style, custom_summary_builder)
   expect_no_error(er_plot_build(plt))
+})
+
+test_that("er_plot_add_summary() works without a model at all", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_summary(style = er_style_summary_n)
+
+  expect_null(plt$layer$summary$config$model)
+  expect_null(plt$layer$summary$config$p_value)
+  expect_no_error(er_plot_build(plt))
+
+  built <- er_plot_build(plt)
+  expect_true(ggplot2::is_ggplot(built$output))
+})
+
+test_that("er_plot_add_summary() computes p_value regardless of stratify, but er_style_summary_pvalue() suppresses it when stratified", {
+  skip_if_not_installed("erglm")
+
+  plt_strat <- er_test_data |>
+    er_plot(aucss, ae1, stratify_by = sex) |>
+    er_plot_add_model(er_test_mod2) |>
+    er_plot_add_summary(model = er_test_mod2, keep_strata = TRUE)
+
+  expect_false(is.null(plt_strat$layer$summary$config$p_value))
+  expect_true(plt_strat$layer$summary$stratify)
+
+  geoms <- er_style_summary_pvalue(
+    data = plt_strat$data,
+    config = plt_strat$layer$summary$config,
+    stratify = plt_strat$layer$summary$stratify,
+    exposure = plt_strat$exposure,
+    response = plt_strat$response,
+    strata = plt_strat$strata,
+    theme = plt_strat$theme
+  )
+  expect_identical(geoms, list())
 })
 
 test_that("er_plot_add_model() rejects a non-function style", {
@@ -620,7 +670,7 @@ test_that("built-in builders are tagged with their layer", {
   expect_identical(attr(er_style_group_histogram, "er_style_layer"), "group")
 })
 
-test_that("er_plot_add_model() errors informatively for a wrong-layer style/summary_style", {
+test_that("er_plot_add_model() errors informatively for a wrong-layer style", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |> er_plot(aucss, ae1)
@@ -629,12 +679,21 @@ test_that("er_plot_add_model() errors informatively for a wrong-layer style/summ
     er_plot_add_model(plt, er_test_mod1, style = er_style_quantile_errorbar),
     "quantile"
   )
+  # a style tagged for the right layer (or no layer at all) is unaffected
+  expect_no_error(er_plot_add_model(plt, er_test_mod1, style = er_style_model_line))
+})
+
+test_that("er_plot_add_summary() errors informatively for a wrong-layer style", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
+
   expect_error(
-    er_plot_add_model(plt, er_test_mod1, summary_style = er_style_group_boxplot),
+    er_plot_add_summary(plt, model = er_test_mod1, style = er_style_group_boxplot),
     "group"
   )
   # a style tagged for the right layer (or no layer at all) is unaffected
-  expect_no_error(er_plot_add_model(plt, er_test_mod1, style = er_style_model_line))
+  expect_no_error(er_plot_add_summary(plt, model = er_test_mod1, style = er_style_summary_n))
 })
 
 test_that("er_plot_add_quantiles() errors informatively for a wrong-layer style", {
@@ -679,6 +738,7 @@ test_that("a style with no `layer` tag is never checked, in any layer", {
   untagged <- function(data, config, stratify, exposure, response, strata, theme) list()
   plt <- er_test_data |> er_plot(aucss, ae1)
 
-  expect_no_error(er_plot_add_model(plt, er_test_mod1, style = untagged, summary_style = untagged))
+  expect_no_error(er_plot_add_model(plt, er_test_mod1, style = untagged))
+  expect_no_error(er_plot_add_summary(plt, model = er_test_mod1, style = untagged))
   expect_no_error(er_plot_add_quantiles(er_plot_add_model(plt, er_test_mod1), style = untagged))
 })

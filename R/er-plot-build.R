@@ -15,9 +15,10 @@
       clip = "off"
     ) 
   if (!is.null(object$layer$model)) {
-    base <- base + 
-      .build_model_geoms(object) +
-      .build_summary_geoms(object)
+    base <- base + .build_model_geoms(object)
+  }
+  if (!is.null(object$layer$summary)) {
+    base <- base + .build_summary_geoms(object)
   }
   if (!is.null(object$layer$quantile)) {
     base <- base + .build_quantile_geoms(object)
@@ -104,7 +105,7 @@
   strata   <- object$strata
   theme    <- object$theme
 
-  model_geoms <- do.call(config$style$model, c(
+  model_geoms <- do.call(config$style, c(
     list(data, config, stratify, exposure, response, strata, theme),
     config$dots
   ))
@@ -114,14 +115,14 @@
 .build_summary_geoms <- function(object) {
 
   data     <- object$data
-  config   <- object$layer$model$config
-  stratify <- object$layer$model$stratify
+  config   <- object$layer$summary$config
+  stratify <- object$layer$summary$stratify
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
   theme    <- object$theme
 
-  summary_geoms <- do.call(config$style$summary, c(
+  summary_geoms <- do.call(config$style, c(
     list(data, config, stratify, exposure, response, strata, theme),
     config$dots
   ))

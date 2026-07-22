@@ -7,7 +7,7 @@
 # geoms/a list of geoms) and checks that the extra named argument reached
 # it unchanged.
 
-test_that("er_plot_add_model() forwards `...` identically to style and summary_style", {
+test_that("er_plot_add_model() forwards `...` to style", {
   skip_if_not_installed("erglm")
 
   seen <- new.env()
@@ -15,6 +15,19 @@ test_that("er_plot_add_model() forwards `...` identically to style and summary_s
     seen$style_dots <- rlang::list2(...)
     list()
   }
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1, style = stub_style, seed = 9626)
+
+  expect_no_error(er_plot_build(plt))
+  expect_equal(seen$style_dots, list(seed = 9626))
+})
+
+test_that("er_plot_add_summary() forwards `...` to style", {
+  skip_if_not_installed("erglm")
+
+  seen <- new.env()
   stub_summary <- function(data, config, stratify, exposure, response, strata, theme, ...) {
     seen$summary_dots <- rlang::list2(...)
     list()
@@ -22,10 +35,10 @@ test_that("er_plot_add_model() forwards `...` identically to style and summary_s
 
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_model(er_test_mod1, style = stub_style, summary_style = stub_summary, seed = 9626)
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_summary(model = er_test_mod1, style = stub_summary, seed = 9626)
 
   expect_no_error(er_plot_build(plt))
-  expect_equal(seen$style_dots, list(seed = 9626))
   expect_equal(seen$summary_dots, list(seed = 9626))
 })
 
@@ -113,7 +126,10 @@ test_that("er_plot_add_*() error on an unnamed extra argument", {
   # final, deliberately unnamed value actually lands in `...` rather than
   # being positionally matched to a standard argument
   expect_error(
-    er_plot_add_model(plt, er_test_mod1, NULL, NULL, NULL, 0.95, 9626)
+    er_plot_add_model(plt, er_test_mod1, NULL, NULL, 0.95, 9626)
+  )
+  expect_error(
+    er_plot_add_summary(plt_mod, er_test_mod1, NULL, NULL, 9626)
   )
   expect_error(
     er_plot_add_quantiles(plt_mod, NULL, NULL, 4, 0.95, 4)

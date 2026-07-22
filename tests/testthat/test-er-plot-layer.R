@@ -7,14 +7,15 @@ test_that(".detect_response_type classifies binary and continuous vectors", {
   expect_equal(.detect_response_type(as.numeric(c(NA, NA))), "continuous")
 })
 
-test_that(".layer_model's corner_distance normalises y for a continuous response", {
+test_that(".layer_summary's corner_distance normalises x/y for a continuous response", {
   skip_if_not_installed("erglm")
 
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change) |>
-    er_plot_add_model(er_test_mod_gaussian)
+    er_plot_add_model(er_test_mod_gaussian) |>
+    er_plot_add_summary(model = er_test_mod_gaussian)
 
-  cfg <- plt$layer$model$config
+  cfg <- plt$layer$summary$config
   expect_true(all(cfg$corner_distance >= 0))
   # every corner distance should be a finite, non-degenerate value on a
   # comparable scale regardless of the response's raw (non [0,1]) range
@@ -50,15 +51,37 @@ test_that(".layer_model constructs the correct data structure", {
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
 
-  expect_length(cfg1, 7)
-  expect_length(cfg2, 7)
-
-  cfg_names <- c(
-    "model", "conf_level", "predictions", "p_value",
-    "corner_distance", "style", "dots"
-  )
+  cfg_names <- c("model", "conf_level", "predictions", "style", "dots")
+  expect_length(cfg1, length(cfg_names))
+  expect_length(cfg2, length(cfg_names))
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
+})
+
+test_that(".layer_summary constructs the correct data structure", {
+  skip_if_not_installed("erglm")
+
+  plt1 <- er_test_data |> er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_summary(model = er_test_mod1)
+  plt2 <- er_test_data |> er_plot(aucss, ae1) |>
+    er_plot_add_summary()
+
+  expect_type(plt1$layer$summary, "list")
+  expect_named(plt1$layer$summary, c("stratify", "config"))
+
+  cfg1 <- plt1$layer$summary$config
+  cfg2 <- plt2$layer$summary$config
+
+  cfg_names <- c("model", "p_value", "corner_distance", "style", "dots")
+  expect_named(cfg1, cfg_names)
+  expect_named(cfg2, cfg_names)
+
+  expect_false(is.null(cfg1$model))
+  expect_false(is.null(cfg1$p_value))
+
+  expect_null(cfg2$model)
+  expect_null(cfg2$p_value)
 })
 
 

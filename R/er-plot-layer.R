@@ -1,7 +1,7 @@
 
 # layer_model ------------------------------------------------------------------
 
-.layer_model <- function(object, model, stratify, conf_level, style, summary_style, dots = list()) {
+.layer_model <- function(object, model, stratify, conf_level, style, dots = list()) {
   
   layer_model <- list()
   config <- list()
@@ -22,25 +22,65 @@
     stratify
   )
 
-  # model summary (e.g. p-value), via the `er_summary()` generic. Only
-  # shown when there is a single (non-stratified) curve to annotate.
+  # `style` is the escape hatch documented in `?er_style`: any function
+  # matching the standard `er_style_*()` signature can be plugged in
+  # without touching package internals. `er_plot_add_model()` has already
+  # resolved a default when the caller didn't supply one, so this is
+  # always a function here.
+  config$style <- style
+
+  # extra named arguments from `er_plot_add_model()`'s `...` -- see
+  # `?er_style`'s "Passing extra arguments to a builder" section
+  config$dots <- dots
+
+  # store and return
+  layer_model$stratify <- stratify
+  layer_model$config <- config
+
+  return(layer_model)
+}
+
+
+# layer_summary -----------------------------------------------------------------
+
+.layer_summary <- function(object, model, stratify, style, dots = list()) {
+
+  layer_summary <- list()
+  config <- list()
+
+  # the fitted model, supplied by the caller. Unlike `.layer_model()`,
+  # this is optional -- a summary builder doesn't have to be a *model*
+  # summary (e.g. `er_style_summary_n()` is purely descriptive of the
+  # data) -- so `model` may be `NULL` here. Use `[` (not `$`) so a `NULL`
+  # model is retained as a named element rather than dropped from `config`.
+  config["model"] <- list(model)
+
+  # model summary (e.g. p-value), via the `er_summary()` generic, when a
+  # model was supplied. Computed unconditionally (regardless of
+  # `stratify`) -- whether a single value makes sense to show when the
+  # layer is stratified is a decision for the builder itself (see
+  # `er_style_summary_pvalue()`), not this generic config-building step.
   config["p_value"] <- list(NULL) # use `[` (not `$`) so the NULL is retained as a named element
-  if (is.null(object$strata$name) || stratify == FALSE) {
-    model_summary <- er_summary(config$model)
+  if (!is.null(model)) {
+    model_summary <- er_summary(model)
     config$p_value <- model_summary$p_value
   }
 
-  # visual distance from corners (used for placement of summary). `y` is
-  # rescaled onto [0, 1] using the response's own limits before computing
-  # corner distances, since `fit_resp` lives on the response's scale (only
-  # [0, 1] itself for a binary response) -- see `PLAN.md` Stage 0.
+  # visual distance from corners (used for placement of the summary
+  # annotation), based on the raw observed data rather than any model's
+  # fitted curve -- this works whether or not a model was supplied, and
+  # avoids overlapping the raw points a data/quantile layer might also be
+  # showing. `x`/`y` are rescaled onto [0, 1] using the exposure/response
+  # variables' own limits before computing corner distances.
+  exposure_lo <- object$exposure$limits[1]
+  exposure_hi <- object$exposure$limits[2]
   response_lo <- object$response$limits[1]
   response_hi <- object$response$limits[2]
-  config$corner_distance <- config$predictions |> 
-    dplyr::select(dplyr::all_of(c(object$exposure$name, "fit_resp"))) |> 
-    dplyr::rename(y = fit_resp, x = dplyr::all_of(object$exposure$name)) |> 
+  config$corner_distance <- object$data |> 
+    dplyr::select(dplyr::all_of(c(object$exposure$name, object$response$name))) |> 
+    dplyr::rename(y = dplyr::all_of(object$response$name), x = dplyr::all_of(object$exposure$name)) |> 
     dplyr::mutate(
-      x = x / sum(x),
+      x = (x - exposure_lo) / (exposure_hi - exposure_lo),
       y = (y - response_lo) / (response_hi - response_lo),
       tl_dist = sqrt(x^2 + (1-y)^2),
       tr_dist = sqrt((1-x)^2 + (1-y)^2),
@@ -53,25 +93,21 @@
       bottom_left  = min(bl_dist, na.rm = TRUE),
       bottom_right = min(br_dist, na.rm = TRUE)
     ) |> 
-    unlist()  
+    unlist()
 
-  # `style`/`summary_style` are the escape hatch documented in
-  # `?er_style`: any function matching the standard `er_style_*()`
-  # signature can be plugged in without touching package internals.
-  # `er_plot_add_model()` has already resolved a default when the
-  # caller didn't supply one, so both are always functions here.
-  config$style <- list(model = style, summary = summary_style)
+  # `style` is the escape hatch documented in `?er_style`; `er_plot_add_summary()`
+  # has already resolved a default when the caller didn't supply one.
+  config$style <- style
 
-  # extra named arguments from `er_plot_add_model()`'s `...`, shared
-  # identically between `style` and `summary_style` -- see `?er_style`'s
-  # "Passing extra arguments to a builder" section
+  # extra named arguments from `er_plot_add_summary()`'s `...` -- see
+  # `?er_style`'s "Passing extra arguments to a builder" section
   config$dots <- dots
 
   # store and return
-  layer_model$stratify <- stratify
-  layer_model$config <- config
+  layer_summary$stratify <- stratify
+  layer_summary$config <- config
 
-  return(layer_model)
+  return(layer_summary)
 }
 
 

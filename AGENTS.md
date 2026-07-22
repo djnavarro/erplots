@@ -3,13 +3,14 @@
 ## What this package is
 
 erplots provides a fluent mini-language for building exposure-response
-plots: model curves/ribbons, quantile-binned response-rate/mean
-summaries, a raw-data layer, and grouped distribution panels. It is
-model-agnostic: erplots never fits a model itself. Any model
-implementing `er_predict()` can be visualised; implementing
+plots: model curves/ribbons, a summary annotation, quantile-binned
+response-rate/mean summaries, a raw-data layer, and grouped distribution
+panels. It is model-agnostic: erplots never fits a model itself. Any
+model implementing `er_predict()` can be visualised; implementing
 `er_simulate()` and `er_summary()` additionally enables uncertainty
-spaghetti plots/VPCs and summary annotations (e.g. p-values). See
-`?er_model_interface`.
+spaghetti plots/VPCs and model-derived summary annotations (e.g.
+p-values, via `er_plot_add_summary()` -- see "The summary layer is
+independent of the model layer" below). See `?er_model_interface`.
 
 `er_plot()` takes a `response_type = c("auto", "binary", "continuous",
 "count")` argument (auto-detected from the response column if not
@@ -246,13 +247,12 @@ five `vignettes/articles/*.Rmd` files plus `README.Rmd`.
 ## Extensibility: `style` is the sole mechanism (no separate layout argument)
 
 Every `er_plot_add_*()` function (`er_plot_add_model()`,
-`er_plot_add_quantiles()`, `er_plot_add_data()`, `er_plot_add_groups()`)
-takes a `style` argument (`er_plot_add_model()` additionally takes
-`summary_style`) that defaults to one built-in `er_style_*()` function
-(`er_style_model_ribbonline()`, `er_style_quantile_errorbar()`,
-`er_style_data_overlay()`, `er_style_group_boxplot()`; `summary_style`
-defaults to `er_style_summary_pvalue()`) and can be set to any other
-function matching the standard `er_style_*()` signature
+`er_plot_add_summary()`, `er_plot_add_quantiles()`, `er_plot_add_data()`,
+`er_plot_add_groups()`) takes a `style` argument that defaults to one
+built-in `er_style_*()` function (`er_style_model_ribbonline()`,
+`er_style_summary_pvalue()`, `er_style_quantile_errorbar()`,
+`er_style_data_overlay()`, `er_style_group_boxplot()`) and can be set to
+any other function matching the standard `er_style_*()` signature
 (`function(data, config, stratify, exposure, response, strata, theme)`)
 -- built-in (e.g. `er_style_model_spaghetti()`, `er_style_model_line()`,
 `er_style_quantile_pointrange()`, `er_style_data_boxjitter()`,
@@ -308,8 +308,9 @@ to use `er_style_tag()`'s four arguments) lives in its own article,
 
 `layer` (one of `"model"`, `"summary"`, `"quantile"`, `"data"`,
 `"group"`) is checked, not just stored: every `er_plot_add_*()`
-function (`er_plot_add_model()` checks `style` against `"model"` and
-`summary_style` against `"summary"`; `er_plot_add_quantiles()`
+function (`er_plot_add_model()` checks `style` against `"model"`;
+`er_plot_add_summary()` checks `style` against `"summary"`;
+`er_plot_add_quantiles()`
 against `"quantile"`; `er_plot_add_data()` against `"data"`;
 `er_plot_add_groups()` against `"group"`) reads a builder's `layer` tag,
 if it has one (via the internal `.check_style_layer()` helper), and
@@ -345,16 +346,87 @@ deprecation shim (see "Naming scheme" above for why erplots doesn't use
 shims). All four quantile builders are tagged
 `er_style_tag(fn, layer = "quantile")`.
 
+## The summary layer is independent of the model layer
+
+`summary` used to be a secondary argument of `er_plot_add_model()`
+(`summary_style`, defaulting to `er_style_summary_pvalue()`), nested
+inside the model layer's own `config` (`config$style <- list(model =
+style, summary = summary_style)`) and computed by `.layer_model()`
+alongside the curve/ribbon predictions. A review promoted it to its own
+peer layer, `er_plot_add_summary()`, storing into `object$layer$summary`
+via a new `.layer_summary()` (in `R/er-plot-layer.R`), for two reasons:
+(1) a summary annotation doesn't have to be a *model* summary at all --
+e.g. a purely descriptive observation count -- so requiring
+`er_plot_add_model()` to be called first, just to get an annotation, was
+an artificial coupling; and (2) it matches how every other constituent
+of an `er_plot` (model, quantile, data, group) is already its own
+independent, singleton (except `group`) layer with its own
+`er_plot_add_*()` verb.
+
+`er_plot_add_summary(object, model = NULL, keep_strata = NULL, style =
+NULL, ...)` takes `model` as an *optional* argument (unlike
+`er_plot_add_model()`, where it's required) -- `NULL` is valid and simply
+means no model-derived statistic is available. `style` defaults to
+`er_style_summary_pvalue()` (draws a p-value from the model's own
+[er_summary()], via `config$p_value`); `er_style_summary_n()` is a new,
+model-agnostic alternative (total observation count, or one count per
+stratum level when stratified) that ignores `model` entirely and reads
+straight from `data`, demonstrating that a summary builder need not
+depend on a model. `er_plot_add_model()` itself dropped `summary_style`
+entirely (straight removal, no deprecation shim, per this package's
+usual convention) and now only draws the curve/ribbon.
+
+Two follow-on design decisions, both made when the layer was split out:
+
+- **Corner placement no longer depends on the model curve.**
+  `config$corner_distance` (a named `top_left`/`top_right`/
+  `bottom_left`/`bottom_right` vector of minimum distances, used to place
+  the annotation in the least-crowded corner) used to be computed from
+  the model's fitted curve (`config$predictions`'s `fit_resp`). Since
+  `er_plot_add_summary()` can now be called with no model at all, this
+  was switched to a single code path based on the raw observed data
+  instead: `.layer_summary()` computes it from `object$data`'s own
+  `(exposure, response)` points, rescaled onto `[0, 1]` via
+  `object$exposure$limits`/`object$response$limits` -- the same
+  rescale-then-`sqrt(x^2+y^2)`-per-corner-then-`min()` shape as before,
+  just fed raw points instead of the curve. This is a deliberate, visible
+  behaviour change to existing plots' label placement, not just an
+  implementation detail, and applies uniformly whether or not a model
+  was supplied.
+- **The "skip when stratified" decision moved into the builder.**
+  `.layer_model()` used to refuse to compute a p-value at all when the
+  layer was stratified (one p-value doesn't unambiguously describe
+  multiple curves). `.layer_summary()` now computes `config$p_value`
+  unconditionally whenever a `model` is supplied, and
+  `er_style_summary_pvalue()` itself checks `stratify` and returns
+  `list()` if `TRUE`. This lets a different summary builder make its own
+  call -- `er_style_summary_n()`, for instance, is most useful precisely
+  when stratified (one count per stratum level), so it doesn't suppress
+  itself.
+
+Both `er_style_summary_pvalue()` and `er_style_summary_n()` are tagged
+`er_style_tag(fn, layer = "summary")`. `er_plot_build()`'s base-plot
+trigger condition gained `object$layer$summary`, so a plot with only a
+summary layer (no model/quantile/data-overlay) still builds a base
+panel. One visible side effect worth flagging: every existing
+`er_plot_add_model(mod)` call used to draw a p-value annotation by
+default (since `summary_style` defaulted on); it no longer does --
+showing one now requires an explicit `er_plot_add_summary(model = mod)`
+call. The three response-type worked-example vignettes
+(`plot-binary.Rmd`/`plot-continuous.Rmd`/`plot-count.Rmd`) were not
+updated to add this call, since none of their prose specifically
+discussed the p-value annotation; their rendered model-layer examples
+now show no summary annotation where they used to.
+
 ## Passing extra arguments to a builder (`...` passthrough)
 
 Every `er_plot_add_*()` function (`er_plot_add_model()`,
-`er_plot_add_quantiles()`, `er_plot_add_data()`, `er_plot_add_groups()`)
-takes its own `...`, forwarded unchanged to whichever `er_style_*()`
-builder(s) it calls at build time -- `er_plot_add_model()`'s `...` is
-shared identically between `style` and `summary_style`. The standard
+`er_plot_add_summary()`, `er_plot_add_quantiles()`, `er_plot_add_data()`,
+`er_plot_add_groups()`) takes its own `...`, forwarded unchanged to
+whichever `er_style_*()` builder it calls at build time. The standard
 builder signature grew a trailing `...` to receive this:
 `function(data, config, stratify, exposure, response, strata, theme,
-...)`, applied (straight rename, no shim) to all 18 built-in builders;
+...)`, applied (straight rename, no shim) to all built-in builders;
 one that doesn't need any extra arguments just declares `...` and
 ignores it. Extra arguments must be named -- checked at each
 `er_plot_add_*()` call site via the internal `.check_dots_named()`
@@ -362,13 +434,11 @@ helper in `R/utils-helpers.R` (there's no exported `rlang::check_dots_named()`
 in the rlang version this package depends on, so this is a small
 hand-rolled equivalent) -- since they're spliced in positionally after
 the seven standard arguments (`do.call(style, c(list(data, config, ...,
-theme), config$dots))` at each of the six call sites in
+theme), config$dots))` at each of the call sites in
 `R/er-plot-build.R`); an unnamed one would otherwise silently bind to
 the wrong parameter. Each `.layer_*()` function gained a `dots`
 parameter (default `list()`), storing it on `config$dots` (shared across
-every per-group config for `.layer_group()`, and identically available
-to both `config$style$model` and `config$style$summary` for
-`.layer_model()`).
+every per-group config for `.layer_group()`).
 
 The motivating concrete case: `er_style_model_spaghetti()` calls
 [er_simulate()], and erglm's implementation auto-selects and reports a
@@ -444,7 +514,12 @@ itself first): `object$style`/`er_plot_style()`/the builder-signature
 `style` parameter became `object$theme`/`er_plot_theme()`/`theme`, then
 `builder`/`summary_builder` and the entire `er_builder_*()` family
 became `style`/`summary_style`/`er_style_*()` -- see "Naming scheme"
-above for the full rationale and two-phase sequencing.
+above for the full rationale and two-phase sequencing. Most recently,
+`summary_style` was itself promoted out of `er_plot_add_model()` into
+its own peer layer, `er_plot_add_summary()`, with a new,
+model-agnostic `er_style_summary_n()` builder added alongside the
+migrated `er_style_summary_pvalue()` -- see "The summary layer is
+independent of the model layer" above.
 
 ## Vignette structure
 
@@ -489,7 +564,8 @@ errors and no leftover old-identifier references in the output.
 - `R/er-generics.R` -- the model interface: `er_predict()`,
   `er_simulate()`, `er_summary()` generics and their default methods.
 - `R/er-plot-api.R` -- the public plot-building API: `er_plot()`,
-  `er_plot_add_model()`, `er_plot_add_quantiles()`,
+  `er_plot_add_model()`, `er_plot_add_summary()`,
+  `er_plot_add_quantiles()`,
   `er_plot_add_data()`, `er_plot_add_groups()`, `er_plot_build()`,
   plus `print`/`plot` methods for the `er_plot` S3 class, and (also
   defined here, not in a separate file) `er_style_tag()` and its
@@ -544,7 +620,7 @@ errors and no leftover old-identifier references in the output.
   pipeline layer-adders are `er_plot_add_*()` (verbs); partial builders
   are `er_style_*()` (noun phrases naming the visual idiom, with the
   layer name as the second token), selected via each layer-adder's
-  `style`/`summary_style` argument; confidence-interval helpers are
+  `style` argument; confidence-interval helpers are
   `ci_*()` (noun phrases naming the statistical method); internal
   helpers are prefixed with `.`. "Builder" remains fine as ordinary
   English prose for "a function you write to build geoms" -- only the

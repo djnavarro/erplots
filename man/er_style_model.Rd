@@ -76,9 +76,8 @@ default), \code{er_style_model_line()} (line only, no ribbon), and
 \code{er_style_model_spaghetti()} (a spaghetti plot of simulated draws, for
 models that implement \code{\link[=er_simulate]{er_simulate()}}). All three are tagged
 \code{er_style_tag(fn, layer = "model")}, so \code{\link[=er_plot_add_model]{er_plot_add_model()}}
-errors informatively if handed one of these swapped into the
-\code{summary_style} argument, or a builder tagged for a different layer
-entirely.
+errors informatively if handed one of these tagged for a different
+layer entirely (e.g. \code{"summary"}, meant for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}).
 
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.

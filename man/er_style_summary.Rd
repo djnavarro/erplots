@@ -3,9 +3,21 @@
 \name{er_style_summary}
 \alias{er_style_summary}
 \alias{er_style_summary_pvalue}
+\alias{er_style_summary_n}
 \title{Summary annotation builders for exposure-response plots}
 \usage{
 er_style_summary_pvalue(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
+
+er_style_summary_n(
   data,
   config,
   stratify,
@@ -42,13 +54,21 @@ A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 Summary annotation builders for exposure-response plots
 }
 \details{
-Builders for the \code{summary_style} argument of
-\code{\link[=er_plot_add_model]{er_plot_add_model()}}, which annotate the model panel with a summary
-statistic rather than drawing the curve itself: \code{er_style_summary_pvalue()}
-(the default) places a formatted p-value in whichever corner of the
-panel is furthest from the data. It's tagged \code{er_style_tag(fn, layer = "summary")}, so \code{\link[=er_plot_add_model]{er_plot_add_model()}} errors informatively if it's
-passed as \code{style} (the curve/ribbon argument) rather than
-\code{summary_style}.
+Builders for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}, which annotate the base
+panel with a summary statistic or descriptive label rather than
+drawing a curve or raw data. \code{er_style_summary_pvalue()} (the default)
+places a formatted p-value -- derived from the model's own
+\code{\link[=er_summary]{er_summary()}} method -- in whichever corner of the panel is furthest
+from the observed data, and draws nothing at all if no model was
+supplied to \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}, or if the layer is stratified (one
+p-value doesn't unambiguously describe multiple curves).
+\code{er_style_summary_n()} is a model-agnostic alternative: it always draws,
+showing the total number of observations (or, when stratified, one
+count per stratum level) -- demonstrating that a summary annotation
+doesn't have to originate from a fitted model at all. Both are tagged
+\code{er_style_tag(fn, layer = "summary")}, so \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} errors
+informatively if a builder tagged for a different layer is passed to
+it instead.
 
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.

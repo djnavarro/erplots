@@ -22,9 +22,8 @@
 #' `er_style_model_spaghetti()` (a spaghetti plot of simulated draws, for
 #' models that implement [er_simulate()]). All three are tagged
 #' `er_style_tag(fn, layer = "model")`, so [er_plot_add_model()]
-#' errors informatively if handed one of these swapped into the
-#' `summary_style` argument, or a builder tagged for a different layer
-#' entirely.
+#' errors informatively if handed one of these tagged for a different
+#' layer entirely (e.g. `"summary"`, meant for [er_plot_add_summary()]).
 #'
 #' See [er_style()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.

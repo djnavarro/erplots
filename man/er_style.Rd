@@ -46,7 +46,7 @@ builders implement. The builders themselves are documented on
 their own family-specific pages, one per layer:
 \itemize{
 \item \code{\link[=er_style_model]{er_style_model()}} -- the \code{model} layer (\code{\link[=er_plot_add_model]{er_plot_add_model()}})
-\item \code{\link[=er_style_summary]{er_style_summary()}} -- the \code{summary_style} argument of \code{\link[=er_plot_add_model]{er_plot_add_model()}}
+\item \code{\link[=er_style_summary]{er_style_summary()}} -- the \code{summary} layer (\code{\link[=er_plot_add_summary]{er_plot_add_summary()}})
 \item \code{\link[=er_style_quantile]{er_style_quantile()}} -- the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}})
 \item \code{\link[=er_style_data]{er_style_data()}} -- the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}})
 \item \code{\link[=er_style_group]{er_style_group()}} -- the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}})
@@ -72,8 +72,7 @@ custom builder -- it was promoted to a built-in option once it proved
 to be a natural, low-risk alternative to \code{er_style_quantile_errorbar()},
 with no new config requirements.)
 
-Each \verb{er_plot_add_*()} function takes a \code{style} argument (and
-\code{er_plot_add_model()} additionally takes \code{summary_style}) that
+Each \verb{er_plot_add_*()} function takes a \code{style} argument that
 defaults to one built-in \verb{er_style_*()} function and can be set to any
 other -- built-in or custom -- matching the standard signature: a
 custom builder can be plugged in without forking the package or
@@ -141,11 +140,10 @@ the user-facing version of this rule.
 
 
 Every \verb{er_plot_add_*()} function (\code{er_plot_add_model()},
-\code{er_plot_add_quantiles()}, \code{er_plot_add_data()}, \code{er_plot_add_groups()})
-takes its own \code{...}, which is forwarded unchanged to \code{style} (and, for
-\code{er_plot_add_model()}, \code{summary_style} -- both builders receive the
-identical set of extra arguments) when it's actually called at build
-time. Extra arguments must be named, since they're appended positionally
+\code{er_plot_add_summary()}, \code{er_plot_add_quantiles()}, \code{er_plot_add_data()},
+\code{er_plot_add_groups()}) takes its own \code{...}, which is forwarded
+unchanged to \code{style} when it's actually called at build time. Extra
+arguments must be named, since they're appended positionally
 after the seven standard arguments; an unnamed one errors immediately
 rather than silently binding to the wrong parameter. This is how a
 builder that needs a piece of information beyond what \code{config} already

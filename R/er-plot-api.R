@@ -3,7 +3,9 @@
 #'
 #' `er_plot()` creates an (empty) plot object of S3 class `er_plot`. Build
 #' up a plot by piping it through one or more layer functions --
-#' [er_plot_add_model()] (fitted-model curve/ribbon and summary),
+#' [er_plot_add_model()] (fitted-model curve/ribbon),
+#' [er_plot_add_summary()] (a summary annotation, e.g. a p-value or
+#' descriptive label),
 #' [er_plot_add_quantiles()] (exposure-quantile-binned response summary),
 #' [er_plot_add_data()] (raw observations, by default overlaid on the
 #' model panel), and/or
@@ -16,7 +18,8 @@
 #' @details
 #' # Layers are either singleton or additive
 #'
-#' [er_plot_add_model()], [er_plot_add_quantiles()], and
+#' [er_plot_add_model()], [er_plot_add_summary()],
+#' [er_plot_add_quantiles()], and
 #' [er_plot_add_data()] are **singleton**: calling one of them twice
 #' on the same object overwrites the first call's result rather than
 #' combining the two. [er_plot_add_groups()] is **additive**: each call
@@ -89,7 +92,8 @@
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot_add_model()], [er_plot_add_quantiles()],
+#' @seealso [er_plot_add_model()], [er_plot_add_summary()],
+#'   [er_plot_add_quantiles()],
 #'   [er_plot_add_data()], [er_plot_add_groups()],
 #'   [er_plot_build()], [er_plot_theme()], [er_model_interface]
 #'
@@ -114,6 +118,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
       strata = .plot_variable(role = "strata"),
       layer = list(
         model    = NULL, 
+        summary  = NULL,
         quantile = NULL, 
         data     = NULL,
         overlay  = NULL,
@@ -215,10 +220,11 @@ er_plot_theme <- function(object, labels) {
 #' Adds the model layer: a fitted exposure-response curve with an
 #' uncertainty ribbon (the default, via [er_predict()]), or a spaghetti
 #' plot of simulated draws (`style = er_style_model_spaghetti`, via
-#' [er_simulate()]), plus an optional summary annotation (e.g. a p-value)
-#' via [er_summary()] when the layer isn't stratified. This layer needs no
-#' `response_type` dispatch -- it only ever consumes [er_predict()]'s
-#' output on the response's own scale.
+#' [er_simulate()]). This layer needs no `response_type` dispatch -- it
+#' only ever consumes [er_predict()]'s output on the response's own
+#' scale. For a summary annotation (e.g. a p-value, via [er_summary()]),
+#' see [er_plot_add_summary()] -- a separate, independent layer that
+#' doesn't require a model layer to also be present.
 #'
 #' This layer is **singleton** -- see [er_plot()]'s "Layers are either
 #' singleton or additive" -- so calling it twice replaces the previous
@@ -236,21 +242,16 @@ er_plot_theme <- function(object, labels) {
 #'   [er_style_model_spaghetti()] (simulated draws, via [er_simulate()]) is
 #'   the other built-in option; any function matching the standard
 #'   `(data, config, stratify, exposure, response, strata, theme, ...)`
-#'   signature can be supplied instead -- see [er_style()].
-#' @param summary_style Function drawing the summary annotation --
-#'   defaults to [er_style_summary_pvalue()]. Any function matching the same
-#'   standard signature as `style` can be supplied instead. See
-#'   [er_style()]. If `style`/`summary_style` is tagged with a
-#'   `layer` (via [er_style_tag()]) other than `"model"`/`"summary"`
-#'   respectively, this errors informatively rather than passing a
-#'   mismatched `config` shape to the builder; an untagged builder is
-#'   never checked.
+#'   signature can be supplied instead -- see [er_style()]. If `style` is
+#'   tagged with a `layer` (via [er_style_tag()]) other than `"model"`,
+#'   this errors informatively rather than passing a mismatched `config`
+#'   shape to the builder; an untagged builder is never checked.
 #' @param conf_level Confidence level for the prediction ribbon
-#' @param ... Additional named arguments forwarded, unchanged, to both
-#'   `style` and `summary_style` when they're called at build time (each
-#'   builder is free to use only the arguments it recognizes, via its own
-#'   `...`). Must be named -- see [er_style()]'s "Passing extra arguments
-#'   to a builder" section. For example,
+#' @param ... Additional named arguments forwarded, unchanged, to `style`
+#'   when it's called at build time (the builder is free to use only the
+#'   arguments it recognizes, via its own `...`). Must be named -- see
+#'   [er_style()]'s "Passing extra arguments to a builder" section. For
+#'   example,
 #'   `er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626)`
 #'   lets [er_style_model_spaghetti()] pass a reproducible `seed` to
 #'   [er_simulate()] instead of relying on erglm's auto-selected one.
@@ -287,24 +288,21 @@ er_plot_theme <- function(object, labels) {
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot()], [er_plot_add_quantiles()],
+#' @seealso [er_plot()], [er_plot_add_summary()], [er_plot_add_quantiles()],
 #'   [er_plot_add_data()], [er_plot_add_groups()], [er_style()]
 #'
 #' @export
 er_plot_add_model <- function(object, model, keep_strata = NULL,
-                                style = NULL, summary_style = NULL, conf_level = 0.95, ...) {
+                                style = NULL, conf_level = 0.95, ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
-  if (!is.null(summary_style) && !is.function(summary_style)) rlang::abort("`summary_style` must be a function or NULL")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
   style <- style %||% er_style_model_ribbonline
-  summary_style <- summary_style %||% er_style_summary_pvalue
   .check_style_layer(style, "model", arg = "style")
-  .check_style_layer(summary_style, "summary", arg = "summary_style")
 
   object$layer$model <- .layer_model(
     object = object, 
@@ -312,10 +310,100 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
     stratify = keep_strata, 
     conf_level = conf_level,
     style = style,
-    summary_style = summary_style,
     dots = dots
   )
   
+  return(object)
+}
+
+
+# summary -----------------------------------------------------------------
+
+#' Add a summary annotation layer
+#'
+#' Adds the summary layer: a text/label annotation placed in whichever
+#' corner of the base panel is furthest from the observed data (see
+#' [er_style_tag()]'s `corner_distance`-based placement, computed from
+#' `object$data`'s raw `(exposure, response)` coordinates -- not any
+#' fitted curve). Unlike [er_plot_add_model()], this layer doesn't require
+#' a model: [er_style_summary_pvalue()] (the default) draws a p-value
+#' derived from a supplied model's own [er_summary()] method, but
+#' [er_style_summary_n()] is purely descriptive (total observation count,
+#' or one count per stratum level) and needs no `model` at all.
+#'
+#' This layer is **singleton** -- see [er_plot()]'s "Layers are either
+#' singleton or additive" -- so calling it twice replaces the previous
+#' summary annotation rather than combining two. A builder wanting to show
+#' several statistics at once composes them into one label/one set of
+#' geoms itself, the way [er_style_summary_n()] does for multiple strata.
+#'
+#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param model A fitted exposure-response model, or `NULL` (the default).
+#'   Only needed by a model-summary builder (e.g.
+#'   [er_style_summary_pvalue()], which calls [er_summary()] on it); a
+#'   purely descriptive builder (e.g. [er_style_summary_n()]) ignores it.
+#' @param keep_strata Logical, indicating whether this layer should be
+#'   split by the plot's stratification variable; defaults to `TRUE` if
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. Passed
+#'   through to `style` as `stratify` -- whether/how a builder changes its
+#'   behaviour when `TRUE` is up to the builder itself (e.g.
+#'   [er_style_summary_pvalue()] draws nothing at all, since one p-value
+#'   doesn't unambiguously describe multiple curves).
+#' @param style Function drawing the summary annotation -- defaults to
+#'   [er_style_summary_pvalue()]. [er_style_summary_n()] is the other
+#'   built-in option; any function matching the standard `(data, config,
+#'   stratify, exposure, response, strata, theme, ...)` signature can be
+#'   supplied instead -- see [er_style()]. `config$p_value` (`NULL` unless
+#'   `model` was supplied) and `config$corner_distance` are the
+#'   pre-computed pieces specific to this layer. If `style` is tagged with
+#'   a `layer` (via [er_style_tag()]) other than `"summary"`, this errors
+#'   informatively; an untagged builder is never checked.
+#' @param ... Additional named arguments forwarded, unchanged, to `style`
+#'   when it's called at build time -- see [er_style()]'s "Passing extra
+#'   arguments to a builder" section. Must be named.
+#'
+#' @returns The input `object`, with the summary layer added
+#'
+#' @examples
+#' if (requireNamespace("erglm", quietly = TRUE)) {
+#' library(erglm)
+#' mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_add_model(mod) |>
+#'   er_plot_add_summary(model = mod) |>
+#'   plot()
+#'
+#' # a purely descriptive annotation, with no model at all
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_add_summary(style = er_style_summary_n) |>
+#'   plot()
+#' }
+#'
+#' @seealso [er_plot()], [er_plot_add_model()], [er_plot_add_quantiles()],
+#'   [er_plot_add_data()], [er_plot_add_groups()], [er_style()]
+#'
+#' @export
+er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style = NULL, ...) {
+
+  dots <- rlang::list2(...)
+  .check_dots_named(dots)
+  if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
+  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
+
+  style <- style %||% er_style_summary_pvalue
+  .check_style_layer(style, "summary")
+
+  object$layer$summary <- .layer_summary(
+    object = object,
+    model = model,
+    stratify = keep_strata,
+    style = style,
+    dots = dots
+  )
+
   return(object)
 }
 
@@ -428,7 +516,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot()], [er_plot_add_model()],
+#' @seealso [er_plot()], [er_plot_add_model()], [er_plot_add_summary()],
 #'   [er_plot_add_data()], [er_plot_add_groups()], [er_vpc_plot()],
 #'   [er_style()]
 #'
@@ -495,8 +583,9 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'
 #' `layer` is also optional, but unlike `fill_role`/`y_role` it isn't read
 #' for labelling -- it's read by every `er_plot_add_*()` function
-#' (`er_plot_add_model()` checks both `style` against `"model"` and
-#' `summary_style` against `"summary"`; `er_plot_add_quantiles()`
+#' (`er_plot_add_model()` checks `style` against `"model"`;
+#' `er_plot_add_summary()` checks `style` against `"summary"`;
+#' `er_plot_add_quantiles()`
 #' against `"quantile"`; `er_plot_add_data()` against `"data"`;
 #' `er_plot_add_groups()` against `"group"`) to catch a builder plugged
 #' into the wrong layer -- e.g. passing a quantile builder to
@@ -519,10 +608,9 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'   (currently only `"count"` is read by `.polish_labels()`), or `NULL`
 #'   (the default) to leave this tag unset
 #' @param layer One of `"model"`, `"summary"`, `"quantile"`, `"data"`, or
-#'   `"group"`, naming which `er_plot_add_*()` layer (or, for `"summary"`,
-#'   which argument of [er_plot_add_model()]) the builder is meant to be
-#'   used with, or `NULL` (the default) to leave this tag unset -- see
-#'   "Details"
+#'   `"group"`, naming which `er_plot_add_*()` layer the builder is meant
+#'   to be used with, or `NULL` (the default) to leave this tag unset --
+#'   see "Details"
 #'
 #' @returns `style`, with whichever of the `"er_style_layout"`/
 #'   `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`
@@ -730,7 +818,7 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot()], [er_plot_add_model()],
+#' @seealso [er_plot()], [er_plot_add_model()], [er_plot_add_summary()],
 #'   [er_plot_add_quantiles()], [er_plot_add_groups()], [er_style()]
 #'
 #' @export
@@ -844,7 +932,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   plot()
 #' }
 #'
-#' @seealso [er_plot()], [er_plot_add_model()],
+#' @seealso [er_plot()], [er_plot_add_model()], [er_plot_add_summary()],
 #'   [er_plot_add_quantiles()], [er_plot_add_data()], [er_style()]
 #'
 #' @export
@@ -910,6 +998,7 @@ print.er_plot <- function(x, ...) {
   if (any(layer_set)) {
     cat("  plot layers:\n")
     if (layer_set["model"])    cat("    - model:           ", paste(class(x$layer$model$config$model), collapse = "/"), "\n", sep = "")
+    if (layer_set["summary"])  cat("    - summary:         ", if (is.null(x$layer$summary$config$model)) "descriptive" else "model-derived", "\n", sep = "")
     if (layer_set["quantile"]) cat("    - quantile:        ", x$layer$quantile$config$n_quantiles, " bins\n", sep = "")
     if (layer_set["data"])     cat("    - data:            ", x$layer$data$config$layout, " ", x$layer$data$config$panel, "\n", sep = "")
     if (layer_set["overlay"])  cat("    - overlay:         ", if (x$layer$overlay$stratify) "stratified" else "unstratified", "\n", sep = "")
@@ -962,7 +1051,7 @@ er_plot_build <- function(object) {
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   
   # build
-  if (!is.null(object$layer$model) | !is.null(object$layer$quantile) | !is.null(object$layer$overlay)) {
+  if (!is.null(object$layer$model) | !is.null(object$layer$summary) | !is.null(object$layer$quantile) | !is.null(object$layer$overlay)) {
     object$plot$base <- .build_base_plot(object)
   }
   if (!is.null(object$layer$data)) object$plot$data <- .build_data_plot(object)

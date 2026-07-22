@@ -17,7 +17,7 @@
 #' their own family-specific pages, one per layer:
 #'
 #' - [er_style_model()] -- the `model` layer ([er_plot_add_model()])
-#' - [er_style_summary()] -- the `summary_style` argument of [er_plot_add_model()]
+#' - [er_style_summary()] -- the `summary` layer ([er_plot_add_summary()])
 #' - [er_style_quantile()] -- the `quantile` layer ([er_plot_add_quantiles()])
 #' - [er_style_data()] -- the `data` layer ([er_plot_add_data()])
 #' - [er_style_group()] -- the `group` layer ([er_plot_add_groups()])
@@ -56,8 +56,7 @@
 #' to be a natural, low-risk alternative to `er_style_quantile_errorbar()`,
 #' with no new config requirements.)
 #'
-#' Each `er_plot_add_*()` function takes a `style` argument (and
-#' `er_plot_add_model()` additionally takes `summary_style`) that
+#' Each `er_plot_add_*()` function takes a `style` argument that
 #' defaults to one built-in `er_style_*()` function and can be set to any
 #' other -- built-in or custom -- matching the standard signature: a
 #' custom builder can be plugged in without forking the package or
@@ -124,11 +123,10 @@
 #' @section Passing extra arguments to a builder:
 #'
 #' Every `er_plot_add_*()` function (`er_plot_add_model()`,
-#' `er_plot_add_quantiles()`, `er_plot_add_data()`, `er_plot_add_groups()`)
-#' takes its own `...`, which is forwarded unchanged to `style` (and, for
-#' `er_plot_add_model()`, `summary_style` -- both builders receive the
-#' identical set of extra arguments) when it's actually called at build
-#' time. Extra arguments must be named, since they're appended positionally
+#' `er_plot_add_summary()`, `er_plot_add_quantiles()`, `er_plot_add_data()`,
+#' `er_plot_add_groups()`) takes its own `...`, which is forwarded
+#' unchanged to `style` when it's actually called at build time. Extra
+#' arguments must be named, since they're appended positionally
 #' after the seven standard arguments; an unnamed one errors immediately
 #' rather than silently binding to the wrong parameter. This is how a
 #' builder that needs a piece of information beyond what `config` already

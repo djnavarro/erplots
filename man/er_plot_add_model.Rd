@@ -9,7 +9,6 @@ er_plot_add_model(
   model,
   keep_strata = NULL,
   style = NULL,
-  summary_style = NULL,
   conf_level = 0.95,
   ...
 )
@@ -30,24 +29,18 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}}) is
 the other built-in option; any function matching the standard
 \verb{(data, config, stratify, exposure, response, strata, theme, ...)}
-signature can be supplied instead -- see \code{\link[=er_style]{er_style()}}.}
-
-\item{summary_style}{Function drawing the summary annotation --
-defaults to \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}. Any function matching the same
-standard signature as \code{style} can be supplied instead. See
-\code{\link[=er_style]{er_style()}}. If \code{style}/\code{summary_style} is tagged with a
-\code{layer} (via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"model"}/\code{"summary"}
-respectively, this errors informatively rather than passing a
-mismatched \code{config} shape to the builder; an untagged builder is
-never checked.}
+signature can be supplied instead -- see \code{\link[=er_style]{er_style()}}. If \code{style} is
+tagged with a \code{layer} (via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"model"},
+this errors informatively rather than passing a mismatched \code{config}
+shape to the builder; an untagged builder is never checked.}
 
 \item{conf_level}{Confidence level for the prediction ribbon}
 
-\item{...}{Additional named arguments forwarded, unchanged, to both
-\code{style} and \code{summary_style} when they're called at build time (each
-builder is free to use only the arguments it recognizes, via its own
-\code{...}). Must be named -- see \code{\link[=er_style]{er_style()}}'s "Passing extra arguments
-to a builder" section. For example,
+\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
+when it's called at build time (the builder is free to use only the
+arguments it recognizes, via its own \code{...}). Must be named -- see
+\code{\link[=er_style]{er_style()}}'s "Passing extra arguments to a builder" section. For
+example,
 \code{er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626)}
 lets \code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} pass a reproducible \code{seed} to
 \code{\link[=er_simulate]{er_simulate()}} instead of relying on erglm's auto-selected one.}
@@ -59,10 +52,11 @@ The input \code{object}, with the model layer added
 Adds the model layer: a fitted exposure-response curve with an
 uncertainty ribbon (the default, via \code{\link[=er_predict]{er_predict()}}), or a spaghetti
 plot of simulated draws (\code{style = er_style_model_spaghetti}, via
-\code{\link[=er_simulate]{er_simulate()}}), plus an optional summary annotation (e.g. a p-value)
-via \code{\link[=er_summary]{er_summary()}} when the layer isn't stratified. This layer needs no
-\code{response_type} dispatch -- it only ever consumes \code{\link[=er_predict]{er_predict()}}'s
-output on the response's own scale.
+\code{\link[=er_simulate]{er_simulate()}}). This layer needs no \code{response_type} dispatch -- it
+only ever consumes \code{\link[=er_predict]{er_predict()}}'s output on the response's own
+scale. For a summary annotation (e.g. a p-value, via \code{\link[=er_summary]{er_summary()}}),
+see \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} -- a separate, independent layer that
+doesn't require a model layer to also be present.
 }
 \details{
 This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
@@ -101,6 +95,6 @@ erglm_data |>
 
 }
 \seealso{
-\code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}},
+\code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}},
 \code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, \code{\link[=er_style]{er_style()}}
 }

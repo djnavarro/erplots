@@ -37,7 +37,9 @@ An (empty) plot object of class \code{er_plot}
 \description{
 \code{er_plot()} creates an (empty) plot object of S3 class \code{er_plot}. Build
 up a plot by piping it through one or more layer functions --
-\code{\link[=er_plot_add_model]{er_plot_add_model()}} (fitted-model curve/ribbon and summary),
+\code{\link[=er_plot_add_model]{er_plot_add_model()}} (fitted-model curve/ribbon),
+\code{\link[=er_plot_add_summary]{er_plot_add_summary()}} (a summary annotation, e.g. a p-value or
+descriptive label),
 \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} (exposure-quantile-binned response summary),
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} (raw observations, by default overlaid on the
 model panel), and/or
@@ -48,7 +50,8 @@ any model implementing the small interface in \link{er_model_interface} can
 be passed to \code{\link[=er_plot_add_model]{er_plot_add_model()}}.
 }
 \section{Layers are either singleton or additive}{
-\code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, and
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_summary]{er_plot_add_summary()}},
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, and
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} are \strong{singleton}: calling one of them twice
 on the same object overwrites the first call's result rather than
 combining the two. \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} is \strong{additive}: each call
@@ -102,7 +105,8 @@ erglm_data |>
 
 }
 \seealso{
-\code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}},
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_summary]{er_plot_add_summary()}},
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}},
 \code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}},
 \code{\link[=er_plot_build]{er_plot_build()}}, \code{\link[=er_plot_theme]{er_plot_theme()}}, \link{er_model_interface}
 }

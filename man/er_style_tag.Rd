@@ -30,10 +30,9 @@ unset}
 (the default) to leave this tag unset}
 
 \item{layer}{One of \code{"model"}, \code{"summary"}, \code{"quantile"}, \code{"data"}, or
-\code{"group"}, naming which \verb{er_plot_add_*()} layer (or, for \code{"summary"},
-which argument of \code{\link[=er_plot_add_model]{er_plot_add_model()}}) the builder is meant to be
-used with, or \code{NULL} (the default) to leave this tag unset -- see
-"Details"}
+\code{"group"}, naming which \verb{er_plot_add_*()} layer the builder is meant
+to be used with, or \code{NULL} (the default) to leave this tag unset --
+see "Details"}
 }
 \value{
 \code{style}, with whichever of the \code{"er_style_layout"}/
@@ -75,8 +74,9 @@ correct for most builders.
 
 \code{layer} is also optional, but unlike \code{fill_role}/\code{y_role} it isn't read
 for labelling -- it's read by every \verb{er_plot_add_*()} function
-(\code{er_plot_add_model()} checks both \code{style} against \code{"model"} and
-\code{summary_style} against \code{"summary"}; \code{er_plot_add_quantiles()}
+(\code{er_plot_add_model()} checks \code{style} against \code{"model"};
+\code{er_plot_add_summary()} checks \code{style} against \code{"summary"};
+\code{er_plot_add_quantiles()}
 against \code{"quantile"}; \code{er_plot_add_data()} against \code{"data"};
 \code{er_plot_add_groups()} against \code{"group"}) to catch a builder plugged
 into the wrong layer -- e.g. passing a quantile builder to
