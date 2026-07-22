@@ -110,7 +110,7 @@ set the x-axis limits.</p>
     <p>This page documents the shared interface all <code>er_style_*()</code>
 builders implement. The builders themselves are documented on
 their own family-specific pages, one per layer:</p><ul><li><p><code><a href="er_style_model.html">er_style_model()</a></code> – the <code>model</code> layer (<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>)</p></li>
-<li><p><code><a href="er_style_summary.html">er_style_summary()</a></code> – the <code>summary_style</code> argument of <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code></p></li>
+<li><p><code><a href="er_style_summary.html">er_style_summary()</a></code> – the <code>summary</code> layer (<code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>)</p></li>
 <li><p><code><a href="er_style_quantile.html">er_style_quantile()</a></code> – the <code>quantile</code> layer (<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>)</p></li>
 <li><p><code><a href="er_style_data.html">er_style_data()</a></code> – the <code>data</code> layer (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>)</p></li>
 <li><p><code><a href="er_style_group.html">er_style_group()</a></code> – the <code>group</code> layer (<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>)</p></li>
@@ -135,8 +135,7 @@ panel-based data layer, or a <code>geom_crossbar()</code> instead of a
 custom builder – it was promoted to a built-in option once it proved
 to be a natural, low-risk alternative to <code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code>,
 with no new config requirements.)</p>
-<p>Each <code>er_plot_add_*()</code> function takes a <code>style</code> argument (and
-<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> additionally takes <code>summary_style</code>) that
+<p>Each <code>er_plot_add_*()</code> function takes a <code>style</code> argument that
 defaults to one built-in <code>er_style_*()</code> function and can be set to any
 other – built-in or custom – matching the standard signature: a
 custom builder can be plugged in without forking the package or
@@ -201,11 +200,10 @@ the user-facing version of this rule.</p>
 
 
 <p>Every <code>er_plot_add_*()</code> function (<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>,
-<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>, <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>)
-takes its own <code>...</code>, which is forwarded unchanged to <code>style</code> (and, for
-<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>, <code>summary_style</code> – both builders receive the
-identical set of extra arguments) when it's actually called at build
-time. Extra arguments must be named, since they're appended positionally
+<code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>, <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>,
+<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>) takes its own <code>...</code>, which is forwarded
+unchanged to <code>style</code> when it's actually called at build time. Extra
+arguments must be named, since they're appended positionally
 after the seven standard arguments; an unnamed one errors immediately
 rather than silently binding to the wrong parameter. This is how a
 builder that needs a piece of information beyond what <code>config</code> already

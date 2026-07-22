@@ -1,7 +1,7 @@
 # Extending erplots: writing your own builder
 
 This article is about writing a custom `er_style_*()` function – the
-mechanism by which any of erplots’ four layers can be drawn differently
+mechanism by which any of erplots’ five layers can be drawn differently
 from its built-in options, without forking the package. It assumes
 you’re already familiar with the plotting grammar described in [the plot
 grammar article](https://erplots.djnavarro.net/articles/design.md)
@@ -19,14 +19,13 @@ library(erglm)
 
 Every layer function
 ([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md))
-delegates its actual drawing to a `style` argument
-([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-additionally has `summary_style`), which defaults to one built-in
-`er_style_*()` function and can be set to any other function – built-in
-or custom – sharing this signature:
+delegates its actual drawing to a `style` argument, which defaults to
+one built-in `er_style_*()` function and can be set to any other
+function – built-in or custom – sharing this signature:
 
 ``` r
 function(data, config, stratify, exposure, response, strata, theme, ...)
@@ -53,10 +52,8 @@ etc.).
 ### Passing extra arguments to a builder
 
 Every `er_plot_add_*()` function also takes its own `...`, forwarded
-unchanged to `style` (and, for
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
-`summary_style`) when it’s called at build time. Extra arguments must be
-named – they’re appended positionally after the seven standard
+unchanged to `style` when it’s called at build time. Extra arguments
+must be named – they’re appended positionally after the seven standard
 arguments, so an unnamed one would silently bind to the wrong parameter.
 A builder that doesn’t need any extra arguments simply declares `...`
 and ignores it, as every builder in this article does; see
@@ -78,6 +75,7 @@ anything itself. Concretely:
 | Layer | `.layer_*()` | Key `config` field | Contents |
 |----|----|----|----|
 | Model | `.layer_model()` | `config$predictions` | One row per exposure grid point, with `fit_resp`, `ci_lower`, `ci_upper` (from [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)) |
+| Summary | `.layer_summary()` | `config$p_value`, `config$corner_distance` | `p_value` is `NULL` unless a `model` was supplied to [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md) (from [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)); `corner_distance` is a named vector of four minimum distances (`top_left`/`top_right`/`bottom_left`/`bottom_right`), computed from `data`’s raw `(exposure, response)` points rescaled onto `[0, 1]`, used to place a label away from the observed data |
 | Quantile | `.layer_quantile()` | `config$summary` | One row per exposure-quantile bin (× stratum), with `x_mid`, `y_mid`, `ci_lower`, `ci_upper`, plus label-placement columns. `config$breaks` also holds the `n + 1` quantile cutpoints themselves (from [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)), which [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/[`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) use to draw bin-boundary separators |
 | Data | `.layer_data()`/`.layer_overlay()` | (none extra) | The builder mostly works from `data` directly, since this layer draws raw observations rather than a summary |
 | Group | `.layer_group()` | `config[[group_var]]$data`, `config[[group_var]]$counts` | The subset of `data` for that grouping variable, joined to per-group sample-size labels |
@@ -353,10 +351,9 @@ built-in builder declares it –
 is tagged `layer = "quantile"`,
 [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md)
 is tagged `layer = "group"`, and so on for all five layers (`"model"`,
-`"summary"`, `"quantile"`, `"data"`, `"group"` – `"summary"` covers
-\[er_plot_add_model()\]’s `summary_style` argument specifically, since
-it’s a different slot from `style` on that same layer function). Passing
-a builder tagged for one layer into a different layer’s
+`"summary"`, `"quantile"`, `"data"`, `"group"` – `"summary"` is its own
+layer, \[er_plot_add_summary()\], independent of the model layer).
+Passing a builder tagged for one layer into a different layer’s
 `er_plot_add_*()` call errors immediately, naming both the layer the
 builder was tagged for and the layer it was actually passed to:
 
@@ -379,13 +376,10 @@ attr(er_style_quantile_errorbar, "er_style_layer")
 
 Unlike `layout`, `layer` is entirely optional – a custom builder that
 omits it is simply never checked, regardless of which `er_plot_add_*()`
-it’s passed to (this is also true of a builder tagged for one layer’s
-`summary_style`-style secondary argument if that layer doesn’t have one;
-there’s currently only `"summary"`, specific to
-\[er_plot_add_model()\]). This means existing custom builders written
-before `layer` existed keep working unchanged; tagging one is purely a
-way to get an earlier, more specific error if it’s ever passed to the
-wrong place by mistake.
+it’s passed to. This means existing custom builders written before
+`layer` existed keep working unchanged; tagging one is purely a way to
+get an earlier, more specific error if it’s ever passed to the wrong
+place by mistake.
 
 ### One function, four independent arguments
 
@@ -419,7 +413,7 @@ does (it sets `layout`, `fill_role`, and `layer` together).
 | `layout` | Data-layer builders only | Yes – errors if missing | `"overlay"` (merged onto the main panel) vs. `"panel"` (stacked panels below) |
 | `fill_role` | Any builder mapping `fill` | No – defaults to strata | Legend title for a non-strata `fill` aesthetic (e.g. `"density"`) |
 | `y_role` | Group-layer builders only | No – defaults to the group variable’s label | y-axis title when the y-axis isn’t the group variable itself (e.g. `"count"`) |
-| `layer` | Any builder | No – unchecked if unset | Which `er_plot_add_*()` (or `summary_style`) the builder is meant for; mismatches error immediately |
+| `layer` | Any builder | No – unchecked if unset | Which `er_plot_add_*()` the builder is meant for; mismatches error immediately |
 
 None of this machinery is needed for a builder that draws a familiar
 idiom in a familiar slot – the crossbar example above needed no tags at

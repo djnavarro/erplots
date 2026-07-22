@@ -99,9 +99,9 @@ models that implement
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
 All three are tagged `er_style_tag(fn, layer = "model")`, so
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-errors informatively if handed one of these swapped into the
-`summary_style` argument, or a builder tagged for a different layer
-entirely.
+errors informatively if handed one of these tagged for a different layer
+entirely (e.g. `"summary"`, meant for
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)).
 
 See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 for the shared builder interface these functions implement, including

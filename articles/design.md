@@ -66,11 +66,12 @@ erglm_data |>
           v
       rendered plot
 
-There are currently four layers, each documented on its own help topic:
+There are currently five layers, each documented on its own help topic:
 
 | Layer | Function | Shows | Depends on `response_type`? |
 |----|----|----|----|
-| Model | \[er_plot_add_model()\] | Fitted curve/ribbon (or spaghetti) plus an optional summary annotation | No |
+| Model | \[er_plot_add_model()\] | Fitted curve/ribbon (or spaghetti) | No |
+| Summary | \[er_plot_add_summary()\] | A corner-placed annotation – a model-derived p-value (\[er_style_summary_pvalue()\]) or a purely descriptive count (\[er_style_summary_n()\]), neither requiring the model layer to also be present | No |
 | Quantile | \[er_plot_add_quantiles()\] | Exposure-quantile-binned response summary (rate/mean + CI) | Yes |
 | Data | \[er_plot_add_data()\] | Raw observations, by default overlaid on the model panel at their true (exposure, response) coordinates (\[er_style_data_overlay()\]); or, for a binary response, \[er_style_data_boxjitter()\]’s older panel-based boxplot + jitter design | Yes |
 | Group | \[er_plot_add_groups()\] | Exposure distribution, boxplot/violin, split by a grouping variable | No |
@@ -78,9 +79,9 @@ There are currently four layers, each documented on its own help topic:
 ## Layers are either singleton or additive
 
 Calling a layer function twice on the same object doesn’t always do the
-same thing. The model, quantile, and data layers are **singleton**: a
-second call replaces the first call’s result rather than combining the
-two.
+same thing. The model, summary, quantile, and data layers are
+**singleton**: a second call replaces the first call’s result rather
+than combining the two.
 
 ``` r
 
@@ -217,8 +218,7 @@ no upper/lower partition to split on) – see \[er_plot_add_data()\].
 ## Extending erplots: writing your own builder
 
 Every layer function delegates the actual drawing to a `style` argument
-([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-additionally has `summary_style`) sharing a common signature –
+sharing a common signature –
 `function(data, config, stratify, exposure, response, strata, theme, ...)`.
 That signature is a documented, public part of the API (see
 \[er_style()\]), each layer’s `style` defaults to one built-in

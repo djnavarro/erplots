@@ -61,6 +61,17 @@
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
 <span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">er_style_summary_n</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">config</span>,</span>
+<span>  <span class="va">stratify</span>,</span>
+<span>  <span class="va">exposure</span>,</span>
+<span>  <span class="va">response</span>,</span>
+<span>  <span class="va">strata</span>,</span>
+<span>  <span class="va">theme</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -108,13 +119,21 @@
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for the <code>summary_style</code> argument of
-<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>, which annotate the model panel with a summary
-statistic rather than drawing the curve itself: <code>er_style_summary_pvalue()</code>
-(the default) places a formatted p-value in whichever corner of the
-panel is furthest from the data. It's tagged <code>er_style_tag(fn, layer = "summary")</code>, so <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> errors informatively if it's
-passed as <code>style</code> (the curve/ribbon argument) rather than
-<code>summary_style</code>.</p>
+    <p>Builders for <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>, which annotate the base
+panel with a summary statistic or descriptive label rather than
+drawing a curve or raw data. <code>er_style_summary_pvalue()</code> (the default)
+places a formatted p-value – derived from the model's own
+<code><a href="er_model_interface.html">er_summary()</a></code> method – in whichever corner of the panel is furthest
+from the observed data, and draws nothing at all if no model was
+supplied to <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>, or if the layer is stratified (one
+p-value doesn't unambiguously describe multiple curves).
+<code>er_style_summary_n()</code> is a model-agnostic alternative: it always draws,
+showing the total number of observations (or, when stratified, one
+count per stratum level) – demonstrating that a summary annotation
+doesn't have to originate from a fitted model at all. Both are tagged
+<code>er_style_tag(fn, layer = "summary")</code>, so <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code> errors
+informatively if a builder tagged for a different layer is passed to
+it instead.</p>
 <p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions
 implement, including how to write a custom builder of your own.</p>
     </div>

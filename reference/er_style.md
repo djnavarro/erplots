@@ -65,8 +65,8 @@ family-specific pages, one per layer:
   ([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md))
 
 - [`er_style_summary()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
-  – the `summary_style` argument of
-  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+  – the `summary` layer
+  ([`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md))
 
 - [`er_style_quantile()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
   – the `quantile` layer
@@ -102,15 +102,14 @@ to
 [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md),
 with no new config requirements.)
 
-Each `er_plot_add_*()` function takes a `style` argument (and
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-additionally takes `summary_style`) that defaults to one built-in
-`er_style_*()` function and can be set to any other – built-in or custom
-– matching the standard signature: a custom builder can be plugged in
-without forking the package or reaching into `object$layer` internals.
-For the data layer specifically, `style` also has to declare which
-*structural* family it belongs to – a single call merged into the main
-panel, or one or more panels stacked below the base plot – via
+Each `er_plot_add_*()` function takes a `style` argument that defaults
+to one built-in `er_style_*()` function and can be set to any other –
+built-in or custom – matching the standard signature: a custom builder
+can be plugged in without forking the package or reaching into
+`object$layer` internals. For the data layer specifically, `style` also
+has to declare which *structural* family it belongs to – a single call
+merged into the main panel, or one or more panels stacked below the base
+plot – via
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md),
 since
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
@@ -183,20 +182,19 @@ for the user-facing version of this rule.
 
 Every `er_plot_add_*()` function
 ([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md))
-takes its own `...`, which is forwarded unchanged to `style` (and, for
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
-`summary_style` – both builders receive the identical set of extra
-arguments) when it's actually called at build time. Extra arguments must
-be named, since they're appended positionally after the seven standard
-arguments; an unnamed one errors immediately rather than silently
-binding to the wrong parameter. This is how a builder that needs a piece
-of information beyond what `config` already carries – something
-genuinely per-call rather than a fixed part of the layer's configuration
-– can accept it without a bespoke argument on every `er_plot_add_*()`
-function. The motivating built-in example is
+takes its own `...`, which is forwarded unchanged to `style` when it's
+actually called at build time. Extra arguments must be named, since
+they're appended positionally after the seven standard arguments; an
+unnamed one errors immediately rather than silently binding to the wrong
+parameter. This is how a builder that needs a piece of information
+beyond what `config` already carries – something genuinely per-call
+rather than a fixed part of the layer's configuration – can accept it
+without a bespoke argument on every `er_plot_add_*()` function. The
+motivating built-in example is
 [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md),
 which calls
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)

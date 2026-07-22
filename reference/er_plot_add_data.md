@@ -123,6 +123,7 @@ own.
 
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
 [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)

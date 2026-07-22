@@ -15,6 +15,17 @@ er_style_summary_pvalue(
   theme,
   ...
 )
+
+er_style_summary_n(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
 ```
 
 ## Arguments
@@ -62,15 +73,25 @@ A geom, or a list of geoms; see
 
 ## Details
 
-Builders for the `summary_style` argument of
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
-which annotate the model panel with a summary statistic rather than
-drawing the curve itself: `er_style_summary_pvalue()` (the default)
-places a formatted p-value in whichever corner of the panel is furthest
-from the data. It's tagged `er_style_tag(fn, layer = "summary")`, so
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-errors informatively if it's passed as `style` (the curve/ribbon
-argument) rather than `summary_style`.
+Builders for
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
+which annotate the base panel with a summary statistic or descriptive
+label rather than drawing a curve or raw data.
+`er_style_summary_pvalue()` (the default) places a formatted p-value –
+derived from the model's own
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+method – in whichever corner of the panel is furthest from the observed
+data, and draws nothing at all if no model was supplied to
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
+or if the layer is stratified (one p-value doesn't unambiguously
+describe multiple curves). `er_style_summary_n()` is a model-agnostic
+alternative: it always draws, showing the total number of observations
+(or, when stratified, one count per stratum level) – demonstrating that
+a summary annotation doesn't have to originate from a fitted model at
+all. Both are tagged `er_style_tag(fn, layer = "summary")`, so
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
+errors informatively if a builder tagged for a different layer is passed
+to it instead.
 
 See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 for the shared builder interface these functions implement, including

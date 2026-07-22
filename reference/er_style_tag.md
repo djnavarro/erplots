@@ -53,11 +53,8 @@ er_style_tag(
 - layer:
 
   One of `"model"`, `"summary"`, `"quantile"`, `"data"`, or `"group"`,
-  naming which `er_plot_add_*()` layer (or, for `"summary"`, which
-  argument of
-  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md))
-  the builder is meant to be used with, or `NULL` (the default) to leave
-  this tag unset – see "Details"
+  naming which `er_plot_add_*()` layer the builder is meant to be used
+  with, or `NULL` (the default) to leave this tag unset – see "Details"
 
 ## Value
 
@@ -93,8 +90,9 @@ variable's label), which is correct for most builders.
 `layer` is also optional, but unlike `fill_role`/`y_role` it isn't read
 for labelling – it's read by every `er_plot_add_*()` function
 ([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-checks both `style` against `"model"` and `summary_style` against
-`"summary"`;
+checks `style` against `"model"`;
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
+checks `style` against `"summary"`;
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 against `"quantile"`;
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)

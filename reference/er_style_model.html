@@ -140,9 +140,8 @@ default), <code>er_style_model_line()</code> (line only, no ribbon), and
 <code>er_style_model_spaghetti()</code> (a spaghetti plot of simulated draws, for
 models that implement <code><a href="er_model_interface.html">er_simulate()</a></code>). All three are tagged
 <code>er_style_tag(fn, layer = "model")</code>, so <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>
-errors informatively if handed one of these swapped into the
-<code>summary_style</code> argument, or a builder tagged for a different layer
-entirely.</p>
+errors informatively if handed one of these tagged for a different
+layer entirely (e.g. <code>"summary"</code>, meant for <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>).</p>
 <p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions
 implement, including how to write a custom builder of your own.</p>
     </div>

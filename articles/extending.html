@@ -78,7 +78,7 @@
     
     
 <p>This article is about writing a custom <code>er_style_*()</code>
-function – the mechanism by which any of erplots’ four layers can be
+function – the mechanism by which any of erplots’ five layers can be
 drawn differently from its built-in options, without forking the
 package. It assumes you’re already familiar with the plotting grammar
 described in <a href="design.html">the plot grammar article</a> (layers,
@@ -92,12 +92,12 @@ more depth on the one topic that article only introduces: the
 <h2 id="the-builder-signature">The builder signature<a class="anchor" aria-label="anchor" href="#the-builder-signature"></a>
 </h2>
 <p>Every layer function (<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>,
+<code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code>,
 <code><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code>,
 <code><a href="../reference/er_plot_add_groups.html">er_plot_add_groups()</a></code>) delegates its actual drawing to a
-<code>style</code> argument (<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>
-additionally has <code>summary_style</code>), which defaults to one
-built-in <code>er_style_*()</code> function and can be set to any other
-function – built-in or custom – sharing this signature:</p>
+<code>style</code> argument, which defaults to one built-in
+<code>er_style_*()</code> function and can be set to any other function
+– built-in or custom – sharing this signature:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="cf">function</span>(data, config, stratify, exposure, response, strata, theme, ...)</span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -158,8 +158,7 @@ etc.).</p>
 <h3 id="passing-extra-arguments-to-a-builder">Passing extra arguments to a builder<a class="anchor" aria-label="anchor" href="#passing-extra-arguments-to-a-builder"></a>
 </h3>
 <p>Every <code>er_plot_add_*()</code> function also takes its own
-<code>...</code>, forwarded unchanged to <code>style</code> (and, for
-<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>, <code>summary_style</code>) when it’s
+<code>...</code>, forwarded unchanged to <code>style</code> when it’s
 called at build time. Extra arguments must be named – they’re appended
 positionally after the seven standard arguments, so an unnamed one would
 silently bind to the wrong parameter. A builder that doesn’t need any
@@ -206,6 +205,23 @@ itself. Concretely:</p>
 <code><a href="../reference/er_model_interface.html">er_predict()</a></code>)</td>
 </tr>
 <tr class="even">
+<td>Summary</td>
+<td><code>.layer_summary()</code></td>
+<td>
+<code>config$p_value</code>,
+<code>config$corner_distance</code>
+</td>
+<td>
+<code>p_value</code> is <code>NULL</code> unless a
+<code>model</code> was supplied to <code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code>
+(from <code><a href="../reference/er_model_interface.html">er_summary()</a></code>); <code>corner_distance</code> is a
+named vector of four minimum distances
+(<code>top_left</code>/<code>top_right</code>/<code>bottom_left</code>/<code>bottom_right</code>),
+computed from <code>data</code>’s raw <code>(exposure, response)</code>
+points rescaled onto <code>[0, 1]</code>, used to place a label away
+from the observed data</td>
+</tr>
+<tr class="odd">
 <td>Quantile</td>
 <td><code>.layer_quantile()</code></td>
 <td><code>config$summary</code></td>
@@ -217,7 +233,7 @@ cutpoints themselves (from <code><a href="../reference/cut_quantile.html">cut_ex
 <code><a href="../reference/er_style_quantile.html">er_style_quantile_errorbar_vlines()</a></code>/<code><a href="../reference/er_style_quantile.html">er_style_quantile_pointrange_vlines()</a></code>
 use to draw bin-boundary separators</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Data</td>
 <td>
 <code>.layer_data()</code>/<code>.layer_overlay()</code>
@@ -226,7 +242,7 @@ use to draw bin-boundary separators</td>
 <td>The builder mostly works from <code>data</code> directly, since this
 layer draws raw observations rather than a summary</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Group</td>
 <td><code>.layer_group()</code></td>
 <td>
@@ -491,13 +507,12 @@ wrong slot. Every built-in builder declares it –
 <code>layer = "quantile"</code>, <code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code> is
 tagged <code>layer = "group"</code>, and so on for all five layers
 (<code>"model"</code>, <code>"summary"</code>, <code>"quantile"</code>,
-<code>"data"</code>, <code>"group"</code> – <code>"summary"</code>
-covers [er_plot_add_model()]’s <code>summary_style</code> argument
-specifically, since it’s a different slot from <code>style</code> on
-that same layer function). Passing a builder tagged for one layer into a
-different layer’s <code>er_plot_add_*()</code> call errors immediately,
-naming both the layer the builder was tagged for and the layer it was
-actually passed to:</p>
+<code>"data"</code>, <code>"group"</code> – <code>"summary"</code> is
+its own layer, [er_plot_add_summary()], independent of the model layer).
+Passing a builder tagged for one layer into a different layer’s
+<code>er_plot_add_*()</code> call errors immediately, naming both the
+layer the builder was tagged for and the layer it was actually passed
+to:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -511,14 +526,10 @@ actually passed to:</p>
 <span><span class="co">#&gt; [1] "quantile"</span></span></code></pre></div>
 <p>Unlike <code>layout</code>, <code>layer</code> is entirely optional –
 a custom builder that omits it is simply never checked, regardless of
-which <code>er_plot_add_*()</code> it’s passed to (this is also true of
-a builder tagged for one layer’s <code>summary_style</code>-style
-secondary argument if that layer doesn’t have one; there’s currently
-only <code>"summary"</code>, specific to [er_plot_add_model()]). This
-means existing custom builders written before <code>layer</code> existed
-keep working unchanged; tagging one is purely a way to get an earlier,
-more specific error if it’s ever passed to the wrong place by
-mistake.</p>
+which <code>er_plot_add_*()</code> it’s passed to. This means existing
+custom builders written before <code>layer</code> existed keep working
+unchanged; tagging one is purely a way to get an earlier, more specific
+error if it’s ever passed to the wrong place by mistake.</p>
 </div>
 <div class="section level3">
 <h3 id="one-function-four-independent-arguments">One function, four independent arguments<a class="anchor" aria-label="anchor" href="#one-function-four-independent-arguments"></a>
@@ -587,8 +598,8 @@ vs. <code>"panel"</code> (stacked panels below)</td>
 <td><code>layer</code></td>
 <td>Any builder</td>
 <td>No – unchecked if unset</td>
-<td>Which <code>er_plot_add_*()</code> (or <code>summary_style</code>)
-the builder is meant for; mismatches error immediately</td>
+<td>Which <code>er_plot_add_*()</code> the builder is meant for;
+mismatches error immediately</td>
 </tr>
 </tbody>
 </table>

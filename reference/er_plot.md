@@ -3,7 +3,9 @@
 `er_plot()` creates an (empty) plot object of S3 class `er_plot`. Build
 up a plot by piping it through one or more layer functions –
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-(fitted-model curve/ribbon and summary),
+(fitted-model curve/ribbon),
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
+(a summary annotation, e.g. a p-value or descriptive label),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 (exposure-quantile-binned response summary),
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
@@ -69,6 +71,7 @@ An (empty) plot object of class `er_plot`
 ## Layers are either singleton or additive
 
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 and
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
@@ -116,6 +119,7 @@ statistic.
 ## See also
 
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),

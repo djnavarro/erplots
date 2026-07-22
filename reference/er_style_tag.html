@@ -118,10 +118,9 @@ unset</p></dd>
 
 <dt id="arg-layer">layer<a class="anchor" aria-label="anchor" href="#arg-layer"></a></dt>
 <dd><p>One of <code>"model"</code>, <code>"summary"</code>, <code>"quantile"</code>, <code>"data"</code>, or
-<code>"group"</code>, naming which <code>er_plot_add_*()</code> layer (or, for <code>"summary"</code>,
-which argument of <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>) the builder is meant to be
-used with, or <code>NULL</code> (the default) to leave this tag unset – see
-"Details"</p></dd>
+<code>"group"</code>, naming which <code>er_plot_add_*()</code> layer the builder is meant
+to be used with, or <code>NULL</code> (the default) to leave this tag unset –
+see "Details"</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -152,8 +151,9 @@ the y-axis is titled with the group variable's label), which is
 correct for most builders.</p>
 <p><code>layer</code> is also optional, but unlike <code>fill_role</code>/<code>y_role</code> it isn't read
 for labelling – it's read by every <code>er_plot_add_*()</code> function
-(<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> checks both <code>style</code> against <code>"model"</code> and
-<code>summary_style</code> against <code>"summary"</code>; <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>
+(<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> checks <code>style</code> against <code>"model"</code>;
+<code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code> checks <code>style</code> against <code>"summary"</code>;
+<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>
 against <code>"quantile"</code>; <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> against <code>"data"</code>;
 <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> against <code>"group"</code>) to catch a builder plugged
 into the wrong layer – e.g. passing a quantile builder to

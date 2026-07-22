@@ -129,7 +129,7 @@ and finish with <code><a href="https://rdrr.io/r/graphics/plot.default.html" cla
       |
       v
   rendered plot</code></pre>
-<p>There are currently four layers, each documented on its own help
+<p>There are currently five layers, each documented on its own help
 topic:</p>
 <table class="table">
 <colgroup>
@@ -148,17 +148,25 @@ topic:</p>
 <tr class="odd">
 <td>Model</td>
 <td>[er_plot_add_model()]</td>
-<td>Fitted curve/ribbon (or spaghetti) plus an optional summary
-annotation</td>
+<td>Fitted curve/ribbon (or spaghetti)</td>
 <td>No</td>
 </tr>
 <tr class="even">
+<td>Summary</td>
+<td>[er_plot_add_summary()]</td>
+<td>A corner-placed annotation – a model-derived p-value
+([er_style_summary_pvalue()]) or a purely descriptive count
+([er_style_summary_n()]), neither requiring the model layer to also be
+present</td>
+<td>No</td>
+</tr>
+<tr class="odd">
 <td>Quantile</td>
 <td>[er_plot_add_quantiles()]</td>
 <td>Exposure-quantile-binned response summary (rate/mean + CI)</td>
 <td>Yes</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Data</td>
 <td>[er_plot_add_data()]</td>
 <td>Raw observations, by default overlaid on the model panel at their
@@ -167,7 +175,7 @@ for a binary response, [er_style_data_boxjitter()]’s older panel-based
 boxplot + jitter design</td>
 <td>Yes</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Group</td>
 <td>[er_plot_add_groups()]</td>
 <td>Exposure distribution, boxplot/violin, split by a grouping
@@ -181,7 +189,7 @@ variable</td>
 <h2 id="layers-are-either-singleton-or-additive">Layers are either singleton or additive<a class="anchor" aria-label="anchor" href="#layers-are-either-singleton-or-additive"></a>
 </h2>
 <p>Calling a layer function twice on the same object doesn’t always do
-the same thing. The model, quantile, and data layers are
+the same thing. The model, summary, quantile, and data layers are
 <strong>singleton</strong>: a second call replaces the first call’s
 result rather than combining the two.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -332,9 +340,7 @@ split on) – see [er_plot_add_data()].</p>
 <h2 id="extending-erplots-writing-your-own-builder">Extending erplots: writing your own builder<a class="anchor" aria-label="anchor" href="#extending-erplots-writing-your-own-builder"></a>
 </h2>
 <p>Every layer function delegates the actual drawing to a
-<code>style</code> argument (<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>
-additionally has <code>summary_style</code>) sharing a common signature
-–
+<code>style</code> argument sharing a common signature –
 <code>function(data, config, stratify, exposure, response, strata, theme, ...)</code>.
 That signature is a documented, public part of the API (see
 [er_style()]), each layer’s <code>style</code> defaults to one built-in

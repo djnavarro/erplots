@@ -125,6 +125,9 @@ Build exposure-response plots from any model that implements
 - [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
   : Add a fitted-model curve/ribbon layer
 
+- [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
+  : Add a summary annotation layer
+
 - [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
   : Add a quantile-binned response summary layer
 
@@ -158,6 +161,7 @@ plot
   [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
   : Model curve builders for exposure-response plots
 - [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+  [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
   : Summary annotation builders for exposure-response plots
 - [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
   [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
