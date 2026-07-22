@@ -12,7 +12,8 @@ er_style_quantile_errorbar(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_quantile_errorbar_vlines(
@@ -22,7 +23,8 @@ er_style_quantile_errorbar_vlines(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_quantile_pointrange(
@@ -32,7 +34,8 @@ er_style_quantile_pointrange(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_quantile_pointrange_vlines(
@@ -42,7 +45,8 @@ er_style_quantile_pointrange_vlines(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 ```
 
@@ -75,6 +79,14 @@ er_style_quantile_pointrange_vlines(
 - theme:
 
   Theme components
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)'s
+  own `...`; see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+  "Passing extra arguments to a builder" section.
 
 ## Value
 

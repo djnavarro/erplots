@@ -24,7 +24,8 @@ er_plot_add_quantiles(
   keep_strata = NULL,
   style = NULL,
   bins = 4,
-  conf_level = 0.95
+  conf_level = 0.95,
+  ...
 )
 ```
 
@@ -54,7 +55,7 @@ er_plot_add_quantiles(
   [`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md))
   that additionally draw a dotted line at each interior quantile-bin
   boundary; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, theme)`
+  `(data, config, stratify, exposure, response, strata, theme, ...)`
   signature can be supplied instead – see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
   `config$summary` is the pre-computed per-bin data frame (point
@@ -70,6 +71,13 @@ er_plot_add_quantiles(
 - conf_level:
 
   Confidence level for the interval
+
+- ...:
+
+  Additional named arguments forwarded, unchanged, to `style` when it's
+  called at build time – see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+  "Passing extra arguments to a builder" section. Must be named.
 
 ## Value
 
@@ -145,7 +153,8 @@ erglm_data |>
   plot()
 
 # plug in a fully custom builder; see `?er_style` for the full contract
-build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, theme) {
+build_quantile_crossbar <- function(data, config, stratify, exposure,
+                                     response, strata, theme, ...) {
   ggplot2::geom_crossbar(
     data = config$summary,
     mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),

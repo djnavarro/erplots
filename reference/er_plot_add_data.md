@@ -25,7 +25,7 @@ since there's no upper/lower partition to select from.
 ## Usage
 
 ``` r
-er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both")
+er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 ```
 
 ## Arguments
@@ -52,7 +52,7 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both")
   [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
   (binary response only: a boxplot + jittered points per panel) is the
   other built-in option; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, theme)`
+  `(data, config, stratify, exposure, response, strata, theme, ...)`
   signature and tagged with
   [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
   can be supplied instead – see
@@ -72,6 +72,13 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both")
   (no upper/lower partition exists) or for a continuous/count response
   under a "panel"-layout builder (there's no upper/lower partition to
   select from either way).
+
+- ...:
+
+  Additional named arguments forwarded, unchanged, to `style` when it's
+  called at build time – see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+  "Passing extra arguments to a builder" section. Must be named.
 
 ## Value
 
@@ -155,7 +162,7 @@ erglm_data |>
 # it "overlay" via `er_style_tag()` keeps it in the single main-panel
 # layout -- see `?er_style`
 build_data_density <- er_style_tag(
-  function(data, config, stratify, exposure, response, strata, theme) {
+  function(data, config, stratify, exposure, response, strata, theme, ...) {
     ggplot2::geom_density_2d(
       data = data,
       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])

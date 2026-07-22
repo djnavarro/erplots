@@ -12,7 +12,8 @@ er_style_data_boxjitter(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_data_overlay(
@@ -22,10 +23,20 @@ er_style_data_overlay(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
-er_style_data_hex(data, config, stratify, exposure, response, strata, theme)
+er_style_data_hex(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
 ```
 
 ## Arguments
@@ -57,6 +68,14 @@ er_style_data_hex(data, config, stratify, exposure, response, strata, theme)
 - theme:
 
   Theme components
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)'s
+  own `...`; see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+  "Passing extra arguments to a builder" section.
 
 ## Value
 

@@ -82,6 +82,12 @@
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
 <dd><p>Theme components</p></dd>
 
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional named arguments forwarded from the corresponding
+<code>er_plot_add_*()</code> call's own <code>...</code>; see "Passing extra arguments to a
+builder" below.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -118,7 +124,7 @@ as needed</p>
 
 <p>Every <code>er_style_*()</code> function above shares the signature documented in
 <code>@param</code>s, and that signature is a public part of the API, not an
-implementation detail: any function <code>function(data, config, stratify, exposure, response, strata, theme)</code> that returns a geom or list of
+implementation detail: any function <code>function(data, config, stratify, exposure, response, strata, theme, ...)</code> that returns a geom or list of
 geoms can stand in for a built-in builder. This is the officially
 supported way to draw a layer differently from any of the built-in
 <code>style</code> options – e.g. a 2D density instead of a scatter for the
@@ -188,6 +194,38 @@ for by the response value itself – there's no built-in
 was removed once <code><a href="er_style_data.html">er_style_data_overlay()</a></code> covered its typical use case
 more simply), but a custom builder tagged <code>er_style_tag(builder, layout = "panel")</code> can still opt into it; see <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for
 the user-facing version of this rule.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="passing-extra-arguments-to-a-builder">Passing extra arguments to a builder<a class="anchor" aria-label="anchor" href="#passing-extra-arguments-to-a-builder"></a></h2>
+
+
+
+<p>Every <code>er_plot_add_*()</code> function (<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>,
+<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>, <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>)
+takes its own <code>...</code>, which is forwarded unchanged to <code>style</code> (and, for
+<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>, <code>summary_style</code> – both builders receive the
+identical set of extra arguments) when it's actually called at build
+time. Extra arguments must be named, since they're appended positionally
+after the seven standard arguments; an unnamed one errors immediately
+rather than silently binding to the wrong parameter. This is how a
+builder that needs a piece of information beyond what <code>config</code> already
+carries – something genuinely per-call rather than a fixed part of the
+layer's configuration – can accept it without a bespoke argument on
+every <code>er_plot_add_*()</code> function. The motivating built-in example is
+<code><a href="er_style_model.html">er_style_model_spaghetti()</a></code>, which calls <code><a href="er_model_interface.html">er_simulate()</a></code> and, for
+models (like erglm's) that auto-select and report a seed when none is
+supplied, would otherwise always trigger that message:</p>
+<p></p><div class="sourceCode r"><pre><code><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span>, style <span class="op">=</span> <span class="va">er_style_model_spaghetti</span>, seed <span class="op">=</span> <span class="fl">9626</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre><p></p></div>
+<p>A builder that doesn't need any extra arguments simply declares <code>...</code>
+and ignores it – every built-in builder does exactly this except
+<code><a href="er_style_model.html">er_style_model_spaghetti()</a></code>. A custom builder can read whichever named
+arguments it recognizes out of its own <code>...</code> (e.g. via
+<code>rlang::list2(...)</code>) and ignore the rest; unrecognized extra arguments
+are never an error at the builder itself, only at the <code>er_plot_add_*()</code>
+call site if they weren't named.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

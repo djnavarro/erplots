@@ -12,7 +12,8 @@ er_style_summary_pvalue(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 ```
 
@@ -45,6 +46,14 @@ er_style_summary_pvalue(
 - theme:
 
   Theme components
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+  own `...` (shared with `style`); see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+  "Passing extra arguments to a builder" section.
 
 ## Value
 

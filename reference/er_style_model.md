@@ -12,10 +12,20 @@ er_style_model_ribbonline(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
-er_style_model_line(data, config, stratify, exposure, response, strata, theme)
+er_style_model_line(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
 
 er_style_model_spaghetti(
   data,
@@ -24,7 +34,8 @@ er_style_model_spaghetti(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 ```
 
@@ -57,6 +68,19 @@ er_style_model_spaghetti(
 - theme:
 
   Theme components
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+  own `...`; see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+  "Passing extra arguments to a builder" section.
+  `er_style_model_spaghetti()` reads a `seed` from here (falling back to
+  `config$seed` – currently always `NULL` for the model layer – when
+  none is supplied) to pass to
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+  letting a caller override erglm's auto-selected seed.
 
 ## Value
 

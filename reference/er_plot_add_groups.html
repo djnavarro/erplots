@@ -69,7 +69,8 @@ the response, so it needs no <code>response_type</code> dispatch.</p>
 <span>  <span class="va">group_by</span>,</span>
 <span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -89,7 +90,7 @@ plots (a tidyselection of variables)</p></dd>
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Function drawing each group panel – defaults to
 <code><a href="er_style_group.html">er_style_group_boxplot()</a></code>. <code><a href="er_style_group.html">er_style_group_violin()</a></code> is the other
-built-in option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, theme)</code> signature can be
+built-in option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, theme, ...)</code> signature can be
 supplied instead – see <code><a href="er_style.html">er_style()</a></code>. Applied to every grouping
 variable added by this call. If <code>style</code> is tagged with a <code>layer</code>
 (via <code><a href="er_style_tag.html">er_style_tag()</a></code>) other than <code>"group"</code>, this errors
@@ -109,6 +110,13 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 variable, since that would mean grouping and stratifying by the
 same column at once; pass <code>keep_strata = FALSE</code> for that grouping
 variable instead</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional named arguments forwarded, unchanged, to <code>style</code>
+when it's called at build time (identically for every grouping
+variable added by this call) – see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra
+arguments to a builder" section. Must be named.</p></dd>
 
 </dl></div>
     <div class="section level2">

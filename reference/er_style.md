@@ -32,6 +32,12 @@ Builder functions for exposure-response plots
 
   Theme components
 
+- ...:
+
+  Additional named arguments forwarded from the corresponding
+  `er_plot_add_*()` call's own `...`; see "Passing extra arguments to a
+  builder" below.
+
 ## Value
 
 A geom, or a list of geoms. More precisely, a list of objects that can
@@ -81,7 +87,7 @@ Arguments are standardised to allow users to write their own as needed
 Every `er_style_*()` function above shares the signature documented in
 `@param`s, and that signature is a public part of the API, not an
 implementation detail: any function
-`function(data, config, stratify, exposure, response, strata, theme)`
+`function(data, config, stratify, exposure, response, strata, theme, ...)`
 that returns a geom or list of geoms can stand in for a built-in
 builder. This is the officially supported way to draw a layer
 differently from any of the built-in `style` options – e.g. a 2D density
@@ -172,6 +178,43 @@ covered its typical use case more simply), but a custom builder tagged
 `er_style_tag(builder, layout = "panel")` can still opt into it; see
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 for the user-facing version of this rule.
+
+## Passing extra arguments to a builder
+
+Every `er_plot_add_*()` function
+([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
+[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md))
+takes its own `...`, which is forwarded unchanged to `style` (and, for
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+`summary_style` – both builders receive the identical set of extra
+arguments) when it's actually called at build time. Extra arguments must
+be named, since they're appended positionally after the seven standard
+arguments; an unnamed one errors immediately rather than silently
+binding to the wrong parameter. This is how a builder that needs a piece
+of information beyond what `config` already carries – something
+genuinely per-call rather than a fixed part of the layer's configuration
+– can accept it without a bespoke argument on every `er_plot_add_*()`
+function. The motivating built-in example is
+[`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md),
+which calls
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+and, for models (like erglm's) that auto-select and report a seed when
+none is supplied, would otherwise always trigger that message:
+
+    erglm_data |>
+      er_plot(aucss, ae1) |>
+      er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626) |>
+      plot()
+
+A builder that doesn't need any extra arguments simply declares `...`
+and ignores it – every built-in builder does exactly this except
+[`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md).
+A custom builder can read whichever named arguments it recognizes out of
+its own `...` (e.g. via `rlang::list2(...)`) and ignore the rest;
+unrecognized extra arguments are never an error at the builder itself,
+only at the `er_plot_add_*()` call site if they weren't named.
 
 ## See also
 

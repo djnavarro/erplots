@@ -219,7 +219,7 @@ no upper/lower partition to split on) – see \[er_plot_add_data()\].
 Every layer function delegates the actual drawing to a `style` argument
 ([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 additionally has `summary_style`) sharing a common signature –
-`function(data, config, stratify, exposure, response, strata, theme)`.
+`function(data, config, stratify, exposure, response, strata, theme, ...)`.
 That signature is a documented, public part of the API (see
 \[er_style()\]), each layer’s `style` defaults to one built-in
 `er_style_*()` function, and it can be set to any other function

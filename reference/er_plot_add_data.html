@@ -97,7 +97,7 @@ partition to select from.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_plot_add_data</span><span class="op">(</span><span class="va">object</span>, keep_strata <span class="op">=</span> <span class="cn">NULL</span>, style <span class="op">=</span> <span class="cn">NULL</span>, panel <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_plot_add_data</span><span class="op">(</span><span class="va">object</span>, keep_strata <span class="op">=</span> <span class="cn">NULL</span>, style <span class="op">=</span> <span class="cn">NULL</span>, panel <span class="op">=</span> <span class="st">"both"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -122,7 +122,7 @@ means a shared color aesthetic, for any response type.</p></dd>
 <dd><p>Function drawing the data layer – defaults to
 <code><a href="er_style_data.html">er_style_data_overlay()</a></code>. <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code> (binary response
 only: a boxplot + jittered points per panel) is the other built-in
-option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, theme)</code> signature and tagged with
+option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, theme, ...)</code> signature and tagged with
 <code><a href="er_style_tag.html">er_style_tag()</a></code> can be supplied instead – see <code><a href="er_style.html">er_style()</a></code> for the
 full contract, e.g. a 2D density in the main panel, a continuous/
 count response's color-encoded panel, or per-panel histograms. If
@@ -138,6 +138,12 @@ response; must be <code>"both"</code> for an "overlay"-layout builder (no
 upper/lower partition exists) or for a continuous/count response
 under a "panel"-layout builder (there's no upper/lower partition to
 select from either way).</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional named arguments forwarded, unchanged, to <code>style</code>
+when it's called at build time – see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra
+arguments to a builder" section. Must be named.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -210,7 +216,7 @@ model/quantile layers use) rather than needing one of its own.</p>
 <span class="r-in"><span><span class="co"># it "overlay" via `er_style_tag()` keeps it in the single main-panel</span></span></span>
 <span class="r-in"><span><span class="co"># layout -- see `?er_style`</span></span></span>
 <span class="r-in"><span><span class="va">build_data_density</span> <span class="op">&lt;-</span> <span class="fu"><a href="er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="external-link">geom_density_2d</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>      data <span class="op">=</span> <span class="va">data</span>,</span></span>
 <span class="r-in"><span>      mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">exposure</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">response</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>

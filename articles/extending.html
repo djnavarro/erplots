@@ -98,7 +98,7 @@ more depth on the one topic that article only introduces: the
 additionally has <code>summary_style</code>), which defaults to one
 built-in <code>er_style_*()</code> function and can be set to any other
 function – built-in or custom – sharing this signature:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="cf">function</span>(data, config, stratify, exposure, response, strata, theme)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="cf">function</span>(data, config, stratify, exposure, response, strata, theme, ...)</span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -140,6 +140,12 @@ stratification variables declared in <code><a href="../reference/er_plot.html">e
 <code>theme$draw_key</code>, <code>theme$format_percent()</code>,
 <code>theme$format_number()</code>.</td>
 </tr>
+<tr class="even">
+<td><code>...</code></td>
+<td>Extra named arguments forwarded from the corresponding
+<code>er_plot_add_*()</code> call’s own <code>...</code> – see “Passing
+extra arguments to a builder” below.</td>
+</tr>
 </tbody>
 </table>
 <p>The function returns a geom, or a list of geoms/other objects that
@@ -148,6 +154,21 @@ documented as public API on <code><a href="../reference/er_style.html">?er_style
 layer’s own <code>er_style_*()</code> family page
 (<code><a href="../reference/er_style_model.html">?er_style_model</a></code>, <code><a href="../reference/er_style_quantile.html">?er_style_quantile</a></code>,
 etc.).</p>
+<div class="section level3">
+<h3 id="passing-extra-arguments-to-a-builder">Passing extra arguments to a builder<a class="anchor" aria-label="anchor" href="#passing-extra-arguments-to-a-builder"></a>
+</h3>
+<p>Every <code>er_plot_add_*()</code> function also takes its own
+<code>...</code>, forwarded unchanged to <code>style</code> (and, for
+<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>, <code>summary_style</code>) when it’s
+called at build time. Extra arguments must be named – they’re appended
+positionally after the seven standard arguments, so an unnamed one would
+silently bind to the wrong parameter. A builder that doesn’t need any
+extra arguments simply declares <code>...</code> and ignores it, as
+every builder in this article does; see <code><a href="../reference/er_style.html">?er_style</a></code>’s own
+“Passing extra arguments to a builder” section (and
+[er_style_model_spaghetti()]’s use of a <code>seed</code> passed this
+way) for a worked example.</p>
+</div>
 <div class="section level3">
 <h3 id="config-is-what-matters-and-its-already-computed-for-you">
 <code>config</code> is what matters, and it’s already computed for
@@ -260,7 +281,7 @@ a builder that skips labels, like the one below, can ignore them.) With
 that in hand, the builder itself is a small function that maps those
 columns onto <code>geom_crossbar()</code>’s aesthetics:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">er_style_quantile_crossbar</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="va">er_style_quantile_crossbar</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_crossbar</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x_mid</span>, y <span class="op">=</span> <span class="va">y_mid</span>, ymin <span class="op">=</span> <span class="va">ci_lower</span>, ymax <span class="op">=</span> <span class="va">ci_upper</span><span class="op">)</span>,</span>
@@ -359,7 +380,7 @@ builder:</p>
 message telling you what to do, rather than silently landing in the
 wrong structural slot:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">untagged_builder</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="va">untagged_builder</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">exposure</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">response</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
@@ -377,7 +398,7 @@ density contour in place of raw points, useful when there are enough
 observations that a scatter overplots into an unreadable smear:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">er_style_data_density</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
-<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="external-link">geom_density2d</a></span><span class="op">(</span></span>
 <span>      data <span class="op">=</span> <span class="va">data</span>,</span>
 <span>      mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">exposure</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">response</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>

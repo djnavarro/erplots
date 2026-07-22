@@ -15,7 +15,8 @@ er_plot_add_groups(
   group_by,
   style = NULL,
   bins = NULL,
-  keep_strata = NULL
+  keep_strata = NULL,
+  ...
 )
 ```
 
@@ -36,7 +37,7 @@ er_plot_add_groups(
   [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md).
   [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md)
   is the other built-in option; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, theme)`
+  `(data, config, stratify, exposure, response, strata, theme, ...)`
   signature can be supplied instead – see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
   Applied to every grouping variable added by this call. If `style` is
@@ -61,6 +62,14 @@ er_plot_add_groups(
   plot's stratification variable, since that would mean grouping and
   stratifying by the same column at once; pass `keep_strata = FALSE` for
   that grouping variable instead
+
+- ...:
+
+  Additional named arguments forwarded, unchanged, to `style` when it's
+  called at build time (identically for every grouping variable added by
+  this call) – see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+  "Passing extra arguments to a builder" section. Must be named.
 
 ## Value
 

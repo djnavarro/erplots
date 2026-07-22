@@ -59,7 +59,8 @@
 <span>  <span class="va">exposure</span>,</span>
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
-<span>  <span class="va">theme</span></span>
+<span>  <span class="va">theme</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">er_style_data_overlay</span><span class="op">(</span></span>
@@ -69,10 +70,20 @@
 <span>  <span class="va">exposure</span>,</span>
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
-<span>  <span class="va">theme</span></span>
+<span>  <span class="va">theme</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">er_style_data_hex</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">er_style_data_hex</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">config</span>,</span>
+<span>  <span class="va">stratify</span>,</span>
+<span>  <span class="va">exposure</span>,</span>
+<span>  <span class="va">response</span>,</span>
+<span>  <span class="va">strata</span>,</span>
+<span>  <span class="va">theme</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -105,6 +116,12 @@
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
 <dd><p>Theme components</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional named arguments forwarded from
+<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>'s own <code>...</code>; see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra
+arguments to a builder" section.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -29,7 +29,7 @@ additionally has `summary_style`), which defaults to one built-in
 or custom – sharing this signature:
 
 ``` r
-function(data, config, stratify, exposure, response, strata, theme)
+function(data, config, stratify, exposure, response, strata, theme, ...)
 ```
 
 | Argument | What it is |
@@ -39,6 +39,7 @@ function(data, config, stratify, exposure, response, strata, theme)
 | `stratify` | `TRUE`/`FALSE`: whether this layer should honour `stratify_by`. |
 | `exposure`, `response`, `strata` | Plot-variable metadata lists (`name`, `label`, `limits`, …) describing the exposure, response, and stratification variables declared in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md). |
 | `theme` | Shared theming helpers: `theme$theme_base()`, `theme$draw_key`, `theme$format_percent()`, `theme$format_number()`. |
+| `...` | Extra named arguments forwarded from the corresponding `er_plot_add_*()` call’s own `...` – see “Passing extra arguments to a builder” below. |
 
 The function returns a geom, or a list of geoms/other objects that can
 be added to a ggplot2 plot – nothing more. This signature is documented
@@ -48,6 +49,21 @@ alongside each layer’s own `er_style_*()` family page
 ([`?er_style_model`](https://erplots.djnavarro.net/reference/er_style_model.md),
 [`?er_style_quantile`](https://erplots.djnavarro.net/reference/er_style_quantile.md),
 etc.).
+
+### Passing extra arguments to a builder
+
+Every `er_plot_add_*()` function also takes its own `...`, forwarded
+unchanged to `style` (and, for
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+`summary_style`) when it’s called at build time. Extra arguments must be
+named – they’re appended positionally after the seven standard
+arguments, so an unnamed one would silently bind to the wrong parameter.
+A builder that doesn’t need any extra arguments simply declares `...`
+and ignores it, as every builder in this article does; see
+[`?er_style`](https://erplots.djnavarro.net/reference/er_style.md)’s own
+“Passing extra arguments to a builder” section (and
+\[er_style_model_spaghetti()\]’s use of a `seed` passed this way) for a
+worked example.
 
 ### `config` is what matters, and it’s already computed for you
 
@@ -114,7 +130,7 @@ aesthetics:
 
 ``` r
 
-er_style_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, theme, ...) {
   ggplot2::geom_crossbar(
     data = config$summary,
     mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
@@ -217,7 +233,7 @@ wrong structural slot:
 
 ``` r
 
-untagged_builder <- function(data, config, stratify, exposure, response, strata, theme) {
+untagged_builder <- function(data, config, stratify, exposure, response, strata, theme, ...) {
   ggplot2::geom_point(ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]]))
 }
 
@@ -240,7 +256,7 @@ observations that a scatter overplots into an unreadable smear:
 ``` r
 
 er_style_data_density <- er_style_tag(
-  function(data, config, stratify, exposure, response, strata, theme) {
+  function(data, config, stratify, exposure, response, strata, theme, ...) {
     ggplot2::geom_density2d(
       data = data,
       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]]),

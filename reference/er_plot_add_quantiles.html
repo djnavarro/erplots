@@ -81,7 +81,8 @@ summary/CI method is used dispatches on the plot's <code>response_type</code>
 <span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bins <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  conf_level <span class="op">=</span> <span class="fl">0.95</span></span>
+<span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -108,7 +109,7 @@ is another built-in option, as are <code>_vlines</code> variants of each
 <code><a href="er_style_quantile.html">er_style_quantile_pointrange_vlines()</a></code>) that additionally draw a
 dotted line at each interior quantile-bin boundary; any function
 matching the standard
-<code>(data, config, stratify, exposure, response, strata, theme)</code>
+<code>(data, config, stratify, exposure, response, strata, theme, ...)</code>
 signature can be supplied instead – see <code><a href="er_style.html">er_style()</a></code>.
 <code>config$summary</code> is the pre-computed per-bin data frame (point
 estimate + CI) to draw. If <code>style</code> is tagged with a <code>layer</code> (via
@@ -122,6 +123,12 @@ informatively; an untagged builder is never checked.</p></dd>
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
 <dd><p>Confidence level for the interval</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional named arguments forwarded, unchanged, to <code>style</code>
+when it's called at build time – see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra
+arguments to a builder" section. Must be named.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -191,7 +198,8 @@ quantile summary rather than combining bins from both calls.</p>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># plug in a fully custom builder; see `?er_style` for the full contract</span></span></span>
-<span class="r-in"><span><span class="va">build_quantile_crossbar</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">build_quantile_crossbar</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>,</span></span>
+<span class="r-in"><span>                                     <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_crossbar</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">summary</span>,</span></span>
 <span class="r-in"><span>    mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x_mid</span>, y <span class="op">=</span> <span class="va">y_mid</span>, ymin <span class="op">=</span> <span class="va">ci_lower</span>, ymax <span class="op">=</span> <span class="va">ci_upper</span><span class="op">)</span>,</span></span>

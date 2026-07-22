@@ -22,7 +22,8 @@ er_plot_add_model(
   keep_strata = NULL,
   style = NULL,
   summary_style = NULL,
-  conf_level = 0.95
+  conf_level = 0.95,
+  ...
 )
 ```
 
@@ -59,7 +60,7 @@ er_plot_add_model(
   (simulated draws, via
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
   is the other built-in option; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, theme)`
+  `(data, config, stratify, exposure, response, strata, theme, ...)`
   signature can be supplied instead – see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
 
@@ -79,6 +80,21 @@ er_plot_add_model(
 - conf_level:
 
   Confidence level for the prediction ribbon
+
+- ...:
+
+  Additional named arguments forwarded, unchanged, to both `style` and
+  `summary_style` when they're called at build time (each builder is
+  free to use only the arguments it recognizes, via its own `...`). Must
+  be named – see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+  "Passing extra arguments to a builder" section. For example,
+  `er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626)`
+  lets
+  [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
+  pass a reproducible `seed` to
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  instead of relying on erglm's auto-selected one.
 
 ## Value
 
@@ -118,7 +134,7 @@ erglm_data |>
 
 # plug in a fully custom model-curve builder; see `?er_style` for the
 # full contract
-build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme) {
+build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme, ...) {
   ggplot2::geom_line(
     data = config$predictions,
     mapping = ggplot2::aes(x = .data[[exposure$name]], y = fit_resp),
@@ -131,7 +147,7 @@ erglm_data |>
   plot()
 }
 
-#> Using seed = 4188
+#> Using seed = 4188. Pass `seed = 4188` to reproduce this result.
 
 
 ```
