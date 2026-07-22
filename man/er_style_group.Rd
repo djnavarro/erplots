@@ -14,7 +14,8 @@ er_style_group_boxplot(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_group_histogram(
@@ -24,7 +25,8 @@ er_style_group_histogram(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_group_violin(
@@ -34,7 +36,8 @@ er_style_group_violin(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 }
 \arguments{
@@ -51,6 +54,10 @@ er_style_group_violin(
 \item{strata}{Stratification variable}
 
 \item{theme}{Theme components}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing
+extra arguments to a builder" section.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.

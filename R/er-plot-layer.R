@@ -1,7 +1,7 @@
 
 # layer_model ------------------------------------------------------------------
 
-.layer_model <- function(object, model, stratify, conf_level, style, summary_style) {
+.layer_model <- function(object, model, stratify, conf_level, style, summary_style, dots = list()) {
   
   layer_model <- list()
   config <- list()
@@ -62,6 +62,11 @@
   # caller didn't supply one, so both are always functions here.
   config$style <- list(model = style, summary = summary_style)
 
+  # extra named arguments from `er_plot_add_model()`'s `...`, shared
+  # identically between `style` and `summary_style` -- see `?er_style`'s
+  # "Passing extra arguments to a builder" section
+  config$dots <- dots
+
   # store and return
   layer_model$stratify <- stratify
   layer_model$config <- config
@@ -72,7 +77,7 @@
 
 # layer_quantile ---------------------------------------------------------------
 
-.layer_quantile <- function(object, stratify, bins, conf_level, style) {
+.layer_quantile <- function(object, stratify, bins, conf_level, style, dots = list()) {
 
   layer_quantile <- list()
   config <- list()
@@ -159,6 +164,10 @@
   # has already resolved a default when the caller didn't supply one
   config$style <- style
 
+  # extra named arguments from `er_plot_add_quantiles()`'s `...` -- see
+  # `?er_style`'s "Passing extra arguments to a builder" section
+  config$dots <- dots
+
   # store and return
   layer_quantile$stratify <- stratify
   layer_quantile$config <- config
@@ -169,7 +178,7 @@
 
 # layer_data -------------------------------------------------------------------
 
-.layer_data <- function(object, stratify, panel, style) {
+.layer_data <- function(object, stratify, panel, style, dots = list()) {
 
   layer_data <- list()
   
@@ -181,6 +190,9 @@
   # its layout is "panel") before calling here -- see `?er_style` for
   # the `style`/`er_style_tag()` escape hatch
   config$style <- style
+  # extra named arguments from `er_plot_add_data()`'s `...` -- see
+  # `?er_style`'s "Passing extra arguments to a builder" section
+  config$dots <- dots
 
   # `panels` is a named list of panels to build, keyed by panel name, in
   # build order; `panel_position` records where each named panel sits
@@ -230,7 +242,7 @@
 
 # layer_overlay ------------------------------------------------------------------
 
-.layer_overlay <- function(object, stratify, style) {
+.layer_overlay <- function(object, stratify, style, dots = list()) {
 
   layer_overlay <- list()
 
@@ -247,6 +259,9 @@
   # escape hatch.
   config$response_type <- object$response$type
   config$style <- style
+  # extra named arguments from `er_plot_add_data()`'s `...` -- see
+  # `?er_style`'s "Passing extra arguments to a builder" section
+  config$dots <- dots
 
   layer_overlay$stratify <- stratify
   layer_overlay$config <- config
@@ -257,7 +272,7 @@
 
 # layer_group ------------------------------------------------------------------
 
-.layer_group <- function(object, group_cols, stratify, bins, style) {
+.layer_group <- function(object, group_cols, stratify, bins, style, dots = list()) {
 
   # grouping by the plot's own stratification variable while also
   # keeping strata (`stratify == TRUE`) bakes the same column name into
@@ -287,6 +302,10 @@
     # see `?er_style` for the `style` escape hatch; `er_plot_add_groups()`
     # has already resolved a default when the caller didn't supply one
     config$style <- style
+    # extra named arguments from `er_plot_add_groups()`'s `...`, shared
+    # identically across every grouping variable added by this call --
+    # see `?er_style`'s "Passing extra arguments to a builder" section
+    config$dots <- dots
 
     # data 
     dat <- object$data

@@ -8,6 +8,9 @@
 #' @param response Response variable
 #' @param strata Stratification variable
 #' @param theme Theme components
+#' @param ... Additional named arguments forwarded from
+#'   [er_plot_add_quantiles()]'s own `...`; see [er_style()]'s "Passing
+#'   extra arguments to a builder" section.
 #'
 #' @details Builders for the `quantile` layer ([er_plot_add_quantiles()]),
 #' which bins exposure into quantile groups and plots a response summary
@@ -63,7 +66,7 @@ NULL
 
 #' @rdname er_style_quantile
 #' @export
-er_style_quantile_errorbar <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_quantile_errorbar <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   if (stratify == FALSE) {
 
@@ -150,9 +153,9 @@ er_style_quantile_errorbar <- er_style_tag(er_style_quantile_errorbar, layer = "
 
 #' @rdname er_style_quantile
 #' @export
-er_style_quantile_errorbar_vlines <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_quantile_errorbar_vlines <- function(data, config, stratify, exposure, response, strata, theme, ...) {
   vlines <- .quantile_boundary_vlines(config, exposure)
-  geoms <- er_style_quantile_errorbar(data, config, stratify, exposure, response, strata, theme)
+  geoms <- er_style_quantile_errorbar(data, config, stratify, exposure, response, strata, theme, ...)
   c(list(vlines), geoms)
 }
 er_style_quantile_errorbar_vlines <- er_style_tag(er_style_quantile_errorbar_vlines, layer = "quantile")
@@ -160,7 +163,7 @@ er_style_quantile_errorbar_vlines <- er_style_tag(er_style_quantile_errorbar_vli
 
 #' @rdname er_style_quantile
 #' @export
-er_style_quantile_pointrange <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_quantile_pointrange <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   if (stratify == FALSE) {
 
@@ -221,9 +224,9 @@ er_style_quantile_pointrange <- er_style_tag(er_style_quantile_pointrange, layer
 
 #' @rdname er_style_quantile
 #' @export
-er_style_quantile_pointrange_vlines <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_quantile_pointrange_vlines <- function(data, config, stratify, exposure, response, strata, theme, ...) {
   vlines <- .quantile_boundary_vlines(config, exposure)
-  geoms <- er_style_quantile_pointrange(data, config, stratify, exposure, response, strata, theme)
+  geoms <- er_style_quantile_pointrange(data, config, stratify, exposure, response, strata, theme, ...)
   c(list(vlines), geoms)
 }
 er_style_quantile_pointrange_vlines <- er_style_tag(er_style_quantile_pointrange_vlines, layer = "quantile")

@@ -8,6 +8,9 @@
 #' @param response Response variable
 #' @param strata Stratification variable
 #' @param theme Theme components
+#' @param ... Additional named arguments forwarded from
+#'   [er_plot_add_data()]'s own `...`; see [er_style()]'s "Passing extra
+#'   arguments to a builder" section.
 #'
 #' @details Builders for the `data` layer ([er_plot_add_data()]), which
 #' shows the raw observations alongside the fitted curve. Each builder is
@@ -33,7 +36,7 @@ NULL
 
 #' @rdname er_style_data
 #' @export
-er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme) {
+er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   # binary-response-only panel builder: filters to responders (upper
   # panel, response == 1) or non-responders (lower panel, response == 0),
@@ -123,7 +126,7 @@ er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposur
 
 #' @rdname er_style_data
 #' @export
-er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme) {
+er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   # unlike `er_style_data_boxjitter()`, this builder draws points at their
   # true (exposure, response) coordinates and its output is meant to be
@@ -175,7 +178,7 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
 
 #' @rdname er_style_data
 #' @export
-er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme) {
+er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   # a 2D-binned density alternative to `er_style_data_overlay()`'s raw
   # scatter, for when N is large enough that individual points overplot

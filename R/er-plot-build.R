@@ -43,9 +43,10 @@
     panel_config$panel <- panel_name
     data_plots[[panel_name]] <- ggplot2::ggplot() +
       theme$theme_base() +
-      panel_config$style(
-        data, panel_config, stratify, exposure, response, strata, theme
-      )
+      do.call(panel_config$style, c(
+        list(data, panel_config, stratify, exposure, response, strata, theme),
+        panel_config$dots
+      ))
   }
 
   return(data_plots)
@@ -61,9 +62,10 @@
   strata   <- object$strata
   theme    <- object$theme
 
-  overlay_geoms <- config$style(
-    data, config, stratify, exposure, response, strata, theme
-  )
+  overlay_geoms <- do.call(config$style, c(
+    list(data, config, stratify, exposure, response, strata, theme),
+    config$dots
+  ))
   return(overlay_geoms)
 }
 
@@ -83,9 +85,10 @@
     # different calls may have used different `keep_strata` settings
     group_plots[[g]] <- ggplot2::ggplot() + 
       theme$theme_base() +
-      config[[g]]$style(
-        data, config[[g]], config[[g]]$stratify, exposure, response, strata, theme
-      )
+      do.call(config[[g]]$style, c(
+        list(data, config[[g]], config[[g]]$stratify, exposure, response, strata, theme),
+        config[[g]]$dots
+      ))
   }
   
   return(group_plots)  
@@ -101,9 +104,10 @@
   strata   <- object$strata
   theme    <- object$theme
 
-  model_geoms <- config$style$model(
-    data, config, stratify, exposure, response, strata, theme
-  )
+  model_geoms <- do.call(config$style$model, c(
+    list(data, config, stratify, exposure, response, strata, theme),
+    config$dots
+  ))
   return(model_geoms)
 }
 
@@ -117,9 +121,10 @@
   strata   <- object$strata
   theme    <- object$theme
 
-  summary_geoms <- config$style$summary(
-    data, config, stratify, exposure, response, strata, theme
-  )
+  summary_geoms <- do.call(config$style$summary, c(
+    list(data, config, stratify, exposure, response, strata, theme),
+    config$dots
+  ))
   return(summary_geoms)
   
 }
@@ -134,9 +139,10 @@
   strata   <- object$strata
   theme    <- object$theme
 
-  quantile_geoms <- config$style(
-    data, config, stratify, exposure, response, strata, theme
-  )
+  quantile_geoms <- do.call(config$style, c(
+    list(data, config, stratify, exposure, response, strata, theme),
+    config$dots
+  ))
   return(quantile_geoms)
 }
 

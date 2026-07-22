@@ -8,6 +8,9 @@
 #' @param response Response variable
 #' @param strata Stratification variable
 #' @param theme Theme components
+#' @param ... Additional named arguments forwarded from
+#'   [er_plot_add_model()]'s own `...` (shared with `style`); see
+#'   [er_style()]'s "Passing extra arguments to a builder" section.
 #'
 #' @details Builders for the `summary_style` argument of
 #' [er_plot_add_model()], which annotate the model panel with a summary
@@ -29,7 +32,7 @@ NULL
 
 #' @rdname er_style_summary
 #' @export
-er_style_summary_pvalue <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_summary_pvalue <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   if (is.null(config$p_value)) return(list())
 

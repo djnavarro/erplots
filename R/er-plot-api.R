@@ -235,7 +235,7 @@ er_plot_theme <- function(object, labels) {
 #'   [er_style_model_ribbonline()] (mean prediction + confidence ribbon).
 #'   [er_style_model_spaghetti()] (simulated draws, via [er_simulate()]) is
 #'   the other built-in option; any function matching the standard
-#'   `(data, config, stratify, exposure, response, strata, theme)`
+#'   `(data, config, stratify, exposure, response, strata, theme, ...)`
 #'   signature can be supplied instead -- see [er_style()].
 #' @param summary_style Function drawing the summary annotation --
 #'   defaults to [er_style_summary_pvalue()]. Any function matching the same
@@ -246,6 +246,14 @@ er_plot_theme <- function(object, labels) {
 #'   mismatched `config` shape to the builder; an untagged builder is
 #'   never checked.
 #' @param conf_level Confidence level for the prediction ribbon
+#' @param ... Additional named arguments forwarded, unchanged, to both
+#'   `style` and `summary_style` when they're called at build time (each
+#'   builder is free to use only the arguments it recognizes, via its own
+#'   `...`). Must be named -- see [er_style()]'s "Passing extra arguments
+#'   to a builder" section. For example,
+#'   `er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626)`
+#'   lets [er_style_model_spaghetti()] pass a reproducible `seed` to
+#'   [er_simulate()] instead of relying on erglm's auto-selected one.
 #'
 #' @returns The input `object`, with the model layer added
 #'
@@ -266,7 +274,7 @@ er_plot_theme <- function(object, labels) {
 #'
 #' # plug in a fully custom model-curve builder; see `?er_style` for the
 #' # full contract
-#' build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme) {
+#' build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 #'   ggplot2::geom_line(
 #'     data = config$predictions,
 #'     mapping = ggplot2::aes(x = .data[[exposure$name]], y = fit_resp),
@@ -284,8 +292,10 @@ er_plot_theme <- function(object, labels) {
 #'
 #' @export
 er_plot_add_model <- function(object, model, keep_strata = NULL,
-                                style = NULL, summary_style = NULL, conf_level = 0.95) {
+                                style = NULL, summary_style = NULL, conf_level = 0.95, ...) {
 
+  dots <- rlang::list2(...)
+  .check_dots_named(dots)
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
   if (!is.null(summary_style) && !is.function(summary_style)) rlang::abort("`summary_style` must be a function or NULL")
@@ -302,7 +312,8 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
     stratify = keep_strata, 
     conf_level = conf_level,
     style = style,
-    summary_style = summary_style
+    summary_style = summary_style,
+    dots = dots
   )
   
   return(object)
@@ -343,7 +354,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   [er_style_quantile_pointrange_vlines()]) that additionally draw a
 #'   dotted line at each interior quantile-bin boundary; any function
 #'   matching the standard
-#'   `(data, config, stratify, exposure, response, strata, theme)`
+#'   `(data, config, stratify, exposure, response, strata, theme, ...)`
 #'   signature can be supplied instead -- see [er_style()].
 #'   `config$summary` is the pre-computed per-bin data frame (point
 #'   estimate + CI) to draw. If `style` is tagged with a `layer` (via
@@ -351,6 +362,9 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   informatively; an untagged builder is never checked.
 #' @param bins Number of exposure bins (not counting placebo)
 #' @param conf_level Confidence level for the interval
+#' @param ... Additional named arguments forwarded, unchanged, to `style`
+#'   when it's called at build time -- see [er_style()]'s "Passing extra
+#'   arguments to a builder" section. Must be named.
 #'
 #' @returns The input `object`, with the quantile layer added
 #'
@@ -399,7 +413,8 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   plot()
 #'
 #' # plug in a fully custom builder; see `?er_style` for the full contract
-#' build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, theme) {
+#' build_quantile_crossbar <- function(data, config, stratify, exposure,
+#'                                      response, strata, theme, ...) {
 #'   ggplot2::geom_crossbar(
 #'     data = config$summary,
 #'     mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
@@ -419,8 +434,10 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'
 #' @export
 er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
-                                    bins = 4, conf_level = 0.95) {
+                                    bins = 4, conf_level = 0.95, ...) {
 
+  dots <- rlang::list2(...)
+  .check_dots_named(dots)
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
@@ -433,7 +450,8 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
     stratify = keep_strata,
     bins = bins,
     conf_level = conf_level,
-    style = style
+    style = style,
+    dots = dots
   )
   
   return(object)
@@ -514,7 +532,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'
 #' @examples
 #' build_data_density <- er_style_tag(
-#'   function(data, config, stratify, exposure, response, strata, theme) {
+#'   function(data, config, stratify, exposure, response, strata, theme, ...) {
 #'     ggplot2::geom_density_2d(
 #'       data = data,
 #'       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
@@ -645,7 +663,7 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #'   [er_style_data_overlay()]. [er_style_data_boxjitter()] (binary response
 #'   only: a boxplot + jittered points per panel) is the other built-in
 #'   option; any function matching the standard `(data, config, stratify,
-#'   exposure, response, strata, theme)` signature and tagged with
+#'   exposure, response, strata, theme, ...)` signature and tagged with
 #'   [er_style_tag()] can be supplied instead -- see [er_style()] for the
 #'   full contract, e.g. a 2D density in the main panel, a continuous/
 #'   count response's color-encoded panel, or per-panel histograms. If
@@ -658,6 +676,9 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #'   upper/lower partition exists) or for a continuous/count response
 #'   under a "panel"-layout builder (there's no upper/lower partition to
 #'   select from either way).
+#' @param ... Additional named arguments forwarded, unchanged, to `style`
+#'   when it's called at build time -- see [er_style()]'s "Passing extra
+#'   arguments to a builder" section. Must be named.
 #'
 #' @returns The input `object`, with the data layer added
 #'
@@ -694,7 +715,7 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #' # it "overlay" via `er_style_tag()` keeps it in the single main-panel
 #' # layout -- see `?er_style`
 #' build_data_density <- er_style_tag(
-#'   function(data, config, stratify, exposure, response, strata, theme) {
+#'   function(data, config, stratify, exposure, response, strata, theme, ...) {
 #'     ggplot2::geom_density_2d(
 #'       data = data,
 #'       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
@@ -713,8 +734,10 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #'   [er_plot_add_quantiles()], [er_plot_add_groups()], [er_style()]
 #'
 #' @export
-er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "both") {
+er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "both", ...) {
 
+  dots <- rlang::list2(...)
+  .check_dots_named(dots)
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
 
@@ -743,14 +766,15 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
   # would remove "x" from the list entirely rather than setting it to
   # NULL, dropping it from `layer_set`/`plot_set` in `print.er_plot()`
   if (layout == "overlay") {
-    object$layer$overlay <- .layer_overlay(object = object, stratify = keep_strata, style = style)
+    object$layer$overlay <- .layer_overlay(object = object, stratify = keep_strata, style = style, dots = dots)
     object$layer["data"] <- list(NULL)
   } else {
     object$layer$data <- .layer_data(
       object = object,
       stratify = keep_strata, 
       panel = panel,
-      style = style
+      style = style,
+      dots = dots
     )
     object$layer["overlay"] <- list(NULL)
   }
@@ -780,7 +804,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' @param style Function drawing each group panel -- defaults to
 #'   [er_style_group_boxplot()]. [er_style_group_violin()] is the other
 #'   built-in option; any function matching the standard `(data, config,
-#'   stratify, exposure, response, strata, theme)` signature can be
+#'   stratify, exposure, response, strata, theme, ...)` signature can be
 #'   supplied instead -- see [er_style()]. Applied to every grouping
 #'   variable added by this call. If `style` is tagged with a `layer`
 #'   (via [er_style_tag()]) other than `"group"`, this errors
@@ -794,6 +818,10 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   variable, since that would mean grouping and stratifying by the
 #'   same column at once; pass `keep_strata = FALSE` for that grouping
 #'   variable instead
+#' @param ... Additional named arguments forwarded, unchanged, to `style`
+#'   when it's called at build time (identically for every grouping
+#'   variable added by this call) -- see [er_style()]'s "Passing extra
+#'   arguments to a builder" section. Must be named.
 #'
 #' @returns The input `object`, with a group panel added
 #'
@@ -820,8 +848,10 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   [er_plot_add_quantiles()], [er_plot_add_data()], [er_style()]
 #'
 #' @export
-er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep_strata = NULL) {
+er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep_strata = NULL, ...) {
 
+  dots <- rlang::list2(...)
+  .check_dots_named(dots)
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
@@ -836,7 +866,8 @@ er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep
     group_cols = group_cols, 
     stratify = keep_strata, 
     bins = bins,
-    style = style
+    style = style,
+    dots = dots
   )
 
   # additive: merge into any existing group panels rather than replacing

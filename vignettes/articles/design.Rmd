@@ -206,7 +206,7 @@ partition to split on) -- see [er_plot_add_data()].
 Every layer function delegates the actual drawing to a `style`
 argument (`er_plot_add_model()` additionally has `summary_style`)
 sharing a common signature -- `function(data, config, stratify,
-exposure, response, strata, theme)`. That signature is a documented,
+exposure, response, strata, theme, ...)`. That signature is a documented,
 public part of the API (see [er_style()]), each layer's `style`
 defaults to one built-in `er_style_*()` function, and it can be set to
 any other function matching the same signature -- no need to fork the

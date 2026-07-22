@@ -4,7 +4,7 @@
 \alias{er_plot_add_data}
 \title{Add a raw-data layer}
 \usage{
-er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both")
+er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 }
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_plot})}
@@ -20,7 +20,7 @@ means a shared color aesthetic, for any response type.}
 \item{style}{Function drawing the data layer -- defaults to
 \code{\link[=er_style_data_overlay]{er_style_data_overlay()}}. \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} (binary response
 only: a boxplot + jittered points per panel) is the other built-in
-option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, theme)} signature and tagged with
+option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, theme, ...)} signature and tagged with
 \code{\link[=er_style_tag]{er_style_tag()}} can be supplied instead -- see \code{\link[=er_style]{er_style()}} for the
 full contract, e.g. a 2D density in the main panel, a continuous/
 count response's color-encoded panel, or per-panel histograms. If
@@ -34,6 +34,10 @@ response; must be \code{"both"} for an "overlay"-layout builder (no
 upper/lower partition exists) or for a continuous/count response
 under a "panel"-layout builder (there's no upper/lower partition to
 select from either way).}
+
+\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
+when it's called at build time -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
+arguments to a builder" section. Must be named.}
 }
 \value{
 The input \code{object}, with the data layer added
@@ -115,7 +119,7 @@ erglm_data |>
 # it "overlay" via `er_style_tag()` keeps it in the single main-panel
 # layout -- see `?er_style`
 build_data_density <- er_style_tag(
-  function(data, config, stratify, exposure, response, strata, theme) {
+  function(data, config, stratify, exposure, response, strata, theme, ...) {
     ggplot2::geom_density_2d(
       data = data,
       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])

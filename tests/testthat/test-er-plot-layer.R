@@ -50,12 +50,12 @@ test_that(".layer_model constructs the correct data structure", {
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
 
-  expect_length(cfg1, 6)
-  expect_length(cfg2, 6)
+  expect_length(cfg1, 7)
+  expect_length(cfg2, 7)
 
   cfg_names <- c(
     "model", "conf_level", "predictions", "p_value",
-    "corner_distance", "style"
+    "corner_distance", "style", "dots"
   )
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
@@ -89,10 +89,10 @@ test_that(".layer_quantile constructs the correct data structure", {
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
 
-  expect_length(cfg1, 5)
-  expect_length(cfg2, 5)
+  expect_length(cfg1, 6)
+  expect_length(cfg2, 6)
 
-  cfg_names <- c("n_quantiles", "conf_level", "breaks", "summary", "style")
+  cfg_names <- c("n_quantiles", "conf_level", "breaks", "summary", "style", "dots")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 
@@ -222,10 +222,10 @@ test_that(".layer_data constructs the correct data structure", {
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
 
-  expect_length(cfg1, 7)
-  expect_length(cfg2, 7)
+  expect_length(cfg1, 8)
+  expect_length(cfg2, 8)
 
-  cfg_names <- c("layout", "panel", "seed", "style", "color_role", "panels", "panel_position")
+  cfg_names <- c("layout", "panel", "seed", "style", "dots", "color_role", "panels", "panel_position")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 
@@ -402,7 +402,7 @@ test_that(".layer_overlay constructs the correct data structure", {
   cfg1 <- plt1$layer$overlay$config
   cfg3 <- plt3$layer$overlay$config
 
-  expect_named(cfg1, c("seed", "response_type", "style"))
+  expect_named(cfg1, c("seed", "response_type", "style", "dots"))
   expect_identical(cfg1$style, er_style_data_overlay)
   expect_equal(cfg1$response_type, "binary")
   expect_equal(cfg3$response_type, "continuous")

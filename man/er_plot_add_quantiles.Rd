@@ -9,7 +9,8 @@ er_plot_add_quantiles(
   keep_strata = NULL,
   style = NULL,
   bins = 4,
-  conf_level = 0.95
+  conf_level = 0.95,
+  ...
 )
 }
 \arguments{
@@ -27,7 +28,7 @@ is another built-in option, as are \verb{_vlines} variants of each
 \code{\link[=er_style_quantile_pointrange_vlines]{er_style_quantile_pointrange_vlines()}}) that additionally draw a
 dotted line at each interior quantile-bin boundary; any function
 matching the standard
-\verb{(data, config, stratify, exposure, response, strata, theme)}
+\verb{(data, config, stratify, exposure, response, strata, theme, ...)}
 signature can be supplied instead -- see \code{\link[=er_style]{er_style()}}.
 \code{config$summary} is the pre-computed per-bin data frame (point
 estimate + CI) to draw. If \code{style} is tagged with a \code{layer} (via
@@ -37,6 +38,10 @@ informatively; an untagged builder is never checked.}
 \item{bins}{Number of exposure bins (not counting placebo)}
 
 \item{conf_level}{Confidence level for the interval}
+
+\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
+when it's called at build time -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
+arguments to a builder" section. Must be named.}
 }
 \value{
 The input \code{object}, with the quantile layer added
@@ -108,7 +113,8 @@ erglm_data |>
   plot()
 
 # plug in a fully custom builder; see `?er_style` for the full contract
-build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, theme) {
+build_quantile_crossbar <- function(data, config, stratify, exposure,
+                                     response, strata, theme, ...) {
   ggplot2::geom_crossbar(
     data = config$summary,
     mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),

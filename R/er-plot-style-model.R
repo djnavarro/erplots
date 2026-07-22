@@ -8,6 +8,12 @@
 #' @param response Response variable
 #' @param strata Stratification variable
 #' @param theme Theme components
+#' @param ... Additional named arguments forwarded from
+#'   [er_plot_add_model()]'s own `...`; see [er_style()]'s "Passing extra
+#'   arguments to a builder" section. `er_style_model_spaghetti()` reads a
+#'   `seed` from here (falling back to `config$seed` -- currently always
+#'   `NULL` for the model layer -- when none is supplied) to pass to
+#'   [er_simulate()], letting a caller override erglm's auto-selected seed.
 #'
 #' @details Builders for the `model` layer ([er_plot_add_model()]), which
 #' draws the fitted curve (and, where applicable, its uncertainty) over
@@ -31,7 +37,7 @@ NULL
 
 #' @rdname er_style_model
 #' @export
-er_style_model_ribbonline <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_model_ribbonline <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   if (stratify == FALSE) {
 
@@ -92,7 +98,7 @@ er_style_model_ribbonline <- er_style_tag(er_style_model_ribbonline, layer = "mo
 
 #' @rdname er_style_model
 #' @export
-er_style_model_line <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_model_line <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   if (stratify == FALSE) {
 
@@ -129,13 +135,22 @@ er_style_model_line <- er_style_tag(er_style_model_line, layer = "model")
 
 #' @rdname er_style_model
 #' @export
-er_style_model_spaghetti <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_model_spaghetti <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+
+  # a user-supplied `seed` (via `er_plot_add_model()`'s `...`) takes
+  # priority over `config$seed` (always `NULL` for the model layer at
+  # present); this is the concrete motivating case for builder `...`
+  # passthrough -- see `?er_style`'s "Passing extra arguments to a
+  # builder" section -- since it lets a caller silence erglm's
+  # auto-selected-seed message with a reproducible seed of their own.
+  dots <- rlang::list2(...)
+  seed <- dots$seed %||% config$seed
 
   newdata <- config$predictions |> 
     dplyr::select(dplyr::all_of(c(exposure$name, strata$name))) |> 
     dplyr::distinct()
 
-  sim <- er_simulate(config$model, newdata = newdata, nsim = 100L, seed = config$seed)
+  sim <- er_simulate(config$model, newdata = newdata, nsim = 100L, seed = seed)
 
   if (is.null(sim)) {
     rlang::inform(paste0(
@@ -143,7 +158,7 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
       paste(class(config$model), collapse = "/"),
       ">; falling back to `style = er_style_model_ribbonline`."
     ))
-    return(er_style_model_ribbonline(data, config, stratify, exposure, response, strata, theme))
+    return(er_style_model_ribbonline(data, config, stratify, exposure, response, strata, theme, ...))
   }
 
   if (stratify == FALSE) {

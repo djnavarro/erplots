@@ -15,7 +15,8 @@ er_style_quantile_errorbar(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_quantile_errorbar_vlines(
@@ -25,7 +26,8 @@ er_style_quantile_errorbar_vlines(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_quantile_pointrange(
@@ -35,7 +37,8 @@ er_style_quantile_pointrange(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_quantile_pointrange_vlines(
@@ -45,7 +48,8 @@ er_style_quantile_pointrange_vlines(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 }
 \arguments{
@@ -62,6 +66,10 @@ er_style_quantile_pointrange_vlines(
 \item{strata}{Stratification variable}
 
 \item{theme}{Theme components}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing
+extra arguments to a builder" section.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.

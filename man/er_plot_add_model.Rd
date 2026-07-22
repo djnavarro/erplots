@@ -10,7 +10,8 @@ er_plot_add_model(
   keep_strata = NULL,
   style = NULL,
   summary_style = NULL,
-  conf_level = 0.95
+  conf_level = 0.95,
+  ...
 )
 }
 \arguments{
@@ -28,7 +29,7 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}} (mean prediction + confidence ribbon).
 \code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}}) is
 the other built-in option; any function matching the standard
-\verb{(data, config, stratify, exposure, response, strata, theme)}
+\verb{(data, config, stratify, exposure, response, strata, theme, ...)}
 signature can be supplied instead -- see \code{\link[=er_style]{er_style()}}.}
 
 \item{summary_style}{Function drawing the summary annotation --
@@ -41,6 +42,15 @@ mismatched \code{config} shape to the builder; an untagged builder is
 never checked.}
 
 \item{conf_level}{Confidence level for the prediction ribbon}
+
+\item{...}{Additional named arguments forwarded, unchanged, to both
+\code{style} and \code{summary_style} when they're called at build time (each
+builder is free to use only the arguments it recognizes, via its own
+\code{...}). Must be named -- see \code{\link[=er_style]{er_style()}}'s "Passing extra arguments
+to a builder" section. For example,
+\code{er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626)}
+lets \code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} pass a reproducible \code{seed} to
+\code{\link[=er_simulate]{er_simulate()}} instead of relying on erglm's auto-selected one.}
 }
 \value{
 The input \code{object}, with the model layer added
@@ -76,7 +86,7 @@ erglm_data |>
 
 # plug in a fully custom model-curve builder; see `?er_style` for the
 # full contract
-build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme) {
+build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme, ...) {
   ggplot2::geom_line(
     data = config$predictions,
     mapping = ggplot2::aes(x = .data[[exposure$name]], y = fit_resp),

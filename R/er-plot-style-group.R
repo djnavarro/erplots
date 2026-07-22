@@ -8,6 +8,9 @@
 #' @param response Response variable
 #' @param strata Stratification variable
 #' @param theme Theme components
+#' @param ... Additional named arguments forwarded from
+#'   [er_plot_add_groups()]'s own `...`; see [er_style()]'s "Passing
+#'   extra arguments to a builder" section.
 #'
 #' @details Builders for the `group` layer ([er_plot_add_groups()]),
 #' which draws the exposure distribution for a grouping variable (e.g.
@@ -31,7 +34,7 @@ NULL
 
 #' @rdname er_style_group
 #' @export
-er_style_group_boxplot <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_group_boxplot <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(
@@ -67,7 +70,7 @@ er_style_group_boxplot <- er_style_tag(er_style_group_boxplot, layer = "group")
 
 #' @rdname er_style_group
 #' @export
-er_style_group_histogram <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_group_histogram <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(x = .data[[exposure$name]])
@@ -123,7 +126,7 @@ er_style_group_histogram <- er_style_tag(er_style_group_histogram, y_role = "cou
 
 #' @rdname er_style_group
 #' @export
-er_style_group_violin <- function(data, config, stratify, exposure, response, strata, theme) {
+er_style_group_violin <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(

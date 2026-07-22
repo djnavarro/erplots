@@ -345,6 +345,45 @@ deprecation shim (see "Naming scheme" above for why erplots doesn't use
 shims). All four quantile builders are tagged
 `er_style_tag(fn, layer = "quantile")`.
 
+## Passing extra arguments to a builder (`...` passthrough)
+
+Every `er_plot_add_*()` function (`er_plot_add_model()`,
+`er_plot_add_quantiles()`, `er_plot_add_data()`, `er_plot_add_groups()`)
+takes its own `...`, forwarded unchanged to whichever `er_style_*()`
+builder(s) it calls at build time -- `er_plot_add_model()`'s `...` is
+shared identically between `style` and `summary_style`. The standard
+builder signature grew a trailing `...` to receive this:
+`function(data, config, stratify, exposure, response, strata, theme,
+...)`, applied (straight rename, no shim) to all 18 built-in builders;
+one that doesn't need any extra arguments just declares `...` and
+ignores it. Extra arguments must be named -- checked at each
+`er_plot_add_*()` call site via the internal `.check_dots_named()`
+helper in `R/utils-helpers.R` (there's no exported `rlang::check_dots_named()`
+in the rlang version this package depends on, so this is a small
+hand-rolled equivalent) -- since they're spliced in positionally after
+the seven standard arguments (`do.call(style, c(list(data, config, ...,
+theme), config$dots))` at each of the six call sites in
+`R/er-plot-build.R`); an unnamed one would otherwise silently bind to
+the wrong parameter. Each `.layer_*()` function gained a `dots`
+parameter (default `list()`), storing it on `config$dots` (shared across
+every per-group config for `.layer_group()`, and identically available
+to both `config$style$model` and `config$style$summary` for
+`.layer_model()`).
+
+The motivating concrete case: `er_style_model_spaghetti()` calls
+[er_simulate()], and erglm's implementation auto-selects and reports a
+seed whenever none is supplied. `er_style_model_spaghetti()` now reads a
+`seed` out of its own `...` (via `rlang::list2(...)`), falling back to
+`config$seed` (currently always `NULL` for the model layer -- a
+pre-existing gap this doesn't otherwise fix) when none is given, so
+`er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626)`
+lets a caller silence that message with a reproducible seed of their
+own. The two quantile `_vlines` wrapper builders and
+`er_style_model_spaghetti()`'s own ribbonline fallback call forward
+`...` into their inner call, so they don't drop extra arguments meant
+for the base builder they wrap/fall back to. Documented in `?er_style`'s
+new "Passing extra arguments to a builder" section.
+
 ## Planned work
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed

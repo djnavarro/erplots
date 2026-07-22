@@ -88,7 +88,7 @@ requirement like \code{layout} is for a data-layer builder.
 }
 \examples{
 build_data_density <- er_style_tag(
-  function(data, config, stratify, exposure, response, strata, theme) {
+  function(data, config, stratify, exposure, response, strata, theme, ...) {
     ggplot2::geom_density_2d(
       data = data,
       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])

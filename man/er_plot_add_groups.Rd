@@ -9,7 +9,8 @@ er_plot_add_groups(
   group_by,
   style = NULL,
   bins = NULL,
-  keep_strata = NULL
+  keep_strata = NULL,
+  ...
 )
 }
 \arguments{
@@ -20,7 +21,7 @@ plots (a tidyselection of variables)}
 
 \item{style}{Function drawing each group panel -- defaults to
 \code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}}. \code{\link[=er_style_group_violin]{er_style_group_violin()}} is the other
-built-in option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, theme)} signature can be
+built-in option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, theme, ...)} signature can be
 supplied instead -- see \code{\link[=er_style]{er_style()}}. Applied to every grouping
 variable added by this call. If \code{style} is tagged with a \code{layer}
 (via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"group"}, this errors
@@ -36,6 +37,11 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 variable, since that would mean grouping and stratifying by the
 same column at once; pass \code{keep_strata = FALSE} for that grouping
 variable instead}
+
+\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
+when it's called at build time (identically for every grouping
+variable added by this call) -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
+arguments to a builder" section. Must be named.}
 }
 \value{
 The input \code{object}, with a group panel added

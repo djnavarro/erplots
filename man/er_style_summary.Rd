@@ -12,7 +12,8 @@ er_style_summary_pvalue(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 }
 \arguments{
@@ -29,6 +30,10 @@ er_style_summary_pvalue(
 \item{strata}{Stratification variable}
 
 \item{theme}{Theme components}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...} (shared with \code{style}); see
+\code{\link[=er_style]{er_style()}}'s "Passing extra arguments to a builder" section.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.

@@ -14,7 +14,8 @@ er_style_data_boxjitter(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
 er_style_data_overlay(
@@ -24,10 +25,20 @@ er_style_data_overlay(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
-er_style_data_hex(data, config, stratify, exposure, response, strata, theme)
+er_style_data_hex(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
 }
 \arguments{
 \item{data}{The original data frame}
@@ -43,6 +54,10 @@ er_style_data_hex(data, config, stratify, exposure, response, strata, theme)
 \item{strata}{Stratification variable}
 
 \item{theme}{Theme components}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_plot_add_data]{er_plot_add_data()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing extra
+arguments to a builder" section.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.

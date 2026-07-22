@@ -8,6 +8,9 @@
 #' @param response Response variable
 #' @param strata Stratification variable
 #' @param theme Theme components
+#' @param ... Additional named arguments forwarded from the corresponding
+#'   `er_plot_add_*()` call's own `...`; see "Passing extra arguments to a
+#'   builder" below.
 #'
 #' @details This page documents the shared interface all `er_style_*()`
 #' builders implement. The builders themselves are documented on
@@ -41,7 +44,7 @@
 #' Every `er_style_*()` function above shares the signature documented in
 #' `@param`s, and that signature is a public part of the API, not an
 #' implementation detail: any function `function(data, config, stratify,
-#' exposure, response, strata, theme)` that returns a geom or list of
+#' exposure, response, strata, theme, ...)` that returns a geom or list of
 #' geoms can stand in for a built-in builder. This is the officially
 #' supported way to draw a layer differently from any of the built-in
 #' `style` options -- e.g. a 2D density instead of a scatter for the
@@ -117,7 +120,40 @@
 #' more simply), but a custom builder tagged `er_style_tag(builder,
 #' layout = "panel")` can still opt into it; see [er_plot_add_data()] for
 #' the user-facing version of this rule.
-#' 
+#'
+#' @section Passing extra arguments to a builder:
+#'
+#' Every `er_plot_add_*()` function (`er_plot_add_model()`,
+#' `er_plot_add_quantiles()`, `er_plot_add_data()`, `er_plot_add_groups()`)
+#' takes its own `...`, which is forwarded unchanged to `style` (and, for
+#' `er_plot_add_model()`, `summary_style` -- both builders receive the
+#' identical set of extra arguments) when it's actually called at build
+#' time. Extra arguments must be named, since they're appended positionally
+#' after the seven standard arguments; an unnamed one errors immediately
+#' rather than silently binding to the wrong parameter. This is how a
+#' builder that needs a piece of information beyond what `config` already
+#' carries -- something genuinely per-call rather than a fixed part of the
+#' layer's configuration -- can accept it without a bespoke argument on
+#' every `er_plot_add_*()` function. The motivating built-in example is
+#' [er_style_model_spaghetti()], which calls [er_simulate()] and, for
+#' models (like erglm's) that auto-select and report a seed when none is
+#' supplied, would otherwise always trigger that message:
+#'
+#' ```r
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626) |>
+#'   plot()
+#' ```
+#'
+#' A builder that doesn't need any extra arguments simply declares `...`
+#' and ignores it -- every built-in builder does exactly this except
+#' `er_style_model_spaghetti()`. A custom builder can read whichever named
+#' arguments it recognizes out of its own `...` (e.g. via
+#' `rlang::list2(...)`) and ignore the rest; unrecognized extra arguments
+#' are never an error at the builder itself, only at the `er_plot_add_*()`
+#' call site if they weren't named.
+#'
 #' @name er_style
 #' @seealso [er_style_model()], [er_style_summary()], [er_style_quantile()],
 #' [er_style_data()], [er_style_group()], [er_style_tag()]

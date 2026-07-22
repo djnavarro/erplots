@@ -17,6 +17,10 @@
 \item{strata}{Stratification variable}
 
 \item{theme}{Theme components}
+
+\item{...}{Additional named arguments forwarded from the corresponding
+\verb{er_plot_add_*()} call's own \code{...}; see "Passing extra arguments to a
+builder" below.}
 }
 \value{
 A geom, or a list of geoms. More precisely, a list of
@@ -56,7 +60,7 @@ as needed
 
 Every \verb{er_style_*()} function above shares the signature documented in
 \verb{@param}s, and that signature is a public part of the API, not an
-implementation detail: any function \verb{function(data, config, stratify, exposure, response, strata, theme)} that returns a geom or list of
+implementation detail: any function \verb{function(data, config, stratify, exposure, response, strata, theme, ...)} that returns a geom or list of
 geoms can stand in for a built-in builder. This is the officially
 supported way to draw a layer differently from any of the built-in
 \code{style} options -- e.g. a 2D density instead of a scatter for the
@@ -131,6 +135,40 @@ for by the response value itself -- there's no built-in
 was removed once \code{er_style_data_overlay()} covered its typical use case
 more simply), but a custom builder tagged \code{er_style_tag(builder, layout = "panel")} can still opt into it; see \code{\link[=er_plot_add_data]{er_plot_add_data()}} for
 the user-facing version of this rule.
+}
+
+\section{Passing extra arguments to a builder}{
+
+
+Every \verb{er_plot_add_*()} function (\code{er_plot_add_model()},
+\code{er_plot_add_quantiles()}, \code{er_plot_add_data()}, \code{er_plot_add_groups()})
+takes its own \code{...}, which is forwarded unchanged to \code{style} (and, for
+\code{er_plot_add_model()}, \code{summary_style} -- both builders receive the
+identical set of extra arguments) when it's actually called at build
+time. Extra arguments must be named, since they're appended positionally
+after the seven standard arguments; an unnamed one errors immediately
+rather than silently binding to the wrong parameter. This is how a
+builder that needs a piece of information beyond what \code{config} already
+carries -- something genuinely per-call rather than a fixed part of the
+layer's configuration -- can accept it without a bespoke argument on
+every \verb{er_plot_add_*()} function. The motivating built-in example is
+\code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}}, which calls \code{\link[=er_simulate]{er_simulate()}} and, for
+models (like erglm's) that auto-select and report a seed when none is
+supplied, would otherwise always trigger that message:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626) |>
+  plot()
+}\if{html}{\out{</div>}}
+
+A builder that doesn't need any extra arguments simply declares \code{...}
+and ignores it -- every built-in builder does exactly this except
+\code{er_style_model_spaghetti()}. A custom builder can read whichever named
+arguments it recognizes out of its own \code{...} (e.g. via
+\code{rlang::list2(...)}) and ignore the rest; unrecognized extra arguments
+are never an error at the builder itself, only at the \verb{er_plot_add_*()}
+call site if they weren't named.
 }
 
 \seealso{

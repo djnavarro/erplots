@@ -14,10 +14,20 @@ er_style_model_ribbonline(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 
-er_style_model_line(data, config, stratify, exposure, response, strata, theme)
+er_style_model_line(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
 
 er_style_model_spaghetti(
   data,
@@ -26,7 +36,8 @@ er_style_model_spaghetti(
   exposure,
   response,
   strata,
-  theme
+  theme,
+  ...
 )
 }
 \arguments{
@@ -43,6 +54,13 @@ er_style_model_spaghetti(
 \item{strata}{Stratification variable}
 
 \item{theme}{Theme components}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing extra
+arguments to a builder" section. \code{er_style_model_spaghetti()} reads a
+\code{seed} from here (falling back to \code{config$seed} -- currently always
+\code{NULL} for the model layer -- when none is supplied) to pass to
+\code{\link[=er_simulate]{er_simulate()}}, letting a caller override erglm's auto-selected seed.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.

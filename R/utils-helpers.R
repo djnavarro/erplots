@@ -4,6 +4,26 @@
   x
 }
 
+# Errors informatively if any element of `dots` (an already-captured
+# `rlang::list2(...)`) is unnamed. Extra arguments passed through
+# `er_plot_add_*()`'s `...` to a builder are spliced in positionally
+# after the seven standard builder arguments (see `?er_style`'s
+# "Passing extra arguments to a builder" section), so an unnamed one
+# would silently bind to the wrong parameter rather than reaching a
+# builder's own `...` -- this catches that at the call site instead.
+#' @noRd
+.check_dots_named <- function(dots) {
+  if (length(dots) == 0) return(invisible(NULL))
+  nms <- names(dots)
+  if (is.null(nms) || any(!nzchar(nms))) {
+    rlang::abort(c(
+      "All arguments passed via `...` must be named.",
+      "i" = "These are forwarded to a builder alongside `data`/`config`/etc, so an unnamed argument would bind to the wrong parameter."
+    ))
+  }
+  invisible(NULL)
+}
+
 .get_label <- function(x) attr(x, "label")
 .set_label <- function(x, lbl) {attr(x, "label") <- lbl; x}
 .set_names <- function(x, nm) {names(x) <- nm; x}
