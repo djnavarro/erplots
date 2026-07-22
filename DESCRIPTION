@@ -24,6 +24,7 @@ Imports:
     tidyselect,
     withr
 Suggests: 
+    emaxnls,
     erglm,
     hexbin,
     knitr,
@@ -33,6 +34,7 @@ Suggests:
 URL: https://github.com/djnavarro/erplots, https://erplots.djnavarro.net/
 BugReports: https://github.com/djnavarro/erplots/issues
 Remotes: 
+    djnavarro/emaxnls,
     djnavarro/erglm
 Depends: 
     R (>= 4.1.0)

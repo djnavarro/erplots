@@ -122,6 +122,38 @@ continuous (`biomarker_change`, `ae_duration`) response columns in
 `er_summary()` methods erglm registers for its model objects are correct
 for all four families, so no erplots-side changes are needed there.
 
+A second, independent companion package,
+[emaxnls](https://github.com/djnavarro/emaxnls), fits Emax (sigmoidal
+dose-response) models via nonlinear least squares and likewise
+registers `er_predict()`/`er_simulate()`/`er_summary()` for its own
+model classes -- confirming the model interface generalises to a
+second, unrelated model-fitting package rather than being implicitly
+shaped around erglm. Same posture as erglm: `Suggests`-only (no hard
+dependency), with a matching `Remotes: djnavarro/emaxnls` entry in
+`DESCRIPTION` since it's also GitHub-only. `emax_nls()` fits continuous
+responses; `emax_logistic()` fits binary responses but returns an
+object of class `c("emaxlogistic", "emaxnls")`, so it dispatches to the
+same `er_predict.emaxnls()`/`er_simulate.emaxnls()`/
+`er_summary.emaxnls()` methods via plain S3 inheritance (there's no
+separate `.emaxlogistic` method) -- those methods branch internally to
+keep predictions in `[0, 1]` and report `r_squared = NA` (rather than a
+meaningless value) in `er_summary()`'s `glance` when called on an
+`emaxlogistic` object. emaxnls doesn't support count responses at all,
+so there's no dispatch to verify there. `er_summary.emaxnls()` always
+returns `p_value = NULL` (an Emax model has no single privileged
+coefficient to headline) and instead populates `coefficients` (one row
+per `E0`/`Emax`/`logEC50` parameter) and `glance`, so
+`er_style_summary_coefficients()` is the natural summary builder for
+emaxnls models rather than the default `er_style_summary_pvalue()`. The
+example dataset is `emaxnls::emax_df`
+(continuous response `rsp_1`, binary response `rsp_2`, exposure
+`exp_1`). A worked example using `emax_nls()` lives in
+`vignettes/articles/plot-continuous.Rmd`'s "A second model package:
+emaxnls" section (with a note on `emax_logistic()`'s binary-response
+dispatch, cross-referencing `plot-binary.Rmd` rather than duplicating a
+full binary example); no equivalent worked example was added to
+`plot-binary.Rmd` itself.
+
 ## Naming scheme
 
 A naming-scheme review (prompted by the `build_*` prefix reading as
