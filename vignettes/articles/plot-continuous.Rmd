@@ -81,6 +81,23 @@ erglm_data |>
   plot()
 ```
 
+## Summary layer
+
+The summary layer doesn't look at `response_type` at all either -- it
+only consumes whatever the model's own [er_summary()] method returns --
+so it works exactly the same way as for a binary response. See the
+[binary responses](plot-binary.html#summary-layer) article for
+`er_style_summary_gof()` and the full four-builder set; the default
+builder is used here:
+
+```{r summary-1}
+erglm_data |> 
+  er_plot(aucss, biomarker_change) |> 
+  er_plot_add_model(mod_gaussian) |> 
+  er_plot_add_summary(model = mod_gaussian) |> 
+  plot()
+```
+
 ## Quantile layer
 
 For a continuous response, each exposure-quantile bin is summarised by

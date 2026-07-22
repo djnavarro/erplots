@@ -81,7 +81,7 @@ reaching into \code{object$layer} internals. For the data layer specifically,
 a single call merged into the main panel, or one or more panels
 stacked below the base plot -- via \code{\link[=er_style_tag]{er_style_tag()}}, since
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} reads that tag off \code{style} to decide how to
-assemble the layer; the other three layers have only one structural
+assemble the layer; the other four layers have only one structural
 call site, so no such tagging is needed there. See the \verb{@examples} on
 \code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, and
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} for worked custom builders (a dashed model curve,

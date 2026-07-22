@@ -54,7 +54,7 @@ grouping variables are binned into quantiles first, via
 the response, so it needs no \code{response_type} dispatch.
 }
 \details{
-Unlike the other three layers, this one is \strong{additive} -- see
+Unlike the other four layers, this one is \strong{additive} -- see
 \code{\link[=er_plot]{er_plot()}}'s "Layers are either singleton or additive" -- each call
 adds another panel alongside any already added by a previous call,
 rather than replacing it.

@@ -73,15 +73,34 @@ test_that(".layer_summary constructs the correct data structure", {
   cfg1 <- plt1$layer$summary$config
   cfg2 <- plt2$layer$summary$config
 
-  cfg_names <- c("model", "p_value", "corner_distance", "style", "dots")
+  cfg_names <- c("model", "summary", "p_value", "corner_distance", "style", "dots")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 
   expect_false(is.null(cfg1$model))
+  expect_false(is.null(cfg1$summary))
   expect_false(is.null(cfg1$p_value))
+  expect_equal(cfg1$p_value, cfg1$summary$p_value)
 
   expect_null(cfg2$model)
+  expect_null(cfg2$summary)
   expect_null(cfg2$p_value)
+})
+
+test_that(".layer_summary stores the full er_summary() list, not just p_value", {
+  skip_if_not_installed("erglm")
+  fake_model <- structure(list(), class = "er_test_fake_summary_model")
+
+  plt <- er_test_data |> er_plot(aucss, ae1) |>
+    er_plot_add_summary(model = fake_model)
+
+  cfg <- plt$layer$summary$config
+
+  expect_null(cfg$p_value)
+  expect_s3_class(cfg$summary$coefficients, "data.frame")
+  expect_equal(cfg$summary$coefficients$term, c("(Intercept)", "aucss"))
+  expect_s3_class(cfg$summary$glance, "data.frame")
+  expect_equal(cfg$summary$glance$aic, 123.4)
 })
 
 

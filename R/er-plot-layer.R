@@ -55,14 +55,23 @@
   # model is retained as a named element rather than dropped from `config`.
   config["model"] <- list(model)
 
-  # model summary (e.g. p-value), via the `er_summary()` generic, when a
-  # model was supplied. Computed unconditionally (regardless of
-  # `stratify`) -- whether a single value makes sense to show when the
-  # layer is stratified is a decision for the builder itself (see
+  # model summary, via the `er_summary()` generic, when a model was
+  # supplied. Computed unconditionally (regardless of `stratify`) --
+  # whether a given value makes sense to show when the layer is
+  # stratified is a decision for the builder itself (see
   # `er_style_summary_pvalue()`), not this generic config-building step.
-  config["p_value"] <- list(NULL) # use `[` (not `$`) so the NULL is retained as a named element
+  # `config$summary` holds the full, raw `er_summary()` return value (see
+  # `?er_model_interface` for its contract -- `p_value`/`coefficients`/
+  # `glance`), so builders needing more than a bare p-value (e.g.
+  # `er_style_summary_coefficients()`) can read it directly.
+  # `config$p_value` is kept as a separate, extracted field alongside it
+  # purely so `er_style_summary_pvalue()`'s existing, simpler read
+  # (`config$p_value`) doesn't need to change.
+  config["summary"] <- list(NULL) # use `[` (not `$`) so the NULL is retained as a named element
+  config["p_value"] <- list(NULL)
   if (!is.null(model)) {
     model_summary <- er_summary(model)
+    config$summary <- model_summary
     config$p_value <- model_summary$p_value
   }
 

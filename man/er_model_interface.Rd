@@ -37,9 +37,38 @@ er_summary(model, ...)
 simulation-based visualisation should not implement a method; the
 default method returns \code{NULL}; callers should treat a \code{NULL} result
 as "not available" rather than an error.
-\item \code{er_summary()} returns a named list of scalar summary statistics (for
-example \code{list(p_value = 0.013)}), or \code{NULL} if nothing is available.
-The default method returns \code{NULL}.
+\item \code{er_summary()} returns \code{NULL} (nothing available -- the default method's
+behaviour), or a named list with any of the following independently
+optional keys. Unrecognized keys are permitted and ignored by built-in
+builders, giving a model package room to stash extra fields for its own
+custom builders.
+\itemize{
+\item \code{p_value}: a single headline p-value (or \code{NULL}) for "the" exposure
+effect, when the model has one unambiguous candidate (e.g. a GLM's
+exposure coefficient). A model with no single privileged parameter
+(e.g. a multi-parameter nonlinear Emax model, with separate \code{E0}/
+\code{Emax}/\code{EC50}/\code{Hill} terms and no obviously "the" effect) should
+return \code{NULL} here rather than picking an arbitrary term --
+\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}} already treats \code{NULL} as "nothing to
+show".
+\item \code{coefficients}: a tibble/data frame with one row per model parameter,
+for builders (e.g. \code{\link[=er_style_summary_coefficients]{er_style_summary_coefficients()}}) that display
+more than a single p-value. Columns follow this package's snake_case
+convention rather than \code{broom::tidy()}'s dotted names:
+\code{term} (required), \code{label} (optional display name, falls back to
+\code{term}), \code{estimate} (required), and optional \code{std_error},
+\code{statistic}, \code{p_value}, \code{conf_low}, \code{conf_high} (each \code{NA} if not
+computed/meaningful). \code{NULL} if not available.
+\item \code{glance}: a single-row tibble/data frame of model-level
+goodness-of-fit, \code{broom::glance()}-style: optional \code{n},
+\code{df_residual}, \code{logLik}, \code{aic}, \code{bic}, \code{deviance}, \code{r_squared}
+(\code{NA} where not meaningful, e.g. non-Gaussian models),
+\code{converged}. Reserved for future builders; no built-in builder
+currently consumes it. \code{NULL} if not available.
+}
+
+This is purely additive: a method that only ever returns
+\code{list(p_value = ...)} (as above) continues to work unchanged.
 }
 }
 \description{

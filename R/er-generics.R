@@ -26,9 +26,36 @@
 #'   simulation-based visualisation should not implement a method; the
 #'   default method returns `NULL`; callers should treat a `NULL` result
 #'   as "not available" rather than an error.
-#' - `er_summary()` returns a named list of scalar summary statistics (for
-#'   example `list(p_value = 0.013)`), or `NULL` if nothing is available.
-#'   The default method returns `NULL`.
+#' - `er_summary()` returns `NULL` (nothing available -- the default method's
+#'   behaviour), or a named list with any of the following independently
+#'   optional keys. Unrecognized keys are permitted and ignored by built-in
+#'   builders, giving a model package room to stash extra fields for its own
+#'   custom builders.
+#'   - `p_value`: a single headline p-value (or `NULL`) for "the" exposure
+#'     effect, when the model has one unambiguous candidate (e.g. a GLM's
+#'     exposure coefficient). A model with no single privileged parameter
+#'     (e.g. a multi-parameter nonlinear Emax model, with separate `E0`/
+#'     `Emax`/`EC50`/`Hill` terms and no obviously "the" effect) should
+#'     return `NULL` here rather than picking an arbitrary term --
+#'     [er_style_summary_pvalue()] already treats `NULL` as "nothing to
+#'     show".
+#'   - `coefficients`: a tibble/data frame with one row per model parameter,
+#'     for builders (e.g. [er_style_summary_coefficients()]) that display
+#'     more than a single p-value. Columns follow this package's snake_case
+#'     convention rather than `broom::tidy()`'s dotted names:
+#'     `term` (required), `label` (optional display name, falls back to
+#'     `term`), `estimate` (required), and optional `std_error`,
+#'     `statistic`, `p_value`, `conf_low`, `conf_high` (each `NA` if not
+#'     computed/meaningful). `NULL` if not available.
+#'   - `glance`: a single-row tibble/data frame of model-level
+#'     goodness-of-fit, `broom::glance()`-style: optional `n`,
+#'     `df_residual`, `logLik`, `aic`, `bic`, `deviance`, `r_squared`
+#'     (`NA` where not meaningful, e.g. non-Gaussian models),
+#'     `converged`. Reserved for future builders; no built-in builder
+#'     currently consumes it. `NULL` if not available.
+#'
+#'   This is purely additive: a method that only ever returns
+#'   `list(p_value = ...)` (as above) continues to work unchanged.
 #'
 #' @name er_model_interface
 NULL

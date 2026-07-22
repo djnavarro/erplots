@@ -65,7 +65,7 @@
 #' a single call merged into the main panel, or one or more panels
 #' stacked below the base plot -- via [er_style_tag()], since
 #' [er_plot_add_data()] reads that tag off `style` to decide how to
-#' assemble the layer; the other three layers have only one structural
+#' assemble the layer; the other four layers have only one structural
 #' call site, so no such tagging is needed there. See the `@examples` on
 #' [er_plot_add_model()], [er_plot_add_quantiles()], and
 #' [er_plot_add_data()] for worked custom builders (a dashed model curve,

@@ -412,11 +412,12 @@ panel. One visible side effect worth flagging: every existing
 `er_plot_add_model(mod)` call used to draw a p-value annotation by
 default (since `summary_style` defaulted on); it no longer does --
 showing one now requires an explicit `er_plot_add_summary(model = mod)`
-call. The three response-type worked-example vignettes
-(`plot-binary.Rmd`/`plot-continuous.Rmd`/`plot-count.Rmd`) were not
-updated to add this call, since none of their prose specifically
-discussed the p-value annotation; their rendered model-layer examples
-now show no summary annotation where they used to.
+call. At the time of this change, the three response-type worked-example
+vignettes were not updated to add it, since none of their prose
+specifically discussed the p-value annotation, and their rendered
+model-layer examples showed no summary annotation where they used to; a
+later change closed that gap by adding a dedicated "Summary layer"
+section -- see "Vignette structure" below.
 
 ## Passing extra arguments to a builder (`...` passthrough)
 
@@ -453,6 +454,87 @@ own. The two quantile `_vlines` wrapper builders and
 `...` into their inner call, so they don't drop extra arguments meant
 for the base builder they wrap/fall back to. Documented in `?er_style`'s
 new "Passing extra arguments to a builder" section.
+
+## The `er_summary()` return-value contract
+
+`er_summary()`'s return value was originally undocumented beyond "a named
+list of scalar summary statistics (e.g. `list(p_value = 0.013)`)" -- fine
+for erglm, whose GLM-based models have one unambiguous exposure
+coefficient to report a p-value for, but not obviously generalisable to a
+sister package like emaxnls, whose nonlinear Emax models have several
+named parameters (`E0`/`Emax`/`EC50`/`Hill`) with no single privileged
+term. A design review settled on a purely additive contract, documented in
+`?er_model_interface`: `er_summary()` returns `NULL`, or a named list with
+any of three independently-optional, reserved keys (unrecognized keys are
+permitted and ignored by built-ins, for a model package's own
+custom-builder escape hatch) --
+
+- `p_value` (scalar or `NULL`, unchanged from before): a single headline
+  p-value, only when the model has one unambiguous candidate. A
+  multi-parameter model with no privileged term should return `NULL`
+  here rather than pick one arbitrarily.
+- `coefficients` (tibble/data frame or `NULL`): one row per model
+  parameter, snake_case columns (`term`, optional `label`, `estimate`,
+  optional `std_error`/`statistic`/`p_value`/`conf_low`/`conf_high`) --
+  snake_case rather than `broom::tidy()`'s dotted names, matching this
+  package's existing convention (`p_value`, `corner_distance`).
+- `glance` (single-row tibble/data frame or `NULL`): model-level
+  goodness-of-fit, `broom::glance()`-style (`n`, `df_residual`, `logLik`,
+  `aic`, `bic`, `deviance`, `r_squared`, `converged`). Reserved now so a
+  second contract revision isn't needed later; no built-in builder
+  consumes it yet.
+
+`.layer_summary()` (`R/er-plot-layer.R`) now stores the full, raw
+`er_summary()` return value as `config$summary`, alongside the existing
+`config$p_value` (still extracted separately so `er_style_summary_pvalue()`
+didn't need to change). A new builder, `er_style_summary_coefficients()`
+(`R/er-plot-style-summary.R`, tagged `layer = "summary"`), demonstrates
+`coefficients` in use: one line per row (`label`-or-`term`: `estimate`,
+plus `(p = ...)` when that row has a non-`NA` `p_value`) in a
+`geom_label()`, placed via the same `config$corner_distance` logic as the
+other two summary builders; it draws nothing if `coefficients` is absent
+or the layer is stratified (same posture as `er_style_summary_pvalue()`).
+Column access inside it uses `"col" %in% names(coefs)` rather than `$`
+directly, since tibble's `$` warns on an absent column.
+
+This is purely additive -- erglm's existing `er_summary.erglm_model()`
+(returning only `list(p_value = ...)`) continues to work unchanged.
+Explicitly deferred: enriching erglm's own method with
+`coefficients`/`glance`, and an actual `er_summary.emaxnls()`
+implementation -- neither is erplots-side work.
+
+A fourth builder, `er_style_summary_gof()` (`R/er-plot-style-summary.R`,
+tagged `layer = "summary"`), was added as the first consumer of
+`$glance`: a single-line, comma-separated annotation drawn from a
+curated subset of `glance`'s reserved columns (`N`, `AIC`, `BIC`, `R²`
+-- deliberately not `df_residual`/`logLik`/`deviance`/`converged`, to
+keep the annotation compact), showing only whichever of those four are
+actually present and non-`NA` in a given model's `glance`. Same posture
+as the other two model-derived summary builders: draws nothing if none
+of the four fields are available, or if the layer is stratified.
+
+**Documentation follow-ups.** A dedicated "Summary layer" section was
+added to `plot-binary.Rmd`, with worked examples of
+`er_style_summary_pvalue()` (the default) and `er_style_summary_gof()`
+-- the latter demonstrating a `glance`-populating `er_summary()` method
+defined and registered on the spot via `registerS3method()`, since
+erglm's own `er_summary.erglm_model()` doesn't populate `glance` yet.
+`plot-continuous.Rmd`/`plot-count.Rmd` link back to it rather than
+duplicating the worked example, mirroring the existing model/group-layer
+cross-referencing pattern -- see "Vignette structure" below.
+`design.Rmd`'s layer-overview table was updated to name all four summary
+builders (it previously named only two, from before
+`_coefficients()`/`_gof()` existed), and a follow-up audit for lingering
+staleness from the summary layer's earlier promotion to independence
+found: `design.Rmd`'s own ASCII pipeline diagram was still missing
+`er_plot_add_summary()` entirely (a plain enumeration, not caught by
+searching for "N layers" phrasing); and two roxygen doc strings
+(`er_plot_add_groups()`'s own details, `?er_style`'s structural-family
+paragraph) still said "the other three layers" where it's now four --
+all fixed. `PLAN.md`'s "Completed: mini-language documentation (grammar
+review)" section -- `design.Rmd`'s own cross-reference target, per its
+"Keeping this article in sync" note -- was updated to record the
+promotion and the layer-table change alongside these fixes.
 
 ## Planned work
 
@@ -527,11 +609,14 @@ independent of the model layer" above.
 workflow" below) holds five articles: `plot-binary.Rmd`,
 `plot-continuous.Rmd`, and `plot-count.Rmd` (worked examples of each
 layer, one per response type; binary is the most detailed, the other
-two link back to it for the response-type-agnostic model/group
-components); `design.Rmd` ("The plotting grammar" -- the singleton/
-additive layer distinction, the stratification color/facet precedence
-rule, and the response-type dispatch table); and `extending.Rmd`
-("Extending erplots: writing your own builder"). The last one used to
+two link back to it for the response-type-agnostic model/summary/group
+components -- including a "Summary layer" section demonstrating
+`er_style_summary_pvalue()`/`er_style_summary_gof()`, added after the
+summary layer's promotion to independence; see "The `er_summary()`
+return-value contract" above); `design.Rmd` ("The plotting grammar" --
+the singleton/additive layer distinction, the stratification color/facet
+precedence rule, and the response-type dispatch table); and
+`extending.Rmd` ("Extending erplots: writing your own builder"). The last one used to
 be a section inside `design.Rmd`, but was split out into its own
 article because it needed to grow -- the original version's illustrative
 `build_quantile_crossbar()` example didn't explain what `config` (its

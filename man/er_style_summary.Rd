@@ -4,6 +4,8 @@
 \alias{er_style_summary}
 \alias{er_style_summary_pvalue}
 \alias{er_style_summary_n}
+\alias{er_style_summary_coefficients}
+\alias{er_style_summary_gof}
 \title{Summary annotation builders for exposure-response plots}
 \usage{
 er_style_summary_pvalue(
@@ -18,6 +20,28 @@ er_style_summary_pvalue(
 )
 
 er_style_summary_n(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
+
+er_style_summary_coefficients(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  ...
+)
+
+er_style_summary_gof(
   data,
   config,
   stratify,
@@ -65,10 +89,21 @@ p-value doesn't unambiguously describe multiple curves).
 \code{er_style_summary_n()} is a model-agnostic alternative: it always draws,
 showing the total number of observations (or, when stratified, one
 count per stratum level) -- demonstrating that a summary annotation
-doesn't have to originate from a fitted model at all. Both are tagged
-\code{er_style_tag(fn, layer = "summary")}, so \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} errors
-informatively if a builder tagged for a different layer is passed to
-it instead.
+doesn't have to originate from a fitted model at all.
+\code{er_style_summary_coefficients()} draws one line per row of the model's
+\code{coefficients} table (see \code{\link[=er_summary]{er_summary()}}'s \code{coefficients} field), useful
+for models with several parameters and no single privileged p-value
+(e.g. a multi-parameter nonlinear model); it draws nothing if
+\code{coefficients} wasn't supplied, or if the layer is stratified.
+\code{er_style_summary_gof()} draws a single-line, comma-separated
+goodness-of-fit annotation from the model's \code{glance} field (see
+\code{\link[=er_summary]{er_summary()}}) -- a curated subset (\code{N}, \code{AIC}, \code{BIC}, \verb{R\\u00b2}) rather
+than every reserved \code{glance} column, showing only whichever of those
+four are actually present and non-\code{NA}; it draws nothing if none of them
+are available, or if the layer is stratified. All four builders are
+tagged \code{er_style_tag(fn, layer = "summary")}, so \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}
+errors informatively if a builder tagged for a different layer is passed
+to it instead.
 
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.

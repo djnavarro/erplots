@@ -881,7 +881,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' [cut_quantile()]). This layer only looks at the exposure variable, not
 #' the response, so it needs no `response_type` dispatch.
 #'
-#' Unlike the other three layers, this one is **additive** -- see
+#' Unlike the other four layers, this one is **additive** -- see
 #' [er_plot()]'s "Layers are either singleton or additive" -- each call
 #' adds another panel alongside any already added by a previous call,
 #' rather than replacing it.

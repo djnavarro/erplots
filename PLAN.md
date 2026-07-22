@@ -346,19 +346,40 @@ color for something else (see the data layer's `color_role` above).
   it to the shared roxygen block in `R/er-plot-partials.R` and
   regenerating `man/er_partial.Rd`.
 - `vignettes/articles/design.Rmd` (new conceptual/grammar vignette) was
-  added, covering the four layers, singleton/additive semantics with
-  runnable examples, the stratification color/facet precedence rule, and
-  the response-type dispatch table -- and has since been refreshed to
-  match the shipped data-layer redesign above (the layer table, the
-  "Stratification composes with layers" section, and the response-type
-  section had all fallen behind Stage 7b/7d and described a binary-only
-  data layer that no longer existed; now describe `style =
-  "overlay"`/`"jitter"` and `color_role` accurately).
+  added, covering the four layers then in existence (model/quantile/
+  data/group), singleton/additive semantics with runnable examples, the
+  stratification color/facet precedence rule, and the response-type
+  dispatch table. It has since been refreshed twice more to stay
+  current, per its own closing note: once to match the shipped
+  data-layer redesign above (the layer table, the "Stratification
+  composes with layers" section, and the response-type section had all
+  fallen behind Stage 7b/7d and described a binary-only data layer that
+  no longer existed; now describe `style = "overlay"`/`"jitter"` and
+  `color_role` accurately), and again once the summary layer was
+  promoted out of the model layer into its own, independent layer (see
+  AGENTS.md's "The summary layer is independent of the model layer"
+  section) with two further builders added consuming the expanded
+  `er_summary()` contract (see AGENTS.md's "The `er_summary()`
+  return-value contract" section) -- the layer table now lists five
+  layers, not four, and the Summary row names all four of its builders
+  (`er_style_summary_pvalue()`/`_coefficients()`/`_gof()`/`_n()`) rather
+  than the original two (`_pvalue()`/`_n()`).
 - `?er_plot`'s previously-shared `@rdname er_plot` page (covering
   `er_plot()`, `er_plot_style()`, and every layer function under one Rd
   topic with one shared `@param` list) turned out to already have been
   split into per-function topics by the time this was checked -- nothing
   further needed there.
+- A follow-up audit for lingering staleness from the summary-layer
+  promotion found two more spots: `design.Rmd`'s own ASCII pipeline
+  diagram (a plain enumeration of `er_plot_add_*()` calls, not caught by
+  searching for "N layers" phrasing) was still missing
+  `er_plot_add_summary()` and got it added; and two roxygen doc strings
+  (`er_plot_add_groups()`'s own details, and `?er_style`'s
+  structural-family paragraph) still said "the other three layers"
+  where it's now four -- both corrected to "four". `er_plot_add_model()`'s
+  own `@examples`/`@seealso` and every other layer function's `@seealso`
+  block were checked too and found already consistent (each correctly
+  excludes itself and lists the other four).
 - Resolved (not left open): model/quantile/data stay singleton, group
   stays additive; an additive `model` layer (for overlaying two fitted
   curves, e.g. candidate vs. reference) is the one plausible future
