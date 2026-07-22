@@ -102,7 +102,7 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
   }
 
   # response-type-dispatched label formatter and observed-side summary --
-  # mirrors .part_quantile()'s binary/continuous/count dispatch (PLAN.md
+  # mirrors .layer_quantile()'s binary/continuous/count dispatch (PLAN.md
   # Stage 1, and the design decision (4) fast-follow for "count")
   if (response_type == "binary") {
     format_y_mid <- scales::label_percent(accuracy = 1)

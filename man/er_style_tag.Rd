@@ -55,9 +55,9 @@ section for the full contract.
 \details{
 \code{layout} is the one required tag for a data-layer builder:
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} reads it off \code{style} to decide whether to route
-through \code{.part_overlay()} (\code{"overlay"}: a single call merged into the
+through \code{.layer_overlay()} (\code{"overlay"}: a single call merged into the
 main panel, at the observations' true \verb{(exposure, response)}
-coordinates) or \code{.part_data()} (\code{"panel"}: one-or-more panels stacked
+coordinates) or \code{.layer_data()} (\code{"panel"}: one-or-more panels stacked
 below the base plot), \emph{before} it can call the builder -- so the choice
 can't be inferred from the builder's return value. Both built-in data
 builders (\code{\link[=er_style_data_overlay]{er_style_data_overlay()}}, \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}})

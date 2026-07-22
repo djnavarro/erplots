@@ -13,8 +13,8 @@ test_that("er_style_model_ribbonline returns 2 geoms", {
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$model$config,
-    stratify = p1$part$model$stratify,
+    config = p1$layer$model$config,
+    stratify = p1$layer$model$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -22,8 +22,8 @@ test_that("er_style_model_ribbonline returns 2 geoms", {
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$model$config,
-    stratify = p2$part$model$stratify,
+    config = p2$layer$model$config,
+    stratify = p2$layer$model$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -62,8 +62,8 @@ test_that("er_style_model_line returns 1 geom", {
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$model$config,
-    stratify = p1$part$model$stratify,
+    config = p1$layer$model$config,
+    stratify = p1$layer$model$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -71,8 +71,8 @@ test_that("er_style_model_line returns 1 geom", {
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$model$config,
-    stratify = p2$part$model$stratify,
+    config = p2$layer$model$config,
+    stratify = p2$layer$model$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -108,8 +108,8 @@ test_that("er_style_model_spaghetti returns 2 geoms", {
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$model$config,
-    stratify = p1$part$model$stratify,
+    config = p1$layer$model$config,
+    stratify = p1$layer$model$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -117,8 +117,8 @@ test_that("er_style_model_spaghetti returns 2 geoms", {
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$model$config,
-    stratify = p2$part$model$stratify,
+    config = p2$layer$model$config,
+    stratify = p2$layer$model$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -153,8 +153,8 @@ test_that("er_style_model_spaghetti does not warn about unused fill aesthetic", 
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$model$config,
-    stratify = p1$part$model$stratify,
+    config = p1$layer$model$config,
+    stratify = p1$layer$model$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -162,8 +162,8 @@ test_that("er_style_model_spaghetti does not warn about unused fill aesthetic", 
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$model$config,
-    stratify = p2$part$model$stratify,
+    config = p2$layer$model$config,
+    stratify = p2$layer$model$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -184,13 +184,13 @@ test_that("er_style_model_spaghetti falls back to ribbonline when er_simulate is
 
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_model(er_test_mod1)
 
-  config <- p1$part$model$config
+  config <- p1$layer$model$config
   config$model <- structure(list(), class = "no_simulate_method")
 
   args1 <- list(
     data = p1$data,
     config = config,
-    stratify = p1$part$model$stratify,
+    stratify = p1$layer$model$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,

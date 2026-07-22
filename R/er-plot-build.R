@@ -14,12 +14,12 @@
       ylim = object$response$limits, 
       clip = "off"
     ) 
-  if (!is.null(object$part$model)) {
+  if (!is.null(object$layer$model)) {
     base <- base + 
       .build_model_geoms(object) +
       .build_summary_geoms(object)
   }
-  if (!is.null(object$part$quantile)) {
+  if (!is.null(object$layer$quantile)) {
     base <- base + .build_quantile_geoms(object)
   }
 
@@ -29,8 +29,8 @@
 .build_data_plot <- function(object) {
 
   data     <- object$data
-  config   <- object$part$data$config
-  stratify <- object$part$data$stratify
+  config   <- object$layer$data$config
+  stratify <- object$layer$data$stratify
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
@@ -54,8 +54,8 @@
 .build_overlay_geoms <- function(object) {
 
   data     <- object$data
-  config   <- object$part$overlay$config
-  stratify <- object$part$overlay$stratify
+  config   <- object$layer$overlay$config
+  stratify <- object$layer$overlay$stratify
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
@@ -70,7 +70,7 @@
 .build_group_plot <- function(object) {
 
   data     <- object$data
-  config   <- object$part$group$config
+  config   <- object$layer$group$config
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
@@ -94,8 +94,8 @@
 .build_model_geoms <- function(object) {
 
   data     <- object$data
-  config   <- object$part$model$config
-  stratify <- object$part$model$stratify
+  config   <- object$layer$model$config
+  stratify <- object$layer$model$stratify
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
@@ -110,8 +110,8 @@
 .build_summary_geoms <- function(object) {
 
   data     <- object$data
-  config   <- object$part$model$config
-  stratify <- object$part$model$stratify
+  config   <- object$layer$model$config
+  stratify <- object$layer$model$stratify
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata
@@ -127,8 +127,8 @@
 .build_quantile_geoms <- function(object) {
 
   data     <- object$data
-  config   <- object$part$quantile$config
-  stratify <- object$part$quantile$stratify
+  config   <- object$layer$quantile$config
+  stratify <- object$layer$quantile$stratify
   exposure <- object$exposure
   response <- object$response
   strata   <- object$strata

@@ -28,7 +28,7 @@ library(erglm)
 `er_plot()` creates an empty object of class `er_plot`, storing the data
 and the plot's exposure/response/stratification variables. You then pipe
 it through one or more *layer* functions, each of which adds one visual
-component, and finish with `plot()`/`print()` (or [er_plot_build()]
+layer, and finish with `plot()`/`print()` (or [er_plot_build()]
 directly):
 
 ```{r pipeline}
@@ -90,7 +90,7 @@ plt <- erglm_data |>
   er_plot_add_quantiles(bins = 4) |>
   er_plot_add_quantiles(bins = 8) # overwrites the bins = 4 call
 
-plt$part$quantile$config$n_quantiles # 8, not 4
+plt$layer$quantile$config$n_quantiles # 8, not 4
 ```
 
 The group layer is the one exception: it's **additive**. Each call adds
@@ -102,7 +102,7 @@ plt <- erglm_data |>
   er_plot_add_groups(aucss) |>
   er_plot_add_groups(treatment) # adds a second panel, doesn't replace the first
 
-names(plt$part$group$config) # both grouping variables are still there
+names(plt$layer$group$config) # both grouping variables are still there
 ```
 
 This is a deliberate design choice, not an oversight: there is only one
@@ -162,7 +162,7 @@ to:
   [er_plot_add_data()] for the full breakdown.
 
 A `config$color_role` tag (`"strata"` or `"response"`, set by
-`.part_data()`) records which meaning applies for a given data-layer
+`.layer_data()`) records which meaning applies for a given data-layer
 build, so the composition machinery (`.polish_labels()`/
 `.polish_legends()`) knows whether to treat a builder's legend as the
 shared strata legend or a standalone response colorbar.
@@ -188,7 +188,7 @@ auto-detects as `"continuous"` and is summarised as an
 approximately-continuous quantity unless `response_type = "count"` is
 declared explicitly. See [er_plot_add_quantiles()] for the full
 rationale and the [count responses](plot-count.html) article's "Quantile
-component" section for a worked example, including a case where the
+layer" section for a worked example, including a case where the
 choice between the t-interval and exact Poisson interval visibly
 matters.
 
@@ -210,7 +210,7 @@ exposure, response, strata, theme)`. That signature is a documented,
 public part of the API (see [er_style()]), each layer's `style`
 defaults to one built-in `er_style_*()` function, and it can be set to
 any other function matching the same signature -- no need to fork the
-package or reach into `object$part` internals. For the data layer
+package or reach into `object$layer` internals. For the data layer
 specifically, a custom builder must additionally declare which
 *structural* family it belongs to via [er_style_tag()].
 

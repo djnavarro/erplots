@@ -70,7 +70,7 @@ print(plt)
 #>     - exposure:        aucss
 #>     - response:        ae2
 #>     - stratification:  sex
-#>   plot components:
+#>   plot layers:
 #>     - model:           erglm_model/glm/lm
 #>     - quantile:        3 bins
 #>     - overlay:         stratified

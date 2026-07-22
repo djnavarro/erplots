@@ -12,8 +12,8 @@ test_that("er_style_group_boxplot returns geom + coord", {
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$group$config[[1]],
-    stratify = p1$part$group$stratify,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -21,8 +21,8 @@ test_that("er_style_group_boxplot returns geom + coord", {
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$group$config[[1]],
-    stratify = p2$part$group$stratify,
+    config = p2$layer$group$config[[1]],
+    stratify = p2$layer$group$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -60,8 +60,8 @@ test_that("er_style_group_histogram returns geom + facet + coord", {
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$group$config[[1]],
-    stratify = p1$part$group$stratify,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -69,8 +69,8 @@ test_that("er_style_group_histogram returns geom + facet + coord", {
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$group$config[[1]],
-    stratify = p2$part$group$stratify,
+    config = p2$layer$group$config[[1]],
+    stratify = p2$layer$group$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -105,8 +105,8 @@ test_that("er_style_group_histogram rotates strip text to avoid clipping long le
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$group$config[[1]],
-    stratify = p1$part$group$stratify,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -144,8 +144,8 @@ test_that("er_style_group_violin returns geom + coord", {
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$group$config[[1]],
-    stratify = p1$part$group$stratify,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -153,8 +153,8 @@ test_that("er_style_group_violin returns geom + coord", {
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$group$config[[1]],
-    stratify = p2$part$group$stratify,
+    config = p2$layer$group$config[[1]],
+    stratify = p2$layer$group$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,

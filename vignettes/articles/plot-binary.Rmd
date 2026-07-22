@@ -14,7 +14,7 @@ erplots draws exposure-response plots from *any* model that implements
 fitted with erglm, but the plotting code itself has no knowledge of
 `glm()`. It's the most detailed of the three response-type articles
 (binary/continuous/count); the continuous and count articles link back
-here for the model and group components, which work identically
+here for the model and group layers, which work identically
 regardless of response type.
 
 ```{r setup}
@@ -43,7 +43,7 @@ erglm_data |>
   plot()
 ```
 
-Adding extra components
+Adding extra layers
 
 ```{r basic-plot-2}
 erglm_data |> 
@@ -57,7 +57,7 @@ erglm_data |>
 
 ## Stratification
 
-Stratification adds colour across all components. This requires a model
+Stratification adds colour across all layers. This requires a model
 that includes the stratification variable as a term:
 
 ```{r stratification-1}
@@ -75,7 +75,7 @@ erglm_data |>
   plot()
 ```
 
-You can suppress stratification for specific components
+You can suppress stratification for specific layers
 
 ```{r stratification-2}
 erglm_data |> 
@@ -92,7 +92,7 @@ erglm_data |>
   plot()
 ```
 
-## Model component
+## Model layer
 
 The default builder is `er_style_model_ribbonline()`, but you can also draw
 spaghetti plots to represent parameter uncertainty with
@@ -111,7 +111,7 @@ erglm_data |>
   plot()
 ```
 
-## Quantile component
+## Quantile layer
 
 You can modify the number of bins:
 
@@ -126,8 +126,8 @@ erglm_data |>
 You can also modify the confidence level for the interval around each
 bin's summary. For a binary response this is a Clopper-Pearson interval
 for the response *rate*; see the
-[continuous](plot-continuous.html#quantile-component) and
-[count](plot-count.html#quantile-component) articles for how this layer
+[continuous](plot-continuous.html#quantile-layer) and
+[count](plot-count.html#quantile-layer) articles for how this layer
 adapts its summary statistic and interval method to those response
 types.
 
@@ -139,7 +139,7 @@ erglm_data |>
   plot()
 ```
 
-## Data component
+## Data layer
 
 `er_plot_add_data()` adds the raw observations. By default
 (`er_style_data_overlay()`), points are drawn at their true `(exposure,
@@ -166,8 +166,8 @@ panel shows the exposure *distribution* conditional on response, not
 just individual points. There is no built-in panel-based builder for a
 continuous/count response; `er_style_data_overlay()` (raw points at their
 true `(exposure, response)` coordinates, shown in the
-[continuous](plot-continuous.html#data-component) and
-[count](plot-count.html#data-component) articles) covers that case
+[continuous](plot-continuous.html#data-layer) and
+[count](plot-count.html#data-layer) articles) covers that case
 there, and a custom `"panel"`-layout builder (e.g. a single
 color-encoded panel) remains possible via [er_style_tag()] if a project
 needs one -- see `vignettes/articles/design.Rmd`'s "Extending erplots"
@@ -218,9 +218,9 @@ p_boxjitter_strat <- erglm_data |>
 p_overlay_strat$output | p_boxjitter_strat$output
 ```
 
-## Group component
+## Group layer
 
-Multiple grouping variables are allowed. Like the model component, this
+Multiple grouping variables are allowed. Like the model layer, this
 layer doesn't look at `response_type` at all -- it only consumes the
 exposure variable -- so everything in this section applies unchanged to
 continuous and count responses too.
@@ -234,7 +234,7 @@ erglm_data |>
   plot()
 ```
 
-Stratification propagates to the group component:
+Stratification propagates to the group layer:
 
 ```{r group-2}
 erglm_data |> 

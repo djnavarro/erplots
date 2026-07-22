@@ -123,11 +123,11 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #'   (ignoring `NA`s); `"continuous"` otherwise. A response with no
 #'   non-missing values is treated as `"continuous"` (there's no evidence
 #'   either way, and `"continuous"` is the more permissive default -- it
-#'   doesn't restrict which plot components can be used).
+#'   doesn't restrict which plot layers can be used).
 #'
 #' @details Used by [er_plot()] to resolve `response_type = "auto"`. See
 #'   `PLAN.md` for the broader plan to generalise response-type-specific
-#'   plot components (quantile summaries, data strips, VPCs) beyond the
+#'   plot layers (quantile summaries, data strips, VPCs) beyond the
 #'   binary case.
 #'
 #' @noRd
@@ -200,7 +200,7 @@ cut_quantile <- function(x, n = 4) {
 #' sensibly across data sets and numbers of strata.
 #'
 #' @param summary A quantile summary data frame (`config$summary` from
-#'   `.part_quantile()`), with `x_mid` and `strata` columns.
+#'   `.layer_quantile()`), with `x_mid` and `strata` columns.
 #' @param exposure_limits Numeric vector of length 2, the exposure
 #'   variable's `c(min, max)`.
 #' @return `summary` with an added `x_dodge` column.

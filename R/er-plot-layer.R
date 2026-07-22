@@ -1,9 +1,9 @@
 
-# part_model ------------------------------------------------------------------
+# layer_model ------------------------------------------------------------------
 
-.part_model <- function(object, model, stratify, conf_level, style, summary_style) {
+.layer_model <- function(object, model, stratify, conf_level, style, summary_style) {
   
-  part_model <- list()
+  layer_model <- list()
   config <- list()
 
   # the fitted model, supplied by the caller (erplots never fits models
@@ -63,18 +63,18 @@
   config$style <- list(model = style, summary = summary_style)
 
   # store and return
-  part_model$stratify <- stratify
-  part_model$config <- config
+  layer_model$stratify <- stratify
+  layer_model$config <- config
 
-  return(part_model)
+  return(layer_model)
 }
 
 
-# part_quantile ---------------------------------------------------------------
+# layer_quantile ---------------------------------------------------------------
 
-.part_quantile <- function(object, stratify, bins, conf_level, style) {
+.layer_quantile <- function(object, stratify, bins, conf_level, style) {
 
-  part_quantile <- list()
+  layer_quantile <- list()
   config <- list()
 
   config$n_quantiles <- bins
@@ -160,18 +160,18 @@
   config$style <- style
 
   # store and return
-  part_quantile$stratify <- stratify
-  part_quantile$config <- config
+  layer_quantile$stratify <- stratify
+  layer_quantile$config <- config
 
-  return(part_quantile)
+  return(layer_quantile)
 }
 
 
-# part_data -------------------------------------------------------------------
+# layer_data -------------------------------------------------------------------
 
-.part_data <- function(object, stratify, panel, style) {
+.layer_data <- function(object, stratify, panel, style) {
 
-  part_data <- list()
+  layer_data <- list()
   
   config <- list()
   config$layout <- "panel"
@@ -221,23 +221,23 @@
     config$panel_position <- stats::setNames(rep("below", length(panels)), panels)
   }
 
-  part_data$stratify <- stratify
-  part_data$config <- config 
+  layer_data$stratify <- stratify
+  layer_data$config <- config 
 
-  return(part_data)
+  return(layer_data)
 }
 
 
-# part_overlay ------------------------------------------------------------------
+# layer_overlay ------------------------------------------------------------------
 
-.part_overlay <- function(object, stratify, style) {
+.layer_overlay <- function(object, stratify, style) {
 
-  part_overlay <- list()
+  layer_overlay <- list()
 
   config <- list()
   config$seed <- 1234L
 
-  # unlike `.part_data()`, there's a single builder regardless of
+  # unlike `.layer_data()`, there's a single builder regardless of
   # response type -- `er_style_data_overlay()` only needs to know the
   # response type to decide how much vertical jitter to apply (binary
   # responses get a small nudge so 0/1 points don't overplot into two
@@ -248,16 +248,16 @@
   config$response_type <- object$response$type
   config$style <- style
 
-  part_overlay$stratify <- stratify
-  part_overlay$config <- config
+  layer_overlay$stratify <- stratify
+  layer_overlay$config <- config
 
-  return(part_overlay)
+  return(layer_overlay)
 }
 
 
-# part_group ------------------------------------------------------------------
+# layer_group ------------------------------------------------------------------
 
-.part_group <- function(object, group_cols, stratify, bins, style) {
+.layer_group <- function(object, group_cols, stratify, bins, style) {
 
   # grouping by the plot's own stratification variable while also
   # keeping strata (`stratify == TRUE`) bakes the same column name into
@@ -277,9 +277,9 @@
     ))
   }
 
-  part_group <- list()
-  part_group$stratify <- stratify
-  part_group$config <- list()
+  layer_group <- list()
+  layer_group$stratify <- stratify
+  layer_group$config <- list()
 
   for(g in group_cols) {
 
@@ -320,7 +320,7 @@
 
     # `er_plot_add_groups()` is additive -- each call may pass a different
     # `keep_strata`, so `stratify` is baked into each group's own config
-    # (rather than only the shared `part_group$stratify` used pre-additivity)
+    # (rather than only the shared `layer_group$stratify` used pre-additivity)
     # and `.build_group_plot()` reads it from here per group
     config$stratify <- stratify
 
@@ -349,10 +349,10 @@
       dplyr::select(dplyr::all_of(c(config$groupings, object$exposure$name))) |> 
       dplyr::left_join(config$counts, by = config$groupings)
     
-    part_group$config[[g]] <- config
+    layer_group$config[[g]] <- config
   }
 
-  return(part_group)
+  return(layer_group)
 }
 
 

@@ -38,7 +38,7 @@ test_that("er_plot_add_quantiles supports both binary and continuous responses",
   plt <- er_test_data |> er_plot(aucss, biomarker_change)
   expect_no_error(er_plot_add_quantiles(plt))
 
-  smm <- (plt |> er_plot_add_quantiles())$part$quantile$config$summary
+  smm <- (plt |> er_plot_add_quantiles())$layer$quantile$config$summary
   expect_named(smm, c(
     "exposure_bins", "strata", "x_mid", "y_mid", "y_mid_lbl",
     "ci_lower", "ci_upper", "y_lwr_lbl", "y_upr_lbl", "y_lbl"
@@ -55,7 +55,7 @@ test_that("er_plot_add_data's panel layout supports a continuous response (singl
 
   # there's no built-in "panel"-layout style for a continuous/count
   # response (see PLAN.md's note on removing `build_data_color()`), but
-  # `.part_data()`'s response-type dispatch is still general-purpose and
+  # `.layer_data()`'s response-type dispatch is still general-purpose and
   # exercised here via a minimal custom style.
   stub_panel_builder <- er_style_tag(
     function(data, config, stratify, exposure, response, strata, theme) list(),
@@ -66,13 +66,13 @@ test_that("er_plot_add_data's panel layout supports a continuous response (singl
   expect_no_error(er_plot_add_data(plt, style = stub_panel_builder))
 
   plt <- er_plot_add_data(plt, style = stub_panel_builder)
-  expect_equal(plt$part$data$config$color_role, "response")
-  expect_equal(plt$part$data$config$panels, "data")
+  expect_equal(plt$layer$data$config$color_role, "response")
+  expect_equal(plt$layer$data$config$panels, "data")
 
   # binary response still works, with er_style_data_boxjitter
   plt_binary <- er_test_data |> er_plot(aucss, ae1)
   expect_no_error(er_plot_add_data(plt_binary, style = er_style_data_boxjitter))
-  expect_equal((plt_binary |> er_plot_add_data(style = er_style_data_boxjitter))$part$data$config$color_role, "strata")
+  expect_equal((plt_binary |> er_plot_add_data(style = er_style_data_boxjitter))$layer$data$config$color_role, "strata")
 })
 
 test_that("er_plot_add_data supports a declared count response", {
@@ -85,7 +85,7 @@ test_that("er_plot_add_data supports a declared count response", {
 
   plt <- er_test_data |> er_plot(aucss, ae_count, response_type = "count")
   expect_no_error(er_plot_add_data(plt, style = stub_panel_builder))
-  expect_equal((plt |> er_plot_add_data(style = stub_panel_builder))$part$data$config$color_role, "response")
+  expect_equal((plt |> er_plot_add_data(style = stub_panel_builder))$layer$data$config$color_role, "response")
 })
 
 test_that("er_plot_add_data's default style is er_style_data_overlay, replacing data/overlay on re-call", {
@@ -94,16 +94,16 @@ test_that("er_plot_add_data's default style is er_style_data_overlay, replacing 
   plt <- er_test_data |> er_plot(aucss, ae1)
 
   plt_overlay <- plt |> er_plot_add_data()
-  expect_false(is.null(plt_overlay$part$overlay))
-  expect_null(plt_overlay$part$data)
+  expect_false(is.null(plt_overlay$layer$overlay))
+  expect_null(plt_overlay$layer$data)
 
   plt_jitter <- plt_overlay |> er_plot_add_data(style = er_style_data_boxjitter)
-  expect_false(is.null(plt_jitter$part$data))
-  expect_null(plt_jitter$part$overlay)
+  expect_false(is.null(plt_jitter$layer$data))
+  expect_null(plt_jitter$layer$overlay)
 
   plt_back <- plt_jitter |> er_plot_add_data()
-  expect_false(is.null(plt_back$part$overlay))
-  expect_null(plt_back$part$data)
+  expect_false(is.null(plt_back$layer$overlay))
+  expect_null(plt_back$layer$data)
 
   expect_error(er_plot_add_data(plt, style = "not a function"))
 })
@@ -147,7 +147,7 @@ test_that("er_plot_add_data produces N stratum panels, each with a response colo
   # there's no built-in "panel"-layout style for a continuous response
   # (see PLAN.md's note on removing `build_data_color()`); this custom
   # style recreates its color-encoded-panel behaviour to check that
-  # `.part_data()`/`.polish_labels()`'s per-stratum-panel machinery still
+  # `.layer_data()`/`.polish_labels()`'s per-stratum-panel machinery still
   # works for a response type with no shipped built-in.
   custom_color_panel_builder <- er_style_tag(
     function(data, config, stratify, exposure, response, strata, theme) {
@@ -252,7 +252,7 @@ test_that("er_plot_add_groups is additive across repeated calls", {
   skip_if_not_installed("erglm")
 
   # regression test: er_plot_add_groups() used to overwrite
-  # object$part$group on each call instead of merging into it, so a
+  # object$layer$group on each call instead of merging into it, so a
   # second call silently dropped the first group panel
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
@@ -260,7 +260,7 @@ test_that("er_plot_add_groups is additive across repeated calls", {
     er_plot_add_groups(aucss) |>
     er_plot_add_groups(treatment)
 
-  expect_named(plt$part$group$config, c(".aucss_quantile", "treatment"))
+  expect_named(plt$layer$group$config, c(".aucss_quantile", "treatment"))
 
   built <- er_plot_build(plt)
   expect_named(built$plot$group, c(".aucss_quantile", "treatment"))
@@ -269,15 +269,15 @@ test_that("er_plot_add_groups is additive across repeated calls", {
   # re-adding the same grouping variable replaces just that one panel,
   # in place, rather than duplicating it
   plt2 <- plt |> er_plot_add_groups(aucss, style = er_style_group_violin)
-  expect_named(plt2$part$group$config, c(".aucss_quantile", "treatment"))
-  expect_identical(plt2$part$group$config[[".aucss_quantile"]]$style, er_style_group_violin)
+  expect_named(plt2$layer$group$config, c(".aucss_quantile", "treatment"))
+  expect_identical(plt2$layer$group$config[[".aucss_quantile"]]$style, er_style_group_violin)
 })
 
 test_that("er_plot_add_groups honors per-call keep_strata when mixed", {
   skip_if_not_installed("erglm")
 
   # regression test: `stratify` used to be stored once for the whole
-  # `part$group` and shared by every panel at build time, so mixing
+  # `layer$group` and shared by every panel at build time, so mixing
   # `keep_strata = TRUE`/`FALSE` across calls applied the wrong flag to
   # at least one panel (and could error if a panel built without a
   # strata column was then asked to map `fill`/`colour` to it)
@@ -288,20 +288,20 @@ test_that("er_plot_add_groups honors per-call keep_strata when mixed", {
     er_plot_add_groups(aucss, keep_strata = FALSE) |>
     er_plot_add_groups(dose, keep_strata = TRUE)
 
-  expect_false(plt$part$group$config[[".aucss_quantile"]]$stratify)
-  expect_true(plt$part$group$config[["dose"]]$stratify)
+  expect_false(plt$layer$group$config[[".aucss_quantile"]]$stratify)
+  expect_true(plt$layer$group$config[["dose"]]$stratify)
 
   # the unstratified panel's data/groupings should have no strata column
-  expect_identical(plt$part$group$config[[".aucss_quantile"]]$groupings, ".aucss_quantile")
-  expect_false("sex" %in% names(plt$part$group$config[[".aucss_quantile"]]$data))
+  expect_identical(plt$layer$group$config[[".aucss_quantile"]]$groupings, ".aucss_quantile")
+  expect_false("sex" %in% names(plt$layer$group$config[[".aucss_quantile"]]$data))
 
   # the stratified panel's data/groupings should include the strata column
-  expect_identical(plt$part$group$config[["dose"]]$groupings, c("dose", "sex"))
-  expect_true("sex" %in% names(plt$part$group$config[["dose"]]$data))
+  expect_identical(plt$layer$group$config[["dose"]]$groupings, c("dose", "sex"))
+  expect_true("sex" %in% names(plt$layer$group$config[["dose"]]$data))
 
   # top-level flag (used only for cross-panel strata-legend dedup) is
   # TRUE because at least one panel is stratified
-  expect_true(plt$part$group$stratify)
+  expect_true(plt$layer$group$stratify)
 
   expect_no_error(er_plot_build(plt))
   built <- er_plot_build(plt)
@@ -485,8 +485,8 @@ test_that("er_plot_add_model() accepts a custom style/summary_style", {
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1, style = custom_model_builder, summary_style = custom_summary_builder)
 
-  expect_identical(plt$part$model$config$style$model, custom_model_builder)
-  expect_identical(plt$part$model$config$style$summary, custom_summary_builder)
+  expect_identical(plt$layer$model$config$style$model, custom_model_builder)
+  expect_identical(plt$layer$model$config$style$summary, custom_summary_builder)
   expect_no_error(er_plot_build(plt))
 })
 
@@ -513,7 +513,7 @@ test_that("er_plot_add_quantiles() accepts a custom style", {
     er_plot_add_model(er_test_mod1) |>
     er_plot_add_quantiles(style = custom_quantile_builder)
 
-  expect_identical(plt$part$quantile$config$style, custom_quantile_builder)
+  expect_identical(plt$layer$quantile$config$style, custom_quantile_builder)
   expect_no_error(er_plot_build(plt))
 })
 
@@ -546,8 +546,8 @@ test_that("er_plot_add_data() accepts a custom style for both the overlay and pa
     er_plot_add_model(er_test_mod1) |>
     er_plot_add_data(style = custom_overlay_builder)
 
-  expect_identical(plt_overlay$part$overlay$config$style, custom_overlay_builder)
-  expect_null(plt_overlay$part$data)
+  expect_identical(plt_overlay$layer$overlay$config$style, custom_overlay_builder)
+  expect_null(plt_overlay$layer$data)
   expect_no_error(er_plot_build(plt_overlay))
 
   plt_jitter <- er_test_data |>
@@ -555,8 +555,8 @@ test_that("er_plot_add_data() accepts a custom style for both the overlay and pa
     er_plot_add_model(er_test_mod1) |>
     er_plot_add_data(style = custom_panel_builder)
 
-  expect_identical(plt_jitter$part$data$config$style, custom_panel_builder)
-  expect_null(plt_jitter$part$overlay)
+  expect_identical(plt_jitter$layer$data$config$style, custom_panel_builder)
+  expect_null(plt_jitter$layer$overlay)
   expect_no_error(er_plot_build(plt_jitter))
 })
 
@@ -583,7 +583,7 @@ test_that("er_plot_add_groups() accepts a custom style, applied to every groupin
     er_plot_add_model(er_test_mod1) |>
     er_plot_add_groups(c(aucss, sex), style = custom_group_builder)
 
-  expect_true(all(purrr::map_lgl(plt$part$group$config, \(cfg) identical(cfg$style, custom_group_builder))))
+  expect_true(all(purrr::map_lgl(plt$layer$group$config, \(cfg) identical(cfg$style, custom_group_builder))))
   expect_no_error(er_plot_build(plt))
 })
 

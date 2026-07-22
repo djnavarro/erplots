@@ -8,7 +8,7 @@
   zero_pt <- ggplot2::unit(0, "pt")
 
   base_mar <- margins
-  panel_position <- object$part$data$config$panel_position %||% character(0)
+  panel_position <- object$layer$data$config$panel_position %||% character(0)
 
   for (panel_name in names(p$data)) {
     panel_mar <- margins
@@ -55,7 +55,7 @@
   # and ggplot2 errors) -- so if `fill` is present at all alongside a
   # density-tagged overlay builder, it's safe to assume the density is
   # the sole source and label it accordingly rather than as strata.
-  overlay_style <- object$part$overlay$config$style
+  overlay_style <- object$layer$overlay$config$style
   fill_is_density <- identical(.style_fill_role(overlay_style), "density")
 
   if ("fill" %in% ll) {
@@ -73,7 +73,7 @@
   # `axes = "collect"` merges across all stacked panels (see
   # `er_plot_build()`), so a per-panel y-axis label would visually
   # overlap with the others rather than sit next to its own panel.
-  data_color_role <- object$part$data$config$color_role %||% "strata"
+  data_color_role <- object$layer$data$config$color_role %||% "strata"
   data_color_label <- if (identical(data_color_role, "response")) {
     object$response$label
   } else {
@@ -102,11 +102,11 @@
       # for counts (with group levels shown via facet strips), and tags
       # itself with `er_style_tag(builder, y_role = "count")` to say so --
       # see `er_style_group_histogram()`.
-      group_style <- object$part$group$config[[g]]$style
+      group_style <- object$layer$group$config[[g]]$style
       y_label <- if (identical(.style_y_role(group_style), "count")) {
         "Count"
       } else {
-        object$part$group$config[[g]]$y$label
+        object$layer$group$config[[g]]$y$label
       }
       p$group[[g]] <- p$group[[g]] + ggplot2::labs(
         x = object$exposure$label,
@@ -133,7 +133,7 @@
   ind <- 0L
 
   data_panels <- names(object$plot$data)
-  panel_position <- object$part$data$config$panel_position %||% character(0)
+  panel_position <- object$layer$data$config$panel_position %||% character(0)
   above_panels <- data_panels[panel_position[data_panels] == "above"]
   below_panels <- data_panels[panel_position[data_panels] == "below"]
 
@@ -179,7 +179,7 @@
   }
   
   if (!is.null(object$plot$group)) {
-    group_n <- purrr::map_dbl(object$part$group$config, \(vv) vv$n_groups)
+    group_n <- purrr::map_dbl(object$layer$group$config, \(vv) vv$n_groups)
     group_prop <- group_n / sum(group_n)
     for(g in seq_along(object$plot$group)) {
       ind <- ind + 1L
@@ -199,7 +199,7 @@
 
 .polish_legends <- function(object, composition) {
   if (is.null(object$strata$name)) return(composition)
-  has_strata <- purrr::map_lgl(object$part, \(x) x$stratify %||% FALSE)
+  has_strata <- purrr::map_lgl(object$layer, \(x) x$stratify %||% FALSE)
 
   # the data layer's `stratify` flag drives per-stratum faceting (not a
   # shared color legend) whenever its color channel is already spoken
@@ -207,7 +207,7 @@
   # count response) -- see `PLAN.md`'s "Stratification vs. the data
   # layer's color channel". Exclude it from strata-legend deduplication
   # in that case so each stratum panel keeps its own response colorbar.
-  if (!is.null(object$part$data) && identical(object$part$data$config$color_role, "response")) {
+  if (!is.null(object$layer$data) && identical(object$layer$data$config$color_role, "response")) {
     has_strata["data"] <- FALSE
   }
 

@@ -13,7 +13,7 @@ erplots draws exposure-response plots from *any* model that implements
 [er_model_interface]. This article uses a Poisson model fitted with
 erglm to cover count-response specifics -- most importantly, the
 `response_type = "count"` declaration and when it matters. The model and
-group components work identically for every response type, so this
+group layers work identically for every response type, so this
 article only shows their default usage and links to the
 [binary responses](plot-binary.html) article for the builder-swapping
 detail (spaghetti plots, violin plots).
@@ -47,11 +47,11 @@ erglm_data |>
 
 ## Stratification
 
-Stratification adds colour across all components, and requires a model
+Stratification adds colour across all layers, and requires a model
 that includes the stratification variable as a term. See the
 [binary responses](plot-binary.html#stratification) article for a fuller
 worked example, including how to suppress stratification for specific
-components with `keep_strata = FALSE`.
+layers with `keep_strata = FALSE`.
 
 ```{r stratification-1}
 mod_poisson_sex <- erglm_model(
@@ -66,12 +66,12 @@ erglm_data |>
   plot()
 ```
 
-## Model component
+## Model layer
 
 The model layer doesn't look at `response_type` at all -- it only
 consumes [er_predict()]/[er_simulate()] output -- so it works exactly the
 same way as for a binary response. See the
-[binary responses](plot-binary.html#model-component) article for
+[binary responses](plot-binary.html#model-layer) article for
 `er_style_model_spaghetti()`; the default builder is used here:
 
 ```{r model-1}
@@ -82,7 +82,7 @@ erglm_data |>
   plot()
 ```
 
-## Quantile component
+## Quantile layer
 
 Under auto-detection, a count response is summarised the same way a
 continuous response is -- bin mean plus t-interval:
@@ -146,7 +146,7 @@ low_count_data |>
   ggplot2::coord_cartesian(ylim = c(-0.5, 1.5), xlim = c(-50, 800))
 ```
 
-## Data component
+## Data layer
 
 `er_plot_add_data()` adds the raw observations at their true `(exposure,
 response)` coordinates via `er_style_data_overlay()`, the default and only
@@ -168,12 +168,12 @@ article) is binary-only. If you need a panel-based builder here, you can
 write a custom one and tag it with `er_style_tag(fn, layout = "panel")` -- see
 `design.Rmd`'s "Extending erplots" section.
 
-## Group component
+## Group layer
 
 The group layer doesn't look at `response_type` at all -- it only
 consumes the exposure variable -- so it works exactly the same way as for
 a binary response. See the
-[binary responses](plot-binary.html#group-component) article for
+[binary responses](plot-binary.html#group-layer) article for
 multiple grouping variables and `er_style_group_violin()`; the default
 builder and a single grouping variable are shown here:
 

@@ -12,8 +12,8 @@ test_that("er_style_quantile_errorbar returns 3 geoms", {
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$quantile$config,
-    stratify = p1$part$quantile$stratify,
+    config = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -21,8 +21,8 @@ test_that("er_style_quantile_errorbar returns 3 geoms", {
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$quantile$config,
-    stratify = p2$part$quantile$stratify,
+    config = p2$layer$quantile$config,
+    stratify = p2$layer$quantile$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -54,8 +54,8 @@ test_that("er_style_quantile_errorbar dodges stratified points/bars/labels horiz
 
   args2 <- list(
     data = p2$data,
-    config = p2$part$quantile$config,
-    stratify = p2$part$quantile$stratify,
+    config = p2$layer$quantile$config,
+    stratify = p2$layer$quantile$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -69,7 +69,7 @@ test_that("er_style_quantile_errorbar dodges stratified points/bars/labels horiz
   label_data <- p2_out[[3]]$data
 
   # a new x_dodge column is used for the plotted x position; the
-  # underlying x_mid (from .part_quantile()'s config$summary) is untouched
+  # underlying x_mid (from .layer_quantile()'s config$summary) is untouched
   expect_true("x_dodge" %in% names(point_data))
   expect_true("x_dodge" %in% names(bar_data))
   expect_true("x_dodge" %in% names(label_data))
@@ -85,7 +85,7 @@ test_that("er_style_quantile_errorbar dodges stratified points/bars/labels horiz
   # zero across strata) and doesn't touch y at all
   offsets <- point_data$x_dodge - point_data$x_mid
   expect_equal(mean(offsets), 0, tolerance = 1e-8)
-  expect_equal(point_data$y_mid, p2$part$quantile$config$summary$y_mid)
+  expect_equal(point_data$y_mid, p2$layer$quantile$config$summary$y_mid)
 })
 
 test_that("er_style_quantile_errorbar leaves x unmodified (no x_dodge column) when unstratified", {
@@ -95,8 +95,8 @@ test_that("er_style_quantile_errorbar leaves x unmodified (no x_dodge column) wh
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$quantile$config,
-    stratify = p1$part$quantile$stratify,
+    config = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -121,8 +121,8 @@ test_that("er_style_quantile_errorbar returns 3 geoms for a continuous response"
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$quantile$config,
-    stratify = p1$part$quantile$stratify,
+    config = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -130,8 +130,8 @@ test_that("er_style_quantile_errorbar returns 3 geoms for a continuous response"
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$quantile$config,
-    stratify = p2$part$quantile$stratify,
+    config = p2$layer$quantile$config,
+    stratify = p2$layer$quantile$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -166,13 +166,13 @@ test_that("er_style_quantile_pointrange returns 2 geoms", {
   p1 <- p1 |> er_plot_add_quantiles(style = er_style_quantile_pointrange)
   p2 <- p2 |> er_plot_add_quantiles(style = er_style_quantile_pointrange)
 
-  expect_identical(p1$part$quantile$config$style, er_style_quantile_pointrange)
-  expect_identical(p2$part$quantile$config$style, er_style_quantile_pointrange)
+  expect_identical(p1$layer$quantile$config$style, er_style_quantile_pointrange)
+  expect_identical(p2$layer$quantile$config$style, er_style_quantile_pointrange)
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$quantile$config,
-    stratify = p1$part$quantile$stratify,
+    config = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -180,8 +180,8 @@ test_that("er_style_quantile_pointrange returns 2 geoms", {
   )
   args2 <- list(
     data = p2$data,
-    config = p2$part$quantile$config,
-    stratify = p2$part$quantile$stratify,
+    config = p2$layer$quantile$config,
+    stratify = p2$layer$quantile$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -216,12 +216,12 @@ test_that("er_plot_add_quantiles() builds and renders with style = er_style_quan
 })
 
 
-test_that(".part_quantile() stores interior quantile breaks in config$breaks", {
+test_that(".layer_quantile() stores interior quantile breaks in config$breaks", {
   skip_if_not_installed("erglm")
 
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
 
-  breaks <- p1$part$quantile$config$breaks
+  breaks <- p1$layer$quantile$config$breaks
   expect_length(breaks, 5)
   expect_true(all(diff(breaks) >= 0))
 })
@@ -233,8 +233,8 @@ test_that("er_style_quantile_errorbar_vlines adds a geom_vline at interior break
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$quantile$config,
-    stratify = p1$part$quantile$stratify,
+    config = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -249,7 +249,7 @@ test_that("er_style_quantile_errorbar_vlines adds a geom_vline at interior break
   expect_true(inherits(p1_out[[1]], "LayerInstance"))
   expect_s3_class(p1_out[[1]]$geom, "GeomVline")
 
-  breaks <- p1$part$quantile$config$breaks
+  breaks <- p1$layer$quantile$config$breaks
   interior_breaks <- breaks[-c(1, length(breaks))]
   expect_equal(p1_out[[1]]$data$x, interior_breaks)
 })
@@ -261,8 +261,8 @@ test_that("er_style_quantile_pointrange_vlines adds a geom_vline at interior bre
 
   args1 <- list(
     data = p1$data,
-    config = p1$part$quantile$config,
-    stratify = p1$part$quantile$stratify,
+    config = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,

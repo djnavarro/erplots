@@ -10,8 +10,8 @@ test_that("er_style_data_boxjitter returns box + jitter + coord + yscale", {
   p1 <- p1 |> er_plot_add_data(style = er_style_data_boxjitter)
   p2 <- p2 |> er_plot_add_data(style = er_style_data_boxjitter)
 
-  config1 <- p1$part$data$config
-  config2 <- p2$part$data$config
+  config1 <- p1$layer$data$config
+  config2 <- p2$layer$data$config
 
   config1$panel <- "upper"
   config2$panel <- "upper"
@@ -19,7 +19,7 @@ test_that("er_style_data_boxjitter returns box + jitter + coord + yscale", {
   args1 <- list(
     data = p1$data,
     config = config1,
-    stratify = p1$part$data$stratify,
+    stratify = p1$layer$data$stratify,
     exposure = p1$exposure,
     response = p1$response,
     strata = p1$strata,
@@ -28,7 +28,7 @@ test_that("er_style_data_boxjitter returns box + jitter + coord + yscale", {
   args2 <- list(
     data = p2$data,
     config = config2,
-    stratify = p2$part$data$stratify,
+    stratify = p2$layer$data$stratify,
     exposure = p2$exposure,
     response = p2$response,
     strata = p2$strata,
@@ -77,8 +77,8 @@ test_that("er_style_data_overlay returns a single geom, jittered only for a bina
   args <- function(p) {
     list(
       data = p$data,
-      config = p$part$overlay$config,
-      stratify = p$part$overlay$stratify,
+      config = p$layer$overlay$config,
+      stratify = p$layer$overlay$stratify,
       exposure = p$exposure,
       response = p$response,
       strata = p$strata,
@@ -123,8 +123,8 @@ test_that("er_style_data_hex returns a single hex geom for any response type", {
   args <- function(p) {
     list(
       data = p$data,
-      config = p$part$overlay$config,
-      stratify = p$part$overlay$stratify,
+      config = p$layer$overlay$config,
+      stratify = p$layer$overlay$stratify,
       exposure = p$exposure,
       response = p$response,
       strata = p$strata,
@@ -151,8 +151,8 @@ test_that("er_style_data_hex informs (not warns/errors) that strata aren't encod
 
   args <- list(
     data = p_strat$data,
-    config = p_strat$part$overlay$config,
-    stratify = p_strat$part$overlay$stratify,
+    config = p_strat$layer$overlay$config,
+    stratify = p_strat$layer$overlay$stratify,
     exposure = p_strat$exposure,
     response = p_strat$response,
     strata = p_strat$strata,

@@ -112,7 +112,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
       exposure = .plot_variable(role = "exposure"),
       response = .plot_variable(role = "response"),
       strata = .plot_variable(role = "strata"),
-      part = list(
+      layer = list(
         model    = NULL, 
         quantile = NULL, 
         data     = NULL,
@@ -296,7 +296,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
   .check_style_layer(style, "model", arg = "style")
   .check_style_layer(summary_style, "summary", arg = "summary_style")
 
-  object$part$model <- .part_model(
+  object$layer$model <- .layer_model(
     object = object, 
     model = model,
     stratify = keep_strata, 
@@ -428,7 +428,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
   style <- style %||% er_style_quantile_errorbar
   .check_style_layer(style, "quantile")
 
-  object$part$quantile <- .part_quantile(
+  object$layer$quantile <- .layer_quantile(
     object = object,
     stratify = keep_strata,
     bins = bins,
@@ -457,9 +457,9 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'
 #' `layout` is the one required tag for a data-layer builder:
 #' [er_plot_add_data()] reads it off `style` to decide whether to route
-#' through `.part_overlay()` (`"overlay"`: a single call merged into the
+#' through `.layer_overlay()` (`"overlay"`: a single call merged into the
 #' main panel, at the observations' true `(exposure, response)`
-#' coordinates) or `.part_data()` (`"panel"`: one-or-more panels stacked
+#' coordinates) or `.layer_data()` (`"panel"`: one-or-more panels stacked
 #' below the base plot), *before* it can call the builder -- so the choice
 #' can't be inferred from the builder's return value. Both built-in data
 #' builders ([er_style_data_overlay()], [er_style_data_boxjitter()])
@@ -739,20 +739,20 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
-  # use `[` (not `$`) to clear the other slot -- `object$part$x <- NULL`
+  # use `[` (not `$`) to clear the other slot -- `object$layer$x <- NULL`
   # would remove "x" from the list entirely rather than setting it to
-  # NULL, dropping it from `part_set`/`plot_set` in `print.er_plot()`
+  # NULL, dropping it from `layer_set`/`plot_set` in `print.er_plot()`
   if (layout == "overlay") {
-    object$part$overlay <- .part_overlay(object = object, stratify = keep_strata, style = style)
-    object$part["data"] <- list(NULL)
+    object$layer$overlay <- .layer_overlay(object = object, stratify = keep_strata, style = style)
+    object$layer["data"] <- list(NULL)
   } else {
-    object$part$data <- .part_data(
+    object$layer$data <- .layer_data(
       object = object,
       stratify = keep_strata, 
       panel = panel,
       style = style
     )
-    object$part["overlay"] <- list(NULL)
+    object$layer["overlay"] <- list(NULL)
   }
 
   return(object)  
@@ -831,7 +831,7 @@ er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep
   style <- style %||% er_style_group_boxplot
   .check_style_layer(style, "group")
 
-  new_group <- .part_group(
+  new_group <- .layer_group(
     object = object,
     group_cols = group_cols, 
     stratify = keep_strata, 
@@ -842,20 +842,20 @@ er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep
   # additive: merge into any existing group panels rather than replacing
   # them (`modifyList()` so re-adding the same grouping variable still
   # replaces just that one panel, in insertion order for new names)
-  if (is.null(object$part$group)) {
-    object$part$group <- new_group
+  if (is.null(object$layer$group)) {
+    object$layer$group <- new_group
   } else {
-    object$part$group$config <- utils::modifyList(
-      object$part$group$config, 
+    object$layer$group$config <- utils::modifyList(
+      object$layer$group$config, 
       new_group$config
     )
   }
-  # kept only for `.polish_legends()`'s part-level strata-legend dedup:
+  # kept only for `.polish_legends()`'s layer-level strata-legend dedup:
   # TRUE if *any* group panel (across all `er_plot_add_groups()` calls)
   # is stratified, since per-panel stratification is now read from each
   # group's own `config[[g]]$stratify` (see `.build_group_plot()`)
-  object$part$group$stratify <- any(
-    purrr::map_lgl(object$part$group$config, \(cfg) cfg$stratify)
+  object$layer$group$stratify <- any(
+    purrr::map_lgl(object$layer$group$config, \(cfg) cfg$stratify)
   )
 
   return(object)  
@@ -867,7 +867,7 @@ er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep
 #' @exportS3Method base::print
 print.er_plot <- function(x, ...) {
 
-  part_set <- !purrr::map_lgl(x$part, is.null)
+  layer_set <- !purrr::map_lgl(x$layer, is.null)
   plot_set <- !purrr::map_lgl(x$plot, is.null)
 
   cat("<er_plot>\n")
@@ -876,15 +876,15 @@ print.er_plot <- function(x, ...) {
   cat("    - response:        ", x$response$name  %||% "<none>", "\n", sep = "")
   cat("    - stratification:  ", x$strata$name    %||% "<none>", "\n", sep = "")
   
-  if (any(part_set)) {
-    cat("  plot components:\n")
-    if (part_set["model"])    cat("    - model:           ", paste(class(x$part$model$config$model), collapse = "/"), "\n", sep = "")
-    if (part_set["quantile"]) cat("    - quantile:        ", x$part$quantile$config$n_quantiles, " bins\n", sep = "")
-    if (part_set["data"])     cat("    - data:            ", x$part$data$config$layout, " ", x$part$data$config$panel, "\n", sep = "")
-    if (part_set["overlay"])  cat("    - overlay:         ", if (x$part$overlay$stratify) "stratified" else "unstratified", "\n", sep = "")
-    if (part_set["group"])    cat("    - group:           ", paste(names(x$part$group$config), collapse = ", "), "\n", sep = "")
+  if (any(layer_set)) {
+    cat("  plot layers:\n")
+    if (layer_set["model"])    cat("    - model:           ", paste(class(x$layer$model$config$model), collapse = "/"), "\n", sep = "")
+    if (layer_set["quantile"]) cat("    - quantile:        ", x$layer$quantile$config$n_quantiles, " bins\n", sep = "")
+    if (layer_set["data"])     cat("    - data:            ", x$layer$data$config$layout, " ", x$layer$data$config$panel, "\n", sep = "")
+    if (layer_set["overlay"])  cat("    - overlay:         ", if (x$layer$overlay$stratify) "stratified" else "unstratified", "\n", sep = "")
+    if (layer_set["group"])    cat("    - group:           ", paste(names(x$layer$group$config), collapse = ", "), "\n", sep = "")
   } else {
-    cat("  plot components: <none>\n")
+    cat("  plot layers: <none>\n")
   }
 
   if (any(plot_set)) {
@@ -931,12 +931,12 @@ er_plot_build <- function(object) {
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   
   # build
-  if (!is.null(object$part$model) | !is.null(object$part$quantile) | !is.null(object$part$overlay)) {
+  if (!is.null(object$layer$model) | !is.null(object$layer$quantile) | !is.null(object$layer$overlay)) {
     object$plot$base <- .build_base_plot(object)
   }
-  if (!is.null(object$part$data)) object$plot$data <- .build_data_plot(object)
-  if (!is.null(object$part$group)) object$plot$group <- .build_group_plot(object)
-  if (!is.null(object$part$overlay)) {
+  if (!is.null(object$layer$data)) object$plot$data <- .build_data_plot(object)
+  if (!is.null(object$layer$group)) object$plot$group <- .build_group_plot(object)
+  if (!is.null(object$layer$overlay)) {
     object$plot$base <- object$plot$base + .build_overlay_geoms(object)
   }
 

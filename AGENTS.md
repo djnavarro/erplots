@@ -51,7 +51,7 @@ from one family clears the other slot. There is no built-in
 were both removed once review found neither earned its keep alongside
 `er_style_data_overlay()`/`er_style_data_boxjitter()` (see PLAN.md); a custom
 `"panel"`-layout builder for continuous/count remains possible via
-`er_style_tag()`, since `.part_data()`'s response-type dispatch was left in
+`er_style_tag()`, since `.layer_data()`'s response-type dispatch was left in
 place.
 
 `er_style_data_hex()` is a second `"overlay"`-layout data builder alongside
@@ -155,7 +155,7 @@ additions stay consistent:
   `ci_t()` (was `t_interval()`), `ci_poisson()` (was
   `poisson_interval()`). Chosen over `confint_*()` to avoid echoing
   `stats::confint()`'s very different calling convention.
-- Internal (dot-prefixed) helpers were mostly left alone: `.part_*()`,
+- Internal (dot-prefixed) helpers were mostly left alone: `.layer_*()`,
   `.polish_*()`, `.get_*()`/`.set_*()` keep their existing names, and the
   internal `.build_*()` assembly helpers in `R/er-plot-build.R` (e.g.
   `.build_model_geoms()`) no longer risk being confused with the public
@@ -214,6 +214,35 @@ errors/warnings/notes), `devtools::test()` (490 passing), and a full
 render of all five `vignettes/articles/*.Rmd` files via
 `rmarkdown::render()`.
 
+**The `part`/`component` -> `layer` consolidation.** The constituent
+pieces of an `er_plot` (model, quantile, data/overlay, group) had drifted
+into three overlapping vocabularies: "layer" (the dominant, user-facing
+term -- the `er_plot_add_*()` verbs, the singleton/additive rule, and
+`er_style_tag()`'s own `layer` argument all already used it), "part"
+(the purely internal storage/naming: `object$part`, the `.part_*()`
+assembly functions in what was `R/er-plot-part.R`), and "component"
+(stray prose/section headings in the worked-example vignettes and one
+`print.er_plot()` line, never a deliberate third choice). A review
+consolidated everything onto "layer": `object$part` -> `object$layer`;
+`.part_model()`/`.part_quantile()`/`.part_data()`/`.part_overlay()`/
+`.part_group()` -> `.layer_model()`/`.layer_quantile()`/`.layer_data()`/
+`.layer_overlay()`/`.layer_group()` (and the file itself,
+`R/er-plot-part.R` -> `R/er-plot-layer.R`, plus its test file,
+`test-er-plot-part.R` -> `test-er-plot-layer.R`); `print.er_plot()`'s
+`"  plot components:"` output -> `"  plot layers:"`; and every stray
+"component" heading/cross-reference in `plot-binary.Rmd`/
+`plot-continuous.Rmd`/`plot-count.Rmd` (`## Model component` etc. ->
+`## Model layer` etc., including anchor links) and `design.Rmd` ->
+"layer". `er_style_tag()`'s own `layer` argument/`"er_style_layer"`
+attribute/`.style_layer()`/`.check_style_layer()` needed no change --
+that vocabulary was already correct. "Part"/"component" survive only as
+ordinary English prose where they don't name this concept (e.g. "a
+public part of the API", ggplot2's own "theme components" in a `@param`
+doc). Straight rename, no deprecation shim, per the usual rationale.
+Verified clean afterward: `devtools::document()`, `devtools::test()`
+(490 passing), `devtools::check()` (0/0/0), and a full re-render of all
+five `vignettes/articles/*.Rmd` files plus `README.Rmd`.
+
 ## Extensibility: `style` is the sole mechanism (no separate layout argument)
 
 Every `er_plot_add_*()` function (`er_plot_add_model()`,
@@ -249,13 +278,13 @@ helper that attaches an `"er_style_layout"` attribute (one of four
 independent, optional attributes `er_style_tag()` can set in a single
 call -- see below). `er_plot_add_data()` reads this tag off
 whatever `style` it's given (internal `.style_layout()`) to decide
-whether to route through `.part_overlay()` or `.part_data()`. Both
+whether to route through `.layer_overlay()` or `.layer_data()`. Both
 built-in data builders already carry this tag (`er_style_data_overlay()`:
 `"overlay"`; `er_style_data_boxjitter()`: `"panel"`); a
 custom data-layer builder that omits it errors immediately and
 informatively, rather than silently landing in the wrong structural
 slot. This was chosen over encoding layout in a builder's *return
-value* because `.part_overlay()`/`.part_data()` build different
+value* because `.layer_overlay()`/`.layer_data()` build different
 `config` shapes before any builder runs, so the layout has to be
 knowable without calling the builder -- see PLAN.md's "removing
 `style`, making `builder` the sole mechanism" section (predating the
@@ -307,7 +336,7 @@ single vline geom to the base builder's own return value), not
 independent copies, so they can't drift out of sync with it.
 `cut_exposure_quantile()` attaches the `n + 1` quantile cutpoints it
 computes (excluding placebo) as a `"breaks"` attribute on its returned
-factor; `.part_quantile()` reads this into `config$breaks`, which the
+factor; `.layer_quantile()` reads this into `config$breaks`, which the
 `_vlines` builders (via the internal `.quantile_boundary_vlines()`
 helper) consume. `er_builder_quantile_bar()` (bar + error bar) was
 removed -- on review it wasn't an idiom that shows up in real
@@ -393,7 +422,7 @@ be a section inside `design.Rmd`, but was split out into its own
 article because it needed to grow -- the original version's illustrative
 `build_quantile_crossbar()` example didn't explain what `config` (its
 second argument) actually *was*, so `extending.Rmd` now leads with a
-table of what each `.part_*()` function's `config` contains (e.g.
+table of what each `.layer_*()` function's `config` contains (e.g.
 `config$summary`'s columns for the quantile layer), inspects it
 interactively before writing the crossbar builder, and then adds a
 section on `er_style_tag()`'s four independent arguments
@@ -410,7 +439,7 @@ pointer into `extending.Rmd`. `_pkgdown.yml`'s `articles` list was
 updated to include `articles/extending` after `articles/design`. Keep
 this split in mind if `design.Rmd`'s grammar changes in a way that
 affects builders (e.g. a new builder-metadata helper, or a change to
-what a `.part_*()` function puts in `config`) -- that detail belongs in
+what a `.layer_*()` function puts in `config`) -- that detail belongs in
 `extending.Rmd`, not back in `design.Rmd`. All five articles were
 re-rendered end-to-end via `rmarkdown::render()` after the
 `style`/`er_style_*()` rename (see "Naming scheme" above) with no
@@ -429,8 +458,8 @@ errors and no leftover old-identifier references in the output.
   `.style_y_role()`, `.style_layer()`, `.check_style_layer()`). Each
   layer function (except `er_plot()` itself) has its own dedicated Rd
   topic (no shared `@rdname`).
-- `R/er-plot-part.R` -- internal `.part_*()` functions that assemble the
-  configuration for each plot component (this is where `er_predict()` /
+- `R/er-plot-layer.R` -- internal `.layer_*()` functions that assemble the
+  configuration for each plot layer (this is where `er_predict()` /
   `er_simulate()` / `er_summary()` get called on the user-supplied model).
 - `R/er-plot-build.R`, `R/er-plot-compose.R` -- internal plotting/layout
   machinery that turns parts into ggplot2 objects and composes them with

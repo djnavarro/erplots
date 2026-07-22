@@ -29,7 +29,7 @@ added to a plot that already has a coord that sets the axis limits
 (panel-based, e.g. \code{er_style_data_boxjitter()}) and "group" plots, the
 plot object does not yet have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That
-is, since all component plots use the exposure variable for the
+is, since all layer plots use the exposure variable for the
 x-axis, they should use the values stored in \code{exposure$limits} tp
 set the x-axis limits.
 }
@@ -73,7 +73,7 @@ Each \verb{er_plot_add_*()} function takes a \code{style} argument (and
 defaults to one built-in \verb{er_style_*()} function and can be set to any
 other -- built-in or custom -- matching the standard signature: a
 custom builder can be plugged in without forking the package or
-reaching into \code{object$part} internals. For the data layer specifically,
+reaching into \code{object$layer} internals. For the data layer specifically,
 \code{style} also has to declare which \emph{structural} family it belongs to --
 a single call merged into the main panel, or one or more panels
 stacked below the base plot -- via \code{\link[=er_style_tag]{er_style_tag()}}, since
@@ -87,7 +87,7 @@ a quantile crossbar, and a data-overlay density, respectively).
 A custom builder receives the same pre-computed \code{config} a built-in
 builder would have received for that layer (e.g. \code{config$predictions}
 for \code{model}, \code{config$summary} for \code{quantile}) -- it does not need to
-recompute anything the corresponding \verb{.part_*()} function already
+recompute anything the corresponding \verb{.layer_*()} function already
 derived from \code{data}/\code{exposure}/\code{response}/\code{strata}; it only needs to
 turn that \code{config} into ggplot2 layers.
 
@@ -106,7 +106,7 @@ unchanged. All built-in builders carry this tag.
 
 All of the builders above feed a \strong{singleton} layer: \code{model},
 \code{summary}, \code{quantile}, \code{data}, and \code{overlay} each occupy a single named
-slot (\code{object$part$model}, \code{object$part$data}, etc.), so calling the
+slot (\code{object$layer$model}, \code{object$layer$data}, etc.), so calling the
 corresponding \verb{er_plot_add_*()} function again overwrites the slot
 rather than combining builders. \code{group} (\code{er_style_group_boxplot()}/
 \code{er_style_group_violin()}) is the one \strong{additive} exception -- each call
@@ -120,7 +120,7 @@ The \code{data} slot's default, \code{er_style_data_overlay()}, needs no
 \code{color_role} tag: its color aesthetic (when stratified) is always
 strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. \code{config$color_role}
-(set by \code{.part_data()}, consulted by \code{.polish_labels()}/
+(set by \code{.layer_data()}, consulted by \code{.polish_labels()}/
 \code{.polish_legends()} in \code{R/er-plot-compose.R}) matters for the
 "panel"-layout family instead, where it's \code{"strata"} for a binary
 response (as used by the built-in \code{er_style_data_boxjitter()}, whose
