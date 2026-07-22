@@ -93,8 +93,8 @@ should be updated together; see the note at the end.</p>
 <p><code><a href="../reference/er_plot.html">er_plot()</a></code> creates an empty object of class
 <code>er_plot</code>, storing the data and the plot’s
 exposure/response/stratification variables. You then pipe it through one
-or more <em>layer</em> functions, each of which adds one visual
-component, and finish with <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>/<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> (or
+or more <em>layer</em> functions, each of which adds one visual layer,
+and finish with <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>/<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> (or
 [er_plot_build()] directly):</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
@@ -190,7 +190,7 @@ result rather than combining the two.</p>
 <span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">8</span><span class="op">)</span> <span class="co"># overwrites the bins = 4 call</span></span>
 <span></span>
-<span><span class="va">plt</span><span class="op">$</span><span class="va">part</span><span class="op">$</span><span class="va">quantile</span><span class="op">$</span><span class="va">config</span><span class="op">$</span><span class="va">n_quantiles</span> <span class="co"># 8, not 4</span></span>
+<span><span class="va">plt</span><span class="op">$</span><span class="va">layer</span><span class="op">$</span><span class="va">quantile</span><span class="op">$</span><span class="va">config</span><span class="op">$</span><span class="va">n_quantiles</span> <span class="co"># 8, not 4</span></span>
 <span><span class="co">#&gt; [1] 8</span></span></code></pre></div>
 <p>The group layer is the one exception: it’s <strong>additive</strong>.
 Each call adds another panel alongside any already added, rather than
@@ -201,7 +201,7 @@ replacing them:</p>
 <span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">treatment</span><span class="op">)</span> <span class="co"># adds a second panel, doesn't replace the first</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">plt</span><span class="op">$</span><span class="va">part</span><span class="op">$</span><span class="va">group</span><span class="op">$</span><span class="va">config</span><span class="op">)</span> <span class="co"># both grouping variables are still there</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">plt</span><span class="op">$</span><span class="va">layer</span><span class="op">$</span><span class="va">group</span><span class="op">$</span><span class="va">config</span><span class="op">)</span> <span class="co"># both grouping variables are still there</span></span>
 <span><span class="co">#&gt; [1] ".aucss_quantile" "treatment"</span></span></code></pre></div>
 <p>This is a deliberate design choice, not an oversight: there is only
 one “the model” and one “the quantile summary” to show per plot, but
@@ -261,8 +261,8 @@ takes precedence” that motivated the general rule. See
 design history, and [er_plot_add_data()] for the full breakdown.</li>
 </ul>
 <p>A <code>config$color_role</code> tag (<code>"strata"</code> or
-<code>"response"</code>, set by <code>.part_data()</code>) records which
-meaning applies for a given data-layer build, so the composition
+<code>"response"</code>, set by <code>.layer_data()</code>) records
+which meaning applies for a given data-layer build, so the composition
 machinery (<code>.polish_labels()</code>/
 <code>.polish_legends()</code>) knows whether to treat a builder’s
 legend as the shared strata legend or a standalone response
@@ -314,10 +314,9 @@ it’s logical or confined to <code>{0, 1}</code>, and
 auto-detects as <code>"continuous"</code> and is summarised as an
 approximately-continuous quantity unless
 <code>response_type = "count"</code> is declared explicitly. See
-[er_plot_add_quantiles()] for the full rationale and the <a href="plot-count.html">count responses</a> article’s “Quantile
-component” section for a worked example, including a case where the
-choice between the t-interval and exact Poisson interval visibly
-matters.</p>
+[er_plot_add_quantiles()] for the full rationale and the <a href="plot-count.html">count responses</a> article’s “Quantile layer”
+section for a worked example, including a case where the choice between
+the t-interval and exact Poisson interval visibly matters.</p>
 <p>The data layer doesn’t compute a summary statistic at all – it just
 plots raw observations – so <code>response_type</code> instead changes
 <em>how</em> it’s drawn: <code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code> (the
@@ -341,7 +340,7 @@ That signature is a documented, public part of the API (see
 [er_style()]), each layer’s <code>style</code> defaults to one built-in
 <code>er_style_*()</code> function, and it can be set to any other
 function matching the same signature – no need to fork the package or
-reach into <code>object$part</code> internals. For the data layer
+reach into <code>object$layer</code> internals. For the data layer
 specifically, a custom builder must additionally declare which
 <em>structural</em> family it belongs to via [er_style_tag()].</p>
 <p>Writing a custom builder in detail – including what

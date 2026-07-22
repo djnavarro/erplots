@@ -70,9 +70,9 @@ were requested attached
 `layout` is the one required tag for a data-layer builder:
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 reads it off `style` to decide whether to route through
-`.part_overlay()` (`"overlay"`: a single call merged into the main
+`.layer_overlay()` (`"overlay"`: a single call merged into the main
 panel, at the observations' true `(exposure, response)` coordinates) or
-`.part_data()` (`"panel"`: one-or-more panels stacked below the base
+`.layer_data()` (`"panel"`: one-or-more panels stacked below the base
 plot), *before* it can call the builder – so the choice can't be
 inferred from the builder's return value. Both built-in data builders
 ([`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),

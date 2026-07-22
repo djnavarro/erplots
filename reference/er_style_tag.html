@@ -134,9 +134,9 @@ attributes were requested attached</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>layout</code> is the one required tag for a data-layer builder:
 <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> reads it off <code>style</code> to decide whether to route
-through <code>.part_overlay()</code> (<code>"overlay"</code>: a single call merged into the
+through <code>.layer_overlay()</code> (<code>"overlay"</code>: a single call merged into the
 main panel, at the observations' true <code>(exposure, response)</code>
-coordinates) or <code>.part_data()</code> (<code>"panel"</code>: one-or-more panels stacked
+coordinates) or <code>.layer_data()</code> (<code>"panel"</code>: one-or-more panels stacked
 below the base plot), <em>before</em> it can call the builder – so the choice
 can't be inferred from the builder's return value. Both built-in data
 builders (<code><a href="er_style_data.html">er_style_data_overlay()</a></code>, <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code>)

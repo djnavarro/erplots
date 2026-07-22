@@ -80,8 +80,8 @@
 <p>erplots draws exposure-response plots from <em>any</em> model that
 implements [er_model_interface]. This article uses a gaussian model
 fitted with erglm to cover continuous-response specifics; the model and
-group components work identically for every response type, so this
-article only shows their default usage and links to the <a href="plot-binary.html">binary responses</a> article for the
+group layers work identically for every response type, so this article
+only shows their default usage and links to the <a href="plot-binary.html">binary responses</a> article for the
 builder-swapping detail (spaghetti plots, violin plots).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
@@ -111,10 +111,10 @@ you can override the detection with <code>response_type</code>.
 <div class="section level2">
 <h2 id="stratification">Stratification<a class="anchor" aria-label="anchor" href="#stratification"></a>
 </h2>
-<p>Stratification adds colour across all components, and requires a
-model that includes the stratification variable as a term. See the <a href="plot-binary.html#stratification">binary responses</a> article for
+<p>Stratification adds colour across all layers, and requires a model
+that includes the stratification variable as a term. See the <a href="plot-binary.html#stratification">binary responses</a> article for
 a fuller worked example, including how to suppress stratification for
-specific components with <code>keep_strata = FALSE</code>.</p>
+specific layers with <code>keep_strata = FALSE</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_gaussian_sex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span></span>
 <span>  <span class="va">biomarker_change</span> <span class="op">~</span> <span class="va">aucss</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -129,11 +129,11 @@ specific components with <code>keep_strata = FALSE</code>.</p>
 <p><img src="plot-continuous_files/figure-html/stratification-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
-<h2 id="model-component">Model component<a class="anchor" aria-label="anchor" href="#model-component"></a>
+<h2 id="model-layer">Model layer<a class="anchor" aria-label="anchor" href="#model-layer"></a>
 </h2>
 <p>The model layer doesn’t look at <code>response_type</code> at all –
 it only consumes [er_predict()]/[er_simulate()] output – so it works
-exactly the same way as for a binary response. See the <a href="plot-binary.html#model-component">binary responses</a> article for
+exactly the same way as for a binary response. See the <a href="plot-binary.html#model-layer">binary responses</a> article for
 <code><a href="../reference/er_style_model.html">er_style_model_spaghetti()</a></code> and the parameter-uncertainty
 rationale behind it; the default builder is used here:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -145,7 +145,7 @@ rationale behind it; the default builder is used here:</p>
 <p><img src="plot-continuous_files/figure-html/model-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
-<h2 id="quantile-component">Quantile component<a class="anchor" aria-label="anchor" href="#quantile-component"></a>
+<h2 id="quantile-layer">Quantile layer<a class="anchor" aria-label="anchor" href="#quantile-layer"></a>
 </h2>
 <p>For a continuous response, each exposure-quantile bin is summarised
 by its <strong>mean</strong> with a <strong>t-interval</strong>, rather
@@ -164,7 +164,7 @@ t-interval approximation can misbehave (a negative lower bound), and the
 <code>response_type = "count"</code> declaration that fixes it.</p>
 </div>
 <div class="section level2">
-<h2 id="data-component">Data component<a class="anchor" aria-label="anchor" href="#data-component"></a>
+<h2 id="data-layer">Data layer<a class="anchor" aria-label="anchor" href="#data-layer"></a>
 </h2>
 <p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> adds the raw observations at their
 true <code>(exposure, response)</code> coordinates via
@@ -187,11 +187,11 @@ tag it with <code>er_style_tag(fn, layout = "panel")</code> – see
 <code>design.Rmd</code>’s “Extending erplots” section.</p>
 </div>
 <div class="section level2">
-<h2 id="group-component">Group component<a class="anchor" aria-label="anchor" href="#group-component"></a>
+<h2 id="group-layer">Group layer<a class="anchor" aria-label="anchor" href="#group-layer"></a>
 </h2>
 <p>The group layer doesn’t look at <code>response_type</code> at all –
 it only consumes the exposure variable – so it works exactly the same
-way as for a binary response. See the <a href="plot-binary.html#group-component">binary responses</a> article for
+way as for a binary response. See the <a href="plot-binary.html#group-layer">binary responses</a> article for
 multiple grouping variables and <code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code>;
 the default builder and a single grouping variable are shown here:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">

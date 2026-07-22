@@ -6,7 +6,7 @@ fitted with erglm, but the plotting code itself has no knowledge of
 [`glm()`](https://rdrr.io/r/stats/glm.html). It’s the most detailed of
 the three response-type articles (binary/continuous/count); the
 continuous and count articles link back here for the model and group
-components, which work identically regardless of response type.
+layers, which work identically regardless of response type.
 
 ``` r
 
@@ -39,7 +39,7 @@ erglm_data |>
 
 ![](plot-binary_files/figure-html/basic-plot-1-1.png)
 
-Adding extra components
+Adding extra layers
 
 ``` r
 
@@ -56,8 +56,8 @@ erglm_data |>
 
 ## Stratification
 
-Stratification adds colour across all components. This requires a model
-that includes the stratification variable as a term:
+Stratification adds colour across all layers. This requires a model that
+includes the stratification variable as a term:
 
 ``` r
 
@@ -77,7 +77,7 @@ erglm_data |>
 
 ![](plot-binary_files/figure-html/stratification-1-1.png)
 
-You can suppress stratification for specific components
+You can suppress stratification for specific layers
 
 ``` r
 
@@ -97,7 +97,7 @@ erglm_data |>
 
 ![](plot-binary_files/figure-html/stratification-2-1.png)
 
-## Model component
+## Model layer
 
 The default builder is
 [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md),
@@ -126,7 +126,7 @@ erglm_data |>
 
 ![](plot-binary_files/figure-html/model-1-1.png)
 
-## Quantile component
+## Quantile layer
 
 You can modify the number of bins:
 
@@ -144,9 +144,9 @@ erglm_data |>
 You can also modify the confidence level for the interval around each
 bin’s summary. For a binary response this is a Clopper-Pearson interval
 for the response *rate*; see the
-[continuous](https://erplots.djnavarro.net/articles/plot-continuous.html#quantile-component)
+[continuous](https://erplots.djnavarro.net/articles/plot-continuous.html#quantile-layer)
 and
-[count](https://erplots.djnavarro.net/articles/plot-count.html#quantile-component)
+[count](https://erplots.djnavarro.net/articles/plot-count.html#quantile-layer)
 articles for how this layer adapts its summary statistic and interval
 method to those response types.
 
@@ -161,7 +161,7 @@ erglm_data |>
 
 ![](plot-binary_files/figure-html/quantile-2-1.png)
 
-## Data component
+## Data layer
 
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 adds the raw observations. By default
@@ -196,9 +196,9 @@ response;
 [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 (raw points at their true `(exposure, response)` coordinates, shown in
 the
-[continuous](https://erplots.djnavarro.net/articles/plot-continuous.html#data-component)
+[continuous](https://erplots.djnavarro.net/articles/plot-continuous.html#data-layer)
 and
-[count](https://erplots.djnavarro.net/articles/plot-count.html#data-component)
+[count](https://erplots.djnavarro.net/articles/plot-count.html#data-layer)
 articles) covers that case there, and a custom `"panel"`-layout builder
 (e.g. a single color-encoded panel) remains possible via
 \[er_style_tag()\] if a project needs one – see
@@ -259,9 +259,9 @@ p_overlay_strat$output | p_boxjitter_strat$output
 
 ![](plot-binary_files/figure-html/data-compare-stratified-1.png)
 
-## Group component
+## Group layer
 
-Multiple grouping variables are allowed. Like the model component, this
+Multiple grouping variables are allowed. Like the model layer, this
 layer doesn’t look at `response_type` at all – it only consumes the
 exposure variable – so everything in this section applies unchanged to
 continuous and count responses too.
@@ -278,7 +278,7 @@ erglm_data |>
 
 ![](plot-binary_files/figure-html/group-1-1.png)
 
-Stratification propagates to the group component:
+Stratification propagates to the group layer:
 
 ``` r
 

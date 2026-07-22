@@ -149,14 +149,14 @@ layer’s own <code>er_style_*()</code> family page
 (<code><a href="../reference/er_style_model.html">?er_style_model</a></code>, <code><a href="../reference/er_style_quantile.html">?er_style_quantile</a></code>,
 etc.).</p>
 <div class="section level3">
-<h3 id="config-is-the-part-that-matters-and-its-already-computed-for-you">
-<code>config</code> is the part that matters, and it’s already
-computed for you<a class="anchor" aria-label="anchor" href="#config-is-the-part-that-matters-and-its-already-computed-for-you"></a>
+<h3 id="config-is-what-matters-and-its-already-computed-for-you">
+<code>config</code> is what matters, and it’s already computed for
+you<a class="anchor" aria-label="anchor" href="#config-is-what-matters-and-its-already-computed-for-you"></a>
 </h3>
 <p><code>config</code> is where a custom builder actually gets its data
 from, and it is <strong>not</strong> the raw <code>data</code> frame –
-it’s whatever the corresponding internal <code>.part_*()</code> function
-derived from
+it’s whatever the corresponding internal <code>.layer_*()</code>
+function derived from
 <code>data</code>/<code>exposure</code>/<code>response</code>/
 <code>strata</code> before any builder ran. A custom builder’s whole job
 is to turn that already-computed <code>config</code> into ggplot2
@@ -171,14 +171,14 @@ itself. Concretely:</p>
 </colgroup>
 <thead><tr class="header">
 <th>Layer</th>
-<th><code>.part_*()</code></th>
+<th><code>.layer_*()</code></th>
 <th>Key <code>config</code> field</th>
 <th>Contents</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td>Model</td>
-<td><code>.part_model()</code></td>
+<td><code>.layer_model()</code></td>
 <td><code>config$predictions</code></td>
 <td>One row per exposure grid point, with <code>fit_resp</code>,
 <code>ci_lower</code>, <code>ci_upper</code> (from
@@ -186,7 +186,7 @@ itself. Concretely:</p>
 </tr>
 <tr class="even">
 <td>Quantile</td>
-<td><code>.part_quantile()</code></td>
+<td><code>.layer_quantile()</code></td>
 <td><code>config$summary</code></td>
 <td>One row per exposure-quantile bin (× stratum), with
 <code>x_mid</code>, <code>y_mid</code>, <code>ci_lower</code>,
@@ -199,7 +199,7 @@ use to draw bin-boundary separators</td>
 <tr class="odd">
 <td>Data</td>
 <td>
-<code>.part_data()</code>/<code>.part_overlay()</code>
+<code>.layer_data()</code>/<code>.layer_overlay()</code>
 </td>
 <td>(none extra)</td>
 <td>The builder mostly works from <code>data</code> directly, since this
@@ -207,7 +207,7 @@ layer draws raw observations rather than a summary</td>
 </tr>
 <tr class="even">
 <td>Group</td>
-<td><code>.part_group()</code></td>
+<td><code>.layer_group()</code></td>
 <td>
 <code>config[[group_var]]$data</code>,
 <code>config[[group_var]]$counts</code>
@@ -228,7 +228,7 @@ alternatives (and their bin-boundary-annotated <code>_vlines</code>
 variants) all feel like the wrong idiom, and you’d rather draw the
 per-bin summary as a <code>geom_crossbar()</code>. First, look at what
 <code>config$summary</code> actually contains, by building the quantile
-part on its own and inspecting it – this is the step a custom builder’s
+layer on its own and inspecting it – this is the step a custom builder’s
 author does once, by hand, before writing the builder:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
@@ -237,7 +237,7 @@ author does once, by hand, before writing the builder:</p>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">plt</span><span class="op">$</span><span class="va">part</span><span class="op">$</span><span class="va">quantile</span><span class="op">$</span><span class="va">config</span><span class="op">$</span><span class="va">summary</span></span>
+<span><span class="va">plt</span><span class="op">$</span><span class="va">layer</span><span class="op">$</span><span class="va">quantile</span><span class="op">$</span><span class="va">config</span><span class="op">$</span><span class="va">summary</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 12</span></span></span>
 <span><span class="co">#&gt;   exposure_bins strata    n1    n0 x_mid y_mid y_mid_lbl ci_lower ci_upper</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -343,10 +343,10 @@ base plot, the way <code><a href="../reference/er_plot_add_groups.html">er_plot_
 boxplot+jitter design, does).</li>
 </ul>
 <p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> has to decide which of two different
-<code>config</code> shapes to build (<code>.part_overlay()</code>
-vs. <code>.part_data()</code>) <em>before</em> it can call the builder –
-so the layout can’t be inferred from what the builder returns; it has to
-be knowable from the builder alone.
+<code>config</code> shapes to build (<code>.layer_overlay()</code>
+vs. <code>.layer_data()</code>) <em>before</em> it can call the builder
+– so the layout can’t be inferred from what the builder returns; it has
+to be knowable from the builder alone.
 <code>er_style_tag(style, layout = ...)</code> attaches that information
 as an attribute, and is the one tag that’s mandatory for a data-layer
 builder:</p>

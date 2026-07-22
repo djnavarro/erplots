@@ -24,7 +24,7 @@ library(erglm)
 creates an empty object of class `er_plot`, storing the data and the
 plot’s exposure/response/stratification variables. You then pipe it
 through one or more *layer* functions, each of which adds one visual
-component, and finish with
+layer, and finish with
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`print()`](https://rdrr.io/r/base/print.html)
 (or \[er_plot_build()\] directly):
 
@@ -89,7 +89,7 @@ plt <- erglm_data |>
   er_plot_add_quantiles(bins = 4) |>
   er_plot_add_quantiles(bins = 8) # overwrites the bins = 4 call
 
-plt$part$quantile$config$n_quantiles # 8, not 4
+plt$layer$quantile$config$n_quantiles # 8, not 4
 #> [1] 8
 ```
 
@@ -103,7 +103,7 @@ plt <- erglm_data |>
   er_plot_add_groups(aucss) |>
   er_plot_add_groups(treatment) # adds a second panel, doesn't replace the first
 
-names(plt$part$group$config) # both grouping variables are still there
+names(plt$layer$group$config) # both grouping variables are still there
 #> [1] ".aucss_quantile" "treatment"
 ```
 
@@ -169,7 +169,7 @@ belongs to:
   history, and \[er_plot_add_data()\] for the full breakdown.
 
 A `config$color_role` tag (`"strata"` or `"response"`, set by
-`.part_data()`) records which meaning applies for a given data-layer
+`.layer_data()`) records which meaning applies for a given data-layer
 build, so the composition machinery (`.polish_labels()`/
 `.polish_legends()`) knows whether to treat a builder’s legend as the
 shared strata legend or a standalone response colorbar.
@@ -198,7 +198,7 @@ approximately-continuous quantity unless `response_type = "count"` is
 declared explicitly. See \[er_plot_add_quantiles()\] for the full
 rationale and the [count
 responses](https://erplots.djnavarro.net/articles/plot-count.md)
-article’s “Quantile component” section for a worked example, including a
+article’s “Quantile layer” section for a worked example, including a
 case where the choice between the t-interval and exact Poisson interval
 visibly matters.
 
@@ -224,7 +224,7 @@ That signature is a documented, public part of the API (see
 \[er_style()\]), each layer’s `style` defaults to one built-in
 `er_style_*()` function, and it can be set to any other function
 matching the same signature – no need to fork the package or reach into
-`object$part` internals. For the data layer specifically, a custom
+`object$layer` internals. For the data layer specifically, a custom
 builder must additionally declare which *structural* family it belongs
 to via \[er_style_tag()\].
 

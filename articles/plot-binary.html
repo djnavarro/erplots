@@ -82,8 +82,8 @@ implements [er_model_interface]. This article uses a logistic regression
 model fitted with erglm, but the plotting code itself has no knowledge
 of <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code>. It’s the most detailed of the three response-type
 articles (binary/continuous/count); the continuous and count articles
-link back here for the model and group components, which work
-identically regardless of response type.</p>
+link back here for the model and group layers, which work identically
+regardless of response type.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>
@@ -107,7 +107,7 @@ explicitly:</p>
 <span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-binary_files/figure-html/basic-plot-1-1.png" class="r-plt" alt="" width="700"></p>
-<p>Adding extra components</p>
+<p>Adding extra layers</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -121,8 +121,8 @@ explicitly:</p>
 <div class="section level2">
 <h2 id="stratification">Stratification<a class="anchor" aria-label="anchor" href="#stratification"></a>
 </h2>
-<p>Stratification adds colour across all components. This requires a
-model that includes the stratification variable as a term:</p>
+<p>Stratification adds colour across all layers. This requires a model
+that includes the stratification variable as a term:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_strat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -137,7 +137,7 @@ model that includes the stratification variable as a term:</p>
 <span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-binary_files/figure-html/stratification-1-1.png" class="r-plt" alt="" width="700"></p>
-<p>You can suppress stratification for specific components</p>
+<p>You can suppress stratification for specific layers</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span></span>
@@ -154,7 +154,7 @@ model that includes the stratification variable as a term:</p>
 <p><img src="plot-binary_files/figure-html/stratification-2-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
-<h2 id="model-component">Model component<a class="anchor" aria-label="anchor" href="#model-component"></a>
+<h2 id="model-layer">Model layer<a class="anchor" aria-label="anchor" href="#model-layer"></a>
 </h2>
 <p>The default builder is <code><a href="../reference/er_style_model.html">er_style_model_ribbonline()</a></code>, but
 you can also draw spaghetti plots to represent parameter uncertainty
@@ -175,7 +175,7 @@ applies unchanged to continuous and count responses too.</p>
 <p><img src="plot-binary_files/figure-html/model-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
-<h2 id="quantile-component">Quantile component<a class="anchor" aria-label="anchor" href="#quantile-component"></a>
+<h2 id="quantile-layer">Quantile layer<a class="anchor" aria-label="anchor" href="#quantile-layer"></a>
 </h2>
 <p>You can modify the number of bins:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -187,9 +187,9 @@ applies unchanged to continuous and count responses too.</p>
 <p><img src="plot-binary_files/figure-html/quantile-1-1.png" class="r-plt" alt="" width="700"></p>
 <p>You can also modify the confidence level for the interval around each
 bin’s summary. For a binary response this is a Clopper-Pearson interval
-for the response <em>rate</em>; see the <a href="plot-continuous.html#quantile-component">continuous</a> and <a href="plot-count.html#quantile-component">count</a> articles for how
-this layer adapts its summary statistic and interval method to those
-response types.</p>
+for the response <em>rate</em>; see the <a href="plot-continuous.html#quantile-layer">continuous</a> and <a href="plot-count.html#quantile-layer">count</a> articles for how this
+layer adapts its summary statistic and interval method to those response
+types.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -199,7 +199,7 @@ response types.</p>
 <p><img src="plot-binary_files/figure-html/quantile-2-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
-<h2 id="data-component">Data component<a class="anchor" aria-label="anchor" href="#data-component"></a>
+<h2 id="data-layer">Data layer<a class="anchor" aria-label="anchor" href="#data-layer"></a>
 </h2>
 <p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> adds the raw observations. By default
 (<code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>), points are drawn at their true
@@ -228,12 +228,12 @@ the panel shows the exposure <em>distribution</em> conditional on
 response, not just individual points. There is no built-in panel-based
 builder for a continuous/count response;
 <code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code> (raw points at their true
-<code>(exposure, response)</code> coordinates, shown in the <a href="plot-continuous.html#data-component">continuous</a> and <a href="plot-count.html#data-component">count</a> articles) covers that
-case there, and a custom <code>"panel"</code>-layout builder (e.g. a
-single color-encoded panel) remains possible via [er_style_tag()] if a
-project needs one – see <code>vignettes/articles/design.Rmd</code>’s
-“Extending erplots” section. Each builder declares which of the two
-structural families it belongs to via [er_style_tag()], which is what
+<code>(exposure, response)</code> coordinates, shown in the <a href="plot-continuous.html#data-layer">continuous</a> and <a href="plot-count.html#data-layer">count</a> articles) covers that case
+there, and a custom <code>"panel"</code>-layout builder (e.g. a single
+color-encoded panel) remains possible via [er_style_tag()] if a project
+needs one – see <code>vignettes/articles/design.Rmd</code>’s “Extending
+erplots” section. Each builder declares which of the two structural
+families it belongs to via [er_style_tag()], which is what
 <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> uses to decide whether to merge it into
 the main panel or stack it in panels below.</p>
 <p>Building both side by side (via patchwork’s <code>|</code> operator)
@@ -277,10 +277,10 @@ color aesthetic does for any response type:</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="group-component">Group component<a class="anchor" aria-label="anchor" href="#group-component"></a>
+<h2 id="group-layer">Group layer<a class="anchor" aria-label="anchor" href="#group-layer"></a>
 </h2>
-<p>Multiple grouping variables are allowed. Like the model component,
-this layer doesn’t look at <code>response_type</code> at all – it only
+<p>Multiple grouping variables are allowed. Like the model layer, this
+layer doesn’t look at <code>response_type</code> at all – it only
 consumes the exposure variable – so everything in this section applies
 unchanged to continuous and count responses too.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -291,7 +291,7 @@ unchanged to continuous and count responses too.</p>
 <span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-binary_files/figure-html/group-1-1.png" class="r-plt" alt="" width="700"></p>
-<p>Stratification propagates to the group component:</p>
+<p>Stratification propagates to the group layer:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>

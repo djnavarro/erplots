@@ -95,7 +95,7 @@ added to a plot that already has a coord that sets the axis limits
 (panel-based, e.g. <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code>) and "group" plots, the
 plot object does not yet have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That
-is, since all component plots use the exposure variable for the
+is, since all layer plots use the exposure variable for the
 x-axis, they should use the values stored in <code>exposure$limits</code> tp
 set the x-axis limits.</p>
     </div>
@@ -134,7 +134,7 @@ with no new config requirements.)</p>
 defaults to one built-in <code>er_style_*()</code> function and can be set to any
 other – built-in or custom – matching the standard signature: a
 custom builder can be plugged in without forking the package or
-reaching into <code>object$part</code> internals. For the data layer specifically,
+reaching into <code>object$layer</code> internals. For the data layer specifically,
 <code>style</code> also has to declare which <em>structural</em> family it belongs to –
 a single call merged into the main panel, or one or more panels
 stacked below the base plot – via <code><a href="er_style_tag.html">er_style_tag()</a></code>, since
@@ -147,7 +147,7 @@ a quantile crossbar, and a data-overlay density, respectively).</p>
 <p>A custom builder receives the same pre-computed <code>config</code> a built-in
 builder would have received for that layer (e.g. <code>config$predictions</code>
 for <code>model</code>, <code>config$summary</code> for <code>quantile</code>) – it does not need to
-recompute anything the corresponding <code>.part_*()</code> function already
+recompute anything the corresponding <code>.layer_*()</code> function already
 derived from <code>data</code>/<code>exposure</code>/<code>response</code>/<code>strata</code>; it only needs to
 turn that <code>config</code> into ggplot2 layers.</p>
 <p>A custom builder can optionally self-declare which layer it's meant
@@ -164,7 +164,7 @@ is simply never checked, so existing custom builders keep working
 unchanged. All built-in builders carry this tag.</p>
 <p>All of the builders above feed a <strong>singleton</strong> layer: <code>model</code>,
 <code>summary</code>, <code>quantile</code>, <code>data</code>, and <code>overlay</code> each occupy a single named
-slot (<code>object$part$model</code>, <code>object$part$data</code>, etc.), so calling the
+slot (<code>object$layer$model</code>, <code>object$layer$data</code>, etc.), so calling the
 corresponding <code>er_plot_add_*()</code> function again overwrites the slot
 rather than combining builders. <code>group</code> (<code><a href="er_style_group.html">er_style_group_boxplot()</a></code>/
 <code><a href="er_style_group.html">er_style_group_violin()</a></code>) is the one <strong>additive</strong> exception – each call
@@ -177,7 +177,7 @@ overlaying two fitted curves).</p>
 <code>color_role</code> tag: its color aesthetic (when stratified) is always
 strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. <code>config$color_role</code>
-(set by <code>.part_data()</code>, consulted by <code>.polish_labels()</code>/
+(set by <code>.layer_data()</code>, consulted by <code>.polish_labels()</code>/
 <code>.polish_legends()</code> in <code>R/er-plot-compose.R</code>) matters for the
 "panel"-layout family instead, where it's <code>"strata"</code> for a binary
 response (as used by the built-in <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code>, whose

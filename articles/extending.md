@@ -49,21 +49,22 @@ alongside each layer’s own `er_style_*()` family page
 [`?er_style_quantile`](https://erplots.djnavarro.net/reference/er_style_quantile.md),
 etc.).
 
-### `config` is the part that matters, and it’s already computed for you
+### `config` is what matters, and it’s already computed for you
 
 `config` is where a custom builder actually gets its data from, and it
 is **not** the raw `data` frame – it’s whatever the corresponding
-internal `.part_*()` function derived from `data`/`exposure`/`response`/
-`strata` before any builder ran. A custom builder’s whole job is to turn
-that already-computed `config` into ggplot2 layers; it never needs to
-re-bin, re-summarise, or re-fit anything itself. Concretely:
+internal `.layer_*()` function derived from
+`data`/`exposure`/`response`/ `strata` before any builder ran. A custom
+builder’s whole job is to turn that already-computed `config` into
+ggplot2 layers; it never needs to re-bin, re-summarise, or re-fit
+anything itself. Concretely:
 
-| Layer | `.part_*()` | Key `config` field | Contents |
+| Layer | `.layer_*()` | Key `config` field | Contents |
 |----|----|----|----|
-| Model | `.part_model()` | `config$predictions` | One row per exposure grid point, with `fit_resp`, `ci_lower`, `ci_upper` (from [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)) |
-| Quantile | `.part_quantile()` | `config$summary` | One row per exposure-quantile bin (× stratum), with `x_mid`, `y_mid`, `ci_lower`, `ci_upper`, plus label-placement columns. `config$breaks` also holds the `n + 1` quantile cutpoints themselves (from [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)), which [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/[`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) use to draw bin-boundary separators |
-| Data | `.part_data()`/`.part_overlay()` | (none extra) | The builder mostly works from `data` directly, since this layer draws raw observations rather than a summary |
-| Group | `.part_group()` | `config[[group_var]]$data`, `config[[group_var]]$counts` | The subset of `data` for that grouping variable, joined to per-group sample-size labels |
+| Model | `.layer_model()` | `config$predictions` | One row per exposure grid point, with `fit_resp`, `ci_lower`, `ci_upper` (from [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)) |
+| Quantile | `.layer_quantile()` | `config$summary` | One row per exposure-quantile bin (× stratum), with `x_mid`, `y_mid`, `ci_lower`, `ci_upper`, plus label-placement columns. `config$breaks` also holds the `n + 1` quantile cutpoints themselves (from [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)), which [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/[`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) use to draw bin-boundary separators |
+| Data | `.layer_data()`/`.layer_overlay()` | (none extra) | The builder mostly works from `data` directly, since this layer draws raw observations rather than a summary |
+| Group | `.layer_group()` | `config[[group_var]]$data`, `config[[group_var]]$counts` | The subset of `data` for that grouping variable, joined to per-group sample-size labels |
 
 ## Worked example: a custom quantile builder
 
@@ -74,7 +75,7 @@ Suppose the built-in
 alternatives (and their bin-boundary-annotated `_vlines` variants) all
 feel like the wrong idiom, and you’d rather draw the per-bin summary as
 a `geom_crossbar()`. First, look at what `config$summary` actually
-contains, by building the quantile part on its own and inspecting it –
+contains, by building the quantile layer on its own and inspecting it –
 this is the step a custom builder’s author does once, by hand, before
 writing the builder:
 
@@ -86,7 +87,7 @@ plt <- erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_quantiles(bins = 6)
 
-plt$part$quantile$config$summary
+plt$layer$quantile$config$summary
 #> # A tibble: 7 × 12
 #>   exposure_bins strata    n1    n0 x_mid y_mid y_mid_lbl ci_lower ci_upper
 #>   <fct>         <lgl>  <int> <int> <dbl> <dbl> <chr>        <dbl>    <dbl>
@@ -196,9 +197,9 @@ builder can be slotted into:
 
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 has to decide which of two different `config` shapes to build
-(`.part_overlay()` vs. `.part_data()`) *before* it can call the builder
-– so the layout can’t be inferred from what the builder returns; it has
-to be knowable from the builder alone.
+(`.layer_overlay()` vs. `.layer_data()`) *before* it can call the
+builder – so the layout can’t be inferred from what the builder returns;
+it has to be knowable from the builder alone.
 `er_style_tag(style, layout = ...)` attaches that information as an
 attribute, and is the one tag that’s mandatory for a data-layer builder:
 

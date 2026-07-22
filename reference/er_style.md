@@ -44,9 +44,9 @@ For the "data" (panel-based, e.g.
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md))
 and "group" plots, the plot object does not yet have a coord. The
 expectation, however, is that the builder will supply an x-axis limit
-that is consistent with the base plot. That is, since all component
-plots use the exposure variable for the x-axis, they should use the
-values stored in `exposure$limits` tp set the x-axis limits.
+that is consistent with the base plot. That is, since all layer plots
+use the exposure variable for the x-axis, they should use the values
+stored in `exposure$limits` tp set the x-axis limits.
 
 ## Details
 
@@ -101,7 +101,7 @@ Each `er_plot_add_*()` function takes a `style` argument (and
 additionally takes `summary_style`) that defaults to one built-in
 `er_style_*()` function and can be set to any other – built-in or custom
 – matching the standard signature: a custom builder can be plugged in
-without forking the package or reaching into `object$part` internals.
+without forking the package or reaching into `object$layer` internals.
 For the data layer specifically, `style` also has to declare which
 *structural* family it belongs to – a single call merged into the main
 panel, or one or more panels stacked below the base plot – via
@@ -121,7 +121,7 @@ and a data-overlay density, respectively).
 A custom builder receives the same pre-computed `config` a built-in
 builder would have received for that layer (e.g. `config$predictions`
 for `model`, `config$summary` for `quantile`) – it does not need to
-recompute anything the corresponding `.part_*()` function already
+recompute anything the corresponding `.layer_*()` function already
 derived from `data`/`exposure`/`response`/`strata`; it only needs to
 turn that `config` into ggplot2 layers.
 
@@ -140,7 +140,7 @@ working unchanged. All built-in builders carry this tag.
 
 All of the builders above feed a **singleton** layer: `model`,
 `summary`, `quantile`, `data`, and `overlay` each occupy a single named
-slot (`object$part$model`, `object$part$data`, etc.), so calling the
+slot (`object$layer$model`, `object$layer$data`, etc.), so calling the
 corresponding `er_plot_add_*()` function again overwrites the slot
 rather than combining builders. `group`
 ([`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md)/
@@ -158,7 +158,7 @@ The `data` slot's default,
 needs no `color_role` tag: its color aesthetic (when stratified) is
 always strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. `config$color_role`
-(set by `.part_data()`, consulted by `.polish_labels()`/
+(set by `.layer_data()`, consulted by `.polish_labels()`/
 `.polish_legends()` in `R/er-plot-compose.R`) matters for the
 "panel"-layout family instead, where it's `"strata"` for a binary
 response (as used by the built-in

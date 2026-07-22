@@ -2,9 +2,9 @@
 
 erplots draws exposure-response plots from *any* model that implements
 \[er_model_interface\]. This article uses a gaussian model fitted with
-erglm to cover continuous-response specifics; the model and group
-components work identically for every response type, so this article
-only shows their default usage and links to the [binary
+erglm to cover continuous-response specifics; the model and group layers
+work identically for every response type, so this article only shows
+their default usage and links to the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.md)
 article for the builder-swapping detail (spaghetti plots, violin plots).
 
@@ -41,11 +41,11 @@ erglm_data |>
 
 ## Stratification
 
-Stratification adds colour across all components, and requires a model
-that includes the stratification variable as a term. See the [binary
+Stratification adds colour across all layers, and requires a model that
+includes the stratification variable as a term. See the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#stratification)
 article for a fuller worked example, including how to suppress
-stratification for specific components with `keep_strata = FALSE`.
+stratification for specific layers with `keep_strata = FALSE`.
 
 ``` r
 
@@ -63,12 +63,12 @@ erglm_data |>
 
 ![](plot-continuous_files/figure-html/stratification-1-1.png)
 
-## Model component
+## Model layer
 
 The model layer doesn’t look at `response_type` at all – it only
 consumes \[er_predict()\]/\[er_simulate()\] output – so it works exactly
 the same way as for a binary response. See the [binary
-responses](https://erplots.djnavarro.net/articles/plot-binary.html#model-component)
+responses](https://erplots.djnavarro.net/articles/plot-binary.html#model-layer)
 article for
 [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
 and the parameter-uncertainty rationale behind it; the default builder
@@ -85,7 +85,7 @@ erglm_data |>
 
 ![](plot-continuous_files/figure-html/model-1-1.png)
 
-## Quantile component
+## Quantile layer
 
 For a continuous response, each exposure-quantile bin is summarised by
 its **mean** with a **t-interval**, rather than a rate with a
@@ -109,7 +109,7 @@ for a case – low-count Poisson data – where the t-interval approximation
 can misbehave (a negative lower bound), and the
 `response_type = "count"` declaration that fixes it.
 
-## Data component
+## Data layer
 
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 adds the raw observations at their true `(exposure, response)`
@@ -139,12 +139,12 @@ single color-encoded panel), you can write a custom one and tag it with
 `er_style_tag(fn, layout = "panel")` – see `design.Rmd`’s “Extending
 erplots” section.
 
-## Group component
+## Group layer
 
 The group layer doesn’t look at `response_type` at all – it only
 consumes the exposure variable – so it works exactly the same way as for
 a binary response. See the [binary
-responses](https://erplots.djnavarro.net/articles/plot-binary.html#group-component)
+responses](https://erplots.djnavarro.net/articles/plot-binary.html#group-layer)
 article for multiple grouping variables and
 [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md);
 the default builder and a single grouping variable are shown here:
