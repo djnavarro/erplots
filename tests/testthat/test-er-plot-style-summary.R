@@ -70,9 +70,13 @@ test_that("er_style_summary_gof shows only present, non-NA fields", {
 test_that("er_style_summary_gof draws nothing when glance is absent", {
   skip_if_not_installed("erglm")
 
+  # constructed directly, rather than via a real fitted model, since every
+  # model implementing the full `er_summary()` contract (e.g. erglm's own
+  # `er_summary.erglm_model()`) now populates `glance` -- this exercises
+  # the "no glance at all" branch a model author omitting it would hit
   plt <- er_plot(er_test_data, aucss, ae1) |>
-    er_plot_add_model(er_test_mod1) |>
-    er_plot_add_summary(model = er_test_mod1, style = er_style_summary_gof)
+    er_plot_add_summary()
+  plt$layer$summary$config$summary <- list(p_value = 0.01)
 
   args <- list(
     data = plt$data,
@@ -112,9 +116,14 @@ test_that("er_style_summary_gof draws nothing when stratified", {
 test_that("er_style_summary_coefficients draws nothing when coefficients are absent", {
   skip_if_not_installed("erglm")
 
+  # constructed directly, rather than via a real fitted model, since every
+  # model implementing the full `er_summary()` contract (e.g. erglm's own
+  # `er_summary.erglm_model()`) now populates `coefficients` -- this
+  # exercises the "no coefficients at all" branch a model author omitting
+  # it would hit
   plt <- er_plot(er_test_data, aucss, ae1) |>
-    er_plot_add_model(er_test_mod1) |>
-    er_plot_add_summary(model = er_test_mod1, style = er_style_summary_coefficients)
+    er_plot_add_summary()
+  plt$layer$summary$config$summary <- list(p_value = 0.01)
 
   args <- list(
     data = plt$data,
