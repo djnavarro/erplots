@@ -120,7 +120,7 @@ statistic.
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
 [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md),
-[`er_plot_style()`](https://erplots.djnavarro.net/reference/er_plot_style.md),
+[`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md),
 [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)
 
 ## Examples

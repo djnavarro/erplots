@@ -134,10 +134,10 @@ Build exposure-response plots from any model that implements
 - [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
   : Add a grouped exposure-distribution panel
 
-- [`er_plot_style()`](https://erplots.djnavarro.net/reference/er_plot_style.md)
+- [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
   :
 
-  Adjust style/labels for an `er_plot` object
+  Adjust theme/labels for an `er_plot` object
 
 - [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
   :
@@ -149,28 +149,28 @@ Build exposure-response plots from any model that implements
 Low level functions to draw specific components of an exposure-response
 plot
 
-- [`er_builder`](https://erplots.djnavarro.net/reference/er_builder.md)
-  : Builder functions for exposure-response plots
-- [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
+- [`er_style`](https://erplots.djnavarro.net/reference/er_style.md) :
+  Builder functions for exposure-response plots
+- [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
   : Tag a builder with structural/aesthetic metadata
-- [`er_builder_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
-  [`er_builder_model_line()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
-  [`er_builder_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
+- [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md)
+  [`er_style_model_line()`](https://erplots.djnavarro.net/reference/er_style_model.md)
+  [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
   : Model curve builders for exposure-response plots
-- [`er_builder_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_builder_summary.md)
+- [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
   : Summary annotation builders for exposure-response plots
-- [`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
-  [`er_builder_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
-  [`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
-  [`er_builder_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
+- [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
+  [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
+  [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
+  [`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
   : Quantile summary builders for exposure-response plots
-- [`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
-  [`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
-  [`er_builder_data_hex()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+- [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+  [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+  [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
   : Data layer builders for exposure-response plots
-- [`er_builder_group_boxplot()`](https://erplots.djnavarro.net/reference/er_builder_group.md)
-  [`er_builder_group_histogram()`](https://erplots.djnavarro.net/reference/er_builder_group.md)
-  [`er_builder_group_violin()`](https://erplots.djnavarro.net/reference/er_builder_group.md)
+- [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md)
+  [`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md)
+  [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md)
   : Group panel builders for exposure-response plots
 
 ## Model interface

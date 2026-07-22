@@ -4,7 +4,7 @@ Adds the model layer: a fitted exposure-response curve with an
 uncertainty ribbon (the default, via
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)),
 or a spaghetti plot of simulated draws
-(`builder = er_builder_model_spaghetti`, via
+(`style = er_style_model_spaghetti`, via
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)),
 plus an optional summary annotation (e.g. a p-value) via
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
@@ -20,8 +20,8 @@ er_plot_add_model(
   object,
   model,
   keep_strata = NULL,
-  builder = NULL,
-  summary_builder = NULL,
+  style = NULL,
+  summary_style = NULL,
   conf_level = 0.95
 )
 ```
@@ -50,28 +50,28 @@ er_plot_add_model(
   in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
   `FALSE` otherwise
 
-- builder:
+- style:
 
   Function drawing the model curve/ribbon – defaults to
-  [`er_builder_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
+  [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md)
   (mean prediction + confidence ribbon).
-  [`er_builder_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
+  [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
   (simulated draws, via
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
   is the other built-in option; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, style)`
+  `(data, config, stratify, exposure, response, strata, theme)`
   signature can be supplied instead – see
-  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
 
-- summary_builder:
+- summary_style:
 
   Function drawing the summary annotation – defaults to
-  [`er_builder_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_builder_summary.md).
-  Any function matching the same standard signature as `builder` can be
+  [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md).
+  Any function matching the same standard signature as `style` can be
   supplied instead. See
-  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
-  If `builder`/`summary_builder` is tagged with a `layer` (via
-  [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md))
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
+  If `style`/`summary_style` is tagged with a `layer` (via
+  [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md))
   other than `"model"`/`"summary"` respectively, this errors
   informatively rather than passing a mismatched `config` shape to the
   builder; an untagged builder is never checked.
@@ -97,7 +97,7 @@ the previous model layer rather than overlaying two model curves.
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
-[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 
 ## Examples
 
@@ -113,12 +113,12 @@ erglm_data |>
 # a spaghetti plot instead of the default ribbon
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_add_model(mod, builder = er_builder_model_spaghetti) |>
+  er_plot_add_model(mod, style = er_style_model_spaghetti) |>
   plot()
 
-# plug in a fully custom model-curve builder; see `?er_builder` for the
+# plug in a fully custom model-curve builder; see `?er_style` for the
 # full contract
-build_model_dashed <- function(data, config, stratify, exposure, response, strata, style) {
+build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme) {
   ggplot2::geom_line(
     data = config$predictions,
     mapping = ggplot2::aes(x = .data[[exposure$name]], y = fit_resp),
@@ -127,7 +127,7 @@ build_model_dashed <- function(data, config, stratify, exposure, response, strat
 }
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_add_model(mod, builder = build_model_dashed) |>
+  er_plot_add_model(mod, style = build_model_dashed) |>
   plot()
 }
 

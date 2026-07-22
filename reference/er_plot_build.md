@@ -1,6 +1,6 @@
 # Build and render an `er_plot` object
 
-Assembles whichever layers have been added (via the `er_plot_show_*()`
+Assembles whichever layers have been added (via the `er_plot_add_*()`
 functions) into ggplot2 objects, applies shared theming and legend
 deduplication across layers, and composes the final output with
 patchwork. Usually invoked indirectly, via

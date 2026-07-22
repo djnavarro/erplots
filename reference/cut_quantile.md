@@ -31,7 +31,7 @@ A factor. `cut_exposure_quantile()`'s result additionally carries a
 placebo) used to form the bins, as computed by
 [`stats::quantile()`](https://rdrr.io/r/stats/quantile.html) – which
 quantile-layer builders that draw bin-boundary separators (e.g.
-[`er_builder_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md))
+[`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md))
 read back out via `attr(exposure_bins, "breaks")`.
 
 ## Examples

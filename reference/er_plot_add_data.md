@@ -1,14 +1,14 @@
 # Add a raw-data layer
 
 Adds the data layer: individual observations. By default
-(`builder = er_builder_data_overlay`), points are drawn at their true
+(`style = er_style_data_overlay`), points are drawn at their true
 `(exposure, response)` coordinates in the *main* model panel – a plain
 scatter for continuous/count responses, or a scatter with a small
 vertical jitter for a binary response (whose y-values are exactly 0/1
 and would otherwise overplot into two solid lines). This works uniformly
 across all three response types, with no response-type dispatch on which
 builder to use.
-[`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 instead uses the older, panel-based design, and is binary-response-only:
 responders (`response == 1`) get a boxplot + jittered points in an upper
 panel and non-responders (`response == 0`) get the same in a lower
@@ -17,7 +17,7 @@ response, not just raw points. There is no built-in "panel"-layout
 builder for a continuous/count response – the older `build_data_color()`
 (a single panel with points colored continuously by the response value)
 was removed once
-[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+[`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 turned out to cover its typical use case more simply; `panel` must be
 `"both"` (the default) for these response types regardless of builder,
 since there's no upper/lower partition to select from.
@@ -25,7 +25,7 @@ since there's no upper/lower partition to select from.
 ## Usage
 
 ``` r
-er_plot_add_data(object, keep_strata = NULL, builder = NULL, panel = "both")
+er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both")
 ```
 
 ## Arguments
@@ -45,21 +45,21 @@ er_plot_add_data(object, keep_strata = NULL, builder = NULL, panel = "both")
   "overlay"-layout builder it always means a shared color aesthetic, for
   any response type.
 
-- builder:
+- style:
 
   Function drawing the data layer – defaults to
-  [`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md).
-  [`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+  [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md).
+  [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
   (binary response only: a boxplot + jittered points per panel) is the
   other built-in option; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, style)`
+  `(data, config, stratify, exposure, response, strata, theme)`
   signature and tagged with
-  [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
+  [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
   can be supplied instead – see
-  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
   for the full contract, e.g. a 2D density in the main panel, a
   continuous/ count response's color-encoded panel, or per-panel
-  histograms. If `builder` is tagged with a `layer` other than `"data"`,
+  histograms. If `style` is tagged with a `layer` other than `"data"`,
   this errors informatively; an untagged builder is never checked (only
   `layout` is a hard requirement).
 
@@ -67,7 +67,7 @@ er_plot_add_data(object, keep_strata = NULL, builder = NULL, panel = "both")
 
   Character string: `"upper"`, `"lower"`, or `"both"` (the default).
   Only meaningful for
-  [`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+  [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
   on a binary response; must be `"both"` for an "overlay"-layout builder
   (no upper/lower partition exists) or for a continuous/count response
   under a "panel"-layout builder (there's no upper/lower partition to
@@ -81,19 +81,18 @@ The input `object`, with the data layer added
 
 Every data-layer builder declares which of these two *structural*
 families it belongs to via
-[`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
 – `"overlay"` (a single call merged into the main panel) or `"panel"`
 (one-or-more panels stacked below the base plot) – which
-`er_plot_add_data()` reads off `builder` to decide how to assemble the
+`er_plot_add_data()` reads off `style` to decide how to assemble the
 layer, rather than taking a separate argument for it. This makes the
 pairing structural rather than incidental:
-[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+[`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 can never be routed into upper/lower panels, and
-[`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 can never be merged into the main panel. See
-[`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md)
-and
-[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+and [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 for how to tag a custom builder the same way.
 
 This layer is **singleton** – see
@@ -119,7 +118,7 @@ own.
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
-[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 
 ## Examples
 
@@ -149,14 +148,14 @@ erglm_data |>
 erglm_data |>
   er_plot(aucss, ae2, stratify_by = sex) |>
   er_plot_add_model(mod2) |>
-  er_plot_add_data(builder = er_builder_data_boxjitter) |>
+  er_plot_add_data(style = er_style_data_boxjitter) |>
   plot()
 
 # plug in a 2D density in the main panel instead of a scatter; tagging
-# it "overlay" via `er_builder_tag()` keeps it in the single main-panel
-# layout -- see `?er_builder`
-build_data_density <- er_builder_tag(
-  function(data, config, stratify, exposure, response, strata, style) {
+# it "overlay" via `er_style_tag()` keeps it in the single main-panel
+# layout -- see `?er_style`
+build_data_density <- er_style_tag(
+  function(data, config, stratify, exposure, response, strata, theme) {
     ggplot2::geom_density_2d(
       data = data,
       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
@@ -167,7 +166,7 @@ build_data_density <- er_builder_tag(
 erglm_data |>
   er_plot(aucss, biomarker_change) |>
   er_plot_add_model(mod3) |>
-  er_plot_add_data(builder = build_data_density) |>
+  er_plot_add_data(style = build_data_density) |>
   plot()
 }
 

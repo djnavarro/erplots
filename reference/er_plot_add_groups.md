@@ -13,7 +13,7 @@ needs no `response_type` dispatch.
 er_plot_add_groups(
   object,
   group_by,
-  builder = NULL,
+  style = NULL,
   bins = NULL,
   keep_strata = NULL
 )
@@ -30,18 +30,18 @@ er_plot_add_groups(
   Grouping variables to define groups for distribution plots (a
   tidyselection of variables)
 
-- builder:
+- style:
 
   Function drawing each group panel – defaults to
-  [`er_builder_group_boxplot()`](https://erplots.djnavarro.net/reference/er_builder_group.md).
-  [`er_builder_group_violin()`](https://erplots.djnavarro.net/reference/er_builder_group.md)
+  [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md).
+  [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md)
   is the other built-in option; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, style)`
+  `(data, config, stratify, exposure, response, strata, theme)`
   signature can be supplied instead – see
-  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
-  Applied to every grouping variable added by this call. If `builder` is
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
+  Applied to every grouping variable added by this call. If `style` is
   tagged with a `layer` (via
-  [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md))
+  [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md))
   other than `"group"`, this errors informatively; an untagged builder
   is never checked.
 
@@ -80,7 +80,7 @@ it.
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
-[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 
 ## Examples
 

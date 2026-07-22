@@ -22,7 +22,7 @@ the plot's `response_type` (set in
 er_plot_add_quantiles(
   object,
   keep_strata = NULL,
-  builder = NULL,
+  style = NULL,
   bins = 4,
   conf_level = 0.95
 )
@@ -41,25 +41,25 @@ er_plot_add_quantiles(
   in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
   `FALSE` otherwise
 
-- builder:
+- style:
 
   Function drawing the quantile summary – defaults to
-  [`er_builder_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
+  [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
   (point + error bar).
-  [`er_builder_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md)
+  [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
   (a single
   [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html))
   is another built-in option, as are `_vlines` variants of each
-  ([`er_builder_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md),
-  [`er_builder_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_builder_quantile.md))
+  ([`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md),
+  [`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md))
   that additionally draw a dotted line at each interior quantile-bin
   boundary; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, style)`
+  `(data, config, stratify, exposure, response, strata, theme)`
   signature can be supplied instead – see
-  [`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md).
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
   `config$summary` is the pre-computed per-bin data frame (point
-  estimate + CI) to draw. If `builder` is tagged with a `layer` (via
-  [`er_builder_tag()`](https://erplots.djnavarro.net/reference/er_builder_tag.md))
+  estimate + CI) to draw. If `style` is tagged with a `layer` (via
+  [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md))
   other than `"quantile"`, this errors informatively; an untagged
   builder is never checked.
 
@@ -96,7 +96,7 @@ calls.
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
 [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md),
-[`er_builder()`](https://erplots.djnavarro.net/reference/er_builder.md)
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 
 ## Examples
 
@@ -133,7 +133,7 @@ erglm_data |>
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
-  er_plot_add_quantiles(builder = er_builder_quantile_pointrange) |>
+  er_plot_add_quantiles(style = er_style_quantile_pointrange) |>
   plot()
 
 # the default errorbar, with dotted lines marking the quantile-bin
@@ -141,11 +141,11 @@ erglm_data |>
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
-  er_plot_add_quantiles(builder = er_builder_quantile_errorbar_vlines) |>
+  er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines) |>
   plot()
 
-# plug in a fully custom builder; see `?er_builder` for the full contract
-build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, style) {
+# plug in a fully custom builder; see `?er_style` for the full contract
+build_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, theme) {
   ggplot2::geom_crossbar(
     data = config$summary,
     mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
@@ -155,7 +155,7 @@ build_quantile_crossbar <- function(data, config, stratify, exposure, response, 
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
-  er_plot_add_quantiles(builder = build_quantile_crossbar) |>
+  er_plot_add_quantiles(style = build_quantile_crossbar) |>
   plot()
 }
 

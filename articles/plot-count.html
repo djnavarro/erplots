@@ -137,7 +137,7 @@ specific components with <code>keep_strata = FALSE</code>.</p>
 <p>The model layer doesn’t look at <code>response_type</code> at all –
 it only consumes [er_predict()]/[er_simulate()] output – so it works
 exactly the same way as for a binary response. See the <a href="plot-binary.html#model-component">binary responses</a> article for
-<code><a href="../reference/er_builder_model.html">er_builder_model_spaghetti()</a></code>; the default builder is used
+<code><a href="../reference/er_style_model.html">er_style_model_spaghetti()</a></code>; the default builder is used
 here:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
@@ -216,7 +216,7 @@ Poisson interval, which stays non-negative:</p>
 </h2>
 <p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> adds the raw observations at their
 true <code>(exposure, response)</code> coordinates via
-<code><a href="../reference/er_builder_data.html">er_builder_data_overlay()</a></code>, the default and only built-in
+<code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>, the default and only built-in
 builder for a count response – no jitter is needed, since the response
 isn’t confined to 0/1:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -227,11 +227,11 @@ isn’t confined to 0/1:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/data-overlay-count-1.png" class="r-plt" alt="" width="700"></p>
 <p>There’s no built-in panel-based alternative for a count response –
-<code><a href="../reference/er_builder_data.html">er_builder_data_boxjitter()</a></code> (the older, panel-based
-responders/non-responders design covered in the <a href="plot-binary.html#er_builder_data_overlay-vs--er_builder_data_boxjitter">binary
+<code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code> (the older, panel-based
+responders/non-responders design covered in the <a href="plot-binary.html#er_style_data_overlay-vs--er_style_data_boxjitter">binary
 responses</a> article) is binary-only. If you need a panel-based builder
 here, you can write a custom one and tag it with
-<code>er_builder_tag(fn, layout = "panel")</code> – see
+<code>er_style_tag(fn, layout = "panel")</code> – see
 <code>design.Rmd</code>’s “Extending erplots” section.</p>
 </div>
 <div class="section level2">
@@ -240,7 +240,7 @@ here, you can write a custom one and tag it with
 <p>The group layer doesn’t look at <code>response_type</code> at all –
 it only consumes the exposure variable – so it works exactly the same
 way as for a binary response. See the <a href="plot-binary.html#group-component">binary responses</a> article for
-multiple grouping variables and <code><a href="../reference/er_builder_group.html">er_builder_group_violin()</a></code>;
+multiple grouping variables and <code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code>;
 the default builder and a single grouping variable are shown here:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>

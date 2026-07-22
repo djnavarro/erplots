@@ -162,8 +162,8 @@ annotation</td>
 <td>Data</td>
 <td>[er_plot_add_data()]</td>
 <td>Raw observations, by default overlaid on the model panel at their
-true (exposure, response) coordinates ([er_builder_data_overlay()]); or,
-for a binary response, [er_builder_data_boxjitter()]’s older panel-based
+true (exposure, response) coordinates ([er_style_data_overlay()]); or,
+for a binary response, [er_style_data_boxjitter()]’s older panel-based
 boxplot + jitter design</td>
 <td>Yes</td>
 </tr>
@@ -237,17 +237,17 @@ defaulting to color/fill.</p>
 <p>For most layers, color/fill is always free for strata, so this rule
 is invisible in practice. The data layer is the one exception, and its
 behaviour now depends on which builder is in play, and which
-<em>structural</em> family (declared via [er_builder_tag()]) that
-builder belongs to:</p>
+<em>structural</em> family (declared via [er_style_tag()]) that builder
+belongs to:</p>
 <ul>
 <li>
-<code><a href="../reference/er_builder_data.html">er_builder_data_overlay()</a></code> (the default,
+<code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code> (the default,
 <code>"overlay"</code>-layout): color, when mapped at all, always means
 strata – the response is already shown via y-position, so color/fill is
 free for stratification like every other layer, and the overlay shares
 the base plot’s own strata legend with the model/quantile layers.</li>
 <li>
-<code><a href="../reference/er_builder_data.html">er_builder_data_boxjitter()</a></code> (the older, panel-based
+<code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code> (the older, panel-based
 design, <code>"panel"</code>-layout, binary-response only): behaves the
 same way as overlay – color/fill means strata, shared legend. There is
 no built-in <code>"panel"</code>-layout builder for a continuous/count
@@ -320,11 +320,11 @@ choice between the t-interval and exact Poisson interval visibly
 matters.</p>
 <p>The data layer doesn’t compute a summary statistic at all – it just
 plots raw observations – so <code>response_type</code> instead changes
-<em>how</em> it’s drawn: <code><a href="../reference/er_builder_data.html">er_builder_data_overlay()</a></code> (the
+<em>how</em> it’s drawn: <code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code> (the
 default) needs no dispatch (a plain scatter, or a small vertical jitter
 for a binary response’s exactly-0/1 y-values);
-<code><a href="../reference/er_builder_data.html">er_builder_data_boxjitter()</a></code> is binary-response only, and
-uses <code>response_type</code> only insofar as
+<code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code> is binary-response only, and uses
+<code>response_type</code> only insofar as
 <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> guards against using it on a
 continuous/count response at all (there’s no upper/lower partition to
 split on) – see [er_plot_add_data()].</p>
@@ -333,20 +333,20 @@ split on) – see [er_plot_add_data()].</p>
 <h2 id="extending-erplots-writing-your-own-builder">Extending erplots: writing your own builder<a class="anchor" aria-label="anchor" href="#extending-erplots-writing-your-own-builder"></a>
 </h2>
 <p>Every layer function delegates the actual drawing to a
-<code>builder</code> argument (<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>
-additionally has <code>summary_builder</code>) sharing a common
-signature –
-<code>function(data, config, stratify, exposure, response, strata, style)</code>.
+<code>style</code> argument (<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>
+additionally has <code>summary_style</code>) sharing a common signature
+–
+<code>function(data, config, stratify, exposure, response, strata, theme)</code>.
 That signature is a documented, public part of the API (see
-[er_builder()]), each layer’s <code>builder</code> defaults to one
-built-in <code>er_builder_*()</code> function, and it can be set to any
-other function matching the same signature – no need to fork the package
-or reach into <code>object$part</code> internals. For the data layer
+[er_style()]), each layer’s <code>style</code> defaults to one built-in
+<code>er_style_*()</code> function, and it can be set to any other
+function matching the same signature – no need to fork the package or
+reach into <code>object$part</code> internals. For the data layer
 specifically, a custom builder must additionally declare which
-<em>structural</em> family it belongs to via [er_builder_tag()].</p>
+<em>structural</em> family it belongs to via [er_style_tag()].</p>
 <p>Writing a custom builder in detail – including what
 <code>config</code> actually contains for each layer, a worked crossbar
-example, and [er_builder_tag()], the single helper a builder can use to
+example, and [er_style_tag()], the single helper a builder can use to
 declare its
 <code>layout</code>/<code>fill_role</code>/<code>y_role</code> metadata
 for the composition machinery – is its own article: <a href="extending.html">Extending erplots: writing your own

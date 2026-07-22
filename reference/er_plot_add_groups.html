@@ -67,7 +67,7 @@ the response, so it needs no <code>response_type</code> dispatch.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_plot_add_groups</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">group_by</span>,</span>
-<span>  builder <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -86,13 +86,13 @@ the response, so it needs no <code>response_type</code> dispatch.</p>
 plots (a tidyselection of variables)</p></dd>
 
 
-<dt id="arg-builder">builder<a class="anchor" aria-label="anchor" href="#arg-builder"></a></dt>
+<dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Function drawing each group panel – defaults to
-<code><a href="er_builder_group.html">er_builder_group_boxplot()</a></code>. <code><a href="er_builder_group.html">er_builder_group_violin()</a></code> is the other
-built-in option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, style)</code> signature can be
-supplied instead – see <code><a href="er_builder.html">er_builder()</a></code>. Applied to every grouping
-variable added by this call. If <code>builder</code> is tagged with a <code>layer</code>
-(via <code><a href="er_builder_tag.html">er_builder_tag()</a></code>) other than <code>"group"</code>, this errors
+<code><a href="er_style_group.html">er_style_group_boxplot()</a></code>. <code><a href="er_style_group.html">er_style_group_violin()</a></code> is the other
+built-in option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, theme)</code> signature can be
+supplied instead – see <code><a href="er_style.html">er_style()</a></code>. Applied to every grouping
+variable added by this call. If <code>style</code> is tagged with a <code>layer</code>
+(via <code><a href="er_style_tag.html">er_style_tag()</a></code>) other than <code>"group"</code>, this errors
 informatively; an untagged builder is never checked.</p></dd>
 
 
@@ -125,7 +125,7 @@ rather than replacing it.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>,
-<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>, <code><a href="er_builder.html">er_builder()</a></code></p></div>
+<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>, <code><a href="er_style.html">er_style()</a></code></p></div>
     </div>
 
     <div class="section level2">

@@ -100,16 +100,16 @@ erglm_data |>
 ## Model component
 
 The default builder is
-[`er_builder_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_builder_model.md),
+[`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md),
 but you can also draw spaghetti plots to represent parameter uncertainty
 with
-[`er_builder_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_builder_model.md).
+[`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md).
 Spaghetti plots require the model to implement
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 (erglm’s models do); models that only implement
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 fall back to
-[`er_builder_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_builder_model.md)
+[`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md)
 with a message. This layer doesn’t look at `response_type` at all – it
 only consumes \[er_predict()\]/\[er_simulate()\] output – so everything
 in this section applies unchanged to continuous and count responses too.
@@ -118,7 +118,7 @@ in this section applies unchanged to continuous and count responses too.
 
 erglm_data |> 
   er_plot(aucss, ae1) |> 
-  er_plot_add_model(mod, builder = er_builder_model_spaghetti) |> 
+  er_plot_add_model(mod, style = er_style_model_spaghetti) |> 
   er_plot_add_quantiles() |> 
   plot()
 #> Using seed = 3244
@@ -165,7 +165,7 @@ erglm_data |>
 
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 adds the raw observations. By default
-([`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)),
+([`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)),
 points are drawn at their true `(exposure, response)` coordinates in the
 *main* model panel – for a binary response this is a scatter with a
 small vertical jitter, since the y-values are exactly 0/1 and would
@@ -183,9 +183,9 @@ erglm_data |>
 
 ![](plot-binary_files/figure-html/data-overlay-binary-1.png)
 
-### `er_builder_data_overlay()` vs. `er_builder_data_boxjitter()`
+### `er_style_data_overlay()` vs. `er_style_data_boxjitter()`
 
-[`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 is the older, panel-based design, and is binary-response only: it splits
 responders/non-responders into separate panels above/below the main
 plot, each showing a boxplot of the exposure values with the raw
@@ -193,7 +193,7 @@ jittered points layered on top – so the panel shows the exposure
 *distribution* conditional on response, not just individual points.
 There is no built-in panel-based builder for a continuous/count
 response;
-[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)
+[`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 (raw points at their true `(exposure, response)` coordinates, shown in
 the
 [continuous](https://erplots.djnavarro.net/articles/plot-continuous.html#data-component)
@@ -201,10 +201,10 @@ and
 [count](https://erplots.djnavarro.net/articles/plot-count.html#data-component)
 articles) covers that case there, and a custom `"panel"`-layout builder
 (e.g. a single color-encoded panel) remains possible via
-\[er_builder_tag()\] if a project needs one – see
+\[er_style_tag()\] if a project needs one – see
 `vignettes/articles/design.Rmd`’s “Extending erplots” section. Each
 builder declares which of the two structural families it belongs to via
-\[er_builder_tag()\], which is what
+\[er_style_tag()\], which is what
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 uses to decide whether to merge it into the main panel or stack it in
 panels below.
@@ -225,7 +225,7 @@ p_boxjitter <- erglm_data |>
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
   er_plot_add_quantiles() |> 
-  er_plot_add_data(builder = er_builder_data_boxjitter) |> 
+  er_plot_add_data(style = er_style_data_boxjitter) |> 
   er_plot_build()
 
 p_overlay$output | p_boxjitter$output
@@ -235,9 +235,9 @@ p_overlay$output | p_boxjitter$output
 
 Stratification looks the same for both: color/fill always means strata
 for
-[`er_builder_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_builder_data.md),
+[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md),
 sharing the model curve’s own legend, the same way
-[`er_builder_data_overlay()`](https://erplots.djnavarro.net/reference/er_builder_data.md)’s
+[`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)’s
 color aesthetic does for any response type:
 
 ``` r
@@ -251,7 +251,7 @@ p_overlay_strat <- erglm_data |>
 p_boxjitter_strat <- erglm_data |> 
   er_plot(aucss, ae1, stratify_by = sex) |> 
   er_plot_add_model(mod_strat) |> 
-  er_plot_add_data(builder = er_builder_data_boxjitter) |> 
+  er_plot_add_data(style = er_style_data_boxjitter) |> 
   er_plot_build()
 
 p_overlay_strat$output | p_boxjitter_strat$output
@@ -293,9 +293,9 @@ erglm_data |>
 ![](plot-binary_files/figure-html/group-2-1.png)
 
 The default builder is
-[`er_builder_group_boxplot()`](https://erplots.djnavarro.net/reference/er_builder_group.md),
+[`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md),
 but you can also use violin plots with
-[`er_builder_group_violin()`](https://erplots.djnavarro.net/reference/er_builder_group.md):
+[`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md):
 
 ``` r
 
@@ -303,7 +303,7 @@ erglm_data |>
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
   er_plot_add_quantiles() |>
-  er_plot_add_groups(group_by = sex, builder = er_builder_group_violin) |> 
+  er_plot_add_groups(group_by = sex, style = er_style_group_violin) |> 
   plot()
 ```
 
