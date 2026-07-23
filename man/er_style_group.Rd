@@ -80,6 +80,35 @@ tagged for a different layer.
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.
 }
+\examples{
+if (requireNamespace("erglm", quietly = TRUE)) {
+  library(erglm)
+  mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+
+  # er_style_group_boxplot(): the default
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_groups(aucss, style = er_style_group_boxplot) |>
+    plot()
+
+  # er_style_group_violin(): a violin instead of a boxplot
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_groups(aucss, style = er_style_group_violin) |>
+    plot()
+
+  # er_style_group_histogram(): group levels on facet strips, with
+  # the y-axis freed for counts
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_groups(aucss, style = er_style_group_histogram) |>
+    plot()
+}
+
+}
 \seealso{
 \code{\link[=er_style]{er_style()}}
 }

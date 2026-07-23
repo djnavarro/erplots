@@ -33,6 +33,34 @@
 #'
 #' @returns A geom, or a list of geoms; see [er_style()].
 #'
+#' @examples
+#' if (requireNamespace("erglm", quietly = TRUE)) {
+#'   library(erglm)
+#'   mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+#'
+#'   # er_style_quantile_errorbar(): point + error bar, the default
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_add_quantiles(style = er_style_quantile_errorbar) |>
+#'     plot()
+#'
+#'   # er_style_quantile_pointrange(): a pointrange instead
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_add_quantiles(style = er_style_quantile_pointrange) |>
+#'     plot()
+#'
+#'   # er_style_quantile_errorbar_vlines(): the default, plus dotted
+#'   # lines marking the interior quantile-bin boundaries
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines) |>
+#'     plot()
+#' }
+#'
 #' @name er_style_quantile
 #' @seealso [er_style()]
 NULL

@@ -30,6 +30,31 @@
 #'
 #' @returns A geom, or a list of geoms; see [er_style()].
 #'
+#' @examples
+#' if (requireNamespace("erglm", quietly = TRUE)) {
+#'   library(erglm)
+#'   mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+#'
+#'   # er_style_model_ribbonline(): ribbon + line, the default
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod, style = er_style_model_ribbonline) |>
+#'     plot()
+#'
+#'   # er_style_model_line(): line only, no ribbon
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod, style = er_style_model_line) |>
+#'     plot()
+#'
+#'   # er_style_model_spaghetti(): simulated draws instead of a ribbon;
+#'   # `seed` is forwarded to `er_simulate()` via `...`
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 4821) |>
+#'     plot()
+#' }
+#'
 #' @name er_style_model
 #' @seealso [er_style()]
 NULL

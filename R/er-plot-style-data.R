@@ -30,6 +30,27 @@
 #'
 #' @returns A geom, or a list of geoms; see [er_style()].
 #'
+#' @examples
+#' if (requireNamespace("erglm", quietly = TRUE)) {
+#'   library(erglm)
+#'   mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+#'
+#'   # er_style_data_overlay(): the default, raw points on the main panel
+#'   erglm_data |>
+#'     er_plot(aucss, ae2, stratify_by = sex) |>
+#'     er_plot_add_model(mod2) |>
+#'     er_plot_add_data(style = er_style_data_overlay) |>
+#'     plot()
+#'
+#'   # er_style_data_boxjitter(): binary-response only, boxplot + jitter
+#'   # panels above/below the main panel instead of an overlay
+#'   erglm_data |>
+#'     er_plot(aucss, ae2, stratify_by = sex) |>
+#'     er_plot_add_model(mod2) |>
+#'     er_plot_add_data(style = er_style_data_boxjitter) |>
+#'     plot()
+#' }
+#'
 #' @name er_style_data
 #' @seealso [er_style()], [er_style_tag()]
 NULL
