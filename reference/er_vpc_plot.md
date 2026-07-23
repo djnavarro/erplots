@@ -95,8 +95,8 @@ er_vpc_plot(
   response_type = "count"
 )
 }
-#> Using seed = 4289. Pass `seed = 4289` to reproduce this result.
-#> Using seed = 5993. Pass `seed = 5993` to reproduce this result.
-#> Using seed = 9248. Pass `seed = 9248` to reproduce this result.
+#> Using seed = 9984. Pass `seed = 9984` to reproduce this result.
+#> Using seed = 5233. Pass `seed = 5233` to reproduce this result.
+#> Using seed = 5650. Pass `seed = 5650` to reproduce this result.
 
 ```

@@ -112,3 +112,29 @@ how to write a custom builder of your own.
 
 [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md),
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+
+## Examples
+
+``` r
+if (requireNamespace("erglm", quietly = TRUE)) {
+  library(erglm)
+  mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+
+  # er_style_data_overlay(): the default, raw points on the main panel
+  erglm_data |>
+    er_plot(aucss, ae2, stratify_by = sex) |>
+    er_plot_add_model(mod2) |>
+    er_plot_add_data(style = er_style_data_overlay) |>
+    plot()
+
+  # er_style_data_boxjitter(): binary-response only, boxplot + jitter
+  # panels above/below the main panel instead of an overlay
+  erglm_data |>
+    er_plot(aucss, ae2, stratify_by = sex) |>
+    er_plot_add_model(mod2) |>
+    er_plot_add_data(style = er_style_data_boxjitter) |>
+    plot()
+}
+
+
+```

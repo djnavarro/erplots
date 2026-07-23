@@ -136,3 +136,29 @@ how to write a custom builder of your own.
 ## See also
 
 [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
+
+## Examples
+
+``` r
+if (requireNamespace("erglm", quietly = TRUE)) {
+  library(erglm)
+  mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+
+  # er_style_summary_pvalue(): the default, drawn from the model's own
+  # er_summary()
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_summary(model = mod, style = er_style_summary_pvalue) |>
+    plot()
+
+  # er_style_summary_n(): model-agnostic observation count
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_summary(style = er_style_summary_n) |>
+    plot()
+}
+
+
+```
