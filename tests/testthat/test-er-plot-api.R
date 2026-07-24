@@ -384,6 +384,41 @@ test_that("er_plot_build constructs ggplot2 objects", {
   )
 })
 
+test_that("er_plot_build/plot() handle a group-only plot (no base layer)", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_groups(aucss) |>
+    er_plot_add_groups(treatment)
+
+  expect_null(plt$layer$model)
+  expect_null(plt$layer$summary)
+  expect_null(plt$layer$quantile)
+  expect_null(plt$layer$overlay)
+
+  expect_no_error(built <- er_plot_build(plt))
+  expect_null(built$plot$base)
+  expect_no_error(plot(plt))
+})
+
+test_that("er_plot_build/plot() handle a panel-layout data-only plot (no base layer)", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_data(style = er_style_data_boxjitter)
+
+  expect_null(plt$layer$model)
+  expect_null(plt$layer$summary)
+  expect_null(plt$layer$quantile)
+  expect_null(plt$layer$overlay)
+
+  expect_no_error(built <- er_plot_build(plt))
+  expect_null(built$plot$base)
+  expect_no_error(plot(plt))
+})
+
 test_that("print method works as expected", {
   skip_if_not_installed("erglm")
 

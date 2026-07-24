@@ -24,7 +24,13 @@
     p$data[[panel_name]] <- p$data[[panel_name]] + ggplot2::theme(margins = panel_mar)
   }
 
-  p$base <- p$base + ggplot2::theme(margins = base_mar)
+  # `p$base` is only built when at least one of the model/summary/
+  # quantile/overlay layers is present (see `er_plot_build()`) -- a
+  # group-only or panel-layout-data-only plot has no base panel to
+  # margin-adjust.
+  if (!is.null(p$base)) {
+    p$base <- p$base + ggplot2::theme(margins = base_mar)
+  }
   if (!is.null(p$group)) {
     for(g in seq_along(p$group)) {
       p$group[[g]] + ggplot2::theme(margins = margins)
@@ -37,31 +43,38 @@
 .polish_labels <- function(object) {
   p <- object$plot
 
-  p$base <- p$base + ggplot2::labs(
-    x = object$exposure$label,
-    y = object$response$label
-  )
-  ll <- names(ggplot2::get_labs(p$base))
+  # `p$base` is only built when at least one of the model/summary/
+  # quantile/overlay layers is present (see `er_plot_build()`) -- a
+  # group-only or panel-layout-data-only plot has no base panel to
+  # label. `ggplot2::get_labs()` errors on `NULL`, so this whole block
+  # is skipped rather than guarded piecemeal.
+  if (!is.null(p$base)) {
+    p$base <- p$base + ggplot2::labs(
+      x = object$exposure$label,
+      y = object$response$label
+    )
+    ll <- names(ggplot2::get_labs(p$base))
 
-  # `fill` on the base plot almost always means strata (e.g.
-  # `er_style_model_ribbonline()`'s ribbon), but an "overlay"-layout data
-  # builder can claim `fill` for something else entirely --
-  # `er_style_data_hex()` uses it for bin density, and tags itself with
-  # `er_style_tag(builder, fill_role = "density")` to say so (mirroring
-  # `er_style_group_histogram()`'s `y_role` tag). Such a builder can
-  # only coexist with other `fill`-mapped layers if they don't map
-  # `fill` themselves (a discrete `fill = strata` ribbon and a
-  # continuous density `fill` collide as two scales for one aesthetic,
-  # and ggplot2 errors) -- so if `fill` is present at all alongside a
-  # density-tagged overlay builder, it's safe to assume the density is
-  # the sole source and label it accordingly rather than as strata.
-  overlay_style <- object$layer$overlay$config$style
-  fill_is_density <- identical(.style_fill_role(overlay_style), "density")
+    # `fill` on the base plot almost always means strata (e.g.
+    # `er_style_model_ribbonline()`'s ribbon), but an "overlay"-layout data
+    # builder can claim `fill` for something else entirely --
+    # `er_style_data_hex()` uses it for bin density, and tags itself with
+    # `er_style_tag(builder, fill_role = "density")` to say so (mirroring
+    # `er_style_group_histogram()`'s `y_role` tag). Such a builder can
+    # only coexist with other `fill`-mapped layers if they don't map
+    # `fill` themselves (a discrete `fill = strata` ribbon and a
+    # continuous density `fill` collide as two scales for one aesthetic,
+    # and ggplot2 errors) -- so if `fill` is present at all alongside a
+    # density-tagged overlay builder, it's safe to assume the density is
+    # the sole source and label it accordingly rather than as strata.
+    overlay_style <- object$layer$overlay$config$style
+    fill_is_density <- identical(.style_fill_role(overlay_style), "density")
 
-  if ("fill" %in% ll) {
-    p$base <- p$base + ggplot2::labs(fill = if (fill_is_density) "Count" else object$strata$label)
+    if ("fill" %in% ll) {
+      p$base <- p$base + ggplot2::labs(fill = if (fill_is_density) "Count" else object$strata$label)
+    }
+    if ("colour" %in% ll) p$base <- p$base + ggplot2::labs(color = object$strata$label)
   }
-  if ("colour" %in% ll) p$base <- p$base + ggplot2::labs(color = object$strata$label)
 
   # the data layer's `colour` aesthetic means strata everywhere except
   # when `config$color_role == "response"` (continuous/count response;
@@ -156,15 +169,23 @@
       )
   }
 
-  ind <- ind + 1L
-  plot_list[[ind]] <- object$plot$base
-  plot_info <- plot_info |> 
-    tibble::add_row(
-      id = ind,
-      size = object$theme$height$base,
-      plot = "base",
-      name = "base"
-    )
+  # `object$plot$base` is only built when at least one of the model/
+  # summary/quantile/overlay layers is present (see `er_plot_build()`)
+  # -- a group-only or panel-layout-data-only plot has no base panel to
+  # place, so it's omitted from the arrangement entirely rather than
+  # inserting a `NULL` into `plot_list` (which `patchwork::wrap_plots()`
+  # can't render).
+  if (!is.null(object$plot$base)) {
+    ind <- ind + 1L
+    plot_list[[ind]] <- object$plot$base
+    plot_info <- plot_info |> 
+      tibble::add_row(
+        id = ind,
+        size = object$theme$height$base,
+        plot = "base",
+        name = "base"
+      )
+  }
 
   for (panel_name in below_panels) {
     ind <- ind + 1L
