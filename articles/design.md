@@ -7,10 +7,7 @@ the [binary](https://erplots.djnavarro.net/articles/plot-binary.md),
 and [count](https://erplots.djnavarro.net/articles/plot-count.md)
 response articles; for writing a custom builder in detail, see
 [Extending
-erplots](https://erplots.djnavarro.net/articles/extending.md). If a
-design choice described here ever changes, this article and `PLAN.md`’s
-“Mini-language architecture review” section should be updated together;
-see the note at the end.
+erplots](https://erplots.djnavarro.net/articles/extending.md).
 
 ``` r
 
@@ -115,8 +112,7 @@ legitimate ways to slice the exposure distribution by different grouping
 variables. The one flagged exception to watch for: because the model
 layer is singleton, overlaying two model curves for comparison (e.g. a
 candidate model against a reference model) isn’t currently possible.
-That’s tracked as a plausible future addition, not planned work – see
-`PLAN.md`.
+That’s a plausible future addition, not something currently planned.
 
 ## Stratification composes with layers, usually via color
 
@@ -163,12 +159,10 @@ belongs to:
   shared legend. There is no built-in `"panel"`-layout builder for a
   continuous/count response today; if one is written, its color
   aesthetic would typically already be spoken for by the response value
-  itself (as the removed `build_data_color()` builder’s was), in which
-  case stratification should fall back to one panel per stratum level
-  instead of a shared legend – the concrete instance of “a layer’s own
-  encoding takes precedence” that motivated the general rule. See
-  `PLAN.md`’s “Continuous-response data strip” section for that design
-  history, and \[er_plot_add_data()\] for the full breakdown.
+  itself, in which case stratification should fall back to one panel per
+  stratum level instead of a shared legend – the concrete instance of “a
+  layer’s own encoding takes precedence” that motivated the general
+  rule. See \[er_plot_add_data()\] for the full breakdown.
 
 A `config$color_role` tag (`"strata"` or `"response"`, set by
 `.layer_data()`) records which meaning applies for a given data-layer
@@ -239,10 +233,3 @@ builder](https://erplots.djnavarro.net/articles/extending.md).
 ## Keeping this article in sync
 
 This article describes the grammar as designed and implemented *today*.
-Whenever a future change lands that alters any of the above – renaming a
-layer, changing which layers are singleton vs. additive, changing how
-stratification composes with a layer’s own encoding, or adding/removing
-a `response_type` dispatch – update this article in the same change, and
-update the cross-references in `PLAN.md`’s “Mini-language architecture
-review” section (which points here) to match. Treat a design change that
-isn’t reflected here as incomplete.
