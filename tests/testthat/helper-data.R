@@ -40,3 +40,43 @@ er_summary.er_test_partial_gof_model <- function(model, ...) {
 # it explicitly, the same runtime pattern erglm itself uses (see AGENTS.md).
 registerS3method("er_summary", "er_test_fake_summary_model", er_summary.er_test_fake_summary_model)
 registerS3method("er_summary", "er_test_partial_gof_model", er_summary.er_test_partial_gof_model)
+
+# test-only fixture used to exercise `er_vpc_plot(model = ...)` without
+# depending on erglm/emaxnls implementing the `sim_resp` extension to
+# `er_simulate()` -- see `?er_model_interface`. `prob` is the (constant,
+# covariate-independent) response probability used to draw simulated
+# binary responses; `fit_resp` is included alongside `sim_resp` in the
+# returned data frame to mirror the real contract (a method can supply
+# both from one call).
+er_simulate.er_test_fake_vpc_model <- function(model, newdata, nsim = 100, seed = NULL, ...) {
+  reps <- vector("list", nsim)
+  withr::with_seed(seed %||% 1, {
+    for (ii in seq_len(nsim)) {
+      row <- newdata
+      row$sim_id <- ii
+      row$fit_resp <- model$prob
+      row$sim_resp <- stats::rbinom(nrow(newdata), size = 1, prob = model$prob)
+      reps[[ii]] <- row
+    }
+  })
+  dplyr::bind_rows(reps)
+}
+# a second fixture with only `fit_resp` (no `sim_resp`), used to exercise
+# `er_vpc_plot(model = ...)`'s "predictive simulation not available"
+# error path -- this is the shape every `er_simulate()` method had before
+# `sim_resp` was added to the contract (e.g. still true of erglm/emaxnls
+# at the time this fixture was written).
+er_simulate.er_test_fake_spaghetti_only_model <- function(model, newdata, nsim = 100, seed = NULL, ...) {
+  reps <- vector("list", nsim)
+  withr::with_seed(seed %||% 1, {
+    for (ii in seq_len(nsim)) {
+      row <- newdata
+      row$sim_id <- ii
+      row$fit_resp <- model$prob
+      reps[[ii]] <- row
+    }
+  })
+  dplyr::bind_rows(reps)
+}
+registerS3method("er_simulate", "er_test_fake_vpc_model", er_simulate.er_test_fake_vpc_model)
+registerS3method("er_simulate", "er_test_fake_spaghetti_only_model", er_simulate.er_test_fake_spaghetti_only_model)

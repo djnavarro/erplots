@@ -117,10 +117,12 @@ it. Key API points to remember: the example dataset is
 erglm now genuinely supports `binomial`/`poisson`/`gaussian`/`Gamma`
 families, with matching binary (`ae1`/`ae2`), count (`ae_count`), and
 continuous (`biomarker_change`, `ae_duration`) response columns in
-`erglm_data` -- not just binomial. Models are simulated with
-`erglm::erglm_vpc_sim()`; the `er_predict()`/`er_simulate()`/
-`er_summary()` methods erglm registers for its model objects are correct
-for all four families, so no erplots-side changes are needed there.
+`erglm_data` -- not just binomial. Models can still be simulated for VPC
+purposes with `erglm::erglm_vpc_sim()` (unchanged), but the preferred
+path is now `er_vpc_plot(model = <erglm model>)`, going through
+`er_simulate()`'s `sim_resp` extension -- see "`er_vpc_plot()` and the
+`sim_resp` extension to `er_simulate()`" below for the erglm-side PR
+this depends on (open, not yet merged, as of this writing).
 
 A second, independent companion package,
 [emaxnls](https://github.com/djnavarro/emaxnls), fits Emax (sigmoidal
@@ -568,6 +570,76 @@ review)" section -- `design.Rmd`'s own cross-reference target, per its
 "Keeping this article in sync" note -- was updated to record the
 promotion and the layer-table change alongside these fixes.
 
+## `er_vpc_plot()` and the `sim_resp` extension to `er_simulate()`
+
+`er_vpc_plot()` used to be the one part of the mini-language not built
+on the model interface: it took a `sim` data frame that had to be
+produced by a bespoke, model-package-specific helper (e.g.
+`erglm::erglm_vpc_sim()`), so every model package needed its own
+VPC-shaped simulation function outside of `er_predict()`/
+`er_simulate()`/`er_summary()`. This was closed by widening
+`er_simulate()`'s contract additively, rather than adding a fourth
+generic: a method may now return an optional `sim_resp` column
+alongside the existing `fit_resp`, giving a full response-scale draw
+for that replicate/observation (parameter uncertainty *and*
+observation-level sampling/residual noise -- e.g. a 0/1 draw for a
+binary response, an integer draw for a count response, a draw
+including residual variance for a continuous response), as opposed to
+`fit_resp`'s point on the mean curve (parameter uncertainty only, used
+by `er_style_model_spaghetti()`). `sim_resp` is independently optional:
+a method can supply `fit_resp` alone (as every implementation did
+before `sim_resp` existed, and as remains sufficient for spaghetti
+plots) or both columns from the same call. See `?er_model_interface`
+for the full contract.
+
+A separate generic (e.g. `er_simulate_response()`) was considered and
+rejected: erglm and emaxnls both already have `stats::simulate()`
+methods that compute both the mean/expected response and a full
+response draw in one call (erglm's `simulate.erglm_model()` returns
+`mu`/`val`; emaxnls's `simulate.emaxnls()`/`simulate.emaxlogistic()`
+have the equivalent noise-drawing machinery in
+`.emax_resample()`/`.emax_logistic_resample()`), so extending
+`er_simulate()`'s *return value* to optionally include the noisy draw
+was a smaller, more natural change than inventing and documenting a
+whole second simulation generic -- both existing model packages needed
+only a few lines added to their `er_simulate()` methods to wire in
+noise they already knew how to draw elsewhere.
+
+`er_vpc_plot()` gained a `model` argument (mutually exclusive with the
+existing `sim` argument -- exactly one of the two must be supplied) and
+new `nsim`/`seed` arguments (only meaningful with `model`). When
+`model` is supplied, `er_vpc_plot()` calls `er_simulate(model, newdata
+= data, nsim = nsim, seed = seed)` internally and looks for
+`sim_resp`; if it's missing (either because `er_simulate()` returned
+`NULL` -- no simulation support at all -- or because the method only
+ever populated `fit_resp`), it errors informatively rather than
+silently treating `fit_resp` as if it were a noisy draw, which would
+produce a falsely narrow, misleading VPC band. The `sim`-based code
+path is unchanged and remains supported indefinitely -- useful for a
+hand-built simulation, or a model-specific helper (like
+`erglm::erglm_vpc_sim()`) that predates or bypasses the `er_simulate()`
+interface.
+
+Both companion packages were updated to implement the extended
+contract: `erglm`'s `.erglm_simulate_draws()` (the engine behind
+`er_simulate.erglm_model()`) now also computes `sim_resp` via the
+existing `.erglm_draw_response()` helper (the same family-appropriate
+noise model `.erglm_resample()`/`erglm_vpc_sim()` already used, just
+wired into a second entry point); `emaxnls`'s `er_simulate.emaxnls()`
+now does the same via `Normal(fit_resp, sigma(model))` for `emaxnls`
+objects or `Bernoulli(fit_resp)` for `emaxlogistic` objects, mirroring
+`.emax_resample()`/`.emax_logistic_resample()`. Both changes were
+implemented as open, unmerged pull requests (erglm PR #6, emaxnls PR
+#67) rather than merged directly, since this repo's `Remotes:` entries
+point at each package's default branch; whoever reviews those PRs
+should merge them (in either order -- they're independent) once
+satisfied, at which point `er_vpc_plot(model = ...)`'s example in
+`R/er-vpc.R` and its test coverage (already passing locally against
+the patched branches) will also pass in CI. Neither package's public
+API changed -- `erglm_vpc_sim()`/`simulate.erglm_model()`/
+`simulate.emaxnls()`/`simulate.emaxlogistic()` are untouched, separate
+code paths.
+
 ## Planned work
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed
@@ -704,7 +776,10 @@ errors and no leftover old-identifier references in the output.
   no builder functions of its own). See `?er_style` for the interface
   these builders share.
 - `R/er-vpc.R` -- `er_vpc_plot()`, a model-agnostic VPC-style plot
-  operating on plain observed/simulated data frames.
+  operating on plain observed/simulated data frames, or (preferred) a
+  `model` argument that goes through `er_simulate()`'s `sim_resp`
+  extension -- see "`er_vpc_plot()` and the `sim_resp` extension to
+  `er_simulate()`" above.
 - `R/utils-helpers.R`, `R/utils-global.R` -- small internal helpers
   (including the binary-response-only `ci_clopper_pearson()`,
   `ci_t()`, `ci_poisson()`, `cut_quantile()`,

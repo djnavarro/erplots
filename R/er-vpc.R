@@ -3,18 +3,33 @@
 #'
 #' Compares observed response rates against simulated response rates from a
 #' model, stratified by a grouping variable. This function is model-agnostic:
-#' it operates purely on data frames. The `sim` data frame is expected to
-#' contain one row per simulated observation per replicate, with a `sim_id`
-#' column identifying each replicate (see e.g. `erglm::erglm_vpc_sim()` for one
-#' way to generate such simulations from a fitted model).
+#' it operates purely on data frames, and can obtain those data frames in
+#' either of two ways -- see the `sim`/`model` arguments below.
 #'
 #' @param data Observed data
 #' @param sim Simulated data, with the same `exposure`/`response`/`group_by`
-#'   columns as `data`, plus a `sim_id` column identifying each replicate
+#'   columns as `data`, plus a `sim_id` column identifying each replicate.
+#'   Mutually exclusive with `model`; supply exactly one of the two. Useful
+#'   for a hand-built simulation, or a model-specific helper that doesn't
+#'   go through the `er_simulate()` interface (e.g. `erglm::erglm_vpc_sim()`).
 #' @param exposure Exposure variable (one variable, unquoted)
 #' @param response Response variable (one variable, unquoted). May be
 #'   binary (0/1, or logical) or continuous; see `response_type`
 #' @param group_by Variable (unquoted) to stratify predictions
+#' @param model A fitted exposure-response model implementing
+#'   [er_simulate()] with a `sim_resp` column (see [er_model_interface]).
+#'   Mutually exclusive with `sim`; supply exactly one of the two. When
+#'   supplied, `sim` is built internally via `er_simulate(model, newdata =
+#'   data, nsim = nsim, seed = seed)`; an error is raised if the model's
+#'   `er_simulate()` method doesn't provide `sim_resp` (either because it
+#'   returns `NULL`, i.e. no simulation support at all, or because it only
+#'   supports the parameter-uncertainty-only `fit_resp` used by
+#'   [er_style_model_spaghetti()] -- a VPC needs the fuller, response-level
+#'   simulation `sim_resp` represents; see [er_model_interface] for the
+#'   distinction).
+#' @param nsim Number of simulation replicates, only used when `model` is
+#'   supplied
+#' @param seed Optional RNG seed, only used when `model` is supplied
 #' @param conf_level Confidence level
 #' @param response_type One of `"auto"` (default), `"binary"`,
 #'   `"continuous"`, or `"count"`. Governs how the observed-side summary
@@ -37,25 +52,33 @@
 #' if (requireNamespace("erglm", quietly = TRUE)) {
 #' library(erglm)
 #' mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+#'
+#' # preferred: let er_vpc_plot() call er_simulate() for you
+#' er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = aucss, model = mod)
+#' er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = sex, model = mod)
+#'
+#' # equivalent, via a pre-built `sim` data frame (e.g. from a
+#' # model-specific helper that predates/bypasses the er_simulate() interface)
 #' sim <- erglm_vpc_sim(mod)
 #' er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
-#' er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = sex)
 #'
 #' mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
-#' sim_gaussian <- erglm_vpc_sim(mod_gaussian)
-#' er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
+#' er_vpc_plot(
+#'   erglm_data, exposure = aucss, response = biomarker_change,
+#'   group_by = aucss, model = mod_gaussian
+#' )
 #'
 #' mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
-#' sim_poisson <- erglm_vpc_sim(mod_poisson)
 #' er_vpc_plot(
-#'   erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
-#'   response_type = "count"
+#'   erglm_data, exposure = aucss, response = ae_count, group_by = aucss,
+#'   model = mod_poisson, response_type = "count"
 #' )
 #' }
 #'
 #' @export
 #' 
-er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.95,
+er_vpc_plot <- function(data, sim = NULL, exposure, response, group_by, model = NULL,
+                         nsim = 100, seed = NULL, conf_level = 0.95,
                          response_type = c("auto", "binary", "continuous", "count")) {
 
   response_type <- match.arg(response_type)
@@ -63,6 +86,33 @@ er_vpc_plot <- function(data, sim, exposure, response, group_by, conf_level = 0.
   exp_var <- rlang::as_name(rlang::enquo(exposure))
   rsp_var <- rlang::as_name(rlang::enquo(response))
   grp_var <- rlang::as_name(rlang::enquo(group_by))
+
+  if (is.null(sim) && is.null(model)) {
+    rlang::abort("Supply exactly one of `sim` or `model` to `er_vpc_plot()`.")
+  }
+  if (!is.null(sim) && !is.null(model)) {
+    rlang::abort("Supply exactly one of `sim` or `model` to `er_vpc_plot()`, not both.")
+  }
+
+  if (!is.null(model)) {
+    raw_sim <- er_simulate(model, newdata = data, nsim = nsim, seed = seed)
+    if (is.null(raw_sim) || !("sim_resp" %in% names(raw_sim))) {
+      rlang::abort(c(
+        paste0(
+          "`er_simulate()` does not provide predictive simulation (a `sim_resp` column) for objects of class <",
+          paste(class(model), collapse = "/"), ">."
+        ),
+        "i" = paste0(
+          "`er_vpc_plot()`'s `model` argument needs an `er_simulate()` method returning `sim_resp` ",
+          "(see `?er_model_interface`) -- this is a stricter requirement than the `fit_resp`-only ",
+          "simulation that suffices for `er_style_model_spaghetti()`."
+        ),
+        "i" = "Alternatively, pass a pre-built `sim` data frame directly."
+      ))
+    }
+    sim <- raw_sim
+    sim[[rsp_var]] <- sim[["sim_resp"]]
+  }
 
   if (response_type == "auto") {
     response_type <- .detect_response_type(data[[rsp_var]])

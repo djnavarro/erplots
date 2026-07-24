@@ -84,3 +84,66 @@ test_that("er_vpc_plot's response_type argument overrides auto-detection", {
     )
   )
 })
+
+test_that("er_vpc_plot(model = ...) builds sim internally via er_simulate()'s sim_resp column", {
+  toy_data <- data.frame(
+    exposure = seq(0, 10, length.out = 40),
+    outcome = rep(c(0, 1), 20),
+    grp = rep(c("a", "b"), each = 20)
+  )
+  fake_mod <- structure(list(prob = 0.4), class = "er_test_fake_vpc_model")
+
+  expect_no_error(
+    p <- er_vpc_plot(
+      toy_data, exposure = exposure, response = outcome, group_by = grp,
+      model = fake_mod, nsim = 5, seed = 837
+    )
+  )
+  expect_true(inherits(p, "ggplot"))
+})
+
+test_that("er_vpc_plot(model = ...) errors informatively when er_simulate() has no sim_resp", {
+  toy_data <- data.frame(
+    exposure = seq(0, 10, length.out = 40),
+    outcome = rep(c(0, 1), 20),
+    grp = rep(c("a", "b"), each = 20)
+  )
+  spaghetti_only_mod <- structure(list(prob = 0.4), class = "er_test_fake_spaghetti_only_model")
+  no_method_mod <- structure(list(), class = "er_test_no_simulate_method_model")
+
+  expect_error(
+    er_vpc_plot(
+      toy_data, exposure = exposure, response = outcome, group_by = grp,
+      model = spaghetti_only_mod
+    ),
+    "sim_resp"
+  )
+  expect_error(
+    er_vpc_plot(
+      toy_data, exposure = exposure, response = outcome, group_by = grp,
+      model = no_method_mod
+    ),
+    "sim_resp"
+  )
+})
+
+test_that("er_vpc_plot requires exactly one of `sim`/`model`", {
+  toy_data <- data.frame(
+    exposure = seq(0, 10, length.out = 40),
+    outcome = rep(c(0, 1), 20),
+    grp = rep(c("a", "b"), each = 20)
+  )
+  fake_mod <- structure(list(prob = 0.4), class = "er_test_fake_vpc_model")
+
+  expect_error(
+    er_vpc_plot(toy_data, exposure = exposure, response = outcome, group_by = grp),
+    "exactly one"
+  )
+  expect_error(
+    er_vpc_plot(
+      toy_data, sim = toy_data, exposure = exposure, response = outcome,
+      group_by = grp, model = fake_mod
+    ),
+    "exactly one"
+  )
+})
