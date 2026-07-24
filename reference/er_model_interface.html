@@ -116,7 +116,24 @@ simulation-based visualisations (e.g. spaghetti plots, VPCs); implementing
 (reflecting parameter uncertainty). Models that cannot support
 simulation-based visualisation should not implement a method; the
 default method returns <code>NULL</code>; callers should treat a <code>NULL</code> result
-as "not available" rather than an error.</p></li>
+as "not available" rather than an error.</p>
+<p>A method may <em>additionally</em> return a <code>sim_resp</code> column: a full
+response-scale draw for that replicate/observation, reflecting both
+parameter uncertainty (as <code>fit_resp</code> already does) and
+observation-level sampling/residual noise (e.g. a 0/1 draw for a
+binary response, an integer draw for a count response, a draw
+including residual variance for a continuous response) – not just
+the fitted mean/probability. This is what <code><a href="er_vpc_plot.html">er_vpc_plot()</a></code>'s <code>model</code>
+argument requires: a visual predictive check needs simulated
+observations comparable to the actually observed data, not points on
+the mean curve, which is a genuinely different question from the one
+<code>fit_resp</code> (used by <code><a href="er_style_model.html">er_style_model_spaghetti()</a></code>) answers. <code>sim_resp</code>
+is independently optional – a method can supply <code>fit_resp</code> alone (as
+every implementation did before <code>sim_resp</code> existed, and as remains
+sufficient for spaghetti plots), or both columns from the same call.
+<code><a href="er_vpc_plot.html">er_vpc_plot()</a></code> treats a <code>sim_resp</code>-less result the same way it
+treats an outright <code>NULL</code>: "predictive simulation not available for
+this model."</p></li>
 <li><p><code>er_summary()</code> returns <code>NULL</code> (nothing available – the default method's
 behaviour), or a named list with any of the following independently
 optional keys. Unrecognized keys are permitted and ignored by built-in
