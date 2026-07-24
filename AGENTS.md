@@ -117,12 +117,13 @@ it. Key API points to remember: the example dataset is
 erglm now genuinely supports `binomial`/`poisson`/`gaussian`/`Gamma`
 families, with matching binary (`ae1`/`ae2`), count (`ae_count`), and
 continuous (`biomarker_change`, `ae_duration`) response columns in
-`erglm_data` -- not just binomial. Models can still be simulated for VPC
-purposes with `erglm::erglm_vpc_sim()` (unchanged), but the preferred
-path is now `er_vpc_plot(model = <erglm model>)`, going through
+`erglm_data` -- not just binomial. The preferred way to build a VPC is
+now `er_vpc_plot(model = <erglm model>)`, going through
 `er_simulate()`'s `sim_resp` extension -- see "`er_vpc_plot()` and the
-`sim_resp` extension to `er_simulate()`" below for the erglm-side PR
-this depends on (open, not yet merged, as of this writing).
+`sim_resp` extension to `er_simulate()`" below. `erglm::erglm_vpc_sim()`
+(the older, bespoke helper this superseded) is slated for removal from
+erglm, so no erplots-side docs, vignettes, or examples reference it any
+longer.
 
 A second, independent companion package,
 [emaxnls](https://github.com/djnavarro/emaxnls), fits Emax (sigmoidal
@@ -614,31 +615,35 @@ new `nsim`/`seed` arguments (only meaningful with `model`). When
 `NULL` -- no simulation support at all -- or because the method only
 ever populated `fit_resp`), it errors informatively rather than
 silently treating `fit_resp` as if it were a noisy draw, which would
-produce a falsely narrow, misleading VPC band. The `sim`-based code
-path is unchanged and remains supported indefinitely -- useful for a
-hand-built simulation, or a model-specific helper (like
-`erglm::erglm_vpc_sim()`) that predates or bypasses the `er_simulate()`
-interface.
+produce a falsely narrow, misleading VPC band. The `sim`-based code path is unchanged and remains supported
+indefinitely -- useful for a hand-built simulation, or a model-specific
+helper that predates or bypasses the `er_simulate()` interface.
 
-Both companion packages were updated to implement the extended
+Both companion packages have been updated to implement the extended
 contract: `erglm`'s `.erglm_simulate_draws()` (the engine behind
 `er_simulate.erglm_model()`) now also computes `sim_resp` via the
 existing `.erglm_draw_response()` helper (the same family-appropriate
-noise model `.erglm_resample()`/`erglm_vpc_sim()` already used, just
+noise model erglm's older, now-superseded `erglm_vpc_sim()` used, just
 wired into a second entry point); `emaxnls`'s `er_simulate.emaxnls()`
 now does the same via `Normal(fit_resp, sigma(model))` for `emaxnls`
 objects or `Bernoulli(fit_resp)` for `emaxlogistic` objects, mirroring
 `.emax_resample()`/`.emax_logistic_resample()`. Both changes were
-implemented as open, unmerged pull requests (erglm PR #6, emaxnls PR
-#67) rather than merged directly, since this repo's `Remotes:` entries
-point at each package's default branch; whoever reviews those PRs
-should merge them (in either order -- they're independent) once
-satisfied, at which point `er_vpc_plot(model = ...)`'s example in
-`R/er-vpc.R` and its test coverage (already passing locally against
-the patched branches) will also pass in CI. Neither package's public
-API changed -- `erglm_vpc_sim()`/`simulate.erglm_model()`/
-`simulate.emaxnls()`/`simulate.emaxlogistic()` are untouched, separate
-code paths.
+implemented via pull requests (erglm PR #6, emaxnls PR #67) that have
+since been merged, so `er_vpc_plot(model = ...)`'s example in
+`R/er-vpc.R` and its test coverage now pass against each package's
+default branch, as resolved via this repo's `Remotes:` entries. With
+`sim_resp` support now in place, `erglm_vpc_sim()` itself is slated for
+removal from erglm -- erplots' own docs, vignettes (`README.Rmd`,
+`vignettes/articles/plot-{binary,continuous,count}.Rmd`), and examples
+have all been updated to go through `er_vpc_plot(model = ...)` instead,
+so none of them call `erglm_vpc_sim()` any longer.
+`tests/testthat/test-er-vpc.R` still exercises the `sim`-argument code
+path directly using data frames built by `erglm_vpc_sim()`, since that
+path remains supported indefinitely regardless of the helper's removal
+-- but once erglm actually drops the function, those specific tests
+will need to build their `sim` data frames another way (e.g. directly
+via `er_simulate(model, newdata = data, nsim = ..., seed = ...)`,
+matching what `model = ` already does internally).
 
 ## Planned work
 

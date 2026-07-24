@@ -24,7 +24,9 @@ er_vpc_plot(
 columns as \code{data}, plus a \code{sim_id} column identifying each replicate.
 Mutually exclusive with \code{model}; supply exactly one of the two. Useful
 for a hand-built simulation, or a model-specific helper that doesn't
-go through the \code{er_simulate()} interface (e.g. \code{erglm::erglm_vpc_sim()}).}
+go through the \code{er_simulate()} interface. Passing \code{model} instead is
+preferred whenever the model implements \code{\link[=er_simulate]{er_simulate()}}'s \code{sim_resp}
+extension (see \link{er_model_interface}).}
 
 \item{exposure}{Exposure variable (one variable, unquoted)}
 
@@ -80,14 +82,8 @@ if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 
-# preferred: let er_vpc_plot() call er_simulate() for you
 er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = aucss, model = mod)
 er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = sex, model = mod)
-
-# equivalent, via a pre-built `sim` data frame (e.g. from a
-# model-specific helper that predates/bypasses the er_simulate() interface)
-sim <- erglm_vpc_sim(mod)
-er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
 
 mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 er_vpc_plot(

@@ -1,7 +1,20 @@
+# `sim=`-path fixture builder: replicates what `erglm::erglm_vpc_sim()`
+# used to provide (a `sim` data frame with the response column already
+# swapped in for the simulated draw), but goes through `er_simulate()`'s
+# `sim_resp` extension directly instead -- the same `sim_resp` ->
+# response-column swap `er_vpc_plot(model = ...)` does internally (see
+# `R/er-vpc.R`). This keeps the `sim=`-path tests below from depending on
+# `erglm_vpc_sim()`, which is slated for removal from erglm.
+vpc_sim_fixture <- function(model, data, response, nsim = 5, seed = NULL) {
+  sim <- er_simulate(model, newdata = data, nsim = nsim, seed = seed)
+  sim[[response]] <- sim[["sim_resp"]]
+  sim
+}
+
 test_that("er_vpc_plot returns a ggplot", {
   skip_if_not_installed("erglm")
   mod <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
-  sim <- erglm::erglm_vpc_sim(mod, nsim = 5)
+  sim <- vpc_sim_fixture(mod, er_test_data, "ae1")
 
   expect_no_error(er_vpc_plot(er_test_data, sim, aucss, ae1, group_by = aucss))
   p1 <- er_vpc_plot(er_test_data, sim, aucss, ae1, group_by = aucss)
@@ -12,7 +25,7 @@ test_that("er_vpc_plot returns a ggplot", {
 
 test_that("er_vpc_plot supports a continuous response with mean/t-interval summaries", {
   skip_if_not_installed("erglm")
-  sim <- erglm::erglm_vpc_sim(er_test_mod_gaussian, nsim = 5)
+  sim <- vpc_sim_fixture(er_test_mod_gaussian, er_test_data, "biomarker_change")
 
   expect_no_error(
     er_vpc_plot(er_test_data, sim, aucss, biomarker_change, group_by = aucss)
@@ -26,7 +39,7 @@ test_that("er_vpc_plot supports a continuous response with mean/t-interval summa
 
 test_that("er_vpc_plot routes a count (Poisson) response through the continuous path", {
   skip_if_not_installed("erglm")
-  sim <- erglm::erglm_vpc_sim(er_test_mod_poisson, nsim = 5)
+  sim <- vpc_sim_fixture(er_test_mod_poisson, er_test_data, "ae_count")
 
   # ae_count is a count, not a {0, 1} response -- "auto" must not
   # misclassify it as binary (PLAN.md Stage 4)
@@ -40,7 +53,7 @@ test_that("er_vpc_plot routes a count (Poisson) response through the continuous 
 
 test_that("er_vpc_plot uses an exact Poisson interval when response_type = \"count\" is declared", {
   skip_if_not_installed("erglm")
-  sim <- erglm::erglm_vpc_sim(er_test_mod_poisson, nsim = 5)
+  sim <- vpc_sim_fixture(er_test_mod_poisson, er_test_data, "ae_count")
 
   expect_no_error(
     er_vpc_plot(
@@ -65,7 +78,7 @@ test_that("er_vpc_plot uses an exact Poisson interval when response_type = \"cou
 test_that("er_vpc_plot's response_type argument overrides auto-detection", {
   skip_if_not_installed("erglm")
   mod <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
-  sim <- erglm::erglm_vpc_sim(mod, nsim = 5)
+  sim <- vpc_sim_fixture(mod, er_test_data, "ae1")
 
   # a 0/1 response explicitly declared continuous should use the
   # mean/t-interval path (no n1/n0 dropped, no percent-style rounding

@@ -78,9 +78,6 @@ plot(plt)
 
 ```{r}
 #| label: er-vpc
-sim <- erglm_vpc_sim(mod2, seed = 1234)
-sim
-
-er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
-er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = sex)
+er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = aucss, model = mod2, seed = 1234)
+er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = sex, model = mod2, seed = 1234)
 ```
