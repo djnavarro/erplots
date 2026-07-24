@@ -1068,19 +1068,15 @@ er_plot_build <- function(object) {
   composition <- .polish_theme(object, composition)
 
   # output
-  if (length(composition$heights) == 1) {
-    object$output <- object$plot$base
-  } else {
-    object$output <- patchwork::wrap_plots(
-      composition$plots, 
-      ncol = 1, 
-      heights = composition$info$size,
-      guides = "collect",
-      axes = "collect"
-    ) + patchwork::plot_annotation(
-      theme = object$theme$theme_args()
-    )
-  }
+  object$output <- patchwork::wrap_plots(
+    composition$plots, 
+    ncol = 1, 
+    heights = composition$info$size,
+    guides = "collect",
+    axes = "collect"
+  ) + patchwork::plot_annotation(
+    theme = object$theme$theme_args()
+  )
 
   return(object)
 }
