@@ -77,25 +77,35 @@
 
     
     
-<p>This article is about the <em>grammar</em> erplots plots are built
-from, not about any one plot’s mechanics – for worked examples of each
-layer, see the <a href="plot-binary.html">binary</a>, <a href="plot-continuous.html">continuous</a>, and <a href="plot-count.html">count</a> response articles; for writing a custom
-builder in detail, see <a href="extending.html">Extending
-erplots</a>.</p>
-<!-- agent-note: if a design choice described here ever changes, update
-this article in the same change -- see the note at the end. -->
+<p>The goal of this article is to describe the <strong>grammar</strong>
+that erplots uses to generate exposure-response plots. It’s not intended
+to describe all the style options available to users, or cover the
+mechanics of how plots are constructed. If you want to see those in more
+detail, there are articles covering <a href="plot-binary.html">binary</a>, <a href="plot-continuous.html">continuous</a>, and <a href="plot-count.html">count</a> response data. You can also read the
+article on <a href="extending.html">extending erplots</a> if you want to
+learn how you can write your own functions that change how the plots are
+displayed.</p>
+<!-- agent-note: whenever a future change lands that alters any of the
+above -- renaming a layer, changing which layers are singleton vs.
+additive, changing how stratification composes with a layer's own
+encoding, or adding/removing a `response_type` dispatch -- update this
+article in the same change. Treat a design change that isn't reflected
+here as incomplete. -->
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="building-a-plot-is-composing-layers-onto-an-object">Building a plot is composing layers onto an object<a class="anchor" aria-label="anchor" href="#building-a-plot-is-composing-layers-onto-an-object"></a>
+<h2 id="plots-are-constructed-in-layers">Plots are constructed in layers<a class="anchor" aria-label="anchor" href="#plots-are-constructed-in-layers"></a>
 </h2>
-<p><code><a href="../reference/er_plot.html">er_plot()</a></code> creates an empty object of class
-<code>er_plot</code>, storing the data and the plot’s
-exposure/response/stratification variables. You then pipe it through one
-or more <em>layer</em> functions, each of which adds one visual layer,
-and finish with <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>/<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> (or
-[er_plot_build()] directly):</p>
+<p>The design of an exposure-response plot follows a very similar logic
+to how plots are built in the ggplot2 package. The first function you
+call is always <code><a href="../reference/er_plot.html">er_plot()</a></code>, which creates an empty object of
+class <code>er_plot</code>. When you do this, it stores the data set
+internally and keeps track of which columns correspond to the exposure,
+response, and stratification variables. You then pipe it through through
+one or more <em>layer</em> functions, each of which adds one visual
+layer, and then finish by calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to generate the
+plot. A typical plot generation pipeline might look like this:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -106,6 +116,28 @@ and finish with <code><a href="https://rdrr.io/r/graphics/plot.default.html" cla
 <span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="design_files/figure-html/pipeline-1.png" class="r-plt" alt="" width="700"></p>
+<p>There are a few features to notice here.</p>
+<ul>
+<li>First, the model object <code>mod</code> is not created by the
+erplots package itself. In this case, we fit the model using
+<code><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm::erglm_model()</a></code>, and because the erglm package
+implements the erplots model interface functions, the erplots package
+knows how to extract everything it needs from the model.</li>
+<li>Second, notice that at the end of the pipeline we call
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> explicitly.One difference between ggplot2 and
+erplots is that erplots makes a strong distinction between calling
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> on the plot object (outputs a written description
+of the plot) and calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on the plot object (renders
+the plot).</li>
+<li>Third, although erplots uses the “layers” language to talk about
+different parts of the plot, an erplot layer operates at a different
+level of abstraction to a ggplot2 geom. A single erplot layer might add
+several ggplot2 geoms rather than a single one; it might even create a
+separate ggplot2 object that gets merged with other ggplot2 objects
+using the patchwork package.</li>
+</ul>
+<p>The diagram below illustrates the structure of the erplots plotting
+pipeline:</p>
 <pre><code>observed data
       |
       v
@@ -120,7 +152,7 @@ and finish with <code><a href="https://rdrr.io/r/graphics/plot.default.html" cla
     er_plot_add_groups()
       |
       v
-  er_plot_build()                 -- called for you by plot()/print()
+  er_plot_build()                 -- called for you by plot()
       |
       v
   polish: margins, labels, legends, theme
@@ -130,101 +162,96 @@ and finish with <code><a href="https://rdrr.io/r/graphics/plot.default.html" cla
       |
       v
   rendered plot</code></pre>
-<p>There are currently five layers, each documented on its own help
-topic:</p>
+<p>From the user perspective, everything ends with the
+<code><a href="../reference/er_plot_build.html">er_plot_build()</a></code> function, which you don’t generally call
+directly: passing your plot to the <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> function will do
+that part for you. The additional “polish” and “compose” steps are
+handled behind the scenes, but shown in the diagram to give you a sense
+of what happens.</p>
+<p>There are currently five different kinds of layer supported by
+erplots, each documented on its own help topic:</p>
 <table class="table">
 <colgroup>
 <col width="25%">
 <col width="25%">
-<col width="25%">
-<col width="25%">
+<col width="50%">
 </colgroup>
 <thead><tr class="header">
 <th>Layer</th>
 <th>Function</th>
 <th>Shows</th>
-<th>Depends on <code>response_type</code>?</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td>Model</td>
-<td>[er_plot_add_model()]</td>
-<td>Fitted curve/ribbon (or spaghetti)</td>
-<td>No</td>
+<td><code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code></td>
+<td>Fitted curve/ribbon (or spaghetti plot) that shows what the model
+predicts</td>
 </tr>
 <tr class="even">
 <td>Summary</td>
-<td>[er_plot_add_summary()]</td>
-<td>A corner-placed annotation – a model-derived p-value
-([er_style_summary_pvalue()]), a per-parameter coefficient table
-([er_style_summary_coefficients()]), a goodness-of-fit summary
-([er_style_summary_gof()]), or a purely descriptive count
-([er_style_summary_n()]) – none requiring the model layer to also be
-present</td>
-<td>No</td>
+<td><code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code></td>
+<td>A corner-placed annotation describing some aspect to the model
+(e.g., p-value) or the data set (e.g., sample statistics)</td>
 </tr>
 <tr class="odd">
 <td>Quantile</td>
-<td>[er_plot_add_quantiles()]</td>
-<td>Exposure-quantile-binned response summary (rate/mean + CI)</td>
-<td>Yes</td>
+<td><code><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code></td>
+<td>Exposure-quantile-binned response summary, usually a mean and
+confidence interval</td>
 </tr>
 <tr class="even">
 <td>Data</td>
-<td>[er_plot_add_data()]</td>
+<td><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code></td>
 <td>Raw observations, by default overlaid on the model panel at their
-true (exposure, response) coordinates ([er_style_data_overlay()]); or,
-for a binary response, [er_style_data_boxjitter()]’s older panel-based
-boxplot + jitter design</td>
-<td>Yes</td>
+true (exposure, response) coordinates, but sometimes added to separate
+“data strips” that appear above and below the model panel</td>
 </tr>
 <tr class="odd">
 <td>Group</td>
-<td>[er_plot_add_groups()]</td>
+<td><code><a href="../reference/er_plot_add_groups.html">er_plot_add_groups()</a></code></td>
 <td>Exposure distribution, boxplot/violin, split by a grouping
 variable</td>
-<td>No</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level2">
-<h2 id="layers-are-either-singleton-or-additive">Layers are either singleton or additive<a class="anchor" aria-label="anchor" href="#layers-are-either-singleton-or-additive"></a>
+<h2 id="layers-are-singleton-or-additive">Layers are singleton or additive<a class="anchor" aria-label="anchor" href="#layers-are-singleton-or-additive"></a>
 </h2>
 <p>Calling a layer function twice on the same object doesn’t always do
 the same thing. The model, summary, quantile, and data layers are
 <strong>singleton</strong>: a second call replaces the first call’s
 result rather than combining the two.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">8</span><span class="op">)</span> <span class="co"># overwrites the bins = 4 call</span></span>
-<span></span>
-<span><span class="va">plt</span><span class="op">$</span><span class="va">layer</span><span class="op">$</span><span class="va">quantile</span><span class="op">$</span><span class="va">config</span><span class="op">$</span><span class="va">n_quantiles</span> <span class="co"># 8, not 4</span></span>
-<span><span class="co">#&gt; [1] 8</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">8</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># overwrites the bins = 8 call</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># rendered plot has 4 quantile bins (plus placebo group)</span></span></code></pre></div>
+<p><img src="design_files/figure-html/singleton-1.png" class="r-plt" alt="" width="700"></p>
 <p>The group layer is the one exception: it’s <strong>additive</strong>.
 Each call adds another panel alongside any already added, rather than
 replacing them:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">treatment</span><span class="op">)</span> <span class="co"># adds a second panel, doesn't replace the first</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">plt</span><span class="op">$</span><span class="va">layer</span><span class="op">$</span><span class="va">group</span><span class="op">$</span><span class="va">config</span><span class="op">)</span> <span class="co"># both grouping variables are still there</span></span>
-<span><span class="co">#&gt; [1] ".aucss_quantile" "treatment"</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># adds first panel</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">treatment</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># adds second panel</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># rendered plot contains both</span></span></code></pre></div>
+<p><img src="design_files/figure-html/additive-1.png" class="r-plt" alt="" width="700"></p>
 <p>This is a deliberate design choice, not an oversight: there is only
-one “the model” and one “the quantile summary” to show per plot, but
-many legitimate ways to slice the exposure distribution by different
-grouping variables. The one flagged exception to watch for: because the
+one “the model” and one “the quantiles” to show per plot, but many
+legitimate ways to slice the exposure distribution by different grouping
+variables.</p>
+<p>Note that there is one important side-effect to this: because the
 model layer is singleton, overlaying two model curves for comparison
 (e.g. a candidate model against a reference model) isn’t currently
-possible. That’s a plausible future addition, not something currently
-planned.</p>
+possible. That’s a plausible future addition, but not something
+currently planned.</p>
 </div>
 <div class="section level2">
-<h2 id="stratification-composes-with-layers-usually-via-color">Stratification composes with layers, usually via color<a class="anchor" aria-label="anchor" href="#stratification-composes-with-layers-usually-via-color"></a>
+<h2 id="stratification-composes-with-layers">Stratification composes with layers<a class="anchor" aria-label="anchor" href="#stratification-composes-with-layers"></a>
 </h2>
 <p><code>stratify_by</code>, set once in <code><a href="../reference/er_plot.html">er_plot()</a></code>,
 declares a single discrete variable used to split layers by color/fill,
@@ -248,8 +275,8 @@ defaulting to color/fill.</p>
 <p>For most layers, color/fill is always free for strata, so this rule
 is invisible in practice. The data layer is the one exception, and its
 behaviour now depends on which builder is in play, and which
-<em>structural</em> family (declared via [er_style_tag()]) that builder
-belongs to:</p>
+<em>structural</em> family (declared via <code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>)
+that builder belongs to:</p>
 <ul>
 <li>
 <code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code> (the default,
@@ -278,16 +305,16 @@ legend as the shared strata legend or a standalone response
 colorbar.</p>
 </div>
 <div class="section level2">
-<h2 id="response-type-changes-what-a-layer-summarises-not-whether-it-appears">Response type changes what a layer summarises, not whether it
-appears<a class="anchor" aria-label="anchor" href="#response-type-changes-what-a-layer-summarises-not-whether-it-appears"></a>
+<h2 id="response-type-changes-what-a-layer-summarises">Response type changes what a layer summarises<a class="anchor" aria-label="anchor" href="#response-type-changes-what-a-layer-summarises"></a>
 </h2>
 <p><code>response_type</code>, also set once in <code><a href="../reference/er_plot.html">er_plot()</a></code>
 (<code>"auto"</code>, <code>"binary"</code>, <code>"continuous"</code>,
 or <code>"count"</code>), governs the response’s scale and which
 summary/CI method a response-type-aware layer uses. The model and group
 layers don’t look at the response’s type at all – they only consume
-[er_predict()]/[er_simulate()] output or the exposure variable,
-respectively. The quantile layer dispatches on it directly:</p>
+<code><a href="../reference/er_model_interface.html">er_predict()</a></code>/<code><a href="../reference/er_model_interface.html">er_simulate()</a></code> output or the
+exposure variable, respectively. The quantile layer dispatches on it
+directly:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -303,17 +330,17 @@ respectively. The quantile layer dispatches on it directly:</p>
 <tr class="odd">
 <td><code>"binary"</code></td>
 <td>Response rate</td>
-<td>Clopper-Pearson ([ci_clopper_pearson()])</td>
+<td>Clopper-Pearson (<code><a href="../reference/ci_clopper_pearson.html">ci_clopper_pearson()</a></code>)</td>
 </tr>
 <tr class="even">
 <td><code>"continuous"</code></td>
 <td>Mean</td>
-<td>t-interval ([ci_t()])</td>
+<td>t-interval (<code><a href="../reference/ci_t.html">ci_t()</a></code>)</td>
 </tr>
 <tr class="odd">
 <td><code>"count"</code></td>
 <td>Mean</td>
-<td>Exact Poisson interval ([ci_poisson()])</td>
+<td>Exact Poisson interval (<code><a href="../reference/ci_poisson.html">ci_poisson()</a></code>)</td>
 </tr>
 </tbody>
 </table>
@@ -323,7 +350,7 @@ it’s logical or confined to <code>{0, 1}</code>, and
 auto-detects as <code>"continuous"</code> and is summarised as an
 approximately-continuous quantity unless
 <code>response_type = "count"</code> is declared explicitly. See
-[er_plot_add_quantiles()] for the full rationale and the <a href="plot-count.html">count responses</a> article’s “Quantile layer”
+<code><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code> for the full rationale and the <a href="plot-count.html">count responses</a> article’s “Quantile layer”
 section for a worked example, including a case where the choice between
 the t-interval and exact Poisson interval visibly matters.</p>
 <p>The data layer doesn’t compute a summary statistic at all – it just
@@ -335,40 +362,29 @@ for a binary response’s exactly-0/1 y-values);
 <code>response_type</code> only insofar as
 <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> guards against using it on a
 continuous/count response at all (there’s no upper/lower partition to
-split on) – see [er_plot_add_data()].</p>
+split on) – see <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code>.</p>
 </div>
 <div class="section level2">
-<h2 id="extending-erplots-writing-your-own-builder">Extending erplots: writing your own builder<a class="anchor" aria-label="anchor" href="#extending-erplots-writing-your-own-builder"></a>
+<h2 id="extending-erplots">Extending erplots<a class="anchor" aria-label="anchor" href="#extending-erplots"></a>
 </h2>
 <p>Every layer function delegates the actual drawing to a
 <code>style</code> argument sharing a common signature –
 <code>function(data, config, stratify, exposure, response, strata, theme, ...)</code>.
 That signature is a documented, public part of the API (see
-[er_style()]), each layer’s <code>style</code> defaults to one built-in
-<code>er_style_*()</code> function, and it can be set to any other
-function matching the same signature – no need to fork the package or
-reach into <code>object$layer</code> internals. For the data layer
-specifically, a custom builder must additionally declare which
-<em>structural</em> family it belongs to via [er_style_tag()].</p>
+<code><a href="../reference/er_style.html">er_style()</a></code>), each layer’s <code>style</code> defaults to
+one built-in <code>er_style_*()</code> function, and it can be set to
+any other function matching the same signature – no need to fork the
+package or reach into <code>object$layer</code> internals. For the data
+layer specifically, a custom builder must additionally declare which
+<em>structural</em> family it belongs to via
+<code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>.</p>
 <p>Writing a custom builder in detail – including what
 <code>config</code> actually contains for each layer, a worked crossbar
-example, and [er_style_tag()], the single helper a builder can use to
-declare its
+example, and <code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>, the single helper a builder
+can use to declare its
 <code>layout</code>/<code>fill_role</code>/<code>y_role</code> metadata
 for the composition machinery – is its own article: <a href="extending.html">Extending erplots: writing your own
 builder</a>.</p>
-</div>
-<div class="section level2">
-<h2 id="keeping-this-article-in-sync">Keeping this article in sync<a class="anchor" aria-label="anchor" href="#keeping-this-article-in-sync"></a>
-</h2>
-<p>This article describes the grammar as designed and implemented
-<em>today</em>.</p>
-<!-- agent-note: whenever a future change lands that alters any of the
-above -- renaming a layer, changing which layers are singleton vs.
-additive, changing how stratification composes with a layer's own
-encoding, or adding/removing a `response_type` dispatch -- update this
-article in the same change. Treat a design change that isn't reflected
-here as incomplete. -->
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
