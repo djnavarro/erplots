@@ -254,10 +254,9 @@ swapping in the exact Poisson interval for the observed-side summary:
 
 ``` r
 
-sim_poisson <- erglm_vpc_sim(mod_poisson, seed = 6142)
 er_vpc_plot(
-  erglm_data, sim_poisson, aucss, ae_count, group_by = aucss,
-  response_type = "count"
+  erglm_data, exposure = aucss, response = ae_count, group_by = aucss,
+  model = mod_poisson, seed = 6142, response_type = "count"
 )
 ```
 

@@ -83,31 +83,14 @@ plot(plt)
 
 ``` r
 
-sim <- erglm_vpc_sim(mod2, seed = 1234)
-sim
-#> # A tibble: 30,000 × 5
-#>      ae2 aucss sex    row_id sim_id
-#>    <int> <dbl> <fct>   <int>  <int>
-#>  1     0  673. Male        1      1
-#>  2     1 2806. Female      2      1
-#>  3     0    0  Female      3      1
-#>  4     1 1169. Female      4      1
-#>  5     0  377. Male        5      1
-#>  6     0  327. Female      6      1
-#>  7     0    0  Male        7      1
-#>  8     1 1208. Female      8      1
-#>  9     0    0  Male        9      1
-#> 10     0  254. Female     10      1
-#> # ℹ 29,990 more rows
-
-er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
+er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = aucss, model = mod2, seed = 1234)
 ```
 
 ![](reference/figures/README-er-vpc-1.png)
 
 ``` r
 
-er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = sex)
+er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = sex, model = mod2, seed = 1234)
 ```
 
 ![](reference/figures/README-er-vpc-2.png)

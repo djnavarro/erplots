@@ -191,8 +191,10 @@ vs. simulated **means** rather than rates:
 
 ``` r
 
-sim_gaussian <- erglm_vpc_sim(mod_gaussian, seed = 3947)
-er_vpc_plot(erglm_data, sim_gaussian, aucss, biomarker_change, group_by = aucss)
+er_vpc_plot(
+  erglm_data, exposure = aucss, response = biomarker_change, group_by = aucss,
+  model = mod_gaussian, seed = 3947
+)
 ```
 
 ![](plot-continuous_files/figure-html/vpc-1-1.png)

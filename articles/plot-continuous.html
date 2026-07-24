@@ -227,8 +227,10 @@ the default builder and a single grouping variable are shown here:</p>
 layer, comparing observed vs. simulated <strong>means</strong> rather
 than rates:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sim_gaussian</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_vpc_sim.html" class="external-link">erglm_vpc_sim</a></span><span class="op">(</span><span class="va">mod_gaussian</span>, seed <span class="op">=</span> <span class="fl">3947</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span><span class="va">erglm_data</span>, <span class="va">sim_gaussian</span>, <span class="va">aucss</span>, <span class="va">biomarker_change</span>, group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">erglm_data</span>, exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">biomarker_change</span>, group_by <span class="op">=</span> <span class="va">aucss</span>,</span>
+<span>  model <span class="op">=</span> <span class="va">mod_gaussian</span>, seed <span class="op">=</span> <span class="fl">3947</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-continuous_files/figure-html/vpc-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">

@@ -381,13 +381,15 @@ erglm_data |>
 [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
 is a model-agnostic VPC-style plot that compares observed data against
 model-simulated data, operating on plain data frames rather than an
-`er_plot` object. For a binary response it compares observed vs.
-simulated response *rates*:
+`er_plot` object. Passing a fitted `model` lets
+[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
+call \[er_simulate()\] for you internally, rather than requiring a
+pre-built `sim` data frame. For a binary response it compares observed
+vs. simulated response *rates*:
 
 ``` r
 
-sim_binary <- erglm_vpc_sim(mod, seed = 5218)
-er_vpc_plot(erglm_data, sim_binary, aucss, ae1, group_by = aucss)
+er_vpc_plot(erglm_data, exposure = aucss, response = ae1, group_by = aucss, model = mod, seed = 5218)
 ```
 
 ![](plot-binary_files/figure-html/vpc-1-1.png)

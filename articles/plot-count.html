@@ -275,10 +275,9 @@ the default builder and a single grouping variable are shown here:</p>
 <code><a href="../reference/er_plot.html">er_plot()</a></code>, swapping in the exact Poisson interval for the
 observed-side summary:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sim_poisson</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_vpc_sim.html" class="external-link">erglm_vpc_sim</a></span><span class="op">(</span><span class="va">mod_poisson</span>, seed <span class="op">=</span> <span class="fl">6142</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span></span>
-<span>  <span class="va">erglm_data</span>, <span class="va">sim_poisson</span>, <span class="va">aucss</span>, <span class="va">ae_count</span>, group_by <span class="op">=</span> <span class="va">aucss</span>,</span>
-<span>  response_type <span class="op">=</span> <span class="st">"count"</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">erglm_data</span>, exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae_count</span>, group_by <span class="op">=</span> <span class="va">aucss</span>,</span>
+<span>  model <span class="op">=</span> <span class="va">mod_poisson</span>, seed <span class="op">=</span> <span class="fl">6142</span>, response_type <span class="op">=</span> <span class="st">"count"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-count_files/figure-html/vpc-1-1.png" class="r-plt" alt="" width="700"></p>
 </div>

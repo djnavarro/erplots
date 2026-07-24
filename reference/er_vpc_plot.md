@@ -37,8 +37,11 @@ er_vpc_plot(
   hand-built simulation, or a model-specific helper that doesn't go
   through the
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  interface (e.g.
-  [`erglm::erglm_vpc_sim()`](https://erglm.djnavarro.net/reference/erglm_vpc_sim.html)).
+  interface. Passing `model` instead is preferred whenever the model
+  implements
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)'s
+  `sim_resp` extension (see
+  [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)).
 
 - exposure:
 
@@ -116,14 +119,8 @@ if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
 mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 
-# preferred: let er_vpc_plot() call er_simulate() for you
 er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = aucss, model = mod)
 er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = sex, model = mod)
-
-# equivalent, via a pre-built `sim` data frame (e.g. from a
-# model-specific helper that predates/bypasses the er_simulate() interface)
-sim <- erglm_vpc_sim(mod)
-er_vpc_plot(erglm_data, sim, aucss, ae2, group_by = aucss)
 
 mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 er_vpc_plot(
@@ -138,7 +135,8 @@ er_vpc_plot(
 )
 }
 #> Using seed = 9984. Pass `seed = 9984` to reproduce this result.
-#> Error in er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = aucss,     model = mod): `er_simulate()` does not provide predictive simulation (a `sim_resp` column) for objects of class <erglm_model/glm/lm>.
-#> ℹ `er_vpc_plot()`'s `model` argument needs an `er_simulate()` method returning `sim_resp` (see `?er_model_interface`) -- this is a stricter requirement than the `fit_resp`-only simulation that suffices for `er_style_model_spaghetti()`.
-#> ℹ Alternatively, pass a pre-built `sim` data frame directly.
+#> Using seed = 5233. Pass `seed = 5233` to reproduce this result.
+#> Using seed = 5650. Pass `seed = 5650` to reproduce this result.
+#> Using seed = 2758. Pass `seed = 2758` to reproduce this result.
+
 ```

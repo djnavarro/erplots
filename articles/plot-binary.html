@@ -369,11 +369,13 @@ can also use violin plots with <code><a href="../reference/er_style_group.html">
 </h2>
 <p><code><a href="../reference/er_vpc_plot.html">er_vpc_plot()</a></code> is a model-agnostic VPC-style plot that
 compares observed data against model-simulated data, operating on plain
-data frames rather than an <code>er_plot</code> object. For a binary
-response it compares observed vs. simulated response <em>rates</em>:</p>
+data frames rather than an <code>er_plot</code> object. Passing a fitted
+<code>model</code> lets <code><a href="../reference/er_vpc_plot.html">er_vpc_plot()</a></code> call [er_simulate()]
+for you internally, rather than requiring a pre-built <code>sim</code>
+data frame. For a binary response it compares observed vs. simulated
+response <em>rates</em>:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sim_binary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_vpc_sim.html" class="external-link">erglm_vpc_sim</a></span><span class="op">(</span><span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">5218</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span><span class="va">erglm_data</span>, <span class="va">sim_binary</span>, <span class="va">aucss</span>, <span class="va">ae1</span>, group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span><span class="va">erglm_data</span>, exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span>, group_by <span class="op">=</span> <span class="va">aucss</span>, model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">5218</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-binary_files/figure-html/vpc-1-1.png" class="r-plt" alt="" width="700"></p>
 <p>See the <a href="plot-continuous.html#vpc-plot">continuous</a> and <a href="plot-count.html#vpc-plot">count</a> articles for how this
 generalises to means (with a t-interval or exact Poisson interval,
