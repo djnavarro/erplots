@@ -321,6 +321,19 @@ test_that("er_plot_add_groups errors when grouping by the stratification variabl
   expect_no_error(er_plot_add_groups(plt, aucss, keep_strata = TRUE))
 })
 
+test_that("er_plot_add_groups() errors clearly when grouping by a constant continuous variable", {
+  skip_if_not_installed("erglm")
+
+  df_const <- er_test_data
+  df_const$biomarker_change <- 3
+
+  plt <- er_plot(df_const, aucss, ae1)
+  expect_error(
+    er_plot_add_groups(plt, biomarker_change),
+    "Cannot compute quantiles"
+  )
+})
+
 test_that("er_plot_add_groups is additive across repeated calls", {
   skip_if_not_installed("erglm")
 

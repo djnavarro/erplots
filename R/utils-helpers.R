@@ -171,12 +171,13 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #'   [stats::quantile()] -- which quantile-layer builders that draw
 #'   bin-boundary separators (e.g. [er_style_quantile_errorbar_vlines()])
 #'   read back out via `attr(exposure_bins, "breaks")`.
-#'   `cut_exposure_quantile()` errors if `x` (excluding placebo and `NA`
-#'   values) has fewer than 2 distinct values -- e.g. a constant, all-`NA`,
-#'   or single-observation exposure column -- since quantile bins aren't
-#'   well-defined in that case; without this check, [stats::quantile()]
-#'   would silently produce non-unique/degenerate breaks and the error
-#'   would instead surface much later, opaquely, from inside [cut()].
+#'   Both `cut_exposure_quantile()` (excluding placebo and `NA` values) and
+#'   `cut_quantile()` (excluding `NA` values) error if `x` has fewer than
+#'   2 distinct values -- e.g. a constant, all-`NA`, or single-observation
+#'   column -- since quantile bins aren't well-defined in that case;
+#'   without this check, [stats::quantile()] would silently produce
+#'   non-unique/degenerate breaks and the error would instead surface
+#'   much later, opaquely, from inside [cut()].
 #'
 #' @name cut_quantile
 #' @examples
@@ -217,6 +218,16 @@ cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL) {
 #' @export
 #' @rdname cut_quantile
 cut_quantile <- function(x, n = 4) {
+  n_distinct <- length(unique(x[!is.na(x)]))
+  if (n_distinct < 2) {
+    rlang::abort(c(
+      sprintf(
+        "Cannot compute quantiles: found only %d distinct non-missing value%s.",
+        n_distinct, if (n_distinct == 1) "" else "s"
+      ),
+      "i" = "At least 2 distinct values are required to form quantile bins -- check for a constant, all-`NA`, or too-small variable."
+    ))
+  }
   breaks <- stats::quantile(x, probs = (0:n)/n, na.rm = TRUE)
   bin_num <- as.numeric(cut(x, breaks, labels = 1:n, include.lowest = TRUE))
   bin_fct <- factor(bin_num, levels = 1:n, labels = paste0("Q", 1:n)) 

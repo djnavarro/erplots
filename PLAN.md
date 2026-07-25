@@ -201,12 +201,45 @@ in `cut_exposure_quantile()`: Cannot compute exposure quantiles: found
 only N distinct..." message through both `er_plot_add_quantiles()` and
 `er_vpc_plot()`, rather than the previous opaque `cut()`-level errors.
 
-**Follow-up not done here:** `cut_quantile()` (used by
-`er_plot_add_groups()` for a continuous grouping variable) has the same
-underlying vulnerability -- a constant or all-`NA` grouping variable
-would hit the same `cut()` failure family -- but wasn't in scope for
-this specific stress-test finding. Worth the same guard if it comes up
-in practice.
+**Follow-up (closed -- see "Completed: guard `cut_quantile()` against
+degenerate group variables" immediately below):** `cut_quantile()`
+(used by `er_plot_add_groups()` for a continuous grouping variable) had
+the same underlying vulnerability -- a constant or all-`NA` grouping
+variable would hit the same `cut()` failure family -- but wasn't in
+scope for this specific stress-test finding at the time.
+
+## Completed: guard `cut_quantile()` against degenerate group variables
+
+**The bug.** The follow-up flagged just above: `cut_quantile()` (the
+sibling of `cut_exposure_quantile()`, used by `er_plot_add_groups()` to
+bin a *continuous grouping variable* rather than the exposure variable
+itself) had the identical vulnerability -- no check that
+`stats::quantile()`'s breaks were usable before handing them to
+`cut()`. A constant or all-`NA` grouping variable (e.g.
+`er_plot_add_groups(plt, some_covariate)` where `some_covariate`
+happens to be constant in the plotted data) hit the same
+`'breaks' are not unique` / `number of intervals and length of 'labels'
+differ` failures as `cut_exposure_quantile()` did, surfacing from
+inside `.layer_group()`'s `dplyr::mutate()` call with no indication
+the grouping variable itself was the problem.
+
+**The fix.** `cut_quantile()` now performs the same up-front check as
+`cut_exposure_quantile()`: count the distinct non-missing values in
+`x` and abort with a clear message if there are fewer than 2. There's
+no placebo concept for a general grouping variable, so the check and
+message are slightly simpler (no exclusion step, no "non-placebo"
+wording) than `cut_exposure_quantile()`'s. The shared `@returns` doc
+for both functions (under the `cut_quantile` topic) was updated to
+describe both guards together.
+
+**Status:** done. New tests in `tests/testthat/test-utils-helpers.R`
+("cut_quantile errors clearly on constant, all-NA, or too-few-value
+input" and a companion normal-usage regression test) mirror the
+`cut_exposure_quantile()` coverage above. A new integration test in
+`tests/testthat/test-er-plot-api.R` ("er_plot_add_groups() errors
+clearly when grouping by a constant continuous variable") confirms the
+error surfaces through the actual layer function, not just the bare
+helper. `devtools::test()` and `devtools::check()` both clean.
 
 ## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 
