@@ -134,6 +134,44 @@
   return(p)
 }
 
+.polish_scales <- function(object) {
+  p <- object$plot
+  color_discrete <- object$theme$color_discrete
+  fill_discrete <- object$theme$fill_discrete
+  if (is.null(color_discrete) && is.null(fill_discrete)) return(p)
+
+  # mirrors `.polish_labels()`'s own eligibility logic: only override
+  # `colour`/`fill` where it's genuinely mapped to strata (discrete),
+  # never where it's been claimed for density/response-value (continuous)
+  if (!is.null(p$base)) {
+    overlay_style <- object$layer$overlay$config$style
+    fill_is_density <- identical(.style_fill_role(overlay_style), "density")
+    ll <- names(ggplot2::get_labs(p$base))
+    if (!is.null(color_discrete) && "colour" %in% ll) p$base <- p$base + color_discrete
+    if (!is.null(fill_discrete) && !fill_is_density && "fill" %in% ll) p$base <- p$base + fill_discrete
+  }
+
+  data_color_role <- object$layer$data$config$color_role %||% "strata"
+  data_is_discrete <- identical(data_color_role, "strata")
+  if (data_is_discrete) {
+    for (panel_name in names(p$data)) {
+      ll <- names(ggplot2::get_labs(p$data[[panel_name]]))
+      if (!is.null(color_discrete) && "colour" %in% ll) p$data[[panel_name]] <- p$data[[panel_name]] + color_discrete
+      if (!is.null(fill_discrete) && "fill" %in% ll) p$data[[panel_name]] <- p$data[[panel_name]] + fill_discrete
+    }
+  }
+
+  if (!is.null(p$group)) {
+    for (g in names(p$group)) {
+      ll <- names(ggplot2::get_labs(p$group[[g]]))
+      if (!is.null(color_discrete) && "colour" %in% ll) p$group[[g]] <- p$group[[g]] + color_discrete
+      if (!is.null(fill_discrete) && "fill" %in% ll) p$group[[g]] <- p$group[[g]] + fill_discrete
+    }
+  }
+
+  return(p)
+}
+
 .polish_arrangement <- function(object) {
   
   plot_list <- list()
@@ -255,9 +293,8 @@
 }
 
 .polish_theme <- function(object, composition) {
-  theme_fn <- object$theme$theme_args
   for (ind in seq_along(composition$plots)) {
-    composition$plots[[ind]] <- composition$plots[[ind]] + theme_fn()
+    composition$plots[[ind]] <- composition$plots[[ind]] + object$theme$theme_extra
   }
   return(composition)
 }

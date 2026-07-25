@@ -4,7 +4,7 @@
 .build_base_plot <- function(object) {
 
   base <- ggplot2::ggplot() +
-    object$theme$theme_base() +
+    object$theme$theme_base +
     ggplot2::scale_y_continuous(
       oob = scales::oob_keep, 
       expand = ggplot2::expansion(mult = .01, add = 0)
@@ -43,7 +43,7 @@
     panel_config <- config
     panel_config$panel <- panel_name
     data_plots[[panel_name]] <- ggplot2::ggplot() +
-      theme$theme_base() +
+      theme$theme_base +
       do.call(panel_config$style, c(
         list(data, panel_config, stratify, exposure, response, strata, theme),
         panel_config$dots
@@ -85,7 +85,7 @@
     # `er_plot_add_groups()`) rather than a single shared value, since
     # different calls may have used different `keep_strata` settings
     group_plots[[g]] <- ggplot2::ggplot() + 
-      theme$theme_base() +
+      theme$theme_base +
       do.call(config[[g]]$style, c(
         list(data, config[[g]], config[[g]]$stratify, exposure, response, strata, theme),
         config[[g]]$dots

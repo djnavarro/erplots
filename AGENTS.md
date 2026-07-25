@@ -157,6 +157,116 @@ dispatch, cross-referencing `plot-binary.Rmd` rather than duplicating a
 full binary example); no equivalent worked example was added to
 `plot-binary.Rmd` itself.
 
+## `er_plot_theme()`: implemented (was a no-op placeholder)
+
+`er_plot_theme()` used to be a two-line stub (`function(object, labels)
+{ return(object) }`) documented as "not yet implemented". It's now a
+working interface for the styling knobs a ggplot2 user would expect to
+control -- labels, plot-level title/subtitle/caption, axis limits, the
+overall visual theme, the discrete color/fill palette used for
+stratification, value formatters, the legend key glyph, and relative
+panel heights -- without touching which variable is mapped to which
+aesthetic (that's still controlled by a layer's `style`/`er_style_tag()`,
+not this function).
+
+**Signature and semantics.** All arguments are flat (not grouped into
+nested lists like `labels = list(...)`, matching every other
+`er_plot_add_*()` function) and default to `NULL`, meaning "leave
+whatever was set before unchanged" -- so `er_plot_theme()` can be called
+more than once on the same object, each call only touching the arguments
+it actually supplies (the same accumulate-by-default behaviour as
+`ggplot2::theme()`'s own merging). There is no way to reset a field back
+to its `er_plot()` default other than re-supplying that default's value
+explicitly. Each argument is validated by a small dedicated helper
+(`.check_theme_string()`, `.check_theme_limits()`, `.check_theme_class()`,
+`.check_theme_function()`, `.check_theme_number()`, all `@noRd` in
+`R/er-plot-api.R`) before being written:
+
+- `xlab`/`ylab`/`strata_lab` -> `object$exposure$label`/
+  `object$response$label`/`object$strata$label`. `strata_lab` errors if
+  `stratify_by` wasn't set in `er_plot()` -- there's no legend to label.
+- `title`/`subtitle`/`caption` -> new `object$theme$title`/`subtitle`/
+  `caption` fields (all `NULL` by default, set in `er_plot()`), applied
+  via `patchwork::plot_annotation()` in `er_plot_build()` (which already
+  passed `theme =` there for the annotation-level theme).
+- `xlim`/`ylim` -> `object$exposure$limits`/`object$response$limits`.
+  These were already read lazily by every builder/`coord_cartesian()`
+  call at build time (not at add-layer time), so overriding them needed
+  no other code changes and works regardless of call order relative to
+  `er_plot_add_*()`.
+- `theme_base`/`theme_extra` -> `object$theme$theme_base`/
+  `object$theme$theme_extra` (renamed from `theme_args` -- see the
+  refactor below). Supplying `theme_extra` fully replaces the existing
+  default (panel border + `legend.position = "bottom"`) rather than
+  merging with it.
+- `color_discrete`/`fill_discrete` -> new `object$theme$color_discrete`/
+  `object$theme$fill_discrete` fields (`NULL` by default). Discrete
+  ggplot2 scale objects only, validated via `inherits(x, "Scale")` --
+  continuous palette control (density/response-colored layers) is
+  explicitly out of scope for now, see "Deferred" below.
+- `format_p`/`format_percent`/`format_number` -> the existing
+  `object$theme$format_*` fields (unchanged consumption elsewhere).
+- `draw_key` -> the existing `object$theme$draw_key` field (unchanged
+  consumption elsewhere).
+- `height_base`/`height_data`/`height_group` -> merged into
+  `object$theme$height` via `utils::modifyList()`, so supplying only one
+  leaves the other two unchanged.
+
+**The `theme_base`/`theme_args` -> plain-object refactor.** Before this
+work, `object$theme$theme_base` and `object$theme$theme_args` were
+zero-argument functions (`function() ggplot2::theme_bw()` etc.) called
+at every use site, even though nothing ever passed them arguments. This
+was simplified to store the plain ggplot2 theme objects directly
+(`object$theme$theme_base <- ggplot2::theme_bw()`), which is both simpler
+internally and lets `er_plot_theme()` accept a theme object directly from
+users the way they'd normally write `+ theme_bw()`. `theme_args` was
+renamed to `theme_extra` in the same pass, to match the new user-facing
+argument name (straight rename, no shim, per this package's usual
+convention). Call sites updated: `.build_base_plot()`,
+`.build_data_plot()`, `.build_group_plot()` (`R/er-plot-build.R`,
+dropping the trailing `()`), `.polish_theme()` (`R/er-plot-compose.R`),
+and `er_plot_build()`'s `patchwork::plot_annotation(theme = ...)` call
+(`R/er-plot-api.R`).
+
+**Applying the discrete palette (`.polish_scales()`).** A new
+`R/er-plot-compose.R` function, called from `er_plot_build()` right
+after `.polish_labels()`, adds `object$theme$color_discrete`/
+`fill_discrete` (when set) to every eligible plot. "Eligible" reuses the
+same role checks `.polish_labels()` already computes to decide whether
+`colour`/`fill` on a given plot means strata (discrete, eligible) or
+density/response-value (continuous, left alone): the base plot is
+skipped for `fill` when the overlay style is tagged `fill_role =
+"density"` (e.g. `er_style_data_hex()`); data panels are skipped when
+`config$color_role == "response"`; group panels are always eligible
+(group builders only ever use strata for color/fill). One known rough
+edge, not solved: if a future custom builder adds its own
+`scale_color_*()`/`scale_fill_*()` directly, `.polish_scales()` will add
+a second scale on top rather than detecting/deferring to the builder's
+own choice (ggplot2 emits a message and the later one wins) -- no
+built-in builder does this today, so it isn't a live bug.
+
+**Deferred / explicitly out of scope for this round:** continuous
+color/fill palette control (`er_style_data_hex()`'s density fill, a
+continuous/count response's response-colored data layer) -- would need
+`color_continuous`/`fill_continuous` arguments and the symmetric branch
+of `.polish_scales()`'s eligibility logic; per-layer/per-geom style knobs
+(alpha, linewidth, hardcoded greys) -- these belong to individual
+`er_style_*()` builders' own arguments/`...`-passthrough, not the global
+theme; validating that a `color_discrete`/`fill_discrete` scale's own
+aesthetic (`"colour"` vs `"fill"`) matches which argument it was passed
+as -- a mismatch surfaces as ggplot2's own error/warning at build time
+rather than being caught by `er_plot_theme()` itself.
+
+Covered by a new `tests/testthat/test-er-plot-theme.R` (partial-update
+semantics across repeated calls, each argument's validation, an
+integration test applying several overrides at once, and a regression
+check that `color_discrete`/`fill_discrete` don't affect an
+`er_style_data_hex()` density fill). Verified clean: `devtools::test()`
+(618 passing) and `devtools::check()` (0 errors/warnings/notes).
+`vignettes/articles/design.Rmd` was not updated to demonstrate
+`er_plot_theme()` -- flagged as a follow-up, not done as part of this
+change.
+
 ## Fixed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
 
 `er_plot_build()`'s trigger condition for building the base panel

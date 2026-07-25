@@ -175,41 +175,211 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   object$theme$format_percent <- scales::label_percent(accuracy = 1)
   object$theme$format_number <- scales::label_number(accuracy = 0.01)
   object$theme$height <- list(base = 6, data = 2, group = 3) 
-  object$theme$theme_base <- function() ggplot2::theme_bw()
-  object$theme$theme_args <- function() {
-    ggplot2::theme(
-      panel.border = ggplot2::element_rect(
-        fill = NA, 
-        color = "grey80", 
-        linewidth = .5
-      ),
-      legend.position = "bottom"
-    ) 
-  }
+  object$theme$theme_base <- ggplot2::theme_bw()
+  object$theme$theme_extra <- ggplot2::theme(
+    panel.border = ggplot2::element_rect(
+      fill = NA, 
+      color = "grey80", 
+      linewidth = .5
+    ),
+    legend.position = "bottom"
+  )
   object$theme$draw_key <- ggplot2::draw_key_rect
+  object$theme$color_discrete <- NULL
+  object$theme$fill_discrete <- NULL
+  object$theme$title <- NULL
+  object$theme$subtitle <- NULL
+  object$theme$caption <- NULL
  
   return(object)
 }
 
 #' Adjust theme/labels for an `er_plot` object
 #'
-#' Not yet implemented -- currently a no-op placeholder for future theme
-#' customisation (labels, ggplot2 theme, formatters). See `object$theme`
-#' (set by [er_plot()]) for what's already there to be made adjustable.
+#' Adjusts the styling knobs a ggplot2 user would expect to control --
+#' axis/legend labels, plot title/subtitle/caption, axis limits, the
+#' overall visual theme, the discrete color/fill palette used for
+#' stratification, value formatters, the legend key glyph, and relative
+#' panel heights -- without touching which variable is mapped to which
+#' aesthetic (that's controlled by a layer's `style`; see [er_style()]).
+#'
+#' Every argument defaults to `NULL`, meaning "leave whatever was set
+#' before unchanged" -- so `er_plot_theme()` can be called more than once
+#' on the same object, each call only touching the arguments it actually
+#' supplies (the same accumulate-by-default behaviour as
+#' [ggplot2::theme()]'s own merging). There is no way to reset a field
+#' back to its [er_plot()] default other than re-supplying that default's
+#' value explicitly.
+#'
+#' `color_discrete`/`fill_discrete` only affect aesthetics that are
+#' genuinely mapped to the stratification variable -- a continuous/count
+#' response's color-encoded data layer, or [er_style_data_hex()]'s density
+#' fill, are left at ggplot2's defaults regardless of these arguments
+#' (continuous palette control isn't implemented yet). If a custom builder
+#' adds its own `scale_color_*()`/`scale_fill_*()` directly, supplying
+#' `color_discrete`/`fill_discrete` here will add a second scale on top
+#' (ggplot2 will emit a message and the later one wins) rather than
+#' detecting and deferring to the builder's own choice.
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`)
-#' @param labels Named list of labels
+#' @param xlab,ylab Exposure/response axis label (single string), written to
+#'   `object$exposure$label`/`object$response$label`
+#' @param strata_lab Stratification legend label (single string), written
+#'   to `object$strata$label`. Errors if `stratify_by` wasn't set in
+#'   [er_plot()] -- there's no stratification legend to label.
+#' @param title,subtitle,caption Plot-level annotation text (single
+#'   strings), applied via `patchwork::plot_annotation()` in
+#'   [er_plot_build()]
+#' @param xlim,ylim Exposure/response axis limits (length-2, increasing
+#'   numeric vectors), written to `object$exposure$limits`/
+#'   `object$response$limits`. These are read lazily by every builder at
+#'   build time, so it doesn't matter whether `er_plot_theme()` is called
+#'   before or after the layers that use them.
+#' @param theme_base A ggplot2 theme object (e.g. [ggplot2::theme_minimal()]),
+#'   written to `object$theme$theme_base` -- the swappable overall visual
+#'   theme, defaulting to [ggplot2::theme_bw()]
+#' @param theme_extra A ggplot2 theme object (e.g. from [ggplot2::theme()]),
+#'   written to `object$theme$theme_extra` -- additional theme tweaks
+#'   layered on top of `theme_base`, defaulting to a panel border plus
+#'   `legend.position = "bottom"`. Supplying a new value fully replaces
+#'   this default rather than merging with it, so re-include the border/
+#'   legend-position settings too if you want to keep them alongside your
+#'   own additions.
+#' @param color_discrete,fill_discrete A discrete ggplot2 scale object
+#'   (e.g. [ggplot2::scale_color_brewer()], [ggplot2::scale_fill_viridis_d()]),
+#'   written to `object$theme$color_discrete`/`object$theme$fill_discrete`
+#'   and applied to every plot whose `colour`/`fill` aesthetic is mapped to
+#'   the stratification variable -- see "Details"
+#' @param format_p,format_percent,format_number Formatter functions
+#'   (typically from `scales::label_*()`), written to
+#'   `object$theme$format_p` etc. Used by the summary/quantile layers to
+#'   format p-values/rates/means for display
+#' @param draw_key A key-glyph function (e.g. [ggplot2::draw_key_point()]),
+#'   written to `object$theme$draw_key` and passed as every geom's
+#'   `key_glyph` argument
+#' @param height_base,height_data,height_group Relative panel heights
+#'   (single positive numbers), merged into `object$theme$height` --
+#'   supplying only one leaves the other two unchanged
 #'
-#' @returns The input `object`, unchanged
+#' @returns The input `object`, with the requested theme fields updated
 #'
-#' @seealso [er_plot()]
+#' @seealso [er_plot()], [er_style()]
 #'
 #' @export
-er_plot_theme <- function(object, labels) {
+er_plot_theme <- function(object,
+                            xlab = NULL, ylab = NULL, strata_lab = NULL,
+                            title = NULL, subtitle = NULL, caption = NULL,
+                            xlim = NULL, ylim = NULL,
+                            theme_base = NULL, theme_extra = NULL,
+                            color_discrete = NULL, fill_discrete = NULL,
+                            format_p = NULL, format_percent = NULL, format_number = NULL,
+                            draw_key = NULL,
+                            height_base = NULL, height_data = NULL, height_group = NULL) {
 
-  # TODO: flesh this out so that users can modify theme, labels, etc
+  if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
+
+  .check_theme_string(xlab, "xlab")
+  .check_theme_string(ylab, "ylab")
+  .check_theme_string(strata_lab, "strata_lab")
+  .check_theme_string(title, "title")
+  .check_theme_string(subtitle, "subtitle")
+  .check_theme_string(caption, "caption")
+  .check_theme_limits(xlim, "xlim")
+  .check_theme_limits(ylim, "ylim")
+  .check_theme_class(theme_base, "theme_base", "theme")
+  .check_theme_class(theme_extra, "theme_extra", "theme")
+  .check_theme_class(color_discrete, "color_discrete", "Scale")
+  .check_theme_class(fill_discrete, "fill_discrete", "Scale")
+  .check_theme_function(format_p, "format_p")
+  .check_theme_function(format_percent, "format_percent")
+  .check_theme_function(format_number, "format_number")
+  .check_theme_function(draw_key, "draw_key")
+  .check_theme_number(height_base, "height_base")
+  .check_theme_number(height_data, "height_data")
+  .check_theme_number(height_group, "height_group")
+
+  if (!is.null(strata_lab) && is.null(object$strata$name)) {
+    rlang::abort(c(
+      "`strata_lab` was supplied, but no `stratify_by` was set in `er_plot()`.",
+      "i" = "There is no stratification legend to label."
+    ))
+  }
+
+  if (!is.null(xlab)) object$exposure$label <- xlab
+  if (!is.null(ylab)) object$response$label <- ylab
+  if (!is.null(strata_lab)) object$strata$label <- strata_lab
+
+  if (!is.null(title)) object$theme$title <- title
+  if (!is.null(subtitle)) object$theme$subtitle <- subtitle
+  if (!is.null(caption)) object$theme$caption <- caption
+
+  if (!is.null(xlim)) object$exposure$limits <- xlim
+  if (!is.null(ylim)) object$response$limits <- ylim
+
+  if (!is.null(theme_base)) object$theme$theme_base <- theme_base
+  if (!is.null(theme_extra)) object$theme$theme_extra <- theme_extra
+
+  if (!is.null(color_discrete)) object$theme$color_discrete <- color_discrete
+  if (!is.null(fill_discrete)) object$theme$fill_discrete <- fill_discrete
+
+  if (!is.null(format_p)) object$theme$format_p <- format_p
+  if (!is.null(format_percent)) object$theme$format_percent <- format_percent
+  if (!is.null(format_number)) object$theme$format_number <- format_number
+
+  if (!is.null(draw_key)) object$theme$draw_key <- draw_key
+
+  new_height <- list(base = height_base, data = height_data, group = height_group)
+  new_height <- new_height[!purrr::map_lgl(new_height, is.null)]
+  if (length(new_height) > 0) {
+    object$theme$height <- utils::modifyList(object$theme$height, new_height)
+  }
 
   return(object)
+}
+
+#' @noRd
+.check_theme_string <- function(x, arg) {
+  if (is.null(x)) return(invisible(NULL))
+  if (!is.character(x) || length(x) != 1L) {
+    rlang::abort(paste0("`", arg, "` must be a single string."))
+  }
+  invisible(NULL)
+}
+
+#' @noRd
+.check_theme_limits <- function(x, arg) {
+  if (is.null(x)) return(invisible(NULL))
+  if (!is.numeric(x) || length(x) != 2L || !(x[2] > x[1])) {
+    rlang::abort(paste0("`", arg, "` must be a length-2, increasing numeric vector."))
+  }
+  invisible(NULL)
+}
+
+#' @noRd
+.check_theme_class <- function(x, arg, class) {
+  if (is.null(x)) return(invisible(NULL))
+  if (!inherits(x, class)) {
+    rlang::abort(paste0("`", arg, "` must be an object of class \"", class, "\"."))
+  }
+  invisible(NULL)
+}
+
+#' @noRd
+.check_theme_function <- function(x, arg) {
+  if (is.null(x)) return(invisible(NULL))
+  if (!is.function(x)) {
+    rlang::abort(paste0("`", arg, "` must be a function."))
+  }
+  invisible(NULL)
+}
+
+#' @noRd
+.check_theme_number <- function(x, arg) {
+  if (is.null(x)) return(invisible(NULL))
+  if (!is.numeric(x) || length(x) != 1L || x <= 0) {
+    rlang::abort(paste0("`", arg, "` must be a single positive number."))
+  }
+  invisible(NULL)
 }
 
 
@@ -1070,6 +1240,7 @@ er_plot_build <- function(object) {
   # polish
   object$plot <- .polish_margins(object)
   object$plot <- .polish_labels(object)
+  object$plot <- .polish_scales(object)
   composition <- .polish_arrangement(object)
   composition <- .polish_legends(object, composition)
   composition <- .polish_theme(object, composition)
@@ -1082,7 +1253,10 @@ er_plot_build <- function(object) {
     guides = "collect",
     axes = "collect"
   ) + patchwork::plot_annotation(
-    theme = object$theme$theme_args()
+    title = object$theme$title,
+    subtitle = object$theme$subtitle,
+    caption = object$theme$caption,
+    theme = object$theme$theme_extra
   )
 
   return(object)

@@ -4,21 +4,110 @@
 \alias{er_plot_theme}
 \title{Adjust theme/labels for an \code{er_plot} object}
 \usage{
-er_plot_theme(object, labels)
+er_plot_theme(
+  object,
+  xlab = NULL,
+  ylab = NULL,
+  strata_lab = NULL,
+  title = NULL,
+  subtitle = NULL,
+  caption = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  theme_base = NULL,
+  theme_extra = NULL,
+  color_discrete = NULL,
+  fill_discrete = NULL,
+  format_p = NULL,
+  format_percent = NULL,
+  format_number = NULL,
+  draw_key = NULL,
+  height_base = NULL,
+  height_data = NULL,
+  height_group = NULL
+)
 }
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_plot})}
 
-\item{labels}{Named list of labels}
+\item{xlab, ylab}{Exposure/response axis label (single string), written to
+\code{object$exposure$label}/\code{object$response$label}}
+
+\item{strata_lab}{Stratification legend label (single string), written
+to \code{object$strata$label}. Errors if \code{stratify_by} wasn't set in
+\code{\link[=er_plot]{er_plot()}} -- there's no stratification legend to label.}
+
+\item{title, subtitle, caption}{Plot-level annotation text (single
+strings), applied via \code{patchwork::plot_annotation()} in
+\code{\link[=er_plot_build]{er_plot_build()}}}
+
+\item{xlim, ylim}{Exposure/response axis limits (length-2, increasing
+numeric vectors), written to \code{object$exposure$limits}/
+\code{object$response$limits}. These are read lazily by every builder at
+build time, so it doesn't matter whether \code{er_plot_theme()} is called
+before or after the layers that use them.}
+
+\item{theme_base}{A ggplot2 theme object (e.g. \code{\link[ggplot2:theme_minimal]{ggplot2::theme_minimal()}}),
+written to \code{object$theme$theme_base} -- the swappable overall visual
+theme, defaulting to \code{\link[ggplot2:theme_bw]{ggplot2::theme_bw()}}}
+
+\item{theme_extra}{A ggplot2 theme object (e.g. from \code{\link[ggplot2:theme]{ggplot2::theme()}}),
+written to \code{object$theme$theme_extra} -- additional theme tweaks
+layered on top of \code{theme_base}, defaulting to a panel border plus
+\code{legend.position = "bottom"}. Supplying a new value fully replaces
+this default rather than merging with it, so re-include the border/
+legend-position settings too if you want to keep them alongside your
+own additions.}
+
+\item{color_discrete, fill_discrete}{A discrete ggplot2 scale object
+(e.g. \code{\link[ggplot2:scale_color_brewer]{ggplot2::scale_color_brewer()}}, \code{\link[ggplot2:scale_fill_viridis_d]{ggplot2::scale_fill_viridis_d()}}),
+written to \code{object$theme$color_discrete}/\code{object$theme$fill_discrete}
+and applied to every plot whose \code{colour}/\code{fill} aesthetic is mapped to
+the stratification variable -- see "Details"}
+
+\item{format_p, format_percent, format_number}{Formatter functions
+(typically from \verb{scales::label_*()}), written to
+\code{object$theme$format_p} etc. Used by the summary/quantile layers to
+format p-values/rates/means for display}
+
+\item{draw_key}{A key-glyph function (e.g. \code{\link[ggplot2:draw_key_point]{ggplot2::draw_key_point()}}),
+written to \code{object$theme$draw_key} and passed as every geom's
+\code{key_glyph} argument}
+
+\item{height_base, height_data, height_group}{Relative panel heights
+(single positive numbers), merged into \code{object$theme$height} --
+supplying only one leaves the other two unchanged}
 }
 \value{
-The input \code{object}, unchanged
+The input \code{object}, with the requested theme fields updated
 }
 \description{
-Not yet implemented -- currently a no-op placeholder for future theme
-customisation (labels, ggplot2 theme, formatters). See \code{object$theme}
-(set by \code{\link[=er_plot]{er_plot()}}) for what's already there to be made adjustable.
+Adjusts the styling knobs a ggplot2 user would expect to control --
+axis/legend labels, plot title/subtitle/caption, axis limits, the
+overall visual theme, the discrete color/fill palette used for
+stratification, value formatters, the legend key glyph, and relative
+panel heights -- without touching which variable is mapped to which
+aesthetic (that's controlled by a layer's \code{style}; see \code{\link[=er_style]{er_style()}}).
+}
+\details{
+Every argument defaults to \code{NULL}, meaning "leave whatever was set
+before unchanged" -- so \code{er_plot_theme()} can be called more than once
+on the same object, each call only touching the arguments it actually
+supplies (the same accumulate-by-default behaviour as
+\code{\link[ggplot2:theme]{ggplot2::theme()}}'s own merging). There is no way to reset a field
+back to its \code{\link[=er_plot]{er_plot()}} default other than re-supplying that default's
+value explicitly.
+
+\code{color_discrete}/\code{fill_discrete} only affect aesthetics that are
+genuinely mapped to the stratification variable -- a continuous/count
+response's color-encoded data layer, or \code{\link[=er_style_data_hex]{er_style_data_hex()}}'s density
+fill, are left at ggplot2's defaults regardless of these arguments
+(continuous palette control isn't implemented yet). If a custom builder
+adds its own \verb{scale_color_*()}/\verb{scale_fill_*()} directly, supplying
+\code{color_discrete}/\code{fill_discrete} here will add a second scale on top
+(ggplot2 will emit a message and the later one wins) rather than
+detecting and deferring to the builder's own choice.
 }
 \seealso{
-\code{\link[=er_plot]{er_plot()}}
+\code{\link[=er_plot]{er_plot()}}, \code{\link[=er_style]{er_style()}}
 }
