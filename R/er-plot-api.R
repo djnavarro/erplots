@@ -532,7 +532,16 @@ er_plot_theme <- function(object,
 #'   when `keep_strata = TRUE`, strata) variable, those covariates are
 #'   filled with a reference value (first factor level, or mean for a
 #'   numeric column) when building the prediction grid -- see
-#'   [er_model_interface]'s `newdata` documentation
+#'   [er_model_interface]'s `newdata` documentation. **erplots never
+#'   checks that `model` was actually fit on the same response as this
+#'   plot's declared `response`** (or that its exposure variable matches
+#'   this plot's `exposure`) -- it's model-agnostic by design and never
+#'   inspects a model's formula (see [er_model_interface]), so nothing
+#'   here would catch, say, a model fit on `ae2` being passed to a plot
+#'   declaring `ae1`. It's the caller's responsibility to ensure `model`
+#'   is actually appropriate to this plot's exposure/response before
+#'   calling this function; a mismatch runs silently rather than
+#'   warning or erroring.
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise

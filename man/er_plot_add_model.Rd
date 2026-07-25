@@ -23,7 +23,16 @@ enables additional visualisations (see \link{er_model_interface}). If
 when \code{keep_strata = TRUE}, strata) variable, those covariates are
 filled with a reference value (first factor level, or mean for a
 numeric column) when building the prediction grid -- see
-\link{er_model_interface}'s \code{newdata} documentation}
+\link{er_model_interface}'s \code{newdata} documentation. \strong{erplots never
+checks that \code{model} was actually fit on the same response as this
+plot's declared \code{response}} (or that its exposure variable matches
+this plot's \code{exposure}) -- it's model-agnostic by design and never
+inspects a model's formula (see \link{er_model_interface}), so nothing
+here would catch, say, a model fit on \code{ae2} being passed to a plot
+declaring \code{ae1}. It's the caller's responsibility to ensure \code{model}
+is actually appropriate to this plot's exposure/response before
+calling this function; a mismatch runs silently rather than
+warning or erroring.}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if

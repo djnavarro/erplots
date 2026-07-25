@@ -14,7 +14,14 @@ er_simulate(model, newdata, nsim = 100, seed = NULL, ...)
 er_summary(model, ...)
 }
 \arguments{
-\item{model}{A fitted exposure-response model object}
+\item{model}{A fitted exposure-response model object. erplots never
+fits models itself and never inspects a model's formula, so nothing
+in this interface or in \code{\link[=er_plot_add_model]{er_plot_add_model()}} cross-checks that
+\code{model} was actually fit on the same exposure/response variables as
+the plot it's added to (e.g. a model fit on \code{ae2} passed to a plot
+declaring \code{response = ae1}) -- such a mismatch runs silently rather
+than warning or erroring. Ensuring \code{model} is appropriate to the
+plotting context is the caller's responsibility.}
 
 \item{newdata}{A data frame of covariate values at which to predict.
 When \code{\link[=er_plot_add_model]{er_plot_add_model()}} builds this internally for the model

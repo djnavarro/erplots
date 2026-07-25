@@ -9,7 +9,14 @@
 #' simulation-based visualisations (e.g. spaghetti plots, VPCs); implementing
 #' [er_summary()] enables annotations such as p-value labels.
 #'
-#' @param model A fitted exposure-response model object
+#' @param model A fitted exposure-response model object. erplots never
+#'   fits models itself and never inspects a model's formula, so nothing
+#'   in this interface or in [er_plot_add_model()] cross-checks that
+#'   `model` was actually fit on the same exposure/response variables as
+#'   the plot it's added to (e.g. a model fit on `ae2` passed to a plot
+#'   declaring `response = ae1`) -- such a mismatch runs silently rather
+#'   than warning or erroring. Ensuring `model` is appropriate to the
+#'   plotting context is the caller's responsibility.
 #' @param newdata A data frame of covariate values at which to predict.
 #'   When [er_plot_add_model()] builds this internally for the model
 #'   curve/ribbon, it always contains the exposure variable (a grid) and,

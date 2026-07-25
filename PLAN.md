@@ -91,7 +91,8 @@ fixed, following this document's usual format.
     plausibly fine, but worth an explicit decision + doc note rather
     than leaving it as an accidental side effect of `dplyr` grouping
     semantics.
-11. **(Low, document-only) Fitting a model whose formula response
+11. **(Low, fixed -- see "Completed: document the model/response
+    mismatch foot-gun" below) Fitting a model whose formula response
     differs from the plot's declared `response`** (e.g.
     `er_plot_add_model()` with a model fit on `ae2` while the plot
     declared `ae1`) runs silently, with nothing cross-checking the
@@ -352,6 +353,49 @@ rather than fixing a bug.
 
 **Status:** done, documentation-only. `devtools::document()` regenerates
 `man/er_plot.Rd`; no test changes needed since no behaviour changed.
+
+## Completed: document the model/response mismatch foot-gun
+
+**The question (stress-test finding #11).** Nothing cross-checks that a
+model passed to `er_plot_add_model()` was actually fit on the same
+response (or exposure) variable the plot itself declared -- e.g. fitting
+a model on `ae2` and passing it to a plot declared with `response =
+ae1` runs silently, producing a curve for the wrong outcome with no
+indication anything is amiss.
+
+**A code-level check was drafted and then rejected.** A first pass
+implemented a heuristic, warn-not-error cross-check: attempt
+`stats::formula(model)`, extract the response side, and warn if it
+didn't contain the plot's declared response name (skipping the check
+silently whenever `formula()` had no method for `model`'s class, or
+failed for any other reason). On reflection this was reverted rather
+than kept: erplots has no reliable way to tell a genuine mistake apart
+from a deliberate choice -- e.g. a model legitimately fit on a
+transformed or differently-named version of the response/exposure
+(a transformed exposure stored as its own column is the more likely
+real-world case, but the same reasoning applies to the response) -- and
+`stats::formula()` is not part of the model interface erplots commits
+to (`er_predict()`/`er_simulate()`/`er_summary()`), so leaning on it
+would have quietly made a fourth, undocumented generic load-bearing for
+every model package that wants this check to actually fire. A warning
+that fires on legitimate uses about as often as on real mistakes isn't
+a clear net improvement over no check at all, and it's not obviously
+better than just telling the user upfront that erplots doesn't attempt
+this.
+
+**The decision: documentation only, no runtime check.** `?er_model_interface`'s
+`@param model` docs and `er_plot_add_model()`'s own `@param model` docs
+now both state explicitly that erplots never fits models and never
+inspects a model's formula, so nothing catches a model fit on the wrong
+exposure/response being passed to a plot -- ensuring `model` is
+appropriate to the plotting context is the caller's responsibility. No
+code changes; this closes the "undocumented foot-gun" gap without
+introducing a heuristic check with a real false-positive/false-negative
+rate.
+
+**Status:** done, documentation-only. `devtools::document()` regenerates
+`man/er_model_interface.Rd`/`man/er_plot_add_model.Rd`; no test changes,
+since no behaviour changed.
 
 ## Completed: validate `nsim` upfront in `er_vpc_plot()`
 
