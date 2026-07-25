@@ -98,6 +98,23 @@ test_that("ci_poisson returns a named lower/upper vector", {
   expect_true(ci["lower"] < ci["upper"])
 })
 
+test_that("cut_exposure_quantile errors clearly on constant, all-NA, or too-few-value exposure", {
+  expect_error(cut_exposure_quantile(rep(5, 10)), "found only 1 distinct")
+  expect_error(cut_exposure_quantile(rep(NA_real_, 10)), "found only 0 distinct")
+  # only one non-placebo value; the rest are placebo (0)
+  expect_error(cut_exposure_quantile(c(0, 0, 0, 5)), "found only 1 distinct")
+  # a single row overall
+  expect_error(cut_exposure_quantile(5), "found only 1 distinct")
+})
+
+test_that("cut_exposure_quantile works normally with at least 2 distinct non-placebo values", {
+  x <- c(0, 0, 1, 2, 3, 4)
+  result <- cut_exposure_quantile(x, n = 2)
+  expect_s3_class(result, "factor")
+  expect_equal(levels(result), c("Placebo", "Q1", "Q2"))
+  expect_equal(as.character(result[1:2]), c("Placebo", "Placebo"))
+})
+
 test_that(".dodge_quantile_strata adds a symmetric, scale-appropriate offset per stratum", {
   summary <- data.frame(
     x_mid = c(10, 10, 50, 50),

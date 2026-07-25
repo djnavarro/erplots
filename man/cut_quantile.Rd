@@ -23,6 +23,12 @@ carries a \code{"breaks"} attribute -- the \code{n + 1} quantile cutpoints
 \code{\link[stats:quantile]{stats::quantile()}} -- which quantile-layer builders that draw
 bin-boundary separators (e.g. \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}})
 read back out via \code{attr(exposure_bins, "breaks")}.
+\code{cut_exposure_quantile()} errors if \code{x} (excluding placebo and \code{NA}
+values) has fewer than 2 distinct values -- e.g. a constant, all-\code{NA},
+or single-observation exposure column -- since quantile bins aren't
+well-defined in that case; without this check, \code{\link[stats:quantile]{stats::quantile()}}
+would silently produce non-unique/degenerate breaks and the error
+would instead surface much later, opaquely, from inside \code{\link[=cut]{cut()}}.
 }
 \description{
 Cut a continuous variable into quantiles

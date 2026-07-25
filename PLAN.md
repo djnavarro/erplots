@@ -41,21 +41,26 @@ fixed, following this document's usual format.
    factor exposure fails with `'range' not meaningful for factors`
    rather than a clear message that exposure must be numeric. Repro:
    `er_plot(df |> mutate(exposure = factor(...)), exposure, response)`.
-3. **(Medium-high) Constant or logical exposure crashes inside
-   `cut_exposure_quantile()` with an unhelpful traceback.** A
-   zero-width exposure range produces non-unique `quantile()` breaks,
-   so `cut()` fails with `'breaks' are not unique`; a logical exposure
-   column fails `cut()`'s `'x' must be numeric` check. Both surface from
-   deep inside a `dplyr::case_when()` call, not from `er_plot()` or
+3. **(Medium-high, fixed -- see "Completed: guard `cut_exposure_quantile()`
+   against degenerate exposure" below) Constant or logical exposure
+   crashes inside `cut_exposure_quantile()` with an unhelpful
+   traceback.** A zero-width exposure range produces non-unique
+   `quantile()` breaks, so `cut()` fails with `'breaks' are not
+   unique`; a logical exposure column fails `cut()`'s `'x' must be
+   numeric` check (this sub-case is now also caught earlier, at
+   `er_plot()` call time, by finding #2's fix, but `cut_exposure_quantile()`
+   itself has no numeric-type check if called directly). Both surfaced
+   from deep inside a `dplyr::case_when()` call, not from `er_plot()` or
    `er_plot_add_quantiles()` themselves. Repro:
    `er_plot(df |> mutate(exposure = 5), exposure, response) |> er_plot_add_quantiles()`.
-4. **(Medium) All-`NA` exposure hits the same `cut()` failure family**
-   (`number of intervals and length of 'labels' differ`) as soon as
-   `er_plot_add_quantiles()` is called -- same root cause as #3, worth
-   fixing together.
-5. **(Medium) Single-row data plus `er_plot_add_quantiles()`** hits the
-   same `'breaks' are not unique` crash as #3 (only one exposure value
-   to quantile) -- again, likely fixed by the same upstream guard.
+4. **(Medium, fixed by the same guard as #3) All-`NA` exposure hits the
+   same `cut()` failure family** (`number of intervals and length of
+   'labels' differ`) as soon as `er_plot_add_quantiles()` is called --
+   same root cause as #3, fixed together.
+5. **(Medium, fixed by the same guard as #3) Single-row data plus
+   `er_plot_add_quantiles()`** hit the same `'breaks' are not unique`
+   crash as #3 (only one exposure value to quantile) -- fixed by the
+   same upstream guard.
 6. **(Medium) `response_type = "binary"` declared but values aren't
    confined to `{0, 1}` is not validated.** Rows with an out-of-range
    value are silently excluded from both `n0`/`n1` in the quantile-layer
@@ -148,6 +153,60 @@ logical *response* remains valid. `devtools::test()` and
 `devtools::check()` both clean. Stress-test finding #3 (constant/
 all-`NA` exposure crashing inside `cut_exposure_quantile()`) is a
 related but separate gap, not addressed here.
+
+## Completed: guard `cut_exposure_quantile()` against degenerate exposure
+
+**The bug (stress-test findings #3, #4, #5).** `cut_exposure_quantile()`
+computed `stats::quantile()` breaks and passed them straight to `cut()`
+with no check that they were usable. Three distinct-looking symptoms
+all traced back to the same root cause -- too few distinct, non-missing,
+non-placebo exposure values to form quantile bins:
+
+- A **constant** exposure column (all one value, e.g. from a synthetic
+  test or a covariate that happens not to vary) produces `n + 1` equal
+  quantile breaks, so `cut()` fails with `'breaks' are not unique`.
+- An **all-`NA`** exposure column produces all-`NA` breaks, so `cut()`
+  fails with `number of intervals and length of 'labels' differ`.
+- **Single-row data** (or, more precisely, a single non-placebo,
+  non-missing exposure value) hits the same non-unique-breaks failure
+  as the constant case.
+
+All three surfaced from deep inside a `dplyr::case_when()`/`cut()` call
+stack, with no indication that the actual problem was the exposure
+column itself.
+
+**The fix.** `cut_exposure_quantile()` now counts the distinct
+non-missing values in `x` *excluding placebo* before computing breaks,
+and aborts immediately with a clear message (naming how many distinct
+values were found) if there are fewer than 2 -- the minimum needed for
+`stats::quantile()`/`cut()` to produce a meaningful set of bins. This
+covers the constant, all-`NA`, and single-row cases uniformly, since
+all three reduce to "0 or 1 distinct usable values". No attempt was
+made to gracefully degrade to fewer bins instead of erroring (unlike
+[ci_t()]'s NA-bounds-for-n<2 approach) -- unlike a per-bin confidence
+interval, there is no sensible partial result for "the exposure
+variable can't be quantile-binned at all", so failing clearly was
+judged the better default. `cut_quantile()` (the sibling function used
+for continuous *group* variables, not exposure) was deliberately left
+unguarded in this pass -- it's a distinct, non-exposure code path not
+covered by this stress-test finding; flagged as a follow-up below.
+
+**Status:** done. New tests in `tests/testthat/test-utils-helpers.R`
+("cut_exposure_quantile errors clearly on constant, all-NA, or
+too-few-value exposure" and a companion normal-usage regression test)
+cover all three degenerate shapes plus confirm the normal binning path
+is unaffected. `devtools::test()` and `devtools::check()` both clean.
+Manually confirmed the error now surfaces as a clear "Caused by error
+in `cut_exposure_quantile()`: Cannot compute exposure quantiles: found
+only N distinct..." message through both `er_plot_add_quantiles()` and
+`er_vpc_plot()`, rather than the previous opaque `cut()`-level errors.
+
+**Follow-up not done here:** `cut_quantile()` (used by
+`er_plot_add_groups()` for a continuous grouping variable) has the same
+underlying vulnerability -- a constant or all-`NA` grouping variable
+would hit the same `cut()` failure family -- but wasn't in scope for
+this specific stress-test finding. Worth the same guard if it comes up
+in practice.
 
 ## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 
