@@ -86,7 +86,14 @@ simulation-based visualisations (e.g. spaghetti plots, VPCs); implementing
 
 
 <dl><dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
-<dd><p>A fitted exposure-response model object</p></dd>
+<dd><p>A fitted exposure-response model object. erplots never
+fits models itself and never inspects a model's formula, so nothing
+in this interface or in <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> cross-checks that
+<code>model</code> was actually fit on the same exposure/response variables as
+the plot it's added to (e.g. a model fit on <code>ae2</code> passed to a plot
+declaring <code>response = ae1</code>) – such a mismatch runs silently rather
+than warning or erroring. Ensuring <code>model</code> is appropriate to the
+plotting context is the caller's responsibility.</p></dd>
 
 
 <dt id="arg-newdata">newdata<a class="anchor" aria-label="anchor" href="#arg-newdata"></a></dt>

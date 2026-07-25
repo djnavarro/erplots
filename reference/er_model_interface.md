@@ -23,7 +23,16 @@ er_summary(model, ...)
 
 - model:
 
-  A fitted exposure-response model object
+  A fitted exposure-response model object. erplots never fits models
+  itself and never inspects a model's formula, so nothing in this
+  interface or in
+  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+  cross-checks that `model` was actually fit on the same
+  exposure/response variables as the plot it's added to (e.g. a model
+  fit on `ae2` passed to a plot declaring `response = ae1`) – such a
+  mismatch runs silently rather than warning or erroring. Ensuring
+  `model` is appropriate to the plotting context is the caller's
+  responsibility.
 
 - newdata:
 

@@ -119,6 +119,18 @@ stratum level instead of a shared legend – see its own documentation and
 `PLAN.md` for the general "a layer's own encoding takes precedence" rule
 this follows.
 
+A row whose `stratify_by` value is `NA` is **kept as its own stratum** –
+an `NA`-labelled color/legend entry or facet, alongside the column's
+other levels – rather than being silently dropped or erroring. This is a
+deliberate choice, not just an incidental consequence of
+[`unique()`](https://rdrr.io/r/base/unique.html)/`dplyr` grouping
+semantics (though it is also that): a missing stratification value can
+itself be informative (e.g. "arm not recorded", "assay below
+quantification limit"), and erplots has no principled way to guess
+whether a given `NA` should be dropped, recoded, or kept. If `NA` rows
+should instead be excluded, or recoded to an explicit level (e.g.
+`"Unknown"`), do so in `data` before calling `er_plot()`.
+
 ## Response type
 
 `response_type` (set once, here in `er_plot()`) governs the response's

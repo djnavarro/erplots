@@ -103,7 +103,16 @@ enables additional visualisations (see <a href="er_model_interface.html">er_mode
 when <code>keep_strata = TRUE</code>, strata) variable, those covariates are
 filled with a reference value (first factor level, or mean for a
 numeric column) when building the prediction grid – see
-<a href="er_model_interface.html">er_model_interface</a>'s <code>newdata</code> documentation</p></dd>
+<a href="er_model_interface.html">er_model_interface</a>'s <code>newdata</code> documentation. <strong>erplots never
+checks that <code>model</code> was actually fit on the same response as this
+plot's declared <code>response</code></strong> (or that its exposure variable matches
+this plot's <code>exposure</code>) – it's model-agnostic by design and never
+inspects a model's formula (see <a href="er_model_interface.html">er_model_interface</a>), so nothing
+here would catch, say, a model fit on <code>ae2</code> being passed to a plot
+declaring <code>ae1</code>. It's the caller's responsibility to ensure <code>model</code>
+is actually appropriate to this plot's exposure/response before
+calling this function; a mismatch runs silently rather than
+warning or erroring.</p></dd>
 
 
 <dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>

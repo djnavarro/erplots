@@ -50,7 +50,16 @@ er_plot_add_model(
   filled with a reference value (first factor level, or mean for a
   numeric column) when building the prediction grid – see
   [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)'s
-  `newdata` documentation
+  `newdata` documentation. **erplots never checks that `model` was
+  actually fit on the same response as this plot's declared `response`**
+  (or that its exposure variable matches this plot's `exposure`) – it's
+  model-agnostic by design and never inspects a model's formula (see
+  [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)),
+  so nothing here would catch, say, a model fit on `ae2` being passed to
+  a plot declaring `ae1`. It's the caller's responsibility to ensure
+  `model` is actually appropriate to this plot's exposure/response
+  before calling this function; a mismatch runs silently rather than
+  warning or erroring.
 
 - keep_strata:
 
