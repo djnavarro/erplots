@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 An exposure-response plot shows how a response variable (does a patient
 have an adverse event? how much does a biomarker change?) relates to an
-exposure variable (drug concentration, dose, AUC, and so on). The usual
+exposure variable (maximum drug concentration, AUC, and so on). The usual
 building blocks are a fitted curve with an uncertainty band, some
 quantile-binned summary points to check the curve against the raw data,
 the raw data itself, and maybe some side panels showing how exposure is
@@ -247,8 +247,8 @@ and so on -- and you can write your own if none of the built-in options
 fit. From here:
 
 * [Plotting binary responses](plot-binary.html),
-  [Plotting continuous responses](plot-continuous.html), and
-  [Plotting count responses](plot-count.html) walk through every layer
+  [plotting continuous responses](plot-continuous.html), and
+  [plotting count responses](plot-count.html) walk through every layer
   and every built-in style in detail, for each response type.
 * [The plotting grammar](design.html) explains the design rules behind
   the mini-language -- which layers can appear more than once, how
@@ -256,3 +256,6 @@ fit. From here:
 * [Extending erplots](extending.html) shows how to write your own layer
   style, and what erplots expects from a model object if you want to
   plug in one that isn't erglm.
+* [Model interface](model-interface.html) describes the technicalities.
+  It outlines what erplots needs from other packages in order to be
+  able to use its models when drawing exposure-response plots.
