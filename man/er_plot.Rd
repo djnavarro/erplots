@@ -10,7 +10,7 @@ er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
 \item{data}{Observed data}
 
 \item{exposure}{Exposure variable (one variable, unquoted). Must name a
-column of \code{data}.}
+numeric column of \code{data}.}
 
 \item{response}{Response variable (one variable, unquoted). Must name a
 column of \code{data}.}

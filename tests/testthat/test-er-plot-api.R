@@ -16,6 +16,26 @@ test_that("er_plot errors clearly when exposure/response/stratify_by name nonexi
   expect_error(er_plot(er_test_data, not_a_col1, not_a_col2), "not_a_col1.*not_a_col2")
 })
 
+test_that("er_plot errors clearly when exposure is not numeric", {
+  skip_if_not_installed("erglm")
+
+  df_factor <- er_test_data
+  df_factor$aucss <- factor(round(df_factor$aucss / 50))
+  expect_error(er_plot(df_factor, aucss, ae1), "must be numeric")
+
+  df_char <- er_test_data
+  df_char$aucss <- as.character(df_char$aucss)
+  expect_error(er_plot(df_char, aucss, ae1), "must be numeric")
+
+  df_logical <- er_test_data
+  df_logical$aucss <- df_logical$aucss > 20
+  expect_error(er_plot(df_logical, aucss, ae1), "must be numeric")
+
+  # response is unaffected by this check -- a logical/binary response
+  # remains valid
+  expect_no_error(er_plot(er_test_data, aucss, ae1))
+})
+
 test_that("er_plot resolves response_type = 'auto' correctly", {
   skip_if_not_installed("erglm")
 

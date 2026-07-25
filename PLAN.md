@@ -34,11 +34,12 @@ fixed, following this document's usual format.
    (prints fine) until a later `er_plot_build()`/`print()` fails deep
    inside ggplot2 with "Column not found", far from the actual mistake.
    Repro: `er_plot(df, not_a_col, response)`.
-2. **(High) A factor column passed as `exposure` crashes immediately
-   with an opaque error.** `er_plot()` itself calls `range()` on the
-   exposure column with no type check first, so a factor exposure fails
-   with `'range' not meaningful for factors` rather than a clear message
-   that exposure must be numeric. Repro:
+2. **(High, fixed -- see "Completed: validate that `exposure` is
+   numeric" below) A factor column passed as `exposure` crashes
+   immediately with an opaque error.** `er_plot()` itself calls
+   `range()` on the exposure column with no type check first, so a
+   factor exposure fails with `'range' not meaningful for factors`
+   rather than a clear message that exposure must be numeric. Repro:
    `er_plot(df |> mutate(exposure = factor(...)), exposure, response)`.
 3. **(Medium-high) Constant or logical exposure crashes inside
    `cut_exposure_quantile()` with an unhelpful traceback.** A
@@ -120,6 +121,33 @@ reused, rather than being recomputed identically further down.
 nonexistent columns") covers each of the three arguments individually
 and the multiple-missing-columns case. `devtools::test()` and
 `devtools::check()` both clean.
+
+## Completed: validate that `exposure` is numeric
+
+**The bug (stress-test finding #2).** `er_plot()` called `range()` on
+the exposure column with no type check first. A factor exposure column
+failed with the opaque `'range' not meaningful for factors`; a
+character or logical exposure column would fail equally unhelpfully
+downstream (a logical column happens to still work with `range()`, but
+then fails later inside `cut_exposure_quantile()` -- see stress-test
+finding #3, not addressed by this fix). None of these failures named
+the actual problem (a non-numeric exposure column) or pointed back to
+`er_plot()`.
+
+**The fix.** `er_plot()` now checks `is.numeric(data[[exposure_name]])`
+immediately after the missing-column check above and aborts with a
+message naming the offending column and its actual class if it's not
+numeric. No equivalent check was added for `response`, which is
+legitimately allowed to be logical (binary), or for `stratify_by`,
+which is legitimately discrete.
+
+**Status:** done. New test in `tests/testthat/test-er-plot-api.R`
+("er_plot errors clearly when exposure is not numeric") covers factor,
+character, and logical exposure columns, plus a regression check that a
+logical *response* remains valid. `devtools::test()` and
+`devtools::check()` both clean. Stress-test finding #3 (constant/
+all-`NA` exposure crashing inside `cut_exposure_quantile()`) is a
+related but separate gap, not addressed here.
 
 ## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 

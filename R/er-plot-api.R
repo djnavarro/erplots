@@ -59,7 +59,7 @@
 #'
 #' @param data Observed data
 #' @param exposure Exposure variable (one variable, unquoted). Must name a
-#'   column of `data`.
+#'   numeric column of `data`.
 #' @param response Response variable (one variable, unquoted). Must name a
 #'   column of `data`.
 #' @param stratify_by Stratification variable used for color and fill (one
@@ -131,6 +131,21 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
         paste0("`", missing_cols, "`", collapse = ", ")
       ),
       "i" = "Check that `exposure`/`response`/`stratify_by` reference actual columns of `data`."
+    ))
+  }
+
+  # validate that exposure is numeric -- without this, a factor/character/
+  # logical exposure column fails much later with an opaque low-level error
+  # (e.g. "'range' not meaningful for factors" from the `range()` call
+  # below), rather than a clear message naming the actual problem; see
+  # PLAN.md's "stress-test findings" section
+  if (!is.numeric(data[[exposure_name]])) {
+    rlang::abort(c(
+      sprintf(
+        "`exposure` (`%s`) must be numeric, not %s.",
+        exposure_name, paste(class(data[[exposure_name]]), collapse = "/")
+      ),
+      "i" = "erplots' quantile-binning and model-prediction grid assume a numeric exposure axis."
     ))
   }
 
