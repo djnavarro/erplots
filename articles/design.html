@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>The plotting grammar • erplots</title>
+<title>Understanding the erplots grammar • erplots</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Atkinson_Hyperlegible-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The plotting grammar">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Understanding the erplots grammar">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -37,8 +37,8 @@
 <li><a class="dropdown-item" href="../articles/plot-binary.html">Plotting: binary responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting: continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting: count responses</a></li>
-    <li><a class="dropdown-item" href="../articles/design.html">The plotting grammar</a></li>
-    <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots: writing your own builder</a></li>
+    <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
+    <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
   </ul>
 </li>
       </ul>
@@ -68,7 +68,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>The plotting grammar</h1>
+      <h1>Understanding the erplots grammar</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/djnavarro/erplots/blob/main/vignettes/articles/design.Rmd" class="external-link"><code>vignettes/articles/design.Rmd</code></a></small>
@@ -367,24 +367,12 @@ split on) – see <code><a href="../reference/er_plot_add_data.html">er_plot_add
 <div class="section level2">
 <h2 id="extending-erplots">Extending erplots<a class="anchor" aria-label="anchor" href="#extending-erplots"></a>
 </h2>
-<p>Every layer function delegates the actual drawing to a
-<code>style</code> argument sharing a common signature –
-<code>function(data, config, stratify, exposure, response, strata, theme, ...)</code>.
-That signature is a documented, public part of the API (see
-<code><a href="../reference/er_style.html">er_style()</a></code>), each layer’s <code>style</code> defaults to
-one built-in <code>er_style_*()</code> function, and it can be set to
-any other function matching the same signature – no need to fork the
-package or reach into <code>object$layer</code> internals. For the data
-layer specifically, a custom builder must additionally declare which
-<em>structural</em> family it belongs to via
-<code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>.</p>
 <p>Writing a custom builder in detail – including what
 <code>config</code> actually contains for each layer, a worked crossbar
 example, and <code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>, the single helper a builder
 can use to declare its
 <code>layout</code>/<code>fill_role</code>/<code>y_role</code> metadata
-for the composition machinery – is its own article: <a href="extending.html">Extending erplots: writing your own
-builder</a>.</p>
+for the composition machinery – is its own article: <a href="extending.html">Extending erplots</a>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

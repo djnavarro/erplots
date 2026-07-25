@@ -1,13 +1,28 @@
-# Extending erplots: writing your own builder
+# Extending erplots
 
-This article is about writing a custom `er_style_*()` function – the
-mechanism by which any of erplots’ five layers can be drawn differently
-from its built-in options, without forking the package. It assumes
-you’re already familiar with the plotting grammar described in [the plot
-grammar article](https://erplots.djnavarro.net/articles/design.md)
-(layers, singleton/additive semantics, stratification); this article
-goes into more depth on the one topic that article only introduces: the
-`style` escape hatch itself.
+The goal when writing the erplots package was to provide a flexible
+mini-language for exposure-response plots that pharmacometricians could
+use to create most such plots without needing to write hundreds of lines
+of ggplot2 code. One problem with doing so, however, is that it is
+almost impossible to anticipate *every* possible use case for the
+package. Inevitably, there will be some cases where the specific plot
+that you need can’t be constructed using the functions that are supplied
+by erplots. This could then become frustrating for the user, if they
+already have code that generates most of what they need using erplots,
+but can’t quite get exactly what they need because there’s one esoteric
+special case that the package can’t handle.
+
+To mitigate this risk, erplots comes with an extension mechanism: you
+can write your own “builder” function that will generate the one part of
+the exposure-response plot that you need to modify, and then erplots
+will handle the rest.
+
+This article discusses that extension mechanism, by showing you how to
+write a “builder” function. It assumes you’re already familiar with the
+erplots mini-language described in [the plot grammar
+article](https://erplots.djnavarro.net/articles/design.md) (layers,
+singleton/additive semantics, stratification); and have a good sense of
+the overall process of building plots with the package.
 
 ``` r
 
@@ -15,41 +30,68 @@ library(erplots)
 library(erglm)
 ```
 
-## The builder signature
+## What is a builder function?
 
-Every layer function
+When creating an exposure-response plot with erplots, you first call
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) to
+create the basic data structure, and then add a series of layers using
+the five layer functions
 ([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
 [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md))
-delegates its actual drawing to a `style` argument, which defaults to
-one built-in `er_style_*()` function and can be set to any other
-function – built-in or custom – sharing this signature:
+to add the features you want to see in your plot. The key thing to note
+is that these layer functions don’t create the ggplot2 code themselves.
+Instead, they delegate that work to some other function that you specify
+via the `style` argument. That function is referred to as the “builder”
+for that layer. The erplots package comes with several different
+builders for each layer:
+
+| Layer | Builders |
+|----|----|
+| Model | [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md) (default), [`er_style_model_line()`](https://erplots.djnavarro.net/reference/er_style_model.md), [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md) |
+| Data | [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md) (default), [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md), [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md) |
+| Quantile | [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) (default), [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md), [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md), [`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) |
+| Summary | [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md) (default), [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md), [`er_style_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_summary.md), [`er_style_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_summary.md) |
+| Groups | [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md) (default), [`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md), [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md) |
+
+These builders cover a wide variety of different stylistic features you
+might want to employ in your exposure-response plots, but if the feature
+you want is not available, you can write your own. As long as your
+builder function has the expected structure, erplots will understand
+what it does and use it when constructing a plot.
+
+## The builder signature
+
+The main constraint that you need to satisfy when writing a builder
+function is to make sure that it takes the expected arguments, and uses
+those arguments in a manner that is consistent with what the erplots
+grammar expects. Specifically, every builder function must have this
+signature”
 
 ``` r
 function(data, config, stratify, exposure, response, strata, theme, ...)
 ```
 
+When writing the function itself, you should be aware of what erplots
+will pass into your function within each of these slots:
+
 | Argument | What it is |
 |----|----|
 | `data` | The original data frame passed to [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md), unmodified. |
-| `config` | The pre-computed configuration for *this specific layer* – see below. |
+| `config` | The pre-computed configuration for this specific layer. This is different for each layer, and is discussed in more detail below. |
 | `stratify` | `TRUE`/`FALSE`: whether this layer should honour `stratify_by`. |
 | `exposure`, `response`, `strata` | Plot-variable metadata lists (`name`, `label`, `limits`, …) describing the exposure, response, and stratification variables declared in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md). |
 | `theme` | Shared theming helpers: `theme$theme_base()`, `theme$draw_key`, `theme$format_percent()`, `theme$format_number()`. |
-| `...` | Extra named arguments forwarded from the corresponding `er_plot_add_*()` call’s own `...` – see “Passing extra arguments to a builder” below. |
+| `...` | Extra named arguments forwarded from the corresponding `er_plot_add_*()` call’s own `...`. See “Passing extra arguments to a builder” below. |
+
+## The builder return value
 
 The function returns a geom, or a list of geoms/other objects that can
-be added to a ggplot2 plot – nothing more. This signature is documented
-as public API on
-[`?er_style`](https://erplots.djnavarro.net/reference/er_style.md),
-alongside each layer’s own `er_style_*()` family page
-([`?er_style_model`](https://erplots.djnavarro.net/reference/er_style_model.md),
-[`?er_style_quantile`](https://erplots.djnavarro.net/reference/er_style_quantile.md),
-etc.).
+be added to a ggplot2 plot – nothing more.
 
-### Passing extra arguments to a builder
+## Passing extra arguments
 
 Every `er_plot_add_*()` function also takes its own `...`, forwarded
 unchanged to `style` when it’s called at build time. Extra arguments
@@ -59,10 +101,10 @@ A builder that doesn’t need any extra arguments simply declares `...`
 and ignores it, as every builder in this article does; see
 [`?er_style`](https://erplots.djnavarro.net/reference/er_style.md)’s own
 “Passing extra arguments to a builder” section (and
-\[er_style_model_spaghetti()\]’s use of a `seed` passed this way) for a
-worked example.
+[`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)’s
+use of a `seed` passed this way) for a worked example.
 
-### `config` is what matters, and it’s already computed for you
+## Understanding the `config` argument
 
 `config` is where a custom builder actually gets its data from, and it
 is **not** the raw `data` frame – it’s whatever the corresponding
@@ -72,26 +114,31 @@ builder’s whole job is to turn that already-computed `config` into
 ggplot2 layers; it never needs to re-bin, re-summarise, or re-fit
 anything itself. Concretely:
 
-| Layer | `.layer_*()` | Key `config` field | Contents |
-|----|----|----|----|
-| Model | `.layer_model()` | `config$predictions` | One row per exposure grid point, with `fit_resp`, `ci_lower`, `ci_upper` (from [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)) |
-| Summary | `.layer_summary()` | `config$summary`, `config$p_value`, `config$corner_distance` | `config$summary` is the full, raw return value of [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md) (`NULL` unless a `model` was supplied) – see [`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md) for its `p_value`/`coefficients`/`glance` contract; `config$p_value` is that same list’s `p_value` field, extracted separately since [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md) reads it directly; `corner_distance` is a named vector of four minimum distances (`top_left`/`top_right`/`bottom_left`/`bottom_right`), computed from `data`’s raw `(exposure, response)` points rescaled onto `[0, 1]`, used to place a label away from the observed data |
-| Quantile | `.layer_quantile()` | `config$summary` | One row per exposure-quantile bin (× stratum), with `x_mid`, `y_mid`, `ci_lower`, `ci_upper`, plus label-placement columns. `config$breaks` also holds the `n + 1` quantile cutpoints themselves (from [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)), which [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/[`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) use to draw bin-boundary separators |
-| Data | `.layer_data()`/`.layer_overlay()` | (none extra) | The builder mostly works from `data` directly, since this layer draws raw observations rather than a summary |
-| Group | `.layer_group()` | `config[[group_var]]$data`, `config[[group_var]]$counts` | The subset of `data` for that grouping variable, joined to per-group sample-size labels |
+| Layer | Key `config` field | Contents |
+|----|----|----|
+| Model | `config$predictions` | One row per exposure grid point, with `fit_resp`, `ci_lower`, `ci_upper` (from [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)) |
+| Summary | `config$summary`, `config$p_value`, `config$corner_distance` | `config$summary` is the full, raw return value of [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md) (`NULL` unless a `model` was supplied) – see [`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md) for its `p_value`/`coefficients`/`glance` contract; `config$p_value` is that same list’s `p_value` field, extracted separately since [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md) reads it directly; `corner_distance` is a named vector of four minimum distances (`top_left`/`top_right`/`bottom_left`/`bottom_right`), computed from `data`’s raw `(exposure, response)` points rescaled onto `[0, 1]`, used to place a label away from the observed data |
+| Quantile | `config$summary` | One row per exposure-quantile bin (× stratum), with `x_mid`, `y_mid`, `ci_lower`, `ci_upper`, plus label-placement columns. `config$breaks` also holds the `n + 1` quantile cutpoints themselves (from [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)), which [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/[`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) use to draw bin-boundary separators |
+| Data | (none extra) | The builder mostly works from `data` directly, since this layer draws raw observations rather than a summary |
+| Group | `config[[group_var]]$data`, `config[[group_var]]$counts` | The subset of `data` for that grouping variable, joined to per-group sample-size labels |
 
-## Worked example: a custom quantile builder
+## A worked example
 
-Suppose the built-in
+The story above is not entirely complete, but it covers enough that we
+can work through an example. Let’s suppose the built-in
 [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
-(point + error bar) and
+and
 [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
-alternatives (and their bin-boundary-annotated `_vlines` variants) all
-feel like the wrong idiom, and you’d rather draw the per-bin summary as
-a `geom_crossbar()`. First, look at what `config$summary` actually
-contains, by building the quantile layer on its own and inspecting it –
-this is the step a custom builder’s author does once, by hand, before
-writing the builder:
+alternatives all feel like the wrong way to display the data summaries
+by exposure quantile. Instead, you would prefer to draw these binwise
+summaries using a `geom_crossbar()`. Personally I think that’s a bad way
+to do it, but you may have a good reason for wanting this that I haven’t
+considered. So you decide to write your own builder function for this.
+And since the quantile layer is mostly dependent on the `config$summary`
+field, that’s the place to start When doing so, it helps to look at what
+`config$summary` actually contains, by building the quantile layer on
+its own and inspecting it. You can extract the config from a plot object
+like this:
 
 ``` r
 
@@ -115,26 +162,54 @@ plt$layer$quantile$config$summary
 #> # ℹ 3 more variables: y_lwr_lbl <dbl>, y_upr_lbl <dbl>, y_lbl <dbl>
 ```
 
-`x_mid`/`y_mid` are the bin’s mean exposure and response rate;
-`ci_lower`/`ci_upper` are the Clopper-Pearson interval bounds a builder
-would map to `ymin`/`ymax`. (The other columns –
-`y_mid_lbl`/`y_lwr_lbl`/`y_upr_lbl`/`y_lbl` – support the built-in label
-geom that
-[`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
-draws alongside its error bar; a builder that skips labels, like the one
-below, can ignore them.) With that in hand, the builder itself is a
-small function that maps those columns onto `geom_crossbar()`’s
-aesthetics:
+Looking at this object we see that it is a tibble with one row per
+exposure quantile (as always, noting that the placebo group will be its
+own distinct group). Each column contains a summary statistic or
+indicator variable that you might want to use in your builder function:
+
+- `x_mid` and `y_mid` capture mean exposure and mean response associated
+  with the exposure bin. Our new builder will need to use these.
+- `ci_lower` and `ci_upper` are the confidence interval bounds. Our
+  bulder will need these too.
+- `y_mid_lbl`, `y_lwr_lbl`, `y_upr_lbl`, and `y_lbl` support the
+  built-in label geom that
+  [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
+  draws alongside its error bar. If we we wanted to use labels in our
+  plot we would need these columns, but since we plan to skip that we
+  can ignore them.
+
+Now that we understand what `config$summary` already provides, writing
+the builder itself is very straightforward. All we need is a small
+function that maps those columns onto `geom_crossbar()`’s aesthetics:
 
 ``` r
 
-er_style_quantile_crossbar <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_quantile_crossbar <- function(data, 
+                                       config, 
+                                       stratify, 
+                                       exposure, 
+                                       response, 
+                                       strata, 
+                                       theme, 
+                                       ...) {
   ggplot2::geom_crossbar(
     data = config$summary,
-    mapping = ggplot2::aes(x = x_mid, y = y_mid, ymin = ci_lower, ymax = ci_upper),
+    mapping = ggplot2::aes(
+      x = x_mid, 
+      y = y_mid, 
+      ymin = ci_lower, 
+      ymax = ci_upper
+    ),
     inherit.aes = FALSE
   )
 }
+```
+
+That’s all we need here. This particular builder is simple enough that
+we just need to specify a single geom, and erplots will handle the rest.
+Here’s what it looks like when we use it:
+
+``` r
 
 erglm_data |>
   er_plot(aucss, ae1) |>
@@ -143,10 +218,18 @@ erglm_data |>
   plot()
 ```
 
-![](extending_files/figure-html/builder-1.png)
+![](extending_files/figure-html/builder-example-plot-1.png)
 
-A few things worth noting about this builder, all generalisable to any
-layer:
+I am not at all convinced this is a good way to create an
+exposure-response plot: in statistical graphics, the “cross bar” visual
+idiom is almost always used to show distributional information (i.e., it
+feels like a boxplot without the whiskers). Using it to display a mean
+and confidence interval is almost certainly going to confuse anyone
+looking at your plot. Even so, it’s convenient to illustrate how to
+design a builder function.
+
+Before moving on, there are a few things worth noting about this
+builder, all of which are generalisable to any layer:
 
 - It ignores `data`, `stratify`, `exposure`, `response`, `strata`, and
   `theme` entirely – a builder only needs to use the arguments relevant
@@ -169,7 +252,7 @@ layer:
   – a reasonable bar to check your own custom builders against if you’re
   considering proposing one upstream.
 
-## Builder metadata: tagging a builder with `er_style_tag()`
+## Supplying builder metadata
 
 The quantile builder above needed nothing beyond the function itself.
 Some builders, though, make a structural or aesthetic choice that the
@@ -406,7 +489,7 @@ This is close to what the built-in
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 does (it sets `layout`, `fill_role`, and `layer` together).
 
-## Summary
+### Summary
 
 | Argument | Applies to | Required? | What it controls |
 |----|----|----|----|

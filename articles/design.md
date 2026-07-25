@@ -1,4 +1,4 @@
-# The plotting grammar
+# Understanding the erplots grammar
 
 The goal of this article is to describe the **grammar** that erplots
 uses to generate exposure-response plots. It’s not intended to describe
@@ -261,22 +261,10 @@ no upper/lower partition to split on) – see
 
 ## Extending erplots
 
-Every layer function delegates the actual drawing to a `style` argument
-sharing a common signature –
-`function(data, config, stratify, exposure, response, strata, theme, ...)`.
-That signature is a documented, public part of the API (see
-[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)),
-each layer’s `style` defaults to one built-in `er_style_*()` function,
-and it can be set to any other function matching the same signature – no
-need to fork the package or reach into `object$layer` internals. For the
-data layer specifically, a custom builder must additionally declare
-which *structural* family it belongs to via
-[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md).
-
 Writing a custom builder in detail – including what `config` actually
 contains for each layer, a worked crossbar example, and
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md),
 the single helper a builder can use to declare its
 `layout`/`fill_role`/`y_role` metadata for the composition machinery –
-is its own article: [Extending erplots: writing your own
-builder](https://erplots.djnavarro.net/articles/extending.md).
+is its own article: [Extending
+erplots](https://erplots.djnavarro.net/articles/extending.md).
