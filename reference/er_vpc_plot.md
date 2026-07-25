@@ -117,26 +117,69 @@ A ggplot2 object
 ``` r
 if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
-mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 
-er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = aucss, model = mod)
-er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = sex, model = mod)
-
-mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
-er_vpc_plot(
-  erglm_data, exposure = aucss, response = biomarker_change,
-  group_by = aucss, model = mod_gaussian
+mod <- erglm_model(
+  ae2 ~ aucss + sex, 
+  erglm_data, 
+  family = binomial()
 )
 
-mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
-er_vpc_plot(
-  erglm_data, exposure = aucss, response = ae_count, group_by = aucss,
-  model = mod_poisson, response_type = "count"
+vpc1 <- er_vpc_plot(
+  data = erglm_data, 
+  exposure = aucss, 
+  response = ae2, 
+  group_by = aucss, 
+  model = mod,
+  seed = 9984
 )
+plot(vpc1)
+
+vpc2 <- er_vpc_plot(
+  data = erglm_data, 
+  exposure = aucss, 
+  response = ae2, 
+  group_by = sex, 
+  model = mod,
+  seed = 5233
+)
+plot(vpc2)
+
+mod_gaussian <- erglm_model(
+  biomarker_change ~ aucss, 
+  erglm_data, 
+  family = gaussian()
+)
+
+vpc3 <- er_vpc_plot(
+  data = erglm_data, 
+  exposure = aucss, 
+  response = biomarker_change,
+  group_by = aucss, 
+  model = mod_gaussian,
+  seed = 5650
+)
+plot(vpc3)
+
+mod_poisson <- erglm_model(
+  ae_count ~ aucss, 
+  erglm_data, 
+  family = poisson()
+)
+
+vpc4 <- er_vpc_plot(
+  data = erglm_data, 
+  exposure = aucss, 
+  response = ae_count, 
+  group_by = aucss,
+  model = mod_poisson, 
+  response_type = "count",
+  seed = 2758
+)
+plot(vpc4)
+
 }
-#> Using seed = 9984. Pass `seed = 9984` to reproduce this result.
-#> Using seed = 5233. Pass `seed = 5233` to reproduce this result.
-#> Using seed = 5650. Pass `seed = 5650` to reproduce this result.
-#> Using seed = 2758. Pass `seed = 2758` to reproduce this result.
+
+
+
 
 ```
