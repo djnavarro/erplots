@@ -9,19 +9,6 @@ fit a model with whatever package suits your workflow
 regression), and pass the fitted object to
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md).
 
-Any model that implements
-[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-can be visualised; implementing
-[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-and
-[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-additionally enables uncertainty spaghetti plots/VPCs and summary
-annotations (e.g. p-values). See the [Implementing the model
-interface](https://erplots.djnavarro.net/articles/model-interface.html)
-article for a worked guide to implementing all three, or
-[`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-for the bare contract.
-
 ## Installation
 
 You can install the development version of erplots like so:
