@@ -93,6 +93,18 @@ by the response value itself, so stratification falls back to one
 panel per stratum level instead of a shared legend -- see its own
 documentation and \code{PLAN.md} for the general "a layer's own encoding
 takes precedence" rule this follows.
+
+A row whose \code{stratify_by} value is \code{NA} is \strong{kept as its own stratum}
+-- an \code{NA}-labelled color/legend entry or facet, alongside the
+column's other levels -- rather than being silently dropped or
+erroring. This is a deliberate choice, not just an incidental
+consequence of \code{unique()}/\code{dplyr} grouping semantics (though it is
+also that): a missing stratification value can itself be informative
+(e.g. "arm not recorded", "assay below quantification limit"), and
+erplots has no principled way to guess whether a given \code{NA} should be
+dropped, recoded, or kept. If \code{NA} rows should instead be excluded, or
+recoded to an explicit level (e.g. \code{"Unknown"}), do so in \code{data}
+before calling \code{er_plot()}.
 }
 
 \section{Response type}{

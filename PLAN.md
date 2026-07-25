@@ -85,11 +85,12 @@ fixed, following this document's usual format.
    `n_quantiles = 20` on 5 rows) silently collapses to fewer bins
    (duplicate breaks dropped by `cut()`), with no warning that fewer
    bins than requested were produced.
-10. **(Low, confirm-intentional) `NA` in the stratification column** is
-    kept as its own `NA`-labelled stratum/facet rather than dropped or
-    flagged -- plausibly fine, but worth an explicit decision + doc note
-    rather than leaving it as an accidental side effect of `dplyr`
-    grouping semantics.
+10. **(Low, fixed -- see "Completed: document `NA`-in-`stratify_by`
+    handling" below) `NA` in the stratification column** is kept as its
+    own `NA`-labelled stratum/facet rather than dropped or flagged --
+    plausibly fine, but worth an explicit decision + doc note rather
+    than leaving it as an accidental side effect of `dplyr` grouping
+    semantics.
 11. **(Low, document-only) Fitting a model whose formula response
     differs from the plot's declared `response`** (e.g.
     `er_plot_add_model()` with a model fit on `ae2` while the plot
@@ -316,6 +317,41 @@ non-negative count response never erroring, and confirms the check is
 scoped to an explicitly declared `"count"` response only (`"continuous"`
 and `"auto"` on the same negative-containing column are both
 unaffected). `devtools::test()` and `devtools::check()` both clean.
+
+## Completed: document `NA`-in-`stratify_by` handling
+
+**The question (stress-test finding #10).** A row with `NA` in the
+`stratify_by` column has always been kept as its own `NA`-labelled
+stratum/facet -- `unique()`'s default `object$strata$limits` includes
+`NA`, and `dplyr::summarise(.by = c(..., "strata"))` treats `NA` as an
+ordinary grouping level -- but this was never a deliberate design
+decision, just an incidental consequence of those two functions' default
+behaviour, and was flagged as worth an explicit call rather than leaving
+it undocumented.
+
+**The decision.** Keep the current behaviour: `NA` in `stratify_by`
+forms its own stratum, exactly like any other level (its own color/
+legend entry, or its own facet where a layer facets by stratum). Two
+alternatives were considered and rejected: warning-and-dropping `NA`
+rows, and erroring outright. Both would silently or forcibly discard
+information a user might actually want to see (e.g. "stratum not
+recorded" or "assay below quantification limit" is itself a meaningful
+group to plot alongside the others), and erplots has no principled way
+to distinguish "this NA is meaningless, drop it" from "this NA is a
+real category" without the user telling it. A user who *does* want `NA`
+rows excluded or recoded (e.g. to an explicit `"Unknown"` level) can
+still do so upstream, in `data`, before calling `er_plot()` -- no new
+argument was added for this, since `dplyr::filter()`/`forcats::fct_na_value_to_level()`
+already do the job and erplots would just be wrapping them.
+
+**What changed:** `?er_plot`'s "Stratification" `@details` section
+(`R/er-plot-api.R`) gained a paragraph stating this explicitly, alongside
+the rationale and the "handle it upstream in `data`" pointer. No code
+changes -- this section confirms existing behaviour as intentional
+rather than fixing a bug.
+
+**Status:** done, documentation-only. `devtools::document()` regenerates
+`man/er_plot.Rd`; no test changes needed since no behaviour changed.
 
 ## Completed: validate `nsim` upfront in `er_vpc_plot()`
 
