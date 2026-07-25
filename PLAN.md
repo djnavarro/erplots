@@ -8,6 +8,91 @@ is done; step-by-step implementation narrative (file-by-file diffs, test
 counts, staged PR sequencing) is not, and has been trimmed. See git
 history / PR descriptions for that level of detail if it's ever needed.
 
+## Planned: stress-test findings (input validation gaps)
+
+A stress-testing pass (exercising empty data, degenerate/missing
+values, mis-declared response types, model/VPC misuse, theming
+validation, and style-selection guards against the loaded package)
+found that most of erplots' guard rails hold up well --
+`er_plot_theme()`'s validation, `er_vpc_plot()`'s `sim`/`model` mutual
+exclusivity, and `er_style_tag()`'s layer-mismatch checks all produced
+clear, informative errors under misuse. The gaps found cluster around
+*unvalidated inputs at the earliest entry points* (`er_plot()`,
+`cut_exposure_quantile()`), where a bad input either fails silently or
+surfaces as an opaque low-level error many calls later. Listed below
+in priority order (highest severity first), to work through
+systematically; each should get its own "Completed" section above once
+fixed, following this document's usual format.
+
+1. **(High) Nonexistent column passed as `exposure`/`response` to
+   `er_plot()` fails silently, not at `er_plot()` call time.**
+   `data[[name]]` on a missing column is `NULL`, so
+   `range(NULL)` returns `c(Inf, -Inf)` with only a bare `min`/`max`
+   warning -- the resulting `er_plot` object looks superficially valid
+   (prints fine) until a later `er_plot_build()`/`print()` fails deep
+   inside ggplot2 with "Column not found", far from the actual mistake.
+   Repro: `er_plot(df, not_a_col, response)`.
+2. **(High) A factor column passed as `exposure` crashes immediately
+   with an opaque error.** `er_plot()` itself calls `range()` on the
+   exposure column with no type check first, so a factor exposure fails
+   with `'range' not meaningful for factors` rather than a clear message
+   that exposure must be numeric. Repro:
+   `er_plot(df |> mutate(exposure = factor(...)), exposure, response)`.
+3. **(Medium-high) Constant or logical exposure crashes inside
+   `cut_exposure_quantile()` with an unhelpful traceback.** A
+   zero-width exposure range produces non-unique `quantile()` breaks,
+   so `cut()` fails with `'breaks' are not unique`; a logical exposure
+   column fails `cut()`'s `'x' must be numeric` check. Both surface from
+   deep inside a `dplyr::case_when()` call, not from `er_plot()` or
+   `er_plot_add_quantiles()` themselves. Repro:
+   `er_plot(df |> mutate(exposure = 5), exposure, response) |> er_plot_add_quantiles()`.
+4. **(Medium) All-`NA` exposure hits the same `cut()` failure family**
+   (`number of intervals and length of 'labels' differ`) as soon as
+   `er_plot_add_quantiles()` is called -- same root cause as #3, worth
+   fixing together.
+5. **(Medium) Single-row data plus `er_plot_add_quantiles()`** hits the
+   same `'breaks' are not unique` crash as #3 (only one exposure value
+   to quantile) -- again, likely fixed by the same upstream guard.
+6. **(Medium) `response_type = "binary"` declared but values aren't
+   confined to `{0, 1}` is not validated.** Rows with an out-of-range
+   value are silently excluded from both `n0`/`n1` in the quantile-layer
+   rate calculation (shrinking the denominator with no warning), and
+   `response$limits` is force-set to `c(0, 1)` regardless of the
+   column's actual range. Should at minimum warn.
+7. **(Medium) `response_type = "count"` with negative values is not
+   validated.** Runs to completion but `ci_poisson()`'s internal
+   `qgamma()` call produces `NaN` bounds, surfacing as a wall of
+   `dplyr::summarise()` warnings rather than one clear upfront message
+   that count responses must be non-negative.
+8. **(Low-medium) `er_vpc_plot(..., nsim = 0)` or `nsim < 0` produces
+   opaque errors** (`non-conformable arguments` / `invalid arguments`)
+   instead of validating `nsim` upfront with a clear message.
+9. **(Low) Requesting more quantile bins than unique exposure values**
+   (e.g. `n_quantiles = 20` on 5 rows) silently collapses to fewer bins
+   (duplicate breaks dropped by `cut()`), with no warning that fewer
+   bins than requested were produced.
+10. **(Low, confirm-intentional) `NA` in the stratification column** is
+    kept as its own `NA`-labelled stratum/facet rather than dropped or
+    flagged -- plausibly fine, but worth an explicit decision + doc note
+    rather than leaving it as an accidental side effect of `dplyr`
+    grouping semantics.
+11. **(Low, document-only) Fitting a model whose formula response
+    differs from the plot's declared `response`** (e.g.
+    `er_plot_add_model()` with a model fit on `ae2` while the plot
+    declared `ae1`) runs silently, with nothing cross-checking the
+    model's formula against the plot's response. Likely fine by design
+    (erplots is deliberately model-agnostic and never inspects a
+    model's formula), but worth a documented caveat as a known foot-gun
+    rather than leaving it completely undocumented.
+
+The common thread across #1-#5: **`er_plot()` and
+`cut_exposure_quantile()` never validate that `exposure` is numeric,
+non-constant, and has at least one non-missing value** before use.
+The likely fix is a single upfront check in each (failing fast with a
+message like "exposure must be numeric with at least 2 distinct
+non-missing values") rather than patching each downstream symptom
+separately.
+
 ## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 
 **Discovered while** converting the roxygen `@examples` blocks across
