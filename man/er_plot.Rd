@@ -32,7 +32,14 @@ quantity (bin mean plus a t-interval). \code{"auto"} never resolves to
 count response to instead get bin mean plus an \emph{exact} Poisson
 interval (see \code{\link[=ci_poisson]{ci_poisson()}}), which -- unlike the t-interval
 approximation -- never produces a negative lower bound. See
-\code{PLAN.md}'s design decision (4) for the rationale.}
+\code{PLAN.md}'s design decision (4) for the rationale. Explicitly
+declaring \code{response_type = "binary"} for a response column that
+isn't actually confined to \verb{\{0, 1\}} (or logical) triggers a warning
+-- rows with an out-of-range value are silently excluded from the
+quantile layer's rate calculation rather than erroring, so this is
+a warning rather than an error, but the resulting rate is computed
+over a smaller effective denominator than the row count would
+suggest.}
 }
 \value{
 An (empty) plot object of class \code{er_plot}

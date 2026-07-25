@@ -36,6 +36,35 @@ test_that("er_plot errors clearly when exposure is not numeric", {
   expect_no_error(er_plot(er_test_data, aucss, ae1))
 })
 
+test_that("er_plot warns when a declared binary response has values outside {0, 1}", {
+  skip_if_not_installed("erglm")
+
+  df_bad <- er_test_data
+  df_bad$ae1[1:3] <- 2
+
+  expect_warning(
+    er_plot(df_bad, aucss, ae1, response_type = "binary"),
+    "outside \\{0, 1\\}"
+  )
+  expect_warning(
+    er_plot(df_bad, aucss, ae1, response_type = "binary"),
+    "3 values"
+  )
+
+  # `response_type = "auto"` never triggers this warning -- it wouldn't
+  # have resolved to "binary" in the first place if values fell outside
+  # {0, 1}
+  expect_no_warning(er_plot(df_bad, aucss, ae1))
+  plt_auto <- er_plot(df_bad, aucss, ae1)
+  expect_equal(plt_auto$response$type, "continuous")
+
+  # a clean binary response (0/1 or logical) never warns
+  expect_no_warning(er_plot(er_test_data, aucss, ae1, response_type = "binary"))
+  df_logical <- er_test_data
+  df_logical$ae1 <- as.logical(df_logical$ae1)
+  expect_no_warning(er_plot(df_logical, aucss, ae1, response_type = "binary"))
+})
+
 test_that("er_plot resolves response_type = 'auto' correctly", {
   skip_if_not_installed("erglm")
 

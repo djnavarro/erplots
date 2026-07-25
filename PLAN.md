@@ -61,12 +61,13 @@ fixed, following this document's usual format.
    `er_plot_add_quantiles()`** hit the same `'breaks' are not unique`
    crash as #3 (only one exposure value to quantile) -- fixed by the
    same upstream guard.
-6. **(Medium) `response_type = "binary"` declared but values aren't
-   confined to `{0, 1}` is not validated.** Rows with an out-of-range
-   value are silently excluded from both `n0`/`n1` in the quantile-layer
-   rate calculation (shrinking the denominator with no warning), and
-   `response$limits` is force-set to `c(0, 1)` regardless of the
-   column's actual range. Should at minimum warn.
+6. **(Medium, fixed -- see "Completed: warn when a declared binary
+   response has values outside `{0, 1}`" below) `response_type =
+   "binary"` declared but values aren't confined to `{0, 1}` is not
+   validated.** Rows with an out-of-range value are silently excluded
+   from both `n0`/`n1` in the quantile-layer rate calculation
+   (shrinking the denominator with no warning), and `response$limits`
+   is force-set to `c(0, 1)` regardless of the column's actual range.
 7. **(Medium) `response_type = "count"` with negative values is not
    validated.** Runs to completion but `ci_poisson()`'s internal
    `qgamma()` call produces `NaN` bounds, surfacing as a wall of
@@ -240,6 +241,43 @@ input" and a companion normal-usage regression test) mirror the
 clearly when grouping by a constant continuous variable") confirms the
 error surfaces through the actual layer function, not just the bare
 helper. `devtools::test()` and `devtools::check()` both clean.
+
+## Completed: warn when a declared binary response has values outside `{0, 1}`
+
+**The bug (stress-test finding #6).** `er_plot(..., response_type =
+"binary")` never checked that the response column was actually
+confined to `{0, 1}` (or logical). This is impossible to trigger via
+`response_type = "auto"` -- `.detect_response_type()` only ever
+resolves to `"binary"` when every non-missing value is already in
+`{0, 1}` -- but an explicit `response_type = "binary"` declaration on a
+column with, say, a stray `2` (e.g. a miscoded value, or a response
+column reused across a refactor) ran silently. `object$response$limits`
+was force-set to `c(0, 1)` regardless of the column's actual range, and
+downstream, the quantile layer's rate calculation (`n1 = sum(response
+== 1)`, `n0 = sum(response == 0)`) silently excluded any out-of-range
+row from *both* counts -- shrinking the effective denominator with no
+indication anything was dropped.
+
+**The fix.** After resolving `object$response$type`, `er_plot()` now
+checks (only when the response isn't logical, since a logical vector
+can't have out-of-range values) whether any non-missing response value
+falls outside `{0, 1}`, and issues a warning naming the response column
+and how many out-of-range values were found if so, with a pointer to
+pass `response_type = "continuous"` instead if the column genuinely
+isn't binary. This is a warning, not an error, matching PLAN.md's
+original "should at minimum warn" framing -- the existing exclusion
+behaviour is left unchanged (fixing *that* would be a separate, more
+invasive design decision about what an out-of-range binary value should
+even mean), so this pass only closes the "silent" half of the problem.
+
+**Status:** done. New test in `tests/testthat/test-er-plot-api.R`
+("er_plot warns when a declared binary response has values outside
+{0, 1}") covers the warning firing (with the correct out-of-range
+count), confirms `response_type = "auto"` can never trigger it (a
+response with out-of-range values simply auto-detects as
+`"continuous"` instead), and confirms a clean 0/1 or logical binary
+response never warns. `devtools::test()` and `devtools::check()` both
+clean.
 
 ## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 

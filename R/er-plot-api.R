@@ -78,7 +78,14 @@
 #'   count response to instead get bin mean plus an *exact* Poisson
 #'   interval (see [ci_poisson()]), which -- unlike the t-interval
 #'   approximation -- never produces a negative lower bound. See
-#'   `PLAN.md`'s design decision (4) for the rationale.
+#'   `PLAN.md`'s design decision (4) for the rationale. Explicitly
+#'   declaring `response_type = "binary"` for a response column that
+#'   isn't actually confined to `{0, 1}` (or logical) triggers a warning
+#'   -- rows with an out-of-range value are silently excluded from the
+#'   quantile layer's rate calculation rather than erroring, so this is
+#'   a warning rather than an error, but the resulting rate is computed
+#'   over a smaller effective denominator than the row count would
+#'   suggest.
 #'
 #' @returns An (empty) plot object of class `er_plot`
 #'
@@ -197,6 +204,30 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
     response_type <- .detect_response_type(object$data[[object$response$name]])
   }
   object$response$type <- response_type
+
+  # `response_type = "binary"` was explicitly declared but the response
+  # column isn't actually confined to {0, 1} (impossible when "auto"
+  # resolves to "binary", since `.detect_response_type()` already checks
+  # this) -- warn, since a row with an out-of-range value is silently
+  # excluded from both `n0`/`n1` in the quantile layer's rate calculation
+  # (shrinking the denominator with no other indication), rather than
+  # erroring or being counted; see PLAN.md's "stress-test findings" section
+  if (object$response$type == "binary") {
+    resp_vals <- object$data[[object$response$name]]
+    if (!is.logical(resp_vals)) {
+      n_out_of_range <- sum(!is.na(resp_vals) & !(resp_vals %in% c(0, 1)))
+      if (n_out_of_range > 0) {
+        rlang::warn(c(
+          sprintf(
+            "`response_type = \"binary\"` was declared for `%s`, but %d value%s outside {0, 1}.",
+            object$response$name, n_out_of_range, if (n_out_of_range == 1) " is" else "s are"
+          ),
+          "i" = "Rows with an out-of-range value are silently excluded from the quantile layer's rate calculation (neither a responder nor a non-responder), shrinking the effective denominator.",
+          "i" = "Pass `response_type = \"continuous\"` if this isn't actually a binary response."
+        ))
+      }
+    }
+  }
 
   # store limits
   object$exposure$limits <- range(object$data[[object$exposure$name]])
