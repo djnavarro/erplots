@@ -106,8 +106,7 @@ er_vpc_plot(
   `"continuous"` (counts aren't confined to `{0, 1}`) and is summarised
   with the bin-mean-plus-t-interval approximation unless
   `response_type = "count"` is declared explicitly, in which case the
-  exact Poisson interval is used instead – see `PLAN.md`'s design
-  decision (4) for the rationale.
+  exact Poisson interval is used instead.
 
 ## Value
 

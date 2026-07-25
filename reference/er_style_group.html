@@ -139,8 +139,7 @@ which draws the exposure distribution for a grouping variable (e.g.
 treatment arm) below the main panel: <code>er_style_group_boxplot()</code> (the
 default), <code>er_style_group_violin()</code>, and <code>er_style_group_histogram()</code>.
 The first two put the group levels on the y-axis; <code>er_style_group_histogram()</code>
-instead puts them on facet strips and frees the y-axis for counts (see
-<code>Details</code> in the package's <code>AGENTS.md</code>/<code>PLAN.md</code> for the rationale).
+instead puts them on facet strips (<code>facet_grid(rows = vars(lvl), switch = "y")</code>) and frees the y-axis for counts.
 All three are tagged <code>er_style_tag(fn, layer = "group")</code>, so
 <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> errors informatively if handed a builder
 tagged for a different layer.</p>

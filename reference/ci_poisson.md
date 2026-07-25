@@ -44,8 +44,7 @@ when `response_type = "count"` is explicitly declared. Unlike
 [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md) (the
 default, opt-in-required approximation used when a count response
 auto-detects or is declared `"continuous"`), this interval is exact and
-never produces a negative lower bound – see `PLAN.md` design decision
-(4) for the rationale and history.
+never produces a negative lower bound.
 
 ## Examples
 

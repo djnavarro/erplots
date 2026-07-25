@@ -64,14 +64,13 @@ er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
   to instead get bin mean plus an *exact* Poisson interval (see
   [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)),
   which – unlike the t-interval approximation – never produces a
-  negative lower bound. See `PLAN.md`'s design decision (4) for the
-  rationale. Explicitly declaring `response_type = "binary"` for a
-  response column that isn't actually confined to `{0, 1}` (or logical)
-  triggers a warning – rows with an out-of-range value are silently
-  excluded from the quantile layer's rate calculation rather than
-  erroring, so this is a warning rather than an error, but the resulting
-  rate is computed over a smaller effective denominator than the row
-  count would suggest. Declaring `response_type = "count"` for a
+  negative lower bound. Explicitly declaring `response_type = "binary"`
+  for a response column that isn't actually confined to `{0, 1}` (or
+  logical) triggers a warning – rows with an out-of-range value are
+  silently excluded from the quantile layer's rate calculation rather
+  than erroring, so this is a warning rather than an error, but the
+  resulting rate is computed over a smaller effective denominator than
+  the row count would suggest. Declaring `response_type = "count"` for a
   response column that contains a negative value *does* error, rather
   than warn – unlike the binary case, a negative count isn't silently
   excluded, it makes
@@ -97,11 +96,10 @@ is **additive**: each call adds another grouped-distribution panel
 alongside any already added, rather than replacing them. This asymmetry
 is deliberate, not accidental – there is only one "the model" and one
 "the quantile summary" to show per plot, but many legitimate ways to
-slice the exposure distribution by different grouping variables. See
-`PLAN.md`'s "Mini-language architecture review" for the design
-discussion, including the one flagged future exception: overlaying two
-model curves for comparison isn't currently supported, but is the one
-singleton layer where an additive variant might eventually make sense.
+slice the exposure distribution by different grouping variables. One
+flagged future exception: overlaying two model curves for comparison
+isn't currently supported, but is the one singleton layer where an
+additive variant might eventually make sense.
 
 ## Stratification
 
@@ -115,9 +113,8 @@ was set, `FALSE` otherwise).
 is a partial exception to the "always color/fill" rule for a
 continuous/count response: its color aesthetic is already spoken for by
 the response value itself, so stratification falls back to one panel per
-stratum level instead of a shared legend – see its own documentation and
-`PLAN.md` for the general "a layer's own encoding takes precedence" rule
-this follows.
+stratum level instead of a shared legend – see its own documentation for
+the general "a layer's own encoding takes precedence" rule this follows.
 
 A row whose `stratify_by` value is `NA` is **kept as its own stratum** –
 an `NA`-labelled color/legend entry or facet, alongside the column's
