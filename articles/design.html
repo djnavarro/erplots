@@ -39,6 +39,7 @@
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
+    <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
     <li><a class="dropdown-item" href="../articles/model-interface.html">Implementing the model interface</a></li>
   </ul>
@@ -365,6 +366,18 @@ for a binary response’s exactly-0/1 y-values);
 <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> guards against using it on a
 continuous/count response at all (there’s no upper/lower partition to
 split on) – see <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="theming-is-a-separate-concern">Theming is a separate concern<a class="anchor" aria-label="anchor" href="#theming-is-a-separate-concern"></a>
+</h2>
+<p>Everything above is about the <strong>grammar</strong>: which layers
+exist, whether a second call to a layer function replaces or adds to the
+first, and how stratification/<code>response_type</code> change what a
+layer draws. None of it touches <em>how the composed plot looks</em> –
+labels, axis limits, the overall ggplot2 theme, the discrete color/fill
+palette, formatters, and so on. That’s a deliberately separate,
+orthogonal knob, <code><a href="../reference/er_plot_theme.html">er_plot_theme()</a></code>, covered in its own
+article: <a href="theming.html">Theming erplots</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="extending-erplots">Extending erplots<a class="anchor" aria-label="anchor" href="#extending-erplots"></a>

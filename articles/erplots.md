@@ -271,6 +271,37 @@ erglm_data |>
 
 ![](erplots_files/figure-html/count-1.png)
 
+## Theming
+
+Everything above changes *what’s drawn*.
+[`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
+changes *how it looks*, without remapping any aesthetic: axis/legend
+labels, a plot title, axis limits, the overall ggplot2 theme, a discrete
+color/fill palette for stratification, and more.
+
+``` r
+
+erglm_data |>
+  er_plot(exposure = aucss, response = ae1, stratify_by = sex) |>
+  er_plot_add_model(mod_strat) |>
+  er_plot_add_quantiles() |>
+  er_plot_add_data() |>
+  er_plot_theme(
+    xlab = "Steady-state AUC",
+    theme_base = ggplot2::theme_minimal(),
+    color_discrete = ggplot2::scale_color_brewer(palette = "Dark2"),
+    fill_discrete = ggplot2::scale_fill_brewer(palette = "Dark2")
+  ) |>
+  plot()
+```
+
+![](erplots_files/figure-html/theme-1.png)
+
+See [Theming erplots](https://erplots.djnavarro.net/articles/theming.md)
+for every argument
+[`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
+supports.
+
 ## Where to next
 
 This vignette only shows the default look for each layer. Every layer
@@ -293,6 +324,11 @@ fit. From here:
   the design rules behind the mini-language – which layers can appear
   more than once, how stratification interacts with each layer, and so
   on.
+- [Theming erplots](https://erplots.djnavarro.net/articles/theming.md)
+  covers every
+  [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
+  argument in detail – labels, limits, the visual theme, the
+  stratification palette, formatters, and panel heights.
 - [Extending
   erplots](https://erplots.djnavarro.net/articles/extending.md) shows
   how to write your own layer style, and what erplots expects from a

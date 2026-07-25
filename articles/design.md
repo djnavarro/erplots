@@ -259,6 +259,18 @@ guards against using it on a continuous/count response at all (there’s
 no upper/lower partition to split on) – see
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md).
 
+## Theming is a separate concern
+
+Everything above is about the **grammar**: which layers exist, whether a
+second call to a layer function replaces or adds to the first, and how
+stratification/`response_type` change what a layer draws. None of it
+touches *how the composed plot looks* – labels, axis limits, the overall
+ggplot2 theme, the discrete color/fill palette, formatters, and so on.
+That’s a deliberately separate, orthogonal knob,
+[`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md),
+covered in its own article: [Theming
+erplots](https://erplots.djnavarro.net/articles/theming.md).
+
 ## Extending erplots
 
 Writing a custom builder in detail – including what `config` actually

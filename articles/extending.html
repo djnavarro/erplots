@@ -39,6 +39,7 @@
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
+    <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
     <li><a class="dropdown-item" href="../articles/model-interface.html">Implementing the model interface</a></li>
   </ul>
@@ -226,8 +227,9 @@ stratification variables declared in <code><a href="../reference/er_plot.html">e
 </tr>
 <tr class="odd">
 <td><code>theme</code></td>
-<td>Shared theming helpers: <code>theme$theme_base()</code>,
-<code>theme$draw_key</code>, <code>theme$format_percent()</code>,
+<td>Shared theming state, adjustable via <code><a href="../reference/er_plot_theme.html">er_plot_theme()</a></code>:
+<code>theme$theme_base</code>, <code>theme$draw_key</code>,
+<code>theme$format_percent()</code>,
 <code>theme$format_number()</code>.</td>
 </tr>
 <tr class="even">

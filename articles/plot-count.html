@@ -39,6 +39,7 @@
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
+    <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
     <li><a class="dropdown-item" href="../articles/model-interface.html">Implementing the model interface</a></li>
   </ul>
@@ -85,7 +86,10 @@ designed to be model agnostic, in the sense that it will work for any
 modelling tool that implements a few key interface functions (see <a href="model-interface.html">Implementing the model interface</a>). It
 can support binary response data, continuous response data, and count
 response data. This article focuses on <strong>count data</strong>,
-using a Poisson model fitted using the erglm package.</p>
+using a Poisson model fitted using the erglm package. It covers
+<em>which builder draws each layer</em>; for overall plot appearance –
+labels, the visual theme, the stratification palette – see <a href="theming.html">Theming erplots</a> instead, which applies unchanged
+regardless of response type.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>

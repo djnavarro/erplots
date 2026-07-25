@@ -83,7 +83,7 @@ will pass into your function within each of these slots:
 | `config` | The pre-computed configuration for this specific layer. This is different for each layer, and is discussed in more detail below. |
 | `stratify` | `TRUE`/`FALSE`: whether this layer should honour `stratify_by`. |
 | `exposure`, `response`, `strata` | Plot-variable metadata lists (`name`, `label`, `limits`, …) describing the exposure, response, and stratification variables declared in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md). |
-| `theme` | Shared theming helpers: `theme$theme_base()`, `theme$draw_key`, `theme$format_percent()`, `theme$format_number()`. |
+| `theme` | Shared theming state, adjustable via [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md): `theme$theme_base`, `theme$draw_key`, `theme$format_percent()`, `theme$format_number()`. |
 | `...` | Extra named arguments forwarded from the corresponding `er_plot_add_*()` call’s own `...`. See “Passing extra arguments to a builder” below. |
 
 ## The builder return value

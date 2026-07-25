@@ -8,7 +8,11 @@ modelling tool that implements a few key interface functions (see
 interface](https://erplots.djnavarro.net/articles/model-interface.md)).
 It can support binary response data, continuous response data, and count
 response data. This article focuses on **continuous data**, using a
-linear regression model fitted using the erglm package.
+linear regression model fitted using the erglm package. It covers *which
+builder draws each layer*; for overall plot appearance – labels, the
+visual theme, the stratification palette – see [Theming
+erplots](https://erplots.djnavarro.net/articles/theming.md) instead,
+which applies unchanged regardless of response type.
 
 ``` r
 
