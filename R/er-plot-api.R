@@ -187,6 +187,8 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   object$theme$draw_key <- ggplot2::draw_key_rect
   object$theme$color_discrete <- NULL
   object$theme$fill_discrete <- NULL
+  object$theme$color_continuous <- NULL
+  object$theme$fill_continuous <- NULL
   object$theme$title <- NULL
   object$theme$subtitle <- NULL
   object$theme$caption <- NULL
@@ -212,14 +214,18 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
 #' value explicitly.
 #'
 #' `color_discrete`/`fill_discrete` only affect aesthetics that are
-#' genuinely mapped to the stratification variable -- a continuous/count
-#' response's color-encoded data layer, or [er_style_data_hex()]'s density
-#' fill, are left at ggplot2's defaults regardless of these arguments
-#' (continuous palette control isn't implemented yet). If a custom builder
-#' adds its own `scale_color_*()`/`scale_fill_*()` directly, supplying
-#' `color_discrete`/`fill_discrete` here will add a second scale on top
-#' (ggplot2 will emit a message and the later one wins) rather than
-#' detecting and deferring to the builder's own choice.
+#' genuinely mapped to the stratification variable; `color_continuous`/
+#' `fill_continuous` are the symmetric counterpart for aesthetics mapped to
+#' something else continuous -- [er_style_data_hex()]'s density `fill`, or
+#' a continuous/count response's color-encoded data layer (there's no
+#' built-in builder for the latter today; see [er_style_tag()]'s `layout`
+#' argument). Each of the four only ever touches the aesthetic role it
+#' names -- supplying `color_continuous` never affects a discrete `colour`
+#' mapping, and vice versa. If a custom builder adds its own
+#' `scale_color_*()`/`scale_fill_*()` directly, supplying any of these four
+#' here will add a second scale on top (ggplot2 will emit a message and the
+#' later one wins) rather than detecting and deferring to the builder's own
+#' choice.
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`)
 #' @param xlab,ylab Exposure/response axis label (single string), written to
@@ -250,6 +256,12 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
 #'   written to `object$theme$color_discrete`/`object$theme$fill_discrete`
 #'   and applied to every plot whose `colour`/`fill` aesthetic is mapped to
 #'   the stratification variable -- see "Details"
+#' @param color_continuous,fill_continuous A continuous ggplot2 scale object
+#'   (e.g. [ggplot2::scale_color_viridis_c()], [ggplot2::scale_fill_gradient()]),
+#'   written to `object$theme$color_continuous`/`object$theme$fill_continuous`
+#'   and applied to every plot whose `colour`/`fill` aesthetic is mapped to
+#'   something continuous other than the stratification variable -- see
+#'   "Details"
 #' @param format_p,format_percent,format_number Formatter functions
 #'   (typically from `scales::label_*()`), written to
 #'   `object$theme$format_p` etc. Used by the summary/quantile layers to
@@ -272,6 +284,7 @@ er_plot_theme <- function(object,
                             xlim = NULL, ylim = NULL,
                             theme_base = NULL, theme_extra = NULL,
                             color_discrete = NULL, fill_discrete = NULL,
+                            color_continuous = NULL, fill_continuous = NULL,
                             format_p = NULL, format_percent = NULL, format_number = NULL,
                             draw_key = NULL,
                             height_base = NULL, height_data = NULL, height_group = NULL) {
@@ -290,6 +303,8 @@ er_plot_theme <- function(object,
   .check_theme_class(theme_extra, "theme_extra", "theme")
   .check_theme_class(color_discrete, "color_discrete", "Scale")
   .check_theme_class(fill_discrete, "fill_discrete", "Scale")
+  .check_theme_class(color_continuous, "color_continuous", "ScaleContinuous")
+  .check_theme_class(fill_continuous, "fill_continuous", "ScaleContinuous")
   .check_theme_function(format_p, "format_p")
   .check_theme_function(format_percent, "format_percent")
   .check_theme_function(format_number, "format_number")
@@ -321,6 +336,8 @@ er_plot_theme <- function(object,
 
   if (!is.null(color_discrete)) object$theme$color_discrete <- color_discrete
   if (!is.null(fill_discrete)) object$theme$fill_discrete <- fill_discrete
+  if (!is.null(color_continuous)) object$theme$color_continuous <- color_continuous
+  if (!is.null(fill_continuous)) object$theme$fill_continuous <- fill_continuous
 
   if (!is.null(format_p)) object$theme$format_p <- format_p
   if (!is.null(format_percent)) object$theme$format_percent <- format_percent

@@ -141,6 +141,55 @@ passing) and `devtools::check()` (0/0/0) both clean.
 `er_plot_theme()` in this pass -- closed by the dedicated `theming.Rmd`
 article added later, see "Completed: vignette restructuring" below.
 
+## Completed: continuous color/fill palette control in `er_plot_theme()`
+
+**Motivation.** `color_discrete`/`fill_discrete` only ever apply where
+`colour`/`fill` is genuinely mapped to the stratification variable;
+there was no equivalent for the other thing those aesthetics get used
+for -- a continuous value -- leaving `er_style_data_hex()`'s bin-density
+fill (the one built-in example) and a hypothetical continuous/count
+response's response-colored data layer (no built-in consumer, but
+`.layer_data()`'s `config$color_role == "response"` dispatch was left
+in place for a custom builder -- see "Completed: removing
+`build_data_jitter()`/`build_data_color()`" below) stuck at ggplot2's
+default gradient with no way to override it.
+
+**What was done:** `color_continuous`/`fill_continuous` added to
+`er_plot_theme()`, validated against ggplot2's `"ScaleContinuous"` class
+(tighter than `color_discrete`/`fill_discrete`'s generic `"Scale"`
+check, since a continuous scale is a distinct S3 class, not just an
+unlabelled variant) rather than reusing the generic `"Scale"` check --
+so passing a *discrete* scale to `color_continuous` is now also
+rejected, not silently accepted. `.polish_scales()` gained the mirror
+image of its existing discrete-eligibility branches: `fill_continuous`
+applies to the base plot's `fill` only when an overlay builder is
+tagged `fill_role = "density"` (never when `fill` means strata);
+`color_continuous`/`fill_continuous` apply to a data panel only when
+`config$color_role == "response"` (never `"strata"`). Each of the four
+arguments only ever touches the aesthetic role it names -- a builder
+that maps both a discrete `fill = strata` ribbon and a continuous
+density `fill` in the same plot was already a ggplot2-level error
+before this (see `er_style_data_hex()`'s own docs), so this doesn't
+introduce a new ambiguity, just gives the continuous side a lever to
+pull.
+
+**What changed:** `R/er-plot-api.R` (`er_plot()`'s default
+`object$theme$color_continuous`/`fill_continuous` fields, `er_plot_theme()`'s
+two new parameters/validation/assignment, docs); `R/er-plot-compose.R`
+(`.polish_scales()`'s two new branches); new tests in
+`tests/testthat/test-er-plot-theme.R` (validation, a regression check
+that `fill_continuous` correctly overrides `er_style_data_hex()`'s
+density fill without being clobbered by a simultaneously-supplied
+`fill_discrete`, and a custom `"panel"`-layout builder exercising the
+`color_role == "response"` branch, since no built-in one exists);
+`vignettes/articles/theming.Rmd` gained a "Continuous color/fill
+palette" section (using `er_style_data_hex()`) alongside the existing
+discrete one.
+
+**Status:** done, `devtools::check()` clean (0 errors/warnings/notes),
+full test suite passing (634 tests), `theming.Rmd` re-rendered
+end-to-end via `rmarkdown::render()`.
+
 ## Completed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
 
 **The bug.** `er_plot_build()`'s trigger condition for building the
@@ -1018,12 +1067,6 @@ full test suite passing (478 tests).
   continuous/count "panel"-layout builder resurfaces, these are the
   design questions to revisit; `.part_data()`'s response-type dispatch
   for that case is still in place, just with no built-in consumer today.
-- **Continuous color/fill palette control in `er_plot_theme()`.**
-  `color_discrete`/`fill_discrete` cover the strata palette; there's no
-  `color_continuous`/`fill_continuous` equivalent yet for
-  `er_style_data_hex()`'s density fill or a continuous/count response's
-  response-colored data layer. Deferred alongside the theme work -- see
-  "Completed: `er_plot_theme()` implemented" above.
 - **`.polish_scales()` vs. a builder's own explicit scale.** If a future
   custom builder calls `scale_color_*()`/`scale_fill_*()` directly,
   `.polish_scales()` will add a second scale on top rather than

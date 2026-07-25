@@ -17,6 +17,7 @@ library(erglm)
 
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 mod_strat <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
+mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
 ```
 
 Every example below reuses the same stratified plot:
@@ -131,11 +132,34 @@ erglm_data |>
   plot()
 ```
 
-This is deliberately scoped to *discrete* palettes only -- the palette
-used for a continuous/response-colored data layer, or for
-`er_style_data_hex()`'s density fill, isn't controllable yet
-(`color_discrete`/`fill_discrete` are left alone wherever `colour`/`fill`
-means something other than strata).
+`color_discrete`/`fill_discrete` are left alone wherever `colour`/`fill`
+means something other than strata -- e.g. `er_style_data_hex()`'s
+density fill, below.
+
+## Continuous color/fill palette
+
+`color_continuous`/`fill_continuous` are the symmetric counterpart,
+scoped to aesthetics mapped to something continuous *other* than the
+stratification variable. `er_style_data_hex()`'s bin-density `fill` is
+the one built-in example (a continuous/count response's response-colored
+data layer is the other, but there's currently no built-in "panel"-layout
+builder for it -- see `vignettes/articles/extending.Rmd` for writing a
+custom one):
+
+```{r continuous-palette}
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_add_model(mod_gaussian, style = er_style_model_line) |>
+  er_plot_add_data(style = er_style_data_hex) |>
+  er_plot_theme(fill_continuous = ggplot2::scale_fill_viridis_c()) |>
+  plot()
+```
+
+As with `color_discrete`/`fill_discrete`, `color_continuous`/
+`fill_continuous` only ever touch the aesthetic role they name --
+supplying `fill_continuous` here has no effect on a *discrete* `fill`
+mapping elsewhere in the same plot (e.g. a stratified model ribbon's
+`fill = strata`), and vice versa for `fill_discrete`.
 
 ## Formatters
 

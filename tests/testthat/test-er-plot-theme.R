@@ -156,3 +156,74 @@ test_that("fill_discrete doesn't affect an er_style_data_hex() density fill", {
   fill_scale <- built$plot$base$scales$get_scales("fill")
   expect_false(inherits(fill_scale, "ScaleDiscrete"))
 })
+
+test_that("er_plot_theme() writes and validates continuous color/fill scales", {
+  plt <- er_test_data |> er_plot(aucss, ae1)
+  color_scale <- ggplot2::scale_color_viridis_c()
+  fill_scale <- ggplot2::scale_fill_viridis_c()
+  plt <- er_plot_theme(plt, color_continuous = color_scale, fill_continuous = fill_scale)
+
+  expect_identical(plt$theme$color_continuous, color_scale)
+  expect_identical(plt$theme$fill_continuous, fill_scale)
+
+  expect_error(er_plot_theme(plt, color_continuous = "not a scale"), "ScaleContinuous")
+  # a *discrete* scale is rejected too -- `color_continuous` isn't just an
+  # alias for `color_discrete`
+  expect_error(
+    er_plot_theme(plt, color_continuous = ggplot2::scale_color_brewer()),
+    "ScaleContinuous"
+  )
+})
+
+test_that("fill_continuous replaces an er_style_data_hex() density fill", {
+  skip_if_not_installed("hexbin")
+  mod <- erglm::erglm_model(biomarker_change ~ aucss, er_test_data, family = gaussian())
+  plt <- er_test_data |>
+    er_plot(aucss, biomarker_change) |>
+    er_plot_add_model(mod, style = er_style_model_line) |>
+    er_plot_add_data(style = er_style_data_hex) |>
+    er_plot_theme(fill_continuous = ggplot2::scale_fill_viridis_c())
+
+  expect_no_error(built <- er_plot_build(plt))
+  fill_scale <- built$plot$base$scales$get_scales("fill")
+  expect_true(inherits(fill_scale, "ScaleContinuous"))
+  expect_match(deparse(fill_scale$call), "scale_fill_viridis_c\\(\\)$")
+
+  # color_discrete/color_continuous have nothing to touch here (`colour`
+  # isn't mapped at all), and fill_discrete must not clobber the density
+  # fill even when fill_continuous is also supplied
+  plt2 <- plt |> er_plot_theme(fill_discrete = ggplot2::scale_fill_brewer())
+  expect_no_error(built2 <- er_plot_build(plt2))
+  fill_scale2 <- built2$plot$base$scales$get_scales("fill")
+  expect_true(inherits(fill_scale2, "ScaleContinuous"))
+})
+
+test_that("color_continuous applies to a custom builder's response-colored data panel", {
+  # there's no built-in "panel"-layout builder for a continuous/count
+  # response's `color_role == "response"` case (see PLAN.md's "Data
+  # layer color scale / continuous-response panel design") -- exercise
+  # the `.polish_scales()` branch with a small custom one instead
+  custom_response_color_builder <- er_style_tag(
+    function(data, config, stratify, exposure, response, strata, theme, ...) {
+      list(
+        ggplot2::geom_point(
+          data = data,
+          mapping = ggplot2::aes(x = .data[[exposure$name]], y = 0, color = .data[[response$name]])
+        )
+      )
+    },
+    layout = "panel"
+  )
+
+  mod <- erglm::erglm_model(biomarker_change ~ aucss, er_test_data, family = gaussian())
+  plt <- er_test_data |>
+    er_plot(aucss, biomarker_change) |>
+    er_plot_add_model(mod, style = er_style_model_line) |>
+    er_plot_add_data(style = custom_response_color_builder) |>
+    er_plot_theme(color_continuous = ggplot2::scale_color_viridis_c())
+
+  expect_no_error(built <- er_plot_build(plt))
+  color_scale <- built$plot$data[["data"]]$scales$get_scales("colour")
+  expect_true(inherits(color_scale, "ScaleContinuous"))
+  expect_match(deparse(color_scale$call), "scale_color_viridis_c\\(\\)$")
+})

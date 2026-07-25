@@ -138,26 +138,43 @@
   p <- object$plot
   color_discrete <- object$theme$color_discrete
   fill_discrete <- object$theme$fill_discrete
-  if (is.null(color_discrete) && is.null(fill_discrete)) return(p)
+  color_continuous <- object$theme$color_continuous
+  fill_continuous <- object$theme$fill_continuous
+  if (is.null(color_discrete) && is.null(fill_discrete) &&
+      is.null(color_continuous) && is.null(fill_continuous)) {
+    return(p)
+  }
 
-  # mirrors `.polish_labels()`'s own eligibility logic: only override
-  # `colour`/`fill` where it's genuinely mapped to strata (discrete),
-  # never where it's been claimed for density/response-value (continuous)
+  # mirrors `.polish_labels()`'s own eligibility logic: `color_discrete`/
+  # `fill_discrete` only ever override `colour`/`fill` where it's
+  # genuinely mapped to strata (discrete); `color_continuous`/
+  # `fill_continuous` are the symmetric counterpart, only ever overriding
+  # where it's mapped to something else continuous instead (density,
+  # or -- for a future custom builder -- a response-colored data layer)
   if (!is.null(p$base)) {
     overlay_style <- object$layer$overlay$config$style
     fill_is_density <- identical(.style_fill_role(overlay_style), "density")
     ll <- names(ggplot2::get_labs(p$base))
     if (!is.null(color_discrete) && "colour" %in% ll) p$base <- p$base + color_discrete
     if (!is.null(fill_discrete) && !fill_is_density && "fill" %in% ll) p$base <- p$base + fill_discrete
+    if (!is.null(fill_continuous) && fill_is_density && "fill" %in% ll) p$base <- p$base + fill_continuous
   }
 
   data_color_role <- object$layer$data$config$color_role %||% "strata"
   data_is_discrete <- identical(data_color_role, "strata")
+  data_is_continuous <- identical(data_color_role, "response")
   if (data_is_discrete) {
     for (panel_name in names(p$data)) {
       ll <- names(ggplot2::get_labs(p$data[[panel_name]]))
       if (!is.null(color_discrete) && "colour" %in% ll) p$data[[panel_name]] <- p$data[[panel_name]] + color_discrete
       if (!is.null(fill_discrete) && "fill" %in% ll) p$data[[panel_name]] <- p$data[[panel_name]] + fill_discrete
+    }
+  }
+  if (data_is_continuous) {
+    for (panel_name in names(p$data)) {
+      ll <- names(ggplot2::get_labs(p$data[[panel_name]]))
+      if (!is.null(color_continuous) && "colour" %in% ll) p$data[[panel_name]] <- p$data[[panel_name]] + color_continuous
+      if (!is.null(fill_continuous) && "fill" %in% ll) p$data[[panel_name]] <- p$data[[panel_name]] + fill_continuous
     }
   }
 

@@ -18,6 +18,8 @@ er_plot_theme(
   theme_extra = NULL,
   color_discrete = NULL,
   fill_discrete = NULL,
+  color_continuous = NULL,
+  fill_continuous = NULL,
   format_p = NULL,
   format_percent = NULL,
   format_number = NULL,
@@ -65,6 +67,13 @@ written to \code{object$theme$color_discrete}/\code{object$theme$fill_discrete}
 and applied to every plot whose \code{colour}/\code{fill} aesthetic is mapped to
 the stratification variable -- see "Details"}
 
+\item{color_continuous, fill_continuous}{A continuous ggplot2 scale object
+(e.g. \code{\link[ggplot2:scale_color_viridis_c]{ggplot2::scale_color_viridis_c()}}, \code{\link[ggplot2:scale_fill_gradient]{ggplot2::scale_fill_gradient()}}),
+written to \code{object$theme$color_continuous}/\code{object$theme$fill_continuous}
+and applied to every plot whose \code{colour}/\code{fill} aesthetic is mapped to
+something continuous other than the stratification variable -- see
+"Details"}
+
 \item{format_p, format_percent, format_number}{Formatter functions
 (typically from \verb{scales::label_*()}), written to
 \code{object$theme$format_p} etc. Used by the summary/quantile layers to
@@ -99,14 +108,18 @@ back to its \code{\link[=er_plot]{er_plot()}} default other than re-supplying th
 value explicitly.
 
 \code{color_discrete}/\code{fill_discrete} only affect aesthetics that are
-genuinely mapped to the stratification variable -- a continuous/count
-response's color-encoded data layer, or \code{\link[=er_style_data_hex]{er_style_data_hex()}}'s density
-fill, are left at ggplot2's defaults regardless of these arguments
-(continuous palette control isn't implemented yet). If a custom builder
-adds its own \verb{scale_color_*()}/\verb{scale_fill_*()} directly, supplying
-\code{color_discrete}/\code{fill_discrete} here will add a second scale on top
-(ggplot2 will emit a message and the later one wins) rather than
-detecting and deferring to the builder's own choice.
+genuinely mapped to the stratification variable; \code{color_continuous}/
+\code{fill_continuous} are the symmetric counterpart for aesthetics mapped to
+something else continuous -- \code{\link[=er_style_data_hex]{er_style_data_hex()}}'s density \code{fill}, or
+a continuous/count response's color-encoded data layer (there's no
+built-in builder for the latter today; see \code{\link[=er_style_tag]{er_style_tag()}}'s \code{layout}
+argument). Each of the four only ever touches the aesthetic role it
+names -- supplying \code{color_continuous} never affects a discrete \code{colour}
+mapping, and vice versa. If a custom builder adds its own
+\verb{scale_color_*()}/\verb{scale_fill_*()} directly, supplying any of these four
+here will add a second scale on top (ggplot2 will emit a message and the
+later one wins) rather than detecting and deferring to the builder's own
+choice.
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_style]{er_style()}}

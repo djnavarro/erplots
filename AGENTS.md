@@ -201,9 +201,10 @@ explicitly. Each argument is validated by a small dedicated helper
   merging with it.
 - `color_discrete`/`fill_discrete` -> new `object$theme$color_discrete`/
   `object$theme$fill_discrete` fields (`NULL` by default). Discrete
-  ggplot2 scale objects only, validated via `inherits(x, "Scale")` --
-  continuous palette control (density/response-colored layers) is
-  explicitly out of scope for now, see "Deferred" below.
+  ggplot2 scale objects only, validated via `inherits(x, "Scale")`.
+  Continuous palette control (density/response-colored layers) was
+  deferred at the time this section was written, then implemented in a
+  later round -- see "Continuous color/fill palette control" below.
 - `format_p`/`format_percent`/`format_number` -> the existing
   `object$theme$format_*` fields (unchanged consumption elsewhere).
 - `draw_key` -> the existing `object$theme$draw_key` field (unchanged
@@ -249,13 +250,15 @@ built-in builder does this today, so it isn't a live bug.
 color/fill palette control (`er_style_data_hex()`'s density fill, a
 continuous/count response's response-colored data layer) -- would need
 `color_continuous`/`fill_continuous` arguments and the symmetric branch
-of `.polish_scales()`'s eligibility logic; per-layer/per-geom style knobs
-(alpha, linewidth, hardcoded greys) -- these belong to individual
-`er_style_*()` builders' own arguments/`...`-passthrough, not the global
-theme; validating that a `color_discrete`/`fill_discrete` scale's own
-aesthetic (`"colour"` vs `"fill"`) matches which argument it was passed
-as -- a mismatch surfaces as ggplot2's own error/warning at build time
-rather than being caught by `er_plot_theme()` itself.
+of `.polish_scales()`'s eligibility logic (see "Continuous color/fill
+palette control" below -- this was implemented in a later round);
+per-layer/per-geom style knobs (alpha, linewidth, hardcoded greys) --
+these belong to individual `er_style_*()` builders' own arguments/
+`...`-passthrough, not the global theme; validating that a
+`color_discrete`/`fill_discrete` scale's own aesthetic (`"colour"` vs
+`"fill"`) matches which argument it was passed as -- a mismatch
+surfaces as ggplot2's own error/warning at build time rather than being
+caught by `er_plot_theme()` itself.
 
 Covered by a new `tests/testthat/test-er-plot-theme.R` (partial-update
 semantics across repeated calls, each argument's validation, an
@@ -266,6 +269,44 @@ check that `color_discrete`/`fill_discrete` don't affect an
 `vignettes/articles/design.Rmd` was not updated to demonstrate
 `er_plot_theme()` -- flagged as a follow-up, not done as part of this
 change.
+
+## Continuous color/fill palette control in `er_plot_theme()`
+
+The gap flagged above -- `color_discrete`/`fill_discrete` only ever
+apply where `colour`/`fill` means strata, leaving `er_style_data_hex()`'s
+bin-density fill (and a hypothetical continuous/count response's
+response-colored data layer -- no built-in consumer, but
+`.layer_data()`'s `config$color_role == "response"` dispatch was left
+in place for a custom builder) stuck at ggplot2's default gradient --
+was closed by adding `color_continuous`/`fill_continuous` to
+`er_plot_theme()`. These validate against ggplot2's `"ScaleContinuous"`
+class specifically (tighter than `color_discrete`/`fill_discrete`'s
+generic `"Scale"` check), so passing a *discrete* scale to
+`color_continuous` is rejected rather than silently accepted.
+`.polish_scales()` gained the mirror image of its existing discrete
+branches: `fill_continuous` applies to the base plot's `fill` only when
+an overlay builder is tagged `fill_role = "density"`; `color_continuous`/
+`fill_continuous` apply to a data panel only when `config$color_role ==
+"response"`. Each of the four `er_plot_theme()` palette arguments only
+ever touches the aesthetic role it names, so they can be supplied
+together without one clobbering the other (e.g. a stratified model
+ribbon's discrete `fill = strata` alongside `er_style_data_hex()`'s
+continuous density `fill` -- though those two specifically can't
+coexist on the *same* plot regardless of theming, since ggplot2 itself
+rejects two scales for one aesthetic; see `er_style_data_hex()`'s own
+docs).
+
+Covered by new tests in `tests/testthat/test-er-plot-theme.R`
+(validation, including the discrete-scale-rejected case; a regression
+check that `fill_continuous` correctly overrides `er_style_data_hex()`'s
+density fill without being clobbered by a simultaneously-supplied
+`fill_discrete`; and a custom `"panel"`-layout builder exercising the
+`color_role == "response"` branch, since no built-in one exists).
+`vignettes/articles/theming.Rmd` gained a "Continuous color/fill
+palette" section (using `er_style_data_hex()`) alongside its existing
+discrete one. Verified clean: `devtools::test()` (634 passing),
+`devtools::check()` (0 errors/warnings/notes), and `theming.Rmd`
+re-rendered end-to-end via `rmarkdown::render()`.
 
 ## Fixed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
 
@@ -833,19 +874,21 @@ builders earned its keep once `er_style_data_overlay()` existed as the
 default. Later still: implementing `er_plot_theme()` (was a no-op
 placeholder), fixing the no-layers-at-all crash, promoting the summary
 layer to independence, the `er_summary()` `coefficients`/`glance`
-contract, and the `sim_resp` extension powering `er_vpc_plot(model =
-...)` -- each covered in its own section above, and each also recorded
-in PLAN.md as a completed entry. The remaining genuinely-deferred items
-(not scheduled, no concrete need yet) are in PLAN.md's "Open / deferred"
-section: an additive `model` layer for overlaying two fitted curves;
-whether a future continuous/count `"panel"`-layout builder should use a
-deliberately chosen continuous color scale instead of ggplot2's default
-gradient, and whether it should be a quantile-binned rug instead of a
-color-encoded scatter (both deferred along with `build_data_color()`'s
-removal); continuous (`color_continuous`/`fill_continuous`) palette
-control in `er_plot_theme()`; and `tests/testthat/test-er-vpc.R`'s
-reliance on `erglm::erglm_vpc_sim()`, which will need reworking once
-erglm actually removes that function. A naming-scheme
+contract, the `sim_resp` extension powering `er_vpc_plot(model = ...)`,
+the missing-covariate `newdata` crash fix, and continuous
+`color_continuous`/`fill_continuous` palette control in
+`er_plot_theme()` -- each covered in its own section above, and each
+also recorded in PLAN.md as a completed entry. The remaining
+genuinely-deferred items (not scheduled, no concrete need yet) are in
+PLAN.md's "Open / deferred" section: an additive `model` layer for
+overlaying two fitted curves; whether a future continuous/count
+`"panel"`-layout builder should use a deliberately chosen continuous
+color scale instead of ggplot2's default gradient, and whether it
+should be a quantile-binned rug instead of a color-encoded scatter
+(both deferred along with `build_data_color()`'s removal); and
+`tests/testthat/test-er-vpc.R`'s reliance on `erglm::erglm_vpc_sim()`,
+which will need reworking once erglm actually removes that function. A
+naming-scheme
 review renamed the pipeline verbs (`er_plot_show_*()` ->
 `er_plot_add_*()`), the partial builders and their metadata helpers
 (`build_*()` -> `er_builder_*()`; `er_layout()`/`er_data_fill`/`er_group_y`
