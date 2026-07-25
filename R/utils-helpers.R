@@ -117,8 +117,7 @@ ci_t <- function(x, conf_level = 0.95) {
 #'   declared. Unlike [ci_t()] (the default, opt-in-required
 #'   approximation used when a count response auto-detects or is declared
 #'   `"continuous"`), this interval is exact and never produces a
-#'   negative lower bound -- see `PLAN.md` design decision (4) for the
-#'   rationale and history.
+#'   negative lower bound.
 #'
 #' @export
 #' @examples
@@ -145,10 +144,7 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #'   either way, and `"continuous"` is the more permissive default -- it
 #'   doesn't restrict which plot layers can be used).
 #'
-#' @details Used by [er_plot()] to resolve `response_type = "auto"`. See
-#'   `PLAN.md` for the broader plan to generalise response-type-specific
-#'   plot layers (quantile summaries, data strips, VPCs) beyond the
-#'   binary case.
+#' @details Used by [er_plot()] to resolve `response_type = "auto"`.
 #'
 #' @noRd
 .detect_response_type <- function(x) {
@@ -288,8 +284,7 @@ cut_quantile <- function(x, n = 4) {
 #' Different strata share (near-)identical `x_mid` values within an
 #' exposure bin (bins are quantile cutpoints of the shared exposure
 #' variable), so plotting points/error bars/labels at `x_mid` unmodified
-#' makes labels for different strata collide -- see `PLAN.md`,
-#' "Stratified quantile labels can visually overlap". This adds an
+#' makes labels for different strata collide. This adds an
 #' `x_dodge` column: `x_mid` plus a small, symmetric-around-`x_mid`,
 #' per-stratum offset, sized relative to `exposure_limits` so it scales
 #' sensibly across data sets and numbers of strata.

@@ -32,8 +32,7 @@ and \code{\link[=er_vpc_plot]{er_vpc_plot()}} when \code{response_type = "count"
 declared. Unlike \code{\link[=ci_t]{ci_t()}} (the default, opt-in-required
 approximation used when a count response auto-detects or is declared
 \code{"continuous"}), this interval is exact and never produces a
-negative lower bound -- see \code{PLAN.md} design decision (4) for the
-rationale and history.
+negative lower bound.
 }
 \examples{
 ci_poisson(3, 10)

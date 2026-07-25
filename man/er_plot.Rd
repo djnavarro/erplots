@@ -31,8 +31,7 @@ quantity (bin mean plus a t-interval). \code{"auto"} never resolves to
 \code{"count"}: pass \code{response_type = "count"} explicitly for a genuine
 count response to instead get bin mean plus an \emph{exact} Poisson
 interval (see \code{\link[=ci_poisson]{ci_poisson()}}), which -- unlike the t-interval
-approximation -- never produces a negative lower bound. See
-\code{PLAN.md}'s design decision (4) for the rationale. Explicitly
+approximation -- never produces a negative lower bound. Explicitly
 declaring \code{response_type = "binary"} for a response column that
 isn't actually confined to \verb{\{0, 1\}} (or logical) triggers a warning
 -- rows with an out-of-range value are silently excluded from the
@@ -73,11 +72,10 @@ adds another grouped-distribution panel alongside any already added,
 rather than replacing them. This asymmetry is deliberate, not
 accidental -- there is only one "the model" and one "the quantile
 summary" to show per plot, but many legitimate ways to slice the
-exposure distribution by different grouping variables. See \code{PLAN.md}'s
-"Mini-language architecture review" for the design discussion,
-including the one flagged future exception: overlaying two model
-curves for comparison isn't currently supported, but is the one
-singleton layer where an additive variant might eventually make sense.
+exposure distribution by different grouping variables. One flagged
+future exception: overlaying two model curves for comparison isn't
+currently supported, but is the one singleton layer where an additive
+variant might eventually make sense.
 }
 
 \section{Stratification}{
@@ -91,8 +89,8 @@ partial exception to the "always color/fill" rule for a
 continuous/count response: its color aesthetic is already spoken for
 by the response value itself, so stratification falls back to one
 panel per stratum level instead of a shared legend -- see its own
-documentation and \code{PLAN.md} for the general "a layer's own encoding
-takes precedence" rule this follows.
+documentation for the general "a layer's own encoding takes
+precedence" rule this follows.
 
 A row whose \code{stratify_by} value is \code{NA} is \strong{kept as its own stratum}
 -- an \code{NA}-labelled color/legend entry or facet, alongside the

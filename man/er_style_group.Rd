@@ -71,8 +71,7 @@ which draws the exposure distribution for a grouping variable (e.g.
 treatment arm) below the main panel: \code{er_style_group_boxplot()} (the
 default), \code{er_style_group_violin()}, and \code{er_style_group_histogram()}.
 The first two put the group levels on the y-axis; \code{er_style_group_histogram()}
-instead puts them on facet strips and frees the y-axis for counts (see
-\code{Details} in the package's \code{AGENTS.md}/\code{PLAN.md} for the rationale).
+instead puts them on facet strips (\code{facet_grid(rows = vars(lvl), switch = "y")}) and frees the y-axis for counts.
 All three are tagged \code{er_style_tag(fn, layer = "group")}, so
 \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} errors informatively if handed a builder
 tagged for a different layer.

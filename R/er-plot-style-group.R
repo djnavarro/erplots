@@ -17,8 +17,8 @@
 #' treatment arm) below the main panel: `er_style_group_boxplot()` (the
 #' default), `er_style_group_violin()`, and `er_style_group_histogram()`.
 #' The first two put the group levels on the y-axis; `er_style_group_histogram()`
-#' instead puts them on facet strips and frees the y-axis for counts (see
-#' `Details` in the package's `AGENTS.md`/`PLAN.md` for the rationale).
+#' instead puts them on facet strips (`facet_grid(rows = vars(lvl), switch =
+#' "y")`) and frees the y-axis for counts.
 #' All three are tagged `er_style_tag(fn, layer = "group")`, so
 #' [er_plot_add_groups()] errors informatively if handed a builder
 #' tagged for a different layer.
