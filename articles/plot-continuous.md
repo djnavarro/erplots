@@ -1,12 +1,13 @@
-# Plotting: continuous responses
+# Plotting continuous responses
 
-erplots draws exposure-response plots from *any* model that implements
-\[er_model_interface\]. This article uses a gaussian model fitted with
-erglm to cover continuous-response specifics; the model and group layers
-work identically for every response type, so this article only shows
-their default usage and links to the [binary
-responses](https://erplots.djnavarro.net/articles/plot-binary.md)
-article for the builder-swapping detail (spaghetti plots, violin plots).
+The erplots package supplies a mini-language for generating
+exposure-response plots commonly used in pharmacometric analyses. It is
+designed to be model agnostic, in the sense that it will work for any
+modelling tool that implements a few key interface functions (see
+[`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+It can support binary response data, continuous response data, and count
+response data. This article focuses on **continuous data**, using a
+linear regression model fitted using the erglm package.
 
 ``` r
 
@@ -66,8 +67,10 @@ erglm_data |>
 ## Model layer
 
 The model layer doesn’t look at `response_type` at all – it only
-consumes \[er_predict()\]/\[er_simulate()\] output – so it works exactly
-the same way as for a binary response. See the [binary
+consumes
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+output – so it works exactly the same way as for a binary response. See
+the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#model-layer)
 article for
 [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
@@ -88,9 +91,10 @@ erglm_data |>
 ## Summary layer
 
 The summary layer doesn’t look at `response_type` at all either – it
-only consumes whatever the model’s own \[er_summary()\] method returns –
-so it works exactly the same way as for a binary response. See the
-[binary
+only consumes whatever the model’s own
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+method returns – so it works exactly the same way as for a binary
+response. See the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#summary-layer)
 article for
 [`er_style_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
@@ -158,8 +162,8 @@ There’s no built-in panel-based alternative for a continuous response –
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#er_style_data_overlay-vs--er_style_data_boxjitter)
 article) is binary-only. If you need a panel-based builder here (e.g. a
 single color-encoded panel), you can write a custom one and tag it with
-`er_style_tag(fn, layout = "panel")` – see `design.Rmd`’s “Extending
-erplots” section.
+`er_style_tag(fn, layout = "panel")` – see the [Extending
+erplots](https://erplots.djnavarro.net/articles/extending.md) article.
 
 ## Group layer
 
@@ -182,22 +186,6 @@ erglm_data |>
 ```
 
 ![](plot-continuous_files/figure-html/group-1-1.png)
-
-## VPC plot
-
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
-generalises the same way as the quantile layer, comparing observed
-vs. simulated **means** rather than rates:
-
-``` r
-
-er_vpc_plot(
-  erglm_data, exposure = aucss, response = biomarker_change, group_by = aucss,
-  model = mod_gaussian, seed = 3947
-)
-```
-
-![](plot-continuous_files/figure-html/vpc-1-1.png)
 
 ## A second model package: emaxnls
 
@@ -245,13 +233,21 @@ parameter (`E0`, `Emax`, `logEC50`) in `coefficients` instead.
 
 emaxnls also implements the interface for
 [`emax_logistic()`](https://emaxnls.djnavarro.net/reference/emax_logistic.html)
-models (binary responses): an `emaxlogistic` object carries class
-`c("emaxlogistic", "emaxnls")`, so it dispatches to the same
-`er_predict.emaxnls()`/`er_simulate.emaxnls()`/`er_summary.emaxnls()`
-methods via S3 inheritance, which branch internally to keep predictions
-in `[0, 1]` and report `r_squared = NA` (rather than a meaningless
-value) in
+models (binary responses). In R’s object-oriented terms, an
+`emaxlogistic` object carries class `c("emaxlogistic", "emaxnls")`, so
+it automatically reuses the same
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+methods written for a plain `emaxnls` object (a mechanism called S3
+inheritance), rather than emaxnls needing to write a second, separate
+set of methods. Those shared methods branch internally to keep
+predictions in `[0, 1]` and report `r_squared = NA` (rather than a
+meaningless value) in
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
-`glance`. See the [binary
+`glance` whenever they’re handed an `emaxlogistic` object specifically.
+None of this detail matters for using
+[`emax_logistic()`](https://emaxnls.djnavarro.net/reference/emax_logistic.html)
+with erplots – fitting one and passing it to
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+just works, the same as any other model. See the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.md)
 article for that response type in general.

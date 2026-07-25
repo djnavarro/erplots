@@ -1,13 +1,13 @@
-# Plotting: count responses
+# Plotting count responses
 
-erplots draws exposure-response plots from *any* model that implements
-\[er_model_interface\]. This article uses a Poisson model fitted with
-erglm to cover count-response specifics – most importantly, the
-`response_type = "count"` declaration and when it matters. The model and
-group layers work identically for every response type, so this article
-only shows their default usage and links to the [binary
-responses](https://erplots.djnavarro.net/articles/plot-binary.md)
-article for the builder-swapping detail (spaghetti plots, violin plots).
+The erplots package supplies a mini-language for generating
+exposure-response plots commonly used in pharmacometric analyses. It is
+designed to be model agnostic, in the sense that it will work for any
+modelling tool that implements a few key interface functions (see
+[`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+It can support binary response data, continuous response data, and count
+response data. This article focuses on **count data**, using a Poisson
+model fitted using the erglm package.
 
 ``` r
 
@@ -70,8 +70,10 @@ erglm_data |>
 ## Model layer
 
 The model layer doesn’t look at `response_type` at all – it only
-consumes \[er_predict()\]/\[er_simulate()\] output – so it works exactly
-the same way as for a binary response. See the [binary
+consumes
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+output – so it works exactly the same way as for a binary response. See
+the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#model-layer)
 article for
 [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md);
@@ -91,9 +93,10 @@ erglm_data |>
 ## Summary layer
 
 The summary layer doesn’t look at `response_type` at all either – it
-only consumes whatever the model’s own \[er_summary()\] method returns –
-so it works exactly the same way as for a binary response. See the
-[binary
+only consumes whatever the model’s own
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+method returns – so it works exactly the same way as for a binary
+response. See the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#summary-layer)
 article for
 [`er_style_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
@@ -127,14 +130,16 @@ erglm_data |>
 ![](plot-count_files/figure-html/quantile-1-1.png)
 
 Declaring `response_type = "count"` swaps the t-interval approximation
-for an exact Poisson interval (bin mean plus \[ci_poisson()\] instead of
-\[ci_t()\]), which never produces a negative lower bound – useful for
-low-count bins, where the t-interval approximation can. For
-`erglm_data`’s own `ae_count`, none of the bin means are low enough for
-this to actually happen, so the two plots above would look almost
-identical if you re-ran the last one with `response_type = "count"`. To
-make the difference concrete, here’s a synthetic dataset where the
-placebo arm has only 2 events among 20 subjects:
+for an exact Poisson interval (bin mean plus
+[`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)
+instead of [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md)),
+which never produces a negative lower bound – useful for low-count bins,
+where the t-interval approximation can. For `erglm_data`’s own
+`ae_count`, none of the bin means are low enough for this to actually
+happen, so the two plots above would look almost identical if you re-ran
+the last one with `response_type = "count"`. To make the difference
+concrete, here’s a synthetic dataset where the placebo arm has only 2
+events among 20 subjects:
 
 ``` r
 
@@ -221,7 +226,8 @@ There’s no built-in panel-based alternative for a count response –
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#er_style_data_overlay-vs--er_style_data_boxjitter)
 article) is binary-only. If you need a panel-based builder here, you can
 write a custom one and tag it with `er_style_tag(fn, layout = "panel")`
-– see `design.Rmd`’s “Extending erplots” section.
+– see the [Extending
+erplots](https://erplots.djnavarro.net/articles/extending.md) article.
 
 ## Group layer
 
@@ -244,20 +250,3 @@ erglm_data |>
 ```
 
 ![](plot-count_files/figure-html/group-1-1.png)
-
-## VPC plot
-
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
-takes the same `response_type = "count"` declaration as
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-swapping in the exact Poisson interval for the observed-side summary:
-
-``` r
-
-er_vpc_plot(
-  erglm_data, exposure = aucss, response = ae_count, group_by = aucss,
-  model = mod_poisson, seed = 6142, response_type = "count"
-)
-```
-
-![](plot-count_files/figure-html/vpc-1-1.png)

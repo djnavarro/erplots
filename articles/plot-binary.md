@@ -1,12 +1,13 @@
-# Plotting: binary responses
+# Plotting binary responses
 
-erplots draws exposure-response plots from *any* model that implements
-\[er_model_interface\]. This article uses a logistic regression model
-fitted with erglm, but the plotting code itself has no knowledge of
-[`glm()`](https://rdrr.io/r/stats/glm.html). It’s the most detailed of
-the three response-type articles (binary/continuous/count); the
-continuous and count articles link back here for the model and group
-layers, which work identically regardless of response type.
+The erplots package supplies a mini-language for generating
+exposure-response plots commonly used in pharmacometric analyses. It is
+designed to be model agnostic, in the sense that it will work for any
+modelling tool that implements a few key interface functions (see
+[`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+It can support binary response data, continuous response data, and count
+response data. This article focuses on **binary data**, using a logistic
+regression model fitted using the erglm package.
 
 ``` r
 
@@ -111,8 +112,10 @@ Spaghetti plots require the model to implement
 fall back to
 [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md)
 with a message. This layer doesn’t look at `response_type` at all – it
-only consumes \[er_predict()\]/\[er_simulate()\] output – so everything
-in this section applies unchanged to continuous and count responses too.
+only consumes
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+output – so everything in this section applies unchanged to continuous
+and count responses too.
 
 ``` r
 
@@ -132,9 +135,10 @@ erglm_data |>
 annotates the base panel with a statistic derived from the model (or,
 for
 [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md),
-purely descriptive of the raw data) – see \[er_model_interface\] for
-what a model’s own \[er_summary()\] method can return. The default
-builder,
+purely descriptive of the raw data) – see `er_model_interface` for what
+a model’s own
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+method can return. The default builder,
 [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md),
 draws whatever headline p-value the model reports, in whichever corner
 is furthest from the observed data:
@@ -155,11 +159,16 @@ draws a different kind of annotation – goodness-of-fit rather than a
 p-value – built from a curated, compact subset of
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
 `glance` field (`N`, `AIC`, `BIC`, `R²`, whichever are present and
-non-`NA`). erglm’s own models don’t populate `glance` yet, so this
-example defines a small demonstration method on the spot purely to show
-the display idiom – a real model package would do this once, in its own
-`er_summary.<class>()` method, the same way erglm already does for
-`p_value`:
+non-`NA`). erglm’s own models don’t populate `glance` yet, so the code
+below fakes up a version of
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+that does, purely to demonstrate the display idiom. Ordinarily this is
+something a model-fitting package writes once, permanently, for its own
+kind of model (the same way erglm already has a permanent
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+that supplies `p_value`); the chunk below just does that same step by
+hand, inline, for demonstration purposes only – it’s not something you’d
+normally write yourself when just using erplots:
 
 ``` r
 
@@ -268,10 +277,13 @@ and
 [count](https://erplots.djnavarro.net/articles/plot-count.html#data-layer)
 articles) covers that case there, and a custom `"panel"`-layout builder
 (e.g. a single color-encoded panel) remains possible via
-\[er_style_tag()\] if a project needs one – see
-`vignettes/articles/design.Rmd`’s “Extending erplots” section. Each
-builder declares which of the two structural families it belongs to via
-\[er_style_tag()\], which is what
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+if a project needs one – see the [Extending
+erplots](https://erplots.djnavarro.net/articles/extending.md) article.
+Each builder declares which of the two structural families it belongs to
+via
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md),
+which is what
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 uses to decide whether to merge it into the main panel or stack it in
 panels below.
@@ -375,28 +387,3 @@ erglm_data |>
 ```
 
 ![](plot-binary_files/figure-html/group-3-1.png)
-
-## VPC plot
-
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
-is a model-agnostic VPC-style plot that compares observed data against
-model-simulated data, operating on plain data frames rather than an
-`er_plot` object. Passing a fitted `model` lets
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
-call \[er_simulate()\] for you internally, rather than requiring a
-pre-built `sim` data frame. For a binary response it compares observed
-vs. simulated response *rates*:
-
-``` r
-
-er_vpc_plot(erglm_data, exposure = aucss, response = ae1, group_by = aucss, model = mod, seed = 5218)
-```
-
-![](plot-binary_files/figure-html/vpc-1-1.png)
-
-See the
-[continuous](https://erplots.djnavarro.net/articles/plot-continuous.html#vpc-plot)
-and
-[count](https://erplots.djnavarro.net/articles/plot-count.html#vpc-plot)
-articles for how this generalises to means (with a t-interval or exact
-Poisson interval, respectively) for those response types.
