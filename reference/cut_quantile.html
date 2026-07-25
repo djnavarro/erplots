@@ -84,7 +84,20 @@ carries a <code>"breaks"</code> attribute – the <code>n + 1</code> quantile cu
 (excluding placebo) used to form the bins, as computed by
 <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">stats::quantile()</a></code> – which quantile-layer builders that draw
 bin-boundary separators (e.g. <code><a href="er_style_quantile.html">er_style_quantile_errorbar_vlines()</a></code>)
-read back out via <code>attr(exposure_bins, "breaks")</code>.</p>
+read back out via <code>attr(exposure_bins, "breaks")</code>.
+Both <code>cut_exposure_quantile()</code> (excluding placebo and <code>NA</code> values) and
+<code>cut_quantile()</code> (excluding <code>NA</code> values) error if <code>x</code> has fewer than
+2 distinct values – e.g. a constant, all-<code>NA</code>, or single-observation
+column – since quantile bins aren't well-defined in that case;
+without this check, <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">stats::quantile()</a></code> would silently produce
+non-unique/degenerate breaks and the error would instead surface
+much later, opaquely, from inside <code><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut()</a></code>. If <code>x</code> has at least 2
+distinct values but not enough resolution to distinguish all <code>n</code>
+requested bins (e.g. many repeated values clustered at one end),
+both functions warn and silently fall back to using as many bins
+as the data actually supports, rather than crashing (duplicate
+<code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile()</a></code> breaks otherwise fail inside <code><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut()</a></code>) or showing fewer
+bins than requested with no explanation.</p>
     </div>
 
     <div class="section level2">

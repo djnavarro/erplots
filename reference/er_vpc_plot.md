@@ -78,7 +78,8 @@ er_vpc_plot(
 
 - nsim:
 
-  Number of simulation replicates, only used when `model` is supplied
+  Number of simulation replicates, only used when `model` is supplied.
+  Must be a single positive whole number.
 
 - seed:
 

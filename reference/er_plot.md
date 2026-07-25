@@ -35,16 +35,19 @@ er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
 
 - exposure:
 
-  Exposure variable (one variable, unquoted)
+  Exposure variable (one variable, unquoted). Must name a numeric column
+  of `data`.
 
 - response:
 
-  Response variable (one variable, unquoted)
+  Response variable (one variable, unquoted). Must name a column of
+  `data`.
 
 - stratify_by:
 
   Stratification variable used for color and fill (one variable,
-  unquoted); see "Stratification" above
+  unquoted); see "Stratification" above. Must name a column of `data` if
+  supplied.
 
 - response_type:
 
@@ -62,7 +65,19 @@ er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
   [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)),
   which – unlike the t-interval approximation – never produces a
   negative lower bound. See `PLAN.md`'s design decision (4) for the
-  rationale.
+  rationale. Explicitly declaring `response_type = "binary"` for a
+  response column that isn't actually confined to `{0, 1}` (or logical)
+  triggers a warning – rows with an out-of-range value are silently
+  excluded from the quantile layer's rate calculation rather than
+  erroring, so this is a warning rather than an error, but the resulting
+  rate is computed over a smaller effective denominator than the row
+  count would suggest. Declaring `response_type = "count"` for a
+  response column that contains a negative value *does* error, rather
+  than warn – unlike the binary case, a negative count isn't silently
+  excluded, it makes
+  [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)'s
+  exact Poisson interval undefined (`NaN`), so there's no usable partial
+  result to fall back to.
 
 ## Value
 
