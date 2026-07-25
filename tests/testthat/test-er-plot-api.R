@@ -65,6 +65,30 @@ test_that("er_plot warns when a declared binary response has values outside {0, 
   expect_no_warning(er_plot(df_logical, aucss, ae1, response_type = "binary"))
 })
 
+test_that("er_plot errors when a declared count response has negative values", {
+  skip_if_not_installed("erglm")
+
+  df_neg <- er_test_data
+  df_neg$ae_count[1:3] <- df_neg$ae_count[1:3] - 100  # force negative
+
+  expect_error(
+    er_plot(df_neg, aucss, ae_count, response_type = "count"),
+    "3 values"
+  )
+  expect_error(
+    er_plot(df_neg, aucss, ae_count, response_type = "count"),
+    "negative"
+  )
+
+  # a clean, non-negative count response never errors
+  expect_no_error(er_plot(er_test_data, aucss, ae_count, response_type = "count"))
+
+  # response_type = "continuous"/"auto" are unaffected by this check --
+  # it only applies to an explicitly declared "count" response
+  expect_no_error(er_plot(df_neg, aucss, ae_count, response_type = "continuous"))
+  expect_no_error(er_plot(df_neg, aucss, ae_count))
+})
+
 test_that("er_plot resolves response_type = 'auto' correctly", {
   skip_if_not_installed("erglm")
 

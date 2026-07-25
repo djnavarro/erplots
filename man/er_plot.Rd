@@ -39,7 +39,11 @@ isn't actually confined to \verb{\{0, 1\}} (or logical) triggers a warning
 quantile layer's rate calculation rather than erroring, so this is
 a warning rather than an error, but the resulting rate is computed
 over a smaller effective denominator than the row count would
-suggest.}
+suggest. Declaring \code{response_type = "count"} for a response column
+that contains a negative value \emph{does} error, rather than warn --
+unlike the binary case, a negative count isn't silently excluded,
+it makes \code{\link[=ci_poisson]{ci_poisson()}}'s exact Poisson interval undefined
+(\code{NaN}), so there's no usable partial result to fall back to.}
 }
 \value{
 An (empty) plot object of class \code{er_plot}

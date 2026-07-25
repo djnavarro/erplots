@@ -85,7 +85,11 @@
 #'   quantile layer's rate calculation rather than erroring, so this is
 #'   a warning rather than an error, but the resulting rate is computed
 #'   over a smaller effective denominator than the row count would
-#'   suggest.
+#'   suggest. Declaring `response_type = "count"` for a response column
+#'   that contains a negative value *does* error, rather than warn --
+#'   unlike the binary case, a negative count isn't silently excluded,
+#'   it makes [ci_poisson()]'s exact Poisson interval undefined
+#'   (`NaN`), so there's no usable partial result to fall back to.
 #'
 #' @returns An (empty) plot object of class `er_plot`
 #'
@@ -226,6 +230,27 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
           "i" = "Pass `response_type = \"continuous\"` if this isn't actually a binary response."
         ))
       }
+    }
+  }
+
+  # `response_type = "count"` was declared but the response contains a
+  # negative value -- unlike the binary case above, this isn't a silent
+  # exclusion, it's a genuinely broken computation: `ci_poisson()`'s
+  # exact Poisson interval is undefined for a negative total (its
+  # internal `qgamma()` call returns `NaN`), so this errors rather than
+  # warns; see PLAN.md's "stress-test findings" section
+  if (object$response$type == "count") {
+    resp_vals <- object$data[[object$response$name]]
+    n_negative <- sum(!is.na(resp_vals) & resp_vals < 0)
+    if (n_negative > 0) {
+      rlang::abort(c(
+        sprintf(
+          "`response_type = \"count\"` was declared for `%s`, but %d value%s negative.",
+          object$response$name, n_negative, if (n_negative == 1) " is" else "s are"
+        ),
+        "i" = "A count response must be non-negative -- the exact Poisson interval used by the quantile and VPC layers (`ci_poisson()`) is undefined for a negative total.",
+        "i" = "Pass `response_type = \"continuous\"` if this isn't actually a count response."
+      ))
     }
   }
 

@@ -68,11 +68,12 @@ fixed, following this document's usual format.
    from both `n0`/`n1` in the quantile-layer rate calculation
    (shrinking the denominator with no warning), and `response$limits`
    is force-set to `c(0, 1)` regardless of the column's actual range.
-7. **(Medium) `response_type = "count"` with negative values is not
-   validated.** Runs to completion but `ci_poisson()`'s internal
-   `qgamma()` call produces `NaN` bounds, surfacing as a wall of
-   `dplyr::summarise()` warnings rather than one clear upfront message
-   that count responses must be non-negative.
+7. **(Medium, fixed -- see "Completed: error when a declared count
+   response has negative values" below) `response_type = "count"` with
+   negative values is not validated.** Runs to completion but
+   `ci_poisson()`'s internal `qgamma()` call produces `NaN` bounds,
+   surfacing as a wall of `dplyr::summarise()` warnings rather than one
+   clear upfront message that count responses must be non-negative.
 8. **(Low-medium) `er_vpc_plot(..., nsim = 0)` or `nsim < 0` produces
    opaque errors** (`non-conformable arguments` / `invalid arguments`)
    instead of validating `nsim` upfront with a clear message.
@@ -278,6 +279,39 @@ response with out-of-range values simply auto-detects as
 `"continuous"` instead), and confirms a clean 0/1 or logical binary
 response never warns. `devtools::test()` and `devtools::check()` both
 clean.
+
+## Completed: error when a declared count response has negative values
+
+**The bug (stress-test finding #7).** `er_plot(..., response_type =
+"count")` never checked that the response column was actually
+non-negative. This ran to completion, but `ci_poisson()`'s exact
+Poisson interval is undefined for a negative total: its internal
+`stats::qgamma()` call returns `NaN`, surfacing much later as a wall of
+`dplyr::summarise()` warnings from `.layer_quantile()`/`er_vpc_plot()`
+rather than one clear message pointing at the actual problem (a count
+response that isn't actually non-negative).
+
+**The fix.** After resolving `object$response$type`, `er_plot()` now
+checks, when the type is `"count"`, whether any non-missing response
+value is negative, and **aborts** (not warns) with a message naming the
+column and how many negative values were found. This is a deliberate
+difference from finding #6's binary-response fix (a warning): a
+negative binary-response value is silently *excluded* from the
+computation while the remaining rows still produce a valid rate, but a
+negative count value doesn't have an analogous silent-exclusion
+fallback -- it breaks the Poisson interval outright (`NaN`), so there's
+no partial result worth letting through. `response_type = "count"` can
+only ever be reached by explicit declaration (never `"auto"`), so this
+check always applies whenever `"count"` is declared, with no
+auto-detection interaction to consider.
+
+**Status:** done. New test in `tests/testthat/test-er-plot-api.R`
+("er_plot errors when a declared count response has negative values")
+covers the error firing with the correct negative-value count, a clean
+non-negative count response never erroring, and confirms the check is
+scoped to an explicitly declared `"count"` response only (`"continuous"`
+and `"auto"` on the same negative-containing column are both
+unaffected). `devtools::test()` and `devtools::check()` both clean.
 
 ## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 
