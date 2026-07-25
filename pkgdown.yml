@@ -3,11 +3,12 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   articles/design: design.html
+  erplots: erplots.html
   articles/extending: extending.html
   articles/plot-binary: plot-binary.html
   articles/plot-continuous: plot-continuous.html
   articles/plot-count: plot-count.html
-last_built: 2026-07-25T00:48Z
+last_built: 2026-07-25T01:53Z
 urls:
   reference: https://erplots.djnavarro.net/reference
   article: https://erplots.djnavarro.net/articles
