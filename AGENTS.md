@@ -741,7 +741,7 @@ independent of the model layer" above.
 ## Vignette structure
 
 `vignettes/articles/` (pkgdown-only, not shipped -- see "Development
-workflow" below) holds five articles: `plot-binary.Rmd`,
+workflow" below) holds six articles: `plot-binary.Rmd`,
 `plot-continuous.Rmd`, and `plot-count.Rmd` (worked examples of each
 layer, one per response type; binary is the most detailed, the other
 two link back to it for the response-type-agnostic model/summary/group
@@ -750,8 +750,10 @@ components -- including a "Summary layer" section demonstrating
 summary layer's promotion to independence; see "The `er_summary()`
 return-value contract" above); `design.Rmd` ("The plotting grammar" --
 the singleton/additive layer distinction, the stratification color/facet
-precedence rule, and the response-type dispatch table); and
-`extending.Rmd` ("Extending erplots: writing your own builder"). The last one used to
+precedence rule, and the response-type dispatch table); `extending.Rmd`
+("Extending erplots: writing your own builder"); and
+`model-interface.Rmd` ("Implementing the model interface" -- see its own
+paragraph below). `extending.Rmd` used to
 be a section inside `design.Rmd`, but was split out into its own
 article because it needed to grow -- the original version's illustrative
 `build_quantile_crossbar()` example didn't explain what `config` (its
@@ -778,6 +780,36 @@ what a `.layer_*()` function puts in `config`) -- that detail belongs in
 re-rendered end-to-end via `rmarkdown::render()` after the
 `style`/`er_style_*()` rename (see "Naming scheme" above) with no
 errors and no leftover old-identifier references in the output.
+
+`model-interface.Rmd` ("Implementing the model interface") unpacks
+`?er_model_interface`'s terse contract statement into a full worked
+article aimed at maintainers of *other* modelling packages who want their
+model classes to work with erplots -- distinct from `extending.Rmd`,
+which is aimed at erplots *users* who want to change how a layer draws
+an already-working model. Its target reader is assumed to already be
+comfortable with S3 dispatch and `predict()` methods, so its prose is
+noticeably terser/denser than the other five articles (a deliberate,
+one-off departure from their style, agreed on for this article
+specifically). It builds two self-contained, dependency-light toy model
+classes from scratch (not relying on erglm/emaxnls internals) to
+demonstrate each generic: `toy_model` (a tagged `glm` wrapper -- single
+exposure coefficient, so `er_summary()` returns a bare `p_value`; the
+`er_simulate()` method draws parameter vectors via `mvtnorm::rmvnorm()`
+and adds a Bernoulli `sim_resp` on top of `fit_resp`, enough to exercise
+both `er_style_model_spaghetti()` and `er_vpc_plot(model = ...)`) and
+`toy_emax` (a tagged `nls()` Emax fit on `biomarker_change ~ aucss` --
+three parameters with no single privileged term, so `er_summary()`
+returns `p_value = NULL` and populates `coefficients` instead, paired
+with `er_style_summary_coefficients()` rather than the default
+`er_style_summary_pvalue()`; its `er_predict()` method computes a
+delta-method CI via a hand-rolled numerical gradient, since
+`predict.nls()` doesn't support `se.fit`/`interval` the way `predict.lm()`
+does). A closing "Real-world implementations" section points to
+erglm's/emaxnls's actual methods as the non-simplified analogues of
+`toy_model`/`toy_emax` respectively, without duplicating their source.
+`_pkgdown.yml`'s `articles` list gained `articles/model-interface` after
+`articles/extending`. Rendered end-to-end via `rmarkdown::render()` with
+no errors when added.
 
 ## Structure
 

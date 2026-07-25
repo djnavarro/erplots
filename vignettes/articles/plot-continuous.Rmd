@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The erplots package supplies a mini-language for generating exposure-response plots commonly used in pharmacometric analyses. It is designed to be model agnostic, in the sense that it will work for any modelling tool that implements a few key interface functions (see `?er_model_interface`). It can support binary response data, continuous response data, and count response data. This article focuses on **continuous data**, using a linear regression model fitted using the erglm package. 
+The erplots package supplies a mini-language for generating exposure-response plots commonly used in pharmacometric analyses. It is designed to be model agnostic, in the sense that it will work for any modelling tool that implements a few key interface functions (see [Implementing the model interface](model-interface.html)). It can support binary response data, continuous response data, and count response data. This article focuses on **continuous data**, using a linear regression model fitted using the erglm package. 
 
 ```{r setup}
 library(erplots)

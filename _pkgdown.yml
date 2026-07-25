@@ -46,3 +46,4 @@ articles:
       - articles/plot-count
       - articles/design
       - articles/extending
+      - articles/model-interface
