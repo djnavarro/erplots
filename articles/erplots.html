@@ -84,7 +84,7 @@
 </h2>
 <p>An exposure-response plot shows how a response variable (does a
 patient have an adverse event? how much does a biomarker change?)
-relates to an exposure variable (drug concentration, dose, AUC, and so
+relates to an exposure variable (maximum drug concentration, AUC, and so
 on). The usual building blocks are a fitted curve with an uncertainty
 band, some quantile-binned summary points to check the curve against the
 raw data, the raw data itself, and maybe some side panels showing how
@@ -315,7 +315,7 @@ and so on – and you can write your own if none of the built-in options
 fit. From here:</p>
 <ul>
 <li>
-<a href="plot-binary.html">Plotting binary responses</a>, <a href="plot-continuous.html">Plotting continuous responses</a>, and <a href="plot-count.html">Plotting count responses</a> walk through every
+<a href="plot-binary.html">Plotting binary responses</a>, <a href="plot-continuous.html">plotting continuous responses</a>, and <a href="plot-count.html">plotting count responses</a> walk through every
 layer and every built-in style in detail, for each response type.</li>
 <li>
 <a href="design.html">The plotting grammar</a> explains the design
@@ -325,6 +325,11 @@ how stratification interacts with each layer, and so on.</li>
 <a href="extending.html">Extending erplots</a> shows how to write
 your own layer style, and what erplots expects from a model object if
 you want to plug in one that isn’t erglm.</li>
+<li>
+<a href="model-interface.html">Model interface</a> describes the
+technicalities. It outlines what erplots needs from other packages in
+order to be able to use its models when drawing exposure-response
+plots.</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

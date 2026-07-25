@@ -4,8 +4,8 @@
 
 An exposure-response plot shows how a response variable (does a patient
 have an adverse event? how much does a biomarker change?) relates to an
-exposure variable (drug concentration, dose, AUC, and so on). The usual
-building blocks are a fitted curve with an uncertainty band, some
+exposure variable (maximum drug concentration, AUC, and so on). The
+usual building blocks are a fitted curve with an uncertainty band, some
 quantile-binned summary points to check the curve against the raw data,
 the raw data itself, and maybe some side panels showing how exposure is
 distributed across other variables of interest. erplots gives you a
@@ -282,9 +282,9 @@ fit. From here:
 
 - [Plotting binary
   responses](https://erplots.djnavarro.net/articles/plot-binary.md),
-  [Plotting continuous
+  [plotting continuous
   responses](https://erplots.djnavarro.net/articles/plot-continuous.md),
-  and [Plotting count
+  and [plotting count
   responses](https://erplots.djnavarro.net/articles/plot-count.md) walk
   through every layer and every built-in style in detail, for each
   response type.
@@ -297,3 +297,8 @@ fit. From here:
   erplots](https://erplots.djnavarro.net/articles/extending.md) shows
   how to write your own layer style, and what erplots expects from a
   model object if you want to plug in one that isn’t erglm.
+- [Model
+  interface](https://erplots.djnavarro.net/articles/model-interface.md)
+  describes the technicalities. It outlines what erplots needs from
+  other packages in order to be able to use its models when drawing
+  exposure-response plots.
