@@ -8,10 +8,10 @@ modelling tool that implements a few key interface functions (see
 interface](https://erplots.djnavarro.net/articles/model-interface.md)).
 It can support binary response data, continuous response data, and count
 response data. This article focuses on **count data**, using a Poisson
-model fitted using the erglm package. It covers *which builder draws
-each layer*; for overall plot appearance – labels, the visual theme, the
-stratification palette – see [Theming
-erplots](https://erplots.djnavarro.net/articles/theming.md) instead,
+model fitted using the erglm package. It covers the substantive aspects
+of plot construction, not the superficial features like labels,
+palettes, and visual theme. Those are covered by the [theming
+erplots](https://erplots.djnavarro.net/articles/theming.md) article,
 which applies unchanged regardless of response type.
 
 ``` r

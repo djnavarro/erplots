@@ -1,20 +1,14 @@
 # Theming erplots
 
-Every `er_plot_add_*()` function has a `style` argument that controls
-*which builder draws a layer* – a ribbon vs. a spaghetti plot, a boxplot
-vs. a violin, and so on (see [the plotting
-grammar](https://erplots.djnavarro.net/articles/design.md) and
-[extending
-erplots](https://erplots.djnavarro.net/articles/extending.md)).
+The goal of this article is to discuss the
 [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
-is a different, orthogonal knob: it controls *how the whole composed
-plot looks*, without changing which variable is mapped to which
-aesthetic in any layer. If `style` answers “what geom draws this layer”,
+function, used to control the surface appearance of plots. In contrast
+to the `er_plot_add_*()` functions and their associated builder
+functions, which can change substantive features of the plot, the role
+of
 [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
-answers the same questions you’d otherwise reach for
-[`ggplot2::labs()`](https://ggplot2.tidyverse.org/reference/labs.html),
-[`ggplot2::theme()`](https://ggplot2.tidyverse.org/reference/theme.html),
-and `ggplot2::scale_color_*()` to answer.
+is to control labels, axis limits, palettes, plot titles, and other
+thematic aspects to the plot.
 
 ``` r
 

@@ -80,16 +80,13 @@
 
     
     
-<p>Every <code>er_plot_add_*()</code> function has a <code>style</code>
-argument that controls <em>which builder draws a layer</em> – a ribbon
-vs. a spaghetti plot, a boxplot vs. a violin, and so on (see <a href="design.html">the plotting grammar</a> and <a href="extending.html">extending erplots</a>).
-<code><a href="../reference/er_plot_theme.html">er_plot_theme()</a></code> is a different, orthogonal knob: it
-controls <em>how the whole composed plot looks</em>, without changing
-which variable is mapped to which aesthetic in any layer. If
-<code>style</code> answers “what geom draws this layer”,
-<code><a href="../reference/er_plot_theme.html">er_plot_theme()</a></code> answers the same questions you’d otherwise
-reach for <code><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggplot2::labs()</a></code>, <code><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">ggplot2::theme()</a></code>,
-and <code>ggplot2::scale_color_*()</code> to answer.</p>
+<p>The goal of this article is to discuss the
+<code><a href="../reference/er_plot_theme.html">er_plot_theme()</a></code> function, used to control the surface
+appearance of plots. In contrast to the <code>er_plot_add_*()</code>
+functions and their associated builder functions, which can change
+substantive features of the plot, the role of
+<code><a href="../reference/er_plot_theme.html">er_plot_theme()</a></code> is to control labels, axis limits,
+palettes, plot titles, and other thematic aspects to the plot.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span>
