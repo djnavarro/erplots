@@ -19,7 +19,8 @@
     config$conf_level, 
     object$exposure, 
     object$strata, 
-    stratify
+    stratify,
+    object$data
   )
 
   # `style` is the escape hatch documented in `?er_style`: any function
@@ -431,7 +432,7 @@
   data[[name]]
 }
 
-.get_model_predictions <- function(model, conf_level, exposure, strata, stratify) {
+.get_model_predictions <- function(model, conf_level, exposure, strata, stratify, data) {
 
   pred_dat <- seq(exposure$limits[1], exposure$limits[2], length.out = 300L) |> 
     data.frame() |> .set_names(exposure$name)
@@ -439,6 +440,41 @@
   if (stratify) pred_dat <- pred_dat |> 
     dplyr::cross_join(data.frame(strata$limits) |> .set_names(strata$name))
 
+  # a fitted model's formula may reference covariates beyond the exposure
+  # (and, when `stratify`, strata) variable -- erplots never inspects a
+  # model's formula (it's deliberately model-agnostic), so instead of
+  # guessing which covariates matter, fill in *every* other column of the
+  # original fitting data at a single reference value. An `er_predict()`
+  # method ignores extra columns it doesn't need, so this is harmless when
+  # the model has no such covariates, and avoids the "object not found"
+  # crash inside `predict()` when it does -- see PLAN.md's former "High
+  # priority" section
+  pred_dat <- .fill_reference_covariates(pred_dat, data)
+
   model_predictions <- er_predict(model = model, newdata = pred_dat, conf_level = conf_level)
   return(model_predictions)
+}
+
+# fills every column of `data` not already present in `pred_dat` with a
+# single reference value (recycled to `pred_dat`'s row count by ordinary
+# vector recycling on assignment)
+.fill_reference_covariates <- function(pred_dat, data) {
+  extra_cols <- setdiff(names(data), names(pred_dat))
+  for (col in extra_cols) {
+    pred_dat[[col]] <- .reference_value(data[[col]])
+  }
+  pred_dat
+}
+
+# a single "typical" value for a covariate: first level for a factor
+# (preserving its levels, so a model's contrasts still resolve correctly),
+# first value (alphabetically) for a character vector, the mean for a
+# numeric vector, `FALSE` for a logical vector, and the first observed
+# value as a fallback for anything else (e.g. Date/POSIXct)
+.reference_value <- function(x) {
+  if (is.factor(x)) return(factor(levels(x)[1], levels = levels(x)))
+  if (is.character(x)) return(sort(unique(x))[1])
+  if (is.logical(x)) return(FALSE)
+  if (is.numeric(x)) return(mean(x, na.rm = TRUE))
+  x[1]
 }

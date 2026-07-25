@@ -16,7 +16,17 @@ er_summary(model, ...)
 \arguments{
 \item{model}{A fitted exposure-response model object}
 
-\item{newdata}{A data frame of covariate values at which to predict}
+\item{newdata}{A data frame of covariate values at which to predict.
+When \code{\link[=er_plot_add_model]{er_plot_add_model()}} builds this internally for the model
+curve/ribbon, it always contains the exposure variable (a grid) and,
+if stratified, the strata variable -- plus, for any \emph{other} column
+the model's fitting data had (covariates \code{er_predict()}'s method
+might reference in its formula but erplots has no way to know about,
+since it never inspects a model's formula), a single reference value
+(first factor level, or mean for a numeric column) repeated across
+every row. A method doesn't need to do anything special to benefit
+from this -- it only matters if the method's own \code{predict()} call
+would otherwise error on a \code{newdata} missing a covariate it needs.}
 
 \item{conf_level}{Confidence level for the prediction interval}
 

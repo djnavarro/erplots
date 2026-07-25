@@ -403,7 +403,12 @@ er_plot_theme <- function(object,
 #' @param object Partially constructed plot (has S3 class `er_plot`)
 #' @param model A fitted exposure-response model. Must implement
 #'   [er_predict()]; implementing [er_simulate()] and [er_summary()]
-#'   enables additional visualisations (see [er_model_interface])
+#'   enables additional visualisations (see [er_model_interface]). If
+#'   `model`'s formula references covariates beyond the exposure (and,
+#'   when `keep_strata = TRUE`, strata) variable, those covariates are
+#'   filled with a reference value (first factor level, or mean for a
+#'   numeric column) when building the prediction grid -- see
+#'   [er_model_interface]'s `newdata` documentation
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
@@ -455,6 +460,15 @@ er_plot_theme <- function(object,
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
 #'   er_plot_add_model(mod, style = build_model_dashed) |>
+#'   plot()
+#'
+#' # a model with a covariate beyond the exposure variable -- `sex`, here
+#' # -- still works even when this layer isn't stratifying by it (`sex`
+#' # is filled in at a reference value when building the prediction grid)
+#' mod_sex <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_add_model(mod_sex) |>
 #'   plot()
 #' }
 #'

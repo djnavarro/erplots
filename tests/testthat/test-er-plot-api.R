@@ -225,6 +225,48 @@ test_that("er_plot creates an er_plot (all parts, all strata)", {
   expect_s3_class(plt, "er_plot")
 })
 
+test_that("er_plot_add_model() fills in covariates missing from the prediction grid", {
+  skip_if_not_installed("erglm")
+
+  # regression test: a model fit with a covariate beyond exposure/strata
+  # (here, `sex`) used to crash inside the model's own `predict()` call
+  # whenever that covariate wasn't in `newdata` -- i.e. whenever
+  # `keep_strata = FALSE`, or `stratify_by` wasn't set in `er_plot()` at
+  # all -- because `.get_model_predictions()` built `newdata` from only
+  # the exposure (and, if stratified, strata) grid. See PLAN.md's former
+  # "High priority" section.
+  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+
+  # no `stratify_by` at all
+  expect_no_error(
+    er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(mod2)
+  )
+
+  # `stratify_by` set, but this layer opts out via `keep_strata = FALSE`
+  expect_no_error(
+    er_test_data |>
+      er_plot(aucss, ae1, sex) |>
+      er_plot_add_model(mod2, keep_strata = FALSE)
+  )
+
+  # the filled-in reference value for a factor covariate is its first
+  # level, not (e.g.) NA or a value outside the training levels
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(mod2)
+  expect_identical(
+    unique(plt$layer$model$config$predictions$sex),
+    factor(levels(er_test_data$sex)[1], levels = levels(er_test_data$sex))
+  )
+
+  # a numeric covariate is filled with its mean, not (e.g.) its first
+  # observed value
+  mod3 <- erglm::erglm_model(ae1 ~ sex + dose, er_test_data, family = binomial())
+  plt3 <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(mod3)
+  expect_equal(
+    unique(plt3$layer$model$config$predictions$dose),
+    mean(er_test_data$dose, na.rm = TRUE)
+  )
+})
+
 test_that("er_plot_add_groups errors when grouping by the stratification variable with keep_strata = TRUE", {
   skip_if_not_installed("erglm")
 

@@ -10,7 +10,17 @@
 #' [er_summary()] enables annotations such as p-value labels.
 #'
 #' @param model A fitted exposure-response model object
-#' @param newdata A data frame of covariate values at which to predict
+#' @param newdata A data frame of covariate values at which to predict.
+#'   When [er_plot_add_model()] builds this internally for the model
+#'   curve/ribbon, it always contains the exposure variable (a grid) and,
+#'   if stratified, the strata variable -- plus, for any *other* column
+#'   the model's fitting data had (covariates `er_predict()`'s method
+#'   might reference in its formula but erplots has no way to know about,
+#'   since it never inspects a model's formula), a single reference value
+#'   (first factor level, or mean for a numeric column) repeated across
+#'   every row. A method doesn't need to do anything special to benefit
+#'   from this -- it only matters if the method's own `predict()` call
+#'   would otherwise error on a `newdata` missing a covariate it needs.
 #' @param conf_level Confidence level for the prediction interval
 #' @param nsim Number of simulation replicates
 #' @param seed Optional RNG seed

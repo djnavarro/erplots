@@ -8,7 +8,7 @@ is done; step-by-step implementation narrative (file-by-file diffs, test
 counts, staged PR sequencing) is not, and has been trimmed. See git
 history / PR descriptions for that level of detail if it's ever needed.
 
-## High priority: `keep_strata = FALSE` / missing-covariate `newdata` can crash `er_predict()`
+## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 
 **Discovered while** converting the roxygen `@examples` blocks across
 `R/er-plot-api.R`/`R/er-vpc.R` from `\dontrun{}` to
@@ -48,38 +48,47 @@ from `er_plot()` altogether, will currently hit this same crash for any
 model implementation (not just erglm's) that doesn't defensively handle
 an incomplete `newdata`.
 
-**What needs deciding, roughly in priority order:**
-1. **Whose responsibility is it to fill in missing covariates -- erplots
-   or the model's `er_predict()` method?** The model interface
-   (`?er_model_interface`) is currently silent on this. If it's the
-   model's job, that needs to be stated explicitly in
-   `?er_model_interface`'s contract, and `erglm::er_predict.erglm_model()`
-   needs a fix (fill unreferenced covariates with a reference level --
-   first level, for factors; mean, for numerics -- before calling
-   `predict()`). If it's erplots' job instead, `.get_model_predictions()`
-   needs to learn what covariates a fitted model actually has (e.g. via
-   `stats::terms()`/`all.vars()` on some formula the model interface
-   would need to expose) and fill them in from `object$data` before
-   calling `er_predict()` -- a bigger, more invasive change given the
-   "never reach into model internals" principle in `AGENTS.md`.
-2. **Should this fail loudly instead, by design?** An alternative to
-   (1) is deciding that `er_plot_add_model(mod, keep_strata = FALSE)`
-   on a model with extra covariates is simply not a supported
-   combination, and should error *immediately and informatively* at
-   `er_plot_add_model()` call time (before ever calling `er_predict()`)
-   rather than crashing deep inside a model's `predict()` call with a
-   confusing "object not found"-style error. This is a much smaller
-   change (erplots-side only), but only papers over the crash rather
-   than making the combination actually work.
-3. Whichever of (1)/(2) is chosen, add regression test coverage:
-   currently no test in `tests/testthat/` exercises a model fit with
-   a non-exposure, non-strata covariate under `keep_strata = FALSE` (or
-   under no `stratify_by` at all) -- this whole class of bug was invisible
-   to the test suite as well as to `\dontrun{}`-skipped examples.
+**The fix chosen** sidesteps the responsibility question the original
+three options (see git history for the fuller discussion this section
+used to contain) posed as mutually exclusive: rather than deciding
+whether erplots or the model's `er_predict()` method should fill in
+missing covariates, `.get_model_predictions()` now fills them in itself
+*without* inspecting the model's formula at all. It already had access
+to `object$data` (the original fitting data, stored by [er_plot()]) --
+so after building the exposure-grid (and, if stratified, strata-crossed)
+`newdata` as before, a new `.fill_reference_covariates()` step adds
+*every other column present in `object$data`* at a single reference
+value (`.reference_value()`: first factor level -- preserving the
+factor's levels, so contrasts still resolve -- first value
+alphabetically for a character column, `FALSE` for logical, the mean for
+numeric, first observed value as a fallback otherwise). A model's
+`er_predict()` method that doesn't reference a given column simply
+ignores the extra column (this is how `predict()` methods generally
+behave), so the fill is harmless when it's not needed and fixes the
+crash when it is -- for `keep_strata = FALSE`, no `stratify_by` at all,
+or any other covariate combination, and for any model implementing the
+standard interface (erglm, emaxnls, or a custom one), with no upstream
+package changes required. This is a materially different design than
+either original option 1 (no `stats::terms()`/`all.vars()` introspection
+needed, and no `?er_model_interface` contract change forcing model
+authors to defensively handle incomplete `newdata` themselves) or option
+2 (the combination now actually works, rather than just failing more
+legibly).
 
-**Status:** not started. Tracked here as high priority because it's a
-crash (not a cosmetic/mis-plot issue) reachable through ordinary,
-documented usage, and it was only found by accident.
+`?er_model_interface`'s `newdata` documentation and `er_plot_add_model()`'s
+own `@param model` docs were both updated to describe this filling
+behaviour (a model author doesn't need to do anything differently; it
+only matters if their own `predict()` call would otherwise error on an
+incomplete `newdata`), with a new runnable `@examples` entry
+(`ae1 ~ aucss + sex` plotted unstratified).
+
+**Status:** done. New regression test in `tests/testthat/test-er-plot-api.R`
+("`er_plot_add_model()` fills in covariates missing from the prediction
+grid") covers the no-`stratify_by`-at-all case, the `keep_strata = FALSE`
+case, and asserts the actual reference values filled in for both a
+factor and a numeric covariate. `devtools::test()` (622 passing) and
+`devtools::check()` (0 errors/warnings/notes) both clean, including the
+new example running for real.
 
 ## Completed: `er_plot_theme()` implemented (was a no-op placeholder)
 

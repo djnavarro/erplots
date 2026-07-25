@@ -18,7 +18,12 @@ er_plot_add_model(
 
 \item{model}{A fitted exposure-response model. Must implement
 \code{\link[=er_predict]{er_predict()}}; implementing \code{\link[=er_simulate]{er_simulate()}} and \code{\link[=er_summary]{er_summary()}}
-enables additional visualisations (see \link{er_model_interface})}
+enables additional visualisations (see \link{er_model_interface}). If
+\code{model}'s formula references covariates beyond the exposure (and,
+when \code{keep_strata = TRUE}, strata) variable, those covariates are
+filled with a reference value (first factor level, or mean for a
+numeric column) when building the prediction grid -- see
+\link{er_model_interface}'s \code{newdata} documentation}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
@@ -90,6 +95,15 @@ build_model_dashed <- function(data, config, stratify, exposure, response, strat
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod, style = build_model_dashed) |>
+  plot()
+
+# a model with a covariate beyond the exposure variable -- `sex`, here
+# -- still works even when this layer isn't stratifying by it (`sex`
+# is filled in at a reference value when building the prediction grid)
+mod_sex <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod_sex) |>
   plot()
 }
 

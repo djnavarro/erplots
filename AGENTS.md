@@ -787,20 +787,27 @@ See [PLAN.md](PLAN.md) for a condensed historical record of completed
 design work (rationale kept, implementation narrative trimmed) and a
 short "Open / deferred" list at the end.
 
-**One genuinely open item, not merely deferred:** PLAN.md's "High
-priority" section describes a real, reachable crash --
-`er_plot_add_model(mod, keep_strata = FALSE)` (or omitting
-`stratify_by` from `er_plot()` altogether) on a model whose formula has
-covariates beyond the exposure variable fails inside the model's own
-`predict()` call, because `.get_model_predictions()` builds `newdata`
-from only the exposure grid (plus strata levels, if stratified), with
-no way to know what other covariates the fitted model's formula
-references. Status: **not started** -- whose responsibility it is to
-fill in missing covariates (erplots' or the model's `er_predict()`
-method), or whether the combination should instead error immediately
-and informatively rather than crash, is still an open design decision.
-No regression test exercises this path yet either. This is the one item
-in PLAN.md that should be treated as unfinished, not historical.
+**The one item flagged as genuinely open (not merely deferred) has since
+been resolved.** `er_plot_add_model(mod, keep_strata = FALSE)` (or
+omitting `stratify_by` from `er_plot()` altogether) on a model whose
+formula has covariates beyond the exposure variable used to fail inside
+the model's own `predict()` call, because `.get_model_predictions()`
+built `newdata` from only the exposure grid (plus strata levels, if
+stratified), with no way to know what other covariates the fitted
+model's formula references. Fixed without needing to decide whose
+responsibility filling those covariates in "should" be: since
+`.get_model_predictions()` already has access to `object$data` (the
+original fitting data), it now fills in every *other* column present in
+`object$data` at a reference value (first factor level, mean for
+numeric) before calling `er_predict()` -- an unused extra column is
+harmless to a `predict()` call, so this works regardless of whether a
+given column is actually in the model's formula, needs no formula
+introspection, and required no upstream erglm/emaxnls changes. See
+PLAN.md's "Completed: `keep_strata = FALSE` / missing-covariate
+`newdata` crash" section for the full rationale and what was
+deliberately *not* needed as a result (no `?er_model_interface`
+contract change forcing model authors to defensively handle incomplete
+`newdata` themselves; no `stats::terms()`/`all.vars()` introspection).
 
 Everything else scoped so far is done, including several rounds not
 reflected below (see PLAN.md for the condensed rationale of each): the
