@@ -317,17 +317,25 @@ unchanged and remains supported indefinitely.
 Both companion packages were updated to implement the extension
 (erglm PR #6, emaxnls PR #67, both merged), so `er_vpc_plot(model =
 ...)`'s example/tests pass against each package's default branch via
-this repo's `Remotes:` entries. `erglm_vpc_sim()` itself is now slated
-for removal from erglm; every erplots doc/vignette/example that used to
-call it now goes through `er_vpc_plot(model = ...)` instead.
+this repo's `Remotes:` entries. `erglm_vpc_sim()` itself was slated
+for removal from erglm at the time; every erplots doc/vignette/example
+that used to call it was switched to go through `er_vpc_plot(model =
+...)` instead, and `tests/testthat/test-er-vpc.R`'s `sim`-argument
+tests were proactively migrated too, via a small `vpc_sim_fixture()`
+helper that builds the same `sim`-shaped data frame directly from
+`er_simulate(model, newdata = data, nsim = ..., seed = seed)` plus a
+`sim_resp` -> response-column swap, rather than calling
+`erglm::erglm_vpc_sim()`.
 
-**Status:** done, except one dangling follow-up (see "Open/deferred"
-below): `tests/testthat/test-er-vpc.R` still builds its `sim` data
-frames via `erglm_vpc_sim()` directly, since that code path remains
-supported regardless of the helper's removal -- but once erglm actually
-drops the function, those specific tests will need another way to
-build `sim` (e.g. directly via `er_simulate(model, newdata = ..., nsim
-= ..., seed = ...)`).
+**Status:** done, including the test migration -- confirmed complete
+once erglm actually removed `erglm_vpc_sim()` (commit `e706ebb`,
+"Remove `erglm_vpc_sim()`, superseded by `er_vpc_plot(model = ...)`",
+now on erglm's `origin/main`): reinstalling erplots' `erglm` dependency
+from that commit and re-running the full suite (`devtools::test()`,
+`devtools::check()`) confirmed nothing in erplots -- code, tests, docs,
+or vignettes -- still calls the now-removed function. There was no
+actual "dangling follow-up" left to do by the time erglm got around to
+removing it; the fixture rewrite had already happened ahead of time.
 
 ## Completed: vignette restructuring (`theming.Rmd`, `extending.Rmd`, `model-interface.Rmd`)
 
@@ -1073,12 +1081,4 @@ full test suite passing (478 tests).
   detecting/deferring to it (ggplot2 emits a message and the later one
   wins). No built-in builder does this today, so not a live bug -- just
   a rough edge to keep in mind if one is added.
-- **`test-er-vpc.R`'s reliance on `erglm_vpc_sim()`.** That test file
-  still builds its `sim` argument test fixtures via
-  `erglm::erglm_vpc_sim()` directly, which erglm has flagged for
-  removal now that `er_vpc_plot(model = ...)` (via the `sim_resp`
-  extension) supersedes it. Not urgent while the function still exists
-  upstream, but once erglm actually drops it, those fixtures need
-  rebuilding via `er_simulate(model, newdata = ..., nsim = ..., seed =
-  ...)` instead -- see "Completed: `er_vpc_plot()`'s `sim_resp`
-  extension" above.
+

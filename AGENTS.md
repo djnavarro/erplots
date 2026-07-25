@@ -121,9 +121,9 @@ continuous (`biomarker_change`, `ae_duration`) response columns in
 now `er_vpc_plot(model = <erglm model>)`, going through
 `er_simulate()`'s `sim_resp` extension -- see "`er_vpc_plot()` and the
 `sim_resp` extension to `er_simulate()`" below. `erglm::erglm_vpc_sim()`
-(the older, bespoke helper this superseded) is slated for removal from
-erglm, so no erplots-side docs, vignettes, or examples reference it any
-longer.
+(the older, bespoke helper this superseded) has since actually been
+removed from erglm, so no erplots-side docs, vignettes, examples, or
+tests reference it any longer.
 
 A second, independent companion package,
 [emaxnls](https://github.com/djnavarro/emaxnls), fits Emax (sigmoidal
@@ -809,18 +809,22 @@ implemented via pull requests (erglm PR #6, emaxnls PR #67) that have
 since been merged, so `er_vpc_plot(model = ...)`'s example in
 `R/er-vpc.R` and its test coverage now pass against each package's
 default branch, as resolved via this repo's `Remotes:` entries. With
-`sim_resp` support now in place, `erglm_vpc_sim()` itself is slated for
-removal from erglm -- erplots' own docs, vignettes (`README.Rmd`,
+`erglm_vpc_sim()` has since actually been removed from erglm (confirmed
+against erglm's own repo: commit `e706ebb`, "Remove `erglm_vpc_sim()`,
+superseded by `er_vpc_plot(model = ...)`", on `origin/main`) -- erplots'
+own docs, vignettes (`README.Rmd`,
 `vignettes/articles/plot-{binary,continuous,count}.Rmd`), and examples
-have all been updated to go through `er_vpc_plot(model = ...)` instead,
-so none of them call `erglm_vpc_sim()` any longer.
-`tests/testthat/test-er-vpc.R` still exercises the `sim`-argument code
-path directly using data frames built by `erglm_vpc_sim()`, since that
-path remains supported indefinitely regardless of the helper's removal
--- but once erglm actually drops the function, those specific tests
-will need to build their `sim` data frames another way (e.g. directly
-via `er_simulate(model, newdata = data, nsim = ..., seed = ...)`,
-matching what `model = ` already does internally).
+were all already updated to go through `er_vpc_plot(model = ...)`
+instead, so none of them call `erglm_vpc_sim()`.
+`tests/testthat/test-er-vpc.R`'s `sim`-argument tests were also already
+proactively migrated off `erglm_vpc_sim()` ahead of its removal: a small
+`vpc_sim_fixture()` helper at the top of that file builds the same
+`sim`-shaped data frame directly via `er_simulate(model, newdata = data,
+nsim = ..., seed = seed)` plus a `sim_resp` -> response-column swap
+(mirroring what `er_vpc_plot(model = ...)` does internally), so no test
+in the suite ever calls `erglm::erglm_vpc_sim()`. Verified against the
+reinstalled, `erglm_vpc_sim()`-free erglm: full `devtools::test()` and
+`devtools::check()` both clean.
 
 ## Planned work
 
@@ -877,18 +881,18 @@ layer to independence, the `er_summary()` `coefficients`/`glance`
 contract, the `sim_resp` extension powering `er_vpc_plot(model = ...)`,
 the missing-covariate `newdata` crash fix, and continuous
 `color_continuous`/`fill_continuous` palette control in
-`er_plot_theme()` -- each covered in its own section above, and each
-also recorded in PLAN.md as a completed entry. The remaining
-genuinely-deferred items (not scheduled, no concrete need yet) are in
-PLAN.md's "Open / deferred" section: an additive `model` layer for
-overlaying two fitted curves; whether a future continuous/count
-`"panel"`-layout builder should use a deliberately chosen continuous
-color scale instead of ggplot2's default gradient, and whether it
-should be a quantile-binned rug instead of a color-encoded scatter
-(both deferred along with `build_data_color()`'s removal); and
-`tests/testthat/test-er-vpc.R`'s reliance on `erglm::erglm_vpc_sim()`,
-which will need reworking once erglm actually removes that function. A
-naming-scheme
+`er_plot_theme()`, and confirming (once erglm actually removed
+`erglm_vpc_sim()` upstream) that nothing in erplots -- code, tests,
+docs, or vignettes -- still depended on it -- each covered in its own
+section above, and each also recorded in PLAN.md as a completed entry.
+The remaining genuinely-deferred items (not scheduled, no concrete need
+yet) are in PLAN.md's "Open / deferred" section: an additive `model`
+layer for overlaying two fitted curves; and whether a future
+continuous/count `"panel"`-layout builder should use a deliberately
+chosen continuous color scale instead of ggplot2's default gradient,
+and whether it should be a quantile-binned rug instead of a
+color-encoded scatter (both deferred along with `build_data_color()`'s
+removal). A naming-scheme
 review renamed the pipeline verbs (`er_plot_show_*()` ->
 `er_plot_add_*()`), the partial builders and their metadata helpers
 (`build_*()` -> `er_builder_*()`; `er_layout()`/`er_data_fill`/`er_group_y`
