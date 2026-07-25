@@ -48,3 +48,4 @@ articles:
       - articles/theming
       - articles/extending
       - articles/model-interface
+      - articles/internals
