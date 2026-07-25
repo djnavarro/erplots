@@ -1051,7 +1051,14 @@ er_plot_build <- function(object) {
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   
   # build
-  if (!is.null(object$layer$model) | !is.null(object$layer$summary) | !is.null(object$layer$quantile) | !is.null(object$layer$overlay)) {
+  has_base_layer <- !is.null(object$layer$model) || !is.null(object$layer$summary) ||
+    !is.null(object$layer$quantile) || !is.null(object$layer$overlay)
+  has_any_layer <- has_base_layer || !is.null(object$layer$data) || !is.null(object$layer$group)
+
+  # an er_plot with no layers at all still renders as an empty canvas
+  # (axes only, no geoms) rather than erroring inside patchwork when handed
+  # an empty plot list -- see `?er_plot`'s "empty plot" example
+  if (has_base_layer || !has_any_layer) {
     object$plot$base <- .build_base_plot(object)
   }
   if (!is.null(object$layer$data)) object$plot$data <- .build_data_plot(object)

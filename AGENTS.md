@@ -157,6 +157,32 @@ dispatch, cross-referencing `plot-binary.Rmd` rather than duplicating a
 full binary example); no equivalent worked example was added to
 `plot-binary.Rmd` itself.
 
+## Fixed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
+
+`er_plot_build()`'s trigger condition for building the base panel
+(`object$plot$base <- .build_base_plot(object)`) only checked for the
+model/summary/quantile/overlay layers, mirroring the documented "a
+group-only or panel-layout-data-only plot has no base panel" exception.
+But when *no* layer at all had been added -- e.g. `data |> er_plot(x,
+y) |> plot()`, the minimal "empty canvas" example now used at the top of
+`vignettes/erplots.Rmd` -- this meant `object$plot$base`,
+`object$plot$data`, and `object$plot$group` were all `NULL`, so
+`.polish_arrangement()`'s `plot_list` ended up empty and
+`patchwork::wrap_plots(list(), ...)` failed inside `grid::unit()` with
+an opaque `'x' and 'units' must have length > 0` error, rather than
+rendering the blank axes-only panel a user would reasonably expect
+(the same way `ggplot(df, aes(x, y))` with no geoms renders fine).
+Fixed by widening the trigger condition: build the base panel either
+when at least one of those four layers is present (unchanged), *or*
+when there are no layers at all (a new `has_any_layer` check spanning
+all six layers, including `data`/`group`) -- so a genuinely group-only
+or panel-layout-data-only plot still correctly has no base panel (that
+existing behaviour/test is unchanged), but the fully-empty case now
+gets an empty `ggplot() + theme_base() + scale/coord` panel instead of
+falling through to nothing. Covered by a new test in
+`tests/testthat/test-er-plot-api.R`, alongside the existing "group-only"/
+"panel-layout data-only" no-base-layer tests it sits next to.
+
 ## Naming scheme
 
 A naming-scheme review (prompted by the `build_*` prefix reading as

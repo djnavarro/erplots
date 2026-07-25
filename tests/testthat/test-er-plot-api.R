@@ -384,6 +384,25 @@ test_that("er_plot_build constructs ggplot2 objects", {
   )
 })
 
+test_that("er_plot_build/plot() handle a plot with no layers at all (empty canvas)", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1)
+
+  expect_null(plt$layer$model)
+  expect_null(plt$layer$summary)
+  expect_null(plt$layer$quantile)
+  expect_null(plt$layer$overlay)
+  expect_null(plt$layer$data)
+  expect_null(plt$layer$group)
+
+  expect_no_error(built <- er_plot_build(plt))
+  expect_true(ggplot2::is_ggplot(built$plot$base))
+  expect_length(built$output$layers, 0)
+  expect_no_error(plot(plt))
+})
+
 test_that("er_plot_build/plot() handle a group-only plot (no base layer)", {
   skip_if_not_installed("erglm")
 
