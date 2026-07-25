@@ -69,7 +69,8 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>erplots provides a fluent mini-language for building exposure-response plots: model curves/ribbons, quantile-binned response-rate summaries, data strips, and grouped distribution panels. It is model-agnostic: erplots never fits a model itself. Instead, you fit a model with whatever package suits your workflow (e.g. <a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a> for logistic regression), and pass the fitted object to <code><a href="reference/er_plot_add_model.html">er_plot_add_model()</a></code>. Any model that implements <code><a href="reference/er_model_interface.html">er_predict()</a></code> can be visualised; implementing <code><a href="reference/er_model_interface.html">er_simulate()</a></code> and <code><a href="reference/er_model_interface.html">er_summary()</a></code> additionally enables uncertainty spaghetti plots/VPCs and summary annotations (e.g. p-values). See <code><a href="reference/er_model_interface.html">?er_model_interface</a></code>.</p>
+<p>The erplots package provides a mini-language for building exposure-response plots: model curves/ribbons, quantile-binned response-rate summaries, data strips, and grouped distribution panels. It is model-agnostic: erplots never fits a model itself. Instead, you fit a model with whatever package suits your workflow (e.g. <a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a> for logistic regression), and pass the fitted object to <code><a href="reference/er_plot_add_model.html">er_plot_add_model()</a></code>.</p>
+<p>Any model that implements <code><a href="reference/er_model_interface.html">er_predict()</a></code> can be visualised; implementing <code><a href="reference/er_model_interface.html">er_simulate()</a></code> and <code><a href="reference/er_model_interface.html">er_summary()</a></code> additionally enables uncertainty spaghetti plots/VPCs and summary annotations (e.g. p-values). See <code><a href="reference/er_model_interface.html">?er_model_interface</a></code>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -96,13 +97,10 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">mod2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae2</span> <span class="op">~</span> <span class="va">aucss</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">mod2_marginal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae2</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>   <span class="fu"><a href="reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>   <span class="co"># keep_strata = FALSE needs a model without the stratification</span></span>
-<span>   <span class="co"># variable as a term, so we pass `mod2_marginal` here</span></span>
-<span>   <span class="fu"><a href="reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod2_marginal</span>, keep_strata <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>   <span class="fu"><a href="reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod2</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>   <span class="fu"><a href="reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>   <span class="fu"><a href="reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>   <span class="fu"><a href="reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">treatment</span><span class="op">)</span>, keep_strata <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -122,16 +120,6 @@
 <span><span class="co">#&gt;   output built: no</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">plt</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-er-plot-2.png" alt="" width="100%"></p>
-</div>
-<div class="section level2">
-<h2 id="vpc-plots">VPC plots<a class="anchor" aria-label="anchor" href="#vpc-plots"></a>
-</h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span><span class="va">erglm_data</span>, exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae2</span>, group_by <span class="op">=</span> <span class="va">aucss</span>, model <span class="op">=</span> <span class="va">mod2</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-er-vpc-1.png" alt="" width="100%"></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span><span class="va">erglm_data</span>, exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae2</span>, group_by <span class="op">=</span> <span class="va">sex</span>, model <span class="op">=</span> <span class="va">mod2</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-er-vpc-2.png" alt="" width="100%"></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -161,7 +149,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Danielle Navarro <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0001-7648-6578" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Danielle Navarro <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-7648-6578" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
