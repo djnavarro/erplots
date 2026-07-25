@@ -140,6 +140,42 @@ test_that("er_vpc_plot(model = ...) errors informatively when er_simulate() has 
   )
 })
 
+test_that("er_vpc_plot(model = ...) validates nsim upfront", {
+  toy_data <- data.frame(
+    exposure = seq(0, 10, length.out = 40),
+    outcome = rep(c(0, 1), 20),
+    grp = rep(c("a", "b"), each = 20)
+  )
+  fake_mod <- structure(list(prob = 0.4), class = "er_test_fake_vpc_model")
+
+  vpc <- function(nsim) {
+    er_vpc_plot(
+      toy_data, exposure = exposure, response = outcome, group_by = grp,
+      model = fake_mod, nsim = nsim, seed = 837
+    )
+  }
+
+  expect_error(vpc(0), "positive whole number")
+  expect_error(vpc(-5), "positive whole number")
+  expect_error(vpc(2.5), "positive whole number")
+  expect_error(vpc(NA_real_), "positive whole number")
+  expect_error(vpc(Inf), "positive whole number")
+  expect_error(vpc(c(5, 10)), "single number")
+  expect_error(vpc("5"), "single number")
+
+  # a valid nsim is unaffected
+  expect_no_error(vpc(5))
+
+  # nsim is only validated (and only used) when `model` is supplied
+  sim <- vpc_sim_fixture(fake_mod, toy_data, "outcome")
+  expect_no_error(
+    er_vpc_plot(
+      toy_data, sim = sim, exposure = exposure, response = outcome,
+      group_by = grp, nsim = -1
+    )
+  )
+})
+
 test_that("er_vpc_plot requires exactly one of `sim`/`model`", {
   toy_data <- data.frame(
     exposure = seq(0, 10, length.out = 40),

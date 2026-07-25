@@ -47,7 +47,7 @@ simulation \code{sim_resp} represents; see \link{er_model_interface} for the
 distinction).}
 
 \item{nsim}{Number of simulation replicates, only used when \code{model} is
-supplied}
+supplied. Must be a single positive whole number.}
 
 \item{seed}{Optional RNG seed, only used when \code{model} is supplied}
 

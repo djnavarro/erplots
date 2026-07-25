@@ -30,7 +30,7 @@
 #'   simulation `sim_resp` represents; see [er_model_interface] for the
 #'   distinction).
 #' @param nsim Number of simulation replicates, only used when `model` is
-#'   supplied
+#'   supplied. Must be a single positive whole number.
 #' @param seed Optional RNG seed, only used when `model` is supplied
 #' @param conf_level Confidence level
 #' @param response_type One of `"auto"` (default), `"binary"`,
@@ -91,6 +91,21 @@ er_vpc_plot <- function(data, sim = NULL, exposure, response, group_by, model = 
   }
 
   if (!is.null(model)) {
+    # validate `nsim` up front -- without this, `nsim = 0`/negative/
+    # fractional values ran to completion but failed deep inside whatever
+    # matrix/vector machinery a model's `er_simulate()` method happens to
+    # use (e.g. "non-conformable arguments", "invalid arguments"), with
+    # no indication that `nsim` itself was the problem; see PLAN.md's
+    # "stress-test findings" section
+    if (!is.numeric(nsim) || length(nsim) != 1L) {
+      rlang::abort("`nsim` must be a single number.")
+    }
+    if (!is.finite(nsim) || nsim < 1 || nsim != round(nsim)) {
+      rlang::abort(c(
+        sprintf("`nsim` must be a positive whole number, not %s.", format(nsim)),
+        "i" = "`nsim` is the number of simulation replicates drawn via `er_simulate()`, only used when `model` is supplied."
+      ))
+    }
     raw_sim <- er_simulate(model, newdata = data, nsim = nsim, seed = seed)
     if (is.null(raw_sim) || !("sim_resp" %in% names(raw_sim))) {
       rlang::abort(c(

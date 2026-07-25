@@ -74,9 +74,11 @@ fixed, following this document's usual format.
    `ci_poisson()`'s internal `qgamma()` call produces `NaN` bounds,
    surfacing as a wall of `dplyr::summarise()` warnings rather than one
    clear upfront message that count responses must be non-negative.
-8. **(Low-medium) `er_vpc_plot(..., nsim = 0)` or `nsim < 0` produces
-   opaque errors** (`non-conformable arguments` / `invalid arguments`)
-   instead of validating `nsim` upfront with a clear message.
+8. **(Low-medium, fixed -- see "Completed: validate `nsim` upfront in
+   `er_vpc_plot()`" below) `er_vpc_plot(..., nsim = 0)` or `nsim < 0`
+   produces opaque errors** (`non-conformable arguments` /
+   `invalid arguments`) instead of validating `nsim` upfront with a
+   clear message.
 9. **(Low) Requesting more quantile bins than unique exposure values**
    (e.g. `n_quantiles = 20` on 5 rows) silently collapses to fewer bins
    (duplicate breaks dropped by `cut()`), with no warning that fewer
@@ -312,6 +314,36 @@ non-negative count response never erroring, and confirms the check is
 scoped to an explicitly declared `"count"` response only (`"continuous"`
 and `"auto"` on the same negative-containing column are both
 unaffected). `devtools::test()` and `devtools::check()` both clean.
+
+## Completed: validate `nsim` upfront in `er_vpc_plot()`
+
+**The bug (stress-test finding #8).** `er_vpc_plot(..., model = mod,
+nsim = ...)` never validated `nsim` before passing it straight to
+`er_simulate()`. `nsim = 0` or a negative value ran until whatever
+matrix/vector machinery a model's own `er_simulate()` method happens to
+use failed with an opaque, model-internal error (`non-conformable
+arguments`, `invalid arguments`) -- with nothing pointing back at
+`nsim` itself as the problem, and the exact failure mode depending on
+implementation details of whichever model package was in use.
+
+**The fix.** `er_vpc_plot()` now validates `nsim` immediately inside
+the `if (!is.null(model))` branch (`nsim` is documented as "only used
+when `model` is supplied", and is genuinely unreferenced on the `sim`
+path, so the check is scoped there rather than unconditionally at the
+top of the function): first that it's a single numeric value, then
+that it's finite, at least 1, and a whole number (`nsim == round(nsim)`),
+aborting with a clear message otherwise. This catches `0`, negative,
+fractional, non-finite (`Inf`/`NaN`), non-numeric, and non-scalar
+values in one pass, before ever reaching `er_simulate()`.
+
+**Status:** done. New test in `tests/testthat/test-er-vpc.R`
+("er_vpc_plot(model = ...) validates nsim upfront") uses the existing
+toy `er_test_fake_vpc_model` fixture (no `erglm` dependency) to check
+each invalid shape (`0`, negative, fractional, `NA`, `Inf`, a
+length-2 vector, a character string), confirms a valid `nsim` is
+unaffected, and confirms the check doesn't fire on the `sim`-argument
+path (where `nsim` is unused, so an invalid value there is harmless).
+`devtools::test()` and `devtools::check()` both clean.
 
 ## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 
