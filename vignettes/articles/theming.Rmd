@@ -9,16 +9,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-Every `er_plot_add_*()` function has a `style` argument that controls
-*which builder draws a layer* -- a ribbon vs. a spaghetti plot, a
-boxplot vs. a violin, and so on (see [the plotting
-grammar](design.html) and [extending erplots](extending.html)).
-`er_plot_theme()` is a different, orthogonal knob: it controls *how the
-whole composed plot looks*, without changing which variable is mapped to
-which aesthetic in any layer. If `style` answers "what geom draws this
-layer", `er_plot_theme()` answers the same questions you'd otherwise
-reach for `ggplot2::labs()`, `ggplot2::theme()`, and
-`ggplot2::scale_color_*()` to answer.
+The goal of this article is to discuss the `er_plot_theme()` function, used to control the surface appearance of plots. In contrast to the `er_plot_add_*()` functions and their associated builder functions, which can change substantive features of the plot, the role of `er_plot_theme()` is to control labels, axis limits, palettes, plot titles, and other thematic aspects to the plot. 
 
 ```{r setup}
 library(erplots)
