@@ -115,6 +115,30 @@ test_that("cut_exposure_quantile works normally with at least 2 distinct non-pla
   expect_equal(as.character(result[1:2]), c("Placebo", "Placebo"))
 })
 
+test_that("cut_exposure_quantile warns and gracefully degrades when requested bins exceed the exposure column's resolution", {
+  # heavily skewed: only 2 distinct values, requesting 4 bins produces
+  # duplicate stats::quantile() breaks -- this used to crash with the
+  # opaque 'breaks' are not unique cut() error
+  x <- c(rep(1, 18), 2)
+  expect_warning(
+    result <- cut_exposure_quantile(x, n = 4),
+    "only 1 are distinguishable"
+  )
+  expect_equal(levels(result), c("Placebo", "Q1"))
+  expect_true(all(as.character(result) == "Q1"))
+
+  # a case that degrades to more than 1 (but still fewer than requested) bin
+  x2 <- c(rep(1, 10), rep(2, 10), 3)
+  expect_warning(
+    result2 <- cut_exposure_quantile(x2, n = 10),
+    "only 2 are distinguishable"
+  )
+  expect_equal(levels(result2), c("Placebo", "Q1", "Q2"))
+
+  # enough resolution for the requested bins -- no warning
+  expect_no_warning(cut_exposure_quantile(1:100, n = 4))
+})
+
 test_that("cut_quantile errors clearly on constant, all-NA, or too-few-value input", {
   expect_error(cut_quantile(rep(5, 10)), "found only 1 distinct")
   expect_error(cut_quantile(rep(NA_real_, 10)), "found only 0 distinct")

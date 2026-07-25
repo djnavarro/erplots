@@ -134,6 +134,24 @@ test_that("er_plot_add_quantiles supports both binary and continuous responses",
   expect_no_error(er_plot_add_quantiles(plt_binary))
 })
 
+test_that("er_plot_add_quantiles() warns instead of crashing when n_quantiles exceeds the exposure column's resolution", {
+  df_skew <- data.frame(
+    aucss = c(rep(1, 18), 2, 3),
+    ae1 = rbinom(20, 1, 0.4)
+  )
+  plt <- er_plot(df_skew, aucss, ae1)
+
+  expect_warning(
+    plt_q <- er_plot_add_quantiles(plt, n_quantiles = 4),
+    "only 1 are distinguishable"
+  )
+  expect_equal(levels(plt_q$layer$quantile$config$summary$exposure_bins), c("Placebo", "Q1"))
+
+  # a well-resolved exposure column doesn't warn
+  df_ok <- data.frame(aucss = 1:100, ae1 = rbinom(100, 1, 0.4))
+  expect_no_warning(er_plot(df_ok, aucss, ae1) |> er_plot_add_quantiles(n_quantiles = 4))
+})
+
 test_that("er_plot_add_data's panel layout supports a continuous response (single color-encoded panel)", {
   skip_if_not_installed("erglm")
 

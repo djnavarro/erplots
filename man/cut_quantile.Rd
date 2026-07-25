@@ -29,7 +29,13 @@ Both \code{cut_exposure_quantile()} (excluding placebo and \code{NA} values) and
 column -- since quantile bins aren't well-defined in that case;
 without this check, \code{\link[stats:quantile]{stats::quantile()}} would silently produce
 non-unique/degenerate breaks and the error would instead surface
-much later, opaquely, from inside \code{\link[=cut]{cut()}}.
+much later, opaquely, from inside \code{\link[=cut]{cut()}}. If \code{x} has at least 2
+distinct values but not enough resolution to distinguish all \code{n}
+requested bins (e.g. many repeated values clustered at one end),
+both functions warn and silently fall back to using as many bins
+as the data actually supports, rather than crashing (duplicate
+\code{quantile()} breaks otherwise fail inside \code{\link[=cut]{cut()}}) or showing fewer
+bins than requested with no explanation.
 }
 \description{
 Cut a continuous variable into quantiles

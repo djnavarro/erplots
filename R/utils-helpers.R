@@ -177,7 +177,13 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #'   column -- since quantile bins aren't well-defined in that case;
 #'   without this check, [stats::quantile()] would silently produce
 #'   non-unique/degenerate breaks and the error would instead surface
-#'   much later, opaquely, from inside [cut()].
+#'   much later, opaquely, from inside [cut()]. If `x` has at least 2
+#'   distinct values but not enough resolution to distinguish all `n`
+#'   requested bins (e.g. many repeated values clustered at one end),
+#'   both functions warn and silently fall back to using as many bins
+#'   as the data actually supports, rather than crashing (duplicate
+#'   `quantile()` breaks otherwise fail inside [cut()]) or showing fewer
+#'   bins than requested with no explanation.
 #'
 #' @name cut_quantile
 #' @examples
@@ -204,6 +210,30 @@ cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL) {
   }
   breaks <- non_placebo_x |>
     stats::quantile(probs = (0:n)/n, na.rm = TRUE)
+
+  # if the exposure column doesn't have enough resolution to distinguish
+  # all `n` requested quantile bins (e.g. many repeated values clustered
+  # at one end), `stats::quantile()` produces duplicate breaks -- passed
+  # straight to `cut()`, this used to either crash with the opaque
+  # `'breaks' are not unique` error, or (when only a few of the `n` bins
+  # ended up genuinely occupied) silently show fewer bins than requested
+  # once empty bins were dropped downstream, with no indication `n` was
+  # too high for the data. Deduplicating breaks and reducing `n` to match
+  # fixes the crash and lets this warn instead of failing.
+  unique_breaks <- unique(breaks)
+  n_actual <- length(unique_breaks) - 1
+  if (n_actual < n) {
+    rlang::warn(c(
+      sprintf(
+        "Requested %d exposure quantile bins, but only %d are distinguishable -- using %d instead.",
+        n, n_actual, n_actual
+      ),
+      "i" = "The exposure column doesn't have enough distinct values (or resolution) to support this many quantile bins."
+    ))
+    breaks <- unique_breaks
+    n <- n_actual
+  }
+
   exp_bin <- as.numeric(dplyr::case_when(
     is_placebo ~ "0",
     is.na(x) ~ NA_character_,
@@ -229,6 +259,25 @@ cut_quantile <- function(x, n = 4) {
     ))
   }
   breaks <- stats::quantile(x, probs = (0:n)/n, na.rm = TRUE)
+
+  # see `cut_exposure_quantile()`'s equivalent step for the rationale --
+  # a variable without enough resolution to distinguish all `n` requested
+  # bins produces duplicate `quantile()` breaks, which used to either
+  # crash `cut()` or silently show fewer bins than requested
+  unique_breaks <- unique(breaks)
+  n_actual <- length(unique_breaks) - 1
+  if (n_actual < n) {
+    rlang::warn(c(
+      sprintf(
+        "Requested %d quantile bins, but only %d are distinguishable -- using %d instead.",
+        n, n_actual, n_actual
+      ),
+      "i" = "The variable doesn't have enough distinct values (or resolution) to support this many quantile bins."
+    ))
+    breaks <- unique_breaks
+    n <- n_actual
+  }
+
   bin_num <- as.numeric(cut(x, breaks, labels = 1:n, include.lowest = TRUE))
   bin_fct <- factor(bin_num, levels = 1:n, labels = paste0("Q", 1:n)) 
   return(bin_fct)

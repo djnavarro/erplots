@@ -79,8 +79,10 @@ fixed, following this document's usual format.
    produces opaque errors** (`non-conformable arguments` /
    `invalid arguments`) instead of validating `nsim` upfront with a
    clear message.
-9. **(Low) Requesting more quantile bins than unique exposure values**
-   (e.g. `n_quantiles = 20` on 5 rows) silently collapses to fewer bins
+9. **(Low, fixed -- see "Completed: warn and gracefully degrade when
+   `n_quantiles` exceeds the exposure column's resolution" below)
+   Requesting more quantile bins than unique exposure values** (e.g.
+   `n_quantiles = 20` on 5 rows) silently collapses to fewer bins
    (duplicate breaks dropped by `cut()`), with no warning that fewer
    bins than requested were produced.
 10. **(Low, confirm-intentional) `NA` in the stratification column** is
@@ -344,6 +346,58 @@ length-2 vector, a character string), confirms a valid `nsim` is
 unaffected, and confirms the check doesn't fire on the `sim`-argument
 path (where `nsim` is unused, so an invalid value there is harmless).
 `devtools::test()` and `devtools::check()` both clean.
+
+## Completed: warn and gracefully degrade when `n_quantiles` exceeds the exposure column's resolution
+
+**The bug (stress-test finding #9), and a related crash found while
+investigating it.** Requesting more quantile bins than an exposure (or
+group) column can actually distinguish was documented as "silently
+collapses to fewer bins" -- but investigating the exact mechanism
+surfaced two distinct behaviours, not one:
+
+- When the requested resolution merely exceeds what a *small sample*
+  happens to occupy (e.g. `n_quantiles = 20` on 20 well-spread rows),
+  `stats::quantile()`'s breaks are still all unique, so
+  `cut_exposure_quantile()` correctly produces 20 distinguishable bins
+  -- it's only the *aggregated summary* (grouped `.by` the observed
+  combinations) that shows fewer occupied rows, which is simply an
+  accurate reflection of a small sample, not a defect.
+- When the exposure column doesn't have enough **resolution** to
+  support `n` bins at all (e.g. many repeated/tied values clustered at
+  one end, so most of the `n + 1` requested quantile probabilities land
+  on the same value), `stats::quantile()` genuinely produces *duplicate*
+  breaks. Passed straight to `cut()`, this crashed with the opaque
+  `'breaks' are not unique` error -- a real, previously-undiscovered
+  crash risk distinct from findings #3-#5 (which only guarded against
+  *fewer than 2 distinct values overall*; a column can have many
+  distinct values and still produce duplicate breaks once `n` is large
+  enough relative to how those values are distributed).
+
+**The fix.** Both `cut_exposure_quantile()` and `cut_quantile()` now
+deduplicate their computed breaks and compare the result's length
+against the number requested. If fewer breaks survive deduplication
+(i.e. `n` was too high for the column's resolution), both functions
+warn -- naming the requested and actual bin counts -- and fall back to
+using the deduplicated breaks (and the correspondingly reduced `n`) to
+build the factor, rather than crashing. This closes the crash and
+converts it into the warning framing finding #9 originally asked for.
+No attempt was made to "compress" or renumber bins to hide the
+small-sample case described above (the first bullet) -- that's expected
+behaviour given a small sample, not something to warn about, and
+`.layer_quantile()`'s aggregation already handles it correctly by only
+showing occupied bins.
+
+**Status:** done. New tests in `tests/testthat/test-utils-helpers.R`
+("cut_exposure_quantile warns and gracefully degrades when requested
+bins exceed the exposure column's resolution") cover the down-to-1-bin
+case (the exact previous crash), a down-to-2-bins case, and confirm a
+well-resolved column never warns. A new integration test in
+`tests/testthat/test-er-plot-api.R` ("er_plot_add_quantiles() warns
+instead of crashing when n_quantiles exceeds the exposure column's
+resolution") confirms the warning and graceful degradation surface
+correctly through the actual layer function. The shared `@returns` doc
+for both functions was updated. `devtools::test()` and
+`devtools::check()` both clean.
 
 ## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 
