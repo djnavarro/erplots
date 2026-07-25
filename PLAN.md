@@ -81,6 +81,232 @@ an incomplete `newdata`.
 crash (not a cosmetic/mis-plot issue) reachable through ordinary,
 documented usage, and it was only found by accident.
 
+## Completed: `er_plot_theme()` implemented (was a no-op placeholder)
+
+**Motivation.** `er_plot_theme()` (then `er_plot_style()`) was a
+two-line stub returning `object` unchanged, documented as "not yet
+implemented" -- there was no supported way to set a plot title, override
+axis limits, swap the base ggplot2 theme, or control the discrete
+color/fill palette, without reaching into `object$theme`/`object$style`
+directly.
+
+**What was done:** a flat-argument, `NULL`-means-"leave unchanged"
+signature covering labels (`xlab`/`ylab`/`strata_lab`), plot-level
+`title`/`subtitle`/`caption` (new `object$theme` fields, applied via
+`patchwork::plot_annotation()`), `xlim`/`ylim` (already read lazily at
+build time, so no other code changes needed), `theme_base`/`theme_extra`
+(renamed from `theme_args`; also changed from zero-arg functions to
+plain ggplot2 theme objects, so a user can pass `theme_bw()` directly
+the way they'd normally write `+ theme_bw()`), `color_discrete`/
+`fill_discrete` (new fields, applied by a new `.polish_scales()` in
+`R/er-plot-compose.R`, which reuses `.polish_labels()`'s existing
+strata-vs-density/response role checks to decide which plots are
+eligible), the existing `format_p`/`format_percent`/`format_number`/
+`draw_key` fields, and `height_base`/`height_data`/`height_group`
+(merged via `utils::modifyList()`). Each argument validated by a small
+dedicated helper (`.check_theme_string()` etc., `R/er-plot-api.R`).
+Calling `er_plot_theme()` more than once accumulates, matching
+`ggplot2::theme()`'s own merging semantics.
+
+**Deferred, not done:** continuous color/fill palette control
+(`color_continuous`/`fill_continuous`, for `er_style_data_hex()`'s
+density fill or a continuous/count response's response-colored data
+layer) -- would need the symmetric branch of `.polish_scales()`'s
+eligibility logic; per-layer/per-geom style knobs (alpha, linewidth) --
+belong to individual `er_style_*()` builders' own arguments, not the
+global theme; validating that a `color_discrete`/`fill_discrete`
+scale's own aesthetic matches the argument it was passed as -- a
+mismatch surfaces as ggplot2's own error at build time instead.
+`.polish_scales()` also has one known rough edge, not solved: if a
+future custom builder adds its own `scale_color_*()`/`scale_fill_*()`
+directly, `.polish_scales()` adds a second scale on top rather than
+detecting/deferring to it (ggplot2 emits a message and the later one
+wins) -- no built-in builder does this today, so it isn't a live bug.
+
+**Status:** done. New `tests/testthat/test-er-plot-theme.R` (partial-
+update semantics, each argument's validation, an integration test, and
+a regression check that `color_discrete`/`fill_discrete` don't affect
+an `er_style_data_hex()` density fill); `devtools::test()` (618
+passing) and `devtools::check()` (0/0/0) both clean.
+`vignettes/articles/design.Rmd` was *not* updated to demonstrate
+`er_plot_theme()` in this pass -- closed by the dedicated `theming.Rmd`
+article added later, see "Completed: vignette restructuring" below.
+
+## Completed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
+
+**The bug.** `er_plot_build()`'s trigger condition for building the
+base panel only checked for the model/summary/quantile/overlay layers
+(mirroring the documented "a group-only or panel-layout-data-only plot
+has no base panel" exception), so a plot with *no* layer added at all
+(e.g. `data |> er_plot(x, y) |> plot()`) ended up with every one of
+`object$plot$base`/`$data`/`$group` `NULL`, and
+`patchwork::wrap_plots(list(), ...)` failed with an opaque
+`'x' and 'units' must have length > 0` error rather than rendering the
+axes-only panel a user would reasonably expect from a bare
+`ggplot(df, aes(x, y))`.
+
+**Fix:** widened the trigger condition with a `has_any_layer` check
+spanning all six layers (including `data`/`group`), so the base panel
+is now built either when one of the original four layers is present
+*or* when there are no layers at all -- the existing group-only/
+panel-layout-data-only no-base-layer behaviour is unchanged.
+
+**Status:** done. Covered by a new test in
+`tests/testthat/test-er-plot-api.R`, alongside the existing no-base-
+layer tests it sits next to.
+
+## Completed: the summary layer promoted to its own peer layer (`er_plot_add_summary()`)
+
+**Motivation.** `summary` used to be a secondary, nested argument of
+`er_plot_add_model()` (`summary_style`), which meant (1) a purely
+descriptive annotation (e.g. an observation count) had to route through
+the model layer even when no model was involved, and (2) summary was
+the only one of the five constituents *not* an independent singleton/
+additive layer with its own `er_plot_add_*()` verb.
+
+**What was done:** a new `er_plot_add_summary(object, model = NULL,
+keep_strata = NULL, style = NULL, ...)`, with `model` genuinely
+optional (`NULL` means no model-derived statistic). `style` defaults to
+`er_style_summary_pvalue()`; a new, model-agnostic
+`er_style_summary_n()` (total or per-stratum observation count) reads
+straight from `data` and ignores `model` entirely, demonstrating a
+summary builder need not depend on a model at all.
+`er_plot_add_model()` dropped `summary_style` entirely (straight
+removal, no shim). Two follow-on decisions made at the same time:
+- **Corner placement no longer depends on the model curve.**
+  `config$corner_distance` is now computed from the raw observed
+  `(exposure, response)` data (rescaled onto `[0, 1]`), not the fitted
+  curve, since a summary can now exist with no model at all. A
+  deliberate, visible change to existing label placement.
+- **The "skip when stratified" decision moved into the builder.**
+  `.layer_summary()` now computes `config$p_value` unconditionally
+  whenever a model is supplied; `er_style_summary_pvalue()` itself
+  checks `stratify` and returns `list()` if `TRUE`, so a different
+  builder (e.g. `er_style_summary_n()`) can make its own call instead.
+
+One visible behaviour change flagged at the time: every existing
+`er_plot_add_model(mod)` call used to draw a p-value annotation by
+default; it no longer does, without an explicit
+`er_plot_add_summary(model = mod)` call.
+
+**Status:** done. `er_plot_build()`'s base-plot trigger condition
+gained `object$layer$summary`. The three worked-example vignettes were
+not updated in this pass to add the now-required explicit call (a gap
+closed by a later "Summary layer" section -- see "Completed: vignette
+restructuring" below).
+
+## Completed: the `er_summary()` return-value contract (`coefficients`/`glance`)
+
+**Motivation.** `er_summary()`'s return value was documented only as
+"a named list (e.g. `list(p_value = ...)`)" -- fine for erglm's GLM
+models (one unambiguous exposure coefficient), not obviously
+generalisable to a multi-parameter model like emaxnls's Emax fits
+(`E0`/`Emax`/`EC50`/`Hill`, no single privileged term).
+
+**What was done:** a purely additive contract in
+`?er_model_interface` -- `er_summary()` returns `NULL` or a named list
+with any of three independently-optional, reserved keys: `p_value`
+(unchanged), `coefficients` (tibble, one row per parameter,
+`term`/`label`/`estimate`/`std_error`/`statistic`/`p_value`/
+`conf_low`/`conf_high`), and `glance` (single-row tibble,
+`broom::glance()`-style goodness-of-fit; reserved for a second
+contract revision, not consumed by any built-in yet -- until the next
+section). `.layer_summary()` now stores the full raw return value as
+`config$summary`. Two new builders demonstrate it:
+`er_style_summary_coefficients()` (one line per `coefficients` row) and,
+added slightly later as the first `glance` consumer,
+`er_style_summary_gof()` (a compact `N`/`AIC`/`BIC`/`R²` annotation,
+showing only whichever of those four fields are present/non-`NA`). Both
+draw nothing if their input is absent or the layer is stratified, same
+posture as `er_style_summary_pvalue()`.
+
+Purely additive -- erglm's existing `er_summary.erglm_model()`
+(`p_value` only) needed no change. Explicitly deferred, not erplots-side
+work: enriching erglm's method with `coefficients`/`glance`, and an
+actual `er_summary.emaxnls()` implementation.
+
+**Status:** done. `plot-binary.Rmd` gained a "Summary layer" section
+(worked examples of both `_pvalue()` and `_gof()`, the latter via a
+`registerS3method()`-registered demo method since erglm doesn't
+populate `glance` yet); `plot-continuous.Rmd`/`plot-count.Rmd` link
+back to it. `design.Rmd`'s layer-overview table and ASCII pipeline
+diagram, and two stale "the other three layers" doc strings, were
+fixed in a follow-up staleness audit at the same time.
+
+## Completed: `er_vpc_plot()`'s `sim_resp` extension to `er_simulate()`
+
+**Motivation.** `er_vpc_plot()` was the one part of the mini-language
+not built on the model interface -- it required a bespoke,
+model-package-specific `sim` data frame (e.g. via
+`erglm::erglm_vpc_sim()`), so every model package needed its own
+VPC-shaped simulation helper outside `er_predict()`/`er_simulate()`/
+`er_summary()`.
+
+**What was done:** widened `er_simulate()`'s contract additively rather
+than adding a fourth generic -- a method may now return an optional
+`sim_resp` column alongside the existing `fit_resp` (a full
+response-scale draw with observation-level noise, vs. `fit_resp`'s
+point on the mean curve). A separate `er_simulate_response()` generic
+was considered and rejected: both erglm and emaxnls already compute
+both quantities in one `stats::simulate()`-family call, so extending
+the return value was the smaller change. `er_vpc_plot()` gained a
+`model` argument (mutually exclusive with `sim`) plus `nsim`/`seed`;
+when `model` is supplied it calls `er_simulate()` internally and errors
+informatively if `sim_resp` is missing, rather than silently treating
+`fit_resp` as if it were a noisy draw. The `sim`-argument path is
+unchanged and remains supported indefinitely.
+
+Both companion packages were updated to implement the extension
+(erglm PR #6, emaxnls PR #67, both merged), so `er_vpc_plot(model =
+...)`'s example/tests pass against each package's default branch via
+this repo's `Remotes:` entries. `erglm_vpc_sim()` itself is now slated
+for removal from erglm; every erplots doc/vignette/example that used to
+call it now goes through `er_vpc_plot(model = ...)` instead.
+
+**Status:** done, except one dangling follow-up (see "Open/deferred"
+below): `tests/testthat/test-er-vpc.R` still builds its `sim` data
+frames via `erglm_vpc_sim()` directly, since that code path remains
+supported regardless of the helper's removal -- but once erglm actually
+drops the function, those specific tests will need another way to
+build `sim` (e.g. directly via `er_simulate(model, newdata = ..., nsim
+= ..., seed = ...)`).
+
+## Completed: vignette restructuring (`theming.Rmd`, `extending.Rmd`, `model-interface.Rmd`)
+
+**What was done, in three separate passes:**
+- `extending.Rmd` ("Extending erplots: writing your own builder") was
+  split out of `design.Rmd`'s "Extending erplots" section into its own
+  article, because it needed to grow: it now leads with a table of what
+  each `.layer_*()` function's `config` contains before writing a
+  custom crossbar builder, and covers all four `er_style_tag()`
+  arguments (`layout`/`fill_role`/`y_role`/`layer`) with a runnable
+  example of each. `design.Rmd` keeps only a short pointer into it.
+- `theming.Rmd` ("Theming erplots") was added as a *standalone* article
+  documenting `er_plot_theme()` (one section per argument group, plus
+  accumulate/partial-update semantics) -- not folded into `design.Rmd`
+  or triplicated across the three worked-example articles, since
+  theming is orthogonal to the mini-language grammar and
+  response-type-/layer-agnostic. Cross-referenced from `design.Rmd`, the
+  top-level `vignettes/erplots.Rmd`, and one sentence each in
+  `plot-binary/continuous/count.Rmd`'s shared opening paragraph.
+- `model-interface.Rmd` ("Implementing the model interface") was added
+  for maintainers of *other* modelling packages (distinct audience from
+  `extending.Rmd`'s erplots-*users*), building two self-contained toy
+  model classes from scratch (`toy_model`: single-coefficient GLM
+  wrapper, exercises `er_style_model_spaghetti()`/`er_vpc_plot(model =
+  ...)`; `toy_emax`: three-parameter `nls()` Emax fit with a delta-method
+  CI, exercises `coefficients`-based summary) to demonstrate every
+  generic, deliberately terser/denser prose than the other five
+  articles. Closes with a pointer to erglm's/emaxnls's real
+  implementations as the non-simplified analogues.
+
+`_pkgdown.yml`'s `articles` list was updated after each split
+(`design` -> `theming` -> `extending` -> `model-interface`).
+
+**Status:** done. All affected/added articles re-rendered end-to-end
+via `rmarkdown::render()` with no errors after each pass;
+`devtools::test()` unaffected (documentation-only changes).
+
 ## Completed: second naming-scheme review -- `builder`/`style` -> `style`/`theme`
 
 **Motivation.** `builder` (and `summary_builder`) read as developer-facing
@@ -783,3 +1009,24 @@ full test suite passing (478 tests).
   continuous/count "panel"-layout builder resurfaces, these are the
   design questions to revisit; `.part_data()`'s response-type dispatch
   for that case is still in place, just with no built-in consumer today.
+- **Continuous color/fill palette control in `er_plot_theme()`.**
+  `color_discrete`/`fill_discrete` cover the strata palette; there's no
+  `color_continuous`/`fill_continuous` equivalent yet for
+  `er_style_data_hex()`'s density fill or a continuous/count response's
+  response-colored data layer. Deferred alongside the theme work -- see
+  "Completed: `er_plot_theme()` implemented" above.
+- **`.polish_scales()` vs. a builder's own explicit scale.** If a future
+  custom builder calls `scale_color_*()`/`scale_fill_*()` directly,
+  `.polish_scales()` will add a second scale on top rather than
+  detecting/deferring to it (ggplot2 emits a message and the later one
+  wins). No built-in builder does this today, so not a live bug -- just
+  a rough edge to keep in mind if one is added.
+- **`test-er-vpc.R`'s reliance on `erglm_vpc_sim()`.** That test file
+  still builds its `sim` argument test fixtures via
+  `erglm::erglm_vpc_sim()` directly, which erglm has flagged for
+  removal now that `er_vpc_plot(model = ...)` (via the `sim_resp`
+  extension) supersedes it. Not urgent while the function still exists
+  upstream, but once erglm actually drops it, those fixtures need
+  rebuilding via `er_simulate(model, newdata = ..., nsim = ..., seed =
+  ...)` instead -- see "Completed: `er_vpc_plot()`'s `sim_resp`
+  extension" above.

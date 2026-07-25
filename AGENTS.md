@@ -785,8 +785,26 @@ matching what `model = ` already does internally).
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed
 design work (rationale kept, implementation narrative trimmed) and a
-short "Open / deferred" list at the end. Everything scoped so far is
-done: the binary→continuous/count response generalisation (response-type
+short "Open / deferred" list at the end.
+
+**One genuinely open item, not merely deferred:** PLAN.md's "High
+priority" section describes a real, reachable crash --
+`er_plot_add_model(mod, keep_strata = FALSE)` (or omitting
+`stratify_by` from `er_plot()` altogether) on a model whose formula has
+covariates beyond the exposure variable fails inside the model's own
+`predict()` call, because `.get_model_predictions()` builds `newdata`
+from only the exposure grid (plus strata levels, if stratified), with
+no way to know what other covariates the fitted model's formula
+references. Status: **not started** -- whose responsibility it is to
+fill in missing covariates (erplots' or the model's `er_predict()`
+method), or whether the combination should instead error immediately
+and informatively rather than crash, is still an open design decision.
+No regression test exercises this path yet either. This is the one item
+in PLAN.md that should be treated as unfinished, not historical.
+
+Everything else scoped so far is done, including several rounds not
+reflected below (see PLAN.md for the condensed rationale of each): the
+binary→continuous/count response generalisation (response-type
 detection/declaration, the quantile summary layer, `er_vpc_plot()`), the
 data layer's continuous/count-response redesign (`build_data_color()`
 and `er_style_data_overlay()`, the latter now the default), the mini-language
@@ -805,13 +823,22 @@ quantile builder -- and then, on review, removing `build_data_jitter()`/
 `build_data_color()` in favor of `er_style_data_boxjitter()` (see
 "Extensibility" above and PLAN.md), since neither of the removed
 builders earned its keep once `er_style_data_overlay()` existed as the
-default. The only genuinely open items are deferred, not scheduled --
-see PLAN.md's "Open / deferred" section (an additive `model` layer for
-overlaying two fitted curves; whether a future continuous/count
-`"panel"`-layout builder should use a deliberately chosen continuous
-color scale instead of ggplot2's default gradient, and whether it
-should be a quantile-binned rug instead of a color-encoded scatter --
-both deferred along with `build_data_color()`'s removal). A naming-scheme
+default. Later still: implementing `er_plot_theme()` (was a no-op
+placeholder), fixing the no-layers-at-all crash, promoting the summary
+layer to independence, the `er_summary()` `coefficients`/`glance`
+contract, and the `sim_resp` extension powering `er_vpc_plot(model =
+...)` -- each covered in its own section above, and each also recorded
+in PLAN.md as a completed entry. The remaining genuinely-deferred items
+(not scheduled, no concrete need yet) are in PLAN.md's "Open / deferred"
+section: an additive `model` layer for overlaying two fitted curves;
+whether a future continuous/count `"panel"`-layout builder should use a
+deliberately chosen continuous color scale instead of ggplot2's default
+gradient, and whether it should be a quantile-binned rug instead of a
+color-encoded scatter (both deferred along with `build_data_color()`'s
+removal); continuous (`color_continuous`/`fill_continuous`) palette
+control in `er_plot_theme()`; and `tests/testthat/test-er-vpc.R`'s
+reliance on `erglm::erglm_vpc_sim()`, which will need reworking once
+erglm actually removes that function. A naming-scheme
 review renamed the pipeline verbs (`er_plot_show_*()` ->
 `er_plot_add_*()`), the partial builders and their metadata helpers
 (`build_*()` -> `er_builder_*()`; `er_layout()`/`er_data_fill`/`er_group_y`
