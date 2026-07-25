@@ -58,10 +58,13 @@
 #' statistic.
 #'
 #' @param data Observed data
-#' @param exposure Exposure variable (one variable, unquoted)
-#' @param response Response variable (one variable, unquoted)
+#' @param exposure Exposure variable (one variable, unquoted). Must name a
+#'   column of `data`.
+#' @param response Response variable (one variable, unquoted). Must name a
+#'   column of `data`.
 #' @param stratify_by Stratification variable used for color and fill (one
-#'   variable, unquoted); see "Stratification" above
+#'   variable, unquoted); see "Stratification" above. Must name a column of
+#'   `data` if supplied.
 #' @param response_type One of `"auto"` (the default), `"binary"`,
 #'   `"continuous"`, or `"count"`. Governs response-scale defaults (e.g.
 #'   axis limits) and which summary/CI method the quantile and VPC layers
@@ -109,6 +112,28 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
 
   response_type <- match.arg(response_type, c("auto", "binary", "continuous", "count"))
 
+  # validate that exposure/response/stratify_by actually name columns of
+  # `data` -- without this, a typo'd column name silently produces
+  # `NULL`/`Inf`/`-Inf` limits (via `data[[name]]` returning `NULL`) rather
+  # than an error at the point of the actual mistake; see PLAN.md's
+  # "stress-test findings" section
+  exposure_name <- rlang::as_name(rlang::enquo(exposure))
+  response_name <- rlang::as_name(rlang::enquo(response))
+  strata_quo <- rlang::enquo(stratify_by)
+  strata_name <- if (!rlang::quo_is_null(strata_quo)) rlang::as_name(strata_quo) else NULL
+
+  missing_cols <- setdiff(c(exposure_name, response_name, strata_name), names(data))
+  if (length(missing_cols) > 0) {
+    rlang::abort(c(
+      sprintf(
+        "Column%s not found in `data`: %s.",
+        if (length(missing_cols) > 1) "s" else "",
+        paste0("`", missing_cols, "`", collapse = ", ")
+      ),
+      "i" = "Check that `exposure`/`response`/`stratify_by` reference actual columns of `data`."
+    ))
+  }
+
   # empty plot object
   object <- structure(
     list(
@@ -139,10 +164,9 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   object$data <- data
 
   # store variable names
-  object$exposure$name <- rlang::as_name(rlang::enquo(exposure))
-  object$response$name <- rlang::as_name(rlang::enquo(response)) 
-  strata_name <- rlang::enquo(stratify_by)
-  if (!rlang::quo_is_null(strata_name)) object$strata$name <- rlang::as_name(strata_name)
+  object$exposure$name <- exposure_name
+  object$response$name <- response_name
+  if (!is.null(strata_name)) object$strata$name <- strata_name
   
   # store (default) variable labels
   object$exposure$label <- .get_label(object$data[[object$exposure$name]]) %||% object$exposure$name

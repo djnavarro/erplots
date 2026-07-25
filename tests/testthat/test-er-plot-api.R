@@ -5,6 +5,17 @@ test_that("er_plot creates an er_plot (minimal)", {
   expect_s3_class(plt, "er_plot")
 })
 
+test_that("er_plot errors clearly when exposure/response/stratify_by name nonexistent columns", {
+  skip_if_not_installed("erglm")
+
+  expect_error(er_plot(er_test_data, not_a_col, ae1), "not_a_col")
+  expect_error(er_plot(er_test_data, aucss, not_a_col), "not_a_col")
+  expect_error(er_plot(er_test_data, aucss, ae1, stratify_by = not_a_col), "not_a_col")
+
+  # multiple missing columns are all named in one error
+  expect_error(er_plot(er_test_data, not_a_col1, not_a_col2), "not_a_col1.*not_a_col2")
+})
+
 test_that("er_plot resolves response_type = 'auto' correctly", {
   skip_if_not_installed("erglm")
 

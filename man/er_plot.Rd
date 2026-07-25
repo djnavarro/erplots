@@ -9,12 +9,15 @@ er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
 \arguments{
 \item{data}{Observed data}
 
-\item{exposure}{Exposure variable (one variable, unquoted)}
+\item{exposure}{Exposure variable (one variable, unquoted). Must name a
+column of \code{data}.}
 
-\item{response}{Response variable (one variable, unquoted)}
+\item{response}{Response variable (one variable, unquoted). Must name a
+column of \code{data}.}
 
 \item{stratify_by}{Stratification variable used for color and fill (one
-variable, unquoted); see "Stratification" above}
+variable, unquoted); see "Stratification" above. Must name a column of
+\code{data} if supplied.}
 
 \item{response_type}{One of \code{"auto"} (the default), \code{"binary"},
 \code{"continuous"}, or \code{"count"}. Governs response-scale defaults (e.g.

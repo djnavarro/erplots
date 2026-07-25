@@ -24,8 +24,10 @@ in priority order (highest severity first), to work through
 systematically; each should get its own "Completed" section above once
 fixed, following this document's usual format.
 
-1. **(High) Nonexistent column passed as `exposure`/`response` to
-   `er_plot()` fails silently, not at `er_plot()` call time.**
+1. **(High, fixed -- see "Completed: validate `exposure`/`response`/
+   `stratify_by` name real columns" below) Nonexistent column passed as
+   `exposure`/`response` to `er_plot()` fails silently, not at
+   `er_plot()` call time.**
    `data[[name]]` on a missing column is `NULL`, so
    `range(NULL)` returns `c(Inf, -Inf)` with only a bare `min`/`max`
    warning -- the resulting `er_plot` object looks superficially valid
@@ -92,6 +94,32 @@ The likely fix is a single upfront check in each (failing fast with a
 message like "exposure must be numeric with at least 2 distinct
 non-missing values") rather than patching each downstream symptom
 separately.
+
+## Completed: validate `exposure`/`response`/`stratify_by` name real columns
+
+**The bug (stress-test finding #1).** `er_plot()` never checked that
+`exposure`/`response`/`stratify_by` actually named columns of `data`.
+`data[[name]]` on a missing column silently returns `NULL`, so
+`range(NULL)` returned `c(Inf, -Inf)` with only a bare `min`/`max`
+warning -- the resulting `er_plot` object looked superficially valid
+(it printed fine) until a much later `er_plot_build()`/`print()` call
+failed deep inside ggplot2 with "Column not found", far from the actual
+typo.
+
+**The fix.** `er_plot()` now resolves `exposure_name`/`response_name`/
+`strata_name` up front (before building the object) and checks all
+three against `names(data)` in one pass, aborting immediately with a
+message naming every missing column at once (not just the first) if
+any don't exist. This replaces the two separate `rlang::enquo()`/
+`rlang::as_name()` calls that used to happen later in the function body
+(for exposure/response) -- they're computed once, validated, then
+reused, rather than being recomputed identically further down.
+
+**Status:** done. New test in `tests/testthat/test-er-plot-api.R`
+("er_plot errors clearly when exposure/response/stratify_by name
+nonexistent columns") covers each of the three arguments individually
+and the multiple-missing-columns case. `devtools::test()` and
+`devtools::check()` both clean.
 
 ## Completed: `keep_strata = FALSE` / missing-covariate `newdata` crash
 
