@@ -90,7 +90,17 @@ simulation-based visualisations (e.g. spaghetti plots, VPCs); implementing
 
 
 <dt id="arg-newdata">newdata<a class="anchor" aria-label="anchor" href="#arg-newdata"></a></dt>
-<dd><p>A data frame of covariate values at which to predict</p></dd>
+<dd><p>A data frame of covariate values at which to predict.
+When <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> builds this internally for the model
+curve/ribbon, it always contains the exposure variable (a grid) and,
+if stratified, the strata variable – plus, for any <em>other</em> column
+the model's fitting data had (covariates <code>er_predict()</code>'s method
+might reference in its formula but erplots has no way to know about,
+since it never inspects a model's formula), a single reference value
+(first factor level, or mean for a numeric column) repeated across
+every row. A method doesn't need to do anything special to benefit
+from this – it only matters if the method's own <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> call
+would otherwise error on a <code>newdata</code> missing a covariate it needs.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>

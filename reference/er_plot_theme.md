@@ -25,6 +25,8 @@ er_plot_theme(
   theme_extra = NULL,
   color_discrete = NULL,
   fill_discrete = NULL,
+  color_continuous = NULL,
+  fill_continuous = NULL,
   format_p = NULL,
   format_percent = NULL,
   format_number = NULL,
@@ -96,6 +98,17 @@ er_plot_theme(
   and applied to every plot whose `colour`/`fill` aesthetic is mapped to
   the stratification variable – see "Details"
 
+- color_continuous, fill_continuous:
+
+  A continuous ggplot2 scale object (e.g.
+  [`ggplot2::scale_color_viridis_c()`](https://ggplot2.tidyverse.org/reference/scale_viridis.html),
+  [`ggplot2::scale_fill_gradient()`](https://ggplot2.tidyverse.org/reference/scale_gradient.html)),
+  written to
+  `object$theme$color_continuous`/`object$theme$fill_continuous` and
+  applied to every plot whose `colour`/`fill` aesthetic is mapped to
+  something continuous other than the stratification variable – see
+  "Details"
+
 - format_p, format_percent, format_number:
 
   Formatter functions (typically from `scales::label_*()`), written to
@@ -131,15 +144,20 @@ own merging). There is no way to reset a field back to its
 default other than re-supplying that default's value explicitly.
 
 `color_discrete`/`fill_discrete` only affect aesthetics that are
-genuinely mapped to the stratification variable – a continuous/count
-response's color-encoded data layer, or
+genuinely mapped to the stratification variable; `color_continuous`/
+`fill_continuous` are the symmetric counterpart for aesthetics mapped to
+something else continuous –
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)'s
-density fill, are left at ggplot2's defaults regardless of these
-arguments (continuous palette control isn't implemented yet). If a
-custom builder adds its own `scale_color_*()`/`scale_fill_*()` directly,
-supplying `color_discrete`/`fill_discrete` here will add a second scale
-on top (ggplot2 will emit a message and the later one wins) rather than
-detecting and deferring to the builder's own choice.
+density `fill`, or a continuous/count response's color-encoded data
+layer (there's no built-in builder for the latter today; see
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)'s
+`layout` argument). Each of the four only ever touches the aesthetic
+role it names – supplying `color_continuous` never affects a discrete
+`colour` mapping, and vice versa. If a custom builder adds its own
+`scale_color_*()`/`scale_fill_*()` directly, supplying any of these four
+here will add a second scale on top (ggplot2 will emit a message and the
+later one wins) rather than detecting and deferring to the builder's own
+choice.
 
 ## See also
 

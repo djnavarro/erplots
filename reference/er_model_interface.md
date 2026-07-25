@@ -27,7 +27,18 @@ er_summary(model, ...)
 
 - newdata:
 
-  A data frame of covariate values at which to predict
+  A data frame of covariate values at which to predict. When
+  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+  builds this internally for the model curve/ribbon, it always contains
+  the exposure variable (a grid) and, if stratified, the strata variable
+  – plus, for any *other* column the model's fitting data had
+  (covariates `er_predict()`'s method might reference in its formula but
+  erplots has no way to know about, since it never inspects a model's
+  formula), a single reference value (first factor level, or mean for a
+  numeric column) repeated across every row. A method doesn't need to do
+  anything special to benefit from this – it only matters if the
+  method's own [`predict()`](https://rdrr.io/r/stats/predict.html) call
+  would otherwise error on a `newdata` missing a covariate it needs.
 
 - conf_level:
 

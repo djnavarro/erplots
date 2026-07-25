@@ -85,6 +85,8 @@ aesthetic (that's controlled by a layer's <code>style</code>; see <code><a href=
 <span>  theme_extra <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  color_discrete <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fill_discrete <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  color_continuous <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fill_continuous <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  format_p <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  format_percent <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  format_number <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -152,6 +154,15 @@ and applied to every plot whose <code>colour</code>/<code>fill</code> aesthetic 
 the stratification variable – see "Details"</p></dd>
 
 
+<dt id="arg-color-continuous-fill-continuous">color_continuous, fill_continuous<a class="anchor" aria-label="anchor" href="#arg-color-continuous-fill-continuous"></a></dt>
+<dd><p>A continuous ggplot2 scale object
+(e.g. <code><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">ggplot2::scale_color_viridis_c()</a></code>, <code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">ggplot2::scale_fill_gradient()</a></code>),
+written to <code>object$theme$color_continuous</code>/<code>object$theme$fill_continuous</code>
+and applied to every plot whose <code>colour</code>/<code>fill</code> aesthetic is mapped to
+something continuous other than the stratification variable – see
+"Details"</p></dd>
+
+
 <dt id="arg-format-p-format-percent-format-number">format_p, format_percent, format_number<a class="anchor" aria-label="anchor" href="#arg-format-p-format-percent-format-number"></a></dt>
 <dd><p>Formatter functions
 (typically from <code>scales::label_*()</code>), written to
@@ -185,14 +196,18 @@ supplies (the same accumulate-by-default behaviour as
 back to its <code><a href="er_plot.html">er_plot()</a></code> default other than re-supplying that default's
 value explicitly.</p>
 <p><code>color_discrete</code>/<code>fill_discrete</code> only affect aesthetics that are
-genuinely mapped to the stratification variable – a continuous/count
-response's color-encoded data layer, or <code><a href="er_style_data.html">er_style_data_hex()</a></code>'s density
-fill, are left at ggplot2's defaults regardless of these arguments
-(continuous palette control isn't implemented yet). If a custom builder
-adds its own <code>scale_color_*()</code>/<code>scale_fill_*()</code> directly, supplying
-<code>color_discrete</code>/<code>fill_discrete</code> here will add a second scale on top
-(ggplot2 will emit a message and the later one wins) rather than
-detecting and deferring to the builder's own choice.</p>
+genuinely mapped to the stratification variable; <code>color_continuous</code>/
+<code>fill_continuous</code> are the symmetric counterpart for aesthetics mapped to
+something else continuous – <code><a href="er_style_data.html">er_style_data_hex()</a></code>'s density <code>fill</code>, or
+a continuous/count response's color-encoded data layer (there's no
+built-in builder for the latter today; see <code><a href="er_style_tag.html">er_style_tag()</a></code>'s <code>layout</code>
+argument). Each of the four only ever touches the aesthetic role it
+names – supplying <code>color_continuous</code> never affects a discrete <code>colour</code>
+mapping, and vice versa. If a custom builder adds its own
+<code>scale_color_*()</code>/<code>scale_fill_*()</code> directly, supplying any of these four
+here will add a second scale on top (ggplot2 will emit a message and the
+later one wins) rather than detecting and deferring to the builder's own
+choice.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
