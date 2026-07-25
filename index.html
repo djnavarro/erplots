@@ -42,6 +42,7 @@
     <li><a class="dropdown-item" href="articles/plot-count.html">Plotting count responses</a></li>
     <li><a class="dropdown-item" href="articles/design.html">Understanding the erplots grammar</a></li>
     <li><a class="dropdown-item" href="articles/extending.html">Extending erplots</a></li>
+    <li><a class="dropdown-item" href="articles/model-interface.html">Implementing the model interface</a></li>
   </ul>
 </li>
       </ul>
@@ -71,7 +72,7 @@
 <!-- badges: start -->
 
 <p>The erplots package provides a mini-language for building exposure-response plots: model curves/ribbons, quantile-binned response-rate summaries, data strips, and grouped distribution panels. It is model-agnostic: erplots never fits a model itself. Instead, you fit a model with whatever package suits your workflow (e.g. <a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a> for logistic regression), and pass the fitted object to <code><a href="reference/er_plot_add_model.html">er_plot_add_model()</a></code>.</p>
-<p>Any model that implements <code><a href="reference/er_model_interface.html">er_predict()</a></code> can be visualised; implementing <code><a href="reference/er_model_interface.html">er_simulate()</a></code> and <code><a href="reference/er_model_interface.html">er_summary()</a></code> additionally enables uncertainty spaghetti plots/VPCs and summary annotations (e.g. p-values). See <code><a href="reference/er_model_interface.html">?er_model_interface</a></code>.</p>
+<p>Any model that implements <code><a href="reference/er_model_interface.html">er_predict()</a></code> can be visualised; implementing <code><a href="reference/er_model_interface.html">er_simulate()</a></code> and <code><a href="reference/er_model_interface.html">er_summary()</a></code> additionally enables uncertainty spaghetti plots/VPCs and summary annotations (e.g. p-values). See the <a href="https://erplots.djnavarro.net/articles/model-interface.html">Implementing the model interface</a> article for a worked guide to implementing all three, or <code><a href="reference/er_model_interface.html">?er_model_interface</a></code> for the bare contract.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>

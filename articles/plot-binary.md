@@ -4,7 +4,8 @@ The erplots package supplies a mini-language for generating
 exposure-response plots commonly used in pharmacometric analyses. It is
 designed to be model agnostic, in the sense that it will work for any
 modelling tool that implements a few key interface functions (see
-[`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+[Implementing the model
+interface](https://erplots.djnavarro.net/articles/model-interface.md)).
 It can support binary response data, continuous response data, and count
 response data. This article focuses on **binary data**, using a logistic
 regression model fitted using the erglm package.
@@ -135,8 +136,9 @@ erglm_data |>
 annotates the base panel with a statistic derived from the model (or,
 for
 [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md),
-purely descriptive of the raw data) – see `er_model_interface` for what
-a model’s own
+purely descriptive of the raw data) – see [Implementing the model
+interface](https://erplots.djnavarro.net/articles/model-interface.md)
+for what a model’s own
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 method can return. The default builder,
 [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md),

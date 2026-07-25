@@ -40,6 +40,7 @@
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
+    <li><a class="dropdown-item" href="../articles/model-interface.html">Implementing the model interface</a></li>
   </ul>
 </li>
       </ul>
@@ -81,11 +82,10 @@
 <p>The erplots package supplies a mini-language for generating
 exposure-response plots commonly used in pharmacometric analyses. It is
 designed to be model agnostic, in the sense that it will work for any
-modelling tool that implements a few key interface functions (see
-<code><a href="../reference/er_model_interface.html">?er_model_interface</a></code>). It can support binary response data,
-continuous response data, and count response data. This article focuses
-on <strong>binary data</strong>, using a logistic regression model
-fitted using the erglm package.</p>
+modelling tool that implements a few key interface functions (see <a href="model-interface.html">Implementing the model interface</a>). It
+can support binary response data, continuous response data, and count
+response data. This article focuses on <strong>binary data</strong>,
+using a logistic regression model fitted using the erglm package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>
@@ -183,11 +183,11 @@ responses too.</p>
 <p><code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code> annotates the base panel with a
 statistic derived from the model (or, for
 <code><a href="../reference/er_style_summary.html">er_style_summary_n()</a></code>, purely descriptive of the raw data) –
-see <code>er_model_interface</code> for what a model’s own
-<code><a href="../reference/er_model_interface.html">er_summary()</a></code> method can return. The default builder,
-<code><a href="../reference/er_style_summary.html">er_style_summary_pvalue()</a></code>, draws whatever headline p-value
-the model reports, in whichever corner is furthest from the observed
-data:</p>
+see <a href="model-interface.html">Implementing the model interface</a>
+for what a model’s own <code><a href="../reference/er_model_interface.html">er_summary()</a></code> method can return. The
+default builder, <code><a href="../reference/er_style_summary.html">er_style_summary_pvalue()</a></code>, draws whatever
+headline p-value the model reports, in whichever corner is furthest from
+the observed data:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>

@@ -16,8 +16,11 @@ can be visualised; implementing
 and
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 additionally enables uncertainty spaghetti plots/VPCs and summary
-annotations (e.g. p-values). See
-[`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md).
+annotations (e.g. p-values). See the [Implementing the model
+interface](https://erplots.djnavarro.net/articles/model-interface.html)
+article for a worked guide to implementing all three, or
+[`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+for the bare contract.
 
 ## Installation
 

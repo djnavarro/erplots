@@ -1,0 +1,523 @@
+# Implementing the model interface
+
+erplots never fits a model. Every plot it draws is built from
+predictions, simulations, or summary statistics that some *other* object
+hands it, via three S3 generics:
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+and
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
+Collectively these are “the model interface”, documented tersely at
+[`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md).
+This article exists because that help topic is a contract, not a
+tutorial: it tells you what each generic must return, but not what
+implementing one actually looks like, or why the contract is shaped the
+way it is. If you maintain a modelling package and want its model
+objects to work with
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+and friends, this is the article to read.
+
+You’re assumed to already know your way around S3 dispatch,
+[`predict()`](https://rdrr.io/r/stats/predict.html) methods, and the
+general shape of a modelling package – this article doesn’t re-explain
+those. What it does explain is the erplots-specific part: which three
+generics to implement, what each one is *for*, and what erplots does
+with the result once you’ve implemented it.
+
+``` r
+
+library(erplots)
+library(erglm)
+```
+
+## Why a generic interface at all?
+
+Exposure-response plots need model predictions, but “model predictions”
+means something different depending on what fit the model: a `glm`’s
+`predict(type = "response")`, an `nls` object’s own delta-method
+standard errors, a Bayesian model’s posterior draws. erplots doesn’t
+want to know about any of that – it wants one stable shape it can build
+a `geom_ribbon()` from, regardless of what produced it.
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+is that shape. The same reasoning extends to
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+(uncertainty visualisation) and
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+(annotation text): each is a narrow, specific question erplots needs
+answered, phrased so that *any* model object can answer it by
+implementing one S3 method.
+
+Only
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+is required.
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+and
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+are opt-in: their default methods return `NULL`, which every part of
+erplots that calls them treats as “not available” rather than an error.
+A model package can implement just
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+and get the model curve/ribbon layer working; adding
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+unlocks spaghetti plots and VPCs; adding
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+unlocks p-value/coefficient/goodness-of-fit annotations. None of the
+three depends on any other being implemented.
+
+## `er_predict()`: the one you must write
+
+``` r
+
+er_predict(model, newdata, conf_level = 0.95, ...)
+```
+
+Given a fitted `model` and a `newdata` data frame of covariate values,
+return `newdata` with three columns added: `fit_resp` (the point
+prediction, on the response scale), `ci_lower`, and `ci_upper` (a
+`conf_level` confidence interval around it, also on the response scale).
+Nothing else is required – no particular column order, no class on the
+return value, no restriction on what other columns `newdata` may already
+have (erplots doesn’t touch them).
+
+Two things are worth calling out explicitly because they’re easy to get
+wrong:
+
+- **The interval is on the response scale, not the link scale.** For a
+  binary-response GLM this matters: computing the interval on the linear
+  predictor and then back-transforming with the inverse link gives an
+  asymmetric, properly-bounded-in-`[0, 1]` interval; computing it
+  directly on the fitted probabilities does not. Get this right at the
+  source, since erplots has no way to tell (or fix) an interval that was
+  computed on the wrong scale.
+- **`newdata` is *returned*, not just used.**
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+  contract is “augment and return `newdata`”, not “return a new
+  three-column data frame”. This matters when `newdata` carries a
+  stratification column – `.get_model_predictions()` (the internal
+  caller, in `R/er-plot-layer.R`) builds `newdata` as an exposure grid
+  crossed with every stratum level when the plot is stratified, and
+  expects that column to survive the round trip through
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  unchanged.
+
+### A worked example
+
+Suppose you’re writing a small modelling package of your own. You fit
+models with a thin wrapper around
+[`stats::glm()`](https://rdrr.io/r/stats/glm.html), and want those model
+objects to work with erplots. Tag the class first, so dispatch has
+something to catch:
+
+``` r
+
+fit_toy_model <- function(formula, data, family = gaussian()) {
+  fit <- glm(formula, data = data, family = family)
+  class(fit) <- c("toy_model", class(fit))
+  fit
+}
+
+mod <- fit_toy_model(ae1 ~ aucss, erglm_data, family = binomial())
+class(mod)
+#> [1] "toy_model" "glm"       "lm"
+```
+
+Prepending `"toy_model"` (rather than replacing the class vector) keeps
+every existing `glm`/`lm` method –
+[`predict()`](https://rdrr.io/r/stats/predict.html),
+[`summary()`](https://rdrr.io/r/base/summary.html),
+[`coef()`](https://rdrr.io/r/stats/coef.html),
+[`vcov()`](https://rdrr.io/r/stats/vcov.html) – working via ordinary S3
+inheritance; `er_predict.toy_model()` only needs to add the three
+columns erplots wants, using
+[`stats::predict.glm()`](https://rdrr.io/r/stats/predict.glm.html) to do
+the actual work:
+
+``` r
+
+er_predict.toy_model <- function(model, newdata, conf_level = 0.95, ...) {
+  z <- -qnorm((1 - conf_level) / 2)
+  link <- predict(model, newdata = newdata, se.fit = TRUE, type = "link")
+  linkinv <- family(model)$linkinv
+
+  newdata$fit_resp <- linkinv(link$fit)
+  newdata$ci_lower <- linkinv(link$fit - z * link$se.fit)
+  newdata$ci_upper <- linkinv(link$fit + z * link$se.fit)
+  newdata
+}
+```
+
+That’s the whole method. It’s already enough to plug into the mini
+language:
+
+``` r
+
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod) |>
+  plot()
+```
+
+![](model-interface_files/figure-html/toy-predict-plot-1.png)
+
+Not every model has a
+[`predict()`](https://rdrr.io/r/stats/predict.html) method that computes
+standard errors for you, though. An `nls` fit doesn’t – `predict.nls()`
+silently ignores `se.fit`. When there’s no ready-made standard error,
+the delta method (a numerical gradient of the fitted-value function with
+respect to the parameters, combined with the parameter covariance
+matrix) is a general-purpose fallback that works for any differentiable
+mean function:
+
+``` r
+
+emax_fun <- function(par, aucss) {
+  par[["e0"]] + par[["emax"]] * aucss / (par[["ec50"]] + aucss)
+}
+
+er_predict.toy_emax <- function(model, newdata, conf_level = 0.95, ...) {
+  z <- -qnorm((1 - conf_level) / 2)
+  par <- coef(model)
+  fit <- emax_fun(par, newdata$aucss)
+
+  eps <- 1e-6
+  grad <- vapply(names(par), function(nm) {
+    par_up <- par; par_up[nm] <- par_up[nm] + eps
+    par_dn <- par; par_dn[nm] <- par_dn[nm] - eps
+    (emax_fun(par_up, newdata$aucss) - emax_fun(par_dn, newdata$aucss)) / (2 * eps)
+  }, FUN.VALUE = numeric(nrow(newdata)))
+  se <- sqrt(rowSums((grad %*% vcov(model)) * grad))
+
+  newdata$fit_resp <- fit
+  newdata$ci_lower <- fit - z * se
+  newdata$ci_upper <- fit + z * se
+  newdata
+}
+
+emax_mod <- nls(
+  biomarker_change ~ e0 + emax * aucss / (ec50 + aucss),
+  data = erglm_data,
+  start = list(e0 = -2, emax = 5, ec50 = 1000)
+)
+class(emax_mod) <- c("toy_emax", class(emax_mod))
+
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_add_model(emax_mod) |>
+  plot()
+```
+
+![](model-interface_files/figure-html/toy-emax-predict-1.png)
+
+This `emax_fun()`/finite-difference pairing is deliberately hand-rolled,
+to keep this article dependency-free; a real implementation would more
+likely reach for `numDeriv::jacobian()`, or – if the fitting function
+already has an analytic gradient available (as
+[`nls()`](https://rdrr.io/r/stats/nls.html) itself does, internally) –
+use that instead of finite differences.
+
+## `er_simulate()`: for spaghetti plots and VPCs
+
+``` r
+
+er_simulate(model, newdata, nsim = 100, seed = NULL, ...)
+```
+
+Return a data frame of `nsim` replicates of `newdata`, stacked row-wise,
+with a `sim_id` column identifying which replicate each row belongs to,
+and a `fit_resp` column giving that replicate’s simulated prediction.
+Don’t implement this generic at all if your model can’t support it – the
+default method returns `NULL`, and every caller
+([`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md),
+[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md))
+checks for `NULL` and treats it as “simulation isn’t available for this
+model”, not an error.
+
+The one subtlety worth understanding is that `fit_resp` here means
+something narrower than it sounds like. It’s a draw from the *parameter
+uncertainty* in the model – “if the true parameters were slightly
+different (as they plausibly could be, given how much data you fit on),
+where would the mean curve sit?” – not a draw of an actual observation.
+That’s enough for a spaghetti plot, where every faint line is one
+plausible mean curve. It is *not* enough for a visual predictive check,
+which needs to compare simulated *observations* (with all their sampling
+noise) against observed ones – a materially different, noisier quantity.
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+contract has an independently optional second column for exactly this,
+`sim_resp`: a full response-scale draw that adds observation-level noise
+on top of the parameter draw (a 0/1 draw for a binary response, an
+integer draw for a count response, a draw that includes residual
+variance for a continuous response). A method can return `fit_resp`
+alone, or both columns from the same call; there’s no reason to compute
+`sim_resp` if you only care about spaghetti plots, but
+`er_vpc_plot(model = ...)` will refuse to run (with an informative
+error, not a silently-too-narrow VPC band) if `sim_resp` is missing.
+
+### A worked example
+
+Continuing the `toy_model` class from above – drawing parameter vectors
+from a multivariate normal approximation to the sampling distribution of
+`coef(model)` is the standard move for a GLM, and gives you `fit_resp`
+for free once you have the draws:
+
+``` r
+
+er_simulate.toy_model <- function(model, newdata, nsim = 100, seed = NULL, ...) {
+  if (!is.null(seed)) set.seed(seed)
+
+  beta_hat <- coef(model)
+  beta_draws <- mvtnorm::rmvnorm(nsim, mean = beta_hat, sigma = vcov(model))
+  linkinv <- family(model)$linkinv
+  X <- model.matrix(delete.response(terms(model)), data = newdata)
+
+  reps <- vector("list", nsim)
+  for (i in seq_len(nsim)) {
+    eta <- as.vector(X %*% beta_draws[i, ])
+    fit_resp <- linkinv(eta)
+    reps[[i]] <- newdata |>
+      dplyr::mutate(
+        sim_id = i,
+        fit_resp = fit_resp,
+        # the extra ingredient `sim_resp` needs beyond `fit_resp`:
+        # observation-level sampling noise, appropriate to the response
+        # type (here, a binary draw at the simulated probability)
+        sim_resp = rbinom(length(fit_resp), size = 1, prob = fit_resp)
+      )
+  }
+  dplyr::bind_rows(reps)
+}
+```
+
+With this in place, both the spaghetti plot and the VPC work:
+
+``` r
+
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 8213) |>
+  plot()
+```
+
+![](model-interface_files/figure-html/toy-simulate-plot-1.png)
+
+``` r
+
+
+er_vpc_plot(
+  erglm_data, exposure = aucss, response = ae1, group_by = aucss,
+  model = mod, nsim = 50, seed = 4471
+)
+```
+
+![](model-interface_files/figure-html/toy-simulate-plot-2.png)
+
+Had `er_simulate.toy_model()` only ever populated `fit_resp`, the
+spaghetti plot above would still work unchanged, but the
+[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
+call would error, naming `sim_resp` as the missing ingredient, rather
+than quietly drawing a too-narrow band from `fit_resp` alone.
+
+The `seed` handling above is a plain
+[`set.seed()`](https://rdrr.io/r/base/Random.html) for readability;
+erglm’s own `er_simulate.erglm_model()` additionally auto-picks and
+*reports* a seed when the caller doesn’t supply one (via
+[`rlang::inform()`](https://rlang.r-lib.org/reference/abort.html)), so a
+plot is reproducible even when nobody thought to pass `seed =` – worth
+considering for your own implementation if reproducibility of un-seeded
+calls matters to your users.
+
+## `er_summary()`: annotation text
+
+``` r
+
+er_summary(model, ...)
+```
+
+Return `NULL` (again, the default – don’t implement this generic if
+there’s nothing sensible to report) or a named list with any of three
+independently-optional keys: `p_value`, `coefficients`, `glance`.
+Unrecognized keys are permitted and ignored by the built-in summary
+builders, which gives your own package room to stash extra fields for a
+custom builder to read, without erplots ever needing to know about them.
+
+- **`p_value`** – a single headline p-value (or `NULL`), for a model
+  with one unambiguous exposure effect.
+  [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+  reads this directly. Only return a non-`NULL` value here when there
+  really is one privileged term; picking one arbitrarily out of several
+  candidates would be misleading.
+- **`coefficients`** – a tibble/data frame, one row per model parameter,
+  for models where no single term deserves top billing. Required
+  columns: `term`, `estimate`. Optional: `label` (a display name,
+  falling back to `term` if absent), `std_error`, `statistic`,
+  `p_value`, `conf_low`, `conf_high` (each `NA` where not
+  computed/meaningful for that row). Read by
+  [`er_style_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_summary.md).
+  Column names are snake_case, not `broom::tidy()`’s dotted names –
+  matching this package’s existing convention elsewhere (`p_value`,
+  `corner_distance`).
+- **`glance`** – a single-row tibble/data frame of model-level
+  goodness-of-fit, `broom::glance()`-style: optional `n`, `df_residual`,
+  `logLik`, `aic`, `bic`, `deviance`, `r_squared` (`NA` if not
+  meaningful – e.g. for a non-Gaussian model), `converged`. Read by
+  [`er_style_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_summary.md).
+
+These three keys are independent, not mutually exclusive alternatives: a
+model with one privileged coefficient can (and, for erglm, does) return
+all three at once – `p_value` for a quick annotation,
+`coefficients`/`glance` for anyone who wants more detail via a different
+summary builder. A model with no privileged term, on the other hand,
+should return `p_value = NULL` explicitly rather than omit the key, so
+callers can tell “there genuinely isn’t one” apart from “this method
+hasn’t been updated yet”.
+
+### A worked example: the single-coefficient case
+
+For `toy_model`, `aucss`’s coefficient is the one term worth headlining:
+
+``` r
+
+er_summary.toy_model <- function(model, ...) {
+  coefs <- summary(model)$coefficients
+  if (nrow(coefs) < 2) return(NULL)  # intercept only, nothing to report
+  list(p_value = unname(coefs[2, "Pr(>|z|)"]))
+}
+
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod) |>
+  er_plot_add_summary(model = mod) |>
+  plot()
+```
+
+![](model-interface_files/figure-html/toy-summary-1.png)
+
+### A worked example: the multi-parameter case
+
+`toy_emax`’s three parameters (`e0`, `emax`, `ec50`) have no single
+“the” effect – there’s no term you could headline with a lone p-value
+without implying the other two don’t matter. This is exactly the
+`coefficients`-instead-of-`p_value` case the contract exists for:
+
+``` r
+
+er_summary.toy_emax <- function(model, ...) {
+  s <- summary(model)$coefficients
+  coefficients <- tibble::tibble(
+    term = rownames(s),
+    estimate = s[, "Estimate"],
+    std_error = s[, "Std. Error"],
+    statistic = s[, "t value"],
+    p_value = s[, "Pr(>|t|)"]
+  )
+  list(p_value = NULL, coefficients = coefficients)
+}
+
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_add_model(emax_mod) |>
+  er_plot_add_summary(model = emax_mod, style = er_style_summary_coefficients) |>
+  plot()
+```
+
+![](model-interface_files/figure-html/toy-emax-summary-1.png)
+
+Note the explicit `p_value = NULL` above, and the explicit
+`style = er_style_summary_coefficients` on the
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
+call –
+[`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
+is still the *default* summary builder regardless of which model is
+attached, and it would silently draw nothing here (correctly: it reads
+`config$p_value`, sees `NULL`, and has nothing to show) rather than
+falling back to `coefficients` on your behalf. Matching a model whose
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+populates `coefficients` with a builder that actually reads
+`coefficients` is left to you, the caller –
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+job is only to make the data available.
+
+## Testing your implementation
+
+There’s no formal conformance checker for this interface – it’s three
+plain S3 generics, so the real test is simply exercising the layers that
+call them:
+
+- `er_plot_add_model(your_model)` exercises
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  alone.
+- `er_plot_add_model(your_model, style = er_style_model_spaghetti)`
+  additionally exercises
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+  `fit_resp`.
+- `er_vpc_plot(model = your_model, ...)` additionally exercises
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+  `sim_resp`.
+- `er_plot_add_summary(model = your_model)` (paired with whichever
+  summary builder matches what your
+  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  populates) exercises
+  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
+
+If you only implement
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+that’s a complete, valid implementation – the other two are additive,
+not phases of a single required rollout. And if a method genuinely can’t
+do better than the default (`NULL`), leaving it unimplemented is the
+correct choice, not a gap to apologise for: every erplots builder that
+depends on
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+already has to handle “not available” gracefully, since the default
+method returns `NULL` for every model class that hasn’t implemented one.
+
+## Real-world implementations
+
+The two examples above are toy classes built for this article. Two real
+packages implement this interface for production modelling code, and are
+worth reading directly if you want to see the pattern applied to a less
+simplified model:
+
+- [erglm](https://github.com/djnavarro/erglm) wraps
+  [`glm()`](https://rdrr.io/r/stats/glm.html)-based exposure-response
+  models. Its `er_predict.erglm_model()` and `er_simulate.erglm_model()`
+  methods follow the same shape as `toy_model`’s above (link-scale
+  prediction with an inverse-link transform; a multivariate-normal draw
+  over the coefficient vector for simulation) but handle all four
+  families erglm supports (`binomial`/`poisson`/`gaussian`/`Gamma`),
+  plus the auto-seed-and-report behaviour mentioned above. Its
+  `er_summary.erglm_model()` populates all three keys at once (`p_value`
+  for the exposure coefficient, `coefficients` for every term, `glance`
+  for goodness-of-fit).
+- [emaxnls](https://github.com/djnavarro/emaxnls) fits genuine
+  Emax/sigmoidal models via [`nls()`](https://rdrr.io/r/stats/nls.html),
+  and is the real-world analogue of `toy_emax` above:
+  `er_summary.emaxnls()` always returns `p_value = NULL` and populates
+  `coefficients` (one row per `E0`/`Emax`/ `logEC50`) instead, for
+  exactly the reason discussed above – no single parameter is “the”
+  effect. Its `emax_logistic()` variant fits a binary response but
+  returns an object with class `c("emaxlogistic", "emaxnls")`, so it
+  reuses the same three methods via ordinary S3 inheritance; the methods
+  branch internally (on `inherits(model, "emaxlogistic")`) to keep
+  predictions bounded in `[0, 1]` and to draw Bernoulli rather than
+  Gaussian noise for `sim_resp`, rather than needing a fourth, separate
+  set of methods.
+
+Both are `Suggests`-only dependencies of erplots (see `DESCRIPTION`),
+used here only as worked examples – there’s no requirement to depend on
+either to implement this interface for your own model class.
+
+## See also
+
+- [`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  for the terse, canonical statement of the contract this article
+  expands on.
+- [The plotting
+  grammar](https://erplots.djnavarro.net/articles/design.md) for how
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+  outputs flow into the layers that consume them (`config$predictions`,
+  `config$summary`, `config$p_value`, and so on).
+- [Extending
+  erplots](https://erplots.djnavarro.net/articles/extending.md) if, once
+  your model works with the built-in layers, you also want to change
+  *how* a layer draws that model’s output – a different kind of
+  extensibility from the one this article covers.
