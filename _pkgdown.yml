@@ -45,5 +45,6 @@ articles:
       - articles/plot-continuous
       - articles/plot-count
       - articles/design
+      - articles/theming
       - articles/extending
       - articles/model-interface

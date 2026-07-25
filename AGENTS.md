@@ -851,7 +851,7 @@ independent of the model layer" above.
 ## Vignette structure
 
 `vignettes/articles/` (pkgdown-only, not shipped -- see "Development
-workflow" below) holds six articles: `plot-binary.Rmd`,
+workflow" below) holds seven articles: `plot-binary.Rmd`,
 `plot-continuous.Rmd`, and `plot-count.Rmd` (worked examples of each
 layer, one per response type; binary is the most detailed, the other
 two link back to it for the response-type-agnostic model/summary/group
@@ -860,7 +860,8 @@ components -- including a "Summary layer" section demonstrating
 summary layer's promotion to independence; see "The `er_summary()`
 return-value contract" above); `design.Rmd` ("The plotting grammar" --
 the singleton/additive layer distinction, the stratification color/facet
-precedence rule, and the response-type dispatch table); `extending.Rmd`
+precedence rule, and the response-type dispatch table); `theming.Rmd`
+("Theming erplots" -- see its own paragraph below); `extending.Rmd`
 ("Extending erplots: writing your own builder"); and
 `model-interface.Rmd` ("Implementing the model interface" -- see its own
 paragraph below). `extending.Rmd` used to
@@ -890,6 +891,42 @@ what a `.layer_*()` function puts in `config`) -- that detail belongs in
 re-rendered end-to-end via `rmarkdown::render()` after the
 `style`/`er_style_*()` rename (see "Naming scheme" above) with no
 errors and no leftover old-identifier references in the output.
+
+`theming.Rmd` ("Theming erplots") documents `er_plot_theme()` -- one
+section per argument group (labels, plot-level title/subtitle/caption,
+axis limits, visual theme, discrete color/fill palette, formatters,
+legend key glyph, panel heights), plus a section on the
+accumulate/partial-update semantics of calling `er_plot_theme()` more
+than once. It was added as a *standalone* article rather than a section
+within `design.Rmd` or within each of `plot-binary`/`plot-continuous`/
+`plot-count.Rmd`, on the reasoning that theming is an orthogonal concern
+to the mini-language grammar (`design.Rmd`'s own opening paragraph
+already disclaims covering "style options"; `er_plot_theme()` itself
+never remaps which variable drives which aesthetic, only how the result
+looks) and is response-type-/layer-agnostic (unlike everything else in
+the three worked-example articles, which are organised by layer within
+one response type) -- adding it to all three would have meant
+near-verbatim triplication. Deliberately titled "Theming", not
+"Styling", to avoid resurrecting the exact `style`/`theme` naming
+collision the "Naming scheme" section above describes resolving.
+Cross-referenced from: `design.Rmd` (a short "Theming is a separate
+concern" pointer section, mirroring its existing "Extending erplots"
+pointer, stating the layer-`style`-vs-plot-`theme` distinction);
+`vignettes/erplots.Rmd` (a worked "Theming" section near the end, using
+the stratified model already fitted earlier in that vignette, plus a
+"Where to next" bullet); and one sentence each in `plot-binary.Rmd`/
+`plot-continuous.Rmd`/`plot-count.Rmd`'s shared opening paragraph (no
+new section in any of the three). `_pkgdown.yml`'s `articles` list
+gained `articles/theming`, positioned after `articles/design` and
+before `articles/extending`. In the same pass, fixed a
+since-stale reference in `extending.Rmd`'s "what `theme` contains" table
+(`theme$theme_base()` -> `theme$theme_base`), left over from the
+`theme_base`/`theme_args` function-to-plain-object refactor described
+above -- a reminder that a refactor to `object$theme`'s shape should
+grep the vignettes for the old call convention, not just `R/`. All
+touched/added articles/vignette re-rendered via `rmarkdown::render()`
+with no errors; `devtools::test()` (618 passing) unaffected, since this
+was a documentation-only change.
 
 `model-interface.Rmd` ("Implementing the model interface") unpacks
 `?er_model_interface`'s terse contract statement into a full worked
