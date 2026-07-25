@@ -128,8 +128,7 @@ er_style_quantile_errorbar <- function(data, config, stratify, exposure, respons
     # different strata share (near-)identical `x_mid` values per exposure
     # bin (bins are quantile cutpoints of the same exposure variable), so
     # plotting points/bars/labels at `x_mid` unmodified makes labels for
-    # different strata collide -- see PLAN.md "Stratified quantile labels
-    # can visually overlap". Dodge all three horizontally by a small,
+    # different strata collide. Dodge all three horizontally by a small,
     # symmetric-around-`x_mid` offset per stratum, sized relative to the
     # exposure range so it scales sensibly across data sets.
     summary_dodged <- .dodge_quantile_strata(config$summary, exposure$limits)

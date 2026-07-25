@@ -148,10 +148,9 @@
 
   # binary response: response *rate* per bin, via a Clopper-Pearson CI.
   # count response, when explicitly declared (`response_type = "count"`):
-  # bin *mean*, via an exact Poisson interval (PLAN.md design decision (4)
-  # fast-follow). continuous (and, when not explicitly declared "count",
-  # an approximation for count) response: bin *mean*, via a t-interval --
-  # see PLAN.md Stage 1. Label placement (y_lwr_lbl/y_upr_lbl/y_lbl) is
+  # bin *mean*, via an exact Poisson interval. continuous (and, when not 
+  # explicitly declared "count", an approximation for count) response: bin 
+  # *mean*, via a t-interval. Label placement (y_lwr_lbl/y_upr_lbl/y_lbl) is
   # generalised across all branches below rather than duplicated, using
   # the response's own scale (`object$response$limits`) in place of the
   # binary-only [0, 1] assumption.
@@ -249,8 +248,7 @@
   # or "response" (the continuous/count variant's color-encoded response
   # value, which needs its own label/legend and isn't deduplicated across
   # stratum panels) -- consumed by `.polish_labels()`/`.polish_legends()`
-  # in R/er-plot-compose.R. See `PLAN.md`'s "Continuous-response data
-  # strip" section.
+  # in R/er-plot-compose.R.
   if (object$response$type == "binary") {
     config$color_role <- "strata"
 
@@ -447,8 +445,7 @@
   # original fitting data at a single reference value. An `er_predict()`
   # method ignores extra columns it doesn't need, so this is harmless when
   # the model has no such covariates, and avoids the "object not found"
-  # crash inside `predict()` when it does -- see PLAN.md's former "High
-  # priority" section
+  # crash inside `predict()` when it does 
   pred_dat <- .fill_reference_covariates(pred_dat, data)
 
   model_predictions <- er_predict(model = model, newdata = pred_dat, conf_level = conf_level)

@@ -118,7 +118,7 @@ test_that("er_plot's response_type argument overrides auto-detection", {
 test_that("er_plot_add_quantiles supports both binary and continuous responses", {
   skip_if_not_installed("erglm")
 
-  # continuous response: bin means with t-interval CIs (PLAN.md Stage 1)
+  # continuous response: bin means with t-interval CIs
   plt <- er_test_data |> er_plot(aucss, biomarker_change)
   expect_no_error(er_plot_add_quantiles(plt))
 
@@ -155,8 +155,7 @@ test_that("er_plot_add_quantiles() warns instead of crashing when n_quantiles ex
 test_that("er_plot_add_data's panel layout supports a continuous response (single color-encoded panel)", {
   skip_if_not_installed("erglm")
 
-  # there's no built-in "panel"-layout style for a continuous/count
-  # response (see PLAN.md's note on removing `build_data_color()`), but
+  # there's no built-in "panel"-layout style for a continuous/count response, but
   # `.layer_data()`'s response-type dispatch is still general-purpose and
   # exercised here via a minimal custom style.
   stub_panel_builder <- er_style_tag(
@@ -246,8 +245,7 @@ test_that("er_plot_add_data errors when panel != 'both'", {
 test_that("er_plot_add_data produces N stratum panels, each with a response colorbar", {
   skip_if_not_installed("erglm")
 
-  # there's no built-in "panel"-layout style for a continuous response
-  # (see PLAN.md's note on removing `build_data_color()`); this custom
+  # there's no built-in "panel"-layout style for a continuous response; this custom
   # style recreates its color-encoded-panel behaviour to check that
   # `.layer_data()`/`.polish_labels()`'s per-stratum-panel machinery still
   # works for a response type with no shipped built-in.
@@ -335,8 +333,7 @@ test_that("er_plot_add_model() fills in covariates missing from the prediction g
   # whenever that covariate wasn't in `newdata` -- i.e. whenever
   # `keep_strata = FALSE`, or `stratify_by` wasn't set in `er_plot()` at
   # all -- because `.get_model_predictions()` built `newdata` from only
-  # the exposure (and, if stratified, strata) grid. See PLAN.md's former
-  # "High priority" section.
+  # the exposure (and, if stratified, strata) grid. 
   mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   # no `stratify_by` at all

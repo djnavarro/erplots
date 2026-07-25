@@ -193,7 +193,7 @@ test_that(".layer_quantile routes a count (Poisson) response through the continu
   skip_if_not_installed("erglm")
 
   # ae_count is a count, not a {0, 1} response -- "auto" must not
-  # misclassify it as binary (PLAN.md Stage 4)
+  # misclassify it as binary
   plt <- er_test_data |> er_plot(aucss, ae_count)
   expect_equal(plt$response$type, "continuous")
 
@@ -284,9 +284,7 @@ test_that(".layer_data records a response-colored panel structure for a continuo
   skip_if_not_installed("erglm")
 
   # there's no built-in "panel"-layout style for a continuous/count
-  # response (the older `build_data_color()` was removed once
-  # `er_style_data_overlay()` covered its typical use case more simply --
-  # see PLAN.md), but `.layer_data()`'s response-type dispatch is still
+  # response, but `.layer_data()`'s response-type dispatch is still
   # general-purpose and exercised here via a minimal custom style.
   stub_panel_builder <- er_style_tag(
     function(data, config, stratify, exposure, response, strata, theme) list(),

@@ -52,22 +52,66 @@
 #' @examples
 #' if (requireNamespace("erglm", quietly = TRUE)) {
 #' library(erglm)
-#' mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
-#'
-#' er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = aucss, model = mod)
-#' er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = sex, model = mod)
-#'
-#' mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
-#' er_vpc_plot(
-#'   erglm_data, exposure = aucss, response = biomarker_change,
-#'   group_by = aucss, model = mod_gaussian
+#' 
+#' mod <- erglm_model(
+#'   ae2 ~ aucss + sex, 
+#'   erglm_data, 
+#'   family = binomial()
 #' )
 #'
-#' mod_poisson <- erglm_model(ae_count ~ aucss, erglm_data, family = poisson())
-#' er_vpc_plot(
-#'   erglm_data, exposure = aucss, response = ae_count, group_by = aucss,
-#'   model = mod_poisson, response_type = "count"
+#' vpc1 <- er_vpc_plot(
+#'   data = erglm_data, 
+#'   exposure = aucss, 
+#'   response = ae2, 
+#'   group_by = aucss, 
+#'   model = mod,
+#'   seed = 9984
 #' )
+#' plot(vpc1)
+#' 
+#' vpc2 <- er_vpc_plot(
+#'   data = erglm_data, 
+#'   exposure = aucss, 
+#'   response = ae2, 
+#'   group_by = sex, 
+#'   model = mod,
+#'   seed = 5233
+#' )
+#' plot(vpc2)
+#'
+#' mod_gaussian <- erglm_model(
+#'   biomarker_change ~ aucss, 
+#'   erglm_data, 
+#'   family = gaussian()
+#' )
+#' 
+#' vpc3 <- er_vpc_plot(
+#'   data = erglm_data, 
+#'   exposure = aucss, 
+#'   response = biomarker_change,
+#'   group_by = aucss, 
+#'   model = mod_gaussian,
+#'   seed = 5650
+#' )
+#' plot(vpc3)
+#'
+#' mod_poisson <- erglm_model(
+#'   ae_count ~ aucss, 
+#'   erglm_data, 
+#'   family = poisson()
+#' )
+#' 
+#' vpc4 <- er_vpc_plot(
+#'   data = erglm_data, 
+#'   exposure = aucss, 
+#'   response = ae_count, 
+#'   group_by = aucss,
+#'   model = mod_poisson, 
+#'   response_type = "count",
+#'   seed = 2758
+#' )
+#' plot(vpc4)
+#' 
 #' }
 #'
 #' @export
@@ -94,8 +138,7 @@ er_vpc_plot <- function(data, sim = NULL, exposure, response, group_by, model = 
     # fractional values ran to completion but failed deep inside whatever
     # matrix/vector machinery a model's `er_simulate()` method happens to
     # use (e.g. "non-conformable arguments", "invalid arguments"), with
-    # no indication that `nsim` itself was the problem; see PLAN.md's
-    # "stress-test findings" section
+    # no indication that `nsim` itself was the problem
     if (!is.numeric(nsim) || length(nsim) != 1L) {
       rlang::abort("`nsim` must be a single number.")
     }
@@ -162,8 +205,7 @@ er_vpc_plot <- function(data, sim = NULL, exposure, response, group_by, model = 
   }
 
   # response-type-dispatched label formatter and observed-side summary --
-  # mirrors .layer_quantile()'s binary/continuous/count dispatch (PLAN.md
-  # Stage 1, and the design decision (4) fast-follow for "count")
+  # mirrors .layer_quantile()'s binary/continuous/count dispatch
   if (response_type == "binary") {
     format_y_mid <- scales::label_percent(accuracy = 1)
     smm_obs <- dat |>

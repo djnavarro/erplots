@@ -78,11 +78,10 @@
 
   # the data layer's `colour` aesthetic means strata everywhere except
   # when `config$color_role == "response"` (continuous/count response;
-  # see `PLAN.md`'s "Continuous-response data strip") -- there, `colour`
-  # is the response value itself, so its label is the response's, not
-  # the strata's. When that response-colored layer is also faceted by
-  # stratum (more than one panel), each panel is tagged with its stratum
-  # level via a plot title -- not the y-axis label, which patchwork's
+  # there, `colour` is the response value itself, so its label is the 
+  # response's, not the strata's. When that response-colored layer is also 
+  # faceted by stratum (more than one panel), each panel is tagged with its 
+  # stratum level via a plot title -- not the y-axis label, which patchwork's
   # `axes = "collect"` merges across all stacked panels (see
   # `er_plot_build()`), so a per-panel y-axis label would visually
   # overlap with the others rather than sit next to its own panel.
@@ -208,8 +207,7 @@
   # divide the data layer's total height budget evenly across however
   # many panels it has -- 2 for the binary upper/lower split (unchanged
   # from before), 1 for an unstratified continuous/count panel, or N for
-  # an N-stratum continuous/count facet fallback (see `PLAN.md`'s
-  # "Continuous-response data strip")
+  # an N-stratum continuous/count facet fallback
   data_panel_height <- object$theme$height$data / max(length(data_panels), 1)
 
   for (panel_name in above_panels) {
@@ -280,8 +278,7 @@
   # the data layer's `stratify` flag drives per-stratum faceting (not a
   # shared color legend) whenever its color channel is already spoken
   # for by the response value (`color_role == "response"`, continuous/
-  # count response) -- see `PLAN.md`'s "Stratification vs. the data
-  # layer's color channel". Exclude it from strata-legend deduplication
+  # count response). Exclude it from strata-legend deduplication
   # in that case so each stratum panel keeps its own response colorbar.
   if (!is.null(object$layer$data) && identical(object$layer$data$config$color_role, "response")) {
     has_strata["data"] <- FALSE

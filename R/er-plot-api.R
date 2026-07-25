@@ -136,8 +136,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   # validate that exposure/response/stratify_by actually name columns of
   # `data` -- without this, a typo'd column name silently produces
   # `NULL`/`Inf`/`-Inf` limits (via `data[[name]]` returning `NULL`) rather
-  # than an error at the point of the actual mistake; see PLAN.md's
-  # "stress-test findings" section
+  # than an error at the point of the actual mistake
   exposure_name <- rlang::as_name(rlang::enquo(exposure))
   response_name <- rlang::as_name(rlang::enquo(response))
   strata_quo <- rlang::enquo(stratify_by)
@@ -158,8 +157,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   # validate that exposure is numeric -- without this, a factor/character/
   # logical exposure column fails much later with an opaque low-level error
   # (e.g. "'range' not meaningful for factors" from the `range()` call
-  # below), rather than a clear message naming the actual problem; see
-  # PLAN.md's "stress-test findings" section
+  # below), rather than a clear message naming the actual problem
   if (!is.numeric(data[[exposure_name]])) {
     rlang::abort(c(
       sprintf(
@@ -225,7 +223,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   # this) -- warn, since a row with an out-of-range value is silently
   # excluded from both `n0`/`n1` in the quantile layer's rate calculation
   # (shrinking the denominator with no other indication), rather than
-  # erroring or being counted; see PLAN.md's "stress-test findings" section
+  # erroring or being counted
   if (object$response$type == "binary") {
     resp_vals <- object$data[[object$response$name]]
     if (!is.logical(resp_vals)) {
@@ -248,7 +246,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   # exclusion, it's a genuinely broken computation: `ci_poisson()`'s
   # exact Poisson interval is undefined for a negative total (its
   # internal `qgamma()` call returns `NaN`), so this errors rather than
-  # warns; see PLAN.md's "stress-test findings" section
+  # warns
   if (object$response$type == "count") {
     resp_vals <- object$data[[object$response$name]]
     n_negative <- sum(!is.na(resp_vals) & resp_vals < 0)

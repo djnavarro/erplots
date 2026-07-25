@@ -63,13 +63,7 @@ er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposur
   # panel, response == 1) or non-responders (lower panel, response == 0),
   # then draws a boxplot of the exposure values underneath the jittered
   # points, so the panel shows the *distribution* of exposure conditional
-  # on response (not just raw points) -- see PLAN.md's "Data layer
-  # panel-based builders" section for why this replaced the older
-  # `build_data_jitter()`, whose typical use case turned out to be
-  # covered already by `er_style_data_overlay()`. Follows the same fill
-  # (box) / color (jitter) split for strata that `er_style_model_ribbonline()`
-  # uses for ribbon/line, so `.polish_labels()`/`.polish_legends()` need
-  # no special-casing.
+  # on response (not just raw points)
   if (config$panel == "upper") dat <- data |> dplyr::filter(.data[[response$name]] == 1)
   if (config$panel == "lower") dat <- data |> dplyr::filter(.data[[response$name]] == 0)
 

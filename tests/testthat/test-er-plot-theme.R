@@ -200,8 +200,7 @@ test_that("fill_continuous replaces an er_style_data_hex() density fill", {
 
 test_that("color_continuous applies to a custom builder's response-colored data panel", {
   # there's no built-in "panel"-layout builder for a continuous/count
-  # response's `color_role == "response"` case (see PLAN.md's "Data
-  # layer color scale / continuous-response panel design") -- exercise
+  # response's `color_role == "response"` case -- exercise
   # the `.polish_scales()` branch with a small custom one instead
   custom_response_color_builder <- er_style_tag(
     function(data, config, stratify, exposure, response, strata, theme, ...) {
