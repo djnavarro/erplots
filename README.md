@@ -12,14 +12,15 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 coverage](https://codecov.io/gh/djnavarro/erplots/graph/badge.svg)](https://app.codecov.io/gh/djnavarro/erplots)
 <!-- badges: end -->
 
-erplots provides a fluent mini-language for building exposure-response
-plots: model curves/ribbons, quantile-binned response-rate summaries,
-data strips, and grouped distribution panels. It is model-agnostic:
-erplots never fits a model itself. Instead, you fit a model with
-whatever package suits your workflow
+The erplots package provides a mini-language for building
+exposure-response plots: model curves/ribbons, quantile-binned
+response-rate summaries, data strips, and grouped distribution panels.
+It is model-agnostic: erplots never fits a model itself. Instead, you
+fit a model with whatever package suits your workflow
 (e.g. [erglm](https://github.com/djnavarro/erglm) for logistic
-regression), and pass the fitted object to `er_plot_add_model()`. Any
-model that implements `er_predict()` can be visualised; implementing
+regression), and pass the fitted object to `er_plot_add_model()`.
+
+Any model that implements `er_predict()` can be visualised; implementing
 `er_simulate()` and `er_summary()` additionally enables uncertainty
 spaghetti plots/VPCs and summary annotations (e.g. p-values). See
 `?er_model_interface`.
@@ -53,13 +54,10 @@ erglm_data |>
 ``` r
 
 mod2 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
-mod2_marginal <- erglm_model(ae2 ~ aucss, erglm_data, family = binomial())
 
 plt <- erglm_data |> 
    er_plot(aucss, ae2, stratify_by = sex) |> 
-   # keep_strata = FALSE needs a model without the stratification
-   # variable as a term, so we pass `mod2_marginal` here
-   er_plot_add_model(mod2_marginal, keep_strata = FALSE) |> 
+   er_plot_add_model(mod2) |> 
    er_plot_add_quantiles(bins = 3) |> 
    er_plot_add_data() |> 
    er_plot_add_groups(group_by = c(aucss, treatment), keep_strata = FALSE)
@@ -81,17 +79,3 @@ plot(plt)
 ```
 
 <img src="man/figures/README-er-plot-2.png" alt="" width="100%" />
-
-## VPC plots
-
-``` r
-er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = aucss, model = mod2, seed = 1234)
-```
-
-<img src="man/figures/README-er-vpc-1.png" alt="" width="100%" />
-
-``` r
-er_vpc_plot(erglm_data, exposure = aucss, response = ae2, group_by = sex, model = mod2, seed = 1234)
-```
-
-<img src="man/figures/README-er-vpc-2.png" alt="" width="100%" />
