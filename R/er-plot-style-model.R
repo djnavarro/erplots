@@ -14,6 +14,30 @@
 #'   `seed` from here (falling back to `config$seed` -- currently always
 #'   `NULL` for the model layer -- when none is supplied) to pass to
 #'   [er_simulate()], letting a caller override erglm's auto-selected seed.
+#' @param ribbon_fill Fill colour for `er_style_model_ribbonline()`'s
+#'   ribbon. Only takes effect when the layer is unstratified -- a
+#'   stratified ribbon already maps `fill` to the strata variable, so
+#'   this argument is ignored in that case. Default `"grey40"`, matching
+#'   the previous fixed value.
+#' @param ribbon_alpha Transparency of `er_style_model_ribbonline()`'s
+#'   ribbon (`0`-`1`), stratified or not. Default `0.25`, matching the
+#'   previous fixed value.
+#' @param ribbon_edges Whether `er_style_model_ribbonline()` additionally
+#'   draws a dashed [ggplot2::geom_path()] along the ribbon's own
+#'   `ci_lower`/`ci_upper` bounds, on top of the shaded ribbon fill.
+#'   Default `FALSE` (ribbon fill only, the previous behaviour).
+#' @param linewidth Width of the fitted curve's line, for all three
+#'   model builders (`er_style_model_ribbonline()`/`_line()`'s single
+#'   curve, `er_style_model_spaghetti()`'s mean curve drawn on top of
+#'   the spaghetti draws). Default `1`, matching the previous fixed
+#'   value.
+#' @param alpha Transparency of `er_style_model_spaghetti()`'s individual
+#'   simulated draws (`0`-`1`). Defaults to `NULL`, which reproduces the
+#'   previous fixed behaviour: `0.1` unstratified, `0.25` stratified. An
+#'   explicit value overrides this for both cases uniformly.
+#' @param nsim Number of simulated draws for `er_style_model_spaghetti()`,
+#'   passed to [er_simulate()]. Default `100L`, matching the previous
+#'   fixed value.
 #'
 #' @details Builders for the `model` layer ([er_plot_add_model()]), which
 #' draws the fitted curve (and, where applicable, its uncertainty) over
@@ -53,6 +77,32 @@
 #'     er_plot(aucss, ae1) |>
 #'     er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 4821) |>
 #'     plot()
+#'
+#'   # overriding a builder's own visual defaults: a thicker, less
+#'   # saturated ribbon with its bounds outlined, and fewer/fainter
+#'   # spaghetti draws
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(
+#'       mod,
+#'       style = er_style_model_ribbonline,
+#'       ribbon_fill = "steelblue",
+#'       ribbon_alpha = 0.15,
+#'       ribbon_edges = TRUE,
+#'       linewidth = 1.5
+#'     ) |>
+#'     plot()
+#'
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(
+#'       mod,
+#'       style = er_style_model_spaghetti,
+#'       seed = 4821,
+#'       nsim = 40L,
+#'       alpha = 0.05
+#'     ) |>
+#'     plot()
 #' }
 #'
 #' @name er_style_model
@@ -61,7 +111,11 @@ NULL
 
 #' @rdname er_style_model
 #' @export
-er_style_model_ribbonline <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_model_ribbonline <- function(data, config, stratify, exposure, response, strata, theme, ...,
+                                       ribbon_fill = "grey40",
+                                       ribbon_alpha = 0.25,
+                                       ribbon_edges = FALSE,
+                                       linewidth = 1) {
 
   if (stratify == FALSE) {
 
@@ -72,8 +126,8 @@ er_style_model_ribbonline <- function(data, config, stratify, exposure, response
         ymin = ci_lower,
         ymax = ci_upper
       ),
-      fill = "grey40",
-      alpha = .25,
+      fill = ribbon_fill,
+      alpha = ribbon_alpha,
       key_glyph = theme$draw_key
     )
 
@@ -83,9 +137,12 @@ er_style_model_ribbonline <- function(data, config, stratify, exposure, response
         x = .data[[exposure$name]], 
         y = fit_resp
       ),
-      linewidth = 1,
+      linewidth = linewidth,
       key_glyph = theme$draw_key
     )
+
+    edge_map_lower <- ggplot2::aes(x = .data[[exposure$name]], y = ci_lower)
+    edge_map_upper <- ggplot2::aes(x = .data[[exposure$name]], y = ci_upper)
   }
 
   if (stratify == TRUE) {
@@ -98,7 +155,7 @@ er_style_model_ribbonline <- function(data, config, stratify, exposure, response
         ymin = ci_lower,
         ymax = ci_upper
       ),
-      alpha = .25,
+      alpha = ribbon_alpha,
       key_glyph = theme$draw_key
     )
 
@@ -109,12 +166,46 @@ er_style_model_ribbonline <- function(data, config, stratify, exposure, response
         y = fit_resp,
         color = .data[[strata$name]]
       ),
-      linewidth = 1,
+      linewidth = linewidth,
       key_glyph = theme$draw_key
-    )    
+    )
+
+    edge_map_lower <- ggplot2::aes(
+      x = .data[[exposure$name]], y = ci_lower, color = .data[[strata$name]]
+    )
+    edge_map_upper <- ggplot2::aes(
+      x = .data[[exposure$name]], y = ci_upper, color = .data[[strata$name]]
+    )
   }
-  
-  geoms <- list(model_ribbon, model_line)
+
+  geoms <- list(model_ribbon)
+
+  # `ribbon_edges` is only ever included when requested, rather than as a
+  # pair of `NULL` placeholders that rely on `ggplot2::ggplot_add.NULL`'s
+  # silent no-op -- unlike the quantile layer's `_vlines` variants, this
+  # builder's *own* return length is asserted on directly in tests, so a
+  # `NULL`-padded list would be a visible (if harmless) behaviour change.
+  if (ribbon_edges) {
+    geoms <- c(
+      geoms,
+      list(
+        ggplot2::geom_path(
+          data = config$predictions,
+          mapping = edge_map_lower,
+          linetype = "dashed",
+          key_glyph = theme$draw_key
+        ),
+        ggplot2::geom_path(
+          data = config$predictions,
+          mapping = edge_map_upper,
+          linetype = "dashed",
+          key_glyph = theme$draw_key
+        )
+      )
+    )
+  }
+
+  geoms <- c(geoms, list(model_line))
   return(geoms)
 }
 er_style_model_ribbonline <- er_style_tag(er_style_model_ribbonline, layer = "model")
@@ -122,7 +213,8 @@ er_style_model_ribbonline <- er_style_tag(er_style_model_ribbonline, layer = "mo
 
 #' @rdname er_style_model
 #' @export
-er_style_model_line <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_model_line <- function(data, config, stratify, exposure, response, strata, theme, ...,
+                                 linewidth = 1) {
 
   if (stratify == FALSE) {
 
@@ -132,7 +224,7 @@ er_style_model_line <- function(data, config, stratify, exposure, response, stra
         x = .data[[exposure$name]],
         y = fit_resp
       ),
-      linewidth = 1,
+      linewidth = linewidth,
       key_glyph = theme$draw_key
     )
   }
@@ -146,7 +238,7 @@ er_style_model_line <- function(data, config, stratify, exposure, response, stra
         y = fit_resp,
         color = .data[[strata$name]]
       ),
-      linewidth = 1,
+      linewidth = linewidth,
       key_glyph = theme$draw_key
     )
   }
@@ -159,7 +251,10 @@ er_style_model_line <- er_style_tag(er_style_model_line, layer = "model")
 
 #' @rdname er_style_model
 #' @export
-er_style_model_spaghetti <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_model_spaghetti <- function(data, config, stratify, exposure, response, strata, theme, ...,
+                                      alpha = NULL,
+                                      linewidth = 1,
+                                      nsim = 100L) {
 
   # a user-supplied `seed` (via `er_plot_add_model()`'s `...`) takes
   # priority over `config$seed` (always `NULL` for the model layer at
@@ -170,11 +265,16 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
   dots <- rlang::list2(...)
   seed <- dots$seed %||% config$seed
 
+  # unlike `seed`, `alpha` is response-independent enough to be promoted
+  # to its own explicit argument rather than staying in `...`; `NULL`
+  # reproduces the previous fixed-per-stratify-status default.
+  if (is.null(alpha)) alpha <- if (stratify) 0.25 else 0.1
+
   newdata <- config$predictions |> 
     dplyr::select(dplyr::all_of(c(exposure$name, strata$name))) |> 
     dplyr::distinct()
 
-  sim <- er_simulate(config$model, newdata = newdata, nsim = 100L, seed = seed)
+  sim <- er_simulate(config$model, newdata = newdata, nsim = nsim, seed = seed)
 
   if (is.null(sim)) {
     rlang::inform(paste0(
@@ -182,7 +282,7 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
       paste(class(config$model), collapse = "/"),
       ">; falling back to `style = er_style_model_ribbonline`."
     ))
-    return(er_style_model_ribbonline(data, config, stratify, exposure, response, strata, theme, ...))
+    return(er_style_model_ribbonline(data, config, stratify, exposure, response, strata, theme, ..., linewidth = linewidth))
   }
 
   if (stratify == FALSE) {
@@ -194,7 +294,7 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
         y = .data[["fit_resp"]],
         group = .data[["sim_id"]]
       ),
-      alpha = .1,
+      alpha = alpha,
       key_glyph = theme$draw_key
     )
 
@@ -204,7 +304,7 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
         x = .data[[exposure$name]], 
         y = fit_resp
       ),
-      linewidth = 1,
+      linewidth = linewidth,
       key_glyph = theme$draw_key
     )
   }
@@ -220,7 +320,7 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
         color = .data[[strata$name]],
         group = .data[["sim_id2"]]
       ),
-      alpha = .25,
+      alpha = alpha,
       key_glyph = theme$draw_key
     )
 
@@ -231,7 +331,7 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
         y = fit_resp,
         color = .data[[strata$name]]
       ),
-      linewidth = 1,
+      linewidth = linewidth,
       key_glyph = theme$draw_key
     )    
   }

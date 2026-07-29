@@ -15,7 +15,11 @@ er_style_model_ribbonline(
   response,
   strata,
   theme,
-  ...
+  ...,
+  ribbon_fill = "grey40",
+  ribbon_alpha = 0.25,
+  ribbon_edges = FALSE,
+  linewidth = 1
 )
 
 er_style_model_line(
@@ -26,7 +30,8 @@ er_style_model_line(
   response,
   strata,
   theme,
-  ...
+  ...,
+  linewidth = 1
 )
 
 er_style_model_spaghetti(
@@ -37,7 +42,10 @@ er_style_model_spaghetti(
   response,
   strata,
   theme,
-  ...
+  ...,
+  alpha = NULL,
+  linewidth = 1,
+  nsim = 100L
 )
 }
 \arguments{
@@ -61,6 +69,36 @@ arguments to a builder" section. \code{er_style_model_spaghetti()} reads a
 \code{seed} from here (falling back to \code{config$seed} -- currently always
 \code{NULL} for the model layer -- when none is supplied) to pass to
 \code{\link[=er_simulate]{er_simulate()}}, letting a caller override erglm's auto-selected seed.}
+
+\item{ribbon_fill}{Fill colour for \code{er_style_model_ribbonline()}'s
+ribbon. Only takes effect when the layer is unstratified -- a
+stratified ribbon already maps \code{fill} to the strata variable, so
+this argument is ignored in that case. Default \code{"grey40"}, matching
+the previous fixed value.}
+
+\item{ribbon_alpha}{Transparency of \code{er_style_model_ribbonline()}'s
+ribbon (\code{0}-\code{1}), stratified or not. Default \code{0.25}, matching the
+previous fixed value.}
+
+\item{ribbon_edges}{Whether \code{er_style_model_ribbonline()} additionally
+draws a dashed \code{\link[ggplot2:geom_path]{ggplot2::geom_path()}} along the ribbon's own
+\code{ci_lower}/\code{ci_upper} bounds, on top of the shaded ribbon fill.
+Default \code{FALSE} (ribbon fill only, the previous behaviour).}
+
+\item{linewidth}{Width of the fitted curve's line, for all three
+model builders (\code{er_style_model_ribbonline()}/\verb{_line()}'s single
+curve, \code{er_style_model_spaghetti()}'s mean curve drawn on top of
+the spaghetti draws). Default \code{1}, matching the previous fixed
+value.}
+
+\item{alpha}{Transparency of \code{er_style_model_spaghetti()}'s individual
+simulated draws (\code{0}-\code{1}). Defaults to \code{NULL}, which reproduces the
+previous fixed behaviour: \code{0.1} unstratified, \code{0.25} stratified. An
+explicit value overrides this for both cases uniformly.}
+
+\item{nsim}{Number of simulated draws for \code{er_style_model_spaghetti()},
+passed to \code{\link[=er_simulate]{er_simulate()}}. Default \code{100L}, matching the previous
+fixed value.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -104,6 +142,32 @@ if (requireNamespace("erglm", quietly = TRUE)) {
   erglm_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 4821) |>
+    plot()
+
+  # overriding a builder's own visual defaults: a thicker, less
+  # saturated ribbon with its bounds outlined, and fewer/fainter
+  # spaghetti draws
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(
+      mod,
+      style = er_style_model_ribbonline,
+      ribbon_fill = "steelblue",
+      ribbon_alpha = 0.15,
+      ribbon_edges = TRUE,
+      linewidth = 1.5
+    ) |>
+    plot()
+
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(
+      mod,
+      style = er_style_model_spaghetti,
+      seed = 4821,
+      nsim = 40L,
+      alpha = 0.05
+    ) |>
     plot()
 }
 

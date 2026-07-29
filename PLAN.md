@@ -168,16 +168,45 @@ correctly forwards through `...` end to end via `er_plot_build()`.
 `devtools::test()` (710 passing) and `devtools::check()` (0 errors/
 warnings/notes) both clean.
 
-**Remaining, not started:** model layer
-(`er_style_model_ribbonline()`/`_line()`/`_spaghetti()`), the
-`dodge_width` theme addition, the quantile builders (which depend on
-it), and the summary/group layers -- suggested order unchanged from the
-original scoping above. Each remaining layer's own `@param` docs need
-updating alongside its new arguments; `vignettes/articles/extending.Rmd`'s
-builder-signature discussion and `theming.Rmd` (for `dodge_width`) will
-need a short mention once implemented. No renames or removals are
-involved, so this remains purely additive and can land incrementally,
-one layer at a time, without breaking any existing call.
+**Model layer: done.** `er_style_model_ribbonline()` gained
+`ribbon_fill = "grey40"` (unstratified only), `ribbon_alpha = 0.25`,
+`ribbon_edges = FALSE`, and `linewidth = 1`; `er_style_model_line()`
+gained `linewidth = 1`; `er_style_model_spaghetti()` gained
+`alpha = NULL` (default: `0.1` unstratified / `0.25` stratified,
+matching before), `linewidth = 1` (mean line), and `nsim = 100L`.
+`ribbon_edges = TRUE` adds a dashed `geom_path()` at `ci_lower`/
+`ci_upper` (colour mapped to strata when stratified, matching the main
+line) -- implemented so the returned geom list stays length 2 by
+default and only grows to length 4 when `ribbon_edges` is requested,
+rather than always including a pair of `NULL` placeholders (a `NULL`-
+padded list is a silent `ggplot2::ggplot_add.NULL` no-op at *render*
+time, matching the `_vlines` quantile builders' trick, but this
+builder's own return length is asserted on directly by existing tests,
+so padding it unconditionally would have been a visible regression).
+`er_style_model_spaghetti()`'s fallback call to `er_style_model_ribbonline()`
+(when `er_simulate()` isn't implemented for a model) now explicitly
+forwards its own `linewidth` argument alongside `...`, so a caller's
+`linewidth` override still applies to the fallback ribbon+line. `seed`
+remains `...`-only, unchanged. `@param` docs added to the shared
+`er_style_model` roxygen block; two new `@examples` entries demonstrate
+overriding `er_style_model_ribbonline()`'s and
+`er_style_model_spaghetti()`'s arguments. New tests in
+`tests/testthat/test-er-plot-style-model.R` cover each builder's
+default-reproduces-old-behaviour case, each explicit-override case
+(including `ribbon_edges`'s geom count/colour mapping and
+`nsim`'s effect on the number of distinct `sim_id`s), and the
+fallback-forwards-`linewidth` case. `devtools::test()` (738 passing)
+and `devtools::check()` (0 errors/warnings/notes) both clean.
+
+**Remaining, not started:** the `dodge_width` theme addition, the
+quantile builders (which depend on it), and the summary/group layers --
+suggested order unchanged from the original scoping above. Each
+remaining layer's own `@param` docs need updating alongside its new
+arguments; `vignettes/articles/extending.Rmd`'s builder-signature
+discussion and `theming.Rmd` (for `dodge_width`) will need a short
+mention once implemented. No renames or removals are involved, so this
+remains purely additive and can land incrementally, one layer at a
+time, without breaking any existing call.
 
 ## Planned: stress-test findings (input validation gaps)
 
