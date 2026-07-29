@@ -210,12 +210,18 @@ arguments (default & explicit-override cases) and the `_vlines`
 variants' behaviour. `devtools::test()` and `devtools::check()` were
 run locally and pass.
 
-**Remaining, not started:** the summary/group layers --
-`dodge_width` is implemented in `er_plot_theme()` and consumed by the
-quantile builders. Each remaining layer's own `@param` docs need updating
-alongside its new arguments; `vignettes/articles/extending.Rmd`'s builder-signature
-discussion will need a short mention once implemented. No renames or removals
-are involved, so this remains purely additive and can land incrementally,
-one layer at a time, without breaking any existing call.
+**Summary layer: done.** `er_style_summary_pvalue()`,
+`er_style_summary_n()`, `er_style_summary_coefficients()`, and
+`er_style_summary_gof()` now expose `inset`, `label_size`,
+`label_colour`, and `label_fill`, with `er_style_summary_gof()` also
+accepting a `fields` argument. `tests/testthat/test-er-plot-style-summary.R`
+covers these new arguments and the existing corner-placement behaviour.
+
+**Group layer: done.** `er_style_group_boxplot()`,
+`er_style_group_violin()`, and `er_style_group_histogram()` already
+expose the planned style arguments (`alpha`, `bins`, `quantiles`,
+`quantile_linetype`) and the tests in
+`tests/testthat/test-er-plot-style-group.R` verify their defaults and
+explicit overrides.
 
 ## Planned: stress-test findings (input validation gaps)

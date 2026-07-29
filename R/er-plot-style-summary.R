@@ -1,4 +1,3 @@
-
 #' Summary annotation builders for exposure-response plots
 #'
 #' @param data The original data frame
@@ -12,6 +11,13 @@
 #'   normalized device coordinates (0 = panel edge, 0.5 = panel centre).
 #'   Default `0.05`, reproducing the previous fixed value (labels placed
 #'   at `0.05` from the near edge and `0.95` from the far edge).
+#' @param label_size Label text size (in mm) — maps to `geom_label()`'s
+#'   `size` parameter (geom_label uses `size.unit = "mm"`). If `NULL` the
+#'   geom default is used.
+#' @param label_colour Label text colour — mapped to `geom_label()`'s
+#'   `text.colour` parameter. If `NULL` the geom default is used.
+#' @param label_fill Label background fill — passed as `fill` to
+#'   `geom_label()`. If `NULL` the geom default is used.
 #' @param fields (for `er_style_summary_gof()` only) Which fields from
 #'   `glance` to include, and in what order. A character vector, any
 #'   subset of `c("n", "aic", "bic", "r_squared")` in the desired display
@@ -78,10 +84,30 @@
 #' @seealso [er_style()]
 NULL
 
+
+# internal helper to construct a geom_label with optional style args
+.summary_label_geom <- function(summary_data, x, y, hjust, vjust,
+                                label_size = NULL, label_colour = NULL, label_fill = NULL) {
+  # geom_label's parameters: label.size, text.colour, fill, size.unit
+  args <- list(
+    data = summary_data,
+    mapping = ggplot2::aes(x = I(x), y = I(y), label = lbl),
+    hjust = hjust,
+    vjust = vjust,
+    show.legend = FALSE,
+    inherit.aes = FALSE
+  )
+  if (!is.null(label_size)) args$size <- label_size
+  if (!is.null(label_colour)) args$colour <- label_colour
+  if (!is.null(label_fill)) args$fill <- label_fill
+
+  do.call(ggplot2::geom_label, args)
+}
+
 #' @rdname er_style_summary
 #' @export
 er_style_summary_pvalue <- function(data, config, stratify, exposure, response, strata, theme,
-                                     inset = 0.05, ...) {
+                                     inset = 0.05, label_size = NULL, label_colour = NULL, label_fill = NULL, ...) {
 
   if (is.null(config$p_value) || stratify) return(list())
 
@@ -93,35 +119,23 @@ er_style_summary_pvalue <- function(data, config, stratify, exposure, response, 
   y_bot   <- inset
 
   if (corner == "top_left") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_left), y = I(y_top), label = lbl),
-      hjust = 0, vjust = 1, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_left, y_top, 0, 1,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "top_right") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_right), y = I(y_top), label = lbl),
-      hjust = 1, vjust = 1, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_right, y_top, 1, 1,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "bottom_left") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_left), y = I(y_bot), label = lbl),
-      hjust = 0, vjust = 0, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_left, y_bot, 0, 0,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "bottom_right") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_right), y = I(y_bot), label = lbl),
-      hjust = 1, vjust = 0, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_right, y_bot, 1, 0,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   return(geoms)
@@ -131,7 +145,7 @@ er_style_summary_pvalue <- er_style_tag(er_style_summary_pvalue, layer = "summar
 #' @rdname er_style_summary
 #' @export
 er_style_summary_n <- function(data, config, stratify, exposure, response, strata, theme,
-                                inset = 0.05, ...) {
+                                inset = 0.05, label_size = NULL, label_colour = NULL, label_fill = NULL, ...) {
 
   if (stratify && !is.null(strata$name)) {
     counts <- data |>
@@ -151,35 +165,23 @@ er_style_summary_n <- function(data, config, stratify, exposure, response, strat
   y_bot   <- inset
 
   if (corner == "top_left") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_left), y = I(y_top), label = lbl),
-      hjust = 0, vjust = 1, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_left, y_top, 0, 1,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "top_right") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_right), y = I(y_top), label = lbl),
-      hjust = 1, vjust = 1, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_right, y_top, 1, 1,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "bottom_left") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_left), y = I(y_bot), label = lbl),
-      hjust = 0, vjust = 0, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_left, y_bot, 0, 0,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "bottom_right") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_right), y = I(y_bot), label = lbl),
-      hjust = 1, vjust = 0, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_right, y_bot, 1, 0,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   return(geoms)
@@ -189,14 +191,14 @@ er_style_summary_n <- er_style_tag(er_style_summary_n, layer = "summary")
 #' @rdname er_style_summary
 #' @export
 er_style_summary_coefficients <- function(data, config, stratify, exposure, response, strata, theme,
-                                           inset = 0.05, ...) {
+                                           inset = 0.05, label_size = NULL, label_colour = NULL, label_fill = NULL, ...) {
 
   coefs <- config$summary$coefficients
   if (is.null(coefs) || stratify) return(list())
 
   # `label` falls back to `term`; `p_value` is optional per row -- see
-  # `?er_model_interface`'s `coefficients` contract. Checked via `%in%
-  # names()` rather than `$` directly, since tibble's `$` warns on access
+  # `?er_model_interface`'s `coefficients` contract. Checked via `%in%`
+  # names() rather than `$` directly, since tibble's `$` warns on access
   # to a column that isn't there.
   term_label <- if ("label" %in% names(coefs)) coefs$label else coefs$term
   row_p_value <- if ("p_value" %in% names(coefs)) coefs$p_value else rep(NA_real_, nrow(coefs))
@@ -214,35 +216,23 @@ er_style_summary_coefficients <- function(data, config, stratify, exposure, resp
   y_bot   <- inset
 
   if (corner == "top_left") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_left), y = I(y_top), label = lbl),
-      hjust = 0, vjust = 1, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_left, y_top, 0, 1,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "top_right") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_right), y = I(y_top), label = lbl),
-      hjust = 1, vjust = 1, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_right, y_top, 1, 1,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "bottom_left") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_left), y = I(y_bot), label = lbl),
-      hjust = 0, vjust = 0, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_left, y_bot, 0, 0,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "bottom_right") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_right), y = I(y_bot), label = lbl),
-      hjust = 1, vjust = 0, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_right, y_bot, 1, 0,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   return(geoms)
@@ -252,7 +242,8 @@ er_style_summary_coefficients <- er_style_tag(er_style_summary_coefficients, lay
 #' @rdname er_style_summary
 #' @export
 er_style_summary_gof <- function(data, config, stratify, exposure, response, strata, theme,
-                                  inset = 0.05, fields = c("n", "aic", "bic", "r_squared"), ...) {
+                                 inset = 0.05, fields = c("n", "aic", "bic", "r_squared"),
+                                 label_size = NULL, label_colour = NULL, label_fill = NULL, ...) {
 
   glance <- config$summary$glance
   if (is.null(glance) || stratify) return(list())
@@ -291,35 +282,23 @@ er_style_summary_gof <- function(data, config, stratify, exposure, response, str
   y_bot   <- inset
 
   if (corner == "top_left") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_left), y = I(y_top), label = lbl),
-      hjust = 0, vjust = 1, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_left, y_top, 0, 1,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "top_right") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_right), y = I(y_top), label = lbl),
-      hjust = 1, vjust = 1, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_right, y_top, 1, 1,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "bottom_left") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_left), y = I(y_bot), label = lbl),
-      hjust = 0, vjust = 0, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_left, y_bot, 0, 0,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   if (corner == "bottom_right") {
-    geoms <- ggplot2::geom_label(
-      data = summary_data,
-      mapping = ggplot2::aes(x = I(x_right), y = I(y_bot), label = lbl),
-      hjust = 1, vjust = 0, show.legend = FALSE
-    )
+    geoms <- .summary_label_geom(summary_data, x_right, y_bot, 1, 0,
+                                 label_size = label_size, label_colour = label_colour, label_fill = label_fill)
   }
 
   return(geoms)

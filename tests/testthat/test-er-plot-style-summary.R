@@ -302,3 +302,73 @@ test_that("er_style_summary_gof() fields argument also controls display order", 
   expect_lt(regexpr("AIC", lbl_fwd), regexpr("N =", lbl_fwd))
   expect_lt(regexpr("N =", lbl_rev), regexpr("AIC", lbl_rev))
 })
+
+# ---- new arguments: label styling ----
+
+test_that("er_style_summary_pvalue() accepts label styling args and stores them as aesthetics", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_summary(model = er_test_mod1)
+  args <- list(
+    data     = plt$data,
+    config   = plt$layer$summary$config,
+    stratify = plt$layer$summary$stratify,
+    exposure = plt$exposure,
+    response = plt$response,
+    strata   = plt$strata,
+    theme    = plt$theme
+  )
+
+  out_custom <- do.call(er_style_summary_pvalue, c(args, list(label_size = 6, label_colour = "red", label_fill = "yellow")))
+  expect_true(inherits(out_custom, "LayerInstance"))
+  expect_equal(out_custom$aes_params$size, 6)
+  expect_equal(out_custom$aes_params$colour, "red")
+  expect_equal(out_custom$aes_params$fill, "yellow")
+})
+
+test_that("er_style_summary_gof() accepts label styling args and stores them as aesthetics", {
+  skip_if_not_installed("erglm")
+
+  fake_model <- structure(list(), class = "er_test_fake_summary_model")
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_summary(model = fake_model, style = er_style_summary_gof)
+
+  args <- list(
+    data     = plt$data,
+    config   = plt$layer$summary$config,
+    stratify = plt$layer$summary$stratify,
+    exposure = plt$exposure,
+    response = plt$response,
+    strata = plt$strata,
+    theme = plt$theme
+  )
+
+  out_custom <- do.call(er_style_summary_gof, c(args, list(label_size = 5, label_colour = "blue")))
+  expect_true(inherits(out_custom, "LayerInstance"))
+  expect_equal(out_custom$aes_params$size, 5)
+  expect_equal(out_custom$aes_params$colour, "blue")
+})
+
+test_that("er_style_summary_n() accepts label styling args and stores them as aesthetics", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_summary(style = er_style_summary_n)
+
+  args <- list(
+    data     = plt$data,
+    config   = plt$layer$summary$config,
+    stratify = plt$layer$summary$stratify,
+    exposure = plt$exposure,
+    response = plt$response,
+    strata = plt$strata,
+    theme = plt$theme
+  )
+
+  out_custom <- do.call(er_style_summary_n, c(args, list(label_size = 5, label_colour = "green", label_fill = "grey")))
+  expect_true(inherits(out_custom, "LayerInstance"))
+  expect_equal(out_custom$aes_params$size, 5)
+  expect_equal(out_custom$aes_params$colour, "green")
+  expect_equal(out_custom$aes_params$fill, "grey")
+})
