@@ -8,6 +8,177 @@ is done; step-by-step implementation narrative (file-by-file diffs, test
 counts, staged PR sequencing) is not, and has been trimmed. See git
 history / PR descriptions for that level of detail if it's ever needed.
 
+## Planned: builder-level style customisation arguments
+
+A review of every exported `er_style_*()` builder found a long list of
+hardcoded, purely visual constants (jitter width/height, alpha,
+linewidth, point/label size, dodge spacing, hex bin count, ribbon fill,
+vline colour/linetype, etc.) with no way for a caller to override them
+short of writing a full custom builder. This section scopes out
+exposing the highest-value ones as explicit function arguments, per
+three cross-cutting decisions made up front:
+
+1. **Explicit named arguments with defaults, not a `...`-only escape
+   hatch.** Every new knob gets its own documented parameter (with a
+   sensible default reproducing today's behaviour) on the relevant
+   `er_style_*()` builder, so it's discoverable via autocomplete and
+   `?er_style_*` -- not just reachable by knowing to pass an
+   undocumented name through `...`. `...` passthrough (see AGENTS.md's
+   "Passing extra arguments to a builder" section) remains for genuine
+   one-offs (e.g. `er_style_model_spaghetti()`'s `seed`), but every
+   argument listed below is promoted to a first-class parameter.
+2. **Names mirror ggplot2's own vocabulary wherever the semantics
+   match.** `alpha`, `linewidth`, `size`, `bins`, `width`, `height`,
+   `linetype` are reused verbatim from the geoms these builders already
+   wrap, so a user who knows ggplot2 doesn't have to learn a parallel
+   vocabulary. Where a value isn't a literal geom parameter (e.g. the
+   quantile errorbar's width is computed as a *fraction* of the exposure
+   range, not an absolute value), the argument name says so explicitly
+   (`errorbar_width`, documented as a fraction) rather than reusing the
+   bare geom name and implying identical units.
+3. **Cross-layer/stratification-wide settings move to
+   `er_plot_theme()`, not a per-builder argument.** Only one candidate
+   fit this: the quantile layer's stratum-dodge spacing
+   (`.dodge_quantile_strata()`'s `step`), which is conceptually about
+   how stratification lays out *any* dodged layer, not one builder's own
+   look. This becomes `er_plot_theme(dodge_width = ...)` (`object$theme$dodge_width`,
+   default `0.05`, a fraction of the exposure range -- matching the
+   existing hardcoded value), threaded into `config` by `.layer_quantile()`
+   and read by `.dodge_quantile_strata()` via `theme$dodge_width` inside
+   the quantile builders that call it. No other candidate cut across
+   layers enough to justify a theme-level home over a builder argument.
+
+Where a current hardcoded value already depends on `stratify` or
+`config$response_type` (e.g. `er_style_data_overlay()`'s jitter height,
+`er_style_model_spaghetti()`'s spaghetti alpha), the new argument
+defaults to `NULL`, preserving that conditional default; an explicit
+value overrides it uniformly regardless of `stratify`/response type.
+
+### Model layer (`R/er-plot-style-model.R`)
+
+- **`er_style_model_ribbonline()`**: `ribbon_fill = "grey40"` (only
+  takes effect when unstratified -- stratified ribbons already map
+  `fill = strata`; documented as such), `ribbon_alpha = 0.25`,
+  `linewidth = 1`, and a new feature, `ribbon_edges = FALSE` -- when
+  `TRUE`, additionally draws `geom_path()` at the ribbon's own
+  `ci_lower`/`ci_upper` bounds (the concrete case from this thread's
+  opening question).
+- **`er_style_model_line()`**: `linewidth = 1`.
+- **`er_style_model_spaghetti()`**: `alpha = NULL` (default: `0.1`
+  unstratified / `0.25` stratified, matching today), `linewidth = 1`
+  (mean line), `nsim = 100L`. `seed` (already supported via `...`) is
+  unaffected.
+
+### Summary layer (`R/er-plot-style-summary.R`)
+
+All four builders (`er_style_summary_pvalue()`, `_n()`,
+`_coefficients()`, `_gof()`) share the same corner-placement
+`geom_label()` pattern:
+
+- **All four**: `inset = 0.05` -- the label's distance from the panel
+  edge, in normalized device coordinates (replaces the hardcoded
+  `.05`/`.95` pair; `.95` becomes `1 - inset`).
+- **`er_style_summary_gof()`** additionally: `fields = c("n", "aic",
+  "bic", "r_squared")` -- which of `glance`'s curated fields to show,
+  and in what order (currently hardcoded to all four in a fixed order).
+
+`label_size`/`label_fill`/etc. are left at `geom_label()`'s own
+defaults for now (never overridden today) -- not part of this round
+unless a concrete need surfaces.
+
+### Quantile layer (`R/er-plot-style-quantile.R`)
+
+- **`er_style_quantile_errorbar()`**: `point_size = 2`,
+  `errorbar_width = 0.025` (fraction of the exposure range, matching
+  today's `0.025 * (exposure$limits[2] - exposure$limits[1])`),
+  `label_size = 3`.
+- **`er_style_quantile_errorbar_vlines()`**: redeclares
+  `point_size`/`errorbar_width`/`label_size` (forwarded to
+  `er_style_quantile_errorbar()`) plus its own `vline_colour =
+  "grey50"`, `vline_linetype = "dotted"`.
+- **`er_style_quantile_pointrange()`**: `label_size = 3`; optionally
+  also exposes `pointrange_size`/`pointrange_linewidth` (ggplot2's own
+  `geom_pointrange()` parameters, currently left at their defaults) for
+  symmetry with the errorbar builder's `point_size` -- lower priority,
+  since nothing is hardcoded here today.
+- **`er_style_quantile_pointrange_vlines()`**: redeclares
+  `label_size` (plus `pointrange_size`/`pointrange_linewidth` if added)
+  forwarded to `er_style_quantile_pointrange()`, plus its own
+  `vline_colour = "grey50"`, `vline_linetype = "dotted"`.
+- **Dodge width**: moves to `er_plot_theme(dodge_width = 0.05)` per
+  decision 3 above -- not a per-builder argument.
+
+### Data layer (`R/er-plot-style-data.R`)
+
+- **`er_style_data_overlay()`**: `jitter_height = NULL` (default:
+  `0.05` for a binary response, `0` otherwise, matching today),
+  `alpha = 0.4`, `size = 1`.
+- **`er_style_data_boxjitter()`**: `box_width = 0.6`, `box_alpha =
+  0.4`, `show_outliers = FALSE` (maps to `outlier.shape = NA`/default
+  shape), `jitter_height = NULL` (default: `0.3` stratified / `0.15`
+  unstratified, matching today), `jitter_size = 1`, `jitter_alpha =
+  0.6`.
+- **`er_style_data_hex()`**: `bins = 30`.
+
+### Group layer (`R/er-plot-style-group.R`)
+
+- **`er_style_group_boxplot()`**: `alpha = 0.5`.
+- **`er_style_group_violin()`**: `alpha = 0.5`. Also noted in passing:
+  the existing `quantile.linetype = "solid"` argument to
+  `geom_violin()` is currently inert, since `draw_quantiles` (the
+  argument that actually enables drawn quantile lines) is never set --
+  worth a decision (fix the dead parameter by adding a `quantiles =
+  NULL` argument mapped to `draw_quantiles`, or drop
+  `quantile.linetype` entirely) alongside this round, not before it.
+- **`er_style_group_histogram()`**: `bins = 30`, `alpha = NULL`
+  (default: `0.5` stratified / `0.8` unstratified, matching today).
+
+### Not carried forward from the original brainstorm
+
+- Per-corner `hjust`/`vjust` and exact label x/y aren't independently
+  exposed -- `inset` covers the one thing worth controlling (how close
+  to the edge), and the corner itself is chosen automatically from the
+  data, not user-set.
+- `show.legend`, `key_glyph`, and other structural/legend-plumbing
+  arguments stay internal -- these aren't visual style choices a user
+  tunes per plot.
+
+### Status
+
+**Data layer: done.** `er_style_data_overlay()` (`jitter_height = NULL`,
+`alpha = 0.4`, `size = 1`), `er_style_data_boxjitter()` (`box_width =
+0.6`, `box_alpha = 0.4`, `show_outliers = FALSE`, `jitter_height =
+NULL`, `jitter_size = 1`, `jitter_alpha = 0.6`), and `er_style_data_hex()`
+(`bins = 30`) all gained the arguments listed above, exactly as scoped
+-- each `NULL` default reproduces the previous conditional behaviour
+(response-type-aware for `_overlay()`, stratify-aware for
+`_boxjitter()`), and every other default reproduces the previous fixed
+constant. `show_outliers` maps to `geom_boxplot()`'s `outlier.shape`
+(`19` when `TRUE`, `NA` when `FALSE`, discovered via
+`geom_params$outlier_gp$shape` under the ggplot2 version in use here --
+`outliers`/`outlier_gp` is ggplot2 4.x's internal split of what used to
+be a flatter set of `outlier.*` arguments). `@param` docs added to the
+shared `er_style_data` roxygen block; one new `@examples` entry
+demonstrates overriding `er_style_data_overlay()`'s three arguments.
+New tests in `tests/testthat/test-er-plot-style-data.R` cover each
+builder's default-reproduces-old-behaviour case, each explicit-override
+case, and one integration test confirming `er_plot_add_data(style =
+er_style_data_overlay, jitter_height = ..., alpha = ..., size = ...)`
+correctly forwards through `...` end to end via `er_plot_build()`.
+`devtools::test()` (710 passing) and `devtools::check()` (0 errors/
+warnings/notes) both clean.
+
+**Remaining, not started:** model layer
+(`er_style_model_ribbonline()`/`_line()`/`_spaghetti()`), the
+`dodge_width` theme addition, the quantile builders (which depend on
+it), and the summary/group layers -- suggested order unchanged from the
+original scoping above. Each remaining layer's own `@param` docs need
+updating alongside its new arguments; `vignettes/articles/extending.Rmd`'s
+builder-signature discussion and `theming.Rmd` (for `dodge_width`) will
+need a short mention once implemented. No renames or removals are
+involved, so this remains purely additive and can land incrementally,
+one layer at a time, without breaking any existing call.
+
 ## Planned: stress-test findings (input validation gaps)
 
 A stress-testing pass (exercising empty data, degenerate/missing

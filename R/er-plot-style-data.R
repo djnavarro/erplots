@@ -11,6 +11,36 @@
 #' @param ... Additional named arguments forwarded from
 #'   [er_plot_add_data()]'s own `...`; see [er_style()]'s "Passing extra
 #'   arguments to a builder" section.
+#' @param jitter_height Vertical jitter applied to the raw points, in
+#'   response units (`er_style_data_overlay()`/`er_style_data_boxjitter()`
+#'   only). Defaults to `NULL`, which reproduces the previous fixed
+#'   behaviour: for `er_style_data_overlay()`, `0.05` for a binary
+#'   response and `0` otherwise; for `er_style_data_boxjitter()`, `0.3`
+#'   when stratified and `0.15` otherwise. An explicit value overrides
+#'   this for both cases uniformly.
+#' @param alpha Point transparency for `er_style_data_overlay()`'s raw
+#'   points (`0`-`1`). Default `0.4`, matching the previous fixed value.
+#' @param size Point size for `er_style_data_overlay()`'s raw points.
+#'   Default `1`, matching the previous fixed value.
+#' @param box_width Width of `er_style_data_boxjitter()`'s boxplot.
+#'   Default `0.6`, matching the previous fixed value.
+#' @param box_alpha Transparency of `er_style_data_boxjitter()`'s
+#'   boxplot fill (`0`-`1`). Default `0.4`, matching the previous fixed
+#'   value.
+#' @param show_outliers Whether `er_style_data_boxjitter()`'s boxplot
+#'   should draw its own outlier points (`geom_boxplot()`'s usual
+#'   default), rather than suppressing them. Default `FALSE` (outliers
+#'   hidden), matching the previous fixed behaviour -- raw points are
+#'   already shown via the jitter layer, so a boxplot's own outlier
+#'   points are normally redundant.
+#' @param jitter_size Point size for `er_style_data_boxjitter()`'s
+#'   jittered points. Default `1`, matching the previous fixed value.
+#' @param jitter_alpha Point transparency for
+#'   `er_style_data_boxjitter()`'s jittered points (`0`-`1`). Default
+#'   `0.6`, matching the previous fixed value.
+#' @param bins Number of hex bins along each axis for
+#'   `er_style_data_hex()`'s [ggplot2::geom_hex()]. Default `30`,
+#'   matching the previous fixed value.
 #'
 #' @details Builders for the `data` layer ([er_plot_add_data()]), which
 #' shows the raw observations alongside the fitted curve. Each builder is
@@ -49,6 +79,19 @@
 #'     er_plot_add_model(mod2) |>
 #'     er_plot_add_data(style = er_style_data_boxjitter) |>
 #'     plot()
+#'
+#'   # overriding a builder's own visual defaults, e.g. larger/more
+#'   # opaque points and a wider jitter
+#'   erglm_data |>
+#'     er_plot(aucss, ae2, stratify_by = sex) |>
+#'     er_plot_add_model(mod2) |>
+#'     er_plot_add_data(
+#'       style = er_style_data_overlay,
+#'       jitter_height = 0.1,
+#'       alpha = 0.7,
+#'       size = 2
+#'     ) |>
+#'     plot()
 #' }
 #'
 #' @name er_style_data
@@ -57,7 +100,13 @@ NULL
 
 #' @rdname er_style_data
 #' @export
-er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...,
+                                                  box_width = 0.6,
+                                                  box_alpha = 0.4,
+                                                  show_outliers = FALSE,
+                                                  jitter_height = NULL,
+                                                  jitter_size = 1,
+                                                  jitter_alpha = 0.6) {
 
   # binary-response-only panel builder: filters to responders (upper
   # panel, response == 1) or non-responders (lower panel, response == 0),
@@ -100,6 +149,12 @@ er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposur
     )
   }
 
+  # raw points are already shown via the jitter layer, so the boxplot's
+  # own outlier points are redundant by default
+  outlier_shape <- if (show_outliers) 19 else NA
+
+  if (is.null(jitter_height)) jitter_height <- if (stratify) 0.3 else 0.15
+
   withr::with_seed( # TODO: setting seed here isn't correct
     seed = config$seed,
     code = {
@@ -108,18 +163,18 @@ er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposur
           data = dat,
           mapping = box_map,
           orientation = "y",
-          width = 0.6,
-          alpha = 0.4,
-          outlier.shape = NA, # raw points are already shown via the jitter layer
+          width = box_width,
+          alpha = box_alpha,
+          outlier.shape = outlier_shape,
           key_glyph = theme$draw_key
         ),
         ggplot2::geom_jitter(
           data = dat,
           mapping = jitter_map,
           width = 0,
-          height = if (stratify) 0.3 else 0.15,
-          size = 1,
-          alpha = 0.6,
+          height = jitter_height,
+          size = jitter_size,
+          alpha = jitter_alpha,
           key_glyph = theme$draw_key
         ),
         ggplot2::coord_cartesian(
@@ -141,7 +196,10 @@ er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposur
 
 #' @rdname er_style_data
 #' @export
-er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...,
+                                                jitter_height = NULL,
+                                                alpha = 0.4,
+                                                size = 1) {
 
   # unlike `er_style_data_boxjitter()`, this builder draws points at their
   # true (exposure, response) coordinates and its output is meant to be
@@ -168,7 +226,9 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
   # a binary response's y-values are exactly 0/1, so without jitter points
   # overplot into two dense horizontal lines; continuous/count responses
   # need no such nudge, since their y-values are already spread out.
-  jitter_height <- if (config$response_type == "binary") 0.05 else 0
+  if (is.null(jitter_height)) {
+    jitter_height <- if (config$response_type == "binary") 0.05 else 0
+  }
 
   withr::with_seed( # TODO: setting seed here isn't correct
     seed = config$seed,
@@ -179,8 +239,8 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
           mapping = plot_map,
           width = 0,
           height = jitter_height,
-          alpha = 0.4,
-          size = 1,
+          alpha = alpha,
+          size = size,
           key_glyph = theme$draw_key
         )
       )
@@ -193,7 +253,8 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
 
 #' @rdname er_style_data
 #' @export
-er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...,
+                                            bins = 30) {
 
   # a 2D-binned density alternative to `er_style_data_overlay()`'s raw
   # scatter, for when N is large enough that individual points overplot
@@ -234,7 +295,7 @@ er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, res
         x = .data[[exposure$name]],
         y = .data[[response$name]]
       ),
-      bins = 30,
+      bins = bins,
       key_glyph = theme$draw_key
     )
   )
