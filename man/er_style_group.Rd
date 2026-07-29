@@ -15,6 +15,7 @@ er_style_group_boxplot(
   response,
   strata,
   theme,
+  alpha = 0.5,
   ...
 )
 
@@ -26,6 +27,8 @@ er_style_group_histogram(
   response,
   strata,
   theme,
+  bins = 30,
+  alpha = NULL,
   ...
 )
 
@@ -37,6 +40,9 @@ er_style_group_violin(
   response,
   strata,
   theme,
+  alpha = 0.5,
+  quantiles = NULL,
+  quantile_linetype = "solid",
   ...
 )
 }
@@ -55,9 +61,24 @@ er_style_group_violin(
 
 \item{theme}{Theme components}
 
+\item{alpha}{Transparency of the geom. For \code{er_style_group_boxplot()} and
+\code{er_style_group_violin()}, a single number; default \code{0.5}. For
+\code{er_style_group_histogram()}, \code{NULL} (default: \code{0.5} when stratified,
+\code{0.8} when unstratified, matching the previous conditional behaviour)
+or an explicit number that overrides that conditional default.}
+
 \item{...}{Additional named arguments forwarded from
 \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing
 extra arguments to a builder" section.}
+
+\item{bins}{(for \code{er_style_group_histogram()} only) Number of histogram
+bins, passed to \code{\link[ggplot2:geom_histogram]{ggplot2::geom_histogram()}}'s own \code{bins}. Default \code{30}.}
+
+\item{quantiles, quantile_linetype}{(for \code{er_style_group_violin()} only)
+Probabilities at which to draw quantile lines on the violin, passed to
+\code{\link[ggplot2:geom_violin]{ggplot2::geom_violin()}}'s own \code{draw_quantiles}; and the linetype for
+those lines, passed to \code{quantile.linetype}. Default \code{NULL} (no lines
+drawn) and \code{"solid"} respectively.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.

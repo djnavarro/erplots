@@ -16,6 +16,10 @@ er_style_summary_pvalue(
   response,
   strata,
   theme,
+  inset = 0.05,
+  label_size = NULL,
+  label_colour = NULL,
+  label_fill = NULL,
   ...
 )
 
@@ -27,6 +31,10 @@ er_style_summary_n(
   response,
   strata,
   theme,
+  inset = 0.05,
+  label_size = NULL,
+  label_colour = NULL,
+  label_fill = NULL,
   ...
 )
 
@@ -38,6 +46,10 @@ er_style_summary_coefficients(
   response,
   strata,
   theme,
+  inset = 0.05,
+  label_size = NULL,
+  label_colour = NULL,
+  label_fill = NULL,
   ...
 )
 
@@ -49,6 +61,11 @@ er_style_summary_gof(
   response,
   strata,
   theme,
+  inset = 0.05,
+  fields = c("n", "aic", "bic", "r_squared"),
+  label_size = NULL,
+  label_colour = NULL,
+  label_fill = NULL,
   ...
 )
 }
@@ -67,9 +84,30 @@ er_style_summary_gof(
 
 \item{theme}{Theme components}
 
+\item{inset}{Distance from the panel edge for the annotation label, in
+normalized device coordinates (0 = panel edge, 0.5 = panel centre).
+Default \code{0.05}, reproducing the previous fixed value (labels placed
+at \code{0.05} from the near edge and \code{0.95} from the far edge).}
+
+\item{label_size}{Label text size (in mm) — maps to \code{geom_label()}'s
+\code{size} parameter (geom_label uses \code{size.unit = "mm"}). If \code{NULL} the
+geom default is used.}
+
+\item{label_colour}{Label text colour — mapped to \code{geom_label()}'s
+\code{text.colour} parameter. If \code{NULL} the geom default is used.}
+
+\item{label_fill}{Label background fill — passed as \code{fill} to
+\code{geom_label()}. If \code{NULL} the geom default is used.}
+
 \item{...}{Additional named arguments forwarded from
 \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...} (shared with \code{style}); see
 \code{\link[=er_style]{er_style()}}'s "Passing extra arguments to a builder" section.}
+
+\item{fields}{(for \code{er_style_summary_gof()} only) Which fields from
+\code{glance} to include, and in what order. A character vector, any
+subset of \code{c("n", "aic", "bic", "r_squared")} in the desired display
+order; unrecognised names are silently ignored. Default
+\code{c("n", "aic", "bic", "r_squared")}.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
