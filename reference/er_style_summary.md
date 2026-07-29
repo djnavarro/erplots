@@ -13,6 +13,10 @@ er_style_summary_pvalue(
   response,
   strata,
   theme,
+  inset = 0.05,
+  label_size = NULL,
+  label_colour = NULL,
+  label_fill = NULL,
   ...
 )
 
@@ -24,6 +28,10 @@ er_style_summary_n(
   response,
   strata,
   theme,
+  inset = 0.05,
+  label_size = NULL,
+  label_colour = NULL,
+  label_fill = NULL,
   ...
 )
 
@@ -35,6 +43,10 @@ er_style_summary_coefficients(
   response,
   strata,
   theme,
+  inset = 0.05,
+  label_size = NULL,
+  label_colour = NULL,
+  label_fill = NULL,
   ...
 )
 
@@ -46,6 +58,11 @@ er_style_summary_gof(
   response,
   strata,
   theme,
+  inset = 0.05,
+  fields = c("n", "aic", "bic", "r_squared"),
+  label_size = NULL,
+  label_colour = NULL,
+  label_fill = NULL,
   ...
 )
 ```
@@ -80,6 +97,29 @@ er_style_summary_gof(
 
   Theme components
 
+- inset:
+
+  Distance from the panel edge for the annotation label, in normalized
+  device coordinates (0 = panel edge, 0.5 = panel centre). Default
+  `0.05`, reproducing the previous fixed value (labels placed at `0.05`
+  from the near edge and `0.95` from the far edge).
+
+- label_size:
+
+  Label text size (in mm) — maps to `geom_label()`'s `size` parameter
+  (geom_label uses `size.unit = "mm"`). If `NULL` the geom default is
+  used.
+
+- label_colour:
+
+  Label text colour — mapped to `geom_label()`'s `text.colour`
+  parameter. If `NULL` the geom default is used.
+
+- label_fill:
+
+  Label background fill — passed as `fill` to `geom_label()`. If `NULL`
+  the geom default is used.
+
 - ...:
 
   Additional named arguments forwarded from
@@ -87,6 +127,14 @@ er_style_summary_gof(
   own `...` (shared with `style`); see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
   "Passing extra arguments to a builder" section.
+
+- fields:
+
+  (for `er_style_summary_gof()` only) Which fields from `glance` to
+  include, and in what order. A character vector, any subset of
+  `c("n", "aic", "bic", "r_squared")` in the desired display order;
+  unrecognised names are silently ignored. Default
+  `c("n", "aic", "bic", "r_squared")`.
 
 ## Value
 

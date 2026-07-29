@@ -13,6 +13,7 @@ er_style_group_boxplot(
   response,
   strata,
   theme,
+  alpha = 0.5,
   ...
 )
 
@@ -24,6 +25,8 @@ er_style_group_histogram(
   response,
   strata,
   theme,
+  bins = 30,
+  alpha = NULL,
   ...
 )
 
@@ -35,6 +38,9 @@ er_style_group_violin(
   response,
   strata,
   theme,
+  alpha = 0.5,
+  quantiles = NULL,
+  quantile_linetype = "solid",
   ...
 )
 ```
@@ -69,6 +75,14 @@ er_style_group_violin(
 
   Theme components
 
+- alpha:
+
+  Transparency of the geom. For `er_style_group_boxplot()` and
+  `er_style_group_violin()`, a single number; default `0.5`. For
+  `er_style_group_histogram()`, `NULL` (default: `0.5` when stratified,
+  `0.8` when unstratified, matching the previous conditional behaviour)
+  or an explicit number that overrides that conditional default.
+
 - ...:
 
   Additional named arguments forwarded from
@@ -76,6 +90,22 @@ er_style_group_violin(
   own `...`; see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
   "Passing extra arguments to a builder" section.
+
+- bins:
+
+  (for `er_style_group_histogram()` only) Number of histogram bins,
+  passed to
+  [`ggplot2::geom_histogram()`](https://ggplot2.tidyverse.org/reference/geom_histogram.html)'s
+  own `bins`. Default `30`.
+
+- quantiles, quantile_linetype:
+
+  (for `er_style_group_violin()` only) Probabilities at which to draw
+  quantile lines on the violin, passed to
+  [`ggplot2::geom_violin()`](https://ggplot2.tidyverse.org/reference/geom_violin.html)'s
+  own `draw_quantiles`; and the linetype for those lines, passed to
+  `quantile.linetype`. Default `NULL` (no lines drawn) and `"solid"`
+  respectively.
 
 ## Value
 

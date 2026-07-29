@@ -13,6 +13,9 @@ er_style_quantile_errorbar(
   response,
   strata,
   theme,
+  point_size = 2,
+  errorbar_width = 0.025,
+  label_size = 3,
   ...
 )
 
@@ -24,6 +27,11 @@ er_style_quantile_errorbar_vlines(
   response,
   strata,
   theme,
+  point_size = 2,
+  errorbar_width = 0.025,
+  label_size = 3,
+  vline_colour = "grey50",
+  vline_linetype = "dotted",
   ...
 )
 
@@ -35,6 +43,9 @@ er_style_quantile_pointrange(
   response,
   strata,
   theme,
+  label_size = 3,
+  pointrange_size = NULL,
+  pointrange_linewidth = NULL,
   ...
 )
 
@@ -46,6 +57,11 @@ er_style_quantile_pointrange_vlines(
   response,
   strata,
   theme,
+  label_size = 3,
+  pointrange_size = NULL,
+  pointrange_linewidth = NULL,
+  vline_colour = "grey50",
+  vline_linetype = "dotted",
   ...
 )
 ```
@@ -80,6 +96,21 @@ er_style_quantile_pointrange_vlines(
 
   Theme components
 
+- point_size:
+
+  Point size for `er_style_quantile_errorbar()`'s per-bin point. Default
+  `2`.
+
+- errorbar_width:
+
+  Width of `er_style_quantile_errorbar()`'s error bars, as a fraction of
+  the exposure range (not an absolute value). Default `0.025`.
+
+- label_size:
+
+  Text size for the per-bin value label drawn by all four builders.
+  Default `3`.
+
 - ...:
 
   Additional named arguments forwarded from
@@ -87,6 +118,20 @@ er_style_quantile_pointrange_vlines(
   own `...`; see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
   "Passing extra arguments to a builder" section.
+
+- vline_colour, vline_linetype:
+
+  Colour/linetype of the interior quantile-bin boundary lines drawn by
+  `er_style_quantile_errorbar_vlines()`/
+  `er_style_quantile_pointrange_vlines()`. Defaults
+  `"grey50"`/`"dotted"`.
+
+- pointrange_size, pointrange_linewidth:
+
+  [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html)'s
+  own `size`/`linewidth` arguments, for
+  `er_style_quantile_pointrange()`. Default `NULL` (ggplot2's own
+  defaults, unchanged from before).
 
 ## Value
 
@@ -161,6 +206,29 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines) |>
     plot()
 
+  # Customize the quantile builder's appearance.
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_quantiles(
+      style = er_style_quantile_errorbar,
+      point_size = 4,
+      errorbar_width = 0.08,
+      label_size = 4
+    ) |>
+    plot()
+
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_quantiles(
+      style = er_style_quantile_pointrange,
+      label_size = 4,
+      pointrange_size = 2,
+      pointrange_linewidth = 1.2
+    ) |>
+    plot()
+
   # widening the stratum-dodge spacing via er_plot_theme(), rather than
   # a per-builder argument -- see "Details"
   mod2 <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
@@ -171,6 +239,8 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_theme(dodge_width = 0.15) |>
     plot()
 }
+
+
 
 
 

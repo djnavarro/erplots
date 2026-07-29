@@ -64,6 +64,7 @@
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -75,6 +76,8 @@
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
+<span>  bins <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -86,6 +89,9 @@
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  quantiles <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  quantile_linetype <span class="op">=</span> <span class="st">"solid"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -122,10 +128,31 @@
 <dd><p>Theme components</p></dd>
 
 
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>Transparency of the geom. For <code>er_style_group_boxplot()</code> and
+<code>er_style_group_violin()</code>, a single number; default <code>0.5</code>. For
+<code>er_style_group_histogram()</code>, <code>NULL</code> (default: <code>0.5</code> when stratified,
+<code>0.8</code> when unstratified, matching the previous conditional behaviour)
+or an explicit number that overrides that conditional default.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional named arguments forwarded from
 <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>'s own <code>...</code>; see <code><a href="er_style.html">er_style()</a></code>'s "Passing
 extra arguments to a builder" section.</p></dd>
+
+
+<dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
+<dd><p>(for <code>er_style_group_histogram()</code> only) Number of histogram
+bins, passed to <code><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="external-link">ggplot2::geom_histogram()</a></code>'s own <code>bins</code>. Default <code>30</code>.</p></dd>
+
+
+<dt id="arg-quantiles-quantile-linetype">quantiles, quantile_linetype<a class="anchor" aria-label="anchor" href="#arg-quantiles-quantile-linetype"></a></dt>
+<dd><p>(for <code>er_style_group_violin()</code> only)
+Probabilities at which to draw quantile lines on the violin, passed to
+<code><a href="https://ggplot2.tidyverse.org/reference/geom_violin.html" class="external-link">ggplot2::geom_violin()</a></code>'s own <code>draw_quantiles</code>; and the linetype for
+those lines, passed to <code>quantile.linetype</code>. Default <code>NULL</code> (no lines
+drawn) and <code>"solid"</code> respectively.</p></dd>
 
 </dl></div>
     <div class="section level2">
