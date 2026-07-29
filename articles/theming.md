@@ -163,6 +163,25 @@ means something other than strata –
 e.g. [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)’s
 density fill, below.
 
+## Stratified quantile spacing
+
+`dodge_width` adjusts the horizontal separation between strata within
+each quantile bin. This is a theme-level setting, because it controls
+the layout of stratification across the quantile layer rather than the
+look of any single builder.
+
+``` r
+
+erglm_data |>
+  er_plot(aucss, ae1, stratify_by = sex) |>
+  er_plot_add_model(mod_strat) |>
+  er_plot_add_quantiles(style = er_style_quantile_errorbar) |>
+  er_plot_theme(dodge_width = 0.15) |>
+  plot()
+```
+
+![](theming_files/figure-html/dodge-width-1.png)
+
 ## Continuous color/fill palette
 
 `color_continuous`/`fill_continuous` are the symmetric counterpart,

@@ -215,6 +215,22 @@ than strata – e.g. <code><a href="../reference/er_style_data.html">er_style_d
 below.</p>
 </div>
 <div class="section level2">
+<h2 id="stratified-quantile-spacing">Stratified quantile spacing<a class="anchor" aria-label="anchor" href="#stratified-quantile-spacing"></a>
+</h2>
+<p><code>dodge_width</code> adjusts the horizontal separation between
+strata within each quantile bin. This is a theme-level setting, because
+it controls the layout of stratification across the quantile layer
+rather than the look of any single builder.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_quantile_errorbar</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_theme.html">er_plot_theme</a></span><span class="op">(</span>dodge_width <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="theming_files/figure-html/dodge-width-1.png" class="r-plt" alt="" width="700"></p>
+</div>
+<div class="section level2">
 <h2 id="continuous-colorfill-palette">Continuous color/fill palette<a class="anchor" aria-label="anchor" href="#continuous-colorfill-palette"></a>
 </h2>
 <p><code>color_continuous</code>/<code>fill_continuous</code> are the
@@ -226,7 +242,7 @@ data layer is the other, but there’s currently no built-in
 “panel”-layout builder for it – see
 <code>vignettes/articles/extending.Rmd</code> for writing a custom
 one):</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span>, style <span class="op">=</span> <span class="va">er_style_model_line</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -248,7 +264,7 @@ model ribbon’s <code>fill = strata</code>), and vice versa for
 <p><code>format_p</code>/<code>format_percent</code>/<code>format_number</code>
 control how the summary and quantile layers format their labels –
 typically a <code>scales::label_*()</code> call:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -266,7 +282,7 @@ typically a <code>scales::label_*()</code> call:</p>
 </h2>
 <p><code>draw_key</code> controls the glyph ggplot2 draws in the legend,
 e.g. a point instead of the default filled rectangle:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -282,7 +298,7 @@ e.g. a point instead of the default filled rectangle:</p>
 set the relative heights patchwork gives to the main panel, any data
 panels, and any group panels – supplying only one leaves the other two
 unchanged:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -301,7 +317,7 @@ actually supplies, the same merging behaviour as
 <code><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">ggplot2::theme()</a></code> itself. This makes it natural to build up
 theming incrementally, e.g. once for labels and again later for the
 palette:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span></span>

@@ -64,7 +64,13 @@
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  box_width <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span>  box_alpha <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  show_outliers <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  jitter_height <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  jitter_size <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  jitter_alpha <span class="op">=</span> <span class="fl">0.6</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">er_style_data_overlay</span><span class="op">(</span></span>
@@ -75,7 +81,10 @@
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  jitter_height <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  size <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">er_style_data_hex</span><span class="op">(</span></span>
@@ -86,7 +95,8 @@
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  bins <span class="op">=</span> <span class="fl">30</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -126,6 +136,63 @@
 <dd><p>Additional named arguments forwarded from
 <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>'s own <code>...</code>; see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra
 arguments to a builder" section.</p></dd>
+
+
+<dt id="arg-box-width">box_width<a class="anchor" aria-label="anchor" href="#arg-box-width"></a></dt>
+<dd><p>Width of <code>er_style_data_boxjitter()</code>'s boxplot.
+Default <code>0.6</code>, matching the previous fixed value.</p></dd>
+
+
+<dt id="arg-box-alpha">box_alpha<a class="anchor" aria-label="anchor" href="#arg-box-alpha"></a></dt>
+<dd><p>Transparency of <code>er_style_data_boxjitter()</code>'s
+boxplot fill (<code>0</code>-<code>1</code>). Default <code>0.4</code>, matching the previous fixed
+value.</p></dd>
+
+
+<dt id="arg-show-outliers">show_outliers<a class="anchor" aria-label="anchor" href="#arg-show-outliers"></a></dt>
+<dd><p>Whether <code>er_style_data_boxjitter()</code>'s boxplot
+should draw its own outlier points (<code>geom_boxplot()</code>'s usual
+default), rather than suppressing them. Default <code>FALSE</code> (outliers
+hidden), matching the previous fixed behaviour – raw points are
+already shown via the jitter layer, so a boxplot's own outlier
+points are normally redundant.</p></dd>
+
+
+<dt id="arg-jitter-height">jitter_height<a class="anchor" aria-label="anchor" href="#arg-jitter-height"></a></dt>
+<dd><p>Vertical jitter applied to the raw points, in
+response units (<code>er_style_data_overlay()</code>/<code>er_style_data_boxjitter()</code>
+only). Defaults to <code>NULL</code>, which reproduces the previous fixed
+behaviour: for <code>er_style_data_overlay()</code>, <code>0.05</code> for a binary
+response and <code>0</code> otherwise; for <code>er_style_data_boxjitter()</code>, <code>0.3</code>
+when stratified and <code>0.15</code> otherwise. An explicit value overrides
+this for both cases uniformly.</p></dd>
+
+
+<dt id="arg-jitter-size">jitter_size<a class="anchor" aria-label="anchor" href="#arg-jitter-size"></a></dt>
+<dd><p>Point size for <code>er_style_data_boxjitter()</code>'s
+jittered points. Default <code>1</code>, matching the previous fixed value.</p></dd>
+
+
+<dt id="arg-jitter-alpha">jitter_alpha<a class="anchor" aria-label="anchor" href="#arg-jitter-alpha"></a></dt>
+<dd><p>Point transparency for
+<code>er_style_data_boxjitter()</code>'s jittered points (<code>0</code>-<code>1</code>). Default
+<code>0.6</code>, matching the previous fixed value.</p></dd>
+
+
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>Point transparency for <code>er_style_data_overlay()</code>'s raw
+points (<code>0</code>-<code>1</code>). Default <code>0.4</code>, matching the previous fixed value.</p></dd>
+
+
+<dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
+<dd><p>Point size for <code>er_style_data_overlay()</code>'s raw points.
+Default <code>1</code>, matching the previous fixed value.</p></dd>
+
+
+<dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
+<dd><p>Number of hex bins along each axis for
+<code>er_style_data_hex()</code>'s <code><a href="https://ggplot2.tidyverse.org/reference/geom_hex.html" class="external-link">ggplot2::geom_hex()</a></code>. Default <code>30</code>,
+matching the previous fixed value.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -174,9 +241,23 @@ implement, including how to write a custom builder of your own.</p>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_data_boxjitter</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># overriding a builder's own visual defaults, e.g. larger/more</span></span></span>
+<span class="r-in"><span>  <span class="co"># opaque points and a wider jitter</span></span></span>
+<span class="r-in"><span>  <span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      style <span class="op">=</span> <span class="va">er_style_data_overlay</span>,</span></span>
+<span class="r-in"><span>      jitter_height <span class="op">=</span> <span class="fl">0.1</span>,</span></span>
+<span class="r-in"><span>      alpha <span class="op">=</span> <span class="fl">0.7</span>,</span></span>
+<span class="r-in"><span>      size <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-plt img"><img src="er_style_data-1.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="er_style_data-2.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="er_style_data-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

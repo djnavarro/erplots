@@ -114,6 +114,16 @@ from the point/error bar spacing alone. All four are tagged
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 errors informatively if handed a builder tagged for a different layer.
 
+When stratified, all four builders horizontally dodge each quantile
+bin's points/bars/labels apart by
+[`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)'s
+`dodge_width` (a fraction of the exposure range, default `0.05`) – a
+cross-layer, stratification-wide setting controlled via
+[`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
+rather than a per-builder argument here, since it's about how
+stratification lays out a dodged layer, not one builder's own visual
+style.
+
 See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 for the shared builder interface these functions implement, including
 how to write a custom builder of your own.
@@ -150,7 +160,18 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_add_model(mod) |>
     er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines) |>
     plot()
+
+  # widening the stratum-dodge spacing via er_plot_theme(), rather than
+  # a per-builder argument -- see "Details"
+  mod2 <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
+  erglm_data |>
+    er_plot(aucss, ae1, stratify_by = sex) |>
+    er_plot_add_model(mod2) |>
+    er_plot_add_quantiles(style = er_style_quantile_errorbar) |>
+    er_plot_theme(dodge_width = 0.15) |>
+    plot()
 }
+
 
 
 

@@ -64,7 +64,11 @@
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  ribbon_fill <span class="op">=</span> <span class="st">"grey40"</span>,</span>
+<span>  ribbon_alpha <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  ribbon_edges <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  linewidth <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">er_style_model_line</span><span class="op">(</span></span>
@@ -75,7 +79,8 @@
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  linewidth <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">er_style_model_spaghetti</span><span class="op">(</span></span>
@@ -86,7 +91,10 @@
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  linewidth <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  nsim <span class="op">=</span> <span class="fl">100L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -129,6 +137,48 @@ arguments to a builder" section. <code>er_style_model_spaghetti()</code> reads a
 <code>seed</code> from here (falling back to <code>config$seed</code> – currently always
 <code>NULL</code> for the model layer – when none is supplied) to pass to
 <code><a href="er_model_interface.html">er_simulate()</a></code>, letting a caller override erglm's auto-selected seed.</p></dd>
+
+
+<dt id="arg-ribbon-fill">ribbon_fill<a class="anchor" aria-label="anchor" href="#arg-ribbon-fill"></a></dt>
+<dd><p>Fill colour for <code>er_style_model_ribbonline()</code>'s
+ribbon. Only takes effect when the layer is unstratified – a
+stratified ribbon already maps <code>fill</code> to the strata variable, so
+this argument is ignored in that case. Default <code>"grey40"</code>, matching
+the previous fixed value.</p></dd>
+
+
+<dt id="arg-ribbon-alpha">ribbon_alpha<a class="anchor" aria-label="anchor" href="#arg-ribbon-alpha"></a></dt>
+<dd><p>Transparency of <code>er_style_model_ribbonline()</code>'s
+ribbon (<code>0</code>-<code>1</code>), stratified or not. Default <code>0.25</code>, matching the
+previous fixed value.</p></dd>
+
+
+<dt id="arg-ribbon-edges">ribbon_edges<a class="anchor" aria-label="anchor" href="#arg-ribbon-edges"></a></dt>
+<dd><p>Whether <code>er_style_model_ribbonline()</code> additionally
+draws a dashed <code><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">ggplot2::geom_path()</a></code> along the ribbon's own
+<code>ci_lower</code>/<code>ci_upper</code> bounds, on top of the shaded ribbon fill.
+Default <code>FALSE</code> (ribbon fill only, the previous behaviour).</p></dd>
+
+
+<dt id="arg-linewidth">linewidth<a class="anchor" aria-label="anchor" href="#arg-linewidth"></a></dt>
+<dd><p>Width of the fitted curve's line, for all three
+model builders (<code>er_style_model_ribbonline()</code>/<code>_line()</code>'s single
+curve, <code>er_style_model_spaghetti()</code>'s mean curve drawn on top of
+the spaghetti draws). Default <code>1</code>, matching the previous fixed
+value.</p></dd>
+
+
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>Transparency of <code>er_style_model_spaghetti()</code>'s individual
+simulated draws (<code>0</code>-<code>1</code>). Defaults to <code>NULL</code>, which reproduces the
+previous fixed behaviour: <code>0.1</code> unstratified, <code>0.25</code> stratified. An
+explicit value overrides this for both cases uniformly.</p></dd>
+
+
+<dt id="arg-nsim">nsim<a class="anchor" aria-label="anchor" href="#arg-nsim"></a></dt>
+<dd><p>Number of simulated draws for <code>er_style_model_spaghetti()</code>,
+passed to <code><a href="er_model_interface.html">er_simulate()</a></code>. Default <code>100L</code>, matching the previous
+fixed value.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -178,10 +228,38 @@ implement, including how to write a custom builder of your own.</p>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span>, style <span class="op">=</span> <span class="va">er_style_model_spaghetti</span>, seed <span class="op">=</span> <span class="fl">4821</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># overriding a builder's own visual defaults: a thicker, less</span></span></span>
+<span class="r-in"><span>  <span class="co"># saturated ribbon with its bounds outlined, and fewer/fainter</span></span></span>
+<span class="r-in"><span>  <span class="co"># spaghetti draws</span></span></span>
+<span class="r-in"><span>  <span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="va">mod</span>,</span></span>
+<span class="r-in"><span>      style <span class="op">=</span> <span class="va">er_style_model_ribbonline</span>,</span></span>
+<span class="r-in"><span>      ribbon_fill <span class="op">=</span> <span class="st">"steelblue"</span>,</span></span>
+<span class="r-in"><span>      ribbon_alpha <span class="op">=</span> <span class="fl">0.15</span>,</span></span>
+<span class="r-in"><span>      ribbon_edges <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>      linewidth <span class="op">=</span> <span class="fl">1.5</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="va">mod</span>,</span></span>
+<span class="r-in"><span>      style <span class="op">=</span> <span class="va">er_style_model_spaghetti</span>,</span></span>
+<span class="r-in"><span>      seed <span class="op">=</span> <span class="fl">4821</span>,</span></span>
+<span class="r-in"><span>      nsim <span class="op">=</span> <span class="fl">40L</span>,</span></span>
+<span class="r-in"><span>      alpha <span class="op">=</span> <span class="fl">0.05</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-plt img"><img src="er_style_model-1.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="er_style_model-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="er_style_model-3.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="er_style_model-4.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="er_style_model-5.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

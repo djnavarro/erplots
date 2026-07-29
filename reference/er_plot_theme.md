@@ -3,9 +3,10 @@
 Adjusts the styling knobs a ggplot2 user would expect to control –
 axis/legend labels, plot title/subtitle/caption, axis limits, the
 overall visual theme, the discrete color/fill palette used for
-stratification, value formatters, the legend key glyph, and relative
-panel heights – without touching which variable is mapped to which
-aesthetic (that's controlled by a layer's `style`; see
+stratification, value formatters, the legend key glyph, the quantile
+layer's stratum-dodge spacing, and relative panel heights – without
+touching which variable is mapped to which aesthetic (that's controlled
+by a layer's `style`; see
 [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)).
 
 ## Usage
@@ -31,6 +32,7 @@ er_plot_theme(
   format_percent = NULL,
   format_number = NULL,
   draw_key = NULL,
+  dodge_width = NULL,
   height_base = NULL,
   height_data = NULL,
   height_group = NULL
@@ -122,6 +124,17 @@ er_plot_theme(
   written to `object$theme$draw_key` and passed as every geom's
   `key_glyph` argument
 
+- dodge_width:
+
+  Spacing between adjacent strata's horizontal offset in the quantile
+  layer (see
+  [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/
+  [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)),
+  as a fraction of the exposure range. A single positive number, written
+  to `object$theme$dodge_width`. Default `0.05` (set in
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)),
+  matching the previous fixed value.
+
 - height_base, height_data, height_group:
 
   Relative panel heights (single positive numbers), merged into
@@ -133,6 +146,15 @@ er_plot_theme(
 The input `object`, with the requested theme fields updated
 
 ## Details
+
+`dodge_width` is the one setting here that's about stratification
+*layout* rather than a single layer's visual style – it's read by
+[`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/[`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
+(and their `_vlines` variants) to horizontally separate strata within
+each quantile bin. It lives in `er_plot_theme()`, rather than as an
+argument to those builders, because dodging is a property of how
+stratification lays out a layer, not something specific to any one
+builder's own visual choices.
 
 Every argument defaults to `NULL`, meaning "leave whatever was set
 before unchanged" – so `er_plot_theme()` can be called more than once on
