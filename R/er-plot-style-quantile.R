@@ -80,6 +80,29 @@
 #'     er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines) |>
 #'     plot()
 #'
+#'   # Customize the quantile builder's appearance.
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_add_quantiles(
+#'       style = er_style_quantile_errorbar,
+#'       point_size = 4,
+#'       errorbar_width = 0.08,
+#'       label_size = 4
+#'     ) |>
+#'     plot()
+#'
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_add_quantiles(
+#'       style = er_style_quantile_pointrange,
+#'       label_size = 4,
+#'       pointrange_size = 2,
+#'       pointrange_linewidth = 1.2
+#'     ) |>
+#'     plot()
+#'
 #'   # widening the stratum-dodge spacing via er_plot_theme(), rather than
 #'   # a per-builder argument -- see "Details"
 #'   mod2 <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
