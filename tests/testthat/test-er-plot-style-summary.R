@@ -184,3 +184,121 @@ test_that("er_style_summary_coefficients tolerates a coefficients table with no 
   expect_true(inherits(out, "LayerInstance"))
 })
 
+
+# ---- new argument: inset ----
+
+test_that("er_style_summary_pvalue() inset argument changes label position", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_summary(model = er_test_mod1)
+  args <- list(
+    data     = plt$data,
+    config   = plt$layer$summary$config,
+    stratify = plt$layer$summary$stratify,
+    exposure = plt$exposure,
+    response = plt$response,
+    strata   = plt$strata,
+    theme    = plt$theme
+  )
+
+  out_default <- do.call(er_style_summary_pvalue, args)
+  out_custom  <- do.call(er_style_summary_pvalue, c(args, list(inset = 0.1)))
+
+  # default positions should be 0.05 or 0.95 (i.e. inset or 1 - inset)
+  x_default <- as.numeric(rlang::eval_tidy(out_default$mapping$x))
+  y_default <- as.numeric(rlang::eval_tidy(out_default$mapping$y))
+  expect_true(x_default %in% c(0.05, 0.95))
+  expect_true(y_default %in% c(0.05, 0.95))
+
+  # custom positions should be 0.1 or 0.9
+  x_custom <- as.numeric(rlang::eval_tidy(out_custom$mapping$x))
+  y_custom <- as.numeric(rlang::eval_tidy(out_custom$mapping$y))
+  expect_true(x_custom %in% c(0.1, 0.9))
+  expect_true(y_custom %in% c(0.1, 0.9))
+
+  # the two should differ
+  expect_false(isTRUE(x_default == x_custom))
+})
+
+test_that("er_style_summary_n() inset argument changes label position", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_summary(style = er_style_summary_n)
+  args <- list(
+    data     = plt$data,
+    config   = plt$layer$summary$config,
+    stratify = plt$layer$summary$stratify,
+    exposure = plt$exposure,
+    response = plt$response,
+    strata   = plt$strata,
+    theme    = plt$theme
+  )
+
+  out_default <- do.call(er_style_summary_n, args)
+  out_custom  <- do.call(er_style_summary_n, c(args, list(inset = 0.15)))
+
+  x_default <- as.numeric(rlang::eval_tidy(out_default$mapping$x))
+  x_custom  <- as.numeric(rlang::eval_tidy(out_custom$mapping$x))
+  expect_true(x_default %in% c(0.05, 0.95))
+  expect_true(x_custom %in% c(0.15, 0.85))
+})
+
+test_that("er_style_summary_gof() fields argument controls which fields appear in the label", {
+  skip_if_not_installed("erglm")
+  fake_model <- structure(list(), class = "er_test_fake_summary_model")
+
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_summary(model = fake_model, style = er_style_summary_gof)
+  args <- list(
+    data     = plt$data,
+    config   = plt$layer$summary$config,
+    stratify = plt$layer$summary$stratify,
+    exposure = plt$exposure,
+    response = plt$response,
+    strata   = plt$strata,
+    theme    = plt$theme
+  )
+
+  # default: all four fields
+  out_all <- do.call(er_style_summary_gof, args)
+  lbl_all <- out_all$data$lbl
+  expect_match(lbl_all, "N = ")
+  expect_match(lbl_all, "AIC = ")
+  expect_match(lbl_all, "BIC = ")
+
+  # subset: only n and aic
+  out_sub <- do.call(er_style_summary_gof, c(args, list(fields = c("n", "aic"))))
+  lbl_sub <- out_sub$data$lbl
+  expect_match(lbl_sub, "N = ")
+  expect_match(lbl_sub, "AIC = ")
+  expect_false(grepl("BIC", lbl_sub))
+  expect_false(grepl("R\u00b2", lbl_sub))
+})
+
+test_that("er_style_summary_gof() fields argument also controls display order", {
+  skip_if_not_installed("erglm")
+  fake_model <- structure(list(), class = "er_test_fake_summary_model")
+
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_summary(model = fake_model, style = er_style_summary_gof)
+  args <- list(
+    data     = plt$data,
+    config   = plt$layer$summary$config,
+    stratify = plt$layer$summary$stratify,
+    exposure = plt$exposure,
+    response = plt$response,
+    strata   = plt$strata,
+    theme    = plt$theme
+  )
+
+  out_fwd <- do.call(er_style_summary_gof, c(args, list(fields = c("aic", "n"))))
+  out_rev <- do.call(er_style_summary_gof, c(args, list(fields = c("n", "aic"))))
+
+  # AIC before N vs N before AIC
+  lbl_fwd <- out_fwd$data$lbl
+  lbl_rev <- out_rev$data$lbl
+  expect_lt(regexpr("AIC", lbl_fwd), regexpr("N =", lbl_fwd))
+  expect_lt(regexpr("N =", lbl_rev), regexpr("AIC", lbl_rev))
+})

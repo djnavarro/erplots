@@ -293,3 +293,185 @@ test_that("er_plot_add_quantiles() builds and renders with the _vlines builders"
     er_plot_add_quantiles(style = er_style_quantile_pointrange_vlines)
   expect_no_error(er_plot_build(plt2))
 })
+
+# ---- new arguments: point_size / errorbar_width / label_size ----
+
+test_that("er_style_quantile_errorbar() respects point_size, errorbar_width, label_size overrides", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles()
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_quantile_errorbar, args)
+  out_custom  <- do.call(er_style_quantile_errorbar,
+                         c(args, list(point_size = 5, errorbar_width = 0.1, label_size = 6)))
+
+  # point geom
+  expect_equal(out_default[[1]]$aes_params$size, 2)
+  expect_equal(out_custom[[1]]$aes_params$size, 5)
+
+  # label geom
+  expect_equal(out_default[[3]]$aes_params$size, 3)
+  expect_equal(out_custom[[3]]$aes_params$size, 6)
+
+  # errorbar width is exposure-range-scaled; default fraction is 0.025
+  exp_range <- diff(p1$exposure$limits)
+  expect_equal(out_default[[2]]$aes_params$width, 0.025 * exp_range)
+  expect_equal(out_custom[[2]]$aes_params$width,  0.1   * exp_range)
+})
+
+test_that("er_style_quantile_errorbar() overrides also apply in the stratified branch", {
+  skip_if_not_installed("erglm")
+
+  p2 <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_add_quantiles()
+  args <- list(
+    data     = p2$data,
+    config   = p2$layer$quantile$config,
+    stratify = p2$layer$quantile$stratify,
+    exposure = p2$exposure,
+    response = p2$response,
+    strata   = p2$strata,
+    theme    = p2$theme
+  )
+
+  out_default <- do.call(er_style_quantile_errorbar, args)
+  out_custom  <- do.call(er_style_quantile_errorbar,
+                         c(args, list(point_size = 4, label_size = 5)))
+
+  expect_equal(out_default[[1]]$aes_params$size, 2)
+  expect_equal(out_custom[[1]]$aes_params$size, 4)
+  expect_equal(out_default[[3]]$aes_params$size, 3)
+  expect_equal(out_custom[[3]]$aes_params$size, 5)
+})
+
+test_that("er_style_quantile_errorbar_vlines() respects vline_colour and vline_linetype overrides", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_quantile_errorbar_vlines, args)
+  out_custom  <- do.call(er_style_quantile_errorbar_vlines,
+                         c(args, list(vline_colour = "blue", vline_linetype = "dashed")))
+
+  # vline geom is the first element
+  expect_equal(out_default[[1]]$aes_params$colour, "grey50")
+  expect_equal(out_default[[1]]$aes_params$linetype, "dotted")
+  expect_equal(out_custom[[1]]$aes_params$colour, "blue")
+  expect_equal(out_custom[[1]]$aes_params$linetype, "dashed")
+})
+
+test_that("er_style_quantile_errorbar_vlines() forwards point_size / label_size to the inner builder", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out <- do.call(er_style_quantile_errorbar_vlines,
+                 c(args, list(point_size = 5, label_size = 6)))
+
+  # geom order: vline, point, errorbar, label
+  expect_equal(out[[2]]$aes_params$size, 5)
+  expect_equal(out[[4]]$aes_params$size, 6)
+})
+
+test_that("er_style_quantile_pointrange() respects label_size, pointrange_size, pointrange_linewidth", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_quantiles(style = er_style_quantile_pointrange)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_quantile_pointrange, args)
+  out_custom  <- do.call(er_style_quantile_pointrange,
+                         c(args, list(label_size = 6, pointrange_size = 2,
+                                      pointrange_linewidth = 1.5)))
+
+  # label is the second geom
+  expect_equal(out_default[[2]]$aes_params$size, 3)
+  expect_equal(out_custom[[2]]$aes_params$size, 6)
+
+  # pointrange size/linewidth: defaults are NULL (ggplot2's own defaults)
+  expect_null(out_default[[1]]$aes_params$size)
+  expect_equal(out_custom[[1]]$aes_params$size, 2)
+  expect_null(out_default[[1]]$aes_params$linewidth)
+  expect_equal(out_custom[[1]]$aes_params$linewidth, 1.5)
+})
+
+test_that("er_style_quantile_pointrange() label_size also applies in the stratified branch", {
+  skip_if_not_installed("erglm")
+
+  p2 <- er_plot(er_test_data, aucss, ae1, sex) |>
+    er_plot_add_quantiles(style = er_style_quantile_pointrange)
+  args <- list(
+    data     = p2$data,
+    config   = p2$layer$quantile$config,
+    stratify = p2$layer$quantile$stratify,
+    exposure = p2$exposure,
+    response = p2$response,
+    strata   = p2$strata,
+    theme    = p2$theme
+  )
+
+  out_default <- do.call(er_style_quantile_pointrange, args)
+  out_custom  <- do.call(er_style_quantile_pointrange, c(args, list(label_size = 7)))
+
+  expect_equal(out_default[[2]]$aes_params$size, 3)
+  expect_equal(out_custom[[2]]$aes_params$size, 7)
+})
+
+test_that("er_style_quantile_pointrange_vlines() forwards all new args and passes vline params", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_quantiles(bins = 4, style = er_style_quantile_pointrange_vlines)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out <- do.call(er_style_quantile_pointrange_vlines,
+                 c(args, list(label_size = 6, vline_colour = "red", vline_linetype = "dashed")))
+
+  # geom order: vline, pointrange, label
+  expect_equal(out[[1]]$aes_params$colour, "red")
+  expect_equal(out[[1]]$aes_params$linetype, "dashed")
+  expect_equal(out[[3]]$aes_params$size, 6)
+})

@@ -86,6 +86,46 @@ test_that("er_plot_theme() writes and validates draw_key", {
   expect_error(er_plot_theme(plt, draw_key = 1), "function")
 })
 
+test_that("er_plot_theme() writes and validates dodge_width", {
+  plt <- er_test_data |> er_plot(aucss, ae1)
+  expect_equal(plt$theme$dodge_width, 0.05) # er_plot()'s default
+
+  plt <- er_plot_theme(plt, dodge_width = 0.2)
+  expect_equal(plt$theme$dodge_width, 0.2)
+
+  expect_error(er_plot_theme(plt, dodge_width = -0.1), "positive")
+  expect_error(er_plot_theme(plt, dodge_width = c(0.1, 0.2)), "positive")
+})
+
+test_that("er_plot_theme()'s dodge_width actually changes the quantile layer's stratum spacing", {
+  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1, stratify_by = sex) |>
+    er_plot_add_model(mod2) |>
+    er_plot_add_quantiles(style = er_style_quantile_errorbar)
+
+  args <- function(p) {
+    list(
+      data = p$data,
+      config = p$layer$quantile$config,
+      stratify = p$layer$quantile$stratify,
+      exposure = p$exposure,
+      response = p$response,
+      strata = p$strata,
+      theme = p$theme
+    )
+  }
+
+  out_default <- do.call(er_style_quantile_errorbar, args(plt))
+  out_wide <- do.call(er_style_quantile_errorbar, args(er_plot_theme(plt, dodge_width = 0.2)))
+
+  spread_default <- diff(range(out_default[[1]]$data$x_dodge))
+  spread_wide <- diff(range(out_wide[[1]]$data$x_dodge))
+
+  expect_gt(spread_wide, spread_default)
+})
+
 test_that("er_plot_theme() merges height overrides without disturbing other fields", {
   plt <- er_test_data |> er_plot(aucss, ae1)
   default_height <- plt$theme$height

@@ -8,6 +8,18 @@
 #' @param response Response variable
 #' @param strata Stratification variable
 #' @param theme Theme components
+#' @param alpha Transparency of the geom. For `er_style_group_boxplot()` and
+#'   `er_style_group_violin()`, a single number; default `0.5`. For
+#'   `er_style_group_histogram()`, `NULL` (default: `0.5` when stratified,
+#'   `0.8` when unstratified, matching the previous conditional behaviour)
+#'   or an explicit number that overrides that conditional default.
+#' @param bins (for `er_style_group_histogram()` only) Number of histogram
+#'   bins, passed to [ggplot2::geom_histogram()]'s own `bins`. Default `30`.
+#' @param quantiles,quantile_linetype (for `er_style_group_violin()` only)
+#'   Probabilities at which to draw quantile lines on the violin, passed to
+#'   [ggplot2::geom_violin()]'s own `draw_quantiles`; and the linetype for
+#'   those lines, passed to `quantile.linetype`. Default `NULL` (no lines
+#'   drawn) and `"solid"` respectively.
 #' @param ... Additional named arguments forwarded from
 #'   [er_plot_add_groups()]'s own `...`; see [er_style()]'s "Passing
 #'   extra arguments to a builder" section.
@@ -62,7 +74,8 @@ NULL
 
 #' @rdname er_style_group
 #' @export
-er_style_group_boxplot <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_group_boxplot <- function(data, config, stratify, exposure, response, strata, theme,
+                                    alpha = 0.5, ...) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(
@@ -82,7 +95,7 @@ er_style_group_boxplot <- function(data, config, stratify, exposure, response, s
     ggplot2::geom_boxplot(
       data = config$data,
       mapping = plot_map,
-      alpha = .5, 
+      alpha = alpha, 
       key_glyph = theme$draw_key
     ),
     ggplot2::coord_cartesian(
@@ -98,7 +111,8 @@ er_style_group_boxplot <- er_style_tag(er_style_group_boxplot, layer = "group")
 
 #' @rdname er_style_group
 #' @export
-er_style_group_histogram <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_group_histogram <- function(data, config, stratify, exposure, response, strata, theme,
+                                      bins = 30, alpha = NULL, ...) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(x = .data[[exposure$name]])
@@ -110,12 +124,14 @@ er_style_group_histogram <- function(data, config, stratify, exposure, response,
     )
   }
 
+  resolved_alpha <- if (is.null(alpha)) (if (stratify) .5 else .8) else alpha
+
   geoms <- list(
     ggplot2::geom_histogram(
       data = config$data,
       mapping = plot_map,
-      bins = 30,
-      alpha = if (stratify) .5 else .8,
+      bins = bins,
+      alpha = resolved_alpha,
       position = if (stratify) "identity" else "stack",
       key_glyph = theme$draw_key
     ),
@@ -154,7 +170,8 @@ er_style_group_histogram <- er_style_tag(er_style_group_histogram, y_role = "cou
 
 #' @rdname er_style_group
 #' @export
-er_style_group_violin <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_group_violin <- function(data, config, stratify, exposure, response, strata, theme,
+                                   alpha = 0.5, quantiles = NULL, quantile_linetype = "solid", ...) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(
@@ -170,14 +187,19 @@ er_style_group_violin <- function(data, config, stratify, exposure, response, st
     )
   }
 
+  geom_args <- list(
+    data = config$data,
+    mapping = plot_map,
+    alpha = alpha,
+    key_glyph = theme$draw_key
+  )
+  if (!is.null(quantiles)) {
+    geom_args$draw_quantiles <- quantiles
+    geom_args$quantile.linetype <- quantile_linetype
+  }
+
   geoms <- list(
-    ggplot2::geom_violin(
-      data = config$data,
-      mapping = plot_map,
-      quantile.linetype = "solid",
-      alpha = 0.5, 
-      key_glyph = theme$draw_key
-    ),
+    do.call(ggplot2::geom_violin, geom_args),
     ggplot2::coord_cartesian(
       xlim = exposure$limits, 
       clip = "off"

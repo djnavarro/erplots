@@ -176,3 +176,127 @@ test_that("er_style_group_violin returns geom + coord", {
   expect_true(inherits(p2_out[[1]], "LayerInstance"))
   expect_true(inherits(p2_out[[2]], "CoordCartesian"))
 })
+
+# ---- new arguments: alpha, bins, quantiles/quantile_linetype ----
+
+test_that("er_style_group_boxplot() alpha argument overrides the default 0.5", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_groups(treatment)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_group_boxplot, args)
+  out_custom  <- do.call(er_style_group_boxplot, c(args, list(alpha = 0.1)))
+
+  expect_equal(out_default[[1]]$aes_params$alpha, 0.5)
+  expect_equal(out_custom[[1]]$aes_params$alpha, 0.1)
+})
+
+test_that("er_style_group_violin() alpha argument overrides the default 0.5", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_violin)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_group_violin, args)
+  out_custom  <- do.call(er_style_group_violin, c(args, list(alpha = 0.2)))
+
+  expect_equal(out_default[[1]]$aes_params$alpha, 0.5)
+  expect_equal(out_custom[[1]]$aes_params$alpha, 0.2)
+})
+
+test_that("er_style_group_violin() quantiles argument maps to draw_quantiles", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_violin)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_group_violin, args)
+  out_custom  <- do.call(er_style_group_violin,
+                         c(args, list(quantiles = c(0.25, 0.5, 0.75),
+                                      quantile_linetype = "dashed")))
+
+  # default: no quantile lines
+  expect_true(is.null(out_default[[1]]$stat_params$quantiles))
+
+  # custom: quantile lines at the specified probabilities, with the given linetype
+  expect_equal(out_custom[[1]]$stat_params$quantiles, c(0.25, 0.5, 0.75))
+  expect_equal(out_custom[[1]]$geom_params$quantile_gp$linetype, "dashed")
+})
+
+test_that("er_style_group_histogram() bins argument overrides the default 30", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_histogram)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_group_histogram, args)
+  out_custom  <- do.call(er_style_group_histogram, c(args, list(bins = 15)))
+
+  expect_equal(out_default[[1]]$stat_params$bins, 30)
+  expect_equal(out_custom[[1]]$stat_params$bins, 15)
+})
+
+test_that("er_style_group_histogram() alpha = NULL gives conditional default; explicit alpha overrides", {
+  skip_if_not_installed("erglm")
+
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_histogram)
+  p2 <- er_plot(er_test_data, aucss, ae1, sex) |>
+    er_plot_add_groups(treatment, style = er_style_group_histogram)
+
+  args <- function(p) list(
+    data     = p$data,
+    config   = p$layer$group$config[[1]],
+    stratify = p$layer$group$stratify,
+    exposure = p$exposure,
+    response = p$response,
+    strata   = p$strata,
+    theme    = p$theme
+  )
+
+  # alpha = NULL (default): 0.8 unstratified, 0.5 stratified
+  out_unstrat <- do.call(er_style_group_histogram, args(p1))
+  out_strat   <- do.call(er_style_group_histogram, args(p2))
+  expect_equal(out_unstrat[[1]]$aes_params$alpha, 0.8)
+  expect_equal(out_strat[[1]]$aes_params$alpha, 0.5)
+
+  # explicit alpha overrides regardless of stratification
+  out_custom <- do.call(er_style_group_histogram, c(args(p1), list(alpha = 0.3)))
+  expect_equal(out_custom[[1]]$aes_params$alpha, 0.3)
+})

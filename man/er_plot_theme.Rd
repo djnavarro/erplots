@@ -24,6 +24,7 @@ er_plot_theme(
   format_percent = NULL,
   format_number = NULL,
   draw_key = NULL,
+  dodge_width = NULL,
   height_base = NULL,
   height_data = NULL,
   height_group = NULL
@@ -83,6 +84,13 @@ format p-values/rates/means for display}
 written to \code{object$theme$draw_key} and passed as every geom's
 \code{key_glyph} argument}
 
+\item{dodge_width}{Spacing between adjacent strata's horizontal offset
+in the quantile layer (see \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}}/
+\code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}}), as a fraction of the exposure
+range. A single positive number, written to \code{object$theme$dodge_width}.
+Default \code{0.05} (set in \code{\link[=er_plot]{er_plot()}}), matching the previous fixed
+value.}
+
 \item{height_base, height_data, height_group}{Relative panel heights
 (single positive numbers), merged into \code{object$theme$height} --
 supplying only one leaves the other two unchanged}
@@ -94,11 +102,21 @@ The input \code{object}, with the requested theme fields updated
 Adjusts the styling knobs a ggplot2 user would expect to control --
 axis/legend labels, plot title/subtitle/caption, axis limits, the
 overall visual theme, the discrete color/fill palette used for
-stratification, value formatters, the legend key glyph, and relative
-panel heights -- without touching which variable is mapped to which
-aesthetic (that's controlled by a layer's \code{style}; see \code{\link[=er_style]{er_style()}}).
+stratification, value formatters, the legend key glyph, the
+quantile layer's stratum-dodge spacing, and relative panel heights --
+without touching which variable is mapped to which aesthetic (that's
+controlled by a layer's \code{style}; see \code{\link[=er_style]{er_style()}}).
 }
 \details{
+\code{dodge_width} is the one setting here that's about stratification
+\emph{layout} rather than a single layer's visual style -- it's read by
+\code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}}/\code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}} (and
+their \verb{_vlines} variants) to horizontally separate strata within each
+quantile bin. It lives in \code{er_plot_theme()}, rather than as an
+argument to those builders, because dodging is a property of how
+stratification lays out a layer, not something specific to any one
+builder's own visual choices.
+
 Every argument defaults to \code{NULL}, meaning "leave whatever was set
 before unchanged" -- so \code{er_plot_theme()} can be called more than once
 on the same object, each call only touching the arguments it actually

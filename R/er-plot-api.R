@@ -288,6 +288,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
     legend.position = "bottom"
   )
   object$theme$draw_key <- ggplot2::draw_key_rect
+  object$theme$dodge_width <- 0.05
   object$theme$color_discrete <- NULL
   object$theme$fill_discrete <- NULL
   object$theme$color_continuous <- NULL
@@ -304,9 +305,19 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
 #' Adjusts the styling knobs a ggplot2 user would expect to control --
 #' axis/legend labels, plot title/subtitle/caption, axis limits, the
 #' overall visual theme, the discrete color/fill palette used for
-#' stratification, value formatters, the legend key glyph, and relative
-#' panel heights -- without touching which variable is mapped to which
-#' aesthetic (that's controlled by a layer's `style`; see [er_style()]).
+#' stratification, value formatters, the legend key glyph, the
+#' quantile layer's stratum-dodge spacing, and relative panel heights --
+#' without touching which variable is mapped to which aesthetic (that's
+#' controlled by a layer's `style`; see [er_style()]).
+#'
+#' `dodge_width` is the one setting here that's about stratification
+#' *layout* rather than a single layer's visual style -- it's read by
+#' [er_style_quantile_errorbar()]/[er_style_quantile_pointrange()] (and
+#' their `_vlines` variants) to horizontally separate strata within each
+#' quantile bin. It lives in `er_plot_theme()`, rather than as an
+#' argument to those builders, because dodging is a property of how
+#' stratification lays out a layer, not something specific to any one
+#' builder's own visual choices.
 #'
 #' Every argument defaults to `NULL`, meaning "leave whatever was set
 #' before unchanged" -- so `er_plot_theme()` can be called more than once
@@ -372,6 +383,12 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
 #' @param draw_key A key-glyph function (e.g. [ggplot2::draw_key_point()]),
 #'   written to `object$theme$draw_key` and passed as every geom's
 #'   `key_glyph` argument
+#' @param dodge_width Spacing between adjacent strata's horizontal offset
+#'   in the quantile layer (see [er_style_quantile_errorbar()]/
+#'   [er_style_quantile_pointrange()]), as a fraction of the exposure
+#'   range. A single positive number, written to `object$theme$dodge_width`.
+#'   Default `0.05` (set in [er_plot()]), matching the previous fixed
+#'   value.
 #' @param height_base,height_data,height_group Relative panel heights
 #'   (single positive numbers), merged into `object$theme$height` --
 #'   supplying only one leaves the other two unchanged
@@ -389,7 +406,7 @@ er_plot_theme <- function(object,
                             color_discrete = NULL, fill_discrete = NULL,
                             color_continuous = NULL, fill_continuous = NULL,
                             format_p = NULL, format_percent = NULL, format_number = NULL,
-                            draw_key = NULL,
+                            draw_key = NULL, dodge_width = NULL,
                             height_base = NULL, height_data = NULL, height_group = NULL) {
 
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
@@ -412,6 +429,7 @@ er_plot_theme <- function(object,
   .check_theme_function(format_percent, "format_percent")
   .check_theme_function(format_number, "format_number")
   .check_theme_function(draw_key, "draw_key")
+  .check_theme_number(dodge_width, "dodge_width")
   .check_theme_number(height_base, "height_base")
   .check_theme_number(height_data, "height_data")
   .check_theme_number(height_group, "height_group")
@@ -447,6 +465,7 @@ er_plot_theme <- function(object,
   if (!is.null(format_number)) object$theme$format_number <- format_number
 
   if (!is.null(draw_key)) object$theme$draw_key <- draw_key
+  if (!is.null(dodge_width)) object$theme$dodge_width <- dodge_width
 
   new_height <- list(base = height_base, data = height_data, group = height_group)
   new_height <- new_height[!purrr::map_lgl(new_height, is.null)]

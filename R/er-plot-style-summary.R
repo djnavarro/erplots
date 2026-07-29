@@ -8,6 +8,15 @@
 #' @param response Response variable
 #' @param strata Stratification variable
 #' @param theme Theme components
+#' @param inset Distance from the panel edge for the annotation label, in
+#'   normalized device coordinates (0 = panel edge, 0.5 = panel centre).
+#'   Default `0.05`, reproducing the previous fixed value (labels placed
+#'   at `0.05` from the near edge and `0.95` from the far edge).
+#' @param fields (for `er_style_summary_gof()` only) Which fields from
+#'   `glance` to include, and in what order. A character vector, any
+#'   subset of `c("n", "aic", "bic", "r_squared")` in the desired display
+#'   order; unrecognised names are silently ignored. Default
+#'   `c("n", "aic", "bic", "r_squared")`.
 #' @param ... Additional named arguments forwarded from
 #'   [er_plot_add_model()]'s own `...` (shared with `style`); see
 #'   [er_style()]'s "Passing extra arguments to a builder" section.
@@ -71,17 +80,22 @@ NULL
 
 #' @rdname er_style_summary
 #' @export
-er_style_summary_pvalue <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_summary_pvalue <- function(data, config, stratify, exposure, response, strata, theme,
+                                     inset = 0.05, ...) {
 
   if (is.null(config$p_value) || stratify) return(list())
 
   corner <- names(sort(config$corner_distance)[4])
   summary_data <- tibble::tibble(lbl = theme$format_p(config$p_value))
+  x_left  <- inset
+  x_right <- 1 - inset
+  y_top   <- 1 - inset
+  y_bot   <- inset
 
   if (corner == "top_left") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.05), y = I(.95), label = lbl),
+      mapping = ggplot2::aes(x = I(x_left), y = I(y_top), label = lbl),
       hjust = 0, vjust = 1, show.legend = FALSE
     )
   }
@@ -89,7 +103,7 @@ er_style_summary_pvalue <- function(data, config, stratify, exposure, response, 
   if (corner == "top_right") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.95), y = I(.95), label = lbl),
+      mapping = ggplot2::aes(x = I(x_right), y = I(y_top), label = lbl),
       hjust = 1, vjust = 1, show.legend = FALSE
     )
   }
@@ -97,7 +111,7 @@ er_style_summary_pvalue <- function(data, config, stratify, exposure, response, 
   if (corner == "bottom_left") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.05), y = I(.05), label = lbl),
+      mapping = ggplot2::aes(x = I(x_left), y = I(y_bot), label = lbl),
       hjust = 0, vjust = 0, show.legend = FALSE
     )
   }
@@ -105,18 +119,19 @@ er_style_summary_pvalue <- function(data, config, stratify, exposure, response, 
   if (corner == "bottom_right") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.95), y = I(.05), label = lbl),
+      mapping = ggplot2::aes(x = I(x_right), y = I(y_bot), label = lbl),
       hjust = 1, vjust = 0, show.legend = FALSE
     )
   }
-  
+
   return(geoms)
 }
 er_style_summary_pvalue <- er_style_tag(er_style_summary_pvalue, layer = "summary")
 
 #' @rdname er_style_summary
 #' @export
-er_style_summary_n <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_summary_n <- function(data, config, stratify, exposure, response, strata, theme,
+                                inset = 0.05, ...) {
 
   if (stratify && !is.null(strata$name)) {
     counts <- data |>
@@ -130,11 +145,15 @@ er_style_summary_n <- function(data, config, stratify, exposure, response, strat
 
   corner <- names(sort(config$corner_distance)[4])
   summary_data <- tibble::tibble(lbl = lbl)
+  x_left  <- inset
+  x_right <- 1 - inset
+  y_top   <- 1 - inset
+  y_bot   <- inset
 
   if (corner == "top_left") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.05), y = I(.95), label = lbl),
+      mapping = ggplot2::aes(x = I(x_left), y = I(y_top), label = lbl),
       hjust = 0, vjust = 1, show.legend = FALSE
     )
   }
@@ -142,7 +161,7 @@ er_style_summary_n <- function(data, config, stratify, exposure, response, strat
   if (corner == "top_right") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.95), y = I(.95), label = lbl),
+      mapping = ggplot2::aes(x = I(x_right), y = I(y_top), label = lbl),
       hjust = 1, vjust = 1, show.legend = FALSE
     )
   }
@@ -150,7 +169,7 @@ er_style_summary_n <- function(data, config, stratify, exposure, response, strat
   if (corner == "bottom_left") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.05), y = I(.05), label = lbl),
+      mapping = ggplot2::aes(x = I(x_left), y = I(y_bot), label = lbl),
       hjust = 0, vjust = 0, show.legend = FALSE
     )
   }
@@ -158,7 +177,7 @@ er_style_summary_n <- function(data, config, stratify, exposure, response, strat
   if (corner == "bottom_right") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.95), y = I(.05), label = lbl),
+      mapping = ggplot2::aes(x = I(x_right), y = I(y_bot), label = lbl),
       hjust = 1, vjust = 0, show.legend = FALSE
     )
   }
@@ -169,7 +188,8 @@ er_style_summary_n <- er_style_tag(er_style_summary_n, layer = "summary")
 
 #' @rdname er_style_summary
 #' @export
-er_style_summary_coefficients <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_summary_coefficients <- function(data, config, stratify, exposure, response, strata, theme,
+                                           inset = 0.05, ...) {
 
   coefs <- config$summary$coefficients
   if (is.null(coefs) || stratify) return(list())
@@ -188,11 +208,15 @@ er_style_summary_coefficients <- function(data, config, stratify, exposure, resp
 
   corner <- names(sort(config$corner_distance)[4])
   summary_data <- tibble::tibble(lbl = paste(line, collapse = "\n"))
+  x_left  <- inset
+  x_right <- 1 - inset
+  y_top   <- 1 - inset
+  y_bot   <- inset
 
   if (corner == "top_left") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.05), y = I(.95), label = lbl),
+      mapping = ggplot2::aes(x = I(x_left), y = I(y_top), label = lbl),
       hjust = 0, vjust = 1, show.legend = FALSE
     )
   }
@@ -200,7 +224,7 @@ er_style_summary_coefficients <- function(data, config, stratify, exposure, resp
   if (corner == "top_right") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.95), y = I(.95), label = lbl),
+      mapping = ggplot2::aes(x = I(x_right), y = I(y_top), label = lbl),
       hjust = 1, vjust = 1, show.legend = FALSE
     )
   }
@@ -208,7 +232,7 @@ er_style_summary_coefficients <- function(data, config, stratify, exposure, resp
   if (corner == "bottom_left") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.05), y = I(.05), label = lbl),
+      mapping = ggplot2::aes(x = I(x_left), y = I(y_bot), label = lbl),
       hjust = 0, vjust = 0, show.legend = FALSE
     )
   }
@@ -216,7 +240,7 @@ er_style_summary_coefficients <- function(data, config, stratify, exposure, resp
   if (corner == "bottom_right") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.95), y = I(.05), label = lbl),
+      mapping = ggplot2::aes(x = I(x_right), y = I(y_bot), label = lbl),
       hjust = 1, vjust = 0, show.legend = FALSE
     )
   }
@@ -227,7 +251,8 @@ er_style_summary_coefficients <- er_style_tag(er_style_summary_coefficients, lay
 
 #' @rdname er_style_summary
 #' @export
-er_style_summary_gof <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+er_style_summary_gof <- function(data, config, stratify, exposure, response, strata, theme,
+                                  inset = 0.05, fields = c("n", "aic", "bic", "r_squared"), ...) {
 
   glance <- config$summary$glance
   if (is.null(glance) || stratify) return(list())
@@ -240,8 +265,9 @@ er_style_summary_gof <- function(data, config, stratify, exposure, response, str
   # Each field is shown only if the column is both present and non-`NA`,
   # so a model that only populates some of `glance` (e.g. `aic` but not
   # `r_squared`) still gets a sensible, partial annotation rather than a
-  # blank or an error.
-  fields <- list(
+  # blank or an error. The `fields` argument controls which of the four
+  # recognised fields to show and in what order.
+  field_specs <- list(
     n         = list(label = "N",   format = function(x) as.character(as.integer(x))),
     aic       = list(label = "AIC", format = theme$format_number),
     bic       = list(label = "BIC", format = theme$format_number),
@@ -249,9 +275,9 @@ er_style_summary_gof <- function(data, config, stratify, exposure, response, str
   )
 
   line <- character(0)
-  for (col in names(fields)) {
-    if (col %in% names(glance) && !is.na(glance[[col]])) {
-      spec <- fields[[col]]
+  for (col in fields) {
+    if (col %in% names(field_specs) && col %in% names(glance) && !is.na(glance[[col]])) {
+      spec <- field_specs[[col]]
       line <- c(line, paste0(spec$label, " = ", spec$format(glance[[col]])))
     }
   }
@@ -259,11 +285,15 @@ er_style_summary_gof <- function(data, config, stratify, exposure, response, str
 
   corner <- names(sort(config$corner_distance)[4])
   summary_data <- tibble::tibble(lbl = paste(line, collapse = ", "))
+  x_left  <- inset
+  x_right <- 1 - inset
+  y_top   <- 1 - inset
+  y_bot   <- inset
 
   if (corner == "top_left") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.05), y = I(.95), label = lbl),
+      mapping = ggplot2::aes(x = I(x_left), y = I(y_top), label = lbl),
       hjust = 0, vjust = 1, show.legend = FALSE
     )
   }
@@ -271,7 +301,7 @@ er_style_summary_gof <- function(data, config, stratify, exposure, response, str
   if (corner == "top_right") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.95), y = I(.95), label = lbl),
+      mapping = ggplot2::aes(x = I(x_right), y = I(y_top), label = lbl),
       hjust = 1, vjust = 1, show.legend = FALSE
     )
   }
@@ -279,7 +309,7 @@ er_style_summary_gof <- function(data, config, stratify, exposure, response, str
   if (corner == "bottom_left") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.05), y = I(.05), label = lbl),
+      mapping = ggplot2::aes(x = I(x_left), y = I(y_bot), label = lbl),
       hjust = 0, vjust = 0, show.legend = FALSE
     )
   }
@@ -287,7 +317,7 @@ er_style_summary_gof <- function(data, config, stratify, exposure, response, str
   if (corner == "bottom_right") {
     geoms <- ggplot2::geom_label(
       data = summary_data,
-      mapping = ggplot2::aes(x = I(.95), y = I(.05), label = lbl),
+      mapping = ggplot2::aes(x = I(x_right), y = I(y_bot), label = lbl),
       hjust = 1, vjust = 0, show.legend = FALSE
     )
   }
