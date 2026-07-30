@@ -102,7 +102,8 @@ boxplot/jitter panels.</p>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  bins <span class="op">=</span> <span class="fl">30</span></span>
+<span>  bins <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.85</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -167,7 +168,8 @@ boxplot/jitter panels.</p>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Point transparency for <code>er_style_data_overlay()</code>.</p></dd>
+<dd><p>Point transparency for <code>er_style_data_overlay()</code>; fill
+transparency for <code>er_style_data_hex()</code>.</p></dd>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
@@ -190,6 +192,11 @@ boxplot/jitter panels.</p>
 background as its count approaches zero rather than starting at
 ggplot2's own default mid-intensity blue. Override it with
 <code>er_plot_theme(fill_continuous = ...)</code>.</p>
+<p>Because its geoms cover the whole panel, <code>er_style_data_hex()</code> is
+tagged <code>er_style_tag(fn, zorder = "background")</code> (see <code><a href="er_style_tag.html">er_style_tag()</a></code>),
+so it's drawn before the model/summary/quantile layers rather than on
+top of them; its default <code>alpha = 0.85</code> gives those layers a little
+extra visibility through even a densely populated hex cell.</p>
 <p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions implement.</p>
     </div>
     <div class="section level2">

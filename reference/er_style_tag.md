@@ -11,7 +11,8 @@ er_style_tag(
   layout = NULL,
   fill_role = NULL,
   y_role = NULL,
-  layer = NULL
+  layer = NULL,
+  zorder = NULL
 )
 ```
 
@@ -45,11 +46,17 @@ er_style_tag(
   naming which `er_plot_add_*()` layer the builder is meant to be used
   with, or `NULL` (the default) to leave this tag unset. See "Details".
 
+- zorder:
+
+  One of `"foreground"` or `"background"`, or `NULL` (the default,
+  equivalent to `"foreground"`) to leave this tag unset. Only meaningful
+  for an overlay-layout data builder; see "Details".
+
 ## Value
 
 `style`, with whichever of the `"er_style_layout"`/
-`"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"` attributes
-were requested attached.
+`"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`/
+`"er_style_zorder"` attributes were requested attached.
 
 ## Details
 
@@ -57,10 +64,11 @@ The metadata to be supplied indicate which *structural* family a
 data-layer builder belongs to (`layout`), what a builder's `fill`
 aesthetic means when it isn't strata (`fill_role`), what a group-layer
 builder's y-axis means when it isn't the group variable itself
-(`y_role`), and which layer a builder is meant to be plugged into
-(`layer`). All four arguments are optional and independent – pass only
-the ones a given builder needs, in one call, rather than chaining
-separate setters.
+(`y_role`), which layer a builder is meant to be plugged into (`layer`),
+and where an overlay-layout data builder's geoms sit relative to the
+model/summary/quantile layers when they share the main panel (`zorder`).
+All five arguments are optional and independent – pass only the ones a
+given builder needs, in one call, rather than chaining separate setters.
 
 `layout` is a required tag for a data-layer builder:
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
@@ -98,6 +106,24 @@ that layer's `config` shape not matching what the builder expects. All
 built-in builders carry this tag. A custom builder that omits it is
 never checked: `layer` is opt-in, not a requirement like `layout` is for
 a data-layer builder.
+
+`zorder` only applies to an overlay-layout data builder
+(`layout = "overlay"`), and controls whether its geoms are drawn before
+or after the model/summary/quantile layers when they share the main
+panel. `"foreground"`, the default for a builder that omits this tag
+(e.g.
+[`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)),
+draws the data geoms last, on top of everything else – appropriate for a
+sparse layer like individual points, which should never be hidden behind
+a model ribbon. `"background"` (used by
+[`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md))
+draws the data geoms first, so a builder whose geoms cover the whole
+panel (leaving no gaps for what's underneath to show through) doesn't
+bury the model curve or summary annotation. `zorder` has no effect on a
+panel-layout data builder (e.g.
+[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)),
+since those geoms are drawn in their own separate panels, never sharing
+space with the model/ summary/quantile layers.
 
 ## See also
 

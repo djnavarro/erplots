@@ -48,7 +48,8 @@ er_style_data_hex(
   strata,
   theme,
   ...,
-  bins = 30
+  bins = 30,
+  alpha = 0.85
 )
 ```
 
@@ -114,7 +115,8 @@ er_style_data_hex(
 
 - alpha:
 
-  Point transparency for `er_style_data_overlay()`.
+  Point transparency for `er_style_data_overlay()`; fill transparency
+  for `er_style_data_hex()`.
 
 - size:
 
@@ -147,6 +149,13 @@ errors if given a builder tagged for another layer.
 background as its count approaches zero rather than starting at
 ggplot2's own default mid-intensity blue. Override it with
 `er_plot_theme(fill_continuous = ...)`.
+
+Because its geoms cover the whole panel, `er_style_data_hex()` is tagged
+`er_style_tag(fn, zorder = "background")` (see
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)),
+so it's drawn before the model/summary/quantile layers rather than on
+top of them; its default `alpha = 0.85` gives those layers a little
+extra visibility through even a densely populated hex cell.
 
 See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 for the shared builder interface these functions implement.
