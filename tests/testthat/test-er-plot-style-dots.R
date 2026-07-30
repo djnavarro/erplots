@@ -8,8 +8,6 @@
 # it unchanged.
 
 test_that("er_plot_add_model() forwards `...` to style", {
-  skip_if_not_installed("erglm")
-
   seen <- new.env()
   stub_style <- function(data, config, stratify, exposure, response, strata, theme, ...) {
     seen$style_dots <- rlang::list2(...)
@@ -25,8 +23,6 @@ test_that("er_plot_add_model() forwards `...` to style", {
 })
 
 test_that("er_plot_add_summary() forwards `...` to style", {
-  skip_if_not_installed("erglm")
-
   seen <- new.env()
   stub_summary <- function(data, config, stratify, exposure, response, strata, theme, ...) {
     seen$summary_dots <- rlang::list2(...)
@@ -43,8 +39,6 @@ test_that("er_plot_add_summary() forwards `...` to style", {
 })
 
 test_that("er_plot_add_quantiles() forwards `...` to style", {
-  skip_if_not_installed("erglm")
-
   seen <- new.env()
   stub_style <- er_style_tag(
     function(data, config, stratify, exposure, response, strata, theme, ...) {
@@ -64,8 +58,6 @@ test_that("er_plot_add_quantiles() forwards `...` to style", {
 })
 
 test_that("er_plot_add_data() forwards `...` to style, for both the overlay and panel structural families", {
-  skip_if_not_installed("erglm")
-
   seen <- new.env()
   stub_overlay <- er_style_tag(
     function(data, config, stratify, exposure, response, strata, theme, ...) {
@@ -98,8 +90,6 @@ test_that("er_plot_add_data() forwards `...` to style, for both the overlay and 
 })
 
 test_that("er_plot_add_groups() forwards `...` to style, identically for every grouping variable", {
-  skip_if_not_installed("erglm")
-
   seen <- new.env()
   stub_style <- function(data, config, stratify, exposure, response, strata, theme, ...) {
     seen[[config$y$name]] <- rlang::list2(...)
@@ -117,8 +107,6 @@ test_that("er_plot_add_groups() forwards `...` to style, identically for every g
 })
 
 test_that("er_plot_add_*() error on an unnamed extra argument", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1)
   plt_mod <- plt |> er_plot_add_model(er_test_mod1)
 
@@ -143,8 +131,6 @@ test_that("er_plot_add_*() error on an unnamed extra argument", {
 })
 
 test_that("er_style_model_spaghetti() prefers a `seed` passed via `...` over `config$seed`", {
-  skip_if_not_installed("erglm")
-
   plt <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_model(er_test_mod1, style = er_style_model_spaghetti, seed = 9626)
 
@@ -168,8 +154,6 @@ test_that("er_style_model_spaghetti() prefers a `seed` passed via `...` over `co
 })
 
 test_that("a builder that doesn't declare `...` in its signature errors when extra arguments are supplied", {
-  skip_if_not_installed("erglm")
-
   old_style <- function(data, config, stratify, exposure, response, strata, theme) list()
 
   plt <- er_test_data |>

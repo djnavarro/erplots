@@ -1,5 +1,3 @@
-skip_if_not_installed("erglm")
-
 test_that("er_plot_theme() writes labels to the expected fields", {
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
@@ -98,7 +96,7 @@ test_that("er_plot_theme() writes and validates dodge_width", {
 })
 
 test_that("er_plot_theme()'s dodge_width actually changes the quantile layer's stratum spacing", {
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   plt <- er_test_data |>
     er_plot(aucss, ae1, stratify_by = sex) |>
@@ -183,7 +181,7 @@ test_that("integration: several er_plot_theme() overrides applied at once build 
 
 test_that("fill_discrete doesn't affect an er_style_data_hex() density fill", {
   skip_if_not_installed("hexbin")
-  mod <- erglm::erglm_model(biomarker_change ~ aucss, er_test_data, family = gaussian())
+  mod <- er_test_toy_model(biomarker_change ~ aucss, er_test_data, family = gaussian())
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change) |>
     er_plot_add_model(mod, style = er_style_model_line) |>
@@ -217,7 +215,7 @@ test_that("er_plot_theme() writes and validates continuous color/fill scales", {
 
 test_that("fill_continuous replaces an er_style_data_hex() density fill", {
   skip_if_not_installed("hexbin")
-  mod <- erglm::erglm_model(biomarker_change ~ aucss, er_test_data, family = gaussian())
+  mod <- er_test_toy_model(biomarker_change ~ aucss, er_test_data, family = gaussian())
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change) |>
     er_plot_add_model(mod, style = er_style_model_line) |>
@@ -254,7 +252,7 @@ test_that("color_continuous applies to a custom builder's response-colored data 
     layout = "panel"
   )
 
-  mod <- erglm::erglm_model(biomarker_change ~ aucss, er_test_data, family = gaussian())
+  mod <- er_test_toy_model(biomarker_change ~ aucss, er_test_data, family = gaussian())
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change) |>
     er_plot_add_model(mod, style = er_style_model_line) |>

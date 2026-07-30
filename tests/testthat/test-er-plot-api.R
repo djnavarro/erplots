@@ -1,13 +1,10 @@
 test_that("er_plot creates an er_plot (minimal)", {
-  skip_if_not_installed("erglm")
   expect_no_error(er_plot(er_test_data, aucss, ae1))
   plt <- er_plot(er_test_data, aucss, ae1)
   expect_s3_class(plt, "er_plot")
 })
 
 test_that("er_plot errors clearly when exposure/response/stratify_by name nonexistent columns", {
-  skip_if_not_installed("erglm")
-
   expect_error(er_plot(er_test_data, not_a_col, ae1), "not_a_col")
   expect_error(er_plot(er_test_data, aucss, not_a_col), "not_a_col")
   expect_error(er_plot(er_test_data, aucss, ae1, stratify_by = not_a_col), "not_a_col")
@@ -17,8 +14,6 @@ test_that("er_plot errors clearly when exposure/response/stratify_by name nonexi
 })
 
 test_that("er_plot errors clearly when exposure is not numeric", {
-  skip_if_not_installed("erglm")
-
   df_factor <- er_test_data
   df_factor$aucss <- factor(round(df_factor$aucss / 50))
   expect_error(er_plot(df_factor, aucss, ae1), "must be numeric")
@@ -37,8 +32,6 @@ test_that("er_plot errors clearly when exposure is not numeric", {
 })
 
 test_that("er_plot warns when a declared binary response has values outside {0, 1}", {
-  skip_if_not_installed("erglm")
-
   df_bad <- er_test_data
   df_bad$ae1[1:3] <- 2
 
@@ -66,8 +59,6 @@ test_that("er_plot warns when a declared binary response has values outside {0, 
 })
 
 test_that("er_plot errors when a declared count response has negative values", {
-  skip_if_not_installed("erglm")
-
   df_neg <- er_test_data
   df_neg$ae_count[1:3] <- df_neg$ae_count[1:3] - 100  # force negative
 
@@ -90,8 +81,6 @@ test_that("er_plot errors when a declared count response has negative values", {
 })
 
 test_that("er_plot resolves response_type = 'auto' correctly", {
-  skip_if_not_installed("erglm")
-
   plt_binary <- er_plot(er_test_data, aucss, ae1)
   expect_equal(plt_binary$response$type, "binary")
   expect_equal(plt_binary$response$limits, c(0, 1))
@@ -105,8 +94,6 @@ test_that("er_plot resolves response_type = 'auto' correctly", {
 })
 
 test_that("er_plot's response_type argument overrides auto-detection", {
-  skip_if_not_installed("erglm")
-
   # a 0/1 response explicitly declared continuous
   plt <- er_plot(er_test_data, aucss, ae1, response_type = "continuous")
   expect_equal(plt$response$type, "continuous")
@@ -116,8 +103,6 @@ test_that("er_plot's response_type argument overrides auto-detection", {
 })
 
 test_that("er_plot_add_quantiles supports both binary and continuous responses", {
-  skip_if_not_installed("erglm")
-
   # continuous response: bin means with t-interval CIs
   plt <- er_test_data |> er_plot(aucss, biomarker_change)
   expect_no_error(er_plot_add_quantiles(plt))
@@ -153,8 +138,6 @@ test_that("er_plot_add_quantiles() warns instead of crashing when n_quantiles ex
 })
 
 test_that("er_plot_add_data's panel layout supports a continuous response (single color-encoded panel)", {
-  skip_if_not_installed("erglm")
-
   # there's no built-in "panel"-layout style for a continuous/count response, but
   # `.layer_data()`'s response-type dispatch is still general-purpose and
   # exercised here via a minimal custom style.
@@ -177,8 +160,6 @@ test_that("er_plot_add_data's panel layout supports a continuous response (singl
 })
 
 test_that("er_plot_add_data supports a declared count response", {
-  skip_if_not_installed("erglm")
-
   stub_panel_builder <- er_style_tag(
     function(data, config, stratify, exposure, response, strata, theme) list(),
     layout = "panel"
@@ -190,8 +171,6 @@ test_that("er_plot_add_data supports a declared count response", {
 })
 
 test_that("er_plot_add_data's default style is er_style_data_overlay, replacing data/overlay on re-call", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1)
 
   plt_overlay <- plt |> er_plot_add_data()
@@ -210,8 +189,6 @@ test_that("er_plot_add_data's default style is er_style_data_overlay, replacing 
 })
 
 test_that("er_plot_add_data errors when panel != 'both'", {
-  skip_if_not_installed("erglm")
-
   stub_panel_builder <- er_style_tag(
     function(data, config, stratify, exposure, response, strata, theme) list(),
     layout = "panel"
@@ -243,8 +220,6 @@ test_that("er_plot_add_data errors when panel != 'both'", {
 })
 
 test_that("er_plot_add_data produces N stratum panels, each with a response colorbar", {
-  skip_if_not_installed("erglm")
-
   # there's no built-in "panel"-layout style for a continuous response; this custom
   # style recreates its color-encoded-panel behaviour to check that
   # `.layer_data()`/`.polish_labels()`'s per-stratum-panel machinery still
@@ -263,7 +238,7 @@ test_that("er_plot_add_data produces N stratum panels, each with a response colo
     layout = "panel"
   )
 
-  mod3 <- erglm::erglm_model(biomarker_change ~ aucss + sex, er_test_data, family = gaussian())
+  mod3 <- er_test_toy_model(biomarker_change ~ aucss + sex, er_test_data, family = gaussian())
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change, sex) |>
     er_plot_add_model(mod3) |>
@@ -283,7 +258,6 @@ test_that("er_plot_add_data produces N stratum panels, each with a response colo
 })
 
 test_that("er_plot creates an er_plot (all parts)", {
-  skip_if_not_installed("erglm")
   expect_no_error(
     er_test_data |>
       dplyr::mutate(dose = factor(dose)) |>
@@ -304,8 +278,7 @@ test_that("er_plot creates an er_plot (all parts)", {
 })
 
 test_that("er_plot creates an er_plot (all parts, all strata)", {
-  skip_if_not_installed("erglm")
-  mod <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
   expect_no_error(
     er_test_data |>
       dplyr::mutate(dose = factor(dose)) |>
@@ -326,15 +299,13 @@ test_that("er_plot creates an er_plot (all parts, all strata)", {
 })
 
 test_that("er_plot_add_model() fills in covariates missing from the prediction grid", {
-  skip_if_not_installed("erglm")
-
   # regression test: a model fit with a covariate beyond exposure/strata
   # (here, `sex`) used to crash inside the model's own `predict()` call
   # whenever that covariate wasn't in `newdata` -- i.e. whenever
   # `keep_strata = FALSE`, or `stratify_by` wasn't set in `er_plot()` at
   # all -- because `.get_model_predictions()` built `newdata` from only
   # the exposure (and, if stratified, strata) grid. 
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   # no `stratify_by` at all
   expect_no_error(
@@ -358,7 +329,7 @@ test_that("er_plot_add_model() fills in covariates missing from the prediction g
 
   # a numeric covariate is filled with its mean, not (e.g.) its first
   # observed value
-  mod3 <- erglm::erglm_model(ae1 ~ sex + dose, er_test_data, family = binomial())
+  mod3 <- er_test_toy_model(ae1 ~ sex + dose, er_test_data, family = binomial())
   plt3 <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(mod3)
   expect_equal(
     unique(plt3$layer$model$config$predictions$dose),
@@ -367,8 +338,6 @@ test_that("er_plot_add_model() fills in covariates missing from the prediction g
 })
 
 test_that("er_plot_add_groups errors when grouping by the stratification variable with keep_strata = TRUE", {
-  skip_if_not_installed("erglm")
-
   # regression test: grouping by the same variable used for
   # stratification while keeping strata bakes that column name into
   # `config$groupings` twice, which used to surface as an opaque
@@ -390,8 +359,6 @@ test_that("er_plot_add_groups errors when grouping by the stratification variabl
 })
 
 test_that("er_plot_add_groups() errors clearly when grouping by a constant continuous variable", {
-  skip_if_not_installed("erglm")
-
   df_const <- er_test_data
   df_const$biomarker_change <- 3
 
@@ -403,8 +370,6 @@ test_that("er_plot_add_groups() errors clearly when grouping by a constant conti
 })
 
 test_that("er_plot_add_groups is additive across repeated calls", {
-  skip_if_not_installed("erglm")
-
   # regression test: er_plot_add_groups() used to overwrite
   # object$layer$group on each call instead of merging into it, so a
   # second call silently dropped the first group panel
@@ -428,8 +393,6 @@ test_that("er_plot_add_groups is additive across repeated calls", {
 })
 
 test_that("er_plot_add_groups honors per-call keep_strata when mixed", {
-  skip_if_not_installed("erglm")
-
   # regression test: `stratify` used to be stored once for the whole
   # `layer$group` and shared by every panel at build time, so mixing
   # `keep_strata = TRUE`/`FALSE` across calls applied the wrong flag to
@@ -470,8 +433,6 @@ test_that("er_plot_add_groups honors per-call keep_strata when mixed", {
 })
 
 test_that("er_plot_build does not error", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1)
@@ -496,8 +457,6 @@ test_that("er_plot_build does not error", {
 })
 
 test_that("er_plot_build constructs ggplot2 objects", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1)
@@ -539,8 +498,6 @@ test_that("er_plot_build constructs ggplot2 objects", {
 })
 
 test_that("er_plot_build/plot() handle a plot with no layers at all (empty canvas)", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |>
     er_plot(aucss, ae1)
 
@@ -558,8 +515,6 @@ test_that("er_plot_build/plot() handle a plot with no layers at all (empty canva
 })
 
 test_that("er_plot_build/plot() handle a group-only plot (no base layer)", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_groups(aucss) |>
@@ -576,8 +531,6 @@ test_that("er_plot_build/plot() handle a group-only plot (no base layer)", {
 })
 
 test_that("er_plot_build/plot() handle a panel-layout data-only plot (no base layer)", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_data(style = er_style_data_boxjitter)
@@ -593,8 +546,6 @@ test_that("er_plot_build/plot() handle a panel-layout data-only plot (no base la
 })
 
 test_that("print method works as expected", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1)
@@ -645,8 +596,6 @@ test_that("print method works as expected", {
 })
 
 test_that("er_plot_add_data() with the default er_style_data_overlay merges into the base plot", {
-  skip_if_not_installed("erglm")
-
   # overlay as the *only* layer: the base plot must still get built (for
   # its coord/scale), with no separate object$plot$data panels
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_data()
@@ -659,7 +608,7 @@ test_that("er_plot_add_data() with the default er_style_data_overlay merges into
 
   # stratified overlay shares one legend with a stratified model curve,
   # both living on the same base plot
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
   plt_strat <- er_test_data |>
     er_plot(aucss, ae1, sex) |>
     er_plot_add_model(mod2) |>
@@ -676,8 +625,6 @@ test_that("er_plot_add_data() with the default er_style_data_overlay merges into
 # style escape hatch ---------------------------------------------------------
 
 test_that("er_plot_add_model() accepts a custom style", {
-  skip_if_not_installed("erglm")
-
   custom_model_builder <- function(data, config, stratify, exposure, response, strata, theme) {
     ggplot2::geom_line(
       data = config$predictions,
@@ -695,8 +642,6 @@ test_that("er_plot_add_model() accepts a custom style", {
 })
 
 test_that("er_plot_add_summary() accepts a custom style", {
-  skip_if_not_installed("erglm")
-
   custom_summary_builder <- function(data, config, stratify, exposure, response, strata, theme) {
     list()
   }
@@ -711,8 +656,6 @@ test_that("er_plot_add_summary() accepts a custom style", {
 })
 
 test_that("er_plot_add_summary() works without a model at all", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_summary(style = er_style_summary_n)
@@ -726,8 +669,6 @@ test_that("er_plot_add_summary() works without a model at all", {
 })
 
 test_that("er_plot_add_summary() computes p_value regardless of stratify, but er_style_summary_pvalue() suppresses it when stratified", {
-  skip_if_not_installed("erglm")
-
   plt_strat <- er_test_data |>
     er_plot(aucss, ae1, stratify_by = sex) |>
     er_plot_add_model(er_test_mod2) |>
@@ -749,15 +690,11 @@ test_that("er_plot_add_summary() computes p_value regardless of stratify, but er
 })
 
 test_that("er_plot_add_model() rejects a non-function style", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1)
   expect_error(er_plot_add_model(plt, er_test_mod1, style = "not a function"))
 })
 
 test_that("er_plot_add_quantiles() accepts a custom style", {
-  skip_if_not_installed("erglm")
-
   custom_quantile_builder <- function(data, config, stratify, exposure, response, strata, theme) {
     ggplot2::geom_pointrange(
       data = config$summary,
@@ -776,15 +713,11 @@ test_that("er_plot_add_quantiles() accepts a custom style", {
 })
 
 test_that("er_plot_add_quantiles() rejects a non-function style", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
   expect_error(er_plot_add_quantiles(plt, style = "not a function"))
 })
 
 test_that("er_plot_add_data() accepts a custom style for both the overlay and panel structural families", {
-  skip_if_not_installed("erglm")
-
   custom_overlay_builder <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme) {
     ggplot2::geom_point(
       data = data,
@@ -819,16 +752,12 @@ test_that("er_plot_add_data() accepts a custom style for both the overlay and pa
 })
 
 test_that("er_plot_add_data() rejects a style with no declared layout", {
-  skip_if_not_installed("erglm")
-
   untagged_builder <- function(data, config, stratify, exposure, response, strata, theme) list()
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
   expect_error(er_plot_add_data(plt, style = untagged_builder))
 })
 
 test_that("er_plot_add_groups() accepts a custom style, applied to every grouping variable", {
-  skip_if_not_installed("erglm")
-
   custom_group_builder <- function(data, config, stratify, exposure, response, strata, theme) {
     ggplot2::geom_violin(
       data = config$data,
@@ -846,8 +775,6 @@ test_that("er_plot_add_groups() accepts a custom style, applied to every groupin
 })
 
 test_that("er_plot_add_groups() rejects a non-function style", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
   expect_error(er_plot_add_groups(plt, aucss, style = "not a function"))
 })
@@ -881,7 +808,6 @@ test_that("er_style_data_hex() is tagged zorder = \"background\"", {
 })
 
 test_that("a zorder = \"background\" overlay style draws before model/summary/quantile geoms", {
-  skip_if_not_installed("erglm")
   skip_if_not_installed("hexbin")
 
   background_builder <- er_style_tag(
@@ -912,8 +838,6 @@ test_that("a zorder = \"background\" overlay style draws before model/summary/qu
 })
 
 test_that("the default (foreground) overlay style still draws after model/summary/quantile geoms", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
@@ -946,8 +870,6 @@ test_that("built-in builders are tagged with their layer", {
 })
 
 test_that("er_plot_add_model() errors informatively for a wrong-layer style", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1)
 
   expect_error(
@@ -959,8 +881,6 @@ test_that("er_plot_add_model() errors informatively for a wrong-layer style", {
 })
 
 test_that("er_plot_add_summary() errors informatively for a wrong-layer style", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
 
   expect_error(
@@ -972,8 +892,6 @@ test_that("er_plot_add_summary() errors informatively for a wrong-layer style", 
 })
 
 test_that("er_plot_add_quantiles() errors informatively for a wrong-layer style", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
 
   expect_error(
@@ -984,8 +902,6 @@ test_that("er_plot_add_quantiles() errors informatively for a wrong-layer style"
 })
 
 test_that("er_plot_add_data() errors informatively for a wrong-layer style", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
 
   expect_error(
@@ -996,8 +912,6 @@ test_that("er_plot_add_data() errors informatively for a wrong-layer style", {
 })
 
 test_that("er_plot_add_groups() errors informatively for a wrong-layer style", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
 
   expect_error(
@@ -1008,8 +922,6 @@ test_that("er_plot_add_groups() errors informatively for a wrong-layer style", {
 })
 
 test_that("a style with no `layer` tag is never checked, in any layer", {
-  skip_if_not_installed("erglm")
-
   untagged <- function(data, config, stratify, exposure, response, strata, theme) list()
   plt <- er_test_data |> er_plot(aucss, ae1)
 
