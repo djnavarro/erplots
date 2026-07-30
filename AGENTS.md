@@ -1467,6 +1467,50 @@ this was additive), and `devtools::check()` (0 errors/warnings/notes).
 - Vignettes/articles live in `vignettes/articles/` and are built for the
   pkgdown site, not shipped with the package (see `.Rbuildignore`).
 
+## r-universe: `Suggests: emaxnls (>= 0.1.1.9000)` guards against resolving the CRAN release instead of the dev build
+
+erplots is published on r-universe (`djnavarro.r-universe.dev`), whose
+build/check pipeline installs `Suggests`/`Remotes` dependencies itself
+rather than relying on a pre-populated library. This broke once
+`emaxnls` was published to CRAN (as plain `emaxnls`, version `0.1.1`):
+that CRAN release predates erplots integration entirely (no
+`emax_logistic()`/`emaxlogistic` class, and -- confirmed by inspecting
+its installed `NAMESPACE` -- no `S3method()` registration for
+`er_predict`/`er_simulate`/`er_summary`, even though an
+`er_predict.emaxnls()` function happens to still exist internally from
+an earlier partial merge; without the `S3method()` entry, `UseMethod()`
+dispatch never finds it). With an unconstrained `Suggests: emaxnls`,
+r-universe's dependency resolver treated the CRAN release as a
+perfectly valid match for the `Suggests` entry and didn't fall through
+to the `Remotes: djnavarro/emaxnls` GitHub source (`Remotes:` is
+generally only forced when CRAN can't satisfy a dependency at all, or a
+version constraint requires it -- with both a CRAN and a Remotes
+candidate satisfying an unconstrained dependency, precedence isn't
+guaranteed to favor Remotes). The result: every `@examples` block using
+`emax_nls()`/`emax_logistic()` followed by `er_plot_add_model()` failed
+on r-universe's real build targets (linux/macos/windows; `wasm` and the
+plain `source` build happened not to hit the failing code path) with
+`Error in er_predict(): No 'er_predict()' method is available for
+objects of class <emaxnls>.` -- reproduced locally by installing
+`emaxnls` from CRAN alone (`0.1.1`, dispatch fails) versus from
+`djnavarro.r-universe.dev` (`0.1.1.9000`, dispatch works).
+
+Fixed by pinning a version floor in `DESCRIPTION` that only the GitHub
+dev build satisfies: `Suggests: emaxnls (>= 0.1.1.9000)`. This removes
+the ambiguity -- CRAN's `0.1.1` no longer satisfies the constraint, so
+the resolver must fall through to `Remotes: djnavarro/emaxnls`. No
+equivalent fix was needed for `erglm`, since it remains GitHub-only (not
+on CRAN) and so has no competing CRAN candidate to be resolved
+ambiguously against.
+
+**This constraint needs revisiting once emaxnls's own CRAN release
+catches up.** Once a future CRAN release of emaxnls actually registers
+the `er_predict`/`er_simulate`/`er_summary` S3 methods, this pin should
+either be dropped (if that CRAN version is an acceptable floor on its
+own) or bumped to whatever new dev-only feature, if any, erplots next
+comes to depend on -- don't just leave `>= 0.1.1.9000` in place
+indefinitely once it's no longer the operative constraint.
+
 ## Conventions
 
 - Use the base R pipe (`|>`), not the magrittr pipe.
