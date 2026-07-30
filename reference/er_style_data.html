@@ -161,8 +161,7 @@ points are normally redundant.</p></dd>
 <dt id="arg-jitter-height">jitter_height<a class="anchor" aria-label="anchor" href="#arg-jitter-height"></a></dt>
 <dd><p>Vertical jitter applied to the raw points, in
 response units (<code>er_style_data_overlay()</code>/<code>er_style_data_boxjitter()</code>
-only). Defaults to <code>NULL</code>, which reproduces the previous fixed
-behaviour: for <code>er_style_data_overlay()</code>, <code>0.05</code> for a binary
+only). Defaults to <code>NULL</code>, which produces <code>0.015</code> for a binary
 response and <code>0</code> otherwise; for <code>er_style_data_boxjitter()</code>, <code>0.3</code>
 when stratified and <code>0.15</code> otherwise. An explicit value overrides
 this for both cases uniformly.</p></dd>

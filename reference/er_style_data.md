@@ -109,8 +109,7 @@ er_style_data_hex(
 
   Vertical jitter applied to the raw points, in response units
   (`er_style_data_overlay()`/`er_style_data_boxjitter()` only). Defaults
-  to `NULL`, which reproduces the previous fixed behaviour: for
-  `er_style_data_overlay()`, `0.05` for a binary response and `0`
+  to `NULL`, which produces `0.015` for a binary response and `0`
   otherwise; for `er_style_data_boxjitter()`, `0.3` when stratified and
   `0.15` otherwise. An explicit value overrides this for both cases
   uniformly.
