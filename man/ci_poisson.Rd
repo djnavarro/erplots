@@ -17,10 +17,7 @@ number of observations in the bin); the rate being estimated is
 \item{conf_level}{Confidence level}
 }
 \value{
-Named numeric vector (\code{lower}, \code{upper}) for the rate \code{sum(x) / n}, with confidence level stored as an attribute. Uses the standard
-exact ("Garwood") Poisson interval, derived from the chi-squared/gamma
-relationship, rather than a normal approximation. If the total count
-is 0, the lower bound is 0 (there's no gamma quantile at \code{shape = 0}).
+Named numeric vector (\code{lower}, \code{upper}) for the rate \code{sum(x) / n}, with confidence level stored as an attribute.
 }
 \description{
 Exact Poisson confidence interval for a count rate
@@ -32,7 +29,9 @@ and \code{\link[=er_vpc_plot]{er_vpc_plot()}} when \code{response_type = "count"
 declared. Unlike \code{\link[=ci_t]{ci_t()}} (the default, opt-in-required
 approximation used when a count response auto-detects or is declared
 \code{"continuous"}), this interval is exact and never produces a
-negative lower bound.
+negative lower bound. Uses the standard exact ("Garwood") Poisson
+interval, derived from the chi-squared/gamma relationship; if the
+total count is 0, the lower bound is 0.
 }
 \examples{
 ci_poisson(3, 10)

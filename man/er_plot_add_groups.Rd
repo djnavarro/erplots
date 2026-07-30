@@ -14,10 +14,10 @@ er_plot_add_groups(
 )
 }
 \arguments{
-\item{object}{Partially constructed plot (has S3 class \code{er_plot})}
+\item{object}{Partially constructed plot (has S3 class \code{er_plot}).}
 
 \item{group_by}{Grouping variables to define groups for distribution
-plots (a tidyselection of variables)}
+plots (a tidyselection of variables).}
 
 \item{style}{Function drawing each group panel -- defaults to
 \code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}}. \code{\link[=er_style_group_violin]{er_style_group_violin()}} is the other
@@ -28,7 +28,7 @@ variable added by this call. If \code{style} is tagged with a \code{layer}
 informatively; an untagged builder is never checked.}
 
 \item{bins}{Number of quantile bins used for continuous grouping
-variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default)}
+variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
@@ -36,7 +36,7 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{TRUE} and \code{group_by} is itself the plot's stratification
 variable, since that would mean grouping and stratifying by the
 same column at once; pass \code{keep_strata = FALSE} for that grouping
-variable instead}
+variable instead.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
 when it's called at build time (identically for every grouping
@@ -54,8 +54,7 @@ grouping variables are binned into quantiles first, via
 the response, so it needs no \code{response_type} dispatch.
 }
 \details{
-Unlike the other four layers, this one is \strong{additive} -- see
-\code{\link[=er_plot]{er_plot()}}'s "Layers are either singleton or additive" -- each call
+Unlike the other four layers, the groups layer is \strong{additive}: each call
 adds another panel alongside any already added by a previous call,
 rather than replacing it.
 }

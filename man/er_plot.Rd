@@ -7,113 +7,29 @@
 er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
 }
 \arguments{
-\item{data}{Observed data}
+\item{data}{Data frame or tibble containing the observed data.}
 
-\item{exposure}{Exposure variable (one variable, unquoted). Must name a
-numeric column of \code{data}.}
+\item{exposure}{Exposure variable (one variable, unquoted).}
 
-\item{response}{Response variable (one variable, unquoted). Must name a
-column of \code{data}.}
+\item{response}{Response variable (one variable, unquoted).}
 
-\item{stratify_by}{Stratification variable used for color and fill (one
-variable, unquoted); see "Stratification" above. Must name a column of
-\code{data} if supplied.}
+\item{stratify_by}{Stratification variable used for color and fill (one variable, unquoted).}
 
-\item{response_type}{One of \code{"auto"} (the default), \code{"binary"},
-\code{"continuous"}, or \code{"count"}. Governs response-scale defaults (e.g.
-axis limits) and which summary/CI method the quantile and VPC layers
-use. When \code{"auto"}, the response column is classified as \code{"binary"}
-if it is logical or takes only values in \verb{\{0, 1\}}, and \code{"continuous"}
-otherwise -- this means a count (Poisson-style) response, e.g. an
-adverse-event count, auto-detects as \code{"continuous"} (counts aren't
-confined to \verb{\{0, 1\}}) and is summarised as an approximately-continuous
-quantity (bin mean plus a t-interval). \code{"auto"} never resolves to
-\code{"count"}: pass \code{response_type = "count"} explicitly for a genuine
-count response to instead get bin mean plus an \emph{exact} Poisson
-interval (see \code{\link[=ci_poisson]{ci_poisson()}}), which -- unlike the t-interval
-approximation -- never produces a negative lower bound. Explicitly
-declaring \code{response_type = "binary"} for a response column that
-isn't actually confined to \verb{\{0, 1\}} (or logical) triggers a warning
--- rows with an out-of-range value are silently excluded from the
-quantile layer's rate calculation rather than erroring, so this is
-a warning rather than an error, but the resulting rate is computed
-over a smaller effective denominator than the row count would
-suggest. Declaring \code{response_type = "count"} for a response column
-that contains a negative value \emph{does} error, rather than warn --
-unlike the binary case, a negative count isn't silently excluded,
-it makes \code{\link[=ci_poisson]{ci_poisson()}}'s exact Poisson interval undefined
-(\code{NaN}), so there's no usable partial result to fall back to.}
+\item{response_type}{One of \code{"auto"}, \code{"binary"}, \code{"continuous"}, or \code{"count"}.}
 }
 \value{
-An (empty) plot object of class \code{er_plot}
+An (empty) plot object of class \code{er_plot}.
 }
 \description{
-\code{er_plot()} creates an (empty) plot object of S3 class \code{er_plot}. Build
-up a plot by piping it through one or more layer functions --
-\code{\link[=er_plot_add_model]{er_plot_add_model()}} (fitted-model curve/ribbon),
-\code{\link[=er_plot_add_summary]{er_plot_add_summary()}} (a summary annotation, e.g. a p-value or
-descriptive label),
-\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} (exposure-quantile-binned response summary),
-\code{\link[=er_plot_add_data]{er_plot_add_data()}} (raw observations, by default overlaid on the
-model panel), and/or
-\code{\link[=er_plot_add_groups]{er_plot_add_groups()}} (grouped exposure-distribution panels) -- then
-render with \code{plot()}/\code{print()}, or build the ggplot2/patchwork objects
-directly with \code{\link[=er_plot_build]{er_plot_build()}}. \code{er_plot()} never fits a model itself;
-any model implementing the small interface in \link{er_model_interface} can
-be passed to \code{\link[=er_plot_add_model]{er_plot_add_model()}}.
+Create an \code{er_plot} specification for exposure-response visualization. Build the plot by adding layers (model, summary, quantiles, data, groups) and render with \code{plot()}/\code{print()} or \code{\link[=er_plot_build]{er_plot_build()}}.
 }
-\section{Layers are either singleton or additive}{
-\code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_summary]{er_plot_add_summary()}},
-\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}, and
-\code{\link[=er_plot_add_data]{er_plot_add_data()}} are \strong{singleton}: calling one of them twice
-on the same object overwrites the first call's result rather than
-combining the two. \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} is \strong{additive}: each call
-adds another grouped-distribution panel alongside any already added,
-rather than replacing them. This asymmetry is deliberate, not
-accidental -- there is only one "the model" and one "the quantile
-summary" to show per plot, but many legitimate ways to slice the
-exposure distribution by different grouping variables. One flagged
-future exception: overlaying two model curves for comparison isn't
-currently supported, but is the one singleton layer where an additive
-variant might eventually make sense.
+\details{
+Layers are either singleton or additive: model, summary, quantile, and data layers are singleton (a second call replaces the previous); groups are additive (each call adds a panel).
+
+\code{stratify_by} declares a discrete variable used for color/fill across layers; each layer's \code{keep_strata} controls whether it uses stratification. Rows with \code{NA} in the stratification variable are kept as their own level.
+
+\code{response_type} governs response-scale defaults and which interval method the quantile and VPC layers use; see \code{response_type} below and \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} for details.
 }
-
-\section{Stratification}{
-\code{stratify_by} (set once, here in \code{er_plot()}) declares a single
-discrete variable used to split layers by color/fill, with one shared,
-deduplicated legend across the whole composed plot. Each layer
-function's \code{keep_strata} argument controls whether \emph{that} layer
-actually uses the stratification (it defaults to \code{TRUE} whenever
-\code{stratify_by} was set, \code{FALSE} otherwise). \code{\link[=er_plot_add_data]{er_plot_add_data()}} is a
-partial exception to the "always color/fill" rule for a
-continuous/count response: its color aesthetic is already spoken for
-by the response value itself, so stratification falls back to one
-panel per stratum level instead of a shared legend -- see its own
-documentation for the general "a layer's own encoding takes
-precedence" rule this follows.
-
-A row whose \code{stratify_by} value is \code{NA} is \strong{kept as its own stratum}
--- an \code{NA}-labelled color/legend entry or facet, alongside the
-column's other levels -- rather than being silently dropped or
-erroring. This is a deliberate choice, not just an incidental
-consequence of \code{unique()}/\code{dplyr} grouping semantics (though it is
-also that): a missing stratification value can itself be informative
-(e.g. "arm not recorded", "assay below quantification limit"), and
-erplots has no principled way to guess whether a given \code{NA} should be
-dropped, recoded, or kept. If \code{NA} rows should instead be excluded, or
-recoded to an explicit level (e.g. \code{"Unknown"}), do so in \code{data}
-before calling \code{er_plot()}.
-}
-
-\section{Response type}{
-\code{response_type} (set once, here in \code{er_plot()}) governs the response's
-scale (\code{object$response$limits}) and which summary/CI method
-\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} and \code{\link[=er_vpc_plot]{er_vpc_plot()}} use; see the
-\code{response_type} parameter below and \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}'s own
-documentation for the specifics of each response type's summary
-statistic.
-}
-
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)

@@ -1,61 +1,27 @@
 
 #' Data layer builders for exposure-response plots
 #'
-#' @param data The original data frame
-#' @param config Configuration for the specific plot
-#' @param stratify Logical indicating whether to stratify
-#' @param exposure Exposure variable
-#' @param response Response variable
-#' @param strata Stratification variable
-#' @param theme Theme components
-#' @param ... Additional named arguments forwarded from
-#'   [er_plot_add_data()]'s own `...`; see [er_style()]'s "Passing extra
-#'   arguments to a builder" section.
-#' @param jitter_height Vertical jitter applied to the raw points, in
-#'   response units (`er_style_data_overlay()`/`er_style_data_boxjitter()`
-#'   only). Defaults to `NULL`, which produces `0.015` for a binary
-#'   response and `0` otherwise; for `er_style_data_boxjitter()`, `0.3`
-#'   when stratified and `0.15` otherwise. An explicit value overrides
-#'   this for both cases uniformly.
-#' @param alpha Point transparency for `er_style_data_overlay()`'s raw
-#'   points (`0`-`1`). Default `0.4`, matching the previous fixed value.
-#' @param size Point size for `er_style_data_overlay()`'s raw points.
-#'   Default `1`, matching the previous fixed value.
+#' @param data The original data frame.
+#' @param config Configuration for the specific plot.
+#' @param stratify Logical: whether to stratify.
+#' @param exposure Exposure variable.
+#' @param response Response variable.
+#' @param strata Stratification variable.
+#' @param theme Theme components.
+#' @param ... Additional named arguments forwarded from [er_plot_add_data()]'s own `...`.
+#' @param jitter_height Vertical jitter applied to raw points.
+#' @param alpha Point transparency for `er_style_data_overlay()`.
+#' @param size Point size for `er_style_data_overlay()`.
 #' @param box_width Width of `er_style_data_boxjitter()`'s boxplot.
-#'   Default `0.6`, matching the previous fixed value.
-#' @param box_alpha Transparency of `er_style_data_boxjitter()`'s
-#'   boxplot fill (`0`-`1`). Default `0.4`, matching the previous fixed
-#'   value.
-#' @param show_outliers Whether `er_style_data_boxjitter()`'s boxplot
-#'   should draw its own outlier points (`geom_boxplot()`'s usual
-#'   default), rather than suppressing them. Default `FALSE` (outliers
-#'   hidden), matching the previous fixed behaviour -- raw points are
-#'   already shown via the jitter layer, so a boxplot's own outlier
-#'   points are normally redundant.
-#' @param jitter_size Point size for `er_style_data_boxjitter()`'s
-#'   jittered points. Default `1`, matching the previous fixed value.
-#' @param jitter_alpha Point transparency for
-#'   `er_style_data_boxjitter()`'s jittered points (`0`-`1`). Default
-#'   `0.6`, matching the previous fixed value.
-#' @param bins Number of hex bins along each axis for
-#'   `er_style_data_hex()`'s [ggplot2::geom_hex()]. Default `30`,
-#'   matching the previous fixed value.
+#' @param box_alpha Transparency of `er_style_data_boxjitter()`'s boxplot fill.
+#' @param show_outliers Logical: whether `er_style_data_boxjitter()` draws outlier points.
+#' @param jitter_size Point size for `er_style_data_boxjitter()`'s jittered points.
+#' @param jitter_alpha Transparency of `er_style_data_boxjitter()`'s jittered points.
+#' @param bins Number of hex bins for `er_style_data_hex()`.
 #'
-#' @details Builders for the `data` layer ([er_plot_add_data()]), which
-#' shows the raw observations alongside the fitted curve. Each builder is
-#' tagged, via [er_style_tag()], with the *structural* family it belongs to:
-#' `er_style_data_overlay()` (the default) and `er_style_data_hex()` use the
-#' `"overlay"` layout, plotting directly on the model panel at the raw
-#' `(exposure, response)` coordinates (points or, for `er_style_data_hex()`,
-#' a 2D density); `er_style_data_boxjitter()` uses the `"panel"` layout
-#' (binary response only), stacking boxplot-plus-jitter panels for
-#' responders/non-responders below the base plot. See [er_style_tag()] and
-#' [er_plot_add_data()] for how this tag is used. All three built-in
-#' data builders are also tagged `layer = "data"`, so [er_plot_add_data()]
-#' errors informatively if handed a builder tagged for a different layer.
+#' @details Builders for the `data` layer ([er_plot_add_data()]) are tagged with the structural family they belong to via [er_style_tag()]. `er_style_data_overlay()` and `er_style_data_hex()` use the overlay layout, drawing in the main panel; `er_style_data_boxjitter()` uses the panel layout and is binary-response only. All built-in data builders are also tagged `layer = "data"`, so [er_plot_add_data()] errors if given a builder tagged for another layer.
 #'
-#' See [er_style()] for the shared builder interface these functions
-#' implement, including how to write a custom builder of your own.
+#' See [er_style()] for the shared builder interface these functions implement.
 #'
 #' @returns A geom, or a list of geoms; see [er_style()].
 #'

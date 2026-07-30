@@ -14,34 +14,17 @@ er_simulate(model, newdata, nsim = 100, seed = NULL, ...)
 er_summary(model, ...)
 }
 \arguments{
-\item{model}{A fitted exposure-response model object. erplots never
-fits models itself and never inspects a model's formula, so nothing
-in this interface or in \code{\link[=er_plot_add_model]{er_plot_add_model()}} cross-checks that
-\code{model} was actually fit on the same exposure/response variables as
-the plot it's added to (e.g. a model fit on \code{ae2} passed to a plot
-declaring \code{response = ae1}) -- such a mismatch runs silently rather
-than warning or erroring. Ensuring \code{model} is appropriate to the
-plotting context is the caller's responsibility.}
+\item{model}{A fitted exposure-response model object.}
 
-\item{newdata}{A data frame of covariate values at which to predict.
-When \code{\link[=er_plot_add_model]{er_plot_add_model()}} builds this internally for the model
-curve/ribbon, it always contains the exposure variable (a grid) and,
-if stratified, the strata variable -- plus, for any \emph{other} column
-the model's fitting data had (covariates \code{er_predict()}'s method
-might reference in its formula but erplots has no way to know about,
-since it never inspects a model's formula), a single reference value
-(first factor level, or mean for a numeric column) repeated across
-every row. A method doesn't need to do anything special to benefit
-from this -- it only matters if the method's own \code{predict()} call
-would otherwise error on a \code{newdata} missing a covariate it needs.}
+\item{newdata}{A data frame of covariate values at which to predict.}
 
-\item{conf_level}{Confidence level for the prediction interval}
+\item{conf_level}{Confidence level for the prediction interval.}
 
-\item{...}{Passed to methods}
+\item{...}{Passed to methods.}
 
-\item{nsim}{Number of simulation replicates}
+\item{nsim}{Number of simulation replicates.}
 
-\item{seed}{Optional RNG seed}
+\item{seed}{Optional RNG seed.}
 }
 \value{
 \itemize{
@@ -107,11 +90,10 @@ This is purely additive: a method that only ever returns
 }
 }
 \description{
-\code{erplots} draws exposure-response plots from \emph{any} fitted model that
-implements this small interface, rather than assuming a particular model
-class (e.g. a logistic regression \code{glm}). To make a model usable with
-\code{\link[=er_plot_add_model]{er_plot_add_model()}} and friends, implement at least a method for
-\code{\link[=er_predict]{er_predict()}}. Implementing \code{\link[=er_simulate]{er_simulate()}} additionally enables
-simulation-based visualisations (e.g. spaghetti plots, VPCs); implementing
-\code{\link[=er_summary]{er_summary()}} enables annotations such as p-value labels.
+\code{erplots} draws exposure-response plots from fitted models that implement this small interface, rather than assuming a particular model class. Implement \code{er_predict()} for basic plotting support; implement \code{er_simulate()} for simulation-based visualisations; implement \code{er_summary()} for summary annotations.
+}
+\details{
+\code{er_plot_add_model()} does not verify that \code{model} was fit on the same exposure/response variables as the plot; that compatibility is the caller's responsibility. When \code{er_plot_add_model()} builds \code{newdata}, it always includes the exposure and, if stratified, strata variables, plus reference values for any other covariates in the model's original fitting data.
+
+\code{er_predict()} should return \code{newdata} with \code{fit_resp}, \code{ci_lower}, and \code{ci_upper}. \code{er_simulate()} should return \code{newdata} replicates with \code{sim_id} and \code{fit_resp}; it may additionally return \code{sim_resp} for response-level simulations. \code{er_summary()} should return \code{NULL} or a named list with optional keys such as \code{p_value}, \code{coefficients}, and \code{glance}.
 }

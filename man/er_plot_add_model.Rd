@@ -16,48 +16,15 @@ er_plot_add_model(
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_plot})}
 
-\item{model}{A fitted exposure-response model. Must implement
-\code{\link[=er_predict]{er_predict()}}; implementing \code{\link[=er_simulate]{er_simulate()}} and \code{\link[=er_summary]{er_summary()}}
-enables additional visualisations (see \link{er_model_interface}). If
-\code{model}'s formula references covariates beyond the exposure (and,
-when \code{keep_strata = TRUE}, strata) variable, those covariates are
-filled with a reference value (first factor level, or mean for a
-numeric column) when building the prediction grid -- see
-\link{er_model_interface}'s \code{newdata} documentation. \strong{erplots never
-checks that \code{model} was actually fit on the same response as this
-plot's declared \code{response}} (or that its exposure variable matches
-this plot's \code{exposure}) -- it's model-agnostic by design and never
-inspects a model's formula (see \link{er_model_interface}), so nothing
-here would catch, say, a model fit on \code{ae2} being passed to a plot
-declaring \code{ae1}. It's the caller's responsibility to ensure \code{model}
-is actually appropriate to this plot's exposure/response before
-calling this function; a mismatch runs silently rather than
-warning or erroring.}
+\item{model}{A fitted exposure-response model. Must implement \code{\link[=er_predict]{er_predict()}}.}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise}
+\item{keep_strata}{Logical; whether this layer should use stratification.}
 
-\item{style}{Function drawing the model curve/ribbon -- defaults to
-\code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}} (mean prediction + confidence ribbon).
-\code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} (simulated draws, via \code{\link[=er_simulate]{er_simulate()}}) is
-the other built-in option; any function matching the standard
-\verb{(data, config, stratify, exposure, response, strata, theme, ...)}
-signature can be supplied instead -- see \code{\link[=er_style]{er_style()}}. If \code{style} is
-tagged with a \code{layer} (via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"model"},
-this errors informatively rather than passing a mismatched \code{config}
-shape to the builder; an untagged builder is never checked.}
+\item{style}{Function drawing the model curve/ribbon. Defaults to \code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}}.}
 
-\item{conf_level}{Confidence level for the prediction ribbon}
+\item{conf_level}{Confidence level for the prediction ribbon.}
 
-\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time (the builder is free to use only the
-arguments it recognizes, via its own \code{...}). Must be named -- see
-\code{\link[=er_style]{er_style()}}'s "Passing extra arguments to a builder" section. For
-example,
-\code{er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626)}
-lets \code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} pass a reproducible \code{seed} to
-\code{\link[=er_simulate]{er_simulate()}} instead of relying on erglm's auto-selected one.}
+\item{...}{Additional named arguments forwarded unchanged to \code{style} at build time.}
 }
 \value{
 The input \code{object}, with the model layer added
@@ -66,16 +33,11 @@ The input \code{object}, with the model layer added
 Adds the model layer: a fitted exposure-response curve with an
 uncertainty ribbon (the default, via \code{\link[=er_predict]{er_predict()}}), or a spaghetti
 plot of simulated draws (\code{style = er_style_model_spaghetti}, via
-\code{\link[=er_simulate]{er_simulate()}}). This layer needs no \code{response_type} dispatch -- it
-only ever consumes \code{\link[=er_predict]{er_predict()}}'s output on the response's own
-scale. For a summary annotation (e.g. a p-value, via \code{\link[=er_summary]{er_summary()}}),
-see \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} -- a separate, independent layer that
-doesn't require a model layer to also be present.
+\code{\link[=er_simulate]{er_simulate()}}). This layer uses \code{\link[=er_predict]{er_predict()}} to compute model
+predictions on the response scale.
 }
 \details{
-This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
-singleton or additive" -- so calling it twice replaces the previous
-model layer rather than overlaying two model curves.
+\code{model} may reference covariates beyond the exposure and strata variables. erplots fills any additional covariates from the plot data with a reference value (first factor level or numeric mean) when building the prediction grid. erplots does not check that \code{model} was fit on the same exposure/response as the plot; the caller must ensure compatibility.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
@@ -92,8 +54,7 @@ erglm_data |>
   er_plot_add_model(mod, style = er_style_model_spaghetti) |>
   plot()
 
-# plug in a fully custom model-curve builder; see `?er_style` for the
-# full contract
+# plug in a fully custom model-curve builder
 build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme, ...) {
   ggplot2::geom_line(
     data = config$predictions,
@@ -106,9 +67,9 @@ erglm_data |>
   er_plot_add_model(mod, style = build_model_dashed) |>
   plot()
 
-# a model with a covariate beyond the exposure variable -- `sex`, here
-# -- still works even when this layer isn't stratifying by it (`sex`
-# is filled in at a reference value when building the prediction grid)
+# a model with a covariate beyond the exposure variable still works even when 
+# this layer isn't stratifying by it: `sex` is set to a reference value 
+# when building the prediction grid, which may not be what the user wants
 mod_sex <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
 erglm_data |>
   er_plot(aucss, ae1) |>

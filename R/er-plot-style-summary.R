@@ -1,43 +1,21 @@
 #' Summary annotation builders for exposure-response plots
 #'
-#' @param data The original data frame
-#' @param config Configuration for the specific plot
-#' @param stratify Logical indicating whether to stratify
-#' @param exposure Exposure variable
-#' @param response Response variable
-#' @param strata Stratification variable
-#' @param theme Theme components
-#' @param inset Distance from the panel edge for the annotation label, in
-#'   normalized device coordinates (0 = panel edge, 0.5 = panel centre).
-#'   Default `0.05`, reproducing the previous fixed value (labels placed
-#'   at `0.05` from the near edge and `0.95` from the far edge).
-#' @param label_size Label text size (in mm) — maps to `geom_label()`'s
-#'   `size` parameter (geom_label uses `size.unit = "mm"`). If `NULL` the
-#'   geom default is used.
-#' @param label_colour Label text colour — mapped to `geom_label()`'s
-#'   `text.colour` parameter. If `NULL` the geom default is used.
-#' @param label_fill Label background fill — passed as `fill` to
-#'   `geom_label()`. If `NULL` the geom default is used.
-#' @param fields (for `er_style_summary_gof()` only) Which fields from
-#'   `glance` to include, and in what order. A character vector, any
-#'   subset of `c("n", "aic", "bic", "r_squared")` in the desired display
-#'   order; unrecognised names are silently ignored. Default
-#'   `c("n", "aic", "bic", "r_squared")`.
-#' @param ... Additional named arguments forwarded from
-#'   [er_plot_add_model()]'s own `...` (shared with `style`); see
-#'   [er_style()]'s "Passing extra arguments to a builder" section.
+#' @param data The original data frame.
+#' @param config Configuration for the specific plot.
+#' @param stratify Logical: whether to stratify.
+#' @param exposure Exposure variable.
+#' @param response Response variable.
+#' @param strata Stratification variable.
+#' @param theme Theme components.
+#' @param inset Distance from the panel edge for the annotation label.
+#' @param label_size Label text size.
+#' @param label_colour Label text colour.
+#' @param label_fill Label background fill.
+#' @param fields Fields from `glance` to include for `er_style_summary_gof()`.
+#' @param ... Additional named arguments forwarded from [er_plot_add_model()]'s own `...`.
 #'
-#' @details Builders for [er_plot_add_summary()], which annotate the base
-#' panel with a summary statistic or descriptive label rather than
-#' drawing a curve or raw data. `er_style_summary_pvalue()` (the default)
-#' places a formatted p-value -- derived from the model's own
-#' [er_summary()] method -- in whichever corner of the panel is furthest
-#' from the observed data, and draws nothing at all if no model was
-#' supplied to [er_plot_add_summary()], or if the layer is stratified (one
-#' p-value doesn't unambiguously describe multiple curves).
-#' `er_style_summary_n()` is a model-agnostic alternative: it always draws,
-#' showing the total number of observations (or, when stratified, one
-#' count per stratum level) -- demonstrating that a summary annotation
+#' @details Builders for [er_plot_add_summary()] annotate the base panel with a summary statistic or descriptive label. `er_style_summary_pvalue()` draws a formatted p-value from the model's [er_summary()] result. `er_style_summary_n()` draws observation counts. `er_style_summary_coefficients()` and `er_style_summary_gof()` consume `coefficients` and `glance`, respectively. All built-in summary builders are tagged `layer = "summary"`.
+
 #' doesn't have to originate from a fitted model at all.
 #' `er_style_summary_coefficients()` draws one line per row of the model's
 #' `coefficients` table (see [er_summary()]'s `coefficients` field), useful

@@ -18,63 +18,36 @@ er_vpc_plot(
 )
 }
 \arguments{
-\item{data}{Observed data}
+\item{data}{Observed data.}
 
-\item{sim}{Simulated data, with the same \code{exposure}/\code{response}/\code{group_by}
-columns as \code{data}, plus a \code{sim_id} column identifying each replicate.
-Mutually exclusive with \code{model}; supply exactly one of the two. Useful
-for a hand-built simulation, or a model-specific helper that doesn't
-go through the \code{er_simulate()} interface. Passing \code{model} instead is
-preferred whenever the model implements \code{\link[=er_simulate]{er_simulate()}}'s \code{sim_resp}
-extension (see \link{er_model_interface}).}
+\item{sim}{Simulated data with matching \code{exposure}/\code{response}/\code{group_by} columns and \code{sim_id}.}
 
-\item{exposure}{Exposure variable (one variable, unquoted)}
+\item{exposure}{Exposure variable (unquoted).}
 
-\item{response}{Response variable (one variable, unquoted). May be
-binary (0/1, or logical) or continuous; see \code{response_type}}
+\item{response}{Response variable (unquoted).}
 
-\item{group_by}{Variable (unquoted) to stratify predictions}
+\item{group_by}{Variable (unquoted) to stratify predictions.}
 
-\item{model}{A fitted exposure-response model implementing
-\code{\link[=er_simulate]{er_simulate()}} with a \code{sim_resp} column (see \link{er_model_interface}).
-Mutually exclusive with \code{sim}; supply exactly one of the two. When
-supplied, \code{sim} is built internally via \code{er_simulate(model, newdata = data, nsim = nsim, seed = seed)}; an error is raised if the model's
-\code{er_simulate()} method doesn't provide \code{sim_resp} (either because it
-returns \code{NULL}, i.e. no simulation support at all, or because it only
-supports the parameter-uncertainty-only \code{fit_resp} used by
-\code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} -- a VPC needs the fuller, response-level
-simulation \code{sim_resp} represents; see \link{er_model_interface} for the
-distinction).}
+\item{model}{A fitted model implementing \code{\link[=er_simulate]{er_simulate()}} with \code{sim_resp}.}
 
-\item{nsim}{Number of simulation replicates, only used when \code{model} is
-supplied. Must be a single positive whole number.}
+\item{nsim}{Number of simulation replicates, only used with \code{model}.}
 
-\item{seed}{Optional RNG seed, only used when \code{model} is supplied}
+\item{seed}{Optional RNG seed, only used with \code{model}.}
 
-\item{conf_level}{Confidence level}
+\item{conf_level}{Confidence level.}
 
-\item{response_type}{One of \code{"auto"} (default), \code{"binary"},
-\code{"continuous"}, or \code{"count"}. Governs how the observed-side summary
-is computed: response \emph{rate} with a Clopper-Pearson CI for
-\code{"binary"}, bin \emph{mean} with a t-interval for \code{"continuous"} (see
-\code{\link[=ci_t]{ci_t()}}), or bin \emph{mean} with an exact Poisson interval for
-\code{"count"} (see \code{\link[=ci_poisson]{ci_poisson()}}). \code{"auto"} detects from the
-observed \code{response} column (entirely in \verb{\{0, 1\}}, or logical, is
-treated as binary; see \code{\link[=er_plot]{er_plot()}}'s \code{response_type} for the same
-heuristic) and never resolves to \code{"count"}: a count (Poisson-style)
-response auto-detects as \code{"continuous"} (counts aren't confined to
-\verb{\{0, 1\}}) and is summarised with the bin-mean-plus-t-interval
-approximation unless \code{response_type = "count"} is declared
-explicitly, in which case the exact Poisson interval is used instead.}
+\item{response_type}{One of \code{"auto"}, \code{"binary"}, \code{"continuous"}, or \code{"count"}.}
 }
 \value{
 A ggplot2 object
 }
 \description{
-Compares observed response rates against simulated response rates from a
-model, stratified by a grouping variable. This function is model-agnostic:
-it operates purely on data frames, and can obtain those data frames in
-either of two ways -- see the \code{sim}/\code{model} arguments below.
+Compare observed and simulated response summaries grouped by a stratification variable.
+}
+\details{
+\code{sim} and \code{model} are mutually exclusive; supply exactly one. \code{model} is preferred when it implements \code{\link[=er_simulate]{er_simulate()}} with \code{sim_resp} because \code{er_vpc_plot()} needs response-level simulated observations rather than only mean predictions.
+
+\code{response_type} controls how the observed-side summary is computed: rate with a Clopper-Pearson interval for binary, mean with a t-interval for continuous, and mean with an exact Poisson interval for count.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

@@ -18,27 +18,25 @@ cut_quantile(x, n = 4)
 }
 \value{
 A factor. \code{cut_exposure_quantile()}'s result additionally
-carries a \code{"breaks"} attribute -- the \code{n + 1} quantile cutpoints
-(excluding placebo) used to form the bins, as computed by
-\code{\link[stats:quantile]{stats::quantile()}} -- which quantile-layer builders that draw
-bin-boundary separators (e.g. \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}})
-read back out via \code{attr(exposure_bins, "breaks")}.
-Both \code{cut_exposure_quantile()} (excluding placebo and \code{NA} values) and
-\code{cut_quantile()} (excluding \code{NA} values) error if \code{x} has fewer than
-2 distinct values -- e.g. a constant, all-\code{NA}, or single-observation
-column -- since quantile bins aren't well-defined in that case;
-without this check, \code{\link[stats:quantile]{stats::quantile()}} would silently produce
-non-unique/degenerate breaks and the error would instead surface
-much later, opaquely, from inside \code{\link[=cut]{cut()}}. If \code{x} has at least 2
-distinct values but not enough resolution to distinguish all \code{n}
-requested bins (e.g. many repeated values clustered at one end),
-both functions warn and silently fall back to using as many bins
-as the data actually supports, rather than crashing (duplicate
-\code{quantile()} breaks otherwise fail inside \code{\link[=cut]{cut()}}) or showing fewer
-bins than requested with no explanation.
+carries a \code{"breaks"} attribute holding the \code{n + 1} quantile
+cutpoints used to form the bins.
 }
 \description{
-Cut a continuous variable into quantiles
+\code{cut_quantile()} bins a numeric vector into \code{n} quantile groups.
+\code{cut_exposure_quantile()} does the same for an exposure variable,
+additionally keeping placebo (\code{0}) observations in their own bin.
+}
+\details{
+Both functions error if \code{x} has fewer than 2 distinct
+non-missing values, since quantile bins aren't well-defined in that
+case. If \code{x} doesn't have enough resolution to distinguish all \code{n}
+requested bins (e.g. many repeated values clustered at one end),
+both functions warn and fall back to using as many bins as the data
+supports, rather than erroring or silently showing fewer bins with
+no explanation. \code{cut_exposure_quantile()}'s \code{"breaks"} attribute is
+read back out by quantile-layer builders that draw bin-boundary
+separators (e.g. \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}}) via
+\code{attr(exposure_bins, "breaks")}.
 }
 \examples{
 x <- rnorm(100)

@@ -1,107 +1,24 @@
 
 #' The exposure-response plotting mini-language
 #'
-#' `er_plot()` creates an (empty) plot object of S3 class `er_plot`. Build
-#' up a plot by piping it through one or more layer functions --
-#' [er_plot_add_model()] (fitted-model curve/ribbon),
-#' [er_plot_add_summary()] (a summary annotation, e.g. a p-value or
-#' descriptive label),
-#' [er_plot_add_quantiles()] (exposure-quantile-binned response summary),
-#' [er_plot_add_data()] (raw observations, by default overlaid on the
-#' model panel), and/or
-#' [er_plot_add_groups()] (grouped exposure-distribution panels) -- then
-#' render with `plot()`/`print()`, or build the ggplot2/patchwork objects
-#' directly with [er_plot_build()]. `er_plot()` never fits a model itself;
-#' any model implementing the small interface in [er_model_interface] can
-#' be passed to [er_plot_add_model()].
+#' Create an `er_plot` specification for exposure-response visualization. Build the plot by adding layers (model, summary, quantiles, data, groups) and render with `plot()`/`print()` or [er_plot_build()].
+#'
 #'
 #' @details
-#' # Layers are either singleton or additive
+#' Layers are either singleton or additive: model, summary, quantile, and data layers are singleton (a second call replaces the previous); groups are additive (each call adds a panel).
 #'
-#' [er_plot_add_model()], [er_plot_add_summary()],
-#' [er_plot_add_quantiles()], and
-#' [er_plot_add_data()] are **singleton**: calling one of them twice
-#' on the same object overwrites the first call's result rather than
-#' combining the two. [er_plot_add_groups()] is **additive**: each call
-#' adds another grouped-distribution panel alongside any already added,
-#' rather than replacing them. This asymmetry is deliberate, not
-#' accidental -- there is only one "the model" and one "the quantile
-#' summary" to show per plot, but many legitimate ways to slice the
-#' exposure distribution by different grouping variables. One flagged
-#' future exception: overlaying two model curves for comparison isn't
-#' currently supported, but is the one singleton layer where an additive
-#' variant might eventually make sense.
+#' `stratify_by` declares a discrete variable used for color/fill across layers; each layer's `keep_strata` controls whether it uses stratification. Rows with `NA` in the stratification variable are kept as their own level.
 #'
-#' # Stratification
+#' `response_type` governs response-scale defaults and which interval method the quantile and VPC layers use; see `response_type` below and [er_plot_add_quantiles()] for details.
+
 #'
-#' `stratify_by` (set once, here in `er_plot()`) declares a single
-#' discrete variable used to split layers by color/fill, with one shared,
-#' deduplicated legend across the whole composed plot. Each layer
-#' function's `keep_strata` argument controls whether *that* layer
-#' actually uses the stratification (it defaults to `TRUE` whenever
-#' `stratify_by` was set, `FALSE` otherwise). [er_plot_add_data()] is a
-#' partial exception to the "always color/fill" rule for a
-#' continuous/count response: its color aesthetic is already spoken for
-#' by the response value itself, so stratification falls back to one
-#' panel per stratum level instead of a shared legend -- see its own
-#' documentation for the general "a layer's own encoding takes
-#' precedence" rule this follows.
+#' @param data Data frame or tibble containing the observed data.
+#' @param exposure Exposure variable (one variable, unquoted).
+#' @param response Response variable (one variable, unquoted).
+#' @param stratify_by Stratification variable used for color and fill (one variable, unquoted).
+#' @param response_type One of `"auto"`, `"binary"`, `"continuous"`, or `"count"`.
 #'
-#' A row whose `stratify_by` value is `NA` is **kept as its own stratum**
-#' -- an `NA`-labelled color/legend entry or facet, alongside the
-#' column's other levels -- rather than being silently dropped or
-#' erroring. This is a deliberate choice, not just an incidental
-#' consequence of `unique()`/`dplyr` grouping semantics (though it is
-#' also that): a missing stratification value can itself be informative
-#' (e.g. "arm not recorded", "assay below quantification limit"), and
-#' erplots has no principled way to guess whether a given `NA` should be
-#' dropped, recoded, or kept. If `NA` rows should instead be excluded, or
-#' recoded to an explicit level (e.g. `"Unknown"`), do so in `data`
-#' before calling `er_plot()`.
-#'
-#' # Response type
-#'
-#' `response_type` (set once, here in `er_plot()`) governs the response's
-#' scale (`object$response$limits`) and which summary/CI method
-#' [er_plot_add_quantiles()] and [er_vpc_plot()] use; see the
-#' `response_type` parameter below and [er_plot_add_quantiles()]'s own
-#' documentation for the specifics of each response type's summary
-#' statistic.
-#'
-#' @param data Observed data
-#' @param exposure Exposure variable (one variable, unquoted). Must name a
-#'   numeric column of `data`.
-#' @param response Response variable (one variable, unquoted). Must name a
-#'   column of `data`.
-#' @param stratify_by Stratification variable used for color and fill (one
-#'   variable, unquoted); see "Stratification" above. Must name a column of
-#'   `data` if supplied.
-#' @param response_type One of `"auto"` (the default), `"binary"`,
-#'   `"continuous"`, or `"count"`. Governs response-scale defaults (e.g.
-#'   axis limits) and which summary/CI method the quantile and VPC layers
-#'   use. When `"auto"`, the response column is classified as `"binary"`
-#'   if it is logical or takes only values in `{0, 1}`, and `"continuous"`
-#'   otherwise -- this means a count (Poisson-style) response, e.g. an
-#'   adverse-event count, auto-detects as `"continuous"` (counts aren't
-#'   confined to `{0, 1}`) and is summarised as an approximately-continuous
-#'   quantity (bin mean plus a t-interval). `"auto"` never resolves to
-#'   `"count"`: pass `response_type = "count"` explicitly for a genuine
-#'   count response to instead get bin mean plus an *exact* Poisson
-#'   interval (see [ci_poisson()]), which -- unlike the t-interval
-#'   approximation -- never produces a negative lower bound. Explicitly
-#'   declaring `response_type = "binary"` for a response column that
-#'   isn't actually confined to `{0, 1}` (or logical) triggers a warning
-#'   -- rows with an out-of-range value are silently excluded from the
-#'   quantile layer's rate calculation rather than erroring, so this is
-#'   a warning rather than an error, but the resulting rate is computed
-#'   over a smaller effective denominator than the row count would
-#'   suggest. Declaring `response_type = "count"` for a response column
-#'   that contains a negative value *does* error, rather than warn --
-#'   unlike the binary case, a negative count isn't silently excluded,
-#'   it makes [ci_poisson()]'s exact Poisson interval undefined
-#'   (`NaN`), so there's no usable partial result to fall back to.
-#'
-#' @returns An (empty) plot object of class `er_plot`
+#' @returns An (empty) plot object of class `er_plot`.
 #'
 #' @examples
 #' if (requireNamespace("erglm", quietly = TRUE)) {
@@ -302,64 +219,45 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
 
 #' Adjust theme/labels for an `er_plot` object
 #'
-#' Adjusts the styling knobs a ggplot2 user would expect to control --
-#' axis/legend labels, plot title/subtitle/caption, axis limits, the
-#' overall visual theme, the discrete color/fill palette used for
-#' stratification, value formatters, the legend key glyph, the
-#' quantile layer's stratum-dodge spacing, and relative panel heights --
-#' without touching which variable is mapped to which aesthetic (that's
-#' controlled by a layer's `style`; see [er_style()]).
+#' Set axis/legend labels, plot titles/captions, axis limits, theme objects, discrete and continuous scale objects, formatters, legend key glyph, and relative panel heights. This does not change which variable is mapped to which aesthetic.
 #'
-#' `dodge_width` is the one setting here that's about stratification
-#' *layout* rather than a single layer's visual style -- it's read by
+#' @details
+#' `dodge_width` is a stratification-layout setting used by
 #' [er_style_quantile_errorbar()]/[er_style_quantile_pointrange()] (and
-#' their `_vlines` variants) to horizontally separate strata within each
-#' quantile bin. It lives in `er_plot_theme()`, rather than as an
-#' argument to those builders, because dodging is a property of how
-#' stratification lays out a layer, not something specific to any one
-#' builder's own visual choices.
+#' their `_vlines` variants) to separate strata horizontally within each
+#' quantile bin. It belongs in `er_plot_theme()` because dodging is about
+#' stratification layout, not an individual builder's visual style.
 #'
 #' Every argument defaults to `NULL`, meaning "leave whatever was set
-#' before unchanged" -- so `er_plot_theme()` can be called more than once
-#' on the same object, each call only touching the arguments it actually
-#' supplies (the same accumulate-by-default behaviour as
-#' [ggplot2::theme()]'s own merging). There is no way to reset a field
-#' back to its [er_plot()] default other than re-supplying that default's
-#' value explicitly.
+#' before unchanged". This allows repeated calls to `er_plot_theme()` to
+#' update only the supplied fields, like [ggplot2::theme()]. There is no
+#' implicit way to reset a field to the `er_plot()` default.
 #'
-#' `color_discrete`/`fill_discrete` only affect aesthetics that are
-#' genuinely mapped to the stratification variable; `color_continuous`/
-#' `fill_continuous` are the symmetric counterpart for aesthetics mapped to
-#' something else continuous -- [er_style_data_hex()]'s density `fill`, or
-#' a continuous/count response's color-encoded data layer (there's no
-#' built-in builder for the latter today; see [er_style_tag()]'s `layout`
-#' argument). Each of the four only ever touches the aesthetic role it
-#' names -- supplying `color_continuous` never affects a discrete `colour`
-#' mapping, and vice versa. If a custom builder adds its own
-#' `scale_color_*()`/`scale_fill_*()` directly, supplying any of these four
-#' here will add a second scale on top (ggplot2 will emit a message and the
-#' later one wins) rather than detecting and deferring to the builder's own
-#' choice.
+#' `color_discrete`/`fill_discrete` apply only when a layer's `colour`/
+#' `fill` aesthetic is mapped to stratification. Their continuous
+#' counterparts, `color_continuous`/`fill_continuous`, apply only when the
+#' aesthetic is mapped to a continuous quantity such as density or a
+#' continuous/count response value. If a custom builder adds its own scale,
+#' supplying one of these four will add a second scale and let ggplot2
+#' choose the later one.
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`)
-#' @param xlab,ylab Exposure/response axis label (single string), written to
-#'   `object$exposure$label`/`object$response$label`.
-#' @param strata_lab Stratification legend label (single string), written
-#'   to `object$strata$label`. Errors if `stratify_by` wasn't set in
+#' @param xlab,ylab Exposure/response axis label (single string).
+#' @param strata_lab Stratification legend label (single string). 
+#'   Errors if `stratify_by` wasn't set in
 #'   [er_plot()] -- there's no stratification legend to label.
 #' @param title,subtitle,caption Plot-level annotation text (single
 #'   strings), applied via `patchwork::plot_annotation()` in
 #'   [er_plot_build()].
 #' @param xlim,ylim Exposure/response axis limits (length-2, increasing
-#'   numeric vectors), written to `object$exposure$limits`/
-#'   `object$response$limits`. These are read lazily by every builder at
+#'   numeric vectors). These are read lazily by every builder at
 #'   build time, so it doesn't matter whether `er_plot_theme()` is called
 #'   before or after the layers that use them.
-#' @param theme_base A ggplot2 theme object (e.g. [ggplot2::theme_minimal()]),
-#'   written to `object$theme$theme_base` -- the swappable overall visual
+#' @param theme_base A ggplot2 theme object (e.g. [ggplot2::theme_minimal()])
+#'   -- the swappable overall visual
 #'   theme, defaulting to [ggplot2::theme_bw()]
 #' @param theme_extra A ggplot2 theme object (e.g. from [ggplot2::theme()]),
-#'   written to `object$theme$theme_extra` -- additional theme tweaks
+#'   -- additional theme tweaks
 #'   layered on top of `theme_base`, defaulting to a panel border plus
 #'   `legend.position = "bottom"`. Supplying a new value fully replaces
 #'   this default rather than merging with it, so re-include the border/
@@ -367,30 +265,25 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
 #'   own additions.
 #' @param color_discrete,fill_discrete A discrete ggplot2 scale object
 #'   (e.g. [ggplot2::scale_color_brewer()], [ggplot2::scale_fill_viridis_d()]),
-#'   written to `object$theme$color_discrete`/`object$theme$fill_discrete`
-#'   and applied to every plot whose `colour`/`fill` aesthetic is mapped to
+#'   applied to every plot whose `colour`/`fill` aesthetic is mapped to
 #'   the stratification variable -- see "Details".
 #' @param color_continuous,fill_continuous A continuous ggplot2 scale object
 #'   (e.g. [ggplot2::scale_color_viridis_c()], [ggplot2::scale_fill_gradient()]),
-#'   written to `object$theme$color_continuous`/`object$theme$fill_continuous`
-#'   and applied to every plot whose `colour`/`fill` aesthetic is mapped to
+#'   applied to every plot whose `colour`/`fill` aesthetic is mapped to
 #'   something continuous other than the stratification variable -- see
 #'   "Details".
 #' @param format_p,format_percent,format_number Formatter functions
-#'   (typically from `scales::label_*()`), written to
-#'   `object$theme$format_p` etc. Used by the summary/quantile layers to
+#'   (typically from `scales::label_*()`). Used by the summary/quantile layers to
 #'   format p-values/rates/means for display.
 #' @param draw_key A key-glyph function (e.g. [ggplot2::draw_key_point()]),
-#'   written to `object$theme$draw_key` and passed as every geom's
-#'   `key_glyph` argument.
+#'   passed as every geom's `key_glyph` argument.
 #' @param dodge_width Spacing between adjacent strata's horizontal offset
 #'   in the quantile layer (see [er_style_quantile_errorbar()]/
 #'   [er_style_quantile_pointrange()]), as a fraction of the exposure
-#'   range. A single positive number, written to `object$theme$dodge_width`.
-#'   Default `0.015` (set in [er_plot()]).
+#'   range. A single positive number.  Default is `0.015` (set in [er_plot()]).
 #' @param height_base,height_data,height_group Relative panel heights
-#'   (single positive numbers), merged into `object$theme$height` --
-#'   supplying only one leaves the other two unchanged.
+#'   (single positive numbers).
+#'   Supplying only one leaves the other two unchanged.
 #'
 #' @returns The input `object`, with the requested theme fields updated
 #'
@@ -528,55 +421,18 @@ er_plot_theme <- function(object,
 #' Adds the model layer: a fitted exposure-response curve with an
 #' uncertainty ribbon (the default, via [er_predict()]), or a spaghetti
 #' plot of simulated draws (`style = er_style_model_spaghetti`, via
-#' [er_simulate()]). This layer needs no `response_type` dispatch -- it
-#' only ever consumes [er_predict()]'s output on the response's own
-#' scale. For a summary annotation (e.g. a p-value, via [er_summary()]),
-#' see [er_plot_add_summary()] -- a separate, independent layer that
-#' doesn't require a model layer to also be present.
-#'
-#' This layer is **singleton** -- see [er_plot()]'s "Layers are either
-#' singleton or additive" -- so calling it twice replaces the previous
-#' model layer rather than overlaying two model curves.
+#' [er_simulate()]). This layer uses [er_predict()] to compute model 
+#' predictions on the response scale.
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`)
-#' @param model A fitted exposure-response model. Must implement
-#'   [er_predict()]; implementing [er_simulate()] and [er_summary()]
-#'   enables additional visualisations (see [er_model_interface]). If
-#'   `model`'s formula references covariates beyond the exposure (and,
-#'   when `keep_strata = TRUE`, strata) variable, those covariates are
-#'   filled with a reference value (first factor level, or mean for a
-#'   numeric column) when building the prediction grid -- see
-#'   [er_model_interface]'s `newdata` documentation. **erplots never
-#'   checks that `model` was actually fit on the same response as this
-#'   plot's declared `response`** (or that its exposure variable matches
-#'   this plot's `exposure`) -- it's model-agnostic by design and never
-#'   inspects a model's formula (see [er_model_interface]), so nothing
-#'   here would catch, say, a model fit on `ae2` being passed to a plot
-#'   declaring `ae1`. It's the caller's responsibility to ensure `model`
-#'   is actually appropriate to this plot's exposure/response before
-#'   calling this function; a mismatch runs silently rather than
-#'   warning or erroring.
-#' @param keep_strata Logical, indicating whether this layer should be
-#'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
-#' @param style Function drawing the model curve/ribbon -- defaults to
-#'   [er_style_model_ribbonline()] (mean prediction + confidence ribbon).
-#'   [er_style_model_spaghetti()] (simulated draws, via [er_simulate()]) is
-#'   the other built-in option; any function matching the standard
-#'   `(data, config, stratify, exposure, response, strata, theme, ...)`
-#'   signature can be supplied instead -- see [er_style()]. If `style` is
-#'   tagged with a `layer` (via [er_style_tag()]) other than `"model"`,
-#'   this errors informatively rather than passing a mismatched `config`
-#'   shape to the builder; an untagged builder is never checked.
-#' @param conf_level Confidence level for the prediction ribbon
-#' @param ... Additional named arguments forwarded, unchanged, to `style`
-#'   when it's called at build time (the builder is free to use only the
-#'   arguments it recognizes, via its own `...`). Must be named -- see
-#'   [er_style()]'s "Passing extra arguments to a builder" section. For
-#'   example,
-#'   `er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626)`
-#'   lets [er_style_model_spaghetti()] pass a reproducible `seed` to
-#'   [er_simulate()] instead of relying on erglm's auto-selected one.
+#' @param model A fitted exposure-response model. Must implement [er_predict()].
+#' @param keep_strata Logical; whether this layer should use stratification.
+#' @param style Function drawing the model curve/ribbon. Defaults to [er_style_model_ribbonline()].
+#' @param conf_level Confidence level for the prediction ribbon.
+#' @param ... Additional named arguments forwarded unchanged to `style` at build time.
+#'
+#' @details
+#' `model` may reference covariates beyond the exposure and strata variables. erplots fills any additional covariates from the plot data with a reference value (first factor level or numeric mean) when building the prediction grid. erplots does not check that `model` was fit on the same exposure/response as the plot; the caller must ensure compatibility.
 #'
 #' @returns The input `object`, with the model layer added
 #'
@@ -595,8 +451,7 @@ er_plot_theme <- function(object,
 #'   er_plot_add_model(mod, style = er_style_model_spaghetti) |>
 #'   plot()
 #'
-#' # plug in a fully custom model-curve builder; see `?er_style` for the
-#' # full contract
+#' # plug in a fully custom model-curve builder
 #' build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 #'   ggplot2::geom_line(
 #'     data = config$predictions,
@@ -609,9 +464,9 @@ er_plot_theme <- function(object,
 #'   er_plot_add_model(mod, style = build_model_dashed) |>
 #'   plot()
 #'
-#' # a model with a covariate beyond the exposure variable -- `sex`, here
-#' # -- still works even when this layer isn't stratifying by it (`sex`
-#' # is filled in at a reference value when building the prediction grid)
+#' # a model with a covariate beyond the exposure variable still works even when 
+#' # this layer isn't stratifying by it: `sex` is set to a reference value 
+#' # when building the prediction grid, which may not be what the user wants
 #' mod_sex <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
 #' erglm_data |>
 #'   er_plot(aucss, ae1) |>
@@ -662,33 +517,16 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #' [er_style_summary_n()] is purely descriptive (total observation count,
 #' or one count per stratum level) and needs no `model` at all.
 #'
-#' This layer is **singleton** -- see [er_plot()]'s "Layers are either
-#' singleton or additive" -- so calling it twice replaces the previous
-#' summary annotation rather than combining two. A builder wanting to show
-#' several statistics at once composes them into one label/one set of
-#' geoms itself, the way [er_style_summary_n()] does for multiple strata.
-#'
-#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param model A fitted exposure-response model, or `NULL` (the default).
-#'   Only needed by a model-summary builder (e.g.
-#'   [er_style_summary_pvalue()], which calls [er_summary()] on it); a
+#'   Only needed for builder styles (e.g.
+#'   [er_style_summary_pvalue()]) that produced model-based summaries; a
 #'   purely descriptive builder (e.g. [er_style_summary_n()]) ignores it.
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. Passed
-#'   through to `style` as `stratify` -- whether/how a builder changes its
-#'   behaviour when `TRUE` is up to the builder itself (e.g.
-#'   [er_style_summary_pvalue()] draws nothing at all, since one p-value
-#'   doesn't unambiguously describe multiple curves).
-#' @param style Function drawing the summary annotation -- defaults to
-#'   [er_style_summary_pvalue()]. [er_style_summary_n()] is the other
-#'   built-in option; any function matching the standard `(data, config,
-#'   stratify, exposure, response, strata, theme, ...)` signature can be
-#'   supplied instead -- see [er_style()]. `config$p_value` (`NULL` unless
-#'   `model` was supplied) and `config$corner_distance` are the
-#'   pre-computed pieces specific to this layer. If `style` is tagged with
-#'   a `layer` (via [er_style_tag()]) other than `"summary"`, this errors
-#'   informatively; an untagged builder is never checked.
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
+#' @param style Function drawing the summary annotation, defaulting to
+#'   [er_style_summary_pvalue()].
 #' @param ... Additional named arguments forwarded, unchanged, to `style`
 #'   when it's called at build time -- see [er_style()]'s "Passing extra
 #'   arguments to a builder" section. Must be named.
@@ -745,45 +583,28 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #'
 #' Adds the quantile layer: exposure is cut into quantile bins (see
 #' [cut_exposure_quantile()]) and, within each bin, the response is
-#' summarised with a point estimate and confidence interval. Which
-#' summary/CI method is used dispatches on the plot's `response_type`
-#' (set in [er_plot()]):
-#' * `"binary"` -- response *rate*, with a Clopper-Pearson interval (see [ci_clopper_pearson()])
-#' * `"continuous"` -- bin *mean*, with a t-interval (see [ci_t()])
-#' * `"count"` -- bin *mean*, with an exact Poisson interval (see [ci_poisson()])
+#' summarised with a point estimate and confidence interval. The 
+#' type of confidence interval shown depends on the `response_type`
+#' set in [er_plot()]:
+#' * `"binary"`: Clopper-Pearson interval (see [ci_clopper_pearson()])
+#' * `"continuous"`: Student t-interval (see [ci_t()])
+#' * `"count"`: exact Poisson interval (see [ci_poisson()])
 #'
-#' Count responses auto-detect as `"continuous"` (see [er_plot()]'s
-#' `response_type` parameter) and are summarised the same way as any other
+#' Note that count responses are not automatically detected as such: they
+#' default to `"continuous"` and are summarised the same way as any other
 #' continuous response unless `response_type = "count"` is declared
-#' explicitly.
+#' explicitly in [er_plot()].
 #'
-#' This layer is **singleton** -- see [er_plot()]'s "Layers are either
-#' singleton or additive" -- so calling it twice replaces the previous
-#' quantile summary rather than combining bins from both calls.
-#'
-#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param object Partially constructed plot, an `er_plot` object.
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise
+#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
 #' @param style Function drawing the quantile summary -- defaults to
 #'   [er_style_quantile_errorbar()] (point + error bar).
-#'   [er_style_quantile_pointrange()] (a single [ggplot2::geom_pointrange()])
-#'   is another built-in option, as are `_vlines` variants of each
-#'   ([er_style_quantile_errorbar_vlines()],
-#'   [er_style_quantile_pointrange_vlines()]) that additionally draw a
-#'   dotted line at each interior quantile-bin boundary; any function
-#'   matching the standard
-#'   `(data, config, stratify, exposure, response, strata, theme, ...)`
-#'   signature can be supplied instead -- see [er_style()].
-#'   `config$summary` is the pre-computed per-bin data frame (point
-#'   estimate + CI) to draw. If `style` is tagged with a `layer` (via
-#'   [er_style_tag()]) other than `"quantile"`, this errors
-#'   informatively; an untagged builder is never checked.
-#' @param bins Number of exposure bins (not counting placebo)
-#' @param conf_level Confidence level for the interval
+#' @param bins Number of exposure bins (not counting placebo).
+#' @param conf_level Confidence level for the interval.
 #' @param ... Additional named arguments forwarded, unchanged, to `style`
-#'   when it's called at build time -- see [er_style()]'s "Passing extra
-#'   arguments to a builder" section. Must be named.
+#'   when it's called at build time. Arguments must be named.
 #'
 #' @returns The input `object`, with the quantile layer added
 #'
@@ -831,7 +652,7 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #'   er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines) |>
 #'   plot()
 #'
-#' # plug in a fully custom builder; see `?er_style` for the full contract
+#' # plug in a fully custom builder; see `?er_style`
 #' build_quantile_crossbar <- function(data, config, stratify, exposure,
 #'                                      response, strata, theme, ...) {
 #'   ggplot2::geom_crossbar(
@@ -889,20 +710,14 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' (`y_role`), and which layer a builder is meant to be plugged into
 #' (`layer`). All four arguments are optional and independent -- pass
 #' only the ones a given builder needs, in one call, rather than chaining
-#' separate setters. See [er_style()]'s "Writing your own builder"
-#' section for the full contract.
+#' separate setters.
 #'
-#' `layout` is the one required tag for a data-layer builder:
-#' [er_plot_add_data()] reads it off `style` to decide whether to route
-#' through `.layer_overlay()` (`"overlay"`: a single call merged into the
-#' main panel, at the observations' true `(exposure, response)`
-#' coordinates) or `.layer_data()` (`"panel"`: one-or-more panels stacked
-#' below the base plot), *before* it can call the builder -- so the choice
-#' can't be inferred from the builder's return value. Both built-in data
-#' builders ([er_style_data_overlay()], [er_style_data_boxjitter()])
-#' already carry this tag.
+#' `layout` is a required tag for a data-layer builder:
+#' [er_plot_add_data()] reads it off `style` to decide whether to place 
+#' the output geoms into the main panel (`layout = "overlay"`) or to put them into
+#' separate strip-like panels above and below the main panel (`layout = "panel"`)
 #'
-#' `fill_role` and `y_role` are both optional, read by `.polish_labels()`
+#' `fill_role` and `y_role` are both optional, and can be used
 #' to title a legend/axis correctly: `fill_role = "density"` (used by
 #' [er_style_data_hex()]) says a builder's `fill` aesthetic encodes bin
 #' density rather than strata; `y_role = "count"` (used by
@@ -913,7 +728,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' correct for most builders.
 #'
 #' `layer` is also optional, but unlike `fill_role`/`y_role` it isn't read
-#' for labelling -- it's read by every `er_plot_add_*()` function
+#' for labelling. It's read by every `er_plot_add_*()` function
 #' (`er_plot_add_model()` checks `style` against `"model"`;
 #' `er_plot_add_summary()` checks `style` against `"summary"`;
 #' `er_plot_add_quantiles()`
@@ -923,25 +738,22 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' `er_plot_add_data()` -- with an informative error instead of whatever
 #' failure results from that layer's `config` shape not matching what the
 #' builder expects. All built-in builders carry this tag. A custom
-#' builder that omits it is never checked -- `layer` is opt-in, not a
+#' builder that omits it is never checked: `layer` is opt-in, not a
 #' requirement like `layout` is for a data-layer builder.
 #'
 #' @param style A function matching the standard `er_style_*()` signature
-#'   (see [er_style()])
+#'   (see [er_style()]).
 #' @param layout One of `"overlay"` or `"panel"`, or `NULL` (the default) to
-#'   leave this tag unset -- see [er_plot_add_data()] for what each
-#'   structural family means
+#'   leave this tag unset. See [er_plot_add_data()] for what each
+#'   structural family means.
 #' @param fill_role A string naming what the builder's `fill` aesthetic
-#'   represents (currently only `"density"` is read by `.polish_labels()`,
-#'   but any string is accepted), or `NULL` (the default) to leave this tag
-#'   unset
-#' @param y_role A string naming what the builder's y-axis represents
-#'   (currently only `"count"` is read by `.polish_labels()`), or `NULL`
-#'   (the default) to leave this tag unset
+#'   represents, or `NULL` (the default) to leave this tag unset.
+#' @param y_role A string naming what the builder's y-axis represents, 
+#'   or `NULL` (the default) to leave this tag unset.
 #' @param layer One of `"model"`, `"summary"`, `"quantile"`, `"data"`, or
 #'   `"group"`, naming which `er_plot_add_*()` layer the builder is meant
-#'   to be used with, or `NULL` (the default) to leave this tag unset --
-#'   see "Details"
+#'   to be used with, or `NULL` (the default) to leave this tag unset.
+#'   See "Details"
 #'
 #' @returns `style`, with whichever of the `"er_style_layout"`/
 #'   `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`
@@ -1032,16 +844,13 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #' for a binary response (whose y-values are exactly 0/1 and would
 #' otherwise overplot into two solid lines). This works uniformly across
 #' all three response types, with no response-type dispatch on which
-#' builder to use. `er_style_data_boxjitter()` instead uses the older,
+#' builder to use. `er_style_data_boxjitter()` instead uses a
 #' panel-based design, and is binary-response-only: responders (`response
 #' == 1`) get a boxplot + jittered points in an upper panel and
 #' non-responders (`response == 0`) get the same in a lower panel, so the
 #' panel shows the exposure *distribution* conditional on response, not
 #' just raw points. There is no built-in "panel"-layout builder for a
-#' continuous/count response -- the older `build_data_color()` (a single
-#' panel with points colored continuously by the response value) was
-#' removed once `er_style_data_overlay()` turned out to cover its typical
-#' use case more simply; `panel` must be `"both"` (the default) for these
+#' continuous/count response; `panel` must be `"both"` (the default) for these
 #' response types regardless of builder, since there's no upper/lower
 #' partition to select from.
 #'
@@ -1056,21 +865,7 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #' panel. See [er_style_tag()] and [er_style()] for how to tag a custom
 #' builder the same way.
 #'
-#' This layer is **singleton** -- see [er_plot()]'s "Layers are either
-#' singleton or additive" -- calling it again (with any builder) fully
-#' replaces the previous data layer. A "panel"-layout builder is also the
-#' one case where stratification behaviour is a partial exception to
-#' "always color/fill" (see [er_plot()]'s "Stratification" section): for a
-#' continuous/count response, the color aesthetic is already spoken for
-#' by the response value, so stratification instead produces one panel
-#' per stratum level (stacked below the base plot, each colored by the
-#' response), rather than a shared strata legend. An "overlay"-layout
-#' builder has no such exception -- its color aesthetic (when stratified)
-#' is always strata, since the response is already shown via y-position,
-#' and it shares the base plot's own strata legend (the same one the
-#' model/quantile layers use) rather than needing one of its own.
-#'
-#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. For a
@@ -1212,14 +1007,13 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' [cut_quantile()]). This layer only looks at the exposure variable, not
 #' the response, so it needs no `response_type` dispatch.
 #'
-#' Unlike the other four layers, this one is **additive** -- see
-#' [er_plot()]'s "Layers are either singleton or additive" -- each call
+#' Unlike the other four layers, the groups layer is **additive**: each call
 #' adds another panel alongside any already added by a previous call,
 #' rather than replacing it.
 #'
-#' @param object Partially constructed plot (has S3 class `er_plot`)
+#' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param group_by Grouping variables to define groups for distribution
-#'   plots (a tidyselection of variables)
+#'   plots (a tidyselection of variables).
 #' @param style Function drawing each group panel -- defaults to
 #'   [er_style_group_boxplot()]. [er_style_group_violin()] is the other
 #'   built-in option; any function matching the standard `(data, config,
@@ -1229,14 +1023,14 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   (via [er_style_tag()]) other than `"group"`, this errors
 #'   informatively; an untagged builder is never checked.
 #' @param bins Number of quantile bins used for continuous grouping
-#'   variables (`NULL`, the default, uses [cut_quantile()]'s own default)
+#'   variables (`NULL`, the default, uses [cut_quantile()]'s own default).
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. Errors if
 #'   `TRUE` and `group_by` is itself the plot's stratification
 #'   variable, since that would mean grouping and stratifying by the
 #'   same column at once; pass `keep_strata = FALSE` for that grouping
-#'   variable instead
+#'   variable instead.
 #' @param ... Additional named arguments forwarded, unchanged, to `style`
 #'   when it's called at build time (identically for every grouping
 #'   variable added by this call) -- see [er_style()]'s "Passing extra

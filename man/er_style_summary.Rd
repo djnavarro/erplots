@@ -70,44 +70,31 @@ er_style_summary_gof(
 )
 }
 \arguments{
-\item{data}{The original data frame}
+\item{data}{The original data frame.}
 
-\item{config}{Configuration for the specific plot}
+\item{config}{Configuration for the specific plot.}
 
-\item{stratify}{Logical indicating whether to stratify}
+\item{stratify}{Logical: whether to stratify.}
 
-\item{exposure}{Exposure variable}
+\item{exposure}{Exposure variable.}
 
-\item{response}{Response variable}
+\item{response}{Response variable.}
 
-\item{strata}{Stratification variable}
+\item{strata}{Stratification variable.}
 
-\item{theme}{Theme components}
+\item{theme}{Theme components.}
 
-\item{inset}{Distance from the panel edge for the annotation label, in
-normalized device coordinates (0 = panel edge, 0.5 = panel centre).
-Default \code{0.05}, reproducing the previous fixed value (labels placed
-at \code{0.05} from the near edge and \code{0.95} from the far edge).}
+\item{inset}{Distance from the panel edge for the annotation label.}
 
-\item{label_size}{Label text size (in mm) — maps to \code{geom_label()}'s
-\code{size} parameter (geom_label uses \code{size.unit = "mm"}). If \code{NULL} the
-geom default is used.}
+\item{label_size}{Label text size.}
 
-\item{label_colour}{Label text colour — mapped to \code{geom_label()}'s
-\code{text.colour} parameter. If \code{NULL} the geom default is used.}
+\item{label_colour}{Label text colour.}
 
-\item{label_fill}{Label background fill — passed as \code{fill} to
-\code{geom_label()}. If \code{NULL} the geom default is used.}
+\item{label_fill}{Label background fill.}
 
-\item{...}{Additional named arguments forwarded from
-\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...} (shared with \code{style}); see
-\code{\link[=er_style]{er_style()}}'s "Passing extra arguments to a builder" section.}
+\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...}.}
 
-\item{fields}{(for \code{er_style_summary_gof()} only) Which fields from
-\code{glance} to include, and in what order. A character vector, any
-subset of \code{c("n", "aic", "bic", "r_squared")} in the desired display
-order; unrecognised names are silently ignored. Default
-\code{c("n", "aic", "bic", "r_squared")}.}
+\item{fields}{Fields from \code{glance} to include for \code{er_style_summary_gof()}.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -116,17 +103,7 @@ A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 Summary annotation builders for exposure-response plots
 }
 \details{
-Builders for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}, which annotate the base
-panel with a summary statistic or descriptive label rather than
-drawing a curve or raw data. \code{er_style_summary_pvalue()} (the default)
-places a formatted p-value -- derived from the model's own
-\code{\link[=er_summary]{er_summary()}} method -- in whichever corner of the panel is furthest
-from the observed data, and draws nothing at all if no model was
-supplied to \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}, or if the layer is stratified (one
-p-value doesn't unambiguously describe multiple curves).
-\code{er_style_summary_n()} is a model-agnostic alternative: it always draws,
-showing the total number of observations (or, when stratified, one
-count per stratum level) -- demonstrating that a summary annotation
+Builders for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} annotate the base panel with a summary statistic or descriptive label. \code{er_style_summary_pvalue()} draws a formatted p-value from the model's \code{\link[=er_summary]{er_summary()}} result. \code{er_style_summary_n()} draws observation counts. \code{er_style_summary_coefficients()} and \code{er_style_summary_gof()} consume \code{coefficients} and \code{glance}, respectively. All built-in summary builders are tagged \code{layer = "summary"}.
 doesn't have to originate from a fitted model at all.
 \code{er_style_summary_coefficients()} draws one line per row of the model's
 \code{coefficients} table (see \code{\link[=er_summary]{er_summary()}}'s \code{coefficients} field), useful

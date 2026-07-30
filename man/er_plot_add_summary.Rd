@@ -13,29 +13,19 @@ er_plot_add_summary(
 )
 }
 \arguments{
-\item{object}{Partially constructed plot (has S3 class \code{er_plot})}
+\item{object}{Partially constructed plot (has S3 class \code{er_plot}).}
 
 \item{model}{A fitted exposure-response model, or \code{NULL} (the default).
-Only needed by a model-summary builder (e.g.
-\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}, which calls \code{\link[=er_summary]{er_summary()}} on it); a
+Only needed for builder styles (e.g.
+\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}) that produced model-based summaries; a
 purely descriptive builder (e.g. \code{\link[=er_style_summary_n]{er_style_summary_n()}}) ignores it.}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. Passed
-through to \code{style} as \code{stratify} -- whether/how a builder changes its
-behaviour when \code{TRUE} is up to the builder itself (e.g.
-\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}} draws nothing at all, since one p-value
-doesn't unambiguously describe multiple curves).}
+\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the summary annotation -- defaults to
-\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}. \code{\link[=er_style_summary_n]{er_style_summary_n()}} is the other
-built-in option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, theme, ...)} signature can be
-supplied instead -- see \code{\link[=er_style]{er_style()}}. \code{config$p_value} (\code{NULL} unless
-\code{model} was supplied) and \code{config$corner_distance} are the
-pre-computed pieces specific to this layer. If \code{style} is tagged with
-a \code{layer} (via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"summary"}, this errors
-informatively; an untagged builder is never checked.}
+\item{style}{Function drawing the summary annotation, defaulting to
+\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
 when it's called at build time -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
@@ -54,13 +44,6 @@ a model: \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}} (the 
 derived from a supplied model's own \code{\link[=er_summary]{er_summary()}} method, but
 \code{\link[=er_style_summary_n]{er_style_summary_n()}} is purely descriptive (total observation count,
 or one count per stratum level) and needs no \code{model} at all.
-}
-\details{
-This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
-singleton or additive" -- so calling it twice replaces the previous
-summary annotation rather than combining two. A builder wanting to show
-several statistics at once composes them into one label/one set of
-geoms itself, the way \code{\link[=er_style_summary_n]{er_style_summary_n()}} does for multiple strata.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

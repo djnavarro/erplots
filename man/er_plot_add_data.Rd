@@ -7,7 +7,7 @@
 er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 }
 \arguments{
-\item{object}{Partially constructed plot (has S3 class \code{er_plot})}
+\item{object}{Partially constructed plot (has S3 class \code{er_plot}).}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
@@ -48,15 +48,12 @@ continuous/count responses, or a scatter with a small vertical jitter
 for a binary response (whose y-values are exactly 0/1 and would
 otherwise overplot into two solid lines). This works uniformly across
 all three response types, with no response-type dispatch on which
-builder to use. \code{er_style_data_boxjitter()} instead uses the older,
+builder to use. \code{er_style_data_boxjitter()} instead uses a
 panel-based design, and is binary-response-only: responders (\code{response == 1}) get a boxplot + jittered points in an upper panel and
 non-responders (\code{response == 0}) get the same in a lower panel, so the
 panel shows the exposure \emph{distribution} conditional on response, not
 just raw points. There is no built-in "panel"-layout builder for a
-continuous/count response -- the older \code{build_data_color()} (a single
-panel with points colored continuously by the response value) was
-removed once \code{er_style_data_overlay()} turned out to cover its typical
-use case more simply; \code{panel} must be \code{"both"} (the default) for these
+continuous/count response; \code{panel} must be \code{"both"} (the default) for these
 response types regardless of builder, since there's no upper/lower
 partition to select from.
 }
@@ -71,20 +68,6 @@ incidental: \code{er_style_data_overlay()} can never be routed into upper/lower
 panels, and \code{er_style_data_boxjitter()} can never be merged into the main
 panel. See \code{\link[=er_style_tag]{er_style_tag()}} and \code{\link[=er_style]{er_style()}} for how to tag a custom
 builder the same way.
-
-This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
-singleton or additive" -- calling it again (with any builder) fully
-replaces the previous data layer. A "panel"-layout builder is also the
-one case where stratification behaviour is a partial exception to
-"always color/fill" (see \code{\link[=er_plot]{er_plot()}}'s "Stratification" section): for a
-continuous/count response, the color aesthetic is already spoken for
-by the response value, so stratification instead produces one panel
-per stratum level (stacked below the base plot, each colored by the
-response), rather than a shared strata legend. An "overlay"-layout
-builder has no such exception -- its color aesthetic (when stratified)
-is always strata, since the response is already shown via y-position,
-and it shares the base plot's own strata legend (the same one the
-model/quantile layers use) rather than needing one of its own.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

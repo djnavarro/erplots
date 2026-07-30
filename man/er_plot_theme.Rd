@@ -33,11 +33,10 @@ er_plot_theme(
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_plot})}
 
-\item{xlab, ylab}{Exposure/response axis label (single string), written to
-\code{object$exposure$label}/\code{object$response$label}.}
+\item{xlab, ylab}{Exposure/response axis label (single string).}
 
-\item{strata_lab}{Stratification legend label (single string), written
-to \code{object$strata$label}. Errors if \code{stratify_by} wasn't set in
+\item{strata_lab}{Stratification legend label (single string).
+Errors if \code{stratify_by} wasn't set in
 \code{\link[=er_plot]{er_plot()}} -- there's no stratification legend to label.}
 
 \item{title, subtitle, caption}{Plot-level annotation text (single
@@ -45,17 +44,16 @@ strings), applied via \code{patchwork::plot_annotation()} in
 \code{\link[=er_plot_build]{er_plot_build()}}.}
 
 \item{xlim, ylim}{Exposure/response axis limits (length-2, increasing
-numeric vectors), written to \code{object$exposure$limits}/
-\code{object$response$limits}. These are read lazily by every builder at
+numeric vectors). These are read lazily by every builder at
 build time, so it doesn't matter whether \code{er_plot_theme()} is called
 before or after the layers that use them.}
 
-\item{theme_base}{A ggplot2 theme object (e.g. \code{\link[ggplot2:theme_minimal]{ggplot2::theme_minimal()}}),
-written to \code{object$theme$theme_base} -- the swappable overall visual
+\item{theme_base}{A ggplot2 theme object (e.g. \code{\link[ggplot2:theme_minimal]{ggplot2::theme_minimal()}})
+-- the swappable overall visual
 theme, defaulting to \code{\link[ggplot2:theme_bw]{ggplot2::theme_bw()}}}
 
 \item{theme_extra}{A ggplot2 theme object (e.g. from \code{\link[ggplot2:theme]{ggplot2::theme()}}),
-written to \code{object$theme$theme_extra} -- additional theme tweaks
+-- additional theme tweaks
 layered on top of \code{theme_base}, defaulting to a panel border plus
 \code{legend.position = "bottom"}. Supplying a new value fully replaces
 this default rather than merging with it, so re-include the border/
@@ -64,79 +62,56 @@ own additions.}
 
 \item{color_discrete, fill_discrete}{A discrete ggplot2 scale object
 (e.g. \code{\link[ggplot2:scale_color_brewer]{ggplot2::scale_color_brewer()}}, \code{\link[ggplot2:scale_fill_viridis_d]{ggplot2::scale_fill_viridis_d()}}),
-written to \code{object$theme$color_discrete}/\code{object$theme$fill_discrete}
-and applied to every plot whose \code{colour}/\code{fill} aesthetic is mapped to
+applied to every plot whose \code{colour}/\code{fill} aesthetic is mapped to
 the stratification variable -- see "Details".}
 
 \item{color_continuous, fill_continuous}{A continuous ggplot2 scale object
 (e.g. \code{\link[ggplot2:scale_color_viridis_c]{ggplot2::scale_color_viridis_c()}}, \code{\link[ggplot2:scale_fill_gradient]{ggplot2::scale_fill_gradient()}}),
-written to \code{object$theme$color_continuous}/\code{object$theme$fill_continuous}
-and applied to every plot whose \code{colour}/\code{fill} aesthetic is mapped to
+applied to every plot whose \code{colour}/\code{fill} aesthetic is mapped to
 something continuous other than the stratification variable -- see
 "Details".}
 
 \item{format_p, format_percent, format_number}{Formatter functions
-(typically from \verb{scales::label_*()}), written to
-\code{object$theme$format_p} etc. Used by the summary/quantile layers to
+(typically from \verb{scales::label_*()}). Used by the summary/quantile layers to
 format p-values/rates/means for display.}
 
 \item{draw_key}{A key-glyph function (e.g. \code{\link[ggplot2:draw_key_point]{ggplot2::draw_key_point()}}),
-written to \code{object$theme$draw_key} and passed as every geom's
-\code{key_glyph} argument.}
+passed as every geom's \code{key_glyph} argument.}
 
 \item{dodge_width}{Spacing between adjacent strata's horizontal offset
 in the quantile layer (see \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}}/
 \code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}}), as a fraction of the exposure
-range. A single positive number, written to \code{object$theme$dodge_width}.
-Default \code{0.015} (set in \code{\link[=er_plot]{er_plot()}}).}
+range. A single positive number.  Default is \code{0.015} (set in \code{\link[=er_plot]{er_plot()}}).}
 
 \item{height_base, height_data, height_group}{Relative panel heights
-(single positive numbers), merged into \code{object$theme$height} --
-supplying only one leaves the other two unchanged.}
+(single positive numbers).
+Supplying only one leaves the other two unchanged.}
 }
 \value{
 The input \code{object}, with the requested theme fields updated
 }
 \description{
-Adjusts the styling knobs a ggplot2 user would expect to control --
-axis/legend labels, plot title/subtitle/caption, axis limits, the
-overall visual theme, the discrete color/fill palette used for
-stratification, value formatters, the legend key glyph, the
-quantile layer's stratum-dodge spacing, and relative panel heights --
-without touching which variable is mapped to which aesthetic (that's
-controlled by a layer's \code{style}; see \code{\link[=er_style]{er_style()}}).
+Set axis/legend labels, plot titles/captions, axis limits, theme objects, discrete and continuous scale objects, formatters, legend key glyph, and relative panel heights. This does not change which variable is mapped to which aesthetic.
 }
 \details{
-\code{dodge_width} is the one setting here that's about stratification
-\emph{layout} rather than a single layer's visual style -- it's read by
+\code{dodge_width} is a stratification-layout setting used by
 \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}}/\code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}} (and
-their \verb{_vlines} variants) to horizontally separate strata within each
-quantile bin. It lives in \code{er_plot_theme()}, rather than as an
-argument to those builders, because dodging is a property of how
-stratification lays out a layer, not something specific to any one
-builder's own visual choices.
+their \verb{_vlines} variants) to separate strata horizontally within each
+quantile bin. It belongs in \code{er_plot_theme()} because dodging is about
+stratification layout, not an individual builder's visual style.
 
 Every argument defaults to \code{NULL}, meaning "leave whatever was set
-before unchanged" -- so \code{er_plot_theme()} can be called more than once
-on the same object, each call only touching the arguments it actually
-supplies (the same accumulate-by-default behaviour as
-\code{\link[ggplot2:theme]{ggplot2::theme()}}'s own merging). There is no way to reset a field
-back to its \code{\link[=er_plot]{er_plot()}} default other than re-supplying that default's
-value explicitly.
+before unchanged". This allows repeated calls to \code{er_plot_theme()} to
+update only the supplied fields, like \code{\link[ggplot2:theme]{ggplot2::theme()}}. There is no
+implicit way to reset a field to the \code{er_plot()} default.
 
-\code{color_discrete}/\code{fill_discrete} only affect aesthetics that are
-genuinely mapped to the stratification variable; \code{color_continuous}/
-\code{fill_continuous} are the symmetric counterpart for aesthetics mapped to
-something else continuous -- \code{\link[=er_style_data_hex]{er_style_data_hex()}}'s density \code{fill}, or
-a continuous/count response's color-encoded data layer (there's no
-built-in builder for the latter today; see \code{\link[=er_style_tag]{er_style_tag()}}'s \code{layout}
-argument). Each of the four only ever touches the aesthetic role it
-names -- supplying \code{color_continuous} never affects a discrete \code{colour}
-mapping, and vice versa. If a custom builder adds its own
-\verb{scale_color_*()}/\verb{scale_fill_*()} directly, supplying any of these four
-here will add a second scale on top (ggplot2 will emit a message and the
-later one wins) rather than detecting and deferring to the builder's own
-choice.
+\code{color_discrete}/\code{fill_discrete} apply only when a layer's \code{colour}/
+\code{fill} aesthetic is mapped to stratification. Their continuous
+counterparts, \code{color_continuous}/\code{fill_continuous}, apply only when the
+aesthetic is mapped to a continuous quantity such as density or a
+continuous/count response value. If a custom builder adds its own scale,
+supplying one of these four will add a second scale and let ggplot2
+choose the later one.
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_style]{er_style()}}

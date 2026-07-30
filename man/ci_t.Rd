@@ -13,9 +13,8 @@ ci_t(x, conf_level = 0.95)
 }
 \value{
 Named numeric vector (\code{lower}, \code{upper}), with confidence level
-stored as an attribute. If fewer than 2 non-missing values are
-supplied, returns \code{c(lower = NA, upper = NA)} (a standard deviation --
-and hence a t-interval -- isn't defined for a single observation).
+stored as an attribute. Returns \code{c(lower = NA, upper = NA)} if fewer
+than 2 non-missing values are supplied.
 }
 \description{
 t-interval confidence interval for the mean of continuous data

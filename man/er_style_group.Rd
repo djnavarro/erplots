@@ -47,38 +47,27 @@ er_style_group_violin(
 )
 }
 \arguments{
-\item{data}{The original data frame}
+\item{data}{The original data frame.}
 
-\item{config}{Configuration for the specific plot}
+\item{config}{Configuration for the specific plot.}
 
-\item{stratify}{Logical indicating whether to stratify}
+\item{stratify}{Logical: whether to stratify.}
 
-\item{exposure}{Exposure variable}
+\item{exposure}{Exposure variable.}
 
-\item{response}{Response variable}
+\item{response}{Response variable.}
 
-\item{strata}{Stratification variable}
+\item{strata}{Stratification variable.}
 
-\item{theme}{Theme components}
+\item{theme}{Theme components.}
 
-\item{alpha}{Transparency of the geom. For \code{er_style_group_boxplot()} and
-\code{er_style_group_violin()}, a single number; default \code{0.5}. For
-\code{er_style_group_histogram()}, \code{NULL} (default: \code{0.5} when stratified,
-\code{0.8} when unstratified, matching the previous conditional behaviour)
-or an explicit number that overrides that conditional default.}
+\item{alpha}{Transparency of the geom.}
 
-\item{...}{Additional named arguments forwarded from
-\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing
-extra arguments to a builder" section.}
+\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}'s own \code{...}.}
 
-\item{bins}{(for \code{er_style_group_histogram()} only) Number of histogram
-bins, passed to \code{\link[ggplot2:geom_histogram]{ggplot2::geom_histogram()}}'s own \code{bins}. Default \code{30}.}
+\item{bins}{Number of histogram bins for \code{er_style_group_histogram()}.}
 
-\item{quantiles, quantile_linetype}{(for \code{er_style_group_violin()} only)
-Probabilities at which to draw quantile lines on the violin, passed to
-\code{\link[ggplot2:geom_violin]{ggplot2::geom_violin()}}'s own \code{draw_quantiles}; and the linetype for
-those lines, passed to \code{quantile.linetype}. Default \code{NULL} (no lines
-drawn) and \code{"solid"} respectively.}
+\item{quantiles, quantile_linetype}{Violin quantile positions and linetype for \code{er_style_group_violin()}.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -87,18 +76,9 @@ A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 Group panel builders for exposure-response plots
 }
 \details{
-Builders for the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}),
-which draws the exposure distribution for a grouping variable (e.g.
-treatment arm) below the main panel: \code{er_style_group_boxplot()} (the
-default), \code{er_style_group_violin()}, and \code{er_style_group_histogram()}.
-The first two put the group levels on the y-axis; \code{er_style_group_histogram()}
-instead puts them on facet strips (\code{facet_grid(rows = vars(lvl), switch = "y")}) and frees the y-axis for counts.
-All three are tagged \code{er_style_tag(fn, layer = "group")}, so
-\code{\link[=er_plot_add_groups]{er_plot_add_groups()}} errors informatively if handed a builder
-tagged for a different layer.
+Builders for the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}) draw exposure distributions for grouping variables. \code{er_style_group_boxplot()} and \code{er_style_group_violin()} put group levels on the y-axis; \code{er_style_group_histogram()} puts them on facet strips and frees the y-axis for counts. All built-in group builders are tagged \code{layer = "group"}, so \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} errors if given one tagged for another layer.
 
-See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
-implement, including how to write a custom builder of your own.
+See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions implement.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

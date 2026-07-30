@@ -69,41 +69,31 @@ er_style_quantile_pointrange_vlines(
 )
 }
 \arguments{
-\item{data}{The original data frame}
+\item{data}{The original data frame.}
 
-\item{config}{Configuration for the specific plot}
+\item{config}{Configuration for the specific plot.}
 
-\item{stratify}{Logical indicating whether to stratify}
+\item{stratify}{Logical: whether to stratify.}
 
-\item{exposure}{Exposure variable}
+\item{exposure}{Exposure variable.}
 
-\item{response}{Response variable}
+\item{response}{Response variable.}
 
-\item{strata}{Stratification variable}
+\item{strata}{Stratification variable.}
 
-\item{theme}{Theme components}
+\item{theme}{Theme components.}
 
-\item{point_size}{Point size for \code{er_style_quantile_errorbar()}'s
-per-bin point. Default \code{2}.}
+\item{point_size}{Point size for \code{er_style_quantile_errorbar()}.}
 
-\item{errorbar_width}{Width of \code{er_style_quantile_errorbar()}'s error
-bars, as a fraction of the exposure range (not an absolute value).
-Default \code{0.025}.}
+\item{errorbar_width}{Width of \code{er_style_quantile_errorbar()}'s error bars.}
 
-\item{label_size}{Text size for the per-bin value label drawn by all
-four builders. Default \code{3}.}
+\item{label_size}{Text size for the per-bin value label.}
 
-\item{...}{Additional named arguments forwarded from
-\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing
-extra arguments to a builder" section.}
+\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}'s own \code{...}.}
 
-\item{vline_colour, vline_linetype}{Colour/linetype of the interior
-quantile-bin boundary lines drawn by \code{er_style_quantile_errorbar_vlines()}/
-\code{er_style_quantile_pointrange_vlines()}. Defaults \code{"grey50"}/\code{"dotted"}.}
+\item{vline_colour, vline_linetype}{Colour and linetype of interior quantile boundary lines.}
 
-\item{pointrange_size, pointrange_linewidth}{\code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}}'s
-own \code{size}/\code{linewidth} arguments, for \code{er_style_quantile_pointrange()}.
-Default \code{NULL} (ggplot2's own defaults, unchanged from before).}
+\item{pointrange_size, pointrange_linewidth}{Size and linewidth for \code{ggplot2::geom_pointrange()}.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -112,19 +102,7 @@ A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 Quantile summary builders for exposure-response plots
 }
 \details{
-Builders for the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}),
-which bins exposure into quantile groups and plots a response summary
-(rate, mean, or count-mean, depending on response type) with an
-uncertainty interval per bin: \code{er_style_quantile_errorbar()} (point plus
-error bar, the default) and \code{er_style_quantile_pointrange()} (point
-range). \code{er_style_quantile_errorbar_vlines()} and
-\code{er_style_quantile_pointrange_vlines()} are minor variants of each,
-additionally drawing a dotted \code{\link[ggplot2:geom_vline]{ggplot2::geom_vline()}} at each interior
-quantile cutpoint (i.e. every bin boundary except the exposure
-variable's overall min/max) -- a common way exposure-response bin plots
-are annotated in practice, so that the reader can see exactly where one
-quantile bin ends and the next begins without inferring it from the
-point/error bar spacing alone. All four are tagged
+Builders for the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}) bin exposure into quantile groups and plot a response summary with an uncertainty interval. \code{er_style_quantile_errorbar()} and \code{er_style_quantile_pointrange()} are the base builders; their \verb{_vlines} variants add interior quantile-bin boundary lines. All built-in quantile builders are tagged \code{layer = "quantile"}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} errors if given one tagged for another layer.
 \code{er_style_tag(fn, layer = "quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}
 errors informatively if handed a builder tagged for a different layer.
 
@@ -188,8 +166,7 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     ) |>
     plot()
 
-  # widening the stratum-dodge spacing via er_plot_theme(), rather than
-  # a per-builder argument -- see "Details"
+  # widening the stratum-dodge spacing via er_plot_theme()
   mod2 <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
   erglm_data |>
     er_plot(aucss, ae1, stratify_by = sex) |>

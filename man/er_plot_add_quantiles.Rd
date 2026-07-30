@@ -14,34 +14,21 @@ er_plot_add_quantiles(
 )
 }
 \arguments{
-\item{object}{Partially constructed plot (has S3 class \code{er_plot})}
+\item{object}{Partially constructed plot, an \code{er_plot} object.}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise}
+\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
 
 \item{style}{Function drawing the quantile summary -- defaults to
-\code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar).
-\code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}} (a single \code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}})
-is another built-in option, as are \verb{_vlines} variants of each
-(\code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}},
-\code{\link[=er_style_quantile_pointrange_vlines]{er_style_quantile_pointrange_vlines()}}) that additionally draw a
-dotted line at each interior quantile-bin boundary; any function
-matching the standard
-\verb{(data, config, stratify, exposure, response, strata, theme, ...)}
-signature can be supplied instead -- see \code{\link[=er_style]{er_style()}}.
-\code{config$summary} is the pre-computed per-bin data frame (point
-estimate + CI) to draw. If \code{style} is tagged with a \code{layer} (via
-\code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"quantile"}, this errors
-informatively; an untagged builder is never checked.}
+\code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar).}
 
-\item{bins}{Number of exposure bins (not counting placebo)}
+\item{bins}{Number of exposure bins (not counting placebo).}
 
-\item{conf_level}{Confidence level for the interval}
+\item{conf_level}{Confidence level for the interval.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section. Must be named.}
+when it's called at build time. Arguments must be named.}
 }
 \value{
 The input \code{object}, with the quantile layer added
@@ -49,24 +36,20 @@ The input \code{object}, with the quantile layer added
 \description{
 Adds the quantile layer: exposure is cut into quantile bins (see
 \code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}}) and, within each bin, the response is
-summarised with a point estimate and confidence interval. Which
-summary/CI method is used dispatches on the plot's \code{response_type}
-(set in \code{\link[=er_plot]{er_plot()}}):
+summarised with a point estimate and confidence interval. The
+type of confidence interval shown depends on the \code{response_type}
+set in \code{\link[=er_plot]{er_plot()}}:
 \itemize{
-\item \code{"binary"} -- response \emph{rate}, with a Clopper-Pearson interval (see \code{\link[=ci_clopper_pearson]{ci_clopper_pearson()}})
-\item \code{"continuous"} -- bin \emph{mean}, with a t-interval (see \code{\link[=ci_t]{ci_t()}})
-\item \code{"count"} -- bin \emph{mean}, with an exact Poisson interval (see \code{\link[=ci_poisson]{ci_poisson()}})
+\item \code{"binary"}: Clopper-Pearson interval (see \code{\link[=ci_clopper_pearson]{ci_clopper_pearson()}})
+\item \code{"continuous"}: Student t-interval (see \code{\link[=ci_t]{ci_t()}})
+\item \code{"count"}: exact Poisson interval (see \code{\link[=ci_poisson]{ci_poisson()}})
 }
 }
 \details{
-Count responses auto-detect as \code{"continuous"} (see \code{\link[=er_plot]{er_plot()}}'s
-\code{response_type} parameter) and are summarised the same way as any other
+Note that count responses are not automatically detected as such: they
+default to \code{"continuous"} and are summarised the same way as any other
 continuous response unless \code{response_type = "count"} is declared
-explicitly.
-
-This layer is \strong{singleton} -- see \code{\link[=er_plot]{er_plot()}}'s "Layers are either
-singleton or additive" -- so calling it twice replaces the previous
-quantile summary rather than combining bins from both calls.
+explicitly in \code{\link[=er_plot]{er_plot()}}.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
@@ -112,7 +95,7 @@ erglm_data |>
   er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines) |>
   plot()
 
-# plug in a fully custom builder; see `?er_style` for the full contract
+# plug in a fully custom builder; see `?er_style`
 build_quantile_crossbar <- function(data, config, stratify, exposure,
                                      response, strata, theme, ...) {
   ggplot2::geom_crossbar(

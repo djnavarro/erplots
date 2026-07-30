@@ -51,61 +51,39 @@ er_style_data_hex(
 )
 }
 \arguments{
-\item{data}{The original data frame}
+\item{data}{The original data frame.}
 
-\item{config}{Configuration for the specific plot}
+\item{config}{Configuration for the specific plot.}
 
-\item{stratify}{Logical indicating whether to stratify}
+\item{stratify}{Logical: whether to stratify.}
 
-\item{exposure}{Exposure variable}
+\item{exposure}{Exposure variable.}
 
-\item{response}{Response variable}
+\item{response}{Response variable.}
 
-\item{strata}{Stratification variable}
+\item{strata}{Stratification variable.}
 
-\item{theme}{Theme components}
+\item{theme}{Theme components.}
 
-\item{...}{Additional named arguments forwarded from
-\code{\link[=er_plot_add_data]{er_plot_add_data()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section.}
+\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_data]{er_plot_add_data()}}'s own \code{...}.}
 
-\item{box_width}{Width of \code{er_style_data_boxjitter()}'s boxplot.
-Default \code{0.6}, matching the previous fixed value.}
+\item{box_width}{Width of \code{er_style_data_boxjitter()}'s boxplot.}
 
-\item{box_alpha}{Transparency of \code{er_style_data_boxjitter()}'s
-boxplot fill (\code{0}-\code{1}). Default \code{0.4}, matching the previous fixed
-value.}
+\item{box_alpha}{Transparency of \code{er_style_data_boxjitter()}'s boxplot fill.}
 
-\item{show_outliers}{Whether \code{er_style_data_boxjitter()}'s boxplot
-should draw its own outlier points (\code{geom_boxplot()}'s usual
-default), rather than suppressing them. Default \code{FALSE} (outliers
-hidden), matching the previous fixed behaviour -- raw points are
-already shown via the jitter layer, so a boxplot's own outlier
-points are normally redundant.}
+\item{show_outliers}{Logical: whether \code{er_style_data_boxjitter()} draws outlier points.}
 
-\item{jitter_height}{Vertical jitter applied to the raw points, in
-response units (\code{er_style_data_overlay()}/\code{er_style_data_boxjitter()}
-only). Defaults to \code{NULL}, which produces \code{0.015} for a binary
-response and \code{0} otherwise; for \code{er_style_data_boxjitter()}, \code{0.3}
-when stratified and \code{0.15} otherwise. An explicit value overrides
-this for both cases uniformly.}
+\item{jitter_height}{Vertical jitter applied to raw points.}
 
-\item{jitter_size}{Point size for \code{er_style_data_boxjitter()}'s
-jittered points. Default \code{1}, matching the previous fixed value.}
+\item{jitter_size}{Point size for \code{er_style_data_boxjitter()}'s jittered points.}
 
-\item{jitter_alpha}{Point transparency for
-\code{er_style_data_boxjitter()}'s jittered points (\code{0}-\code{1}). Default
-\code{0.6}, matching the previous fixed value.}
+\item{jitter_alpha}{Transparency of \code{er_style_data_boxjitter()}'s jittered points.}
 
-\item{alpha}{Point transparency for \code{er_style_data_overlay()}'s raw
-points (\code{0}-\code{1}). Default \code{0.4}, matching the previous fixed value.}
+\item{alpha}{Point transparency for \code{er_style_data_overlay()}.}
 
-\item{size}{Point size for \code{er_style_data_overlay()}'s raw points.
-Default \code{1}, matching the previous fixed value.}
+\item{size}{Point size for \code{er_style_data_overlay()}.}
 
-\item{bins}{Number of hex bins along each axis for
-\code{er_style_data_hex()}'s \code{\link[ggplot2:geom_hex]{ggplot2::geom_hex()}}. Default \code{30},
-matching the previous fixed value.}
+\item{bins}{Number of hex bins for \code{er_style_data_hex()}.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -114,21 +92,9 @@ A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 Data layer builders for exposure-response plots
 }
 \details{
-Builders for the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}}), which
-shows the raw observations alongside the fitted curve. Each builder is
-tagged, via \code{\link[=er_style_tag]{er_style_tag()}}, with the \emph{structural} family it belongs to:
-\code{er_style_data_overlay()} (the default) and \code{er_style_data_hex()} use the
-\code{"overlay"} layout, plotting directly on the model panel at the raw
-\verb{(exposure, response)} coordinates (points or, for \code{er_style_data_hex()},
-a 2D density); \code{er_style_data_boxjitter()} uses the \code{"panel"} layout
-(binary response only), stacking boxplot-plus-jitter panels for
-responders/non-responders below the base plot. See \code{\link[=er_style_tag]{er_style_tag()}} and
-\code{\link[=er_plot_add_data]{er_plot_add_data()}} for how this tag is used. All three built-in
-data builders are also tagged \code{layer = "data"}, so \code{\link[=er_plot_add_data]{er_plot_add_data()}}
-errors informatively if handed a builder tagged for a different layer.
+Builders for the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}}) are tagged with the structural family they belong to via \code{\link[=er_style_tag]{er_style_tag()}}. \code{er_style_data_overlay()} and \code{er_style_data_hex()} use the overlay layout, drawing in the main panel; \code{er_style_data_boxjitter()} uses the panel layout and is binary-response only. All built-in data builders are also tagged \code{layer = "data"}, so \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors if given a builder tagged for another layer.
 
-See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
-implement, including how to write a custom builder of your own.
+See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions implement.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

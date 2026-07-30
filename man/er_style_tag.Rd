@@ -14,25 +14,22 @@ er_style_tag(
 }
 \arguments{
 \item{style}{A function matching the standard \verb{er_style_*()} signature
-(see \code{\link[=er_style]{er_style()}})}
+(see \code{\link[=er_style]{er_style()}}).}
 
 \item{layout}{One of \code{"overlay"} or \code{"panel"}, or \code{NULL} (the default) to
-leave this tag unset -- see \code{\link[=er_plot_add_data]{er_plot_add_data()}} for what each
-structural family means}
+leave this tag unset. See \code{\link[=er_plot_add_data]{er_plot_add_data()}} for what each
+structural family means.}
 
 \item{fill_role}{A string naming what the builder's \code{fill} aesthetic
-represents (currently only \code{"density"} is read by \code{.polish_labels()},
-but any string is accepted), or \code{NULL} (the default) to leave this tag
-unset}
+represents, or \code{NULL} (the default) to leave this tag unset.}
 
-\item{y_role}{A string naming what the builder's y-axis represents
-(currently only \code{"count"} is read by \code{.polish_labels()}), or \code{NULL}
-(the default) to leave this tag unset}
+\item{y_role}{A string naming what the builder's y-axis represents,
+or \code{NULL} (the default) to leave this tag unset.}
 
 \item{layer}{One of \code{"model"}, \code{"summary"}, \code{"quantile"}, \code{"data"}, or
 \code{"group"}, naming which \verb{er_plot_add_*()} layer the builder is meant
-to be used with, or \code{NULL} (the default) to leave this tag unset --
-see "Details"}
+to be used with, or \code{NULL} (the default) to leave this tag unset.
+See "Details"}
 }
 \value{
 \code{style}, with whichever of the \code{"er_style_layout"}/
@@ -48,21 +45,15 @@ builder's y-axis means when it isn't the group variable itself
 (\code{y_role}), and which layer a builder is meant to be plugged into
 (\code{layer}). All four arguments are optional and independent -- pass
 only the ones a given builder needs, in one call, rather than chaining
-separate setters. See \code{\link[=er_style]{er_style()}}'s "Writing your own builder"
-section for the full contract.
+separate setters.
 }
 \details{
-\code{layout} is the one required tag for a data-layer builder:
-\code{\link[=er_plot_add_data]{er_plot_add_data()}} reads it off \code{style} to decide whether to route
-through \code{.layer_overlay()} (\code{"overlay"}: a single call merged into the
-main panel, at the observations' true \verb{(exposure, response)}
-coordinates) or \code{.layer_data()} (\code{"panel"}: one-or-more panels stacked
-below the base plot), \emph{before} it can call the builder -- so the choice
-can't be inferred from the builder's return value. Both built-in data
-builders (\code{\link[=er_style_data_overlay]{er_style_data_overlay()}}, \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}})
-already carry this tag.
+\code{layout} is a required tag for a data-layer builder:
+\code{\link[=er_plot_add_data]{er_plot_add_data()}} reads it off \code{style} to decide whether to place
+the output geoms into the main panel (\code{layout = "overlay"}) or to put them into
+separate strip-like panels above and below the main panel (\code{layout = "panel"})
 
-\code{fill_role} and \code{y_role} are both optional, read by \code{.polish_labels()}
+\code{fill_role} and \code{y_role} are both optional, and can be used
 to title a legend/axis correctly: \code{fill_role = "density"} (used by
 \code{\link[=er_style_data_hex]{er_style_data_hex()}}) says a builder's \code{fill} aesthetic encodes bin
 density rather than strata; \code{y_role = "count"} (used by
@@ -73,7 +64,7 @@ the y-axis is titled with the group variable's label), which is
 correct for most builders.
 
 \code{layer} is also optional, but unlike \code{fill_role}/\code{y_role} it isn't read
-for labelling -- it's read by every \verb{er_plot_add_*()} function
+for labelling. It's read by every \verb{er_plot_add_*()} function
 (\code{er_plot_add_model()} checks \code{style} against \code{"model"};
 \code{er_plot_add_summary()} checks \code{style} against \code{"summary"};
 \code{er_plot_add_quantiles()}
@@ -83,7 +74,7 @@ into the wrong layer -- e.g. passing a quantile builder to
 \code{er_plot_add_data()} -- with an informative error instead of whatever
 failure results from that layer's \code{config} shape not matching what the
 builder expects. All built-in builders carry this tag. A custom
-builder that omits it is never checked -- \code{layer} is opt-in, not a
+builder that omits it is never checked: \code{layer} is opt-in, not a
 requirement like \code{layout} is for a data-layer builder.
 }
 \examples{

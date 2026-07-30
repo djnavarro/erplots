@@ -62,9 +62,8 @@ ci_clopper_pearson <- function(x, n, conf_level = 0.95) {
 #' @param conf_level Confidence level
 #'
 #' @returns Named numeric vector (`lower`, `upper`), with confidence level
-#'   stored as an attribute. If fewer than 2 non-missing values are
-#'   supplied, returns `c(lower = NA, upper = NA)` (a standard deviation --
-#'   and hence a t-interval -- isn't defined for a single observation).
+#'   stored as an attribute. Returns `c(lower = NA, upper = NA)` if fewer
+#'   than 2 non-missing values are supplied.
 #'
 #' @details Used by the quantile-binned summary layer (see
 #'   [er_plot_add_quantiles()]) and `er_vpc_plot()` to compute a
@@ -104,12 +103,7 @@ ci_t <- function(x, conf_level = 0.95) {
 #'   `sum(x) / n`
 #' @param conf_level Confidence level
 #'
-#' @returns Named numeric vector (`lower`, `upper`) for the rate `sum(x) /
-#'   n`, with confidence level stored as an attribute. Uses the standard
-#'   exact ("Garwood") Poisson interval, derived from the chi-squared/gamma
-#'   relationship, rather than a normal approximation. If the total count
-#'   is 0, the lower bound is 0 (there's no gamma quantile at `shape =
-#'   0`).
+#' @returns Named numeric vector (`lower`, `upper`) for the rate `sum(x) / n`, with confidence level stored as an attribute.
 #'
 #' @details The count-response analogue of [ci_clopper_pearson()], used by
 #'   the quantile-binned summary layer (see [er_plot_add_quantiles()])
@@ -117,7 +111,9 @@ ci_t <- function(x, conf_level = 0.95) {
 #'   declared. Unlike [ci_t()] (the default, opt-in-required
 #'   approximation used when a count response auto-detects or is declared
 #'   `"continuous"`), this interval is exact and never produces a
-#'   negative lower bound.
+#'   negative lower bound. Uses the standard exact ("Garwood") Poisson
+#'   interval, derived from the chi-squared/gamma relationship; if the
+#'   total count is 0, the lower bound is 0.
 #'
 #' @export
 #' @examples
@@ -157,29 +153,28 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 
 #' Cut a continuous variable into quantiles
 #'
+#' `cut_quantile()` bins a numeric vector into `n` quantile groups.
+#' `cut_exposure_quantile()` does the same for an exposure variable,
+#' additionally keeping placebo (`0`) observations in their own bin.
+#'
 #' @param x Numeric vector
 #' @param n Number of bins
 #' @param is_placebo Logical vector indicating placebo samples
 #'
 #' @returns A factor. `cut_exposure_quantile()`'s result additionally
-#'   carries a `"breaks"` attribute -- the `n + 1` quantile cutpoints
-#'   (excluding placebo) used to form the bins, as computed by
-#'   [stats::quantile()] -- which quantile-layer builders that draw
-#'   bin-boundary separators (e.g. [er_style_quantile_errorbar_vlines()])
-#'   read back out via `attr(exposure_bins, "breaks")`.
-#'   Both `cut_exposure_quantile()` (excluding placebo and `NA` values) and
-#'   `cut_quantile()` (excluding `NA` values) error if `x` has fewer than
-#'   2 distinct values -- e.g. a constant, all-`NA`, or single-observation
-#'   column -- since quantile bins aren't well-defined in that case;
-#'   without this check, [stats::quantile()] would silently produce
-#'   non-unique/degenerate breaks and the error would instead surface
-#'   much later, opaquely, from inside [cut()]. If `x` has at least 2
-#'   distinct values but not enough resolution to distinguish all `n`
+#'   carries a `"breaks"` attribute holding the `n + 1` quantile
+#'   cutpoints used to form the bins.
+#'
+#' @details Both functions error if `x` has fewer than 2 distinct
+#'   non-missing values, since quantile bins aren't well-defined in that
+#'   case. If `x` doesn't have enough resolution to distinguish all `n`
 #'   requested bins (e.g. many repeated values clustered at one end),
-#'   both functions warn and silently fall back to using as many bins
-#'   as the data actually supports, rather than crashing (duplicate
-#'   `quantile()` breaks otherwise fail inside [cut()]) or showing fewer
-#'   bins than requested with no explanation.
+#'   both functions warn and fall back to using as many bins as the data
+#'   supports, rather than erroring or silently showing fewer bins with
+#'   no explanation. `cut_exposure_quantile()`'s `"breaks"` attribute is
+#'   read back out by quantile-layer builders that draw bin-boundary
+#'   separators (e.g. [er_style_quantile_errorbar_vlines()]) via
+#'   `attr(exposure_bins, "breaks")`.
 #'
 #' @name cut_quantile
 #' @examples

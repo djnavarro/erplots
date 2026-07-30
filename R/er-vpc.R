@@ -1,51 +1,23 @@
 
 #' Visual predictive check plot for an exposure-response model
 #'
-#' Compares observed response rates against simulated response rates from a
-#' model, stratified by a grouping variable. This function is model-agnostic:
-#' it operates purely on data frames, and can obtain those data frames in
-#' either of two ways -- see the `sim`/`model` arguments below.
+#' Compare observed and simulated response summaries grouped by a stratification variable.
 #'
-#' @param data Observed data
-#' @param sim Simulated data, with the same `exposure`/`response`/`group_by`
-#'   columns as `data`, plus a `sim_id` column identifying each replicate.
-#'   Mutually exclusive with `model`; supply exactly one of the two. Useful
-#'   for a hand-built simulation, or a model-specific helper that doesn't
-#'   go through the `er_simulate()` interface. Passing `model` instead is
-#'   preferred whenever the model implements [er_simulate()]'s `sim_resp`
-#'   extension (see [er_model_interface]).
-#' @param exposure Exposure variable (one variable, unquoted)
-#' @param response Response variable (one variable, unquoted). May be
-#'   binary (0/1, or logical) or continuous; see `response_type`
-#' @param group_by Variable (unquoted) to stratify predictions
-#' @param model A fitted exposure-response model implementing
-#'   [er_simulate()] with a `sim_resp` column (see [er_model_interface]).
-#'   Mutually exclusive with `sim`; supply exactly one of the two. When
-#'   supplied, `sim` is built internally via `er_simulate(model, newdata =
-#'   data, nsim = nsim, seed = seed)`; an error is raised if the model's
-#'   `er_simulate()` method doesn't provide `sim_resp` (either because it
-#'   returns `NULL`, i.e. no simulation support at all, or because it only
-#'   supports the parameter-uncertainty-only `fit_resp` used by
-#'   [er_style_model_spaghetti()] -- a VPC needs the fuller, response-level
-#'   simulation `sim_resp` represents; see [er_model_interface] for the
-#'   distinction).
-#' @param nsim Number of simulation replicates, only used when `model` is
-#'   supplied. Must be a single positive whole number.
-#' @param seed Optional RNG seed, only used when `model` is supplied
-#' @param conf_level Confidence level
-#' @param response_type One of `"auto"` (default), `"binary"`,
-#'   `"continuous"`, or `"count"`. Governs how the observed-side summary
-#'   is computed: response *rate* with a Clopper-Pearson CI for
-#'   `"binary"`, bin *mean* with a t-interval for `"continuous"` (see
-#'   [ci_t()]), or bin *mean* with an exact Poisson interval for
-#'   `"count"` (see [ci_poisson()]). `"auto"` detects from the
-#'   observed `response` column (entirely in `{0, 1}`, or logical, is
-#'   treated as binary; see [er_plot()]'s `response_type` for the same
-#'   heuristic) and never resolves to `"count"`: a count (Poisson-style)
-#'   response auto-detects as `"continuous"` (counts aren't confined to
-#'   `{0, 1}`) and is summarised with the bin-mean-plus-t-interval
-#'   approximation unless `response_type = "count"` is declared
-#'   explicitly, in which case the exact Poisson interval is used instead.
+#' @param data Observed data.
+#' @param sim Simulated data with matching `exposure`/`response`/`group_by` columns and `sim_id`.
+#' @param exposure Exposure variable (unquoted).
+#' @param response Response variable (unquoted).
+#' @param group_by Variable (unquoted) to stratify predictions.
+#' @param model A fitted model implementing [er_simulate()] with `sim_resp`.
+#' @param nsim Number of simulation replicates, only used with `model`.
+#' @param seed Optional RNG seed, only used with `model`.
+#' @param conf_level Confidence level.
+#' @param response_type One of `"auto"`, `"binary"`, `"continuous"`, or `"count"`.
+#'
+#' @details
+#' `sim` and `model` are mutually exclusive; supply exactly one. `model` is preferred when it implements [er_simulate()] with `sim_resp` because `er_vpc_plot()` needs response-level simulated observations rather than only mean predictions.
+#'
+#' `response_type` controls how the observed-side summary is computed: rate with a Clopper-Pearson interval for binary, mean with a t-interval for continuous, and mean with an exact Poisson interval for count.
 #'
 #' @returns A ggplot2 object
 #'
