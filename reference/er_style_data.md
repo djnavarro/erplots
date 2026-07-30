@@ -142,6 +142,12 @@ also tagged `layer = "data"`, so
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 errors if given a builder tagged for another layer.
 
+`er_style_data_hex()` defaults to a light-grey-to-navy (`"grey90"` to
+`"#132B43"`) fill gradient, so a cell's fill fades toward the panel
+background as its count approaches zero rather than starting at
+ggplot2's own default mid-intensity blue. Override it with
+`er_plot_theme(fill_continuous = ...)`.
+
 See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 for the shared builder interface these functions implement.
 
