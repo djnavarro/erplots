@@ -271,9 +271,9 @@ legend. erplots solves this by letting a builder carry metadata as
 **attributes on the function itself**, set by a single wrapper function,
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md),
 with one optional argument per piece of metadata (`layout`, `fill_role`,
-`y_role`). It wraps a builder and returns it back, attributes attached,
-so it composes naturally with assignment, and a builder that needs more
-than one tag only needs one call:
+`y_role`, `layer`, `zorder`). It wraps a builder and returns it back,
+attributes attached, so it composes naturally with assignment, and a
+builder that needs more than one tag only needs one call:
 
 ``` r
 
@@ -467,16 +467,106 @@ it’s passed to. This means existing custom builders written before
 get an earlier, more specific error if it’s ever passed to the wrong
 place by mistake.
 
-### One function, four independent arguments
+### `zorder`: where an overlay-layout data builder’s geoms sit in the main panel
 
-`layout`, `fill_role`, `y_role`, and `layer` are all set via the same
+The model, summary, and quantile layers always draw in the same fixed
+order relative to each other when they share the main panel. An
+`"overlay"`-layout data builder’s geoms, by default, draw *last* – on
+top of all three – which is the right choice for a sparse builder like
+[`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),
+whose individual points should never be hidden behind a translucent
+model ribbon. But a builder whose geoms cover the *whole* panel, with no
+gaps for anything underneath to show through, would completely bury the
+model curve and summary annotation by drawing last in the same way.
+`er_style_tag(style, zorder = "background")` tells erplots to draw that
+builder’s geoms *first* instead, so the model/summary/quantile layers
+are drawn on top of it.
+[`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+is tagged this way:
+
+``` r
+
+attr(er_style_data_hex, "er_style_zorder")
+#> [1] "background"
+```
+
+Here’s a custom `"overlay"`-layout builder that makes the same choice –
+a filled 2D density contour, which (like
+[`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md))
+covers the whole panel:
+
+``` r
+
+mod_gaussian <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+
+er_style_data_density_fill <- er_style_tag(
+  function(data, config, stratify, exposure, response, strata, theme, ...) {
+    ggplot2::geom_density_2d_filled(
+      data = data,
+      mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]]),
+      contour_var = "ndensity",
+      show.legend = FALSE
+    )
+  },
+  layout = "overlay",
+  zorder = "background"
+)
+
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_add_model(mod_gaussian) |>
+  er_plot_add_data(style = er_style_data_density_fill) |>
+  plot()
+```
+
+![](extending_files/figure-html/zorder-custom-1.png)
+
+The model curve stays visible because the filled contours were drawn
+first. Omitting the `zorder` tag (or setting it to `"foreground"`,
+equivalent to the default) draws exactly the same contours *after* the
+model curve instead, burying it completely:
+
+``` r
+
+er_style_data_density_fill_fg <- er_style_tag(
+  function(data, config, stratify, exposure, response, strata, theme, ...) {
+    ggplot2::geom_density_2d_filled(
+      data = data,
+      mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]]),
+      contour_var = "ndensity",
+      show.legend = FALSE
+    )
+  },
+  layout = "overlay"
+)
+
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_add_model(mod_gaussian) |>
+  er_plot_add_data(style = er_style_data_density_fill_fg) |>
+  plot()
+```
+
+![](extending_files/figure-html/zorder-foreground-1.png)
+
+`zorder` only has an effect on an `"overlay"`-layout data builder. A
+`"panel"`-layout builder’s geoms
+(e.g. [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md))
+are drawn in their own, separate patchwork panel, never sharing space
+with the model/summary/quantile layers, so the tag is inert there if
+set.
+
+### One function, five independent arguments
+
+`layout`, `fill_role`, `y_role`, `layer`, and `zorder` are all set via
+the same
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
-call rather than four separate wrapper functions. Each argument is
+call rather than five separate wrapper functions. Each argument is
 independent and optional (aside from `layout` being mandatory for a
 data-layer builder specifically – see above), so a builder that needs to
 declare more than one piece of metadata – say, a custom “overlay”-layout
-data builder whose `fill` also means something other than strata – can
-do it in one call:
+data builder whose `fill` also means something other than strata, and
+whose geoms cover the whole panel – can do it in one call:
 
 ``` r
 
@@ -484,13 +574,14 @@ my_density_builder <- er_style_tag(
   my_density_builder,
   layout = "overlay",
   fill_role = "density",
-  layer = "data"
+  layer = "data",
+  zorder = "background"
 )
 ```
 
 This is close to what the built-in
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-does (it sets `layout`, `fill_role`, and `layer` together).
+does (it sets `layout`, `fill_role`, `layer`, and `zorder` together).
 
 ### Summary
 
@@ -500,6 +591,7 @@ does (it sets `layout`, `fill_role`, and `layer` together).
 | `fill_role` | Any builder mapping `fill` | No – defaults to strata | Legend title for a non-strata `fill` aesthetic (e.g. `"density"`) |
 | `y_role` | Group-layer builders only | No – defaults to the group variable’s label | y-axis title when the y-axis isn’t the group variable itself (e.g. `"count"`) |
 | `layer` | Any builder | No – unchecked if unset | Which `er_plot_add_*()` the builder is meant for; mismatches error immediately |
+| `zorder` | `"overlay"`-layout data builders only | No – defaults to `"foreground"` | `"foreground"` (drawn after model/summary/quantile) vs. `"background"` (drawn before) |
 
 None of this machinery is needed for a builder that draws a familiar
 idiom in a familiar slot – the crossbar example above needed no tags at

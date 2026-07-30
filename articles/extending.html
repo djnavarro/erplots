@@ -487,10 +487,10 @@ title a legend. erplots solves this by letting a builder carry metadata
 as <strong>attributes on the function itself</strong>, set by a single
 wrapper function, <code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>, with one optional
 argument per piece of metadata (<code>layout</code>,
-<code>fill_role</code>, <code>y_role</code>). It wraps a builder and
-returns it back, attributes attached, so it composes naturally with
-assignment, and a builder that needs more than one tag only needs one
-call:</p>
+<code>fill_role</code>, <code>y_role</code>, <code>layer</code>,
+<code>zorder</code>). It wraps a builder and returns it back, attributes
+attached, so it composes naturally with assignment, and a builder that
+needs more than one tag only needs one call:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_builder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span><span class="va">my_builder</span>, layout <span class="op">=</span> <span class="st">"overlay"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
@@ -665,26 +665,105 @@ unchanged; tagging one is purely a way to get an earlier, more specific
 error if it’s ever passed to the wrong place by mistake.</p>
 </div>
 <div class="section level3">
-<h3 id="one-function-four-independent-arguments">One function, four independent arguments<a class="anchor" aria-label="anchor" href="#one-function-four-independent-arguments"></a>
+<h3 id="zorder-where-an-overlay-layout-data-builders-geoms-sit-in-the-main-panel">
+<code>zorder</code>: where an overlay-layout data builder’s geoms
+sit in the main panel<a class="anchor" aria-label="anchor" href="#zorder-where-an-overlay-layout-data-builders-geoms-sit-in-the-main-panel"></a>
 </h3>
-<p><code>layout</code>, <code>fill_role</code>, <code>y_role</code>, and
-<code>layer</code> are all set via the same <code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>
-call rather than four separate wrapper functions. Each argument is
-independent and optional (aside from <code>layout</code> being mandatory
-for a data-layer builder specifically – see above), so a builder that
-needs to declare more than one piece of metadata – say, a custom
-“overlay”-layout data builder whose <code>fill</code> also means
-something other than strata – can do it in one call:</p>
+<p>The model, summary, and quantile layers always draw in the same fixed
+order relative to each other when they share the main panel. An
+<code>"overlay"</code>-layout data builder’s geoms, by default, draw
+<em>last</em> – on top of all three – which is the right choice for a
+sparse builder like <code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>, whose
+individual points should never be hidden behind a translucent model
+ribbon. But a builder whose geoms cover the <em>whole</em> panel, with
+no gaps for anything underneath to show through, would completely bury
+the model curve and summary annotation by drawing last in the same way.
+<code>er_style_tag(style, zorder = "background")</code> tells erplots to
+draw that builder’s geoms <em>first</em> instead, so the
+model/summary/quantile layers are drawn on top of it.
+<code><a href="../reference/er_style_data.html">er_style_data_hex()</a></code> is tagged this way:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">er_style_data_hex</span>, <span class="st">"er_style_zorder"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "background"</span></span></code></pre></div>
+<p>Here’s a custom <code>"overlay"</code>-layout builder that makes the
+same choice – a filled 2D density contour, which (like
+<code><a href="../reference/er_style_data.html">er_style_data_hex()</a></code>) covers the whole panel:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mod_gaussian</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">biomarker_change</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">er_style_data_density_fill</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="external-link">geom_density_2d_filled</a></span><span class="op">(</span></span>
+<span>      data <span class="op">=</span> <span class="va">data</span>,</span>
+<span>      mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">exposure</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">response</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>      contour_var <span class="op">=</span> <span class="st">"ndensity"</span>,</span>
+<span>      show.legend <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span>,</span>
+<span>  layout <span class="op">=</span> <span class="st">"overlay"</span>,</span>
+<span>  zorder <span class="op">=</span> <span class="st">"background"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_data_density_fill</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="extending_files/figure-html/zorder-custom-1.png" class="r-plt" alt="" width="700"></p>
+<p>The model curve stays visible because the filled contours were drawn
+first. Omitting the <code>zorder</code> tag (or setting it to
+<code>"foreground"</code>, equivalent to the default) draws exactly the
+same contours <em>after</em> the model curve instead, burying it
+completely:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">er_style_data_density_fill_fg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="external-link">geom_density_2d_filled</a></span><span class="op">(</span></span>
+<span>      data <span class="op">=</span> <span class="va">data</span>,</span>
+<span>      mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">exposure</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">response</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>      contour_var <span class="op">=</span> <span class="st">"ndensity"</span>,</span>
+<span>      show.legend <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span>,</span>
+<span>  layout <span class="op">=</span> <span class="st">"overlay"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_gaussian</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_data_density_fill_fg</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="extending_files/figure-html/zorder-foreground-1.png" class="r-plt" alt="" width="700"></p>
+<p><code>zorder</code> only has an effect on an
+<code>"overlay"</code>-layout data builder. A
+<code>"panel"</code>-layout builder’s geoms
+(e.g. <code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code>) are drawn in their own,
+separate patchwork panel, never sharing space with the
+model/summary/quantile layers, so the tag is inert there if set.</p>
+</div>
+<div class="section level3">
+<h3 id="one-function-five-independent-arguments">One function, five independent arguments<a class="anchor" aria-label="anchor" href="#one-function-five-independent-arguments"></a>
+</h3>
+<p><code>layout</code>, <code>fill_role</code>, <code>y_role</code>,
+<code>layer</code>, and <code>zorder</code> are all set via the same
+<code><a href="../reference/er_style_tag.html">er_style_tag()</a></code> call rather than five separate wrapper
+functions. Each argument is independent and optional (aside from
+<code>layout</code> being mandatory for a data-layer builder
+specifically – see above), so a builder that needs to declare more than
+one piece of metadata – say, a custom “overlay”-layout data builder
+whose <code>fill</code> also means something other than strata, and
+whose geoms cover the whole panel – can do it in one call:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_density_builder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
 <span>  <span class="va">my_density_builder</span>,</span>
 <span>  layout <span class="op">=</span> <span class="st">"overlay"</span>,</span>
 <span>  fill_role <span class="op">=</span> <span class="st">"density"</span>,</span>
-<span>  layer <span class="op">=</span> <span class="st">"data"</span></span>
+<span>  layer <span class="op">=</span> <span class="st">"data"</span>,</span>
+<span>  zorder <span class="op">=</span> <span class="st">"background"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This is close to what the built-in <code><a href="../reference/er_style_data.html">er_style_data_hex()</a></code>
-does (it sets <code>layout</code>, <code>fill_role</code>, and
-<code>layer</code> together).</p>
+does (it sets <code>layout</code>, <code>fill_role</code>,
+<code>layer</code>, and <code>zorder</code> together).</p>
 </div>
 <div class="section level3">
 <h3 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
@@ -732,6 +811,16 @@ vs. <code>"panel"</code> (stacked panels below)</td>
 <td>No – unchecked if unset</td>
 <td>Which <code>er_plot_add_*()</code> the builder is meant for;
 mismatches error immediately</td>
+</tr>
+<tr class="odd">
+<td><code>zorder</code></td>
+<td>
+<code>"overlay"</code>-layout data builders only</td>
+<td>No – defaults to <code>"foreground"</code>
+</td>
+<td>
+<code>"foreground"</code> (drawn after model/summary/quantile)
+vs. <code>"background"</code> (drawn before)</td>
 </tr>
 </tbody>
 </table>
