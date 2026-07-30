@@ -308,6 +308,41 @@ discrete one. Verified clean: `devtools::test()` (634 passing),
 `devtools::check()` (0 errors/warnings/notes), and `theming.Rmd`
 re-rendered end-to-end via `rmarkdown::render()`.
 
+## `er_style_data_hex()`'s default fill palette fades to the panel background near zero
+
+`er_style_data_hex()` used to leave its `fill` aesthetic (bin density)
+at ggplot2's own default continuous fill gradient, whose low end is
+already a moderate blue rather than something that reads as "no data
+here" -- a real usability gap now that `erplots_data` (4,000 rows) makes
+this builder's main use case (avoiding scatter overplot) concrete. It
+now adds its own default, `ggplot2::scale_fill_gradient(low = "grey90",
+high = "#132B43")`, so a cell's fill fades toward (though doesn't fully
+reach) the panel background as its count approaches zero -- `grey90`
+rather than pure white, so a very-low-density cell still reads as a
+drawn hex rather than disappearing indistinguishably into the `theme_bw()`
+background. This default is only added when the user hasn't
+already supplied `er_plot_theme(fill_continuous = ...)` -- checked via
+the builder's own `theme$fill_continuous` (the `theme` argument passed
+into every builder *is* `object$theme`, so this needed no new plumbing)
+-- so overriding the palette doesn't trip ggplot2's "already present"
+duplicate-scale warning that `.polish_scales()` layering a second scale
+on top would otherwise cause. Covered by an updated test in
+`tests/testthat/test-er-plot-style-data.R` (renamed from "returns a
+single hex geom" to "returns a hex geom plus its default fill scale",
+now asserting length 2 and checking the scale's `low` color via its
+captured `$call`). `devtools::test()` (813 passing) and
+`devtools::document()` both clean; the one pre-existing `WARN` in the
+suite (`geom_violin()`'s `draw_quantiles` deprecation) is unrelated.
+
+Deliberately not done as part of this change: no equivalent default was
+added for `color_continuous`/a hypothetical `color_role == "response"`
+data panel (no built-in builder uses that role today, so there's
+nothing to apply a default to yet); `vignettes/articles/theming.Rmd`'s
+existing "Continuous color/fill palette" section (which already
+demonstrates overriding `er_style_data_hex()`'s fill) was not
+re-rendered to show the new default explicitly, since the section's own
+prose doesn't describe what the *unstyled* default looks like.
+
 ## Fixed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
 
 `er_plot_build()`'s trigger condition for building the base panel

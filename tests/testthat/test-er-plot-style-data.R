@@ -199,7 +199,7 @@ test_that("er_style_data_overlay's new style arguments override their defaults",
 })
 
 
-test_that("er_style_data_hex returns a single hex geom for any response type", {
+test_that("er_style_data_hex returns a hex geom plus its default fill scale for any response type", {
   skip_if_not_installed("erglm")
   skip_if_not_installed("hexbin")
 
@@ -223,11 +223,18 @@ test_that("er_style_data_hex returns a single hex geom for any response type", {
   out_binary <- do.call(er_style_data_hex, args(p_binary))
   out_cont <- do.call(er_style_data_hex, args(p_cont))
 
-  expect_length(out_binary, 1)
-  expect_length(out_cont, 1)
+  expect_length(out_binary, 2)
+  expect_length(out_cont, 2)
   expect_true(inherits(out_binary[[1]], "LayerInstance"))
   expect_true(inherits(out_cont[[1]], "LayerInstance"))
   expect_identical(class(out_cont[[1]]$geom)[1], "GeomHex")
+
+  # the default fill scale fades toward the `theme_bw()` panel
+  # background as a cell's count approaches zero
+  expect_true(inherits(out_binary[[2]], "ScaleContinuous"))
+  expect_true(inherits(out_cont[[2]], "ScaleContinuous"))
+  expect_identical(out_cont[[2]]$aesthetics, "fill")
+  expect_identical(eval(out_cont[[2]]$call$low), "grey90")
 })
 
 test_that("er_style_data_hex informs (not warns/errors) that strata aren't encoded", {

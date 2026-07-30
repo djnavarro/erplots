@@ -96,6 +96,12 @@ boxplot/jitter panels.
 \details{
 Builders for the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}}) are tagged with the structural family they belong to via \code{\link[=er_style_tag]{er_style_tag()}}. \code{er_style_data_overlay()} and \code{er_style_data_hex()} use the overlay layout, drawing in the main panel; \code{er_style_data_boxjitter()} uses the panel layout and is binary-response only. All built-in data builders are also tagged \code{layer = "data"}, so \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors if given a builder tagged for another layer.
 
+\code{er_style_data_hex()} defaults to a light-grey-to-navy (\code{"grey90"} to
+\code{"#132B43"}) fill gradient, so a cell's fill fades toward the panel
+background as its count approaches zero rather than starting at
+ggplot2's own default mid-intensity blue. Override it with
+\code{er_plot_theme(fill_continuous = ...)}.
+
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions implement.
 }
 \examples{

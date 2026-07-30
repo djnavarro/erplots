@@ -25,6 +25,12 @@
 #'
 #' @details Builders for the `data` layer ([er_plot_add_data()]) are tagged with the structural family they belong to via [er_style_tag()]. `er_style_data_overlay()` and `er_style_data_hex()` use the overlay layout, drawing in the main panel; `er_style_data_boxjitter()` uses the panel layout and is binary-response only. All built-in data builders are also tagged `layer = "data"`, so [er_plot_add_data()] errors if given a builder tagged for another layer.
 #'
+#' `er_style_data_hex()` defaults to a light-grey-to-navy (`"grey90"` to
+#' `"#132B43"`) fill gradient, so a cell's fill fades toward the panel
+#' background as its count approaches zero rather than starting at
+#' ggplot2's own default mid-intensity blue. Override it with
+#' `er_plot_theme(fill_continuous = ...)`.
+#'
 #' See [er_style()] for the shared builder interface these functions implement.
 #'
 #' @returns A geom, or a list of geoms; see [er_style()].
@@ -268,6 +274,18 @@ er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, res
       key_glyph = theme$draw_key
     )
   )
+
+  # Fade toward the panel background matching the default
+  # `theme_bw()` base theme as a cell's count approaches zero, rather
+  # than starting at ggplot2's default mid-intensity blue -- this is this
+  # builder's own visual default. Only added when the user hasn't already
+  # supplied `er_plot_theme(fill_continuous = ...)`, so overriding the
+  # palette doesn't trip ggplot2's "already present" duplicate-scale
+  # warning (`.polish_scales()` would otherwise be adding a second fill
+  # scale on top of this one).
+  if (is.null(theme$fill_continuous)) {
+    geoms <- c(geoms, list(ggplot2::scale_fill_gradient(low = "grey90", high = "#132B43")))
+  }
 
   return(geoms)
 }, layout = "overlay", fill_role = "density", layer = "data")
