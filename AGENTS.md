@@ -431,6 +431,20 @@ to the `zorder` fix) before the existing override example.
 `vignettes/articles/theming.Rmd` and `vignettes/articles/design.Rmd`
 re-rendered end-to-end via `rmarkdown::render()` with no errors.
 
+A second follow-up pass closed the one item still left open above:
+`extending.Rmd` gained a `### zorder` section, worked the same way as
+its `layout`/`fill_role`/`y_role`/`layer` sections -- explaining the
+concept, showing `er_style_data_hex()`'s own `"er_style_zorder"`
+attribute, and a custom `"overlay"`-layout builder (a filled 2D density
+contour, `geom_density_2d_filled()`) demonstrated twice: once tagged
+`zorder = "background"` (model curve stays visible, drawn on top) and
+once without the tag (model curve is completely buried, drawn
+underneath) -- a direct, runnable illustration of the bug this tag
+fixes. The "One function, four independent arguments" section was
+renumbered to five and its code example/summary table both gained a
+`zorder` row/argument. Verified: `rmarkdown::render()` of
+`vignettes/articles/extending.Rmd` with no errors.
+
 ## Fixed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
 
 `er_plot_build()`'s trigger condition for building the base panel
