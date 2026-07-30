@@ -155,7 +155,14 @@ assemble the layer; the other four layers have only one structural
 call site, so no such tagging is needed there. See the <code>@examples</code> on
 <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>, <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>, and
 <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for worked custom builders (a dashed model curve,
-a quantile crossbar, and a data-overlay density, respectively).</p>
+a quantile crossbar, and a data-overlay density, respectively). An
+overlay-layout data builder can additionally declare, via the same
+<code><a href="er_style_tag.html">er_style_tag()</a></code> call's <code>zorder</code> argument, whether its geoms are drawn
+before or after the model/summary/quantile layers when they share the
+main panel – relevant for a builder whose geoms cover the whole panel
+(e.g. <code><a href="er_style_data.html">er_style_data_hex()</a></code>), which would otherwise bury those layers
+by drawing on top of them; see <code><a href="er_style_data.html">er_style_data()</a></code> for the full
+explanation.</p>
 <p>A custom builder receives the same pre-computed <code>config</code> a built-in
 builder would have received for that layer (e.g. <code>config$predictions</code>
 for <code>model</code>, <code>config$summary</code> for <code>quantile</code>) – it does not need to

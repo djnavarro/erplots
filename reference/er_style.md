@@ -124,7 +124,16 @@ is needed there. See the `@examples` on
 and
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 for worked custom builders (a dashed model curve, a quantile crossbar,
-and a data-overlay density, respectively).
+and a data-overlay density, respectively). An overlay-layout data
+builder can additionally declare, via the same
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+call's `zorder` argument, whether its geoms are drawn before or after
+the model/summary/quantile layers when they share the main panel –
+relevant for a builder whose geoms cover the whole panel (e.g.
+[`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)),
+which would otherwise bury those layers by drawing on top of them; see
+[`er_style_data()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+for the full explanation.
 
 A custom builder receives the same pre-computed `config` a built-in
 builder would have received for that layer (e.g. `config$predictions`
