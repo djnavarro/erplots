@@ -415,6 +415,22 @@ outline contrast treatment was added to any model-layer builder (flagged
 during the design review as a possible follow-up if `alpha = 0.85` alone
 doesn't give enough contrast in practice).
 
+A follow-up pass closed two of the three vignette/staleness gaps this
+change left open (`extending.Rmd`'s own `zorder` walkthrough remains
+the one still-open item, listed above). `theming.Rmd`'s "Continuous
+color/fill palette" section previously only showed `er_style_data_hex()`
+with a `fill_continuous` override, never the builder's own unstyled
+default -- it now leads with a plot using no `fill_continuous` at all
+(demonstrating the grey90-to-navy default, and incidentally also
+showing the model line correctly visible on top of the hex fill, thanks
+to the `zorder` fix) before the existing override example.
+`design.Rmd`'s "Extending erplots" pointer section understated
+`er_style_tag()`'s metadata list as just `layout`/`fill_role`/`y_role`
+-- missing `layer` (a pre-existing gap predating this round) and now
+`zorder` -- corrected to name all five. Verified: both
+`vignettes/articles/theming.Rmd` and `vignettes/articles/design.Rmd`
+re-rendered end-to-end via `rmarkdown::render()` with no errors.
+
 ## Fixed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
 
 `er_plot_build()`'s trigger condition for building the base panel
