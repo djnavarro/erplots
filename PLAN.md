@@ -224,4 +224,42 @@ expose the planned style arguments (`alpha`, `bins`, `quantiles`,
 `tests/testthat/test-er-plot-style-group.R` verify their defaults and
 explicit overrides.
 
+## Completed: bundled `erplots_data` example dataset
+
+Added erplots' own simulated dataset (`data/erplots_data.rda`, built by
+`data-raw/erplots_data.R`, documented in `R/data.R`) rather than relying
+solely on `erglm`/`emaxnls`'s example data for the package's own
+examples/vignettes. Design goals: multiple (three) continuous exposure
+columns, response columns spanning all three response types, one
+exposure/response pair suited to each of Emax-continuous, Emax-binary,
+logistic regression, linear regression, and Poisson regression, a
+placebo arm plus multiple dose levels, a few plausible covariates, and
+enough rows (4,000) that raw-point overplotting is genuinely visible
+(motivating `er_style_data_hex()`). All five modelling scenarios were
+validated end to end against real `erglm`/`emaxnls` fits before
+finalizing the simulation parameters -- not just plausible-looking code,
+but confirmed parameter recovery close to the simulated truth.
+
+A follow-up added a sixth column, `study_id`, generated independently of
+dose/exposure/response purely so it's convenient to filter on --
+subsetting to one study shrinks N substantially (as low as 400 rows)
+while still spanning the full dose range, for illustrating the same
+plot at smaller sample sizes (e.g. when a raw overlay stops overplotting
+and a hex/density summary is no longer the better choice). Unevenly
+sized (400/800/1200/1600 across 4 studies) so there's a genuinely small
+one to filter down to, rather than four equal quarters.
+
+Verified clean: `devtools::document()`, `devtools::test()` (809 passing,
+unaffected -- purely additive), and `devtools::check()` (0 errors/
+warnings/notes). See AGENTS.md's "Bundled example dataset: `erplots_data`"
+section for the full column-by-column rationale.
+
+**Open / deferred, not scheduled:** a dedicated
+`vignettes/articles/erplots-data.Rmd` walkthrough of all five scenarios
+end-to-end (currently just a one-sentence pointer from
+`vignettes/erplots.Rmd` plus `?erplots_data`'s own `@examples`); tests
+asserting `study_id`'s independence from dose/exposure/response
+directly (currently just eyeballed via `table(study_id, dose_group)`
+during development, not asserted in `tests/testthat/`).
+
 ## Planned: stress-test findings (input validation gaps)

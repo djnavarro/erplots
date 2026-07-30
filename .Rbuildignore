@@ -9,3 +9,4 @@
 ^vignettes/articles$
 ^AGENTS\.md$
 ^PLAN\.md$
+^data-raw$

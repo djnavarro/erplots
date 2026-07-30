@@ -36,6 +36,7 @@ reference:
   - ci_poisson
   - ci_t
   - cut_quantile
+  - erplots_data
 
 articles:
   - title:
