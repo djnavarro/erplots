@@ -48,7 +48,7 @@ er_plot_theme(
 - xlab, ylab:
 
   Exposure/response axis label (single string), written to
-  `object$exposure$label`/`object$response$label`
+  `object$exposure$label`/`object$response$label`.
 
 - strata_lab:
 
@@ -62,7 +62,7 @@ er_plot_theme(
   Plot-level annotation text (single strings), applied via
   [`patchwork::plot_annotation()`](https://patchwork.data-imaginist.com/reference/plot_annotation.html)
   in
-  [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
+  [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md).
 
 - xlim, ylim:
 
@@ -98,7 +98,7 @@ er_plot_theme(
   [`ggplot2::scale_fill_viridis_d()`](https://ggplot2.tidyverse.org/reference/scale_viridis.html)),
   written to `object$theme$color_discrete`/`object$theme$fill_discrete`
   and applied to every plot whose `colour`/`fill` aesthetic is mapped to
-  the stratification variable – see "Details"
+  the stratification variable – see "Details".
 
 - color_continuous, fill_continuous:
 
@@ -109,20 +109,20 @@ er_plot_theme(
   `object$theme$color_continuous`/`object$theme$fill_continuous` and
   applied to every plot whose `colour`/`fill` aesthetic is mapped to
   something continuous other than the stratification variable – see
-  "Details"
+  "Details".
 
 - format_p, format_percent, format_number:
 
   Formatter functions (typically from `scales::label_*()`), written to
   `object$theme$format_p` etc. Used by the summary/quantile layers to
-  format p-values/rates/means for display
+  format p-values/rates/means for display.
 
 - draw_key:
 
   A key-glyph function (e.g.
   [`ggplot2::draw_key_point()`](https://ggplot2.tidyverse.org/reference/draw_key.html)),
   written to `object$theme$draw_key` and passed as every geom's
-  `key_glyph` argument
+  `key_glyph` argument.
 
 - dodge_width:
 
@@ -131,15 +131,14 @@ er_plot_theme(
   [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/
   [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)),
   as a fraction of the exposure range. A single positive number, written
-  to `object$theme$dodge_width`. Default `0.05` (set in
-  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)),
-  matching the previous fixed value.
+  to `object$theme$dodge_width`. Default `0.015` (set in
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)).
 
 - height_base, height_data, height_group:
 
   Relative panel heights (single positive numbers), merged into
   `object$theme$height` – supplying only one leaves the other two
-  unchanged
+  unchanged.
 
 ## Value
 
