@@ -25,7 +25,7 @@ Imports:
     tidyselect,
     withr
 Suggests: 
-    emaxnls,
+    emaxnls (>= 0.1.1.9000),
     erglm,
     hexbin,
     knitr,
