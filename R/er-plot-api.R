@@ -712,10 +712,13 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'   `"group"`, naming which `er_plot_add_*()` layer the builder is meant
 #'   to be used with, or `NULL` (the default) to leave this tag unset.
 #'   See "Details".
+#' @param zorder One of `"foreground"` or `"background"`, or `NULL` (the
+#'   default, equivalent to `"foreground"`) to leave this tag unset. Only
+#'   meaningful for an overlay-layout data builder; see "Details".
 #'
 #' @returns `style`, with whichever of the `"er_style_layout"`/
-#'   `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`
-#'   attributes were requested attached.
+#'   `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`/
+#'   `"er_style_zorder"` attributes were requested attached.
 #'
 
 #' @details
@@ -723,10 +726,12 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' data-layer builder belongs to (`layout`), what a builder's `fill`
 #' aesthetic means when it isn't strata (`fill_role`), what a group-layer
 #' builder's y-axis means when it isn't the group variable itself
-#' (`y_role`), and which layer a builder is meant to be plugged into
-#' (`layer`). All four arguments are optional and independent -- pass
-#' only the ones a given builder needs, in one call, rather than chaining
-#' separate setters.
+#' (`y_role`), which layer a builder is meant to be plugged into
+#' (`layer`), and where an overlay-layout data builder's geoms sit
+#' relative to the model/summary/quantile layers when they share the main
+#' panel (`zorder`). All five arguments are optional and independent --
+#' pass only the ones a given builder needs, in one call, rather than
+#' chaining separate setters.
 #'
 #' `layout` is a required tag for a data-layer builder:
 #' [er_plot_add_data()] reads it off `style` to decide whether to place 
@@ -757,7 +762,21 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' builder that omits it is never checked: `layer` is opt-in, not a
 #' requirement like `layout` is for a data-layer builder.
 #'
-#' 
+#' `zorder` only applies to an overlay-layout data builder (`layout =
+#' "overlay"`), and controls whether its geoms are drawn before or after
+#' the model/summary/quantile layers when they share the main panel.
+#' `"foreground"`, the default for a builder that omits this tag (e.g.
+#' `er_style_data_overlay()`), draws the data geoms last, on top of
+#' everything else -- appropriate for a sparse layer like individual
+#' points, which should never be hidden behind a model ribbon.
+#' `"background"` (used by `er_style_data_hex()`) draws the data geoms
+#' first, so a builder whose geoms cover the whole panel (leaving no gaps
+#' for what's underneath to show through) doesn't bury the model curve or
+#' summary annotation. `zorder` has no effect on a panel-layout data
+#' builder (e.g. `er_style_data_boxjitter()`), since those geoms are
+#' drawn in their own separate panels, never sharing space with the model/
+#' summary/quantile layers.
+#'
 #' @seealso [er_plot_add_data()], [er_style()]
 #'
 #' @examples
@@ -773,7 +792,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' )
 #'
 #' @export
-er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, layer = NULL) {
+er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL) {
   if (!is.function(style)) rlang::abort("`style` must be a function")
 
   if (!is.null(layout)) {
@@ -789,6 +808,10 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   if (!is.null(layer)) {
     layer <- match.arg(layer, c("model", "summary", "quantile", "data", "group"))
     attr(style, "er_style_layer") <- layer
+  }
+  if (!is.null(zorder)) {
+    zorder <- match.arg(zorder, c("foreground", "background"))
+    attr(style, "er_style_zorder") <- zorder
   }
 
   style
@@ -820,6 +843,12 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #' @noRd
 .style_layer <- function(style) {
   attr(style, "er_style_layer")
+}
+
+#' @noRd
+.style_zorder <- function(style) {
+  zorder <- attr(style, "er_style_zorder")
+  if (is.null(zorder)) "foreground" else zorder
 }
 
 #' @noRd
@@ -1196,7 +1225,7 @@ er_plot_build <- function(object) {
   }
   if (!is.null(object$layer$data)) object$plot$data <- .build_data_plot(object)
   if (!is.null(object$layer$group)) object$plot$group <- .build_group_plot(object)
-  if (!is.null(object$layer$overlay)) {
+  if (!is.null(object$layer$overlay) && !identical(.style_zorder(object$layer$overlay$config$style), "background")) {
     object$plot$base <- object$plot$base + .build_overlay_geoms(object)
   }
 

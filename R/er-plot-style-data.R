@@ -14,7 +14,8 @@
 #' @param theme Theme components.
 #' @param ... Additional named arguments forwarded from [er_plot_add_data()]'s own `...`.
 #' @param jitter_height Vertical jitter applied to raw points.
-#' @param alpha Point transparency for `er_style_data_overlay()`.
+#' @param alpha Point transparency for `er_style_data_overlay()`; fill
+#'   transparency for `er_style_data_hex()`.
 #' @param size Point size for `er_style_data_overlay()`.
 #' @param box_width Width of `er_style_data_boxjitter()`'s boxplot.
 #' @param box_alpha Transparency of `er_style_data_boxjitter()`'s boxplot fill.
@@ -30,6 +31,12 @@
 #' background as its count approaches zero rather than starting at
 #' ggplot2's own default mid-intensity blue. Override it with
 #' `er_plot_theme(fill_continuous = ...)`.
+#'
+#' Because its geoms cover the whole panel, `er_style_data_hex()` is
+#' tagged `er_style_tag(fn, zorder = "background")` (see [er_style_tag()]),
+#' so it's drawn before the model/summary/quantile layers rather than on
+#' top of them; its default `alpha = 0.85` gives those layers a little
+#' extra visibility through even a densely populated hex cell.
 #'
 #' See [er_style()] for the shared builder interface these functions implement.
 #'
@@ -229,7 +236,7 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
 #' @rdname er_style_data
 #' @export
 er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...,
-                                            bins = 30) {
+                                            bins = 30, alpha = 0.85) {
 
   # a 2D-binned density alternative to `er_style_data_overlay()`'s raw
   # scatter, for when N is large enough that individual points overplot
@@ -271,6 +278,7 @@ er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, res
         y = .data[[response$name]]
       ),
       bins = bins,
+      alpha = alpha,
       key_glyph = theme$draw_key
     )
   )
@@ -288,4 +296,4 @@ er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, res
   }
 
   return(geoms)
-}, layout = "overlay", fill_role = "density", layer = "data")
+}, layout = "overlay", fill_role = "density", layer = "data", zorder = "background")

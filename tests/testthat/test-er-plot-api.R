@@ -861,6 +861,73 @@ test_that("er_style_tag() attaches a layer attribute, validated against a fixed 
   expect_error(er_style_tag(fn, layer = "not_a_layer"))
 })
 
+test_that("er_style_tag() attaches a zorder attribute, validated against a fixed set", {
+  fn <- function(data, config, stratify, exposure, response, strata, theme) list()
+
+  tagged <- er_style_tag(fn, zorder = "background")
+  expect_identical(attr(tagged, "er_style_zorder"), "background")
+
+  expect_error(er_style_tag(fn, zorder = "not_a_zorder"))
+
+  # an untagged builder has no attribute set...
+  expect_null(attr(fn, "er_style_zorder"))
+  # ...but `.style_zorder()` defaults it to "foreground"
+  expect_identical(erplots:::.style_zorder(fn), "foreground")
+  expect_identical(erplots:::.style_zorder(tagged), "background")
+})
+
+test_that("er_style_data_hex() is tagged zorder = \"background\"", {
+  expect_identical(attr(er_style_data_hex, "er_style_zorder"), "background")
+})
+
+test_that("a zorder = \"background\" overlay style draws before model/summary/quantile geoms", {
+  skip_if_not_installed("erglm")
+  skip_if_not_installed("hexbin")
+
+  background_builder <- er_style_tag(
+    function(data, config, stratify, exposure, response, strata, theme, ...) {
+      ggplot2::geom_point(
+        data = data,
+        mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]]),
+        shape = 4
+      )
+    },
+    layout = "overlay",
+    zorder = "background"
+  )
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_summary(model = er_test_mod1) |>
+    er_plot_add_data(style = background_builder) |>
+    er_plot_build()
+
+  geom_classes <- purrr::map_chr(plt$plot$base$layers, \(l) class(l$geom)[1])
+  overlay_position <- which(geom_classes == "GeomPoint")
+  model_position <- which(geom_classes == "GeomPath")
+
+  expect_true(length(overlay_position) > 0 && length(model_position) > 0)
+  expect_true(min(overlay_position) < min(model_position))
+})
+
+test_that("the default (foreground) overlay style still draws after model/summary/quantile geoms", {
+  skip_if_not_installed("erglm")
+
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_data(style = er_style_data_overlay) |>
+    er_plot_build()
+
+  geom_classes <- purrr::map_chr(plt$plot$base$layers, \(l) class(l$geom)[1])
+  overlay_position <- which(geom_classes == "GeomPoint")
+  model_position <- which(geom_classes == "GeomPath")
+
+  expect_true(length(overlay_position) > 0 && length(model_position) > 0)
+  expect_true(min(overlay_position) > min(model_position))
+})
+
 test_that("built-in builders are tagged with their layer", {
   expect_identical(attr(er_style_model_ribbonline, "er_style_layer"), "model")
   expect_identical(attr(er_style_model_line, "er_style_layer"), "model")

@@ -343,6 +343,78 @@ demonstrates overriding `er_style_data_hex()`'s fill) was not
 re-rendered to show the new default explicitly, since the section's own
 prose doesn't describe what the *unstyled* default looks like.
 
+## `er_style_tag()`'s `zorder` attribute: a background/foreground stacking position for overlay-layout data builders
+
+`er_style_data_hex()`'s geoms cover the whole panel (no gaps for a
+lower layer to show through), so being added last -- the fixed
+z-order every overlay-layout data builder used to share, added after
+model/summary/quantile so a scatter overlay's individual points are
+never hidden behind a translucent model ribbon -- meant it completely
+buried the model curve/ribbon and the summary annotation whenever all
+three shared the main panel. A design review considered two fixes: (1)
+a builder-declared z-order tag, so only a full-coverage builder like
+`er_style_data_hex()` opts into drawing first, or (2) switching the
+whole package to ggplot2-style semantics where the order layers are
+*added* in the `er_plot_add_*()` pipeline determines z-order. (2) was
+rejected as a much bigger architectural bet for a currently-hypothetical
+benefit: it would require new object state tracking call order among
+the (at most four) main-panel layers, a policy decision for what
+happens to that order when a singleton layer is replaced by a second
+call, and -- most importantly -- it would break the package's existing,
+foundational "pipe order never affects the result" property (every
+`er_plot_add_*()` call writes into its own named `object$layer$*` slot,
+assembled deterministically by `er_plot_build()` regardless of call
+order) for exactly one dimension (main-panel z-order) while leaving
+that property intact everywhere else in the spec -- a real, if narrow,
+inconsistency to document and reason about. (1) was implemented
+instead, since it required no new object state, changed no existing
+builder's behaviour, and follows the same self-declared-metadata
+pattern `layout`/`fill_role`/`y_role`/`layer` already established.
+
+`er_style_tag()` gained a fifth independent, optional argument,
+`zorder`, one of `"foreground"` (the default when a builder omits the
+tag, unchanged behaviour: overlay geoms added last, after
+model/summary/quantile) or `"background"` (overlay geoms added first,
+before model/summary/quantile). It's stored as the `"er_style_zorder"`
+attribute and read via a new internal `.style_zorder()` (which, unlike
+`.style_layout()`, doesn't error on an untagged builder -- it defaults
+to `"foreground"`, since every existing builder is meant to keep
+working unchanged). `zorder` only has an effect for an overlay-layout
+data builder; a panel-layout builder's geoms are never in the same
+ggplot object as model/summary/quantile, so the tag is inert there.
+`.build_base_plot()` (`R/er-plot-build.R`) now checks
+`object$layer$overlay`'s style for this tag *before* adding the
+model/summary/quantile geoms, adding the overlay geoms first when it's
+`"background"`; `er_plot_build()`'s own overlay-adding step (previously
+unconditional, always after `.build_base_plot()` returns) now skips
+re-adding them when the tag is `"background"`, since `.build_base_plot()`
+already did.
+
+`er_style_data_hex()` is now tagged `zorder = "background"`, and
+also gained a modest default `alpha = 0.85` on its `geom_hex()` (a new,
+overridable formal, same pattern as `bins`) -- giving the
+now-visible-again model curve/summary annotation a little extra
+contrast against even a densely populated hex cell, on top of the fix
+to ordering itself. Neither change affects any other builder.
+
+Covered by new tests in `tests/testthat/test-er-plot-api.R`: `zorder`'s
+validation (including the untagged-defaults-to-`"foreground"` case),
+`er_style_data_hex()` carrying the tag, and two integration tests
+building a plot with a custom `zorder = "background"` overlay style
+(confirming its geoms precede the model layer's in
+`object$plot$base$layers`) and with the default (`"foreground"`)
+`er_style_data_overlay()` (confirming the opposite, unchanged ordering).
+Verified: `devtools::test()` (823 passing, up from 813; the one
+pre-existing `WARN` -- `geom_violin()`'s `draw_quantiles` deprecation --
+is unrelated) and `devtools::check()` (0 errors/warnings/notes).
+
+Not done as part of this change: no vignette was updated to demonstrate
+`zorder` (`extending.Rmd`'s `er_style_tag()` walkthrough covers
+`layout`/`fill_role`/`y_role`/`layer` but not yet `zorder`); no halo/
+outline contrast treatment was added to any model-layer builder (flagged
+during the design review as a possible follow-up if `alpha = 0.85` alone
+doesn't give enough contrast in practice).
+
 ## Fixed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
 
 `er_plot_build()`'s trigger condition for building the base panel

@@ -47,7 +47,8 @@ er_style_data_hex(
   strata,
   theme,
   ...,
-  bins = 30
+  bins = 30,
+  alpha = 0.85
 )
 }
 \arguments{
@@ -79,7 +80,8 @@ er_style_data_hex(
 
 \item{jitter_alpha}{Transparency of \code{er_style_data_boxjitter()}'s jittered points.}
 
-\item{alpha}{Point transparency for \code{er_style_data_overlay()}.}
+\item{alpha}{Point transparency for \code{er_style_data_overlay()}; fill
+transparency for \code{er_style_data_hex()}.}
 
 \item{size}{Point size for \code{er_style_data_overlay()}.}
 
@@ -101,6 +103,12 @@ Builders for the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_d
 background as its count approaches zero rather than starting at
 ggplot2's own default mid-intensity blue. Override it with
 \code{er_plot_theme(fill_continuous = ...)}.
+
+Because its geoms cover the whole panel, \code{er_style_data_hex()} is
+tagged \code{er_style_tag(fn, zorder = "background")} (see \code{\link[=er_style_tag]{er_style_tag()}}),
+so it's drawn before the model/summary/quantile layers rather than on
+top of them; its default \code{alpha = 0.85} gives those layers a little
+extra visibility through even a densely populated hex cell.
 
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions implement.
 }

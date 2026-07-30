@@ -14,6 +14,16 @@
       ylim = object$response$limits, 
       clip = "off"
     ) 
+
+  # an overlay builder tagged `zorder = "background"` (e.g.
+  # `er_style_data_hex()`) draws before the model/summary/quantile geoms,
+  # so a full-panel-coverage data layer doesn't bury them; every other
+  # overlay builder defaults to `"foreground"` and is instead added after
+  # `.build_base_plot()` returns (see `er_plot_build()`), on top of
+  # everything drawn here -- unchanged from before this tag existed.
+  if (!is.null(object$layer$overlay) && identical(.style_zorder(object$layer$overlay$config$style), "background")) {
+    base <- base + .build_overlay_geoms(object)
+  }
   if (!is.null(object$layer$model)) {
     base <- base + .build_model_geoms(object)
   }
