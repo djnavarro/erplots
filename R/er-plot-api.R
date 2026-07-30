@@ -288,7 +288,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
     legend.position = "bottom"
   )
   object$theme$draw_key <- ggplot2::draw_key_rect
-  object$theme$dodge_width <- 0.05
+  object$theme$dodge_width <- 0.015 # deliberately narrow to avoid distortion
   object$theme$color_discrete <- NULL
   object$theme$fill_discrete <- NULL
   object$theme$color_continuous <- NULL
@@ -343,13 +343,13 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`)
 #' @param xlab,ylab Exposure/response axis label (single string), written to
-#'   `object$exposure$label`/`object$response$label`
+#'   `object$exposure$label`/`object$response$label`.
 #' @param strata_lab Stratification legend label (single string), written
 #'   to `object$strata$label`. Errors if `stratify_by` wasn't set in
 #'   [er_plot()] -- there's no stratification legend to label.
 #' @param title,subtitle,caption Plot-level annotation text (single
 #'   strings), applied via `patchwork::plot_annotation()` in
-#'   [er_plot_build()]
+#'   [er_plot_build()].
 #' @param xlim,ylim Exposure/response axis limits (length-2, increasing
 #'   numeric vectors), written to `object$exposure$limits`/
 #'   `object$response$limits`. These are read lazily by every builder at
@@ -369,29 +369,28 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
 #'   (e.g. [ggplot2::scale_color_brewer()], [ggplot2::scale_fill_viridis_d()]),
 #'   written to `object$theme$color_discrete`/`object$theme$fill_discrete`
 #'   and applied to every plot whose `colour`/`fill` aesthetic is mapped to
-#'   the stratification variable -- see "Details"
+#'   the stratification variable -- see "Details".
 #' @param color_continuous,fill_continuous A continuous ggplot2 scale object
 #'   (e.g. [ggplot2::scale_color_viridis_c()], [ggplot2::scale_fill_gradient()]),
 #'   written to `object$theme$color_continuous`/`object$theme$fill_continuous`
 #'   and applied to every plot whose `colour`/`fill` aesthetic is mapped to
 #'   something continuous other than the stratification variable -- see
-#'   "Details"
+#'   "Details".
 #' @param format_p,format_percent,format_number Formatter functions
 #'   (typically from `scales::label_*()`), written to
 #'   `object$theme$format_p` etc. Used by the summary/quantile layers to
-#'   format p-values/rates/means for display
+#'   format p-values/rates/means for display.
 #' @param draw_key A key-glyph function (e.g. [ggplot2::draw_key_point()]),
 #'   written to `object$theme$draw_key` and passed as every geom's
-#'   `key_glyph` argument
+#'   `key_glyph` argument.
 #' @param dodge_width Spacing between adjacent strata's horizontal offset
 #'   in the quantile layer (see [er_style_quantile_errorbar()]/
 #'   [er_style_quantile_pointrange()]), as a fraction of the exposure
 #'   range. A single positive number, written to `object$theme$dodge_width`.
-#'   Default `0.05` (set in [er_plot()]), matching the previous fixed
-#'   value.
+#'   Default `0.015` (set in [er_plot()]).
 #' @param height_base,height_data,height_group Relative panel heights
 #'   (single positive numbers), merged into `object$theme$height` --
-#'   supplying only one leaves the other two unchanged
+#'   supplying only one leaves the other two unchanged.
 #'
 #' @returns The input `object`, with the requested theme fields updated
 #'

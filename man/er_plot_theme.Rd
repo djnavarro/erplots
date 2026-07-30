@@ -34,7 +34,7 @@ er_plot_theme(
 \item{object}{Partially constructed plot (has S3 class \code{er_plot})}
 
 \item{xlab, ylab}{Exposure/response axis label (single string), written to
-\code{object$exposure$label}/\code{object$response$label}}
+\code{object$exposure$label}/\code{object$response$label}.}
 
 \item{strata_lab}{Stratification legend label (single string), written
 to \code{object$strata$label}. Errors if \code{stratify_by} wasn't set in
@@ -42,7 +42,7 @@ to \code{object$strata$label}. Errors if \code{stratify_by} wasn't set in
 
 \item{title, subtitle, caption}{Plot-level annotation text (single
 strings), applied via \code{patchwork::plot_annotation()} in
-\code{\link[=er_plot_build]{er_plot_build()}}}
+\code{\link[=er_plot_build]{er_plot_build()}}.}
 
 \item{xlim, ylim}{Exposure/response axis limits (length-2, increasing
 numeric vectors), written to \code{object$exposure$limits}/
@@ -66,34 +66,33 @@ own additions.}
 (e.g. \code{\link[ggplot2:scale_color_brewer]{ggplot2::scale_color_brewer()}}, \code{\link[ggplot2:scale_fill_viridis_d]{ggplot2::scale_fill_viridis_d()}}),
 written to \code{object$theme$color_discrete}/\code{object$theme$fill_discrete}
 and applied to every plot whose \code{colour}/\code{fill} aesthetic is mapped to
-the stratification variable -- see "Details"}
+the stratification variable -- see "Details".}
 
 \item{color_continuous, fill_continuous}{A continuous ggplot2 scale object
 (e.g. \code{\link[ggplot2:scale_color_viridis_c]{ggplot2::scale_color_viridis_c()}}, \code{\link[ggplot2:scale_fill_gradient]{ggplot2::scale_fill_gradient()}}),
 written to \code{object$theme$color_continuous}/\code{object$theme$fill_continuous}
 and applied to every plot whose \code{colour}/\code{fill} aesthetic is mapped to
 something continuous other than the stratification variable -- see
-"Details"}
+"Details".}
 
 \item{format_p, format_percent, format_number}{Formatter functions
 (typically from \verb{scales::label_*()}), written to
 \code{object$theme$format_p} etc. Used by the summary/quantile layers to
-format p-values/rates/means for display}
+format p-values/rates/means for display.}
 
 \item{draw_key}{A key-glyph function (e.g. \code{\link[ggplot2:draw_key_point]{ggplot2::draw_key_point()}}),
 written to \code{object$theme$draw_key} and passed as every geom's
-\code{key_glyph} argument}
+\code{key_glyph} argument.}
 
 \item{dodge_width}{Spacing between adjacent strata's horizontal offset
 in the quantile layer (see \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}}/
 \code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}}), as a fraction of the exposure
 range. A single positive number, written to \code{object$theme$dodge_width}.
-Default \code{0.05} (set in \code{\link[=er_plot]{er_plot()}}), matching the previous fixed
-value.}
+Default \code{0.015} (set in \code{\link[=er_plot]{er_plot()}}).}
 
 \item{height_base, height_data, height_group}{Relative panel heights
 (single positive numbers), merged into \code{object$theme$height} --
-supplying only one leaves the other two unchanged}
+supplying only one leaves the other two unchanged.}
 }
 \value{
 The input \code{object}, with the requested theme fields updated

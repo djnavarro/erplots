@@ -160,7 +160,7 @@ test_that("er_style_data_overlay returns a single geom, jittered only for a bina
 })
 
 
-test_that("er_style_data_overlay's new style arguments override their previous fixed defaults", {
+test_that("er_style_data_overlay's new style arguments override their defaults", {
   skip_if_not_installed("erglm")
 
   p_binary <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_data()
@@ -184,7 +184,7 @@ test_that("er_style_data_overlay's new style arguments override their previous f
   # defaults reproduce the previous response-type-dependent behaviour
   out_binary_default <- do.call(er_style_data_overlay, args(p_binary))
   out_cont_default    <- do.call(er_style_data_overlay, args(p_cont))
-  expect_equal(out_binary_default[[1]]$position$height, 0.05)
+  expect_equal(out_binary_default[[1]]$position$height, 0.015)
   expect_equal(out_cont_default[[1]]$position$height, 0)
   expect_equal(out_binary_default[[1]]$aes_params$alpha, 0.4)
   expect_equal(out_binary_default[[1]]$aes_params$size, 1)

@@ -88,7 +88,7 @@ test_that("er_plot_theme() writes and validates draw_key", {
 
 test_that("er_plot_theme() writes and validates dodge_width", {
   plt <- er_test_data |> er_plot(aucss, ae1)
-  expect_equal(plt$theme$dodge_width, 0.05) # er_plot()'s default
+  expect_equal(plt$theme$dodge_width, 0.015) # er_plot()'s default
 
   plt <- er_plot_theme(plt, dodge_width = 0.2)
   expect_equal(plt$theme$dodge_width, 0.2)
