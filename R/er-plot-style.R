@@ -73,7 +73,14 @@
 #' call site, so no such tagging is needed there. See the `@examples` on
 #' [er_plot_add_model()], [er_plot_add_quantiles()], and
 #' [er_plot_add_data()] for worked custom builders (a dashed model curve,
-#' a quantile crossbar, and a data-overlay density, respectively).
+#' a quantile crossbar, and a data-overlay density, respectively). An
+#' overlay-layout data builder can additionally declare, via the same
+#' [er_style_tag()] call's `zorder` argument, whether its geoms are drawn
+#' before or after the model/summary/quantile layers when they share the
+#' main panel -- relevant for a builder whose geoms cover the whole panel
+#' (e.g. `er_style_data_hex()`), which would otherwise bury those layers
+#' by drawing on top of them; see [er_style_data()] for the full
+#' explanation.
 #'
 #' A custom builder receives the same pre-computed `config` a built-in
 #' builder would have received for that layer (e.g. `config$predictions`

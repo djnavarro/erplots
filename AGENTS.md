@@ -445,6 +445,30 @@ renumbered to five and its code example/summary table both gained a
 `zorder` row/argument. Verified: `rmarkdown::render()` of
 `vignettes/articles/extending.Rmd` with no errors.
 
+A third follow-up considered whether `?er_style` (the shared
+builder-interface doc page, `R/er-plot-style.R`) should also gain a
+`zorder` mention. That page already discusses `layout` and `layer` in
+some depth, but conspicuously never mentions `fill_role`/`y_role` at
+all -- those are left entirely to the family-specific pages
+(`er_style_data`, `er_style_group`), on the reasoning that `layout` and
+`layer` are broad/cross-cutting (`layer` applies to every builder
+family; `layout` is the mandatory routing mechanism for data builders)
+while `fill_role`/`y_role` are narrow, single-family concerns. `zorder`
+is closer in scope to `fill_role` (optional, narrow -- only meaningful
+for one structural sub-family, overlay-layout data builders) than to
+`layout`/`layer`, so a full walkthrough wasn't added to `?er_style` to
+avoid breaking that established precedent and duplicating what
+`er_style_data()`'s own docs (and `extending.Rmd`) already cover in
+depth. It did, however, get a single pointer sentence appended to
+`?er_style`'s existing `layout` paragraph -- since `zorder` is set via
+the same `er_style_tag()` call and is conceptually a sibling of
+`layout` (both are data-layer structural tags) -- noting that an
+overlay-layout builder can also declare its stacking position, with a
+cross-reference to `er_style_data()` for the full explanation. Verified:
+`devtools::document()` regenerated `er_style.Rd` cleanly, and
+`devtools::test()` passed (823 passing, unaffected -- this was a
+documentation-only change).
+
 ## Fixed: an `er_plot` with no layers at all errored instead of drawing a blank canvas
 
 `er_plot_build()`'s trigger condition for building the base panel
