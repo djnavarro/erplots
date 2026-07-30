@@ -89,3 +89,5 @@ Other functions and objects
 - [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   : Cut a continuous variable into quantiles
+- [`erplots_data`](https://erplots.djnavarro.net/reference/erplots_data.md)
+  : Simulated exposure-response data

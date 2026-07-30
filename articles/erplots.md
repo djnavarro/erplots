@@ -37,6 +37,12 @@ occur?), `biomarker_change` is continuous, and `ae_count` is a count. It
 also has some grouping/stratification columns, `sex` and `treatment`.
 We’ll start with `ae1`.
 
+(erplots also ships its own simulated example dataset, `erplots_data`,
+with multiple exposure columns and one exposure/response pair suited to
+each of the Emax, logistic, linear, and Poisson regression scenarios –
+see
+[`?erplots_data`](https://erplots.djnavarro.net/reference/erplots_data.md).)
+
 ``` r
 
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())

@@ -115,6 +115,10 @@ occur?), <code>biomarker_change</code> is continuous, and
 <code>ae_count</code> is a count. It also has some
 grouping/stratification columns, <code>sex</code> and
 <code>treatment</code>. We’ll start with <code>ae1</code>.</p>
+<p>(erplots also ships its own simulated example dataset,
+<code>erplots_data</code>, with multiple exposure columns and one
+exposure/response pair suited to each of the Emax, logistic, linear, and
+Poisson regression scenarios – see <code><a href="../reference/erplots_data.html">?erplots_data</a></code>.)</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
