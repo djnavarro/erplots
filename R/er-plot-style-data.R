@@ -13,8 +13,7 @@
 #'   arguments to a builder" section.
 #' @param jitter_height Vertical jitter applied to the raw points, in
 #'   response units (`er_style_data_overlay()`/`er_style_data_boxjitter()`
-#'   only). Defaults to `NULL`, which reproduces the previous fixed
-#'   behaviour: for `er_style_data_overlay()`, `0.05` for a binary
+#'   only). Defaults to `NULL`, which produces `0.015` for a binary
 #'   response and `0` otherwise; for `er_style_data_boxjitter()`, `0.3`
 #'   when stratified and `0.15` otherwise. An explicit value overrides
 #'   this for both cases uniformly.
@@ -227,7 +226,7 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
   # overplot into two dense horizontal lines; continuous/count responses
   # need no such nudge, since their y-values are already spread out.
   if (is.null(jitter_height)) {
-    jitter_height <- if (config$response_type == "binary") 0.05 else 0
+    jitter_height <- if (config$response_type == "binary") 0.015 else 0
   }
 
   withr::with_seed( # TODO: setting seed here isn't correct

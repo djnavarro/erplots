@@ -85,8 +85,7 @@ points are normally redundant.}
 
 \item{jitter_height}{Vertical jitter applied to the raw points, in
 response units (\code{er_style_data_overlay()}/\code{er_style_data_boxjitter()}
-only). Defaults to \code{NULL}, which reproduces the previous fixed
-behaviour: for \code{er_style_data_overlay()}, \code{0.05} for a binary
+only). Defaults to \code{NULL}, which produces \code{0.015} for a binary
 response and \code{0} otherwise; for \code{er_style_data_boxjitter()}, \code{0.3}
 when stratified and \code{0.15} otherwise. An explicit value overrides
 this for both cases uniformly.}
