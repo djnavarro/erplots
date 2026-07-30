@@ -136,10 +136,7 @@ bin exposure into quantile groups and plot a response summary with an
 uncertainty interval. `er_style_quantile_errorbar()` and
 `er_style_quantile_pointrange()` are the base builders; their `_vlines`
 variants add interior quantile-bin boundary lines. All built-in quantile
-builders are tagged `layer = "quantile"`, so
-[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
-errors if given one tagged for another layer.
-`er_style_tag(fn, layer = "quantile")`, so
+builders are tagged `er_style_tag(fn, layer = "quantile")`, so
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 errors informatively if handed a builder tagged for a different layer.
 

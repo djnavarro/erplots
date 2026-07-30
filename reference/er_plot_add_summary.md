@@ -1,19 +1,8 @@
 # Add a summary annotation layer
 
 Adds the summary layer: a text/label annotation placed in whichever
-corner of the base panel is furthest from the observed data (see
-[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)'s
-`corner_distance`-based placement, computed from `object$data`'s raw
-`(exposure, response)` coordinates – not any fitted curve). Unlike
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
-this layer doesn't require a model:
-[`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
-(the default) draws a p-value derived from a supplied model's own
-[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-method, but
-[`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
-is purely descriptive (total observation count, or one count per stratum
-level) and needs no `model` at all.
+corner of the base panel is furthest from the observed data, computed
+from the raw `(exposure, response)` coordinates of the data.
 
 ## Usage
 
@@ -58,13 +47,13 @@ er_plot_add_summary(
 - ...:
 
   Additional named arguments forwarded, unchanged, to `style` when it's
-  called at build time – see
+  called at build time; see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
   "Passing extra arguments to a builder" section. Must be named.
 
 ## Value
 
-The input `object`, with the summary layer added
+The input `object`, with the summary layer added.
 
 ## See also
 

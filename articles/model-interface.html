@@ -157,11 +157,10 @@ on the wrong scale.</li>
 used.</strong> <code><a href="../reference/er_model_interface.html">er_predict()</a></code>’s contract is “augment and
 return <code>newdata</code>”, not “return a new three-column data
 frame”. This matters when <code>newdata</code> carries a stratification
-column – <code>.get_model_predictions()</code> (the internal caller, in
-<code>R/er-plot-layer.R</code>) builds <code>newdata</code> as an
-exposure grid crossed with every stratum level when the plot is
-stratified, and expects that column to survive the round trip through
-<code><a href="../reference/er_model_interface.html">er_predict()</a></code> unchanged.</li>
+column – erplots builds <code>newdata</code> as an exposure grid crossed
+with every stratum level when the plot is stratified, and expects that
+column to survive the round trip through <code><a href="../reference/er_model_interface.html">er_predict()</a></code>
+unchanged.</li>
 </ul>
 <div class="section level3">
 <h3 id="a-worked-example">A worked example<a class="anchor" aria-label="anchor" href="#a-worked-example"></a>

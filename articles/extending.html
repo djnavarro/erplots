@@ -267,13 +267,11 @@ passed this way) for a worked example.</p>
 </h2>
 <p><code>config</code> is where a custom builder actually gets its data
 from, and it is <strong>not</strong> the raw <code>data</code> frame –
-it’s whatever the corresponding internal <code>.layer_*()</code>
-function derived from
-<code>data</code>/<code>exposure</code>/<code>response</code>/
-<code>strata</code> before any builder ran. A custom builder’s whole job
-is to turn that already-computed <code>config</code> into ggplot2
-layers; it never needs to re-bin, re-summarise, or re-fit anything
-itself. Concretely:</p>
+it’s whatever erplots derived from
+<code>data</code>/<code>exposure</code>/<code>response</code>/<code>strata</code>
+before any builder ran. A custom builder’s whole job is to turn that
+already-computed <code>config</code> into ggplot2 layers; it never needs
+to re-bin, re-summarise, or re-fit anything itself. Concretely:</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -356,18 +354,24 @@ Instead, you would prefer to draw these binwise summaries using a
 it, but you may have a good reason for wanting this that I haven’t
 considered. So you decide to write your own builder function for this.
 And since the quantile layer is mostly dependent on the
-<code>config$summary</code> field, that’s the place to start When doing
+<code>config$summary</code> field, that’s the place to start. When doing
 so, it helps to look at what <code>config$summary</code> actually
-contains, by building the quantile layer on its own and inspecting it.
-You can extract the config from a plot object like this:</p>
+contains, and the most reliable way to do that is to ask erplots to show
+you: write a tiny “spy” builder that just prints <code>config</code> and
+draws nothing, and pass it in as the <code>style</code> for the layer
+you want to inspect:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="va">inspect_config</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">config</span><span class="op">$</span><span class="va">summary</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">plt</span><span class="op">$</span><span class="va">layer</span><span class="op">$</span><span class="va">quantile</span><span class="op">$</span><span class="va">config</span><span class="op">$</span><span class="va">summary</span></span>
+<span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">6</span>, style <span class="op">=</span> <span class="va">inspect_config</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 12</span></span></span>
 <span><span class="co">#&gt;   exposure_bins strata    n1    n0 x_mid y_mid y_mid_lbl ci_lower ci_upper</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -379,6 +383,7 @@ You can extract the config from a plot object like this:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Q2            <span style="color: #BB0000;">NA</span>        21    12  488. 0.636 64%         0.451     0.796</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> Q5            <span style="color: #BB0000;">NA</span>        33     0 <span style="text-decoration: underline;">1</span>645. 1     100%        0.894     1    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: y_lwr_lbl &lt;dbl&gt;, y_upr_lbl &lt;dbl&gt;, y_lbl &lt;dbl&gt;</span></span></span></code></pre></div>
+<p><img src="extending_files/figure-html/inspect-config-1.png" class="r-plt" alt="" width="700"></p>
 <p>Looking at this object we see that it is a tibble with one row per
 exposure quantile (as always, noting that the placebo group will be its
 own distinct group). Each column contains a summary statistic or
@@ -474,18 +479,18 @@ you’re considering proposing one upstream.</li>
 <p>The quantile builder above needed nothing beyond the function itself.
 Some builders, though, make a structural or aesthetic choice that the
 <em>composition</em> machinery (the code that assembles/labels/legends
-the finished plot in <code>R/er-plot-compose.R</code>) needs to know
-about <em>before</em> it calls the builder. Since a builder is “just a
-function”, that information can’t live in its return value – composition
-needs it in advance, to decide things like which panel to route the
-builder’s output into, or how to title a legend. erplots solves this by
-letting a builder carry metadata as <strong>attributes on the function
-itself</strong>, set by a single wrapper function,
-<code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>, with one optional argument per piece of
-metadata (<code>layout</code>, <code>fill_role</code>,
-<code>y_role</code>). It wraps a builder and returns it back, attributes
-attached, so it composes naturally with assignment, and a builder that
-needs more than one tag only needs one call:</p>
+the finished plot) needs to know about <em>before</em> it calls the
+builder. Since a builder is “just a function”, that information can’t
+live in its return value – composition needs it in advance, to decide
+things like which panel to route the builder’s output into, or how to
+title a legend. erplots solves this by letting a builder carry metadata
+as <strong>attributes on the function itself</strong>, set by a single
+wrapper function, <code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>, with one optional
+argument per piece of metadata (<code>layout</code>,
+<code>fill_role</code>, <code>y_role</code>). It wraps a builder and
+returns it back, attributes attached, so it composes naturally with
+assignment, and a builder that needs more than one tag only needs one
+call:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_builder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span><span class="va">my_builder</span>, layout <span class="op">=</span> <span class="st">"overlay"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
@@ -509,10 +514,9 @@ base plot, the way <code><a href="../reference/er_plot_add_groups.html">er_plot_
 boxplot+jitter design, does).</li>
 </ul>
 <p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> has to decide which of two different
-<code>config</code> shapes to build (<code>.layer_overlay()</code>
-vs. <code>.layer_data()</code>) <em>before</em> it can call the builder
-– so the layout can’t be inferred from what the builder returns; it has
-to be knowable from the builder alone.
+<code>config</code> shapes to build <em>before</em> it can call the
+builder – so the layout can’t be inferred from what the builder returns;
+it has to be knowable from the builder alone.
 <code>er_style_tag(style, layout = ...)</code> attaches that information
 as an attribute, and is the one tag that’s mandatory for a data-layer
 builder:</p>
@@ -570,8 +574,8 @@ means<a class="anchor" aria-label="anchor" href="#fill_role-what-a-builders-fill
 built-in <code>"overlay"</code>-layout data builder for when N is too
 large for a legible scatter – is the one exception: its
 <code>fill</code> encodes 2D bin density (a continuous scale), not
-strata, so <code>.polish_labels()</code> needs to know to title that
-legend “Count” rather than the stratification variable’s label.
+strata, so erplots needs to know to title that legend “Count” rather
+than the stratification variable’s label.
 <code>er_style_tag(style, fill_role = "density")</code> records exactly
 that:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -585,11 +589,11 @@ that:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="extending_files/figure-html/fill-role-1.png" class="r-plt" alt="" width="700"></p>
 <p>Note the legend is titled “Count”, not the (nonexistent, here) strata
-label – that’s <code>.polish_labels()</code> consulting the
-<code>"density"</code> tag. Unlike <code>layout</code>,
-<code>fill_role</code> is optional: a builder that doesn’t set it is
-assumed to mean strata whenever it maps <code>fill</code> at all, which
-is the right default for every other builder.</p>
+label – that’s erplots consulting the <code>"density"</code> tag. Unlike
+<code>layout</code>, <code>fill_role</code> is optional: a builder that
+doesn’t set it is assumed to mean strata whenever it maps
+<code>fill</code> at all, which is the right default for every other
+builder.</p>
 </div>
 <div class="section level3">
 <h3 id="y_role-what-a-builders-y-axis-means">
@@ -602,9 +606,8 @@ itself</em> on the y-axis – one categorical row per level – so the group
 variable’s own label is the right axis title.
 <code><a href="../reference/er_style_group.html">er_style_group_histogram()</a></code> instead needs its y-axis free
 for counts, moving group levels onto facet strips instead;
-<code>er_style_tag(style, y_role = "count")</code> tells
-<code>.polish_labels()</code> to title the y-axis “Count” rather than
-the group variable’s label:</p>
+<code>er_style_tag(style, y_role = "count")</code> tells erplots to
+title the y-axis “Count” rather than the group variable’s label:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">er_style_group_histogram</span>, <span class="st">"er_style_y_role"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "count"</span></span>

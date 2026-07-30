@@ -179,9 +179,13 @@
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for the <code>quantile</code> layer (<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>) bin exposure into quantile groups and plot a response summary with an uncertainty interval. <code>er_style_quantile_errorbar()</code> and <code>er_style_quantile_pointrange()</code> are the base builders; their <code>_vlines</code> variants add interior quantile-bin boundary lines. All built-in quantile builders are tagged <code>layer = "quantile"</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code> errors if given one tagged for another layer.
-<code>er_style_tag(fn, layer = "quantile")</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>
-errors informatively if handed a builder tagged for a different layer.</p>
+    <p>Builders for the <code>quantile</code> layer (<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>)
+bin exposure into quantile groups and plot a response summary with an
+uncertainty interval. <code>er_style_quantile_errorbar()</code> and
+<code>er_style_quantile_pointrange()</code> are the base builders; their
+<code>_vlines</code> variants add interior quantile-bin boundary lines. All
+built-in quantile builders are tagged <code>er_style_tag(fn, layer = "quantile")</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code> errors informatively if
+handed a builder tagged for a different layer.</p>
 <p>When stratified, all four builders horizontally dodge each quantile
 bin's points/bars/labels apart by <code><a href="er_plot_theme.html">er_plot_theme()</a></code>'s <code>dodge_width</code>
 (a fraction of the exposure range, default <code>0.05</code>) – a cross-layer,

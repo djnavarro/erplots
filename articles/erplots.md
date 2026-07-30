@@ -2,16 +2,14 @@
 
 ## What erplots is for
 
-An exposure-response plot shows how a response variable (does a patient
-have an adverse event? how much does a biomarker change?) relates to an
-exposure variable (maximum drug concentration, AUC, and so on). The
-usual building blocks are a fitted curve with an uncertainty band, some
-quantile-binned summary points to check the curve against the raw data,
-the raw data itself, and maybe some side panels showing how exposure is
-distributed across other variables of interest. erplots gives you a
-small set of functions for assembling exactly that, layer by layer, in a
-style that should feel familiar if you’ve used ggplot2’s `+` to build up
-a plot.
+An exposure-response plot shows how a response variable relates to a
+drug exposure variable (Cmax, AUC, and so on). The usual building blocks
+are a fitted curve with an uncertainty band, some quantile-binned
+summary points to check the curve against the raw data, the raw data
+itself, and maybe some side panels showing how exposure is distributed
+across other variables of interest. erplots gives you a small set of
+functions for assembling exactly that, layer by layer, in a style that
+should feel familiar if you’ve used ggplot2’s `+` to build up a plot.
 
 The one thing erplots deliberately does *not* do is fit models. You fit
 a model with whatever tool suits the job – logistic regression,

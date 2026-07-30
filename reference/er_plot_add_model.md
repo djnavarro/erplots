@@ -1,14 +1,7 @@
 # Add a fitted-model curve/ribbon layer
 
 Adds the model layer: a fitted exposure-response curve with an
-uncertainty ribbon (the default, via
-[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)),
-or a spaghetti plot of simulated draws
-(`style = er_style_model_spaghetti`, via
-[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
-This layer uses
-[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-to compute model predictions on the response scale.
+uncertainty ribbon, or possibly a spaghetti plot of simulated draws.
 
 ## Usage
 
@@ -27,7 +20,7 @@ er_plot_add_model(
 
 - object:
 
-  Partially constructed plot (has S3 class `er_plot`)
+  Partially constructed plot (has S3 class `er_plot`).
 
 - model:
 
@@ -54,16 +47,18 @@ er_plot_add_model(
 
 ## Value
 
-The input `object`, with the model layer added
+The input `object`, with the model layer added.
 
 ## Details
 
-`model` may reference covariates beyond the exposure and strata
-variables. erplots fills any additional covariates from the plot data
-with a reference value (first factor level or numeric mean) when
-building the prediction grid. erplots does not check that `model` was
-fit on the same exposure/response as the plot; the caller must ensure
-compatibility.
+This layer uses
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+to compute model predictions on the response scale. `model` may
+reference covariates beyond the exposure and strata variables. erplots
+fills any additional covariates from the plot data with a reference
+value (first factor level or numeric mean) when building the prediction
+grid. erplots does not check that `model` was fit on the same
+exposure/response as the plot; the caller must ensure compatibility.
 
 ## See also
 

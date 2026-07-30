@@ -107,9 +107,8 @@ use of a `seed` passed this way) for a worked example.
 ## Understanding the `config` argument
 
 `config` is where a custom builder actually gets its data from, and it
-is **not** the raw `data` frame – it’s whatever the corresponding
-internal `.layer_*()` function derived from
-`data`/`exposure`/`response`/ `strata` before any builder ran. A custom
+is **not** the raw `data` frame – it’s whatever erplots derived from
+`data`/`exposure`/`response`/`strata` before any builder ran. A custom
 builder’s whole job is to turn that already-computed `config` into
 ggplot2 layers; it never needs to re-bin, re-summarise, or re-fit
 anything itself. Concretely:
@@ -135,20 +134,25 @@ summaries using a `geom_crossbar()`. Personally I think that’s a bad way
 to do it, but you may have a good reason for wanting this that I haven’t
 considered. So you decide to write your own builder function for this.
 And since the quantile layer is mostly dependent on the `config$summary`
-field, that’s the place to start When doing so, it helps to look at what
-`config$summary` actually contains, by building the quantile layer on
-its own and inspecting it. You can extract the config from a plot object
-like this:
+field, that’s the place to start. When doing so, it helps to look at
+what `config$summary` actually contains, and the most reliable way to do
+that is to ask erplots to show you: write a tiny “spy” builder that just
+prints `config` and draws nothing, and pass it in as the `style` for the
+layer you want to inspect:
 
 ``` r
 
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 
-plt <- erglm_data |>
-  er_plot(aucss, ae1) |>
-  er_plot_add_quantiles(bins = 6)
+inspect_config <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+  print(config$summary)
+  list()
+}
 
-plt$layer$quantile$config$summary
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_quantiles(bins = 6, style = inspect_config) |>
+  plot()
 #> # A tibble: 7 × 12
 #>   exposure_bins strata    n1    n0 x_mid y_mid y_mid_lbl ci_lower ci_upper
 #>   <fct>         <lgl>  <int> <int> <dbl> <dbl> <chr>        <dbl>    <dbl>
@@ -161,6 +165,8 @@ plt$layer$quantile$config$summary
 #> 7 Q5            NA        33     0 1645. 1     100%        0.894     1    
 #> # ℹ 3 more variables: y_lwr_lbl <dbl>, y_upr_lbl <dbl>, y_lbl <dbl>
 ```
+
+![](extending_files/figure-html/inspect-config-1.png)
 
 Looking at this object we see that it is a tibble with one row per
 exposure quantile (as always, noting that the placebo group will be its
@@ -257,13 +263,12 @@ builder, all of which are generalisable to any layer:
 The quantile builder above needed nothing beyond the function itself.
 Some builders, though, make a structural or aesthetic choice that the
 *composition* machinery (the code that assembles/labels/legends the
-finished plot in `R/er-plot-compose.R`) needs to know about *before* it
-calls the builder. Since a builder is “just a function”, that
-information can’t live in its return value – composition needs it in
-advance, to decide things like which panel to route the builder’s output
-into, or how to title a legend. erplots solves this by letting a builder
-carry metadata as **attributes on the function itself**, set by a single
-wrapper function,
+finished plot) needs to know about *before* it calls the builder. Since
+a builder is “just a function”, that information can’t live in its
+return value – composition needs it in advance, to decide things like
+which panel to route the builder’s output into, or how to title a
+legend. erplots solves this by letting a builder carry metadata as
+**attributes on the function itself**, set by a single wrapper function,
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md),
 with one optional argument per piece of metadata (`layout`, `fill_role`,
 `y_role`). It wraps a builder and returns it back, attributes attached,
@@ -293,10 +298,9 @@ builder can be slotted into:
   the older binary-only boxplot+jitter design, does).
 
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-has to decide which of two different `config` shapes to build
-(`.layer_overlay()` vs. `.layer_data()`) *before* it can call the
-builder – so the layout can’t be inferred from what the builder returns;
-it has to be knowable from the builder alone.
+has to decide which of two different `config` shapes to build *before*
+it can call the builder – so the layout can’t be inferred from what the
+builder returns; it has to be knowable from the builder alone.
 `er_style_tag(style, layout = ...)` attaches that information as an
 attribute, and is the one tag that’s mandatory for a data-layer builder:
 
@@ -363,10 +367,10 @@ model ribbon).
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 – a built-in `"overlay"`-layout data builder for when N is too large for
 a legible scatter – is the one exception: its `fill` encodes 2D bin
-density (a continuous scale), not strata, so `.polish_labels()` needs to
-know to title that legend “Count” rather than the stratification
-variable’s label. `er_style_tag(style, fill_role = "density")` records
-exactly that:
+density (a continuous scale), not strata, so erplots needs to know to
+title that legend “Count” rather than the stratification variable’s
+label. `er_style_tag(style, fill_role = "density")` records exactly
+that:
 
 ``` r
 
@@ -383,10 +387,10 @@ erglm_data |>
 ![](extending_files/figure-html/fill-role-1.png)
 
 Note the legend is titled “Count”, not the (nonexistent, here) strata
-label – that’s `.polish_labels()` consulting the `"density"` tag. Unlike
-`layout`, `fill_role` is optional: a builder that doesn’t set it is
-assumed to mean strata whenever it maps `fill` at all, which is the
-right default for every other builder.
+label – that’s erplots consulting the `"density"` tag. Unlike `layout`,
+`fill_role` is optional: a builder that doesn’t set it is assumed to
+mean strata whenever it maps `fill` at all, which is the right default
+for every other builder.
 
 ### `y_role`: what a builder’s y-axis means
 
@@ -398,9 +402,8 @@ put the *group variable itself* on the y-axis – one categorical row per
 level – so the group variable’s own label is the right axis title.
 [`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md)
 instead needs its y-axis free for counts, moving group levels onto facet
-strips instead; `er_style_tag(style, y_role = "count")` tells
-`.polish_labels()` to title the y-axis “Count” rather than the group
-variable’s label:
+strips instead; `er_style_tag(style, y_role = "count")` tells erplots to
+title the y-axis “Count” rather than the group variable’s label:
 
 ``` r
 

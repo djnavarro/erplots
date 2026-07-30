@@ -93,8 +93,7 @@ wrong:
   [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
   contract is “augment and return `newdata`”, not “return a new
   three-column data frame”. This matters when `newdata` carries a
-  stratification column – `.get_model_predictions()` (the internal
-  caller, in `R/er-plot-layer.R`) builds `newdata` as an exposure grid
+  stratification column – erplots builds `newdata` as an exposure grid
   crossed with every stratum level when the plot is stratified, and
   expects that column to survive the round trip through
   [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)

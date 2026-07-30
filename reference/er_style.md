@@ -45,8 +45,8 @@ be added to a ggplot2 plot. The expectation is that these objects will
 be added to a partially constructed plot which, at a minimum, already
 has the base theme applied. For "model", "summary", "quantile", and
 "overlay", the pieces will be added to a plot that already has a coord
-that sets the axis limits (the base plot; see `.build_overlay_geoms()`).
-For the "data" (panel-based, e.g.
+that sets the axis limits (the base plot). For the "data" (panel-based,
+e.g.
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md))
 and "group" plots, the plot object does not yet have a coord. The
 expectation, however, is that the builder will supply an x-axis limit
@@ -105,8 +105,8 @@ with no new config requirements.)
 Each `er_plot_add_*()` function takes a `style` argument that defaults
 to one built-in `er_style_*()` function and can be set to any other –
 built-in or custom – matching the standard signature: a custom builder
-can be plugged in without forking the package or reaching into
-`object$layer` internals. For the data layer specifically, `style` also
+can be plugged in without forking the package or reaching into the plot
+object's internal state. For the data layer specifically, `style` also
 has to declare which *structural* family it belongs to – a single call
 merged into the main panel, or one or more panels stacked below the base
 plot – via
@@ -126,9 +126,9 @@ and a data-overlay density, respectively).
 A custom builder receives the same pre-computed `config` a built-in
 builder would have received for that layer (e.g. `config$predictions`
 for `model`, `config$summary` for `quantile`) – it does not need to
-recompute anything the corresponding `.layer_*()` function already
-derived from `data`/`exposure`/`response`/`strata`; it only needs to
-turn that `config` into ggplot2 layers.
+recompute anything erplots already derived from `data`/`exposure`/
+`response`/`strata`; it only needs to turn that `config` into ggplot2
+layers.
 
 A custom builder can optionally self-declare which layer it's meant for
 via `er_style_tag(builder, layer = ...)` (one of `"model"`, `"summary"`,
@@ -144,10 +144,10 @@ builder is simply never checked, so existing custom builders keep
 working unchanged. All built-in builders carry this tag.
 
 All of the builders above feed a **singleton** layer: `model`,
-`summary`, `quantile`, `data`, and `overlay` each occupy a single named
-slot (`object$layer$model`, `object$layer$data`, etc.), so calling the
-corresponding `er_plot_add_*()` function again overwrites the slot
-rather than combining builders. `group`
+`summary`, `quantile`, `data`, and `overlay` each occupy a single slot
+in the plot's internal state, so calling the corresponding
+`er_plot_add_*()` function again overwrites that slot rather than
+combining builders. `group`
 ([`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md)/
 [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md))
 is the one **additive** exception – each call to
@@ -163,17 +163,13 @@ The `data` slot's default,
 needs no `color_role` tag: its color aesthetic (when stratified) is
 always strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. `config$color_role`
-(set by `.layer_data()`, consulted by `.polish_labels()`/
-`.polish_legends()` in `R/er-plot-compose.R`) matters for the
-"panel"-layout family instead, where it's `"strata"` for a binary
-response (as used by the built-in
+matters for the "panel"-layout family instead, where it's `"strata"` for
+a binary response (as used by the built-in
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md),
 whose color aesthetic still means strata) or `"response"` for a
 continuous/count response, where the color channel is already spoken for
 by the response value itself – there's no built-in "panel"-layout
-builder for that case (the older `build_data_color()` was removed once
-[`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-covered its typical use case more simply), but a custom builder tagged
+builder for that case today, but a custom builder tagged
 `er_style_tag(builder, layout = "panel")` can still opt into it; see
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 for the user-facing version of this rule.

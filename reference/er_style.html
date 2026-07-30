@@ -101,7 +101,7 @@ that these objects will be added to a partially constructed plot
 which, at a minimum, already has the base theme applied. For
 "model", "summary", "quantile", and "overlay", the pieces will be
 added to a plot that already has a coord that sets the axis limits
-(the base plot; see <code>.build_overlay_geoms()</code>). For the "data"
+(the base plot). For the "data"
 (panel-based, e.g. <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code>) and "group" plots, the
 plot object does not yet have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That
@@ -143,7 +143,7 @@ with no new config requirements.)</p>
 defaults to one built-in <code>er_style_*()</code> function and can be set to any
 other – built-in or custom – matching the standard signature: a
 custom builder can be plugged in without forking the package or
-reaching into <code>object$layer</code> internals. For the data layer specifically,
+reaching into the plot object's internal state. For the data layer specifically,
 <code>style</code> also has to declare which <em>structural</em> family it belongs to –
 a single call merged into the main panel, or one or more panels
 stacked below the base plot – via <code><a href="er_style_tag.html">er_style_tag()</a></code>, since
@@ -156,9 +156,9 @@ a quantile crossbar, and a data-overlay density, respectively).</p>
 <p>A custom builder receives the same pre-computed <code>config</code> a built-in
 builder would have received for that layer (e.g. <code>config$predictions</code>
 for <code>model</code>, <code>config$summary</code> for <code>quantile</code>) – it does not need to
-recompute anything the corresponding <code>.layer_*()</code> function already
-derived from <code>data</code>/<code>exposure</code>/<code>response</code>/<code>strata</code>; it only needs to
-turn that <code>config</code> into ggplot2 layers.</p>
+recompute anything erplots already derived from <code>data</code>/<code>exposure</code>/
+<code>response</code>/<code>strata</code>; it only needs to turn that <code>config</code> into ggplot2
+layers.</p>
 <p>A custom builder can optionally self-declare which layer it's meant
 for via <code>er_style_tag(builder, layer = ...)</code> (one of <code>"model"</code>,
 <code>"summary"</code>, <code>"quantile"</code>, <code>"data"</code>, <code>"group"</code>). Every
@@ -172,10 +172,10 @@ for a data-layer builder specifically) – an untagged custom builder
 is simply never checked, so existing custom builders keep working
 unchanged. All built-in builders carry this tag.</p>
 <p>All of the builders above feed a <strong>singleton</strong> layer: <code>model</code>,
-<code>summary</code>, <code>quantile</code>, <code>data</code>, and <code>overlay</code> each occupy a single named
-slot (<code>object$layer$model</code>, <code>object$layer$data</code>, etc.), so calling the
-corresponding <code>er_plot_add_*()</code> function again overwrites the slot
-rather than combining builders. <code>group</code> (<code><a href="er_style_group.html">er_style_group_boxplot()</a></code>/
+<code>summary</code>, <code>quantile</code>, <code>data</code>, and <code>overlay</code> each occupy a single slot
+in the plot's internal state, so calling the corresponding
+<code>er_plot_add_*()</code> function again overwrites that slot rather than
+combining builders. <code>group</code> (<code><a href="er_style_group.html">er_style_group_boxplot()</a></code>/
 <code><a href="er_style_group.html">er_style_group_violin()</a></code>) is the one <strong>additive</strong> exception – each call
 to <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> adds another named entry rather than
 replacing the previous one. See <code><a href="er_plot.html">er_plot()</a></code>'s "Layers are either
@@ -186,17 +186,15 @@ overlaying two fitted curves).</p>
 <code>color_role</code> tag: its color aesthetic (when stratified) is always
 strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. <code>config$color_role</code>
-(set by <code>.layer_data()</code>, consulted by <code>.polish_labels()</code>/
-<code>.polish_legends()</code> in <code>R/er-plot-compose.R</code>) matters for the
-"panel"-layout family instead, where it's <code>"strata"</code> for a binary
-response (as used by the built-in <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code>, whose
-color aesthetic still means strata) or <code>"response"</code> for a
-continuous/count response, where the color channel is already spoken
-for by the response value itself – there's no built-in
-"panel"-layout builder for that case (the older <code>build_data_color()</code>
-was removed once <code><a href="er_style_data.html">er_style_data_overlay()</a></code> covered its typical use case
-more simply), but a custom builder tagged <code>er_style_tag(builder, layout = "panel")</code> can still opt into it; see <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for
-the user-facing version of this rule.</p>
+matters for the "panel"-layout family instead, where it's <code>"strata"</code>
+for a binary response (as used by the built-in
+<code><a href="er_style_data.html">er_style_data_boxjitter()</a></code>, whose color aesthetic still means strata)
+or <code>"response"</code> for a continuous/count response, where the color
+channel is already spoken for by the response value itself – there's
+no built-in "panel"-layout builder for that case today, but a custom
+builder tagged <code>er_style_tag(builder, layout = "panel")</code> can still opt
+into it; see <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for the user-facing version of this
+rule.</p>
     </div>
     <div class="section level2">
     <h2 id="passing-extra-arguments-to-a-builder">Passing extra arguments to a builder<a class="anchor" aria-label="anchor" href="#passing-extra-arguments-to-a-builder"></a></h2>

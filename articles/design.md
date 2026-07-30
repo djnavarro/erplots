@@ -210,11 +210,10 @@ that builder belongs to:
   layer’s own encoding takes precedence” that motivated the general
   rule. See \[er_plot_add_data()\] for the full breakdown.
 
-A `config$color_role` tag (`"strata"` or `"response"`, set by
-`.layer_data()`) records which meaning applies for a given data-layer
-build, so the composition machinery (`.polish_labels()`/
-`.polish_legends()`) knows whether to treat a builder’s legend as the
-shared strata legend or a standalone response colorbar.
+A `config$color_role` tag (`"strata"` or `"response"`) records which
+meaning applies for a given data-layer build, so erplots knows whether
+to treat a builder’s legend as the shared strata legend or a standalone
+response colorbar.
 
 ## Response type changes what a layer summarises
 

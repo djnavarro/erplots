@@ -71,17 +71,14 @@ er_plot_theme(
   A ggplot2 theme object (e.g.
   [`ggplot2::theme_minimal()`](https://ggplot2.tidyverse.org/reference/ggtheme.html))
   – the swappable overall visual theme, defaulting to
-  [`ggplot2::theme_bw()`](https://ggplot2.tidyverse.org/reference/ggtheme.html)
+  [`ggplot2::theme_bw()`](https://ggplot2.tidyverse.org/reference/ggtheme.html).
 
 - theme_extra:
 
   A ggplot2 theme object (e.g. from
-  [`ggplot2::theme()`](https://ggplot2.tidyverse.org/reference/theme.html)),
-  – additional theme tweaks layered on top of `theme_base`, defaulting
-  to a panel border plus `legend.position = "bottom"`. Supplying a new
-  value fully replaces this default rather than merging with it, so
-  re-include the border/ legend-position settings too if you want to
-  keep them alongside your own additions.
+  [`ggplot2::theme()`](https://ggplot2.tidyverse.org/reference/theme.html))
+  with additional theme tweaks layered on top of `theme_base`. See
+  "Details" for its default and replacement semantics.
 
 - color_discrete, fill_discrete:
 
@@ -114,12 +111,8 @@ er_plot_theme(
 - dodge_width:
 
   Spacing between adjacent strata's horizontal offset in the quantile
-  layer (see
-  [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/
-  [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)),
-  as a fraction of the exposure range. A single positive number. Default
-  is `0.015` (set in
-  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)).
+  layer, as a fraction of the exposure range. A single positive number;
+  see "Details".
 
 - height_base, height_data, height_group:
 
@@ -128,7 +121,7 @@ er_plot_theme(
 
 ## Value
 
-The input `object`, with the requested theme fields updated
+The input `object`, with the requested theme fields updated.
 
 ## Details
 
@@ -137,6 +130,8 @@ The input `object`, with the requested theme fields updated
 (and their `_vlines` variants) to separate strata horizontally within
 each quantile bin. It belongs in `er_plot_theme()` because dodging is
 about stratification layout, not an individual builder's visual style.
+Defaults to `0.015` (set in
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)).
 
 Every argument defaults to `NULL`, meaning "leave whatever was set
 before unchanged". This allows repeated calls to `er_plot_theme()` to
@@ -153,6 +148,12 @@ aesthetic is mapped to a continuous quantity such as density or a
 continuous/count response value. If a custom builder adds its own scale,
 supplying one of these four will add a second scale and let ggplot2
 choose the later one.
+
+`theme_extra` defaults to a panel border plus
+`legend.position = "bottom"`. Supplying a new value fully replaces this
+default rather than merging with it, so re-include the
+border/legend-position settings too if you want to keep them alongside
+your own additions.
 
 ## See also
 

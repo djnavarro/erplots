@@ -117,17 +117,13 @@ before or after the layers that use them.</p></dd>
 <dt id="arg-theme-base">theme_base<a class="anchor" aria-label="anchor" href="#arg-theme-base"></a></dt>
 <dd><p>A ggplot2 theme object (e.g. <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">ggplot2::theme_minimal()</a></code>)
 – the swappable overall visual
-theme, defaulting to <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">ggplot2::theme_bw()</a></code></p></dd>
+theme, defaulting to <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">ggplot2::theme_bw()</a></code>.</p></dd>
 
 
 <dt id="arg-theme-extra">theme_extra<a class="anchor" aria-label="anchor" href="#arg-theme-extra"></a></dt>
-<dd><p>A ggplot2 theme object (e.g. from <code><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">ggplot2::theme()</a></code>),
-– additional theme tweaks
-layered on top of <code>theme_base</code>, defaulting to a panel border plus
-<code>legend.position = "bottom"</code>. Supplying a new value fully replaces
-this default rather than merging with it, so re-include the border/
-legend-position settings too if you want to keep them alongside your
-own additions.</p></dd>
+<dd><p>A ggplot2 theme object (e.g. from <code><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">ggplot2::theme()</a></code>)
+with additional theme tweaks layered on top of <code>theme_base</code>. See
+"Details" for its default and replacement semantics.</p></dd>
 
 
 <dt id="arg-color-discrete-fill-discrete">color_discrete, fill_discrete<a class="anchor" aria-label="anchor" href="#arg-color-discrete-fill-discrete"></a></dt>
@@ -158,9 +154,8 @@ passed as every geom's <code>key_glyph</code> argument.</p></dd>
 
 <dt id="arg-dodge-width">dodge_width<a class="anchor" aria-label="anchor" href="#arg-dodge-width"></a></dt>
 <dd><p>Spacing between adjacent strata's horizontal offset
-in the quantile layer (see <code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code>/
-<code><a href="er_style_quantile.html">er_style_quantile_pointrange()</a></code>), as a fraction of the exposure
-range. A single positive number.  Default is <code>0.015</code> (set in <code><a href="er_plot.html">er_plot()</a></code>).</p></dd>
+in the quantile layer, as a fraction of the exposure range. A single
+positive number; see "Details".</p></dd>
 
 
 <dt id="arg-height-base-height-data-height-group">height_base, height_data, height_group<a class="anchor" aria-label="anchor" href="#arg-height-base-height-data-height-group"></a></dt>
@@ -171,7 +166,7 @@ Supplying only one leaves the other two unchanged.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The input <code>object</code>, with the requested theme fields updated</p>
+    <p>The input <code>object</code>, with the requested theme fields updated.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -179,7 +174,8 @@ Supplying only one leaves the other two unchanged.</p></dd>
 <code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code>/<code><a href="er_style_quantile.html">er_style_quantile_pointrange()</a></code> (and
 their <code>_vlines</code> variants) to separate strata horizontally within each
 quantile bin. It belongs in <code>er_plot_theme()</code> because dodging is about
-stratification layout, not an individual builder's visual style.</p>
+stratification layout, not an individual builder's visual style.
+Defaults to <code>0.015</code> (set in <code><a href="er_plot.html">er_plot()</a></code>).</p>
 <p>Every argument defaults to <code>NULL</code>, meaning "leave whatever was set
 before unchanged". This allows repeated calls to <code>er_plot_theme()</code> to
 update only the supplied fields, like <code><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">ggplot2::theme()</a></code>. There is no
@@ -191,6 +187,9 @@ aesthetic is mapped to a continuous quantity such as density or a
 continuous/count response value. If a custom builder adds its own scale,
 supplying one of these four will add a second scale and let ggplot2
 choose the later one.</p>
+<p><code>theme_extra</code> defaults to a panel border plus <code>legend.position = "bottom"</code>. Supplying a new value fully replaces this default rather
+than merging with it, so re-include the border/legend-position
+settings too if you want to keep them alongside your own additions.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

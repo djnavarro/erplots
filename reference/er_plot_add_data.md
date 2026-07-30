@@ -1,22 +1,8 @@
 # Add a raw-data layer
 
-Adds the data layer: individual observations. By default
-(`style = er_style_data_overlay`), points are drawn at their true
-`(exposure, response)` coordinates in the *main* model panel – a plain
-scatter for continuous/count responses, or a scatter with a small
-vertical jitter for a binary response (whose y-values are exactly 0/1
-and would otherwise overplot into two solid lines). This works uniformly
-across all three response types, with no response-type dispatch on which
-builder to use.
-[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-instead uses a panel-based design, and is binary-response-only:
-responders (`response == 1`) get a boxplot + jittered points in an upper
-panel and non-responders (`response == 0`) get the same in a lower
-panel, so the panel shows the exposure *distribution* conditional on
-response, not just raw points. There is no built-in "panel"-layout
-builder for a continuous/count response; `panel` must be `"both"` (the
-default) for these response types regardless of builder, since there's
-no upper/lower partition to select from.
+Adds the data layer: individual observations. By default, points are
+drawn as an overlay showing the exposure and response values in the main
+panel of the plot, but other possibilities are available.
 
 ## Usage
 
@@ -35,39 +21,27 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
   Logical, indicating whether this layer should be split by the plot's
   stratification variable; defaults to `TRUE` if `stratify_by` was set
   in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-  `FALSE` otherwise. For a "panel"-layout builder on a continuous/count
-  response this produces one panel per stratum level (see
-  "Stratification" above) rather than a shared color aesthetic; for an
-  "overlay"-layout builder it always means a shared color aesthetic, for
-  any response type.
+  `FALSE` otherwise. See "Details" for how this interacts with a
+  builder's structural family.
 
 - style:
 
   Function drawing the data layer – defaults to
   [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md).
-  [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-  (binary response only: a boxplot + jittered points per panel) is the
-  other built-in option; any function matching the standard
+  Any function matching the standard
   `(data, config, stratify, exposure, response, strata, theme, ...)`
   signature and tagged with
   [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
-  can be supplied instead – see
+  can be supplied instead; see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
-  for the full contract, e.g. a 2D density in the main panel, a
-  continuous/ count response's color-encoded panel, or per-panel
-  histograms. If `style` is tagged with a `layer` other than `"data"`,
-  this errors informatively; an untagged builder is never checked (only
-  `layout` is a hard requirement).
+  and "Details".
 
 - panel:
 
   Character string: `"upper"`, `"lower"`, or `"both"` (the default).
   Only meaningful for
   [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-  on a binary response; must be `"both"` for an "overlay"-layout builder
-  (no upper/lower partition exists) or for a continuous/count response
-  under a "panel"-layout builder (there's no upper/lower partition to
-  select from either way).
+  on a binary response; see "Details" for when `"both"` is required.
 
 - ...:
 
@@ -78,9 +52,26 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 
 ## Value
 
-The input `object`, with the data layer added
+The input `object`, with the data layer added.
 
 ## Details
+
+The default builder for the data layer is
+[`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),
+which creates a plain scatter plot for continuous/count responses, or a
+scatter with a small vertical jitter for a binary response (whose
+y-values are exactly 0/1 and would otherwise overplot into two solid
+lines). This works uniformly across all three response types, with no
+response-type dispatch on which builder to use.
+[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+instead uses a panel-based design, and is binary-response-only:
+responders (`response == 1`) get a boxplot + jittered points in an upper
+panel and non-responders (`response == 0`) get the same in a lower
+panel, so the panel shows the exposure *distribution* conditional on
+response, not just raw points. There is no built-in "panel"-layout
+builder for a continuous/count response; `panel` must be `"both"` (the
+default) for these response types regardless of builder, since there's
+no upper/lower partition to select from.
 
 Every data-layer builder declares which of these two *structural*
 families it belongs to via
@@ -96,7 +87,19 @@ can never be routed into upper/lower panels, and
 can never be merged into the main panel. See
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
 and [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
-for how to tag a custom builder the same way.
+for how to tag a custom builder the same way. If `style` is tagged with
+a `layer` other than `"data"`, `er_plot_add_data()` errors
+informatively; an untagged builder is never checked (only `layout` is a
+hard requirement).
+
+`keep_strata`'s effect also depends on a builder's structural family:
+for an "overlay"-layout builder it always means a shared color
+aesthetic, for any response type; for a "panel"-layout builder on a
+continuous/count response it instead produces one panel per stratum
+level rather than a shared color aesthetic. `panel` must be `"both"` for
+an "overlay"-layout builder (there's no upper/lower partition to select
+from) and for a continuous/count response under a "panel"-layout builder
+(same reason).
 
 ## See also
 

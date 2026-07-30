@@ -3,18 +3,7 @@
 Adds the quantile layer: exposure is cut into quantile bins (see
 [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md))
 and, within each bin, the response is summarised with a point estimate
-and confidence interval. The type of confidence interval shown depends
-on the `response_type` set in
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md):
-
-- `"binary"`: Clopper-Pearson interval (see
-  [`ci_clopper_pearson()`](https://erplots.djnavarro.net/reference/ci_clopper_pearson.md))
-
-- `"continuous"`: Student t-interval (see
-  [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md))
-
-- `"count"`: exact Poisson interval (see
-  [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md))
+and confidence interval.
 
 ## Usage
 
@@ -44,7 +33,7 @@ er_plot_add_quantiles(
 
 - style:
 
-  Function drawing the quantile summary – defaults to
+  Function drawing the quantile summary; defaults to
   [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
   (point + error bar).
 
@@ -63,9 +52,21 @@ er_plot_add_quantiles(
 
 ## Value
 
-The input `object`, with the quantile layer added
+The input `object`, with the quantile layer added.
 
 ## Details
+
+The type of confidence interval shown depends on the `response_type` set
+in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md):
+
+- `"binary"`: Clopper-Pearson interval (see
+  [`ci_clopper_pearson()`](https://erplots.djnavarro.net/reference/ci_clopper_pearson.md))
+
+- `"continuous"`: Student t-interval (see
+  [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md))
+
+- `"count"`: exact Poisson interval (see
+  [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md))
 
 Note that count responses are not automatically detected as such: they
 default to `"continuous"` and are summarised the same way as any other

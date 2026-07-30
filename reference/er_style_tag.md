@@ -1,14 +1,7 @@
 # Tag a builder with structural/aesthetic metadata
 
 Attaches the self-declared metadata a custom `er_style_*()`-style
-function can carry, in a single call: which *structural* family a
-data-layer builder belongs to (`layout`), what a builder's `fill`
-aesthetic means when it isn't strata (`fill_role`), what a group-layer
-builder's y-axis means when it isn't the group variable itself
-(`y_role`), and which layer a builder is meant to be plugged into
-(`layer`). All four arguments are optional and independent – pass only
-the ones a given builder needs, in one call, rather than chaining
-separate setters.
+function can carry.
 
 ## Usage
 
@@ -50,15 +43,24 @@ er_style_tag(
 
   One of `"model"`, `"summary"`, `"quantile"`, `"data"`, or `"group"`,
   naming which `er_plot_add_*()` layer the builder is meant to be used
-  with, or `NULL` (the default) to leave this tag unset. See "Details"
+  with, or `NULL` (the default) to leave this tag unset. See "Details".
 
 ## Value
 
 `style`, with whichever of the `"er_style_layout"`/
 `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"` attributes
-were requested attached
+were requested attached.
 
 ## Details
+
+The metadata to be supplied indicate which *structural* family a
+data-layer builder belongs to (`layout`), what a builder's `fill`
+aesthetic means when it isn't strata (`fill_role`), what a group-layer
+builder's y-axis means when it isn't the group variable itself
+(`y_role`), and which layer a builder is meant to be plugged into
+(`layer`). All four arguments are optional and independent – pass only
+the ones a given builder needs, in one call, rather than chaining
+separate setters.
 
 `layout` is a required tag for a data-layer builder:
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)

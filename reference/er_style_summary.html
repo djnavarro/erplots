@@ -180,8 +180,11 @@
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code> annotate the base panel with a summary statistic or descriptive label. <code>er_style_summary_pvalue()</code> draws a formatted p-value from the model's <code><a href="er_model_interface.html">er_summary()</a></code> result. <code>er_style_summary_n()</code> draws observation counts. <code>er_style_summary_coefficients()</code> and <code>er_style_summary_gof()</code> consume <code>coefficients</code> and <code>glance</code>, respectively. All built-in summary builders are tagged <code>layer = "summary"</code>.
-doesn't have to originate from a fitted model at all.
+    <p>Builders for <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code> annotate the base panel
+with a summary statistic or descriptive label. <code>er_style_summary_pvalue()</code>
+draws a formatted p-value from the model's <code><a href="er_model_interface.html">er_summary()</a></code> result;
+<code>er_style_summary_n()</code> draws observation counts and doesn't have to
+originate from a fitted model at all.
 <code>er_style_summary_coefficients()</code> draws one line per row of the model's
 <code>coefficients</code> table (see <code><a href="er_model_interface.html">er_summary()</a></code>'s <code>coefficients</code> field), useful
 for models with several parameters and no single privileged p-value
