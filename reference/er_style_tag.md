@@ -8,9 +8,7 @@ builder's y-axis means when it isn't the group variable itself
 (`y_role`), and which layer a builder is meant to be plugged into
 (`layer`). All four arguments are optional and independent – pass only
 the ones a given builder needs, in one call, rather than chaining
-separate setters. See
-[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-"Writing your own builder" section for the full contract.
+separate setters.
 
 ## Usage
 
@@ -29,32 +27,30 @@ er_style_tag(
 - style:
 
   A function matching the standard `er_style_*()` signature (see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md))
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)).
 
 - layout:
 
   One of `"overlay"` or `"panel"`, or `NULL` (the default) to leave this
-  tag unset – see
+  tag unset. See
   [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-  for what each structural family means
+  for what each structural family means.
 
 - fill_role:
 
-  A string naming what the builder's `fill` aesthetic represents
-  (currently only `"density"` is read by `.polish_labels()`, but any
-  string is accepted), or `NULL` (the default) to leave this tag unset
+  A string naming what the builder's `fill` aesthetic represents, or
+  `NULL` (the default) to leave this tag unset.
 
 - y_role:
 
-  A string naming what the builder's y-axis represents (currently only
-  `"count"` is read by `.polish_labels()`), or `NULL` (the default) to
-  leave this tag unset
+  A string naming what the builder's y-axis represents, or `NULL` (the
+  default) to leave this tag unset.
 
 - layer:
 
   One of `"model"`, `"summary"`, `"quantile"`, `"data"`, or `"group"`,
   naming which `er_plot_add_*()` layer the builder is meant to be used
-  with, or `NULL` (the default) to leave this tag unset – see "Details"
+  with, or `NULL` (the default) to leave this tag unset. See "Details"
 
 ## Value
 
@@ -64,20 +60,14 @@ were requested attached
 
 ## Details
 
-`layout` is the one required tag for a data-layer builder:
+`layout` is a required tag for a data-layer builder:
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-reads it off `style` to decide whether to route through
-`.layer_overlay()` (`"overlay"`: a single call merged into the main
-panel, at the observations' true `(exposure, response)` coordinates) or
-`.layer_data()` (`"panel"`: one-or-more panels stacked below the base
-plot), *before* it can call the builder – so the choice can't be
-inferred from the builder's return value. Both built-in data builders
-([`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),
-[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md))
-already carry this tag.
+reads it off `style` to decide whether to place the output geoms into
+the main panel (`layout = "overlay"`) or to put them into separate
+strip-like panels above and below the main panel (`layout = "panel"`)
 
-`fill_role` and `y_role` are both optional, read by `.polish_labels()`
-to title a legend/axis correctly: `fill_role = "density"` (used by
+`fill_role` and `y_role` are both optional, and can be used to title a
+legend/axis correctly: `fill_role = "density"` (used by
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md))
 says a builder's `fill` aesthetic encodes bin density rather than
 strata; `y_role = "count"` (used by
@@ -88,7 +78,7 @@ behaviour (`fill` means strata; the y-axis is titled with the group
 variable's label), which is correct for most builders.
 
 `layer` is also optional, but unlike `fill_role`/`y_role` it isn't read
-for labelling – it's read by every `er_plot_add_*()` function
+for labelling. It's read by every `er_plot_add_*()` function
 ([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 checks `style` against `"model"`;
 [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
@@ -104,8 +94,8 @@ e.g. passing a quantile builder to
 – with an informative error instead of whatever failure results from
 that layer's `config` shape not matching what the builder expects. All
 built-in builders carry this tag. A custom builder that omits it is
-never checked – `layer` is opt-in, not a requirement like `layout` is
-for a data-layer builder.
+never checked: `layer` is opt-in, not a requirement like `layout` is for
+a data-layer builder.
 
 ## See also
 

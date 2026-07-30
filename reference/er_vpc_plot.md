@@ -1,10 +1,7 @@
 # Visual predictive check plot for an exposure-response model
 
-Compares observed response rates against simulated response rates from a
-model, stratified by a grouping variable. This function is
-model-agnostic: it operates purely on data frames, and can obtain those
-data frames in either of two ways – see the `sim`/`model` arguments
-below.
+Compare observed and simulated response summaries grouped by a
+stratification variable.
 
 ## Usage
 
@@ -27,90 +24,62 @@ er_vpc_plot(
 
 - data:
 
-  Observed data
+  Observed data.
 
 - sim:
 
-  Simulated data, with the same `exposure`/`response`/`group_by` columns
-  as `data`, plus a `sim_id` column identifying each replicate. Mutually
-  exclusive with `model`; supply exactly one of the two. Useful for a
-  hand-built simulation, or a model-specific helper that doesn't go
-  through the
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  interface. Passing `model` instead is preferred whenever the model
-  implements
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)'s
-  `sim_resp` extension (see
-  [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+  Simulated data with matching `exposure`/`response`/`group_by` columns
+  and `sim_id`.
 
 - exposure:
 
-  Exposure variable (one variable, unquoted)
+  Exposure variable (unquoted).
 
 - response:
 
-  Response variable (one variable, unquoted). May be binary (0/1, or
-  logical) or continuous; see `response_type`
+  Response variable (unquoted).
 
 - group_by:
 
-  Variable (unquoted) to stratify predictions
+  Variable (unquoted) to stratify predictions.
 
 - model:
 
-  A fitted exposure-response model implementing
+  A fitted model implementing
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  with a `sim_resp` column (see
-  [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)).
-  Mutually exclusive with `sim`; supply exactly one of the two. When
-  supplied, `sim` is built internally via
-  `er_simulate(model, newdata = data, nsim = nsim, seed = seed)`; an
-  error is raised if the model's
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  method doesn't provide `sim_resp` (either because it returns `NULL`,
-  i.e. no simulation support at all, or because it only supports the
-  parameter-uncertainty-only `fit_resp` used by
-  [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
-  – a VPC needs the fuller, response-level simulation `sim_resp`
-  represents; see
-  [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  for the distinction).
+  with `sim_resp`.
 
 - nsim:
 
-  Number of simulation replicates, only used when `model` is supplied.
-  Must be a single positive whole number.
+  Number of simulation replicates, only used with `model`.
 
 - seed:
 
-  Optional RNG seed, only used when `model` is supplied
+  Optional RNG seed, only used with `model`.
 
 - conf_level:
 
-  Confidence level
+  Confidence level.
 
 - response_type:
 
-  One of `"auto"` (default), `"binary"`, `"continuous"`, or `"count"`.
-  Governs how the observed-side summary is computed: response *rate*
-  with a Clopper-Pearson CI for `"binary"`, bin *mean* with a t-interval
-  for `"continuous"` (see
-  [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md)), or bin
-  *mean* with an exact Poisson interval for `"count"` (see
-  [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)).
-  `"auto"` detects from the observed `response` column (entirely in
-  `{0, 1}`, or logical, is treated as binary; see
-  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
-  `response_type` for the same heuristic) and never resolves to
-  `"count"`: a count (Poisson-style) response auto-detects as
-  `"continuous"` (counts aren't confined to `{0, 1}`) and is summarised
-  with the bin-mean-plus-t-interval approximation unless
-  `response_type = "count"` is declared explicitly, in which case the
-  exact Poisson interval is used instead.
+  One of `"auto"`, `"binary"`, `"continuous"`, or `"count"`.
 
 ## Value
 
 A ggplot2 object
+
+## Details
+
+`sim` and `model` are mutually exclusive; supply exactly one. `model` is
+preferred when it implements
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+with `sim_resp` because `er_vpc_plot()` needs response-level simulated
+observations rather than only mean predictions.
+
+`response_type` controls how the observed-side summary is computed: rate
+with a Clopper-Pearson interval for binary, mean with a t-interval for
+continuous, and mean with an exact Poisson interval for count.
 
 ## Examples
 

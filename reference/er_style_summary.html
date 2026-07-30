@@ -123,68 +123,55 @@
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>The original data frame</p></dd>
+<dd><p>The original data frame.</p></dd>
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
-<dd><p>Configuration for the specific plot</p></dd>
+<dd><p>Configuration for the specific plot.</p></dd>
 
 
 <dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
-<dd><p>Logical indicating whether to stratify</p></dd>
+<dd><p>Logical: whether to stratify.</p></dd>
 
 
 <dt id="arg-exposure">exposure<a class="anchor" aria-label="anchor" href="#arg-exposure"></a></dt>
-<dd><p>Exposure variable</p></dd>
+<dd><p>Exposure variable.</p></dd>
 
 
 <dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
-<dd><p>Response variable</p></dd>
+<dd><p>Response variable.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
-<dd><p>Stratification variable</p></dd>
+<dd><p>Stratification variable.</p></dd>
 
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
-<dd><p>Theme components</p></dd>
+<dd><p>Theme components.</p></dd>
 
 
 <dt id="arg-inset">inset<a class="anchor" aria-label="anchor" href="#arg-inset"></a></dt>
-<dd><p>Distance from the panel edge for the annotation label, in
-normalized device coordinates (0 = panel edge, 0.5 = panel centre).
-Default <code>0.05</code>, reproducing the previous fixed value (labels placed
-at <code>0.05</code> from the near edge and <code>0.95</code> from the far edge).</p></dd>
+<dd><p>Distance from the panel edge for the annotation label.</p></dd>
 
 
 <dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
-<dd><p>Label text size (in mm) — maps to <code>geom_label()</code>'s
-<code>size</code> parameter (geom_label uses <code>size.unit = "mm"</code>). If <code>NULL</code> the
-geom default is used.</p></dd>
+<dd><p>Label text size.</p></dd>
 
 
 <dt id="arg-label-colour">label_colour<a class="anchor" aria-label="anchor" href="#arg-label-colour"></a></dt>
-<dd><p>Label text colour — mapped to <code>geom_label()</code>'s
-<code>text.colour</code> parameter. If <code>NULL</code> the geom default is used.</p></dd>
+<dd><p>Label text colour.</p></dd>
 
 
 <dt id="arg-label-fill">label_fill<a class="anchor" aria-label="anchor" href="#arg-label-fill"></a></dt>
-<dd><p>Label background fill — passed as <code>fill</code> to
-<code>geom_label()</code>. If <code>NULL</code> the geom default is used.</p></dd>
+<dd><p>Label background fill.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from
-<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>'s own <code>...</code> (shared with <code>style</code>); see
-<code><a href="er_style.html">er_style()</a></code>'s "Passing extra arguments to a builder" section.</p></dd>
+<dd><p>Additional named arguments forwarded from <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>'s own <code>...</code>.</p></dd>
 
 
 <dt id="arg-fields">fields<a class="anchor" aria-label="anchor" href="#arg-fields"></a></dt>
-<dd><p>(for <code>er_style_summary_gof()</code> only) Which fields from
-<code>glance</code> to include, and in what order. A character vector, any
-subset of <code>c("n", "aic", "bic", "r_squared")</code> in the desired display
-order; unrecognised names are silently ignored. Default
-<code>c("n", "aic", "bic", "r_squared")</code>.</p></dd>
+<dd><p>Fields from <code>glance</code> to include for <code>er_style_summary_gof()</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -193,17 +180,7 @@ order; unrecognised names are silently ignored. Default
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>, which annotate the base
-panel with a summary statistic or descriptive label rather than
-drawing a curve or raw data. <code>er_style_summary_pvalue()</code> (the default)
-places a formatted p-value – derived from the model's own
-<code><a href="er_model_interface.html">er_summary()</a></code> method – in whichever corner of the panel is furthest
-from the observed data, and draws nothing at all if no model was
-supplied to <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>, or if the layer is stratified (one
-p-value doesn't unambiguously describe multiple curves).
-<code>er_style_summary_n()</code> is a model-agnostic alternative: it always draws,
-showing the total number of observations (or, when stratified, one
-count per stratum level) – demonstrating that a summary annotation
+    <p>Builders for <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code> annotate the base panel with a summary statistic or descriptive label. <code>er_style_summary_pvalue()</code> draws a formatted p-value from the model's <code><a href="er_model_interface.html">er_summary()</a></code> result. <code>er_style_summary_n()</code> draws observation counts. <code>er_style_summary_coefficients()</code> and <code>er_style_summary_gof()</code> consume <code>coefficients</code> and <code>glance</code>, respectively. All built-in summary builders are tagged <code>layer = "summary"</code>.
 doesn't have to originate from a fitted model at all.
 <code>er_style_summary_coefficients()</code> draws one line per row of the model's
 <code>coefficients</code> table (see <code><a href="er_model_interface.html">er_summary()</a></code>'s <code>coefficients</code> field), useful

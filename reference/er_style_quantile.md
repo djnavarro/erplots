@@ -70,68 +70,58 @@ er_style_quantile_pointrange_vlines(
 
 - data:
 
-  The original data frame
+  The original data frame.
 
 - config:
 
-  Configuration for the specific plot
+  Configuration for the specific plot.
 
 - stratify:
 
-  Logical indicating whether to stratify
+  Logical: whether to stratify.
 
 - exposure:
 
-  Exposure variable
+  Exposure variable.
 
 - response:
 
-  Response variable
+  Response variable.
 
 - strata:
 
-  Stratification variable
+  Stratification variable.
 
 - theme:
 
-  Theme components
+  Theme components.
 
 - point_size:
 
-  Point size for `er_style_quantile_errorbar()`'s per-bin point. Default
-  `2`.
+  Point size for `er_style_quantile_errorbar()`.
 
 - errorbar_width:
 
-  Width of `er_style_quantile_errorbar()`'s error bars, as a fraction of
-  the exposure range (not an absolute value). Default `0.025`.
+  Width of `er_style_quantile_errorbar()`'s error bars.
 
 - label_size:
 
-  Text size for the per-bin value label drawn by all four builders.
-  Default `3`.
+  Text size for the per-bin value label.
 
 - ...:
 
   Additional named arguments forwarded from
   [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)'s
-  own `...`; see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-  "Passing extra arguments to a builder" section.
+  own `...`.
 
 - vline_colour, vline_linetype:
 
-  Colour/linetype of the interior quantile-bin boundary lines drawn by
-  `er_style_quantile_errorbar_vlines()`/
-  `er_style_quantile_pointrange_vlines()`. Defaults
-  `"grey50"`/`"dotted"`.
+  Colour and linetype of interior quantile boundary lines.
 
 - pointrange_size, pointrange_linewidth:
 
-  [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html)'s
-  own `size`/`linewidth` arguments, for
-  `er_style_quantile_pointrange()`. Default `NULL` (ggplot2's own
-  defaults, unchanged from before).
+  Size and linewidth for
+  [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html).
 
 ## Value
 
@@ -141,20 +131,14 @@ A geom, or a list of geoms; see
 ## Details
 
 Builders for the `quantile` layer
-([`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)),
-which bins exposure into quantile groups and plots a response summary
-(rate, mean, or count-mean, depending on response type) with an
-uncertainty interval per bin: `er_style_quantile_errorbar()` (point plus
-error bar, the default) and `er_style_quantile_pointrange()` (point
-range). `er_style_quantile_errorbar_vlines()` and
-`er_style_quantile_pointrange_vlines()` are minor variants of each,
-additionally drawing a dotted
-[`ggplot2::geom_vline()`](https://ggplot2.tidyverse.org/reference/geom_abline.html)
-at each interior quantile cutpoint (i.e. every bin boundary except the
-exposure variable's overall min/max) – a common way exposure-response
-bin plots are annotated in practice, so that the reader can see exactly
-where one quantile bin ends and the next begins without inferring it
-from the point/error bar spacing alone. All four are tagged
+([`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md))
+bin exposure into quantile groups and plot a response summary with an
+uncertainty interval. `er_style_quantile_errorbar()` and
+`er_style_quantile_pointrange()` are the base builders; their `_vlines`
+variants add interior quantile-bin boundary lines. All built-in quantile
+builders are tagged `layer = "quantile"`, so
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
+errors if given one tagged for another layer.
 `er_style_tag(fn, layer = "quantile")`, so
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 errors informatively if handed a builder tagged for a different layer.
@@ -229,8 +213,7 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     ) |>
     plot()
 
-  # widening the stratum-dodge spacing via er_plot_theme(), rather than
-  # a per-builder argument -- see "Details"
+  # widening the stratum-dodge spacing via er_plot_theme()
   mod2 <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
   erglm_data |>
     er_plot(aucss, ae1, stratify_by = sex) |>

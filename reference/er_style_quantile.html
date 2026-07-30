@@ -122,65 +122,55 @@
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>The original data frame</p></dd>
+<dd><p>The original data frame.</p></dd>
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
-<dd><p>Configuration for the specific plot</p></dd>
+<dd><p>Configuration for the specific plot.</p></dd>
 
 
 <dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
-<dd><p>Logical indicating whether to stratify</p></dd>
+<dd><p>Logical: whether to stratify.</p></dd>
 
 
 <dt id="arg-exposure">exposure<a class="anchor" aria-label="anchor" href="#arg-exposure"></a></dt>
-<dd><p>Exposure variable</p></dd>
+<dd><p>Exposure variable.</p></dd>
 
 
 <dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
-<dd><p>Response variable</p></dd>
+<dd><p>Response variable.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
-<dd><p>Stratification variable</p></dd>
+<dd><p>Stratification variable.</p></dd>
 
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
-<dd><p>Theme components</p></dd>
+<dd><p>Theme components.</p></dd>
 
 
 <dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>
-<dd><p>Point size for <code>er_style_quantile_errorbar()</code>'s
-per-bin point. Default <code>2</code>.</p></dd>
+<dd><p>Point size for <code>er_style_quantile_errorbar()</code>.</p></dd>
 
 
 <dt id="arg-errorbar-width">errorbar_width<a class="anchor" aria-label="anchor" href="#arg-errorbar-width"></a></dt>
-<dd><p>Width of <code>er_style_quantile_errorbar()</code>'s error
-bars, as a fraction of the exposure range (not an absolute value).
-Default <code>0.025</code>.</p></dd>
+<dd><p>Width of <code>er_style_quantile_errorbar()</code>'s error bars.</p></dd>
 
 
 <dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
-<dd><p>Text size for the per-bin value label drawn by all
-four builders. Default <code>3</code>.</p></dd>
+<dd><p>Text size for the per-bin value label.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from
-<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>'s own <code>...</code>; see <code><a href="er_style.html">er_style()</a></code>'s "Passing
-extra arguments to a builder" section.</p></dd>
+<dd><p>Additional named arguments forwarded from <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>'s own <code>...</code>.</p></dd>
 
 
 <dt id="arg-vline-colour-vline-linetype">vline_colour, vline_linetype<a class="anchor" aria-label="anchor" href="#arg-vline-colour-vline-linetype"></a></dt>
-<dd><p>Colour/linetype of the interior
-quantile-bin boundary lines drawn by <code>er_style_quantile_errorbar_vlines()</code>/
-<code>er_style_quantile_pointrange_vlines()</code>. Defaults <code>"grey50"</code>/<code>"dotted"</code>.</p></dd>
+<dd><p>Colour and linetype of interior quantile boundary lines.</p></dd>
 
 
 <dt id="arg-pointrange-size-pointrange-linewidth">pointrange_size, pointrange_linewidth<a class="anchor" aria-label="anchor" href="#arg-pointrange-size-pointrange-linewidth"></a></dt>
-<dd><p><code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>'s
-own <code>size</code>/<code>linewidth</code> arguments, for <code>er_style_quantile_pointrange()</code>.
-Default <code>NULL</code> (ggplot2's own defaults, unchanged from before).</p></dd>
+<dd><p>Size and linewidth for <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -189,19 +179,7 @@ Default <code>NULL</code> (ggplot2's own defaults, unchanged from before).</p></
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for the <code>quantile</code> layer (<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>),
-which bins exposure into quantile groups and plots a response summary
-(rate, mean, or count-mean, depending on response type) with an
-uncertainty interval per bin: <code>er_style_quantile_errorbar()</code> (point plus
-error bar, the default) and <code>er_style_quantile_pointrange()</code> (point
-range). <code>er_style_quantile_errorbar_vlines()</code> and
-<code>er_style_quantile_pointrange_vlines()</code> are minor variants of each,
-additionally drawing a dotted <code><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">ggplot2::geom_vline()</a></code> at each interior
-quantile cutpoint (i.e. every bin boundary except the exposure
-variable's overall min/max) – a common way exposure-response bin plots
-are annotated in practice, so that the reader can see exactly where one
-quantile bin ends and the next begins without inferring it from the
-point/error bar spacing alone. All four are tagged
+    <p>Builders for the <code>quantile</code> layer (<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>) bin exposure into quantile groups and plot a response summary with an uncertainty interval. <code>er_style_quantile_errorbar()</code> and <code>er_style_quantile_pointrange()</code> are the base builders; their <code>_vlines</code> variants add interior quantile-bin boundary lines. All built-in quantile builders are tagged <code>layer = "quantile"</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code> errors if given one tagged for another layer.
 <code>er_style_tag(fn, layer = "quantile")</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>
 errors informatively if handed a builder tagged for a different layer.</p>
 <p>When stratified, all four builders horizontally dodge each quantile
@@ -269,8 +247,7 @@ implement, including how to write a custom builder of your own.</p>
 <span class="r-in"><span>    <span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="co"># widening the stratum-dodge spacing via er_plot_theme(), rather than</span></span></span>
-<span class="r-in"><span>  <span class="co"># a per-builder argument -- see "Details"</span></span></span>
+<span class="r-in"><span>  <span class="co"># widening the stratum-dodge spacing via er_plot_theme()</span></span></span>
 <span class="r-in"><span>  <span class="va">mod2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>

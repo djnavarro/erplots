@@ -101,58 +101,47 @@
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>The original data frame</p></dd>
+<dd><p>The original data frame.</p></dd>
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
-<dd><p>Configuration for the specific plot</p></dd>
+<dd><p>Configuration for the specific plot.</p></dd>
 
 
 <dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
-<dd><p>Logical indicating whether to stratify</p></dd>
+<dd><p>Logical: whether to stratify.</p></dd>
 
 
 <dt id="arg-exposure">exposure<a class="anchor" aria-label="anchor" href="#arg-exposure"></a></dt>
-<dd><p>Exposure variable</p></dd>
+<dd><p>Exposure variable.</p></dd>
 
 
 <dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
-<dd><p>Response variable</p></dd>
+<dd><p>Response variable.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
-<dd><p>Stratification variable</p></dd>
+<dd><p>Stratification variable.</p></dd>
 
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
-<dd><p>Theme components</p></dd>
+<dd><p>Theme components.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Transparency of the geom. For <code>er_style_group_boxplot()</code> and
-<code>er_style_group_violin()</code>, a single number; default <code>0.5</code>. For
-<code>er_style_group_histogram()</code>, <code>NULL</code> (default: <code>0.5</code> when stratified,
-<code>0.8</code> when unstratified, matching the previous conditional behaviour)
-or an explicit number that overrides that conditional default.</p></dd>
+<dd><p>Transparency of the geom.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from
-<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>'s own <code>...</code>; see <code><a href="er_style.html">er_style()</a></code>'s "Passing
-extra arguments to a builder" section.</p></dd>
+<dd><p>Additional named arguments forwarded from <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>'s own <code>...</code>.</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
-<dd><p>(for <code>er_style_group_histogram()</code> only) Number of histogram
-bins, passed to <code><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="external-link">ggplot2::geom_histogram()</a></code>'s own <code>bins</code>. Default <code>30</code>.</p></dd>
+<dd><p>Number of histogram bins for <code>er_style_group_histogram()</code>.</p></dd>
 
 
 <dt id="arg-quantiles-quantile-linetype">quantiles, quantile_linetype<a class="anchor" aria-label="anchor" href="#arg-quantiles-quantile-linetype"></a></dt>
-<dd><p>(for <code>er_style_group_violin()</code> only)
-Probabilities at which to draw quantile lines on the violin, passed to
-<code><a href="https://ggplot2.tidyverse.org/reference/geom_violin.html" class="external-link">ggplot2::geom_violin()</a></code>'s own <code>draw_quantiles</code>; and the linetype for
-those lines, passed to <code>quantile.linetype</code>. Default <code>NULL</code> (no lines
-drawn) and <code>"solid"</code> respectively.</p></dd>
+<dd><p>Violin quantile positions and linetype for <code>er_style_group_violin()</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -161,17 +150,8 @@ drawn) and <code>"solid"</code> respectively.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for the <code>group</code> layer (<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>),
-which draws the exposure distribution for a grouping variable (e.g.
-treatment arm) below the main panel: <code>er_style_group_boxplot()</code> (the
-default), <code>er_style_group_violin()</code>, and <code>er_style_group_histogram()</code>.
-The first two put the group levels on the y-axis; <code>er_style_group_histogram()</code>
-instead puts them on facet strips (<code>facet_grid(rows = vars(lvl), switch = "y")</code>) and frees the y-axis for counts.
-All three are tagged <code>er_style_tag(fn, layer = "group")</code>, so
-<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> errors informatively if handed a builder
-tagged for a different layer.</p>
-<p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions
-implement, including how to write a custom builder of your own.</p>
+    <p>Builders for the <code>group</code> layer (<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>) draw exposure distributions for grouping variables. <code>er_style_group_boxplot()</code> and <code>er_style_group_violin()</code> put group levels on the y-axis; <code>er_style_group_histogram()</code> puts them on facet strips and frees the y-axis for counts. All built-in group builders are tagged <code>layer = "group"</code>, so <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> errors if given one tagged for another layer.</p>
+<p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions implement.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

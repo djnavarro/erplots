@@ -31,16 +31,15 @@ er_plot_add_summary(
 
 - object:
 
-  Partially constructed plot (has S3 class `er_plot`)
+  Partially constructed plot (has S3 class `er_plot`).
 
 - model:
 
   A fitted exposure-response model, or `NULL` (the default). Only needed
-  by a model-summary builder (e.g.
-  [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md),
-  which calls
-  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  on it); a purely descriptive builder (e.g.
+  for builder styles (e.g.
+  [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md))
+  that produced model-based summaries; a purely descriptive builder
+  (e.g.
   [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md))
   ignores it.
 
@@ -49,28 +48,12 @@ er_plot_add_summary(
   Logical, indicating whether this layer should be split by the plot's
   stratification variable; defaults to `TRUE` if `stratify_by` was set
   in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-  `FALSE` otherwise. Passed through to `style` as `stratify` –
-  whether/how a builder changes its behaviour when `TRUE` is up to the
-  builder itself (e.g.
-  [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
-  draws nothing at all, since one p-value doesn't unambiguously describe
-  multiple curves).
+  `FALSE` otherwise.
 
 - style:
 
-  Function drawing the summary annotation – defaults to
+  Function drawing the summary annotation, defaulting to
   [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md).
-  [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
-  is the other built-in option; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, theme, ...)`
-  signature can be supplied instead – see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
-  `config$p_value` (`NULL` unless `model` was supplied) and
-  `config$corner_distance` are the pre-computed pieces specific to this
-  layer. If `style` is tagged with a `layer` (via
-  [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md))
-  other than `"summary"`, this errors informatively; an untagged builder
-  is never checked.
 
 - ...:
 
@@ -82,17 +65,6 @@ er_plot_add_summary(
 ## Value
 
 The input `object`, with the summary layer added
-
-## Details
-
-This layer is **singleton** – see
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
-"Layers are either singleton or additive" – so calling it twice replaces
-the previous summary annotation rather than combining two. A builder
-wanting to show several statistics at once composes them into one
-label/one set of geoms itself, the way
-[`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md)
-does for multiple strata.
 
 ## See also
 

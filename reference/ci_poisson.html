@@ -80,10 +80,7 @@ number of observations in the bin); the rate being estimated is
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Named numeric vector (<code>lower</code>, <code>upper</code>) for the rate <code>sum(x) / n</code>, with confidence level stored as an attribute. Uses the standard
-exact ("Garwood") Poisson interval, derived from the chi-squared/gamma
-relationship, rather than a normal approximation. If the total count
-is 0, the lower bound is 0 (there's no gamma quantile at <code>shape = 0</code>).</p>
+    <p>Named numeric vector (<code>lower</code>, <code>upper</code>) for the rate <code>sum(x) / n</code>, with confidence level stored as an attribute.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -93,7 +90,9 @@ and <code><a href="er_vpc_plot.html">er_vpc_plot()</a></code> when <code>respons
 declared. Unlike <code><a href="ci_t.html">ci_t()</a></code> (the default, opt-in-required
 approximation used when a count response auto-detects or is declared
 <code>"continuous"</code>), this interval is exact and never produces a
-negative lower bound.</p>
+negative lower bound. Uses the standard exact ("Garwood") Poisson
+interval, derived from the chi-squared/gamma relationship; if the
+total count is 0, the lower bound is 0.</p>
     </div>
 
     <div class="section level2">

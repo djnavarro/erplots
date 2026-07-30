@@ -83,12 +83,12 @@ the response, so it needs no <code>response_type</code> dispatch.</p>
 
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
-<dd><p>Partially constructed plot (has S3 class <code>er_plot</code>)</p></dd>
+<dd><p>Partially constructed plot (has S3 class <code>er_plot</code>).</p></dd>
 
 
 <dt id="arg-group-by">group_by<a class="anchor" aria-label="anchor" href="#arg-group-by"></a></dt>
 <dd><p>Grouping variables to define groups for distribution
-plots (a tidyselection of variables)</p></dd>
+plots (a tidyselection of variables).</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
@@ -103,7 +103,7 @@ informatively; an untagged builder is never checked.</p></dd>
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
 <dd><p>Number of quantile bins used for continuous grouping
-variables (<code>NULL</code>, the default, uses <code><a href="cut_quantile.html">cut_quantile()</a></code>'s own default)</p></dd>
+variables (<code>NULL</code>, the default, uses <code><a href="cut_quantile.html">cut_quantile()</a></code>'s own default).</p></dd>
 
 
 <dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
@@ -113,7 +113,7 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <code>TRUE</code> and <code>group_by</code> is itself the plot's stratification
 variable, since that would mean grouping and stratifying by the
 same column at once; pass <code>keep_strata = FALSE</code> for that grouping
-variable instead</p></dd>
+variable instead.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -129,8 +129,7 @@ arguments to a builder" section. Must be named.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Unlike the other four layers, this one is <strong>additive</strong> – see
-<code><a href="er_plot.html">er_plot()</a></code>'s "Layers are either singleton or additive" – each call
+    <p>Unlike the other four layers, the groups layer is <strong>additive</strong>: each call
 adds another panel alongside any already added by a previous call,
 rather than replacing it.</p>
     </div>

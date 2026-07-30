@@ -3,17 +3,17 @@
 Adds the quantile layer: exposure is cut into quantile bins (see
 [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md))
 and, within each bin, the response is summarised with a point estimate
-and confidence interval. Which summary/CI method is used dispatches on
-the plot's `response_type` (set in
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)):
+and confidence interval. The type of confidence interval shown depends
+on the `response_type` set in
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md):
 
-- `"binary"` – response *rate*, with a Clopper-Pearson interval (see
+- `"binary"`: Clopper-Pearson interval (see
   [`ci_clopper_pearson()`](https://erplots.djnavarro.net/reference/ci_clopper_pearson.md))
 
-- `"continuous"` – bin *mean*, with a t-interval (see
+- `"continuous"`: Student t-interval (see
   [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md))
 
-- `"count"` – bin *mean*, with an exact Poisson interval (see
+- `"count"`: exact Poisson interval (see
   [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md))
 
 ## Usage
@@ -33,51 +33,33 @@ er_plot_add_quantiles(
 
 - object:
 
-  Partially constructed plot (has S3 class `er_plot`)
+  Partially constructed plot, an `er_plot` object.
 
 - keep_strata:
 
   Logical, indicating whether this layer should be split by the plot's
   stratification variable; defaults to `TRUE` if `stratify_by` was set
   in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-  `FALSE` otherwise
+  `FALSE` otherwise.
 
 - style:
 
   Function drawing the quantile summary – defaults to
   [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
   (point + error bar).
-  [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
-  (a single
-  [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html))
-  is another built-in option, as are `_vlines` variants of each
-  ([`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md),
-  [`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md))
-  that additionally draw a dotted line at each interior quantile-bin
-  boundary; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, theme, ...)`
-  signature can be supplied instead – see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
-  `config$summary` is the pre-computed per-bin data frame (point
-  estimate + CI) to draw. If `style` is tagged with a `layer` (via
-  [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md))
-  other than `"quantile"`, this errors informatively; an untagged
-  builder is never checked.
 
 - bins:
 
-  Number of exposure bins (not counting placebo)
+  Number of exposure bins (not counting placebo).
 
 - conf_level:
 
-  Confidence level for the interval
+  Confidence level for the interval.
 
 - ...:
 
   Additional named arguments forwarded, unchanged, to `style` when it's
-  called at build time – see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-  "Passing extra arguments to a builder" section. Must be named.
+  called at build time. Arguments must be named.
 
 ## Value
 
@@ -85,17 +67,11 @@ The input `object`, with the quantile layer added
 
 ## Details
 
-Count responses auto-detect as `"continuous"` (see
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
-`response_type` parameter) and are summarised the same way as any other
+Note that count responses are not automatically detected as such: they
+default to `"continuous"` and are summarised the same way as any other
 continuous response unless `response_type = "count"` is declared
-explicitly.
-
-This layer is **singleton** – see
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
-"Layers are either singleton or additive" – so calling it twice replaces
-the previous quantile summary rather than combining bins from both
-calls.
+explicitly in
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md).
 
 ## See also
 
@@ -153,7 +129,7 @@ erglm_data |>
   er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines) |>
   plot()
 
-# plug in a fully custom builder; see `?er_style` for the full contract
+# plug in a fully custom builder; see `?er_style`
 build_quantile_crossbar <- function(data, config, stratify, exposure,
                                      response, strata, theme, ...) {
   ggplot2::geom_crossbar(

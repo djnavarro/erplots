@@ -49,63 +49,49 @@ er_style_group_violin(
 
 - data:
 
-  The original data frame
+  The original data frame.
 
 - config:
 
-  Configuration for the specific plot
+  Configuration for the specific plot.
 
 - stratify:
 
-  Logical indicating whether to stratify
+  Logical: whether to stratify.
 
 - exposure:
 
-  Exposure variable
+  Exposure variable.
 
 - response:
 
-  Response variable
+  Response variable.
 
 - strata:
 
-  Stratification variable
+  Stratification variable.
 
 - theme:
 
-  Theme components
+  Theme components.
 
 - alpha:
 
-  Transparency of the geom. For `er_style_group_boxplot()` and
-  `er_style_group_violin()`, a single number; default `0.5`. For
-  `er_style_group_histogram()`, `NULL` (default: `0.5` when stratified,
-  `0.8` when unstratified, matching the previous conditional behaviour)
-  or an explicit number that overrides that conditional default.
+  Transparency of the geom.
 
 - ...:
 
   Additional named arguments forwarded from
   [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)'s
-  own `...`; see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-  "Passing extra arguments to a builder" section.
+  own `...`.
 
 - bins:
 
-  (for `er_style_group_histogram()` only) Number of histogram bins,
-  passed to
-  [`ggplot2::geom_histogram()`](https://ggplot2.tidyverse.org/reference/geom_histogram.html)'s
-  own `bins`. Default `30`.
+  Number of histogram bins for `er_style_group_histogram()`.
 
 - quantiles, quantile_linetype:
 
-  (for `er_style_group_violin()` only) Probabilities at which to draw
-  quantile lines on the violin, passed to
-  [`ggplot2::geom_violin()`](https://ggplot2.tidyverse.org/reference/geom_violin.html)'s
-  own `draw_quantiles`; and the linetype for those lines, passed to
-  `quantile.linetype`. Default `NULL` (no lines drawn) and `"solid"`
-  respectively.
+  Violin quantile positions and linetype for `er_style_group_violin()`.
 
 ## Value
 
@@ -115,20 +101,17 @@ A geom, or a list of geoms; see
 ## Details
 
 Builders for the `group` layer
-([`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)),
-which draws the exposure distribution for a grouping variable (e.g.
-treatment arm) below the main panel: `er_style_group_boxplot()` (the
-default), `er_style_group_violin()`, and `er_style_group_histogram()`.
-The first two put the group levels on the y-axis;
-`er_style_group_histogram()` instead puts them on facet strips
-(`facet_grid(rows = vars(lvl), switch = "y")`) and frees the y-axis for
-counts. All three are tagged `er_style_tag(fn, layer = "group")`, so
+([`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md))
+draw exposure distributions for grouping variables.
+`er_style_group_boxplot()` and `er_style_group_violin()` put group
+levels on the y-axis; `er_style_group_histogram()` puts them on facet
+strips and frees the y-axis for counts. All built-in group builders are
+tagged `layer = "group"`, so
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
-errors informatively if handed a builder tagged for a different layer.
+errors if given one tagged for another layer.
 
 See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
-for the shared builder interface these functions implement, including
-how to write a custom builder of your own.
+for the shared builder interface these functions implement.
 
 ## See also
 

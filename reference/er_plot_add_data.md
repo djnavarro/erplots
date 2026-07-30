@@ -9,18 +9,14 @@ and would otherwise overplot into two solid lines). This works uniformly
 across all three response types, with no response-type dispatch on which
 builder to use.
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-instead uses the older, panel-based design, and is binary-response-only:
+instead uses a panel-based design, and is binary-response-only:
 responders (`response == 1`) get a boxplot + jittered points in an upper
 panel and non-responders (`response == 0`) get the same in a lower
 panel, so the panel shows the exposure *distribution* conditional on
 response, not just raw points. There is no built-in "panel"-layout
-builder for a continuous/count response – the older `build_data_color()`
-(a single panel with points colored continuously by the response value)
-was removed once
-[`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-turned out to cover its typical use case more simply; `panel` must be
-`"both"` (the default) for these response types regardless of builder,
-since there's no upper/lower partition to select from.
+builder for a continuous/count response; `panel` must be `"both"` (the
+default) for these response types regardless of builder, since there's
+no upper/lower partition to select from.
 
 ## Usage
 
@@ -32,7 +28,7 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 
 - object:
 
-  Partially constructed plot (has S3 class `er_plot`)
+  Partially constructed plot (has S3 class `er_plot`).
 
 - keep_strata:
 
@@ -101,23 +97,6 @@ can never be merged into the main panel. See
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
 and [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 for how to tag a custom builder the same way.
-
-This layer is **singleton** – see
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
-"Layers are either singleton or additive" – calling it again (with any
-builder) fully replaces the previous data layer. A "panel"-layout
-builder is also the one case where stratification behaviour is a partial
-exception to "always color/fill" (see
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
-"Stratification" section): for a continuous/count response, the color
-aesthetic is already spoken for by the response value, so stratification
-instead produces one panel per stratum level (stacked below the base
-plot, each colored by the response), rather than a shared strata legend.
-An "overlay"-layout builder has no such exception – its color aesthetic
-(when stratified) is always strata, since the response is already shown
-via y-position, and it shares the base plot's own strata legend (the
-same one the model/quantile layers use) rather than needing one of its
-own.
 
 ## See also
 

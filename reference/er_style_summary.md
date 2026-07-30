@@ -71,70 +71,57 @@ er_style_summary_gof(
 
 - data:
 
-  The original data frame
+  The original data frame.
 
 - config:
 
-  Configuration for the specific plot
+  Configuration for the specific plot.
 
 - stratify:
 
-  Logical indicating whether to stratify
+  Logical: whether to stratify.
 
 - exposure:
 
-  Exposure variable
+  Exposure variable.
 
 - response:
 
-  Response variable
+  Response variable.
 
 - strata:
 
-  Stratification variable
+  Stratification variable.
 
 - theme:
 
-  Theme components
+  Theme components.
 
 - inset:
 
-  Distance from the panel edge for the annotation label, in normalized
-  device coordinates (0 = panel edge, 0.5 = panel centre). Default
-  `0.05`, reproducing the previous fixed value (labels placed at `0.05`
-  from the near edge and `0.95` from the far edge).
+  Distance from the panel edge for the annotation label.
 
 - label_size:
 
-  Label text size (in mm) — maps to `geom_label()`'s `size` parameter
-  (geom_label uses `size.unit = "mm"`). If `NULL` the geom default is
-  used.
+  Label text size.
 
 - label_colour:
 
-  Label text colour — mapped to `geom_label()`'s `text.colour`
-  parameter. If `NULL` the geom default is used.
+  Label text colour.
 
 - label_fill:
 
-  Label background fill — passed as `fill` to `geom_label()`. If `NULL`
-  the geom default is used.
+  Label background fill.
 
 - ...:
 
   Additional named arguments forwarded from
   [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
-  own `...` (shared with `style`); see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-  "Passing extra arguments to a builder" section.
+  own `...`.
 
 - fields:
 
-  (for `er_style_summary_gof()` only) Which fields from `glance` to
-  include, and in what order. A character vector, any subset of
-  `c("n", "aic", "bic", "r_squared")` in the desired display order;
-  unrecognised names are silently ignored. Default
-  `c("n", "aic", "bic", "r_squared")`.
+  Fields from `glance` to include for `er_style_summary_gof()`.
 
 ## Value
 
@@ -144,22 +131,16 @@ A geom, or a list of geoms; see
 ## Details
 
 Builders for
-[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
-which annotate the base panel with a summary statistic or descriptive
-label rather than drawing a curve or raw data.
-`er_style_summary_pvalue()` (the default) places a formatted p-value –
-derived from the model's own
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
+annotate the base panel with a summary statistic or descriptive label.
+`er_style_summary_pvalue()` draws a formatted p-value from the model's
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-method – in whichever corner of the panel is furthest from the observed
-data, and draws nothing at all if no model was supplied to
-[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
-or if the layer is stratified (one p-value doesn't unambiguously
-describe multiple curves). `er_style_summary_n()` is a model-agnostic
-alternative: it always draws, showing the total number of observations
-(or, when stratified, one count per stratum level) – demonstrating that
-a summary annotation doesn't have to originate from a fitted model at
-all. `er_style_summary_coefficients()` draws one line per row of the
-model's `coefficients` table (see
+result. `er_style_summary_n()` draws observation counts.
+`er_style_summary_coefficients()` and `er_style_summary_gof()` consume
+`coefficients` and `glance`, respectively. All built-in summary builders
+are tagged `layer = "summary"`. doesn't have to originate from a fitted
+model at all. `er_style_summary_coefficients()` draws one line per row
+of the model's `coefficients` table (see
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)'s
 `coefficients` field), useful for models with several parameters and no
 single privileged p-value (e.g. a multi-parameter nonlinear model); it

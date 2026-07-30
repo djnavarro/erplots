@@ -105,93 +105,71 @@
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>The original data frame</p></dd>
+<dd><p>The original data frame.</p></dd>
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
-<dd><p>Configuration for the specific plot</p></dd>
+<dd><p>Configuration for the specific plot.</p></dd>
 
 
 <dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
-<dd><p>Logical indicating whether to stratify</p></dd>
+<dd><p>Logical: whether to stratify.</p></dd>
 
 
 <dt id="arg-exposure">exposure<a class="anchor" aria-label="anchor" href="#arg-exposure"></a></dt>
-<dd><p>Exposure variable</p></dd>
+<dd><p>Exposure variable.</p></dd>
 
 
 <dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
-<dd><p>Response variable</p></dd>
+<dd><p>Response variable.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
-<dd><p>Stratification variable</p></dd>
+<dd><p>Stratification variable.</p></dd>
 
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
-<dd><p>Theme components</p></dd>
+<dd><p>Theme components.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from
-<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>'s own <code>...</code>; see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra
-arguments to a builder" section.</p></dd>
+<dd><p>Additional named arguments forwarded from <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>'s own <code>...</code>.</p></dd>
 
 
 <dt id="arg-box-width">box_width<a class="anchor" aria-label="anchor" href="#arg-box-width"></a></dt>
-<dd><p>Width of <code>er_style_data_boxjitter()</code>'s boxplot.
-Default <code>0.6</code>, matching the previous fixed value.</p></dd>
+<dd><p>Width of <code>er_style_data_boxjitter()</code>'s boxplot.</p></dd>
 
 
 <dt id="arg-box-alpha">box_alpha<a class="anchor" aria-label="anchor" href="#arg-box-alpha"></a></dt>
-<dd><p>Transparency of <code>er_style_data_boxjitter()</code>'s
-boxplot fill (<code>0</code>-<code>1</code>). Default <code>0.4</code>, matching the previous fixed
-value.</p></dd>
+<dd><p>Transparency of <code>er_style_data_boxjitter()</code>'s boxplot fill.</p></dd>
 
 
 <dt id="arg-show-outliers">show_outliers<a class="anchor" aria-label="anchor" href="#arg-show-outliers"></a></dt>
-<dd><p>Whether <code>er_style_data_boxjitter()</code>'s boxplot
-should draw its own outlier points (<code>geom_boxplot()</code>'s usual
-default), rather than suppressing them. Default <code>FALSE</code> (outliers
-hidden), matching the previous fixed behaviour – raw points are
-already shown via the jitter layer, so a boxplot's own outlier
-points are normally redundant.</p></dd>
+<dd><p>Logical: whether <code>er_style_data_boxjitter()</code> draws outlier points.</p></dd>
 
 
 <dt id="arg-jitter-height">jitter_height<a class="anchor" aria-label="anchor" href="#arg-jitter-height"></a></dt>
-<dd><p>Vertical jitter applied to the raw points, in
-response units (<code>er_style_data_overlay()</code>/<code>er_style_data_boxjitter()</code>
-only). Defaults to <code>NULL</code>, which produces <code>0.015</code> for a binary
-response and <code>0</code> otherwise; for <code>er_style_data_boxjitter()</code>, <code>0.3</code>
-when stratified and <code>0.15</code> otherwise. An explicit value overrides
-this for both cases uniformly.</p></dd>
+<dd><p>Vertical jitter applied to raw points.</p></dd>
 
 
 <dt id="arg-jitter-size">jitter_size<a class="anchor" aria-label="anchor" href="#arg-jitter-size"></a></dt>
-<dd><p>Point size for <code>er_style_data_boxjitter()</code>'s
-jittered points. Default <code>1</code>, matching the previous fixed value.</p></dd>
+<dd><p>Point size for <code>er_style_data_boxjitter()</code>'s jittered points.</p></dd>
 
 
 <dt id="arg-jitter-alpha">jitter_alpha<a class="anchor" aria-label="anchor" href="#arg-jitter-alpha"></a></dt>
-<dd><p>Point transparency for
-<code>er_style_data_boxjitter()</code>'s jittered points (<code>0</code>-<code>1</code>). Default
-<code>0.6</code>, matching the previous fixed value.</p></dd>
+<dd><p>Transparency of <code>er_style_data_boxjitter()</code>'s jittered points.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Point transparency for <code>er_style_data_overlay()</code>'s raw
-points (<code>0</code>-<code>1</code>). Default <code>0.4</code>, matching the previous fixed value.</p></dd>
+<dd><p>Point transparency for <code>er_style_data_overlay()</code>.</p></dd>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>Point size for <code>er_style_data_overlay()</code>'s raw points.
-Default <code>1</code>, matching the previous fixed value.</p></dd>
+<dd><p>Point size for <code>er_style_data_overlay()</code>.</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
-<dd><p>Number of hex bins along each axis for
-<code>er_style_data_hex()</code>'s <code><a href="https://ggplot2.tidyverse.org/reference/geom_hex.html" class="external-link">ggplot2::geom_hex()</a></code>. Default <code>30</code>,
-matching the previous fixed value.</p></dd>
+<dd><p>Number of hex bins for <code>er_style_data_hex()</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -200,20 +178,8 @@ matching the previous fixed value.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for the <code>data</code> layer (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>), which
-shows the raw observations alongside the fitted curve. Each builder is
-tagged, via <code><a href="er_style_tag.html">er_style_tag()</a></code>, with the <em>structural</em> family it belongs to:
-<code>er_style_data_overlay()</code> (the default) and <code>er_style_data_hex()</code> use the
-<code>"overlay"</code> layout, plotting directly on the model panel at the raw
-<code>(exposure, response)</code> coordinates (points or, for <code>er_style_data_hex()</code>,
-a 2D density); <code>er_style_data_boxjitter()</code> uses the <code>"panel"</code> layout
-(binary response only), stacking boxplot-plus-jitter panels for
-responders/non-responders below the base plot. See <code><a href="er_style_tag.html">er_style_tag()</a></code> and
-<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for how this tag is used. All three built-in
-data builders are also tagged <code>layer = "data"</code>, so <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>
-errors informatively if handed a builder tagged for a different layer.</p>
-<p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions
-implement, including how to write a custom builder of your own.</p>
+    <p>Builders for the <code>data</code> layer (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>) are tagged with the structural family they belong to via <code><a href="er_style_tag.html">er_style_tag()</a></code>. <code>er_style_data_overlay()</code> and <code>er_style_data_hex()</code> use the overlay layout, drawing in the main panel; <code>er_style_data_boxjitter()</code> uses the panel layout and is binary-response only. All built-in data builders are also tagged <code>layer = "data"</code>, so <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> errors if given a builder tagged for another layer.</p>
+<p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions implement.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

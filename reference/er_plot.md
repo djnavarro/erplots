@@ -1,25 +1,11 @@
 # The exposure-response plotting mini-language
 
-`er_plot()` creates an (empty) plot object of S3 class `er_plot`. Build
-up a plot by piping it through one or more layer functions –
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-(fitted-model curve/ribbon),
-[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
-(a summary annotation, e.g. a p-value or descriptive label),
-[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
-(exposure-quantile-binned response summary),
-[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-(raw observations, by default overlaid on the model panel), and/or
-[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
-(grouped exposure-distribution panels) – then render with
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`print()`](https://rdrr.io/r/base/print.html),
-or build the ggplot2/patchwork objects directly with
+Create an `er_plot` specification for exposure-response visualization.
+Build the plot by adding layers (model, summary, quantiles, data,
+groups) and render with
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`print()`](https://rdrr.io/r/base/print.html)
+or
 [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md).
-`er_plot()` never fits a model itself; any model implementing the small
-interface in
-[er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)
-can be passed to
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md).
 
 ## Usage
 
@@ -31,114 +17,44 @@ er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
 
 - data:
 
-  Observed data
+  Data frame or tibble containing the observed data.
 
 - exposure:
 
-  Exposure variable (one variable, unquoted). Must name a numeric column
-  of `data`.
+  Exposure variable (one variable, unquoted).
 
 - response:
 
-  Response variable (one variable, unquoted). Must name a column of
-  `data`.
+  Response variable (one variable, unquoted).
 
 - stratify_by:
 
   Stratification variable used for color and fill (one variable,
-  unquoted); see "Stratification" above. Must name a column of `data` if
-  supplied.
+  unquoted).
 
 - response_type:
 
-  One of `"auto"` (the default), `"binary"`, `"continuous"`, or
-  `"count"`. Governs response-scale defaults (e.g. axis limits) and
-  which summary/CI method the quantile and VPC layers use. When
-  `"auto"`, the response column is classified as `"binary"` if it is
-  logical or takes only values in `{0, 1}`, and `"continuous"` otherwise
-  – this means a count (Poisson-style) response, e.g. an adverse-event
-  count, auto-detects as `"continuous"` (counts aren't confined to
-  `{0, 1}`) and is summarised as an approximately-continuous quantity
-  (bin mean plus a t-interval). `"auto"` never resolves to `"count"`:
-  pass `response_type = "count"` explicitly for a genuine count response
-  to instead get bin mean plus an *exact* Poisson interval (see
-  [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)),
-  which – unlike the t-interval approximation – never produces a
-  negative lower bound. Explicitly declaring `response_type = "binary"`
-  for a response column that isn't actually confined to `{0, 1}` (or
-  logical) triggers a warning – rows with an out-of-range value are
-  silently excluded from the quantile layer's rate calculation rather
-  than erroring, so this is a warning rather than an error, but the
-  resulting rate is computed over a smaller effective denominator than
-  the row count would suggest. Declaring `response_type = "count"` for a
-  response column that contains a negative value *does* error, rather
-  than warn – unlike the binary case, a negative count isn't silently
-  excluded, it makes
-  [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)'s
-  exact Poisson interval undefined (`NaN`), so there's no usable partial
-  result to fall back to.
+  One of `"auto"`, `"binary"`, `"continuous"`, or `"count"`.
 
 ## Value
 
-An (empty) plot object of class `er_plot`
+An (empty) plot object of class `er_plot`.
 
-## Layers are either singleton or additive
+## Details
 
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
-[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
-[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
-and
-[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-are **singleton**: calling one of them twice on the same object
-overwrites the first call's result rather than combining the two.
-[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
-is **additive**: each call adds another grouped-distribution panel
-alongside any already added, rather than replacing them. This asymmetry
-is deliberate, not accidental – there is only one "the model" and one
-"the quantile summary" to show per plot, but many legitimate ways to
-slice the exposure distribution by different grouping variables. One
-flagged future exception: overlaying two model curves for comparison
-isn't currently supported, but is the one singleton layer where an
-additive variant might eventually make sense.
+Layers are either singleton or additive: model, summary, quantile, and
+data layers are singleton (a second call replaces the previous); groups
+are additive (each call adds a panel).
 
-## Stratification
+`stratify_by` declares a discrete variable used for color/fill across
+layers; each layer's `keep_strata` controls whether it uses
+stratification. Rows with `NA` in the stratification variable are kept
+as their own level.
 
-`stratify_by` (set once, here in `er_plot()`) declares a single discrete
-variable used to split layers by color/fill, with one shared,
-deduplicated legend across the whole composed plot. Each layer
-function's `keep_strata` argument controls whether *that* layer actually
-uses the stratification (it defaults to `TRUE` whenever `stratify_by`
-was set, `FALSE` otherwise).
-[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-is a partial exception to the "always color/fill" rule for a
-continuous/count response: its color aesthetic is already spoken for by
-the response value itself, so stratification falls back to one panel per
-stratum level instead of a shared legend – see its own documentation for
-the general "a layer's own encoding takes precedence" rule this follows.
-
-A row whose `stratify_by` value is `NA` is **kept as its own stratum** –
-an `NA`-labelled color/legend entry or facet, alongside the column's
-other levels – rather than being silently dropped or erroring. This is a
-deliberate choice, not just an incidental consequence of
-[`unique()`](https://rdrr.io/r/base/unique.html)/`dplyr` grouping
-semantics (though it is also that): a missing stratification value can
-itself be informative (e.g. "arm not recorded", "assay below
-quantification limit"), and erplots has no principled way to guess
-whether a given `NA` should be dropped, recoded, or kept. If `NA` rows
-should instead be excluded, or recoded to an explicit level (e.g.
-`"Unknown"`), do so in `data` before calling `er_plot()`.
-
-## Response type
-
-`response_type` (set once, here in `er_plot()`) governs the response's
-scale (`object$response$limits`) and which summary/CI method
+`response_type` governs response-scale defaults and which interval
+method the quantile and VPC layers use; see `response_type` below and
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
-and
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
-use; see the `response_type` parameter below and
-[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)'s
-own documentation for the specifics of each response type's summary
-statistic.
+for details.
 
 ## See also
 

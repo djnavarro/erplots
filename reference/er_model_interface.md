@@ -1,13 +1,10 @@
 # Model interface for exposure-response plots
 
-`erplots` draws exposure-response plots from *any* fitted model that
-implements this small interface, rather than assuming a particular model
-class (e.g. a logistic regression `glm`). To make a model usable with
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-and friends, implement at least a method for `er_predict()`.
-Implementing `er_simulate()` additionally enables simulation-based
-visualisations (e.g. spaghetti plots, VPCs); implementing `er_summary()`
-enables annotations such as p-value labels.
+`erplots` draws exposure-response plots from fitted models that
+implement this small interface, rather than assuming a particular model
+class. Implement `er_predict()` for basic plotting support; implement
+`er_simulate()` for simulation-based visualisations; implement
+`er_summary()` for summary annotations.
 
 ## Usage
 
@@ -23,47 +20,27 @@ er_summary(model, ...)
 
 - model:
 
-  A fitted exposure-response model object. erplots never fits models
-  itself and never inspects a model's formula, so nothing in this
-  interface or in
-  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-  cross-checks that `model` was actually fit on the same
-  exposure/response variables as the plot it's added to (e.g. a model
-  fit on `ae2` passed to a plot declaring `response = ae1`) – such a
-  mismatch runs silently rather than warning or erroring. Ensuring
-  `model` is appropriate to the plotting context is the caller's
-  responsibility.
+  A fitted exposure-response model object.
 
 - newdata:
 
-  A data frame of covariate values at which to predict. When
-  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-  builds this internally for the model curve/ribbon, it always contains
-  the exposure variable (a grid) and, if stratified, the strata variable
-  – plus, for any *other* column the model's fitting data had
-  (covariates `er_predict()`'s method might reference in its formula but
-  erplots has no way to know about, since it never inspects a model's
-  formula), a single reference value (first factor level, or mean for a
-  numeric column) repeated across every row. A method doesn't need to do
-  anything special to benefit from this – it only matters if the
-  method's own [`predict()`](https://rdrr.io/r/stats/predict.html) call
-  would otherwise error on a `newdata` missing a covariate it needs.
+  A data frame of covariate values at which to predict.
 
 - conf_level:
 
-  Confidence level for the prediction interval
+  Confidence level for the prediction interval.
 
 - ...:
 
-  Passed to methods
+  Passed to methods.
 
 - nsim:
 
-  Number of simulation replicates
+  Number of simulation replicates.
 
 - seed:
 
-  Optional RNG seed
+  Optional RNG seed.
 
 ## Value
 
@@ -133,3 +110,21 @@ er_summary(model, ...)
 
   This is purely additive: a method that only ever returns
   `list(p_value = ...)` (as above) continues to work unchanged.
+
+## Details
+
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+does not verify that `model` was fit on the same exposure/response
+variables as the plot; that compatibility is the caller's
+responsibility. When
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+builds `newdata`, it always includes the exposure and, if stratified,
+strata variables, plus reference values for any other covariates in the
+model's original fitting data.
+
+`er_predict()` should return `newdata` with `fit_resp`, `ci_lower`, and
+`ci_upper`. `er_simulate()` should return `newdata` replicates with
+`sim_id` and `fit_resp`; it may additionally return `sim_resp` for
+response-level simulations. `er_summary()` should return `NULL` or a
+named list with optional keys such as `p_value`, `coefficients`, and
+`glance`.

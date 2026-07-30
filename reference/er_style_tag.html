@@ -7,8 +7,7 @@ builder's y-axis means when it isn't the group variable itself
 (y_role), and which layer a builder is meant to be plugged into
 (layer). All four arguments are optional and independent – pass
 only the ones a given builder needs, in one call, rather than chaining
-separate setters. See er_style()'s &quot;Writing your own builder&quot;
-section for the full contract."><meta property="og:description" content="Attaches the self-declared metadata a custom er_style_*()-style
+separate setters."><meta property="og:description" content="Attaches the self-declared metadata a custom er_style_*()-style
 function can carry, in a single call: which structural family a
 data-layer builder belongs to (layout), what a builder's fill
 aesthetic means when it isn't strata (fill_role), what a group-layer
@@ -16,8 +15,7 @@ builder's y-axis means when it isn't the group variable itself
 (y_role), and which layer a builder is meant to be plugged into
 (layer). All four arguments are optional and independent – pass
 only the ones a given builder needs, in one call, rather than chaining
-separate setters. See er_style()'s &quot;Writing your own builder&quot;
-section for the full contract."></head><body>
+separate setters."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -77,8 +75,7 @@ builder's y-axis means when it isn't the group variable itself
 (<code>y_role</code>), and which layer a builder is meant to be plugged into
 (<code>layer</code>). All four arguments are optional and independent – pass
 only the ones a given builder needs, in one call, rather than chaining
-separate setters. See <code><a href="er_style.html">er_style()</a></code>'s "Writing your own builder"
-section for the full contract.</p>
+separate setters.</p>
     </div>
 
     <div class="section level2">
@@ -98,33 +95,30 @@ section for the full contract.</p>
 
 <dl><dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>A function matching the standard <code>er_style_*()</code> signature
-(see <code><a href="er_style.html">er_style()</a></code>)</p></dd>
+(see <code><a href="er_style.html">er_style()</a></code>).</p></dd>
 
 
 <dt id="arg-layout">layout<a class="anchor" aria-label="anchor" href="#arg-layout"></a></dt>
 <dd><p>One of <code>"overlay"</code> or <code>"panel"</code>, or <code>NULL</code> (the default) to
-leave this tag unset – see <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for what each
-structural family means</p></dd>
+leave this tag unset. See <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for what each
+structural family means.</p></dd>
 
 
 <dt id="arg-fill-role">fill_role<a class="anchor" aria-label="anchor" href="#arg-fill-role"></a></dt>
 <dd><p>A string naming what the builder's <code>fill</code> aesthetic
-represents (currently only <code>"density"</code> is read by <code>.polish_labels()</code>,
-but any string is accepted), or <code>NULL</code> (the default) to leave this tag
-unset</p></dd>
+represents, or <code>NULL</code> (the default) to leave this tag unset.</p></dd>
 
 
 <dt id="arg-y-role">y_role<a class="anchor" aria-label="anchor" href="#arg-y-role"></a></dt>
-<dd><p>A string naming what the builder's y-axis represents
-(currently only <code>"count"</code> is read by <code>.polish_labels()</code>), or <code>NULL</code>
-(the default) to leave this tag unset</p></dd>
+<dd><p>A string naming what the builder's y-axis represents,
+or <code>NULL</code> (the default) to leave this tag unset.</p></dd>
 
 
 <dt id="arg-layer">layer<a class="anchor" aria-label="anchor" href="#arg-layer"></a></dt>
 <dd><p>One of <code>"model"</code>, <code>"summary"</code>, <code>"quantile"</code>, <code>"data"</code>, or
 <code>"group"</code>, naming which <code>er_plot_add_*()</code> layer the builder is meant
-to be used with, or <code>NULL</code> (the default) to leave this tag unset –
-see "Details"</p></dd>
+to be used with, or <code>NULL</code> (the default) to leave this tag unset.
+See "Details"</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -135,16 +129,11 @@ attributes were requested attached</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>layout</code> is the one required tag for a data-layer builder:
-<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> reads it off <code>style</code> to decide whether to route
-through <code>.layer_overlay()</code> (<code>"overlay"</code>: a single call merged into the
-main panel, at the observations' true <code>(exposure, response)</code>
-coordinates) or <code>.layer_data()</code> (<code>"panel"</code>: one-or-more panels stacked
-below the base plot), <em>before</em> it can call the builder – so the choice
-can't be inferred from the builder's return value. Both built-in data
-builders (<code><a href="er_style_data.html">er_style_data_overlay()</a></code>, <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code>)
-already carry this tag.</p>
-<p><code>fill_role</code> and <code>y_role</code> are both optional, read by <code>.polish_labels()</code>
+    <p><code>layout</code> is a required tag for a data-layer builder:
+<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> reads it off <code>style</code> to decide whether to place
+the output geoms into the main panel (<code>layout = "overlay"</code>) or to put them into
+separate strip-like panels above and below the main panel (<code>layout = "panel"</code>)</p>
+<p><code>fill_role</code> and <code>y_role</code> are both optional, and can be used
 to title a legend/axis correctly: <code>fill_role = "density"</code> (used by
 <code><a href="er_style_data.html">er_style_data_hex()</a></code>) says a builder's <code>fill</code> aesthetic encodes bin
 density rather than strata; <code>y_role = "count"</code> (used by
@@ -154,7 +143,7 @@ omits either tag keeps the default behaviour (<code>fill</code> means strata;
 the y-axis is titled with the group variable's label), which is
 correct for most builders.</p>
 <p><code>layer</code> is also optional, but unlike <code>fill_role</code>/<code>y_role</code> it isn't read
-for labelling – it's read by every <code>er_plot_add_*()</code> function
+for labelling. It's read by every <code>er_plot_add_*()</code> function
 (<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> checks <code>style</code> against <code>"model"</code>;
 <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code> checks <code>style</code> against <code>"summary"</code>;
 <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>
@@ -164,7 +153,7 @@ into the wrong layer – e.g. passing a quantile builder to
 <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> – with an informative error instead of whatever
 failure results from that layer's <code>config</code> shape not matching what the
 builder expects. All built-in builders carry this tag. A custom
-builder that omits it is never checked – <code>layer</code> is opt-in, not a
+builder that omits it is never checked: <code>layer</code> is opt-in, not a
 requirement like <code>layout</code> is for a data-layer builder.</p>
     </div>
     <div class="section level2">

@@ -27,10 +27,7 @@ ci_poisson(x, n, conf_level = 0.95)
 ## Value
 
 Named numeric vector (`lower`, `upper`) for the rate `sum(x) / n`, with
-confidence level stored as an attribute. Uses the standard exact
-("Garwood") Poisson interval, derived from the chi-squared/gamma
-relationship, rather than a normal approximation. If the total count is
-0, the lower bound is 0 (there's no gamma quantile at `shape = 0`).
+confidence level stored as an attribute.
 
 ## Details
 
@@ -44,7 +41,9 @@ when `response_type = "count"` is explicitly declared. Unlike
 [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md) (the
 default, opt-in-required approximation used when a count response
 auto-detects or is declared `"continuous"`), this interval is exact and
-never produces a negative lower bound.
+never produces a negative lower bound. Uses the standard exact
+("Garwood") Poisson interval, derived from the chi-squared/gamma
+relationship; if the total count is 0, the lower bound is 0.
 
 ## Examples
 

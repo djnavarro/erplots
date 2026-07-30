@@ -6,15 +6,9 @@ uncertainty ribbon (the default, via
 or a spaghetti plot of simulated draws
 (`style = er_style_model_spaghetti`, via
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
-This layer needs no `response_type` dispatch – it only ever consumes
-[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)'s
-output on the response's own scale. For a summary annotation (e.g. a
-p-value, via
-[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)),
-see
-[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
-– a separate, independent layer that doesn't require a model layer to
-also be present.
+This layer uses
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+to compute model predictions on the response scale.
 
 ## Usage
 
@@ -38,71 +32,25 @@ er_plot_add_model(
 - model:
 
   A fitted exposure-response model. Must implement
-  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md);
-  implementing
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  and
-  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  enables additional visualisations (see
-  [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)).
-  If `model`'s formula references covariates beyond the exposure (and,
-  when `keep_strata = TRUE`, strata) variable, those covariates are
-  filled with a reference value (first factor level, or mean for a
-  numeric column) when building the prediction grid – see
-  [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)'s
-  `newdata` documentation. **erplots never checks that `model` was
-  actually fit on the same response as this plot's declared `response`**
-  (or that its exposure variable matches this plot's `exposure`) – it's
-  model-agnostic by design and never inspects a model's formula (see
-  [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)),
-  so nothing here would catch, say, a model fit on `ae2` being passed to
-  a plot declaring `ae1`. It's the caller's responsibility to ensure
-  `model` is actually appropriate to this plot's exposure/response
-  before calling this function; a mismatch runs silently rather than
-  warning or erroring.
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
 
 - keep_strata:
 
-  Logical, indicating whether this layer should be split by the plot's
-  stratification variable; defaults to `TRUE` if `stratify_by` was set
-  in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-  `FALSE` otherwise
+  Logical; whether this layer should use stratification.
 
 - style:
 
-  Function drawing the model curve/ribbon – defaults to
-  [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md)
-  (mean prediction + confidence ribbon).
-  [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
-  (simulated draws, via
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
-  is the other built-in option; any function matching the standard
-  `(data, config, stratify, exposure, response, strata, theme, ...)`
-  signature can be supplied instead – see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md).
-  If `style` is tagged with a `layer` (via
-  [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md))
-  other than `"model"`, this errors informatively rather than passing a
-  mismatched `config` shape to the builder; an untagged builder is never
-  checked.
+  Function drawing the model curve/ribbon. Defaults to
+  [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md).
 
 - conf_level:
 
-  Confidence level for the prediction ribbon
+  Confidence level for the prediction ribbon.
 
 - ...:
 
-  Additional named arguments forwarded, unchanged, to `style` when it's
-  called at build time (the builder is free to use only the arguments it
-  recognizes, via its own `...`). Must be named – see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-  "Passing extra arguments to a builder" section. For example,
-  `er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 9626)`
-  lets
-  [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
-  pass a reproducible `seed` to
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  instead of relying on erglm's auto-selected one.
+  Additional named arguments forwarded unchanged to `style` at build
+  time.
 
 ## Value
 
@@ -110,10 +58,12 @@ The input `object`, with the model layer added
 
 ## Details
 
-This layer is **singleton** – see
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
-"Layers are either singleton or additive" – so calling it twice replaces
-the previous model layer rather than overlaying two model curves.
+`model` may reference covariates beyond the exposure and strata
+variables. erplots fills any additional covariates from the plot data
+with a reference value (first factor level or numeric mean) when
+building the prediction grid. erplots does not check that `model` was
+fit on the same exposure/response as the plot; the caller must ensure
+compatibility.
 
 ## See also
 
@@ -141,8 +91,7 @@ erglm_data |>
   er_plot_add_model(mod, style = er_style_model_spaghetti) |>
   plot()
 
-# plug in a fully custom model-curve builder; see `?er_style` for the
-# full contract
+# plug in a fully custom model-curve builder
 build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme, ...) {
   ggplot2::geom_line(
     data = config$predictions,
@@ -155,9 +104,9 @@ erglm_data |>
   er_plot_add_model(mod, style = build_model_dashed) |>
   plot()
 
-# a model with a covariate beyond the exposure variable -- `sex`, here
-# -- still works even when this layer isn't stratifying by it (`sex`
-# is filled in at a reference value when building the prediction grid)
+# a model with a covariate beyond the exposure variable still works even when 
+# this layer isn't stratifying by it: `sex` is set to a reference value 
+# when building the prediction grid, which may not be what the user wants
 mod_sex <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
 erglm_data |>
   er_plot(aucss, ae1) |>

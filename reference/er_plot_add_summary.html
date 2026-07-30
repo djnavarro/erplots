@@ -94,35 +94,25 @@ or one count per stratum level) and needs no <code>model</code> at all.</p>
 
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
-<dd><p>Partially constructed plot (has S3 class <code>er_plot</code>)</p></dd>
+<dd><p>Partially constructed plot (has S3 class <code>er_plot</code>).</p></dd>
 
 
 <dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
 <dd><p>A fitted exposure-response model, or <code>NULL</code> (the default).
-Only needed by a model-summary builder (e.g.
-<code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code>, which calls <code><a href="er_model_interface.html">er_summary()</a></code> on it); a
+Only needed for builder styles (e.g.
+<code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code>) that produced model-based summaries; a
 purely descriptive builder (e.g. <code><a href="er_style_summary.html">er_style_summary_n()</a></code>) ignores it.</p></dd>
 
 
 <dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
 <dd><p>Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to <code>TRUE</code> if
-<code>stratify_by</code> was set in <code><a href="er_plot.html">er_plot()</a></code>, <code>FALSE</code> otherwise. Passed
-through to <code>style</code> as <code>stratify</code> – whether/how a builder changes its
-behaviour when <code>TRUE</code> is up to the builder itself (e.g.
-<code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code> draws nothing at all, since one p-value
-doesn't unambiguously describe multiple curves).</p></dd>
+<code>stratify_by</code> was set in <code><a href="er_plot.html">er_plot()</a></code>, <code>FALSE</code> otherwise.</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
-<dd><p>Function drawing the summary annotation – defaults to
-<code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code>. <code><a href="er_style_summary.html">er_style_summary_n()</a></code> is the other
-built-in option; any function matching the standard <code>(data, config, stratify, exposure, response, strata, theme, ...)</code> signature can be
-supplied instead – see <code><a href="er_style.html">er_style()</a></code>. <code>config$p_value</code> (<code>NULL</code> unless
-<code>model</code> was supplied) and <code>config$corner_distance</code> are the
-pre-computed pieces specific to this layer. If <code>style</code> is tagged with
-a <code>layer</code> (via <code><a href="er_style_tag.html">er_style_tag()</a></code>) other than <code>"summary"</code>, this errors
-informatively; an untagged builder is never checked.</p></dd>
+<dd><p>Function drawing the summary annotation, defaulting to
+<code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -134,14 +124,6 @@ arguments to a builder" section. Must be named.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The input <code>object</code>, with the summary layer added</p>
-    </div>
-    <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This layer is <strong>singleton</strong> – see <code><a href="er_plot.html">er_plot()</a></code>'s "Layers are either
-singleton or additive" – so calling it twice replaces the previous
-summary annotation rather than combining two. A builder wanting to show
-several statistics at once composes them into one label/one set of
-geoms itself, the way <code><a href="er_style_summary.html">er_style_summary_n()</a></code> does for multiple strata.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

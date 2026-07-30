@@ -24,12 +24,12 @@ er_plot_add_groups(
 
 - object:
 
-  Partially constructed plot (has S3 class `er_plot`)
+  Partially constructed plot (has S3 class `er_plot`).
 
 - group_by:
 
   Grouping variables to define groups for distribution plots (a
-  tidyselection of variables)
+  tidyselection of variables).
 
 - style:
 
@@ -51,7 +51,7 @@ er_plot_add_groups(
   Number of quantile bins used for continuous grouping variables
   (`NULL`, the default, uses
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)'s
-  own default)
+  own default).
 
 - keep_strata:
 
@@ -61,7 +61,7 @@ er_plot_add_groups(
   `FALSE` otherwise. Errors if `TRUE` and `group_by` is itself the
   plot's stratification variable, since that would mean grouping and
   stratifying by the same column at once; pass `keep_strata = FALSE` for
-  that grouping variable instead
+  that grouping variable instead.
 
 - ...:
 
@@ -77,11 +77,9 @@ The input `object`, with a group panel added
 
 ## Details
 
-Unlike the other four layers, this one is **additive** – see
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
-"Layers are either singleton or additive" – each call adds another panel
-alongside any already added by a previous call, rather than replacing
-it.
+Unlike the other four layers, the groups layer is **additive**: each
+call adds another panel alongside any already added by a previous call,
+rather than replacing it.
 
 ## See also
 

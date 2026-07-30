@@ -21,9 +21,8 @@ ci_t(x, conf_level = 0.95)
 ## Value
 
 Named numeric vector (`lower`, `upper`), with confidence level stored as
-an attribute. If fewer than 2 non-missing values are supplied, returns
-`c(lower = NA, upper = NA)` (a standard deviation – and hence a
-t-interval – isn't defined for a single observation).
+an attribute. Returns `c(lower = NA, upper = NA)` if fewer than 2
+non-missing values are supplied.
 
 ## Details
 
