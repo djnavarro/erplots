@@ -1,6 +1,9 @@
 # Data layer builders for exposure-response plots
 
-Data layer builders for exposure-response plots
+Builder functions for the `data` layer
+([`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)),
+drawing raw observations either as an overlay on the main panel or as
+separate boxplot/jitter panels.
 
 ## Usage
 

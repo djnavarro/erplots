@@ -286,20 +286,21 @@ into two solid lines:</p>
 <code>er_style_data_overlay()</code>
 vs. <code>er_style_data_boxjitter()</code><a class="anchor" aria-label="anchor" href="#er_style_data_overlay-vs--er_style_data_boxjitter"></a>
 </h3>
-<p><code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code> is the older, panel-based
-design, and is binary-response only: it splits responders/non-responders
-into separate panels above/below the main plot, each showing a boxplot
-of the exposure values with the raw jittered points layered on top – so
-the panel shows the exposure <em>distribution</em> conditional on
-response, not just individual points. There is no built-in panel-based
-builder for a continuous/count response;
-<code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code> (raw points at their true
-<code>(exposure, response)</code> coordinates, shown in the <a href="plot-continuous.html#data-layer">continuous</a> and <a href="plot-count.html#data-layer">count</a> articles) covers that case
-there, and a custom <code>"panel"</code>-layout builder (e.g. a single
-color-encoded panel) remains possible via <code><a href="../reference/er_style_tag.html">er_style_tag()</a></code> if
-a project needs one – see the <a href="extending.html">Extending
-erplots</a> article. Each builder declares which of the two structural
-families it belongs to via <code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>, which is what
+<p><code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code> is a panel-based design, and
+is binary-response only: it splits responders/non-responders into
+separate panels above/below the main plot, each showing a boxplot of the
+exposure values with the raw jittered points layered on top – so the
+panel shows the exposure <em>distribution</em> conditional on response,
+not just individual points. There is no built-in panel-based builder for
+a continuous/count response; <code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code> (raw
+points at their true <code>(exposure, response)</code> coordinates,
+shown in the <a href="plot-continuous.html#data-layer">continuous</a>
+and <a href="plot-count.html#data-layer">count</a> articles) covers that
+case there, and a custom <code>"panel"</code>-layout builder (e.g. a
+single color-encoded panel) remains possible via
+<code><a href="../reference/er_style_tag.html">er_style_tag()</a></code> if a project needs one – see the <a href="extending.html">Extending erplots</a> article. Each builder
+declares which of the two structural families it belongs to via
+<code><a href="../reference/er_style_tag.html">er_style_tag()</a></code>, which is what
 <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> uses to decide whether to merge it into
 the main panel or stack it in panels below.</p>
 <p>Building both side by side (via patchwork’s <code>|</code> operator)

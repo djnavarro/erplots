@@ -1,6 +1,6 @@
 # t-interval confidence interval for the mean of continuous data
 
-t-interval confidence interval for the mean of continuous data
+Computes a t-distribution confidence interval for a sample mean.
 
 ## Usage
 

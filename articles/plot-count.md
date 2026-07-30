@@ -226,8 +226,7 @@ erglm_data |>
 
 There’s no built-in panel-based alternative for a count response –
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-(the older, panel-based responders/non-responders design covered in the
-[binary
+(the panel-based responders/non-responders design covered in the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#er_style_data_overlay-vs--er_style_data_boxjitter)
 article) is binary-only. If you need a panel-based builder here, you can
 write a custom one and tag it with `er_style_tag(fn, layout = "panel")`

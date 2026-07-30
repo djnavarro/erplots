@@ -510,8 +510,8 @@ does).</li>
 <li>
 <code>"panel"</code>: one or more panels stacked <em>below</em> the
 base plot, the way <code><a href="../reference/er_plot_add_groups.html">er_plot_add_groups()</a></code>’s panels are (what
-<code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code>, the older binary-only
-boxplot+jitter design, does).</li>
+<code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code>, the binary-only boxplot+jitter
+design, does).</li>
 </ul>
 <p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> has to decide which of two different
 <code>config</code> shapes to build <em>before</em> it can call the
@@ -619,8 +619,9 @@ title the y-axis “Count” rather than the group variable’s label:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="extending_files/figure-html/y-role-1.png" class="r-plt" alt="" width="700"></p>
 <p>Like <code>fill_role</code>, this tag is optional – a group builder
-that doesn’t set it keeps the old behaviour (group variable’s label on
-the y-axis), which is correct for <code><a href="../reference/er_style_group.html">er_style_group_boxplot()</a></code>/
+that doesn’t set it keeps the default behaviour (group variable’s label
+on the y-axis), which is correct for
+<code><a href="../reference/er_style_group.html">er_style_group_boxplot()</a></code>/
 <code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code>.</p>
 </div>
 <div class="section level3">

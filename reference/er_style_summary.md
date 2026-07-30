@@ -1,6 +1,9 @@
 # Summary annotation builders for exposure-response plots
 
-Summary annotation builders for exposure-response plots
+Builder functions for the `summary` layer
+([`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)),
+drawing a text/label annotation from a model's p-value, coefficients,
+goodness-of-fit statistics, or observation counts.
 
 ## Usage
 

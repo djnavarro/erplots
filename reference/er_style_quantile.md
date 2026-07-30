@@ -1,6 +1,9 @@
 # Quantile summary builders for exposure-response plots
 
-Quantile summary builders for exposure-response plots
+Builder functions for the `quantile` layer
+([`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)),
+drawing a point/interval summary per exposure quantile bin as an error
+bar or a pointrange, optionally with bin-boundary vlines.
 
 ## Usage
 

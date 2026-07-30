@@ -1,6 +1,9 @@
 # Group panel builders for exposure-response plots
 
-Group panel builders for exposure-response plots
+Builder functions for the `group` layer
+([`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)),
+drawing the exposure distribution for a grouping variable as a boxplot,
+violin, or histogram panel.
 
 ## Usage
 

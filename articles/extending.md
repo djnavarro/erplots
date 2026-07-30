@@ -295,7 +295,7 @@ builder can be slotted into:
   [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)’s
   panels are (what
   [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md),
-  the older binary-only boxplot+jitter design, does).
+  the binary-only boxplot+jitter design, does).
 
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 has to decide which of two different `config` shapes to build *before*
@@ -420,8 +420,8 @@ erglm_data |>
 ![](extending_files/figure-html/y-role-1.png)
 
 Like `fill_role`, this tag is optional – a group builder that doesn’t
-set it keeps the old behaviour (group variable’s label on the y-axis),
-which is correct for
+set it keeps the default behaviour (group variable’s label on the
+y-axis), which is correct for
 [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md)/
 [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md).
 

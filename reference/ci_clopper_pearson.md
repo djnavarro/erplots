@@ -1,6 +1,6 @@
 # Clopper-Pearson confidence interval for binary data
 
-Clopper-Pearson confidence interval for binary data
+Computes an exact binomial confidence interval for a proportion.
 
 ## Usage
 

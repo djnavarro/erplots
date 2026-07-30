@@ -1,6 +1,9 @@
 # Model curve builders for exposure-response plots
 
-Model curve builders for exposure-response plots
+Builder functions for the `model` layer
+([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)),
+drawing the fitted exposure-response curve as a ribbon-and-line, a line
+alone, or a spaghetti plot of simulated draws.
 
 ## Usage
 
@@ -95,40 +98,39 @@ er_style_model_spaghetti(
   Fill colour for `er_style_model_ribbonline()`'s ribbon. Only takes
   effect when the layer is unstratified – a stratified ribbon already
   maps `fill` to the strata variable, so this argument is ignored in
-  that case. Default `"grey40"`, matching the previous fixed value.
+  that case. Default `"grey40"`.
 
 - ribbon_alpha:
 
   Transparency of `er_style_model_ribbonline()`'s ribbon (`0`-`1`),
-  stratified or not. Default `0.25`, matching the previous fixed value.
+  stratified or not. Default `0.25`.
 
 - ribbon_edges:
 
   Whether `er_style_model_ribbonline()` additionally draws a dashed
   [`ggplot2::geom_path()`](https://ggplot2.tidyverse.org/reference/geom_path.html)
   along the ribbon's own `ci_lower`/`ci_upper` bounds, on top of the
-  shaded ribbon fill. Default `FALSE` (ribbon fill only, the previous
-  behaviour).
+  shaded ribbon fill. Default `FALSE` (ribbon fill only).
 
 - linewidth:
 
   Width of the fitted curve's line, for all three model builders
   (`er_style_model_ribbonline()`/`_line()`'s single curve,
   `er_style_model_spaghetti()`'s mean curve drawn on top of the
-  spaghetti draws). Default `1`, matching the previous fixed value.
+  spaghetti draws). Default `1`.
 
 - alpha:
 
   Transparency of `er_style_model_spaghetti()`'s individual simulated
-  draws (`0`-`1`). Defaults to `NULL`, which reproduces the previous
-  fixed behaviour: `0.1` unstratified, `0.25` stratified. An explicit
-  value overrides this for both cases uniformly.
+  draws (`0`-`1`). Defaults to `NULL`, which uses `0.1` unstratified and
+  `0.25` stratified. An explicit value overrides this for both cases
+  uniformly.
 
 - nsim:
 
   Number of simulated draws for `er_style_model_spaghetti()`, passed to
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
-  Default `100L`, matching the previous fixed value.
+  Default `100L`.
 
 ## Value
 

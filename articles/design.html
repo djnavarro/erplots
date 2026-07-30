@@ -289,10 +289,10 @@ strata – the response is already shown via y-position, so color/fill is
 free for stratification like every other layer, and the overlay shares
 the base plot’s own strata legend with the model/quantile layers.</li>
 <li>
-<code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code> (the older, panel-based
-design, <code>"panel"</code>-layout, binary-response only): behaves the
-same way as overlay – color/fill means strata, shared legend. There is
-no built-in <code>"panel"</code>-layout builder for a continuous/count
+<code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code> (the panel-based design,
+<code>"panel"</code>-layout, binary-response only): behaves the same way
+as overlay – color/fill means strata, shared legend. There is no
+built-in <code>"panel"</code>-layout builder for a continuous/count
 response today; if one is written, its color aesthetic would typically
 already be spoken for by the response value itself, in which case
 stratification should fall back to one panel per stratum level instead

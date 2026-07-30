@@ -200,9 +200,9 @@ that builder belongs to:
   overlay shares the base plot’s own strata legend with the
   model/quantile layers.
 - [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-  (the older, panel-based design, `"panel"`-layout, binary-response
-  only): behaves the same way as overlay – color/fill means strata,
-  shared legend. There is no built-in `"panel"`-layout builder for a
+  (the panel-based design, `"panel"`-layout, binary-response only):
+  behaves the same way as overlay – color/fill means strata, shared
+  legend. There is no built-in `"panel"`-layout builder for a
   continuous/count response today; if one is written, its color
   aesthetic would typically already be spoken for by the response value
   itself, in which case stratification should fall back to one panel per

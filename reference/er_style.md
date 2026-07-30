@@ -1,6 +1,9 @@
 # Builder functions for exposure-response plots
 
-Builder functions for exposure-response plots
+Documents the shared
+`function(data, config, stratify, exposure, response, strata, theme, ...)`
+signature every `er_style_*()` builder implements, including how to
+write a custom one.
 
 ## Arguments
 
@@ -155,8 +158,7 @@ is the one **additive** exception – each call to
 adds another named entry rather than replacing the previous one. See
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
 "Layers are either singleton or additive" section for the full
-discussion, including the one flagged future exception (an additive
-`model` layer, for overlaying two fitted curves).
+discussion.
 
 The `data` slot's default,
 [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),

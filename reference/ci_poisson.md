@@ -1,6 +1,6 @@
 # Exact Poisson confidence interval for a count rate
 
-Exact Poisson confidence interval for a count rate
+Computes an exact Poisson confidence interval for a count rate.
 
 ## Usage
 

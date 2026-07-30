@@ -268,7 +268,7 @@ erglm_data |>
 ### `er_style_data_overlay()` vs. `er_style_data_boxjitter()`
 
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-is the older, panel-based design, and is binary-response only: it splits
+is a panel-based design, and is binary-response only: it splits
 responders/non-responders into separate panels above/below the main
 plot, each showing a boxplot of the exposure values with the raw
 jittered points layered on top – so the panel shows the exposure
