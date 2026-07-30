@@ -158,7 +158,7 @@ to:
   via y-position, so color/fill is free for stratification like every
   other layer, and the overlay shares the base plot's own strata legend
   with the model/quantile layers.
-- `er_style_data_boxjitter()` (the older, panel-based design,
+- `er_style_data_boxjitter()` (the panel-based design,
   `"panel"`-layout, binary-response only): behaves the same way as
   overlay -- color/fill means strata, shared legend. There is no
   built-in `"panel"`-layout builder for a continuous/count response

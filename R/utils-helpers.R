@@ -32,6 +32,8 @@
 
 #' Clopper-Pearson confidence interval for binary data
 #'
+#' Computes an exact binomial confidence interval for a proportion.
+#'
 #' @param x Number of successes
 #' @param n Total number of trials
 #' @param conf_level Confidence level
@@ -57,6 +59,8 @@ ci_clopper_pearson <- function(x, n, conf_level = 0.95) {
 
 
 #' t-interval confidence interval for the mean of continuous data
+#'
+#' Computes a t-distribution confidence interval for a sample mean.
 #'
 #' @param x Numeric vector of observations
 #' @param conf_level Confidence level
@@ -95,6 +99,8 @@ ci_t <- function(x, conf_level = 0.95) {
 
 
 #' Exact Poisson confidence interval for a count rate
+#'
+#' Computes an exact Poisson confidence interval for a count rate.
 #'
 #' @param x Vector (or sum) of observed counts, e.g. all counts falling in
 #'   one exposure bin

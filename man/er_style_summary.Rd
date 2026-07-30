@@ -100,7 +100,9 @@ er_style_summary_gof(
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 }
 \description{
-Summary annotation builders for exposure-response plots
+Builder functions for the \code{summary} layer (\code{\link[=er_plot_add_summary]{er_plot_add_summary()}}),
+drawing a text/label annotation from a model's p-value, coefficients,
+goodness-of-fit statistics, or observation counts.
 }
 \details{
 Builders for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} annotate the base panel

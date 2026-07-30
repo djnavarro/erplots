@@ -1,6 +1,10 @@
 
 #' Data layer builders for exposure-response plots
 #'
+#' Builder functions for the `data` layer ([er_plot_add_data()]), drawing raw
+#' observations either as an overlay on the main panel or as separate
+#' boxplot/jitter panels.
+#'
 #' @param data The original data frame.
 #' @param config Configuration for the specific plot.
 #' @param stratify Logical: whether to stratify.

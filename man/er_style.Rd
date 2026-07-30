@@ -38,7 +38,8 @@ x-axis, they should use the values stored in \code{exposure$limits} tp
 set the x-axis limits.
 }
 \description{
-Builder functions for exposure-response plots
+Documents the shared \verb{function(data, config, stratify, exposure, response, strata, theme, ...)} signature every \verb{er_style_*()} builder implements,
+including how to write a custom one.
 }
 \details{
 This page documents the shared interface all \verb{er_style_*()}
@@ -115,9 +116,7 @@ combining builders. \code{group} (\code{er_style_group_boxplot()}/
 \code{er_style_group_violin()}) is the one \strong{additive} exception -- each call
 to \code{er_plot_add_groups()} adds another named entry rather than
 replacing the previous one. See \code{\link[=er_plot]{er_plot()}}'s "Layers are either
-singleton or additive" section for the full discussion, including the
-one flagged future exception (an additive \code{model} layer, for
-overlaying two fitted curves).
+singleton or additive" section for the full discussion.
 
 The \code{data} slot's default, \code{er_style_data_overlay()}, needs no
 \code{color_role} tag: its color aesthetic (when stratified) is always

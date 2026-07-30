@@ -1,6 +1,10 @@
 
 #' Group panel builders for exposure-response plots
 #'
+#' Builder functions for the `group` layer ([er_plot_add_groups()]), drawing
+#' the exposure distribution for a grouping variable as a boxplot, violin, or
+#' histogram panel.
+#'
 #' @param data The original data frame.
 #' @param config Configuration for the specific plot.
 #' @param stratify Logical: whether to stratify.

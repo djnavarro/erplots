@@ -94,7 +94,7 @@ erglm_data |>
   er_plot_add_data() |>
   plot()
 
-# older panel-based design, binary-response only: a boxplot + jittered
+# panel-based design, binary-response only: a boxplot + jittered
 # points per panel (responders above, non-responders below), instead
 # of an overlay in the main panel
 erglm_data |>

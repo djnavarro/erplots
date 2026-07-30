@@ -89,7 +89,9 @@ er_style_data_hex(
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 }
 \description{
-Data layer builders for exposure-response plots
+Builder functions for the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}}), drawing raw
+observations either as an overlay on the main panel or as separate
+boxplot/jitter panels.
 }
 \details{
 Builders for the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}}) are tagged with the structural family they belong to via \code{\link[=er_style_tag]{er_style_tag()}}. \code{er_style_data_overlay()} and \code{er_style_data_hex()} use the overlay layout, drawing in the main panel; \code{er_style_data_boxjitter()} uses the panel layout and is binary-response only. All built-in data builders are also tagged \code{layer = "data"}, so \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors if given a builder tagged for another layer.

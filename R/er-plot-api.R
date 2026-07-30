@@ -918,7 +918,7 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #'   er_plot_add_data() |>
 #'   plot()
 #'
-#' # older panel-based design, binary-response only: a boxplot + jittered
+#' # panel-based design, binary-response only: a boxplot + jittered
 #' # points per panel (responders above, non-responders below), instead
 #' # of an overlay in the main panel
 #' erglm_data |>

@@ -99,7 +99,9 @@ er_style_quantile_pointrange_vlines(
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 }
 \description{
-Quantile summary builders for exposure-response plots
+Builder functions for the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}),
+drawing a point/interval summary per exposure quantile bin as an error bar
+or a pointrange, optionally with bin-boundary vlines.
 }
 \details{
 Builders for the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}})

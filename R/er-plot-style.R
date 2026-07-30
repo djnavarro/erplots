@@ -1,6 +1,10 @@
 
 #' Builder functions for exposure-response plots
 #'
+#' Documents the shared `function(data, config, stratify, exposure, response,
+#' strata, theme, ...)` signature every `er_style_*()` builder implements,
+#' including how to write a custom one.
+#'
 #' @param data The original data frame
 #' @param config Configuration for the specific plot
 #' @param stratify Logical indicating whether to stratify
@@ -99,9 +103,7 @@
 #' `er_style_group_violin()`) is the one **additive** exception -- each call
 #' to `er_plot_add_groups()` adds another named entry rather than
 #' replacing the previous one. See [er_plot()]'s "Layers are either
-#' singleton or additive" section for the full discussion, including the
-#' one flagged future exception (an additive `model` layer, for
-#' overlaying two fitted curves).
+#' singleton or additive" section for the full discussion.
 #'
 #' The `data` slot's default, `er_style_data_overlay()`, needs no
 #' `color_role` tag: its color aesthetic (when stratified) is always

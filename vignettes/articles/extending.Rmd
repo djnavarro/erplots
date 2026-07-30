@@ -200,7 +200,7 @@ mutually exclusive structural families a builder can be slotted into:
   `er_style_data_overlay()`, the default, does).
 - `"panel"`: one or more panels stacked *below* the base plot, the way
   `er_plot_add_groups()`'s panels are (what `er_style_data_boxjitter()`,
-  the older binary-only boxplot+jitter design, does).
+  the binary-only boxplot+jitter design, does).
 
 `er_plot_add_data()` has to decide which of two different `config`
 shapes to build *before* it can call the builder -- so the layout can't
@@ -300,8 +300,8 @@ erglm_data |>
 ```
 
 Like `fill_role`, this tag is optional -- a group builder
-that doesn't set it keeps the old behaviour (group variable's label on
-the y-axis), which is correct for `er_style_group_boxplot()`/
+that doesn't set it keeps the default behaviour (group variable's label
+on the y-axis), which is correct for `er_style_group_boxplot()`/
 `er_style_group_violin()`.
 
 ### `layer`: which `er_plot_add_*()` a builder is meant for

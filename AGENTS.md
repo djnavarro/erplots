@@ -915,12 +915,16 @@ existing `@details`, extending it rather than adding a new section) in
 run 3+ sentences deep into cross-references and edge cases that belong
 in prose describing the function as a whole, not a single argument.
 
-**What was deliberately left alone.** Files/blocks with no separate
-`@description` paragraph at all (e.g. `R/er-plot-style-model.R`,
-`R/er-plot-style-data.R`, `R/er-plot-style-group.R`, whose title doubles
+**What was deliberately left alone (at the time -- since revisited).**
+Files/blocks with no separate `@description` paragraph at all (e.g.
+`R/er-plot-style-model.R`, `R/er-plot-style-data.R`,
+`R/er-plot-style-group.R`, whose title doubles
 as the description via roxygen2's own fallback) were not given an
 invented description -- the convention is about trimming what's there,
-not padding what's absent. `@details` sections that were already long
+not padding what's absent. See "Third documentation sweep" below, where
+this specific decision was reversed for the six builder-family topics
+and three `ci_*()` helpers that had no `@description` at all. `@details`
+sections that were already long
 but organised as one-idea-per-paragraph (e.g. `er_model_interface`'s
 `@returns`, `er_style_summary`'s per-builder rundown) were left as-is;
 length in `@details`/`@returns` is expected and appropriate, only
@@ -932,6 +936,55 @@ Verified: `devtools::document()` regenerated `er_plot_theme.Rd`,
 `\description{}`/`\details{}` for the fixed prose), and `devtools::test()`
 passed (809 passing) -- this was a documentation-only change with no
 code-path effects.
+
+## Third documentation sweep: added missing `@description` blocks, purged remaining "previous behaviour" language
+
+A follow-up review revisited two loose ends left by the two documentation
+sweeps above.
+
+**Missing `@description` blocks.** The "Roxygen convention sweep" above
+explicitly declined to add invented `@description` text to blocks that had
+none (title doubling as description via roxygen2's own fallback). On
+reflection this left nine rendered `.Rd` pages with `\title{}` and
+`\description{}` containing identical text -- not a stylistic quirk but a
+genuine documentation gap, since a description should say what the
+function *does*, not just restate its name. Fixed by adding a real 1-2
+sentence `@description` to: the six builder-family topics (`er_style.Rd`,
+`er_style_data.Rd`, `er_style_group.Rd`, `er_style_model.Rd`,
+`er_style_quantile.Rd`, `er_style_summary.Rd`, each naming the specific
+builders in that family and what they draw) and the three
+confidence-interval helpers (`ci_clopper_pearson()`, `ci_t()`,
+`ci_poisson()`, one sentence each stating what interval it computes).
+
+**Removing remaining "previous behaviour" language.** A second pass swept
+`R/*.R` roxygen and `vignettes/articles/*.Rmd` for language describing a
+current default or behaviour by reference to what came before it (e.g.
+"matching the previous fixed value", "the previous behaviour", "the
+older, panel-based design", "keeps the old behaviour") -- appropriate for
+this AGENTS.md file, whose whole purpose is a historical record, but not
+for user-facing docs, which should describe erplots as it is today rather
+than as a diff against an earlier version. Fixed: six `@param` entries in
+`R/er-plot-style-model.R` (`ribbon_fill`, `ribbon_alpha`, `ribbon_edges`,
+`linewidth`, `alpha`, `nsim`) that justified their defaults by saying they
+matched a prior fixed value -- reworded to just state the default;
+`R/er-plot-style.R`'s dangling cross-reference to "one flagged future
+exception (an additive `model` layer...)", pointing at a roadmap item that
+doesn't actually appear in `er_plot()`'s own docs -- removed; five
+vignettes (`plot-binary.Rmd`, `plot-continuous.Rmd`, `plot-count.Rmd`,
+`design.Rmd`, `extending.Rmd`) plus one `@examples` comment in
+`R/er-plot-api.R` that called `er_style_data_boxjitter()` "the older"
+design relative to `er_style_data_overlay()` -- reworded to describe both
+builders by their structural design (panel-based vs. overlay) rather than
+by age/precedence; and `extending.Rmd`'s "keeps the old behaviour" ->
+"keeps the default behaviour". `PLAN.md` was not touched by this sweep --
+its own historical-record language (e.g. "matching the previous
+conditional behaviour" in the builder-style-customisation section) is
+appropriate there, since `PLAN.md`'s explicit purpose, like this file's,
+is recording *why* things changed.
+
+Verified: `devtools::document()` regenerated the nine `.Rd` files
+cleanly, and `devtools::test()` passed (809 passing) both before and
+after.
 
 ## Planned work
 

@@ -17,7 +17,7 @@ ci_clopper_pearson(x, n, conf_level = 0.95)
 Named numeric vector, with confidence level stored as an attribute
 }
 \description{
-Clopper-Pearson confidence interval for binary data
+Computes an exact binomial confidence interval for a proportion.
 }
 \details{
 Used by the quantile-binned summary layer (see \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}})

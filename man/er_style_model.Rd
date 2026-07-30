@@ -73,38 +73,36 @@ arguments to a builder" section. \code{er_style_model_spaghetti()} reads a
 \item{ribbon_fill}{Fill colour for \code{er_style_model_ribbonline()}'s
 ribbon. Only takes effect when the layer is unstratified -- a
 stratified ribbon already maps \code{fill} to the strata variable, so
-this argument is ignored in that case. Default \code{"grey40"}, matching
-the previous fixed value.}
+this argument is ignored in that case. Default \code{"grey40"}.}
 
 \item{ribbon_alpha}{Transparency of \code{er_style_model_ribbonline()}'s
-ribbon (\code{0}-\code{1}), stratified or not. Default \code{0.25}, matching the
-previous fixed value.}
+ribbon (\code{0}-\code{1}), stratified or not. Default \code{0.25}.}
 
 \item{ribbon_edges}{Whether \code{er_style_model_ribbonline()} additionally
 draws a dashed \code{\link[ggplot2:geom_path]{ggplot2::geom_path()}} along the ribbon's own
 \code{ci_lower}/\code{ci_upper} bounds, on top of the shaded ribbon fill.
-Default \code{FALSE} (ribbon fill only, the previous behaviour).}
+Default \code{FALSE} (ribbon fill only).}
 
 \item{linewidth}{Width of the fitted curve's line, for all three
 model builders (\code{er_style_model_ribbonline()}/\verb{_line()}'s single
 curve, \code{er_style_model_spaghetti()}'s mean curve drawn on top of
-the spaghetti draws). Default \code{1}, matching the previous fixed
-value.}
+the spaghetti draws). Default \code{1}.}
 
 \item{alpha}{Transparency of \code{er_style_model_spaghetti()}'s individual
-simulated draws (\code{0}-\code{1}). Defaults to \code{NULL}, which reproduces the
-previous fixed behaviour: \code{0.1} unstratified, \code{0.25} stratified. An
-explicit value overrides this for both cases uniformly.}
+simulated draws (\code{0}-\code{1}). Defaults to \code{NULL}, which uses \code{0.1}
+unstratified and \code{0.25} stratified. An explicit value overrides this
+for both cases uniformly.}
 
 \item{nsim}{Number of simulated draws for \code{er_style_model_spaghetti()},
-passed to \code{\link[=er_simulate]{er_simulate()}}. Default \code{100L}, matching the previous
-fixed value.}
+passed to \code{\link[=er_simulate]{er_simulate()}}. Default \code{100L}.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 }
 \description{
-Model curve builders for exposure-response plots
+Builder functions for the \code{model} layer (\code{\link[=er_plot_add_model]{er_plot_add_model()}}), drawing
+the fitted exposure-response curve as a ribbon-and-line, a line alone, or a
+spaghetti plot of simulated draws.
 }
 \details{
 Builders for the \code{model} layer (\code{\link[=er_plot_add_model]{er_plot_add_model()}}), which

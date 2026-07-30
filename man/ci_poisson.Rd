@@ -20,7 +20,7 @@ number of observations in the bin); the rate being estimated is
 Named numeric vector (\code{lower}, \code{upper}) for the rate \code{sum(x) / n}, with confidence level stored as an attribute.
 }
 \description{
-Exact Poisson confidence interval for a count rate
+Computes an exact Poisson confidence interval for a count rate.
 }
 \details{
 The count-response analogue of \code{\link[=ci_clopper_pearson]{ci_clopper_pearson()}}, used by

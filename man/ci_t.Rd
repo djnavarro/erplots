@@ -17,7 +17,7 @@ stored as an attribute. Returns \code{c(lower = NA, upper = NA)} if fewer
 than 2 non-missing values are supplied.
 }
 \description{
-t-interval confidence interval for the mean of continuous data
+Computes a t-distribution confidence interval for a sample mean.
 }
 \details{
 Used by the quantile-binned summary layer (see

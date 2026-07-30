@@ -73,7 +73,9 @@ er_style_group_violin(
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 }
 \description{
-Group panel builders for exposure-response plots
+Builder functions for the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}), drawing
+the exposure distribution for a grouping variable as a boxplot, violin, or
+histogram panel.
 }
 \details{
 Builders for the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}) draw exposure distributions for grouping variables. \code{er_style_group_boxplot()} and \code{er_style_group_violin()} put group levels on the y-axis; \code{er_style_group_histogram()} puts them on facet strips and frees the y-axis for counts. All built-in group builders are tagged \code{layer = "group"}, so \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} errors if given one tagged for another layer.

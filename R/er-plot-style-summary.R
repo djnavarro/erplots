@@ -1,5 +1,9 @@
 #' Summary annotation builders for exposure-response plots
 #'
+#' Builder functions for the `summary` layer ([er_plot_add_summary()]),
+#' drawing a text/label annotation from a model's p-value, coefficients,
+#' goodness-of-fit statistics, or observation counts.
+#'
 #' @param data The original data frame.
 #' @param config Configuration for the specific plot.
 #' @param stratify Logical: whether to stratify.

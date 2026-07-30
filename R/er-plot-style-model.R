@@ -1,6 +1,10 @@
 
 #' Model curve builders for exposure-response plots
 #'
+#' Builder functions for the `model` layer ([er_plot_add_model()]), drawing
+#' the fitted exposure-response curve as a ribbon-and-line, a line alone, or a
+#' spaghetti plot of simulated draws.
+#'
 #' @param data The original data frame
 #' @param config Configuration for the specific plot
 #' @param stratify Logical indicating whether to stratify
@@ -17,27 +21,23 @@
 #' @param ribbon_fill Fill colour for `er_style_model_ribbonline()`'s
 #'   ribbon. Only takes effect when the layer is unstratified -- a
 #'   stratified ribbon already maps `fill` to the strata variable, so
-#'   this argument is ignored in that case. Default `"grey40"`, matching
-#'   the previous fixed value.
+#'   this argument is ignored in that case. Default `"grey40"`.
 #' @param ribbon_alpha Transparency of `er_style_model_ribbonline()`'s
-#'   ribbon (`0`-`1`), stratified or not. Default `0.25`, matching the
-#'   previous fixed value.
+#'   ribbon (`0`-`1`), stratified or not. Default `0.25`.
 #' @param ribbon_edges Whether `er_style_model_ribbonline()` additionally
 #'   draws a dashed [ggplot2::geom_path()] along the ribbon's own
 #'   `ci_lower`/`ci_upper` bounds, on top of the shaded ribbon fill.
-#'   Default `FALSE` (ribbon fill only, the previous behaviour).
+#'   Default `FALSE` (ribbon fill only).
 #' @param linewidth Width of the fitted curve's line, for all three
 #'   model builders (`er_style_model_ribbonline()`/`_line()`'s single
 #'   curve, `er_style_model_spaghetti()`'s mean curve drawn on top of
-#'   the spaghetti draws). Default `1`, matching the previous fixed
-#'   value.
+#'   the spaghetti draws). Default `1`.
 #' @param alpha Transparency of `er_style_model_spaghetti()`'s individual
-#'   simulated draws (`0`-`1`). Defaults to `NULL`, which reproduces the
-#'   previous fixed behaviour: `0.1` unstratified, `0.25` stratified. An
-#'   explicit value overrides this for both cases uniformly.
+#'   simulated draws (`0`-`1`). Defaults to `NULL`, which uses `0.1`
+#'   unstratified and `0.25` stratified. An explicit value overrides this
+#'   for both cases uniformly.
 #' @param nsim Number of simulated draws for `er_style_model_spaghetti()`,
-#'   passed to [er_simulate()]. Default `100L`, matching the previous
-#'   fixed value.
+#'   passed to [er_simulate()]. Default `100L`.
 #'
 #' @details Builders for the `model` layer ([er_plot_add_model()]), which
 #' draws the fitted curve (and, where applicable, its uncertainty) over
