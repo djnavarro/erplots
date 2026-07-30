@@ -20,7 +20,7 @@ er_plot_add_quantiles(
 split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the quantile summary -- defaults to
+\item{style}{Function drawing the quantile summary; defaults to
 \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar).}
 
 \item{bins}{Number of exposure bins (not counting placebo).}
@@ -31,21 +31,22 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 when it's called at build time. Arguments must be named.}
 }
 \value{
-The input \code{object}, with the quantile layer added
+The input \code{object}, with the quantile layer added.
 }
 \description{
 Adds the quantile layer: exposure is cut into quantile bins (see
 \code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}}) and, within each bin, the response is
-summarised with a point estimate and confidence interval. The
-type of confidence interval shown depends on the \code{response_type}
+summarised with a point estimate and confidence interval.
+}
+\details{
+The type of confidence interval shown depends on the \code{response_type}
 set in \code{\link[=er_plot]{er_plot()}}:
 \itemize{
 \item \code{"binary"}: Clopper-Pearson interval (see \code{\link[=ci_clopper_pearson]{ci_clopper_pearson()}})
 \item \code{"continuous"}: Student t-interval (see \code{\link[=ci_t]{ci_t()}})
 \item \code{"count"}: exact Poisson interval (see \code{\link[=ci_poisson]{ci_poisson()}})
 }
-}
-\details{
+
 Note that count responses are not automatically detected as such: they
 default to \code{"continuous"} and are summarised the same way as any other
 continuous response unless \code{response_type = "count"} is declared

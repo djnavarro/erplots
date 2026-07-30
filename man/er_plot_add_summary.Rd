@@ -28,22 +28,16 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
+when it's called at build time; see \code{\link[=er_style]{er_style()}}'s "Passing extra
 arguments to a builder" section. Must be named.}
 }
 \value{
-The input \code{object}, with the summary layer added
+The input \code{object}, with the summary layer added.
 }
 \description{
 Adds the summary layer: a text/label annotation placed in whichever
-corner of the base panel is furthest from the observed data (see
-\code{\link[=er_style_tag]{er_style_tag()}}'s \code{corner_distance}-based placement, computed from
-\code{object$data}'s raw \verb{(exposure, response)} coordinates -- not any
-fitted curve). Unlike \code{\link[=er_plot_add_model]{er_plot_add_model()}}, this layer doesn't require
-a model: \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}} (the default) draws a p-value
-derived from a supplied model's own \code{\link[=er_summary]{er_summary()}} method, but
-\code{\link[=er_style_summary_n]{er_style_summary_n()}} is purely descriptive (total observation count,
-or one count per stratum level) and needs no \code{model} at all.
+corner of the base panel is furthest from the observed data, computed
+from the raw \verb{(exposure, response)} coordinates of the data.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

@@ -18,9 +18,8 @@ knitr::opts_chunk$set(
 
 ## What erplots is for
 
-An exposure-response plot shows how a response variable (does a patient
-have an adverse event? how much does a biomarker change?) relates to an
-exposure variable (maximum drug concentration, AUC, and so on). The usual
+An exposure-response plot shows how a response variable relates to a drug
+exposure variable (Cmax, AUC, and so on). The usual
 building blocks are a fitted curve with an uncertainty band, some
 quantile-binned summary points to check the curve against the raw data,
 the raw data itself, and maybe some side panels showing how exposure is

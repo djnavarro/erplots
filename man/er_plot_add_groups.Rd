@@ -20,23 +20,16 @@ er_plot_add_groups(
 plots (a tidyselection of variables).}
 
 \item{style}{Function drawing each group panel -- defaults to
-\code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}}. \code{\link[=er_style_group_violin]{er_style_group_violin()}} is the other
-built-in option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, theme, ...)} signature can be
-supplied instead -- see \code{\link[=er_style]{er_style()}}. Applied to every grouping
-variable added by this call. If \code{style} is tagged with a \code{layer}
-(via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"group"}, this errors
-informatively; an untagged builder is never checked.}
+\code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}}. Applied to every grouping variable added
+by this call; see \code{\link[=er_style]{er_style()}} and "Details".}
 
 \item{bins}{Number of quantile bins used for continuous grouping
 variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. Errors if
-\code{TRUE} and \code{group_by} is itself the plot's stratification
-variable, since that would mean grouping and stratifying by the
-same column at once; pass \code{keep_strata = FALSE} for that grouping
-variable instead.}
+\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. See
+"Details" for an error case.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
 when it's called at build time (identically for every grouping
@@ -44,19 +37,29 @@ variable added by this call) -- see \code{\link[=er_style]{er_style()}}'s "Passi
 arguments to a builder" section. Must be named.}
 }
 \value{
-The input \code{object}, with a group panel added
+The input \code{object}, with a group panel added.
 }
 \description{
 Adds a group layer: a boxplot/violin panel showing the \emph{exposure}
 distribution, split by one or more grouping variables (continuous
-grouping variables are binned into quantiles first, via
-\code{\link[=cut_quantile]{cut_quantile()}}). This layer only looks at the exposure variable, not
-the response, so it needs no \code{response_type} dispatch.
+grouping variables are binned into quantiles first.
 }
 \details{
 Unlike the other four layers, the groups layer is \strong{additive}: each call
 adds another panel alongside any already added by a previous call,
 rather than replacing it.
+
+\code{\link[=er_style_group_violin]{er_style_group_violin()}} and \code{\link[=er_style_group_histogram]{er_style_group_histogram()}} are the
+other built-in \code{style} options; any function matching the standard
+\verb{(data, config, stratify, exposure, response, strata, theme, ...)}
+signature can be supplied instead. If \code{style} is tagged with a
+\code{layer} (via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"group"}, this errors
+informatively; an untagged builder is never checked.
+
+\code{keep_strata = TRUE} errors if \code{group_by} is itself the plot's
+stratification variable, since that would mean grouping and
+stratifying by the same column at once; pass \code{keep_strata = FALSE}
+for that grouping variable instead.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

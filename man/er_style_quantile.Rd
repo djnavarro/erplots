@@ -102,9 +102,13 @@ A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 Quantile summary builders for exposure-response plots
 }
 \details{
-Builders for the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}) bin exposure into quantile groups and plot a response summary with an uncertainty interval. \code{er_style_quantile_errorbar()} and \code{er_style_quantile_pointrange()} are the base builders; their \verb{_vlines} variants add interior quantile-bin boundary lines. All built-in quantile builders are tagged \code{layer = "quantile"}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} errors if given one tagged for another layer.
-\code{er_style_tag(fn, layer = "quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}
-errors informatively if handed a builder tagged for a different layer.
+Builders for the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}})
+bin exposure into quantile groups and plot a response summary with an
+uncertainty interval. \code{er_style_quantile_errorbar()} and
+\code{er_style_quantile_pointrange()} are the base builders; their
+\verb{_vlines} variants add interior quantile-bin boundary lines. All
+built-in quantile builders are tagged \code{er_style_tag(fn, layer = "quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} errors informatively if
+handed a builder tagged for a different layer.
 
 When stratified, all four builders horizontally dodge each quantile
 bin's points/bars/labels apart by \code{\link[=er_plot_theme]{er_plot_theme()}}'s \code{dodge_width}

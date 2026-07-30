@@ -103,8 +103,11 @@ A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
 Summary annotation builders for exposure-response plots
 }
 \details{
-Builders for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} annotate the base panel with a summary statistic or descriptive label. \code{er_style_summary_pvalue()} draws a formatted p-value from the model's \code{\link[=er_summary]{er_summary()}} result. \code{er_style_summary_n()} draws observation counts. \code{er_style_summary_coefficients()} and \code{er_style_summary_gof()} consume \code{coefficients} and \code{glance}, respectively. All built-in summary builders are tagged \code{layer = "summary"}.
-doesn't have to originate from a fitted model at all.
+Builders for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} annotate the base panel
+with a summary statistic or descriptive label. \code{er_style_summary_pvalue()}
+draws a formatted p-value from the model's \code{\link[=er_summary]{er_summary()}} result;
+\code{er_style_summary_n()} draws observation counts and doesn't have to
+originate from a fitted model at all.
 \code{er_style_summary_coefficients()} draws one line per row of the model's
 \code{coefficients} table (see \code{\link[=er_summary]{er_summary()}}'s \code{coefficients} field), useful
 for models with several parameters and no single privileged p-value

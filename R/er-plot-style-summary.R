@@ -14,9 +14,11 @@
 #' @param fields Fields from `glance` to include for `er_style_summary_gof()`.
 #' @param ... Additional named arguments forwarded from [er_plot_add_model()]'s own `...`.
 #'
-#' @details Builders for [er_plot_add_summary()] annotate the base panel with a summary statistic or descriptive label. `er_style_summary_pvalue()` draws a formatted p-value from the model's [er_summary()] result. `er_style_summary_n()` draws observation counts. `er_style_summary_coefficients()` and `er_style_summary_gof()` consume `coefficients` and `glance`, respectively. All built-in summary builders are tagged `layer = "summary"`.
-
-#' doesn't have to originate from a fitted model at all.
+#' @details Builders for [er_plot_add_summary()] annotate the base panel
+#' with a summary statistic or descriptive label. `er_style_summary_pvalue()`
+#' draws a formatted p-value from the model's [er_summary()] result;
+#' `er_style_summary_n()` draws observation counts and doesn't have to
+#' originate from a fitted model at all.
 #' `er_style_summary_coefficients()` draws one line per row of the model's
 #' `coefficients` table (see [er_summary()]'s `coefficients` field), useful
 #' for models with several parameters and no single privileged p-value

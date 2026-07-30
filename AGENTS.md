@@ -826,6 +826,113 @@ in the suite ever calls `erglm::erglm_vpc_sim()`. Verified against the
 reinstalled, `erglm_vpc_sim()`-free erglm: full `devtools::test()` and
 `devtools::check()` both clean.
 
+## Documentation sweep: no internal implementation details outside `internals.Rmd`
+
+A review swept `man/*.Rd` (via their roxygen sources) and
+`vignettes/articles/*.Rmd` for references to internal implementation
+details -- dot-prefixed functions (`.layer_*()`, `.polish_*()`,
+`.build_overlay_geoms()`, `.get_model_predictions()`, etc.), internal
+`R/` file paths, and direct access into the `er_plot` object's own
+internal slots (`object$layer`, `object$data`, `object$part`) -- on the
+principle that user-facing documentation shouldn't encourage relying on
+internals that may change between releases. `vignettes/articles/internals.Rmd`
+is the sole exception, by design (its explicit purpose is documenting
+those internals) and was left untouched.
+
+Found and rewritten: `R/er-plot-style.R`'s `?er_style` topic (several
+mentions of `.build_overlay_geoms()`, `.layer_*()`, `.layer_data()`,
+`.polish_labels()`/`.polish_legends()`, `R/er-plot-compose.R`,
+`object$layer`, and the historical, already-removed `build_data_color()`);
+`er_plot_add_summary()`'s roxygen (`object$data`'s raw coordinates, in
+`R/er-plot-api.R`); and `design.Rmd`/`extending.Rmd`/`model-interface.Rmd`
+(the same family of internal function/file references, plus
+`extending.Rmd`'s worked "inspect `config$summary`" example, which used
+to fetch it via direct slot access, `plt$layer$quantile$config$summary`).
+That last one was rewritten as a "spy" builder -- a tiny custom `style`
+function that just `print()`s `config` and returns `list()` -- passed as
+the layer's own `style` argument, so config can still be inspected
+interactively without depending on the object's internal storage shape;
+this is the recommended pattern for anyone wanting to inspect a layer's
+`config` while developing a custom builder.
+
+**What was deliberately left alone.** References to `config$predictions`/
+`config$summary`/`config$breaks`/`config$color_role`/etc. -- the
+contents of the `config` argument passed to a custom `er_style_*()`
+builder -- are not internal details; `config`'s shape per layer is the
+documented, public extension contract (`?er_style`, `extending.Rmd`),
+so describing what it contains is required, not something to scrub.
+Plain (`#`, not `#'`) source-code comments inside builder function
+bodies (e.g. `er-plot-style-data.R`'s comment pointing a future
+maintainer at `.build_overlay_geoms()` in `R/er-plot-build.R`,
+`er-plot-style-group.R`'s comment about `.polish_labels()`) were also
+left alone -- they're maintainer-facing code comments, not generated
+into any `.Rd` page or vignette, so they don't reach end users. Likewise
+`@noRd`-tagged roxygen (e.g. `.dodge_quantile_strata()`'s own doc
+comment in `R/utils-helpers.R`, which references `.layer_quantile()`)
+was left alone, since `@noRd` means it's never rendered into a `.Rd`
+page either. The exported `ci_clopper_pearson()`/`ci_t()`/`ci_poisson()`
+functions named in `design.Rmd`'s quantile-layer table are genuinely
+public API (`@export`ed, listed in `NAMESPACE`), not internal
+implementation, so those references were kept as-is.
+
+Verified after the edits: `devtools::document()` (regenerated
+`er_plot_add_summary.Rd`/`er_style.Rd` cleanly), `devtools::test()` (809
+passing), and `rmarkdown::render()` of `design.Rmd`/`extending.Rmd`/
+`model-interface.Rmd` with no errors.
+
+## Roxygen convention sweep: short `@description`/`@param`, detail deferred to `@details`/`@returns`
+
+A second documentation review (following the internal-implementation-details
+sweep above) checked every roxygen block against a consistent convention:
+`@description` is a plain 1-2 sentence summary, each `@param` is 1-2
+sentences, and anything longer -- caveats, error conditions, cross-builder
+comparisons, defaults with rationale -- is deferred to `@details` (or
+`@returns` for return-value nuance). Most of the package already followed
+this (`R/er-generics.R`, `R/er-plot-style-model.R`, `R/er-plot-style-data.R`,
+`R/er-plot-style-group.R`, `R/er-vpc.R`, `R/utils-helpers.R` needed no
+changes). Two genuine content bugs were found and fixed along the way,
+both caused by a stray blank (non-`#'`) line splitting what was meant to
+be one `@details` paragraph across two roxygen blocks that only merged
+back together in the rendered `.Rd` because they shared the same `@name`/
+followed the same function -- roxygen2 does not require blocks to be
+contiguous to merge them, so the split was silent (no build warning) but
+left the *prose* broken:
+
+- `R/er-plot-style-quantile.R`'s `@details` had a duplicated sentence
+  about the `layer = "quantile"` tag (once phrased as "tagged `layer =
+  \"quantile\"`", once as "`er_style_tag(fn, layer = \"quantile\")`") --
+  merged into one non-repeated sentence.
+- `R/er-plot-style-summary.R`'s `@details` had a sentence fragment
+  missing its subject ("doesn't have to originate from a fitted model at
+  all.", with no preceding noun) -- rewritten as part of the
+  `er_style_summary_n()` sentence it was originally describing.
+
+Trimmed `@param`s (with their overflow moved into each function's
+existing `@details`, extending it rather than adding a new section) in
+`R/er-plot-api.R`: `er_plot_theme()`'s `theme_extra` and `dodge_width`;
+`er_plot_add_data()`'s `keep_strata`, `style`, and `panel`; and
+`er_plot_add_groups()`'s `style` and `keep_strata`. Each of these used to
+run 3+ sentences deep into cross-references and edge cases that belong
+in prose describing the function as a whole, not a single argument.
+
+**What was deliberately left alone.** Files/blocks with no separate
+`@description` paragraph at all (e.g. `R/er-plot-style-model.R`,
+`R/er-plot-style-data.R`, `R/er-plot-style-group.R`, whose title doubles
+as the description via roxygen2's own fallback) were not given an
+invented description -- the convention is about trimming what's there,
+not padding what's absent. `@details` sections that were already long
+but organised as one-idea-per-paragraph (e.g. `er_model_interface`'s
+`@returns`, `er_style_summary`'s per-builder rundown) were left as-is;
+length in `@details`/`@returns` is expected and appropriate, only
+`@description`/`@param` have the 1-2 sentence ceiling.
+
+Verified: `devtools::document()` regenerated `er_plot_theme.Rd`,
+`er_plot_add_data.Rd`, `er_plot_add_groups.Rd`, `er_style_quantile.Rd`,
+`er_style_summary.Rd` cleanly (spot-checked each rendered
+`\description{}`/`\details{}` for the fixed prose), and `devtools::test()`
+passed (809 passing) -- this was a documentation-only change with no
+code-path effects.
+
 ## Planned work
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed

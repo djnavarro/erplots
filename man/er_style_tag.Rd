@@ -29,16 +29,19 @@ or \code{NULL} (the default) to leave this tag unset.}
 \item{layer}{One of \code{"model"}, \code{"summary"}, \code{"quantile"}, \code{"data"}, or
 \code{"group"}, naming which \verb{er_plot_add_*()} layer the builder is meant
 to be used with, or \code{NULL} (the default) to leave this tag unset.
-See "Details"}
+See "Details".}
 }
 \value{
 \code{style}, with whichever of the \code{"er_style_layout"}/
 \code{"er_style_fill_role"}/\code{"er_style_y_role"}/\code{"er_style_layer"}
-attributes were requested attached
+attributes were requested attached.
 }
 \description{
 Attaches the self-declared metadata a custom \verb{er_style_*()}-style
-function can carry, in a single call: which \emph{structural} family a
+function can carry.
+}
+\details{
+The metadata to be supplied indicate which \emph{structural} family a
 data-layer builder belongs to (\code{layout}), what a builder's \code{fill}
 aesthetic means when it isn't strata (\code{fill_role}), what a group-layer
 builder's y-axis means when it isn't the group variable itself
@@ -46,8 +49,7 @@ builder's y-axis means when it isn't the group variable itself
 (\code{layer}). All four arguments are optional and independent -- pass
 only the ones a given builder needs, in one call, rather than chaining
 separate setters.
-}
-\details{
+
 \code{layout} is a required tag for a data-layer builder:
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} reads it off \code{style} to decide whether to place
 the output geoms into the main panel (\code{layout = "overlay"}) or to put them into

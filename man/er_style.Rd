@@ -29,7 +29,7 @@ that these objects will be added to a partially constructed plot
 which, at a minimum, already has the base theme applied. For
 "model", "summary", "quantile", and "overlay", the pieces will be
 added to a plot that already has a coord that sets the axis limits
-(the base plot; see \code{.build_overlay_geoms()}). For the "data"
+(the base plot). For the "data"
 (panel-based, e.g. \code{er_style_data_boxjitter()}) and "group" plots, the
 plot object does not yet have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That
@@ -76,7 +76,7 @@ Each \verb{er_plot_add_*()} function takes a \code{style} argument that
 defaults to one built-in \verb{er_style_*()} function and can be set to any
 other -- built-in or custom -- matching the standard signature: a
 custom builder can be plugged in without forking the package or
-reaching into \code{object$layer} internals. For the data layer specifically,
+reaching into the plot object's internal state. For the data layer specifically,
 \code{style} also has to declare which \emph{structural} family it belongs to --
 a single call merged into the main panel, or one or more panels
 stacked below the base plot -- via \code{\link[=er_style_tag]{er_style_tag()}}, since
@@ -90,9 +90,9 @@ a quantile crossbar, and a data-overlay density, respectively).
 A custom builder receives the same pre-computed \code{config} a built-in
 builder would have received for that layer (e.g. \code{config$predictions}
 for \code{model}, \code{config$summary} for \code{quantile}) -- it does not need to
-recompute anything the corresponding \verb{.layer_*()} function already
-derived from \code{data}/\code{exposure}/\code{response}/\code{strata}; it only needs to
-turn that \code{config} into ggplot2 layers.
+recompute anything erplots already derived from \code{data}/\code{exposure}/
+\code{response}/\code{strata}; it only needs to turn that \code{config} into ggplot2
+layers.
 
 A custom builder can optionally self-declare which layer it's meant
 for via \code{er_style_tag(builder, layer = ...)} (one of \code{"model"},
@@ -108,10 +108,10 @@ is simply never checked, so existing custom builders keep working
 unchanged. All built-in builders carry this tag.
 
 All of the builders above feed a \strong{singleton} layer: \code{model},
-\code{summary}, \code{quantile}, \code{data}, and \code{overlay} each occupy a single named
-slot (\code{object$layer$model}, \code{object$layer$data}, etc.), so calling the
-corresponding \verb{er_plot_add_*()} function again overwrites the slot
-rather than combining builders. \code{group} (\code{er_style_group_boxplot()}/
+\code{summary}, \code{quantile}, \code{data}, and \code{overlay} each occupy a single slot
+in the plot's internal state, so calling the corresponding
+\verb{er_plot_add_*()} function again overwrites that slot rather than
+combining builders. \code{group} (\code{er_style_group_boxplot()}/
 \code{er_style_group_violin()}) is the one \strong{additive} exception -- each call
 to \code{er_plot_add_groups()} adds another named entry rather than
 replacing the previous one. See \code{\link[=er_plot]{er_plot()}}'s "Layers are either
@@ -123,17 +123,15 @@ The \code{data} slot's default, \code{er_style_data_overlay()}, needs no
 \code{color_role} tag: its color aesthetic (when stratified) is always
 strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. \code{config$color_role}
-(set by \code{.layer_data()}, consulted by \code{.polish_labels()}/
-\code{.polish_legends()} in \code{R/er-plot-compose.R}) matters for the
-"panel"-layout family instead, where it's \code{"strata"} for a binary
-response (as used by the built-in \code{er_style_data_boxjitter()}, whose
-color aesthetic still means strata) or \code{"response"} for a
-continuous/count response, where the color channel is already spoken
-for by the response value itself -- there's no built-in
-"panel"-layout builder for that case (the older \code{build_data_color()}
-was removed once \code{er_style_data_overlay()} covered its typical use case
-more simply), but a custom builder tagged \code{er_style_tag(builder, layout = "panel")} can still opt into it; see \code{\link[=er_plot_add_data]{er_plot_add_data()}} for
-the user-facing version of this rule.
+matters for the "panel"-layout family instead, where it's \code{"strata"}
+for a binary response (as used by the built-in
+\code{er_style_data_boxjitter()}, whose color aesthetic still means strata)
+or \code{"response"} for a continuous/count response, where the color
+channel is already spoken for by the response value itself -- there's
+no built-in "panel"-layout builder for that case today, but a custom
+builder tagged \code{er_style_tag(builder, layout = "panel")} can still opt
+into it; see \code{\link[=er_plot_add_data]{er_plot_add_data()}} for the user-facing version of this
+rule.
 }
 
 \section{Passing extra arguments to a builder}{

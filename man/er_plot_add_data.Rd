@@ -11,39 +11,34 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. For a
-"panel"-layout builder on a continuous/count response this produces
-one panel per stratum level (see "Stratification" above) rather than
-a shared color aesthetic; for an "overlay"-layout builder it always
-means a shared color aesthetic, for any response type.}
+\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. See
+"Details" for how this interacts with a builder's structural family.}
 
 \item{style}{Function drawing the data layer -- defaults to
-\code{\link[=er_style_data_overlay]{er_style_data_overlay()}}. \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} (binary response
-only: a boxplot + jittered points per panel) is the other built-in
-option; any function matching the standard \verb{(data, config, stratify, exposure, response, strata, theme, ...)} signature and tagged with
-\code{\link[=er_style_tag]{er_style_tag()}} can be supplied instead -- see \code{\link[=er_style]{er_style()}} for the
-full contract, e.g. a 2D density in the main panel, a continuous/
-count response's color-encoded panel, or per-panel histograms. If
-\code{style} is tagged with a \code{layer} other than \code{"data"}, this errors
-informatively; an untagged builder is never checked (only \code{layout}
-is a hard requirement).}
+\code{\link[=er_style_data_overlay]{er_style_data_overlay()}}. Any function matching the standard
+\verb{(data, config, stratify, exposure, response, strata, theme, ...)}
+signature and tagged with \code{\link[=er_style_tag]{er_style_tag()}} can be supplied instead;
+see \code{\link[=er_style]{er_style()}} and "Details".}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
-default). Only meaningful for \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} on a binary
-response; must be \code{"both"} for an "overlay"-layout builder (no
-upper/lower partition exists) or for a continuous/count response
-under a "panel"-layout builder (there's no upper/lower partition to
-select from either way).}
+default). Only meaningful for \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} on a
+binary response; see "Details" for when \code{"both"} is required.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
 when it's called at build time -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
 arguments to a builder" section. Must be named.}
 }
 \value{
-The input \code{object}, with the data layer added
+The input \code{object}, with the data layer added.
 }
 \description{
-Adds the data layer: individual observations. By default (\code{style = er_style_data_overlay}), points are drawn at their true \verb{(exposure, response)} coordinates in the \emph{main} model panel -- a plain scatter for
+Adds the data layer: individual observations. By default, points are drawn
+as an overlay showing the exposure and response values in the main panel of
+the plot, but other possibilities are available.
+}
+\details{
+The default builder for the data layer is \code{er_style_data_overlay()},
+which creates a plain scatter plot for
 continuous/count responses, or a scatter with a small vertical jitter
 for a binary response (whose y-values are exactly 0/1 and would
 otherwise overplot into two solid lines). This works uniformly across
@@ -56,8 +51,7 @@ just raw points. There is no built-in "panel"-layout builder for a
 continuous/count response; \code{panel} must be \code{"both"} (the default) for these
 response types regardless of builder, since there's no upper/lower
 partition to select from.
-}
-\details{
+
 Every data-layer builder declares which of these two \emph{structural}
 families it belongs to via \code{\link[=er_style_tag]{er_style_tag()}} -- \code{"overlay"} (a single call
 merged into the main panel) or \code{"panel"} (one-or-more panels stacked
@@ -67,7 +61,18 @@ argument for it. This makes the pairing structural rather than
 incidental: \code{er_style_data_overlay()} can never be routed into upper/lower
 panels, and \code{er_style_data_boxjitter()} can never be merged into the main
 panel. See \code{\link[=er_style_tag]{er_style_tag()}} and \code{\link[=er_style]{er_style()}} for how to tag a custom
-builder the same way.
+builder the same way. If \code{style} is tagged with a \code{layer} other than
+\code{"data"}, \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors informatively; an untagged
+builder is never checked (only \code{layout} is a hard requirement).
+
+\code{keep_strata}'s effect also depends on a builder's structural family:
+for an "overlay"-layout builder it always means a shared color
+aesthetic, for any response type; for a "panel"-layout builder on a
+continuous/count response it instead produces one panel per stratum
+level rather than a shared color aesthetic. \code{panel} must be \code{"both"}
+for an "overlay"-layout builder (there's no upper/lower partition to
+select from) and for a continuous/count response under a
+"panel"-layout builder (same reason).
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

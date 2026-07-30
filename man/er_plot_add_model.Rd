@@ -14,7 +14,7 @@ er_plot_add_model(
 )
 }
 \arguments{
-\item{object}{Partially constructed plot (has S3 class \code{er_plot})}
+\item{object}{Partially constructed plot (has S3 class \code{er_plot}).}
 
 \item{model}{A fitted exposure-response model. Must implement \code{\link[=er_predict]{er_predict()}}.}
 
@@ -27,17 +27,14 @@ er_plot_add_model(
 \item{...}{Additional named arguments forwarded unchanged to \code{style} at build time.}
 }
 \value{
-The input \code{object}, with the model layer added
+The input \code{object}, with the model layer added.
 }
 \description{
 Adds the model layer: a fitted exposure-response curve with an
-uncertainty ribbon (the default, via \code{\link[=er_predict]{er_predict()}}), or a spaghetti
-plot of simulated draws (\code{style = er_style_model_spaghetti}, via
-\code{\link[=er_simulate]{er_simulate()}}). This layer uses \code{\link[=er_predict]{er_predict()}} to compute model
-predictions on the response scale.
+uncertainty ribbon, or possibly a spaghetti plot of simulated draws.
 }
 \details{
-\code{model} may reference covariates beyond the exposure and strata variables. erplots fills any additional covariates from the plot data with a reference value (first factor level or numeric mean) when building the prediction grid. erplots does not check that \code{model} was fit on the same exposure/response as the plot; the caller must ensure compatibility.
+This layer uses \code{\link[=er_predict]{er_predict()}} to compute model predictions on the response scale. \code{model} may reference covariates beyond the exposure and strata variables. erplots fills any additional covariates from the plot data with a reference value (first factor level or numeric mean) when building the prediction grid. erplots does not check that \code{model} was fit on the same exposure/response as the plot; the caller must ensure compatibility.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

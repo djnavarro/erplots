@@ -50,15 +50,11 @@ before or after the layers that use them.}
 
 \item{theme_base}{A ggplot2 theme object (e.g. \code{\link[ggplot2:theme_minimal]{ggplot2::theme_minimal()}})
 -- the swappable overall visual
-theme, defaulting to \code{\link[ggplot2:theme_bw]{ggplot2::theme_bw()}}}
+theme, defaulting to \code{\link[ggplot2:theme_bw]{ggplot2::theme_bw()}}.}
 
-\item{theme_extra}{A ggplot2 theme object (e.g. from \code{\link[ggplot2:theme]{ggplot2::theme()}}),
--- additional theme tweaks
-layered on top of \code{theme_base}, defaulting to a panel border plus
-\code{legend.position = "bottom"}. Supplying a new value fully replaces
-this default rather than merging with it, so re-include the border/
-legend-position settings too if you want to keep them alongside your
-own additions.}
+\item{theme_extra}{A ggplot2 theme object (e.g. from \code{\link[ggplot2:theme]{ggplot2::theme()}})
+with additional theme tweaks layered on top of \code{theme_base}. See
+"Details" for its default and replacement semantics.}
 
 \item{color_discrete, fill_discrete}{A discrete ggplot2 scale object
 (e.g. \code{\link[ggplot2:scale_color_brewer]{ggplot2::scale_color_brewer()}}, \code{\link[ggplot2:scale_fill_viridis_d]{ggplot2::scale_fill_viridis_d()}}),
@@ -79,16 +75,15 @@ format p-values/rates/means for display.}
 passed as every geom's \code{key_glyph} argument.}
 
 \item{dodge_width}{Spacing between adjacent strata's horizontal offset
-in the quantile layer (see \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}}/
-\code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}}), as a fraction of the exposure
-range. A single positive number.  Default is \code{0.015} (set in \code{\link[=er_plot]{er_plot()}}).}
+in the quantile layer, as a fraction of the exposure range. A single
+positive number; see "Details".}
 
 \item{height_base, height_data, height_group}{Relative panel heights
 (single positive numbers).
 Supplying only one leaves the other two unchanged.}
 }
 \value{
-The input \code{object}, with the requested theme fields updated
+The input \code{object}, with the requested theme fields updated.
 }
 \description{
 Set axis/legend labels, plot titles/captions, axis limits, theme objects, discrete and continuous scale objects, formatters, legend key glyph, and relative panel heights. This does not change which variable is mapped to which aesthetic.
@@ -99,6 +94,7 @@ Set axis/legend labels, plot titles/captions, axis limits, theme objects, discre
 their \verb{_vlines} variants) to separate strata horizontally within each
 quantile bin. It belongs in \code{er_plot_theme()} because dodging is about
 stratification layout, not an individual builder's visual style.
+Defaults to \code{0.015} (set in \code{\link[=er_plot]{er_plot()}}).
 
 Every argument defaults to \code{NULL}, meaning "leave whatever was set
 before unchanged". This allows repeated calls to \code{er_plot_theme()} to
@@ -112,6 +108,10 @@ aesthetic is mapped to a continuous quantity such as density or a
 continuous/count response value. If a custom builder adds its own scale,
 supplying one of these four will add a second scale and let ggplot2
 choose the later one.
+
+\code{theme_extra} defaults to a panel border plus \code{legend.position = "bottom"}. Supplying a new value fully replaces this default rather
+than merging with it, so re-include the border/legend-position
+settings too if you want to keep them alongside your own additions.
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_style]{er_style()}}
