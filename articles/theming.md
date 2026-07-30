@@ -191,7 +191,26 @@ stratification variable.
 bin-density `fill` is the one built-in example (a continuous/count
 response’s response-colored data layer is the other, but there’s
 currently no built-in “panel”-layout builder for it – see
-`vignettes/articles/extending.Rmd` for writing a custom one):
+`vignettes/articles/extending.Rmd` for writing a custom one).
+
+Left unstyled,
+[`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+already supplies its own default – a light-grey-to-navy gradient that
+fades toward the panel background as a cell’s count approaches zero,
+rather than ggplot2’s own default mid-intensity blue:
+
+``` r
+
+erglm_data |>
+  er_plot(aucss, biomarker_change) |>
+  er_plot_add_model(mod_gaussian, style = er_style_model_line) |>
+  er_plot_add_data(style = er_style_data_hex) |>
+  plot()
+```
+
+![](theming_files/figure-html/continuous-default-1.png)
+
+`fill_continuous` overrides that default wherever it’s set:
 
 ``` r
 

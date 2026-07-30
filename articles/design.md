@@ -276,6 +276,6 @@ Writing a custom builder in detail – including what `config` actually
 contains for each layer, a worked crossbar example, and
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md),
 the single helper a builder can use to declare its
-`layout`/`fill_role`/`y_role` metadata for the composition machinery –
-is its own article: [Extending
+`layout`/`fill_role`/`y_role`/`layer`/`zorder` metadata for the
+composition machinery – is its own article: [Extending
 erplots](https://erplots.djnavarro.net/articles/extending.md).
