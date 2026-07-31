@@ -17,6 +17,7 @@ er_style_group_boxplot(
   strata,
   theme,
   alpha = 0.5,
+  show_outliers = TRUE,
   ...
 )
 
@@ -130,6 +131,13 @@ er_style_group_violinjitter(
 - alpha:
 
   Transparency of the geom.
+
+- show_outliers:
+
+  Logical: whether `er_style_group_boxplot()` draws the boxplot's own
+  outlier points. Defaults to `TRUE`; `er_style_group_boxjitter()` sets
+  this to `FALSE` when it wraps this builder, since its own jittered
+  points already show every raw value, outliers included.
 
 - ...:
 
