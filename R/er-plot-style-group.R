@@ -18,9 +18,10 @@
 #' @param size Overall size multiplier for `er_style_group_linerange()`'s dot and lines.
 #' @param inner_range,outer_range Quantile probabilities (length 2) for `er_style_group_linerange()`'s thick and thin lines.
 #' @param alpha_dot,alpha_inner,alpha_outer Per-part transparency for `er_style_group_linerange()`'s dot, inner line, and outer line.
+#' @param jitter_height,jitter_size,jitter_alpha Vertical jitter, point size, and transparency for `er_style_group_boxjitter()`/`er_style_group_violinjitter()`'s overlaid points.
 #' @param ... Additional named arguments forwarded from [er_plot_add_groups()]'s own `...`.
 #'
-#' @details Builders for the `group` layer ([er_plot_add_groups()]) draw exposure distributions for grouping variables. `er_style_group_boxplot()` and `er_style_group_violin()` put group levels on the y-axis; `er_style_group_histogram()` puts them on facet strips and frees the y-axis for counts; `er_style_group_linerange()` also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. All built-in group builders are tagged `layer = "group"`, so [er_plot_add_groups()] errors if given one tagged for another layer.
+#' @details Builders for the `group` layer ([er_plot_add_groups()]) draw exposure distributions for grouping variables. `er_style_group_boxplot()` and `er_style_group_violin()` put group levels on the y-axis; `er_style_group_histogram()` puts them on facet strips and frees the y-axis for counts; `er_style_group_linerange()` also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. `er_style_group_boxjitter()`/`er_style_group_violinjitter()` are thin wrappers around `er_style_group_boxplot()`/`er_style_group_violin()` that additionally overlay jittered raw exposure values (vertical jitter only -- exposure position on the x-axis is never perturbed), the same idea `er_style_data_boxjitter()` applies to the data layer. All built-in group builders are tagged `layer = "group"`, so [er_plot_add_groups()] errors if given one tagged for another layer.
 #'
 #' See [er_style()] for the shared builder interface these functions implement.
 #'
@@ -59,6 +60,22 @@
 #'     er_plot(aucss, ae1) |>
 #'     er_plot_add_model(mod) |>
 #'     er_plot_add_groups(aucss, style = er_style_group_linerange) |>
+#'     plot()
+#'
+#'   # er_style_group_boxjitter(): the boxplot, with jittered raw
+#'   # exposure values overlaid on top
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_add_groups(aucss, style = er_style_group_boxjitter) |>
+#'     plot()
+#'
+#'   # er_style_group_violinjitter(): the violin, with jittered raw
+#'   # exposure values overlaid on top
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_add_groups(aucss, style = er_style_group_violinjitter) |>
 #'     plot()
 #' }
 #'
@@ -323,3 +340,116 @@ er_style_group_linerange <- function(data, config, stratify, exposure, response,
   return(geoms)
 }
 er_style_group_linerange <- er_style_tag(er_style_group_linerange, layer = "group")
+
+
+#' Compute dodged, vertically-jittered y positions for a stratified group jitter overlay
+#'
+#' @param dat A data frame with a `lvl` factor column and a strata column.
+#' @param strata_col Name of the strata column in `dat`.
+#' @param dodge_width Total width the strata are spread across within one `lvl` row.
+#' @param jitter_height Amount of additional uniform vertical jitter (as in [ggplot2::geom_jitter()]'s `height`).
+#'
+#' @details Mirrors `.dodge_quantile_strata()`'s offset formula (symmetric
+#' offsets around the center, sized by the number of strata), applied to
+#' the y-axis (`lvl`'s integer position) instead of x -- since neither
+#' `er_style_group_boxplot()` nor `er_style_group_violin()` sets an
+#' explicit dodge width (both rely on ggplot2's automatic `dodge2()`/
+#' `dodge()`), this is an approximation rather than a guaranteed exact
+#' match; see `er_style_group_boxjitter()`'s own `@details`.
+#'
+#' @returns `dat` with an added numeric `y_jitter` column.
+#' @noRd
+.dodge_group_jitter <- function(dat, strata_col, dodge_width, jitter_height) {
+
+  strata_vals <- dat[[strata_col]]
+  strata_levels <- if (is.factor(strata_vals)) levels(strata_vals) else sort(unique(strata_vals))
+  n_strata <- length(strata_levels)
+
+  offsets <- stats::setNames(
+    (seq_len(n_strata) - (n_strata + 1) / 2) * (dodge_width / n_strata),
+    strata_levels
+  )
+
+  dat$y_jitter <- as.numeric(factor(dat$lvl)) +
+    offsets[as.character(strata_vals)] +
+    stats::runif(nrow(dat), -jitter_height, jitter_height)
+
+  dat
+}
+
+
+#' @rdname er_style_group
+#' @export
+er_style_group_boxjitter <- function(data, config, stratify, exposure, response, strata, theme,
+                                      alpha = 0.5, jitter_height = 0.15, jitter_size = 1, jitter_alpha = 0.6, ...) {
+
+  geoms <- er_style_group_boxplot(
+    data, config, stratify, exposure, response, strata, theme,
+    alpha = alpha, ...
+  )
+
+  if (stratify == FALSE) {
+    jitter_data <- config$data
+    jitter_data$y_jitter <- as.numeric(factor(jitter_data$lvl)) +
+      stats::runif(nrow(jitter_data), -jitter_height, jitter_height)
+    jitter_map <- ggplot2::aes(x = .data[[exposure$name]], y = y_jitter)
+  }
+  if (stratify == TRUE) {
+    # `0.75` matches `geom_boxplot()`'s own default width -- see
+    # `.dodge_group_jitter()`'s `@details` for why this is an
+    # approximation, not a guaranteed exact match, to the boxplot's own
+    # (ggplot2-automatic) dodge positions.
+    jitter_data <- .dodge_group_jitter(config$data, strata$name, dodge_width = 0.75, jitter_height = jitter_height)
+    jitter_map <- ggplot2::aes(x = .data[[exposure$name]], y = y_jitter, color = .data[[strata$name]])
+  }
+
+  jitter_geom <- ggplot2::geom_point(
+    data = jitter_data,
+    mapping = jitter_map,
+    size = jitter_size,
+    alpha = jitter_alpha,
+    key_glyph = theme$draw_key
+  )
+
+  c(geoms, list(jitter_geom))
+}
+er_style_group_boxjitter <- er_style_tag(er_style_group_boxjitter, layer = "group")
+
+
+#' @rdname er_style_group
+#' @export
+er_style_group_violinjitter <- function(data, config, stratify, exposure, response, strata, theme,
+                                         alpha = 0.5, quantiles = NULL, quantile_linetype = "solid",
+                                         jitter_height = 0.15, jitter_size = 1, jitter_alpha = 0.6, ...) {
+
+  geoms <- er_style_group_violin(
+    data, config, stratify, exposure, response, strata, theme,
+    alpha = alpha, quantiles = quantiles, quantile_linetype = quantile_linetype, ...
+  )
+
+  if (stratify == FALSE) {
+    jitter_data <- config$data
+    jitter_data$y_jitter <- as.numeric(factor(jitter_data$lvl)) +
+      stats::runif(nrow(jitter_data), -jitter_height, jitter_height)
+    jitter_map <- ggplot2::aes(x = .data[[exposure$name]], y = y_jitter)
+  }
+  if (stratify == TRUE) {
+    # `0.9` matches `geom_violin()`'s own default width -- see
+    # `.dodge_group_jitter()`'s `@details` for why this is an
+    # approximation, not a guaranteed exact match, to the violin's own
+    # (ggplot2-automatic) dodge positions.
+    jitter_data <- .dodge_group_jitter(config$data, strata$name, dodge_width = 0.9, jitter_height = jitter_height)
+    jitter_map <- ggplot2::aes(x = .data[[exposure$name]], y = y_jitter, color = .data[[strata$name]])
+  }
+
+  jitter_geom <- ggplot2::geom_point(
+    data = jitter_data,
+    mapping = jitter_map,
+    size = jitter_size,
+    alpha = jitter_alpha,
+    key_glyph = theme$draw_key
+  )
+
+  c(geoms, list(jitter_geom))
+}
+er_style_group_violinjitter <- er_style_tag(er_style_group_violinjitter, layer = "group")

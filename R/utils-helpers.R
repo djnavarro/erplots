@@ -360,5 +360,6 @@ utils::globalVariables(c(
   "inner_hi",
   "outer_lo",
   "outer_hi",
+  "y_jitter",
   ":="
 ))

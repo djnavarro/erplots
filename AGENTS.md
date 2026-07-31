@@ -495,6 +495,79 @@ falling through to nothing. Covered by a new test in
 `tests/testthat/test-er-plot-api.R`, alongside the existing "group-only"/
 "panel-layout data-only" no-base-layer tests it sits next to.
 
+## `er_style_group_boxjitter()`/`er_style_group_violinjitter()`: jitter overlays for the group layer's box/violin builders
+
+`er_style_group_boxplot()`/`er_style_group_violin()` had no way to show
+individual raw exposure values alongside the box/violin shape, the way
+`er_style_data_boxjitter()` already does for the data layer. Two new
+builders close this gap: `er_style_group_boxjitter()` and
+`er_style_group_violinjitter()`, each a thin wrapper that calls the
+corresponding base builder to get its existing geoms, then appends a
+`geom_point()` layer of jittered raw exposure values on top -- the same
+"new dedicated builder, not new arguments on the existing one" shape
+already established by the quantile layer's `_vlines` wrappers and by
+`er_style_data_boxjitter()` itself, chosen over adding jitter arguments
+directly to `er_style_group_boxplot()`/`er_style_group_violin()`.
+`jitter_height`/`jitter_size`/`jitter_alpha` reuse
+`er_style_data_boxjitter()`'s exact argument names/defaults for
+consistency across the package's two "boxjitter"-family builders,
+though unlike that builder these two default `jitter_height` to a
+fixed `0.15` rather than resolving it conditionally on stratification
+-- there's no equivalent reason (a binary response's upper/lower panel
+split) for a group panel's jitter spread to depend on stratification.
+Both forward their other arguments (`alpha` for boxjitter;
+`alpha`/`quantiles`/`quantile_linetype` for violinjitter) straight
+through to the wrapped base builder. Both tagged
+`er_style_tag(fn, layer = "group")`.
+
+Exposure position on the x-axis is never perturbed by the jitter (only
+vertical/y jitter is applied), matching `er_style_data_boxjitter()`'s
+own rule that jittering the actual exposure value would misrepresent
+the data.
+
+**Stratified dodging.** `geom_boxplot()`/`geom_violin()` rely on
+ggplot2's automatic `dodge2()`/`dodge()` positioning to separate strata
+within each `lvl` row, with no explicit dodge width set anywhere to
+match a jitter overlay against. `ggplot2::position_jitterdodge()` -- the
+obvious first choice, designed exactly for jittering points on top of
+dodged boxplots -- turned out not to support an `orientation` argument
+(confirmed against the installed ggplot2 version: `position_dodge()`/
+`position_linerange()` support `orientation = "y"`, as used by
+`er_style_group_linerange()` above, but `position_jitterdodge()`'s
+signature has no such parameter), which is required here since the
+group layer puts the discrete grouping variable on y and the continuous
+exposure on x -- the opposite of `position_jitterdodge()`'s assumed
+orientation. Worked around with a small internal helper,
+`.dodge_group_jitter()` (`R/er-plot-style-group.R`, `@noRd`): converts
+`lvl` to its integer axis position via `as.numeric(factor(lvl))` (`lvl`
+itself is a plain character column, not a factor -- calling
+`as.numeric()` directly on it coerces the label text and silently
+produces `NA`, a real bug hit and fixed during development), computes a
+symmetric per-stratum offset the same shape as
+`.dodge_quantile_strata()`'s (adapted from x to y), and adds
+`stats::runif()` noise on top. The dodge width defaults to each wrapped
+geom's own ggplot2 default width (`0.75` for boxplot, `0.9` for violin)
+as a reasonable approximation of `dodge2()`'s actual (padded, and thus
+slightly narrower) dodge spacing -- confirmed visually to align closely
+enough with the automatic dodge that exact matching wasn't pursued,
+per an explicit design decision made before implementation.
+
+Covered by new tests in `tests/testthat/test-er-plot-style-group.R`:
+return-shape checks (non-stratified and stratified) for both builders,
+confirming forwarded arguments (`alpha`, `quantiles`) reach the wrapped
+base builder unchanged, `jitter_size`/`jitter_alpha` overrides, a
+numeric check that jittered `y` values stay within
+`dodge_width/2 + jitter_height` of their `lvl`'s integer position, and
+full `er_plot_build()` integration tests for both builders. Verified:
+`devtools::test()` (905 passing, up from 873) and `devtools::check()`
+(0 errors/warnings/notes).
+
+Not done as part of this change: no vignette updates (matching how
+`er_style_group_linerange()` was scoped -- the worked-example vignettes
+don't individually showcase every group builder); `dodge_width` isn't
+exposed as a user-facing argument on either new builder (only the
+fixed per-geom defaults described above).
+
 ## Naming scheme
 
 A naming-scheme review (prompted by the `build_*` prefix reading as

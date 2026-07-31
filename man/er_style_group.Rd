@@ -6,6 +6,8 @@
 \alias{er_style_group_histogram}
 \alias{er_style_group_violin}
 \alias{er_style_group_linerange}
+\alias{er_style_group_boxjitter}
+\alias{er_style_group_violinjitter}
 \title{Group panel builders for exposure-response plots}
 \usage{
 er_style_group_boxplot(
@@ -63,6 +65,38 @@ er_style_group_linerange(
   alpha_outer = 0.4,
   ...
 )
+
+er_style_group_boxjitter(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  alpha = 0.5,
+  jitter_height = 0.15,
+  jitter_size = 1,
+  jitter_alpha = 0.6,
+  ...
+)
+
+er_style_group_violinjitter(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  alpha = 0.5,
+  quantiles = NULL,
+  quantile_linetype = "solid",
+  jitter_height = 0.15,
+  jitter_size = 1,
+  jitter_alpha = 0.6,
+  ...
+)
 }
 \arguments{
 \item{data}{The original data frame.}
@@ -92,6 +126,8 @@ er_style_group_linerange(
 \item{inner_range, outer_range}{Quantile probabilities (length 2) for \code{er_style_group_linerange()}'s thick and thin lines.}
 
 \item{alpha_dot, alpha_inner, alpha_outer}{Per-part transparency for \code{er_style_group_linerange()}'s dot, inner line, and outer line.}
+
+\item{jitter_height, jitter_size, jitter_alpha}{Vertical jitter, point size, and transparency for \code{er_style_group_boxjitter()}/\code{er_style_group_violinjitter()}'s overlaid points.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -102,7 +138,7 @@ the exposure distribution for a grouping variable as a boxplot, violin, or
 histogram panel.
 }
 \details{
-Builders for the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}) draw exposure distributions for grouping variables. \code{er_style_group_boxplot()} and \code{er_style_group_violin()} put group levels on the y-axis; \code{er_style_group_histogram()} puts them on facet strips and frees the y-axis for counts; \code{er_style_group_linerange()} also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. All built-in group builders are tagged \code{layer = "group"}, so \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} errors if given one tagged for another layer.
+Builders for the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}) draw exposure distributions for grouping variables. \code{er_style_group_boxplot()} and \code{er_style_group_violin()} put group levels on the y-axis; \code{er_style_group_histogram()} puts them on facet strips and frees the y-axis for counts; \code{er_style_group_linerange()} also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. \code{er_style_group_boxjitter()}/\code{er_style_group_violinjitter()} are thin wrappers around \code{er_style_group_boxplot()}/\code{er_style_group_violin()} that additionally overlay jittered raw exposure values (vertical jitter only -- exposure position on the x-axis is never perturbed), the same idea \code{er_style_data_boxjitter()} applies to the data layer. All built-in group builders are tagged \code{layer = "group"}, so \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} errors if given one tagged for another layer.
 
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions implement.
 }
@@ -139,6 +175,22 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot(aucss, ae1) |>
     er_plot_add_model(mod) |>
     er_plot_add_groups(aucss, style = er_style_group_linerange) |>
+    plot()
+
+  # er_style_group_boxjitter(): the boxplot, with jittered raw
+  # exposure values overlaid on top
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_groups(aucss, style = er_style_group_boxjitter) |>
+    plot()
+
+  # er_style_group_violinjitter(): the violin, with jittered raw
+  # exposure values overlaid on top
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_groups(aucss, style = er_style_group_violinjitter) |>
     plot()
 }
 

@@ -422,3 +422,188 @@ test_that("er_plot_add_groups() builds and renders with style = er_style_group_l
 
   expect_no_error(er_plot_build(plt_strat))
 })
+
+# ---- er_style_group_boxjitter / er_style_group_violinjitter ----
+
+test_that("er_style_group_boxjitter returns boxplot geoms + jitter geom + coord", {
+  p1 <- er_plot(er_test_data, aucss, ae1)
+  p2 <- er_plot(er_test_data, aucss, ae1, sex)
+
+  expect_no_error(p1 |> er_plot_add_groups(treatment, style = er_style_group_boxjitter))
+  expect_no_error(p2 |> er_plot_add_groups(treatment, style = er_style_group_boxjitter))
+
+  p1 <- p1 |> er_plot_add_groups(treatment, style = er_style_group_boxjitter)
+  p2 <- p2 |> er_plot_add_groups(treatment, style = er_style_group_boxjitter)
+
+  args1 <- list(
+    data = p1$data,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata = p1$strata,
+    theme = p1$theme
+  )
+  args2 <- list(
+    data = p2$data,
+    config = p2$layer$group$config[[1]],
+    stratify = p2$layer$group$stratify,
+    exposure = p2$exposure,
+    response = p2$response,
+    strata = p2$strata,
+    theme = p2$theme
+  )
+
+  p1_out <- do.call(er_style_group_boxjitter, args1)
+  p2_out <- do.call(er_style_group_boxjitter, args2)
+
+  # boxplot geom + coord (from er_style_group_boxplot()) + jitter geom
+  expect_length(p1_out, 3)
+  expect_length(p2_out, 3)
+
+  expect_true(inherits(p1_out[[1]], "LayerInstance"))
+  expect_true(inherits(p1_out[[2]], "CoordCartesian"))
+  expect_true(inherits(p1_out[[3]], "LayerInstance"))
+
+  expect_true(inherits(p2_out[[1]], "LayerInstance"))
+  expect_true(inherits(p2_out[[2]], "CoordCartesian"))
+  expect_true(inherits(p2_out[[3]], "LayerInstance"))
+})
+
+test_that("er_style_group_violinjitter returns violin geoms + jitter geom + coord", {
+  p1 <- er_plot(er_test_data, aucss, ae1)
+  p2 <- er_plot(er_test_data, aucss, ae1, sex)
+
+  expect_no_error(p1 |> er_plot_add_groups(treatment, style = er_style_group_violinjitter))
+  expect_no_error(p2 |> er_plot_add_groups(treatment, style = er_style_group_violinjitter))
+
+  p1 <- p1 |> er_plot_add_groups(treatment, style = er_style_group_violinjitter)
+  p2 <- p2 |> er_plot_add_groups(treatment, style = er_style_group_violinjitter)
+
+  args1 <- list(
+    data = p1$data,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata = p1$strata,
+    theme = p1$theme
+  )
+  args2 <- list(
+    data = p2$data,
+    config = p2$layer$group$config[[1]],
+    stratify = p2$layer$group$stratify,
+    exposure = p2$exposure,
+    response = p2$response,
+    strata = p2$strata,
+    theme = p2$theme
+  )
+
+  p1_out <- do.call(er_style_group_violinjitter, args1)
+  p2_out <- do.call(er_style_group_violinjitter, args2)
+
+  expect_length(p1_out, 3)
+  expect_length(p2_out, 3)
+
+  expect_true(inherits(p1_out[[1]], "LayerInstance"))
+  expect_true(inherits(p1_out[[2]], "CoordCartesian"))
+  expect_true(inherits(p1_out[[3]], "LayerInstance"))
+
+  expect_true(inherits(p2_out[[1]], "LayerInstance"))
+  expect_true(inherits(p2_out[[2]], "CoordCartesian"))
+  expect_true(inherits(p2_out[[3]], "LayerInstance"))
+})
+
+test_that("er_style_group_boxjitter()/er_style_group_violinjitter() forward alpha to the wrapped base builder", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_groups(treatment, style = er_style_group_boxjitter)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_group_boxjitter, args)
+  out_custom  <- do.call(er_style_group_boxjitter, c(args, list(alpha = 0.1)))
+  expect_equal(out_default[[1]]$aes_params$alpha, 0.5)
+  expect_equal(out_custom[[1]]$aes_params$alpha, 0.1)
+
+  p2 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_groups(treatment, style = er_style_group_violinjitter)
+  args2 <- list(
+    data     = p2$data,
+    config   = p2$layer$group$config[[1]],
+    stratify = p2$layer$group$stratify,
+    exposure = p2$exposure,
+    response = p2$response,
+    strata   = p2$strata,
+    theme    = p2$theme
+  )
+
+  out_default2 <- do.call(er_style_group_violinjitter, args2)
+  out_custom2  <- do.call(er_style_group_violinjitter, c(args2, list(alpha = 0.2, quantiles = c(0.5))))
+  expect_equal(out_default2[[1]]$aes_params$alpha, 0.5)
+  expect_equal(out_custom2[[1]]$aes_params$alpha, 0.2)
+  expect_equal(out_custom2[[1]]$stat_params$quantiles, c(0.5))
+})
+
+test_that("er_style_group_boxjitter()/er_style_group_violinjitter() jitter_size/jitter_alpha override defaults", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_groups(treatment, style = er_style_group_boxjitter)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_group_boxjitter, args)
+  out_custom  <- do.call(er_style_group_boxjitter, c(args, list(jitter_size = 3, jitter_alpha = 0.9)))
+
+  jitter_layer_default <- out_default[[3]]
+  jitter_layer_custom  <- out_custom[[3]]
+
+  expect_equal(jitter_layer_default$aes_params$size, 1)
+  expect_equal(jitter_layer_default$aes_params$alpha, 0.6)
+  expect_equal(jitter_layer_custom$aes_params$size, 3)
+  expect_equal(jitter_layer_custom$aes_params$alpha, 0.9)
+})
+
+test_that("er_style_group_boxjitter()/er_style_group_violinjitter() jitter stays within jitter_height of the lvl position", {
+  p1 <- er_plot(er_test_data, aucss, ae1, sex) |>
+    er_plot_add_groups(treatment, style = er_style_group_boxjitter)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out <- do.call(er_style_group_boxjitter, c(args, list(jitter_height = 0.1)))
+  jitter_data <- out[[3]]$data
+
+  lvl_num <- as.numeric(factor(jitter_data$lvl))
+  # dodge (max half-width 0.75/2 = 0.375) + jitter_height (0.1)
+  expect_true(all(abs(jitter_data$y_jitter - lvl_num) <= 0.375 + 0.1 + 1e-8))
+})
+
+test_that("er_plot_add_groups() builds and renders with style = er_style_group_boxjitter/violinjitter", {
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_groups(treatment, style = er_style_group_boxjitter)
+  expect_no_error(er_plot_build(plt))
+
+  plt_strat <- er_test_data |>
+    er_plot(aucss, ae1, sex) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_groups(treatment, style = er_style_group_violinjitter)
+  expect_no_error(er_plot_build(plt_strat))
+})
