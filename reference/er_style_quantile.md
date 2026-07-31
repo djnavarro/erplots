@@ -35,6 +35,12 @@ er_style_quantile_errorbar_vlines(
   label_size = 3,
   vline_colour = "grey50",
   vline_linetype = "dotted",
+  vline_labels = FALSE,
+  vline_label_position = c("auto", "top", "bottom"),
+  vline_label_size = 3,
+  vline_label_colour = NULL,
+  vline_label_fill = NULL,
+  vline_label_inset = 0.05,
   ...
 )
 
@@ -65,6 +71,12 @@ er_style_quantile_pointrange_vlines(
   pointrange_linewidth = NULL,
   vline_colour = "grey50",
   vline_linetype = "dotted",
+  vline_labels = FALSE,
+  vline_label_position = c("auto", "top", "bottom"),
+  vline_label_size = 3,
+  vline_label_colour = NULL,
+  vline_label_fill = NULL,
+  vline_label_inset = 0.05,
   ...
 )
 ```
@@ -121,6 +133,25 @@ er_style_quantile_pointrange_vlines(
 
   Colour and linetype of interior quantile boundary lines.
 
+- vline_labels:
+
+  Logical: whether the `_vlines` builders also label each interior
+  boundary with its exposure value.
+
+- vline_label_position:
+
+  One of `"auto"`, `"top"`, `"bottom"` – vertical placement of
+  `vline_labels`.
+
+- vline_label_size, vline_label_colour, vline_label_fill:
+
+  Size, text colour, and background fill for `vline_labels`.
+
+- vline_label_inset:
+
+  Fraction of the response range `vline_labels` are inset from the panel
+  edge.
+
 - pointrange_size, pointrange_linewidth:
 
   Size and linewidth for
@@ -142,6 +173,21 @@ variants add interior quantile-bin boundary lines. All built-in quantile
 builders are tagged `er_style_tag(fn, layer = "quantile")`, so
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 errors informatively if handed a builder tagged for a different layer.
+
+The `_vlines` variants can also label each interior boundary with its
+exposure value (`vline_labels = TRUE`, off by default). Labels are drawn
+with
+[`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
+(an opaque background, since a label sits directly on a vline spanning
+the full panel height) along either the top or bottom edge of the panel.
+`vline_label_position = "auto"` (the default) picks whichever vertical
+half doesn't contain the corner a summary annotation
+([`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md))
+would place itself in – based on the same raw-data corner-crowdedness
+calculation the summary layer itself uses – so the two don't collide;
+this works whether or not a summary layer is actually present, since
+both layers compute the same deterministic quantity independently.
+Override with `"top"`/`"bottom"` to place labels manually instead.
 
 When stratified, all four builders horizontally dodge each quantile
 bin's points/bars/labels apart by
@@ -221,7 +267,17 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_add_quantiles(style = er_style_quantile_errorbar) |>
     er_plot_theme(dodge_width = 0.15) |>
     plot()
+
+  # labeling each interior quantile-bin boundary with its exposure
+  # value, placed automatically to avoid the summary annotation
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_summary(mod) |>
+    er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines, vline_labels = TRUE) |>
+    plot()
 }
+
 
 
 

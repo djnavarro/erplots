@@ -89,6 +89,12 @@ or a pointrange, optionally with bin-boundary vlines.</p>
 <span>  label_size <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  vline_colour <span class="op">=</span> <span class="st">"grey50"</span>,</span>
 <span>  vline_linetype <span class="op">=</span> <span class="st">"dotted"</span>,</span>
+<span>  vline_labels <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  vline_label_position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"top"</span>, <span class="st">"bottom"</span><span class="op">)</span>,</span>
+<span>  vline_label_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  vline_label_colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vline_label_fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vline_label_inset <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -119,6 +125,12 @@ or a pointrange, optionally with bin-boundary vlines.</p>
 <span>  pointrange_linewidth <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  vline_colour <span class="op">=</span> <span class="st">"grey50"</span>,</span>
 <span>  vline_linetype <span class="op">=</span> <span class="st">"dotted"</span>,</span>
+<span>  vline_labels <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  vline_label_position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"top"</span>, <span class="st">"bottom"</span><span class="op">)</span>,</span>
+<span>  vline_label_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  vline_label_colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vline_label_fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vline_label_inset <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -175,6 +187,22 @@ or a pointrange, optionally with bin-boundary vlines.</p>
 <dd><p>Colour and linetype of interior quantile boundary lines.</p></dd>
 
 
+<dt id="arg-vline-labels">vline_labels<a class="anchor" aria-label="anchor" href="#arg-vline-labels"></a></dt>
+<dd><p>Logical: whether the <code>_vlines</code> builders also label each interior boundary with its exposure value.</p></dd>
+
+
+<dt id="arg-vline-label-position">vline_label_position<a class="anchor" aria-label="anchor" href="#arg-vline-label-position"></a></dt>
+<dd><p>One of <code>"auto"</code>, <code>"top"</code>, <code>"bottom"</code> – vertical placement of <code>vline_labels</code>.</p></dd>
+
+
+<dt id="arg-vline-label-size-vline-label-colour-vline-label-fill">vline_label_size, vline_label_colour, vline_label_fill<a class="anchor" aria-label="anchor" href="#arg-vline-label-size-vline-label-colour-vline-label-fill"></a></dt>
+<dd><p>Size, text colour, and background fill for <code>vline_labels</code>.</p></dd>
+
+
+<dt id="arg-vline-label-inset">vline_label_inset<a class="anchor" aria-label="anchor" href="#arg-vline-label-inset"></a></dt>
+<dd><p>Fraction of the response range <code>vline_labels</code> are inset from the panel edge.</p></dd>
+
+
 <dt id="arg-pointrange-size-pointrange-linewidth">pointrange_size, pointrange_linewidth<a class="anchor" aria-label="anchor" href="#arg-pointrange-size-pointrange-linewidth"></a></dt>
 <dd><p>Size and linewidth for <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>.</p></dd>
 
@@ -192,6 +220,18 @@ uncertainty interval. <code>er_style_quantile_errorbar()</code> and
 <code>_vlines</code> variants add interior quantile-bin boundary lines. All
 built-in quantile builders are tagged <code>er_style_tag(fn, layer = "quantile")</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code> errors informatively if
 handed a builder tagged for a different layer.</p>
+<p>The <code>_vlines</code> variants can also label each interior boundary with its
+exposure value (<code>vline_labels = TRUE</code>, off by default). Labels are
+drawn with <code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code> (an opaque background, since a
+label sits directly on a vline spanning the full panel height) along
+either the top or bottom edge of the panel. <code>vline_label_position = "auto"</code> (the default) picks whichever vertical half doesn't contain
+the corner a summary annotation (<code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>) would place
+itself in – based on the same raw-data corner-crowdedness
+calculation the summary layer itself uses – so the two don't
+collide; this works whether or not a summary layer is actually
+present, since both layers compute the same deterministic quantity
+independently. Override with <code>"top"</code>/<code>"bottom"</code> to place labels
+manually instead.</p>
 <p>When stratified, all four builders horizontally dodge each quantile
 bin's points/bars/labels apart by <code><a href="er_plot_theme.html">er_plot_theme()</a></code>'s <code>dodge_width</code>
 (a fraction of the exposure range, default <code>0.05</code>) – a cross-layer,
@@ -265,6 +305,15 @@ implement, including how to write a custom builder of your own.</p>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_quantile_errorbar</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_theme.html">er_plot_theme</a></span><span class="op">(</span>dodge_width <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># labeling each interior quantile-bin boundary with its exposure</span></span></span>
+<span class="r-in"><span>  <span class="co"># value, placed automatically to avoid the summary annotation</span></span></span>
+<span class="r-in"><span>  <span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_quantile_errorbar_vlines</span>, vline_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-plt img"><img src="er_style_quantile-1.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="er_style_quantile-2.png" alt="" width="700" height="433"></span>
@@ -272,6 +321,7 @@ implement, including how to write a custom builder of your own.</p>
 <span class="r-plt img"><img src="er_style_quantile-4.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="er_style_quantile-5.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="er_style_quantile-6.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="er_style_quantile-7.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
