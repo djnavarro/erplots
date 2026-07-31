@@ -105,9 +105,9 @@ er_style_quantile_pointrange_vlines(
 
 \item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}'s own \code{...}.}
 
-\item{vline_colour, vline_linetype}{Colour and linetype of interior quantile boundary lines.}
+\item{vline_colour, vline_linetype}{Colour and linetype of quantile-bin boundary lines.}
 
-\item{vline_labels}{Logical: whether the \verb{_vlines} builders also label each interior boundary with its exposure value.}
+\item{vline_labels}{Logical: whether the \verb{_vlines} builders also label each bin boundary with its exposure value.}
 
 \item{vline_label_position}{One of \code{"auto"}, \code{"top"}, \code{"bottom"} -- vertical placement of \code{vline_labels}.}
 
@@ -132,11 +132,16 @@ Builders for the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_p
 bin exposure into quantile groups and plot a response summary with an
 uncertainty interval. \code{er_style_quantile_errorbar()} and
 \code{er_style_quantile_pointrange()} are the base builders; their
-\verb{_vlines} variants add interior quantile-bin boundary lines. All
-built-in quantile builders are tagged \code{er_style_tag(fn, layer = "quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} errors informatively if
-handed a builder tagged for a different layer.
+\verb{_vlines} variants add a line at every quantile-bin boundary --
+including the two outer boundaries at the minimum non-placebo
+exposure and the overall maximum exposure, not just the boundaries
+shared between two adjacent bins -- so a reader can see every bin
+edge from the plot alone. All built-in quantile builders are tagged
+\code{er_style_tag(fn, layer = "quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}
+errors informatively if handed a builder tagged for a different
+layer.
 
-The \verb{_vlines} variants can also label each interior boundary with its
+The \verb{_vlines} variants can also label each boundary with its
 exposure value (\code{vline_labels = TRUE}, off by default). Labels are
 drawn with \code{\link[ggplot2:geom_label]{ggplot2::geom_label()}} (an opaque background, since a
 label sits directly on a vline spanning the full panel height) along
@@ -179,7 +184,8 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     plot()
 
   # er_style_quantile_errorbar_vlines(): the default, plus dotted
-  # lines marking the interior quantile-bin boundaries
+  # lines marking every quantile-bin boundary, including the outer
+  # edges at the minimum non-placebo and maximum exposure
   erglm_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(mod) |>
@@ -218,8 +224,9 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_theme(dodge_width = 0.15) |>
     plot()
 
-  # labeling each interior quantile-bin boundary with its exposure
-  # value, placed automatically to avoid the summary annotation
+  # labeling every quantile-bin boundary (including the outer edges)
+  # with its exposure value, placed automatically to avoid the
+  # summary annotation
   erglm_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(mod) |>

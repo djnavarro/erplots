@@ -603,6 +603,33 @@ passed as constants rather than mapped aesthetics), and a
 explicit override. `devtools::test()` (935 passing) and
 `devtools::document()` both clean.
 
+**Follow-up: the `_vlines` builders now draw a line (and, when
+`vline_labels = TRUE`, a label) at every quantile-bin boundary,
+including the two outer edges.** `.quantile_boundary_vlines()`/
+`.quantile_boundary_vline_labels()` used to explicitly drop
+`config$breaks`' first and last element -- the overall minimum
+non-placebo exposure and the overall maximum exposure -- on the
+reasoning that those "sit at (or beyond) the plot's own edges" and
+aren't boundaries a reader would care about. In practice the panel's
+x-axis extends past both (there's padding, and placebo subjects sit at
+`x = 0`, to the left of the minimum non-placebo exposure), so those two
+boundaries were genuinely invisible on the rendered plot -- a reader
+had no way to tell where the first bin actually starts or the last bin
+actually ends, only where the *interior* cutpoints between adjacent
+bins fall. Fixed by simply drawing/labelling every element of
+`config$breaks` (dropping the `breaks[-c(1, length(breaks))]`
+subsetting entirely), so both builders' `length(breaks) < 2` guard
+(previously `<= 2`, since a single bin's 2 breaks used to have no
+*interior* boundary at all) is now the only length check -- a
+single-bin quantile summary now draws two boundary lines (its own
+min/max) rather than none. No new argument was added to opt out of the
+outer edges; the `_vlines` builders' entire purpose is showing bin
+boundaries, and the outer ones are boundaries too. Covered by updated
+tests in `tests/testthat/test-er-plot-style-quantile.R` (the vline/
+vline-label data-shape tests now assert against the full `breaks`
+vector rather than `breaks[-c(1, length(breaks))]`). `devtools::test()`
+(936 passing) and `devtools::document()` both clean.
+
 ## `er_style_group_boxjitter()`/`er_style_group_violinjitter()`: jitter overlays for the group layer's box/violin builders
 
 `er_style_group_boxplot()`/`er_style_group_violin()` had no way to show

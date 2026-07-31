@@ -16,8 +16,8 @@
 #' @param errorbar_width Width of `er_style_quantile_errorbar()`'s error bars.
 #' @param label_size Text size for the per-bin value label.
 #' @param pointrange_size,pointrange_linewidth Size and linewidth for `ggplot2::geom_pointrange()`.
-#' @param vline_colour,vline_linetype Colour and linetype of interior quantile boundary lines.
-#' @param vline_labels Logical: whether the `_vlines` builders also label each interior boundary with its exposure value.
+#' @param vline_colour,vline_linetype Colour and linetype of quantile-bin boundary lines.
+#' @param vline_labels Logical: whether the `_vlines` builders also label each bin boundary with its exposure value.
 #' @param vline_label_position One of `"auto"`, `"top"`, `"bottom"` -- vertical placement of `vline_labels`.
 #' @param vline_label_size,vline_label_colour,vline_label_fill Size, text colour, and background fill for `vline_labels`.
 #' @param vline_label_inset Fraction of the response range `vline_labels` are inset from the panel edge.
@@ -28,12 +28,16 @@
 #' bin exposure into quantile groups and plot a response summary with an
 #' uncertainty interval. `er_style_quantile_errorbar()` and
 #' `er_style_quantile_pointrange()` are the base builders; their
-#' `_vlines` variants add interior quantile-bin boundary lines. All
-#' built-in quantile builders are tagged `er_style_tag(fn, layer =
-#' "quantile")`, so [er_plot_add_quantiles()] errors informatively if
-#' handed a builder tagged for a different layer.
+#' `_vlines` variants add a line at every quantile-bin boundary --
+#' including the two outer boundaries at the minimum non-placebo
+#' exposure and the overall maximum exposure, not just the boundaries
+#' shared between two adjacent bins -- so a reader can see every bin
+#' edge from the plot alone. All built-in quantile builders are tagged
+#' `er_style_tag(fn, layer = "quantile")`, so [er_plot_add_quantiles()]
+#' errors informatively if handed a builder tagged for a different
+#' layer.
 #'
-#' The `_vlines` variants can also label each interior boundary with its
+#' The `_vlines` variants can also label each boundary with its
 #' exposure value (`vline_labels = TRUE`, off by default). Labels are
 #' drawn with [ggplot2::geom_label()] (an opaque background, since a
 #' label sits directly on a vline spanning the full panel height) along
@@ -79,7 +83,8 @@
 #'     plot()
 #'
 #'   # er_style_quantile_errorbar_vlines(): the default, plus dotted
-#'   # lines marking the interior quantile-bin boundaries
+#'   # lines marking every quantile-bin boundary, including the outer
+#'   # edges at the minimum non-placebo and maximum exposure
 #'   erglm_data |>
 #'     er_plot(aucss, ae1) |>
 #'     er_plot_add_model(mod) |>
@@ -118,8 +123,9 @@
 #'     er_plot_theme(dodge_width = 0.15) |>
 #'     plot()
 #'
-#'   # labeling each interior quantile-bin boundary with its exposure
-#'   # value, placed automatically to avoid the summary annotation
+#'   # labeling every quantile-bin boundary (including the outer edges)
+#'   # with its exposure value, placed automatically to avoid the
+#'   # summary annotation
 #'   erglm_data |>
 #'     er_plot(aucss, ae1) |>
 #'     er_plot_add_model(mod) |>
@@ -132,7 +138,7 @@
 #' @seealso [er_style()]
 NULL
 
-#' Dotted vertical lines at interior quantile-bin boundaries
+#' Dotted vertical lines at every quantile-bin boundary
 #'
 #' @param config Configuration for the quantile layer (as passed to a
 #'   quantile builder); `config$breaks` holds the `n + 1` quantile
@@ -142,21 +148,23 @@ NULL
 #'   see `er_style_quantile_errorbar_vlines()`'s own arguments of the
 #'   same name.
 #'
+#' @details Draws a line at every one of `config$breaks`' `n + 1`
+#' cutpoints -- both the boundaries interior to the exposure range
+#' (shared between two adjacent bins) and the two outer boundaries (the
+#' minimum non-placebo exposure and the overall maximum exposure), so a
+#' reader can see every bin edge, not just the ones separating two
+#' bins.
+#'
 #' @returns A single [ggplot2::geom_vline()], or `NULL` if there are no
-#'   interior boundaries to draw (e.g. a single bin).
+#'   breaks to draw.
 #' @noRd
 .quantile_boundary_vlines <- function(config, exposure, vline_colour = "grey50", vline_linetype = "dotted") {
 
   breaks <- config$breaks
-  if (is.null(breaks) || length(breaks) <= 2) return(NULL)
-
-  # drop the overall min/max -- those sit at (or beyond) the plot's own
-  # edges and aren't bin *boundaries* in the sense a reader would care
-  # about
-  interior_breaks <- breaks[-c(1, length(breaks))]
+  if (is.null(breaks) || length(breaks) < 2) return(NULL)
 
   ggplot2::geom_vline(
-    xintercept = interior_breaks,
+    xintercept = breaks,
     linetype = vline_linetype,
     colour = vline_colour
   )
@@ -182,7 +190,7 @@ NULL
   if (least_crowded %in% c("top_left", "top_right")) "bottom" else "top"
 }
 
-#' Value labels for interior quantile-bin boundary vlines
+#' Value labels for quantile-bin boundary vlines
 #'
 #' @param config Configuration for the quantile layer; `config$breaks`
 #'   and `config$corner_distance` are used.
@@ -196,16 +204,20 @@ NULL
 #'   the panel edge.
 #' @param digits Number of decimal places the label text is rounded to.
 #'
+#' @details Labels every one of `config$breaks`' `n + 1` cutpoints, the
+#' same set `.quantile_boundary_vlines()` draws lines at -- including
+#' the two outer boundaries at the minimum non-placebo and maximum
+#' exposure, not just the interior boundaries shared between two bins.
+#'
 #' @returns A single [ggplot2::geom_label()], or `NULL` if there are no
-#'   interior boundaries to label.
+#'   breaks to label.
 #' @noRd
 .quantile_boundary_vline_labels <- function(config, exposure, response, theme, position = "auto",
                                              size = 3, colour = NULL, fill = NULL, inset = 0.05,
                                              digits = 0) {
 
   breaks <- config$breaks
-  if (is.null(breaks) || length(breaks) <= 2) return(NULL)
-  interior_breaks <- breaks[-c(1, length(breaks))]
+  if (is.null(breaks) || length(breaks) < 2) return(NULL)
 
   side <- if (identical(position, "auto")) {
     .quantile_label_side(config$corner_distance)
@@ -218,9 +230,9 @@ NULL
   margin <- inset * (response_hi - response_lo)
 
   label_data <- data.frame(
-    x = interior_breaks,
+    x = breaks,
     y = if (side == "top") response_hi - margin else response_lo + margin,
-    lbl = scales::label_number(accuracy = 10^(-digits))(interior_breaks)
+    lbl = scales::label_number(accuracy = 10^(-digits))(breaks)
   )
 
   args <- list(

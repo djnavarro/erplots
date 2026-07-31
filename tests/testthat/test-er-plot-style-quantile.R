@@ -212,7 +212,7 @@ test_that(".layer_quantile() stores interior quantile breaks in config$breaks", 
   expect_true(all(diff(breaks) >= 0))
 })
 
-test_that("er_style_quantile_errorbar_vlines adds a geom_vline at interior breaks", {
+test_that("er_style_quantile_errorbar_vlines adds a geom_vline at every bin boundary, including the outer edges", {
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
 
   args1 <- list(
@@ -234,11 +234,10 @@ test_that("er_style_quantile_errorbar_vlines adds a geom_vline at interior break
   expect_s3_class(p1_out[[1]]$geom, "GeomVline")
 
   breaks <- p1$layer$quantile$config$breaks
-  interior_breaks <- breaks[-c(1, length(breaks))]
-  expect_equal(p1_out[[1]]$data$x, interior_breaks)
+  expect_equal(p1_out[[1]]$data$x, breaks)
 })
 
-test_that("er_style_quantile_pointrange_vlines adds a geom_vline at interior breaks", {
+test_that("er_style_quantile_pointrange_vlines adds a geom_vline at every bin boundary, including the outer edges", {
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
 
   args1 <- list(
@@ -258,6 +257,9 @@ test_that("er_style_quantile_pointrange_vlines adds a geom_vline at interior bre
   expect_length(p1_out, 3)
   expect_true(inherits(p1_out[[1]], "LayerInstance"))
   expect_s3_class(p1_out[[1]]$geom, "GeomVline")
+
+  breaks <- p1$layer$quantile$config$breaks
+  expect_equal(p1_out[[1]]$data$x, breaks)
 })
 
 test_that("er_plot_add_quantiles() builds and renders with the _vlines builders", {
@@ -482,7 +484,7 @@ test_that("vline_labels = FALSE (the default) leaves _vlines builders' output un
   expect_length(out_pointrange, 3) # vline, pointrange, label
 })
 
-test_that("vline_labels = TRUE adds a geom_label at the interior breaks", {
+test_that("vline_labels = TRUE adds a geom_label at every bin boundary, including the outer edges", {
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
   args <- list(
     data     = p1$data,
@@ -502,8 +504,7 @@ test_that("vline_labels = TRUE adds a geom_label at the interior breaks", {
   expect_s3_class(label_layer$geom, "GeomLabel")
 
   breaks <- p1$layer$quantile$config$breaks
-  interior_breaks <- breaks[-c(1, length(breaks))]
-  expect_equal(label_layer$data$x, unname(interior_breaks))
+  expect_equal(label_layer$data$x, unname(breaks))
 })
 
 test_that("vline_label_position overrides the automatic top/bottom heuristic", {
@@ -587,15 +588,14 @@ test_that("vline_label_digits controls rounding of the label text (default 0)", 
     theme    = p1$theme
   )
 
-  breaks <- p1$layer$quantile$config$breaks
-  interior_breaks <- unname(breaks[-c(1, length(breaks))])
+  breaks <- unname(p1$layer$quantile$config$breaks)
 
   out_default <- do.call(er_style_quantile_errorbar_vlines, c(args, list(vline_labels = TRUE)))
-  expect_equal(out_default[[5]]$data$lbl, scales::label_number(accuracy = 1)(interior_breaks))
+  expect_equal(out_default[[5]]$data$lbl, scales::label_number(accuracy = 1)(breaks))
 
   out_digits2 <- do.call(er_style_quantile_errorbar_vlines,
                           c(args, list(vline_labels = TRUE, vline_label_digits = 2)))
-  expect_equal(out_digits2[[5]]$data$lbl, scales::label_number(accuracy = 0.01)(interior_breaks))
+  expect_equal(out_digits2[[5]]$data$lbl, scales::label_number(accuracy = 0.01)(breaks))
 })
 
 test_that(".layer_summary()'s corner_distance output is unchanged after the .compute_corner_distance() extraction", {
