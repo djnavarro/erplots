@@ -46,6 +46,23 @@ er_style_group_violin(
   quantile_linetype = "solid",
   ...
 )
+
+er_style_group_linerange(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  size = 1,
+  inner_range = c(0.25, 0.75),
+  outer_range = c(0.05, 0.95),
+  alpha_dot = 1,
+  alpha_inner = 0.8,
+  alpha_outer = 0.4,
+  ...
+)
 ```
 
 ## Arguments
@@ -96,6 +113,21 @@ er_style_group_violin(
 
   Violin quantile positions and linetype for `er_style_group_violin()`.
 
+- size:
+
+  Overall size multiplier for `er_style_group_linerange()`'s dot and
+  lines.
+
+- inner_range, outer_range:
+
+  Quantile probabilities (length 2) for `er_style_group_linerange()`'s
+  thick and thin lines.
+
+- alpha_dot, alpha_inner, alpha_outer:
+
+  Per-part transparency for `er_style_group_linerange()`'s dot, inner
+  line, and outer line.
+
 ## Value
 
 A geom, or a list of geoms; see
@@ -108,8 +140,11 @@ Builders for the `group` layer
 draw exposure distributions for grouping variables.
 `er_style_group_boxplot()` and `er_style_group_violin()` put group
 levels on the y-axis; `er_style_group_histogram()` puts them on facet
-strips and frees the y-axis for counts. All built-in group builders are
-tagged `layer = "group"`, so
+strips and frees the y-axis for counts; `er_style_group_linerange()`
+also puts group levels on the y-axis, summarising each level's exposure
+distribution as a median dot flanked by an inner-range and outer-range
+line rather than a full boxplot/violin shape. All built-in group
+builders are tagged `layer = "group"`, so
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
 errors if given one tagged for another layer.
 
@@ -148,7 +183,16 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_add_model(mod) |>
     er_plot_add_groups(aucss, style = er_style_group_histogram) |>
     plot()
+
+  # er_style_group_linerange(): median dot + inner/outer range lines,
+  # instead of a full boxplot/violin shape
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_groups(aucss, style = er_style_group_linerange) |>
+    plot()
 }
+
 
 
 
