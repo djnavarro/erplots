@@ -1,5 +1,4 @@
 test_that("er_style_summary_coefficients renders when coefficients are present", {
-  skip_if_not_installed("erglm")
   fake_model <- structure(list(), class = "er_test_fake_summary_model")
 
   plt <- er_plot(er_test_data, aucss, ae1) |>
@@ -20,7 +19,6 @@ test_that("er_style_summary_coefficients renders when coefficients are present",
 })
 
 test_that("er_style_summary_gof renders all four fields when present", {
-  skip_if_not_installed("erglm")
   fake_model <- structure(list(), class = "er_test_fake_summary_model")
 
   plt <- er_plot(er_test_data, aucss, ae1) |>
@@ -46,7 +44,6 @@ test_that("er_style_summary_gof renders all four fields when present", {
 })
 
 test_that("er_style_summary_gof shows only present, non-NA fields", {
-  skip_if_not_installed("erglm")
   partial_model <- structure(list(), class = "er_test_partial_gof_model")
 
   plt <- er_plot(er_test_data, aucss, ae1) |>
@@ -68,8 +65,6 @@ test_that("er_style_summary_gof shows only present, non-NA fields", {
 })
 
 test_that("er_style_summary_gof draws nothing when glance is absent", {
-  skip_if_not_installed("erglm")
-
   # constructed directly, rather than via a real fitted model, since every
   # model implementing the full `er_summary()` contract (e.g. erglm's own
   # `er_summary.erglm_model()`) now populates `glance` -- this exercises
@@ -93,7 +88,6 @@ test_that("er_style_summary_gof draws nothing when glance is absent", {
 })
 
 test_that("er_style_summary_gof draws nothing when stratified", {
-  skip_if_not_installed("erglm")
   fake_model <- structure(list(), class = "er_test_fake_summary_model")
 
   plt <- er_plot(er_test_data, aucss, ae1, sex) |>
@@ -114,8 +108,6 @@ test_that("er_style_summary_gof draws nothing when stratified", {
 })
 
 test_that("er_style_summary_coefficients draws nothing when coefficients are absent", {
-  skip_if_not_installed("erglm")
-
   # constructed directly, rather than via a real fitted model, since every
   # model implementing the full `er_summary()` contract (e.g. erglm's own
   # `er_summary.erglm_model()`) now populates `coefficients` -- this
@@ -140,7 +132,6 @@ test_that("er_style_summary_coefficients draws nothing when coefficients are abs
 })
 
 test_that("er_style_summary_coefficients draws nothing when stratified", {
-  skip_if_not_installed("erglm")
   fake_model <- structure(list(), class = "er_test_fake_summary_model")
 
   plt <- er_plot(er_test_data, aucss, ae1, sex) |>
@@ -161,8 +152,6 @@ test_that("er_style_summary_coefficients draws nothing when stratified", {
 })
 
 test_that("er_style_summary_coefficients tolerates a coefficients table with no p_value column", {
-  skip_if_not_installed("erglm")
-
   plt <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_summary()
 
@@ -188,8 +177,6 @@ test_that("er_style_summary_coefficients tolerates a coefficients table with no 
 # ---- new argument: inset ----
 
 test_that("er_style_summary_pvalue() inset argument changes label position", {
-  skip_if_not_installed("erglm")
-
   plt <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_summary(model = er_test_mod1)
   args <- list(
@@ -222,8 +209,6 @@ test_that("er_style_summary_pvalue() inset argument changes label position", {
 })
 
 test_that("er_style_summary_n() inset argument changes label position", {
-  skip_if_not_installed("erglm")
-
   plt <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_summary(style = er_style_summary_n)
   args <- list(
@@ -246,7 +231,6 @@ test_that("er_style_summary_n() inset argument changes label position", {
 })
 
 test_that("er_style_summary_gof() fields argument controls which fields appear in the label", {
-  skip_if_not_installed("erglm")
   fake_model <- structure(list(), class = "er_test_fake_summary_model")
 
   plt <- er_plot(er_test_data, aucss, ae1) |>
@@ -278,7 +262,6 @@ test_that("er_style_summary_gof() fields argument controls which fields appear i
 })
 
 test_that("er_style_summary_gof() fields argument also controls display order", {
-  skip_if_not_installed("erglm")
   fake_model <- structure(list(), class = "er_test_fake_summary_model")
 
   plt <- er_plot(er_test_data, aucss, ae1) |>
@@ -306,8 +289,6 @@ test_that("er_style_summary_gof() fields argument also controls display order", 
 # ---- new arguments: label styling ----
 
 test_that("er_style_summary_pvalue() accepts label styling args and stores them as aesthetics", {
-  skip_if_not_installed("erglm")
-
   plt <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_summary(model = er_test_mod1)
   args <- list(
@@ -328,8 +309,6 @@ test_that("er_style_summary_pvalue() accepts label styling args and stores them 
 })
 
 test_that("er_style_summary_gof() accepts label styling args and stores them as aesthetics", {
-  skip_if_not_installed("erglm")
-
   fake_model <- structure(list(), class = "er_test_fake_summary_model")
   plt <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_summary(model = fake_model, style = er_style_summary_gof)
@@ -351,8 +330,6 @@ test_that("er_style_summary_gof() accepts label styling args and stores them as 
 })
 
 test_that("er_style_summary_n() accepts label styling args and stores them as aesthetics", {
-  skip_if_not_installed("erglm")
-
   plt <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_summary(style = er_style_summary_n)
 

@@ -8,8 +8,6 @@ test_that(".detect_response_type classifies binary and continuous vectors", {
 })
 
 test_that(".layer_summary's corner_distance normalises x/y for a continuous response", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |>
     er_plot(aucss, biomarker_change) |>
     er_plot_add_model(er_test_mod_gaussian) |>
@@ -24,8 +22,7 @@ test_that(".layer_summary's corner_distance normalises x/y for a continuous resp
 })
 
 test_that(".layer_model constructs the correct data structure", {
-  skip_if_not_installed("erglm")
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
@@ -59,8 +56,6 @@ test_that(".layer_model constructs the correct data structure", {
 })
 
 test_that(".layer_summary constructs the correct data structure", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |> er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
     er_plot_add_summary(model = er_test_mod1)
@@ -88,7 +83,6 @@ test_that(".layer_summary constructs the correct data structure", {
 })
 
 test_that(".layer_summary stores the full er_summary() list, not just p_value", {
-  skip_if_not_installed("erglm")
   fake_model <- structure(list(), class = "er_test_fake_summary_model")
 
   plt <- er_test_data |> er_plot(aucss, ae1) |>
@@ -105,8 +99,6 @@ test_that(".layer_summary stores the full er_summary() list, not just p_value", 
 
 
 test_that(".layer_quantile constructs the correct data structure", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
@@ -159,8 +151,6 @@ test_that(".layer_quantile constructs the correct data structure", {
 
 
 test_that(".layer_quantile uses bin means and t-intervals for a continuous response", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |> er_plot(aucss, biomarker_change)
   plt2 <- er_test_data |> er_plot(aucss, biomarker_change, sex)
 
@@ -238,8 +228,6 @@ test_that(".layer_quantile uses an exact Poisson interval when response_type = \
 
 
 test_that(".layer_data constructs the correct data structure", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
@@ -281,8 +269,6 @@ test_that(".layer_data constructs the correct data structure", {
 
 
 test_that(".layer_data records a response-colored panel structure for a continuous response", {
-  skip_if_not_installed("erglm")
-
   # there's no built-in "panel"-layout style for a continuous/count
   # response, but `.layer_data()`'s response-type dispatch is still
   # general-purpose and exercised here via a minimal custom style.
@@ -319,8 +305,6 @@ test_that(".layer_data records a response-colored panel structure for a continuo
 
 
 test_that(".layer_data records the same single-panel structure for a count response", {
-  skip_if_not_installed("erglm")
-
   stub_panel_builder <- er_style_tag(
     function(data, config, stratify, exposure, response, strata, theme) list(),
     layout = "panel"
@@ -336,8 +320,6 @@ test_that(".layer_data records the same single-panel structure for a count respo
 
 
 test_that(".layer_group constructs the correct data structure", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
 
@@ -410,8 +392,6 @@ test_that(".layer_group constructs the correct data structure", {
 
 
 test_that(".layer_overlay constructs the correct data structure", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |> er_plot(aucss, ae1)
   plt2 <- er_test_data |> er_plot(aucss, ae1, sex)
   plt3 <- er_test_data |> er_plot(aucss, biomarker_change)

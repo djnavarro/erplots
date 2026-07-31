@@ -1147,6 +1147,85 @@ Verified: `devtools::document()` regenerated the nine `.Rd` files
 cleanly, and `devtools::test()` passed (809 passing) both before and
 after.
 
+## Internal toy `lm`/`glm` test wrapper (reduces the test suite's dependency on erglm)
+
+The test suite used to lean on `erglm` for almost every fixture -- not
+because erglm itself was being tested, but because it was the easiest way
+to get a fitted model object to exercise the (model-agnostic) plotting
+machinery. This was considered, and explicitly rejected, as a case for
+adding *user-facing* native `lm`/`glm` support to erplots itself (which
+would meaningfully blur the "erplots never fits a model" design principle
+and undercut erglm's own reason to exist); instead, the fix was scoped to
+test infrastructure only.
+
+`tests/testthat/helper-toy-model.R` defines `er_test_toy_model()`, an
+unexported, test-only S3 class covering exactly two cases --
+Gaussian/identity ("linear regression") and binomial/logit ("logistic
+regression") -- implemented via a plain `stats::glm()` call, since
+`erglm::erglm_model()` itself is nothing more than a tagged `glm()` call
+(`.as_erglm(stats::glm(formula, data, family))`). Its
+`er_predict()`/`er_simulate()`/`er_summary()` methods are direct mirrors of
+erglm's own (`erglm:::erglm_predict()`, `erglm:::.erglm_simulate_draws()`/
+`.erglm_draw_response()`, `erglm:::er_summary.erglm_model()`) -- same
+link-scale prediction + inverse-link + z-interval; same
+`mvtnorm::rmvnorm()` parameter draws plus family-appropriate response
+noise; same coefficient/glance extraction from `summary()`. This is why a
+dedicated sync-check file, `tests/testthat/test-toy-model-sync.R` (gated on
+erglm being installed, since it fits a real erglm model to compare
+against), exists: it fits the same formula/data through both
+`er_test_toy_model()` and `erglm::erglm_model()` and asserts their
+`er_predict()`/`er_summary()` outputs agree exactly, and that
+`er_simulate()`'s draws agree structurally/distributionally (not
+value-for-value, since the two implementations' RNG call shapes differ
+even though the algorithm is the same). If a future erglm release changes
+its prediction/summary/simulation algorithm, this file -- not some other,
+unrelated test -- is the one that would start failing, making the drift
+visible rather than silent. Deliberately narrow: `er_test_toy_model()`
+doesn't support Poisson/Gamma/non-canonical links, so `er_test_mod_poisson`
+(`helper-data.R`) stays erglm-backed and gated behind
+`skip_if_not_installed("erglm")`, as do the handful of tests that
+specifically exercise it or other genuinely erglm-specific behavior.
+`mvtnorm` was added to `DESCRIPTION`'s `Suggests` for this (test-only use,
+same as erglm's own dependency on it).
+
+`er_test_data` (the shared dataset fixture, `helper-data.R`) used to be
+`erglm::erglm_data` directly, gated behind `requireNamespace("erglm")`.
+It's now a frozen snapshot, checked in at
+`tests/testthat/fixtures/er_test_data.rds` (fully synthetic, ~10 KB
+compressed, no licensing/privacy concern), loaded unconditionally via
+`readRDS(testthat::test_path("fixtures", "er_test_data.rds"))`. Column
+names/values are identical to the erglm original, so none of the dozens of
+existing `er_test_data$aucss`/`ae1`/etc. references elsewhere in the suite
+needed to change -- refreshing this snapshot (if erglm's own `erglm_data`
+is ever revised) is a manual, not automatic, step, documented in a comment
+at its point of use. `er_test_mod1`/`er_test_mod2`/`er_test_mod_gaussian`
+are now built via `er_test_toy_model()` and are unconditionally available;
+the ~20 inline `erglm::erglm_model()` calls scattered through
+`test-er-plot-api.R`/`test-er-plot-layer.R`/`test-er-plot-style-model.R`/
+`test-er-plot-theme.R`/`test-er-vpc.R` (all binomial/gaussian; none
+Poisson) were migrated to `er_test_toy_model()` the same way. Across the
+whole suite, `skip_if_not_installed("erglm")` usage dropped from 133
+occurrences to 9 -- the 4 tests that genuinely need the Poisson fixture,
+plus the 5 sync-check tests in `test-toy-model-sync.R` that exist
+specifically to compare against a real erglm fit.
+
+Since `helper-*.R` files load in alphabetical order and
+`helper-toy-model.R` needs to be available before `helper-data.R` runs,
+`helper-data.R` sources it explicitly (`source(testthat::test_path(...),
+local = TRUE)`) rather than relying on load order; `local = TRUE` is
+required so the sourced function lands in the same environment
+`helper-data.R` itself is being evaluated in (the alternative,
+`local = FALSE`, sources into `globalenv()`, which isn't necessarily an
+ancestor of that environment under `testthat`/`pkgload`'s helper-loading
+machinery).
+
+Verified: `devtools::test()` (847 passing, the one pre-existing
+`draw_quantiles` deprecation warning unaffected) and `devtools::check()`
+(1 pre-existing `ERROR` -- a local environment mismatch between the
+installed, CRAN-released `emaxnls` and the GitHub dev version erplots'
+own `@examples` expect, unrelated to this change and present identically
+before and after it; 0 warnings, 0 notes, both before and after).
+
 ## Planned work
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed

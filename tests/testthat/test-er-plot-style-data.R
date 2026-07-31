@@ -1,6 +1,4 @@
 test_that("er_style_data_boxjitter returns box + jitter + coord + yscale", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
@@ -68,8 +66,6 @@ test_that("er_style_data_boxjitter returns box + jitter + coord + yscale", {
 
 
 test_that("er_style_data_boxjitter's new style arguments override their previous fixed defaults", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_data(style = er_style_data_boxjitter)
   config1 <- p1$layer$data$config
   config1$panel <- "upper"
@@ -117,8 +113,6 @@ test_that("er_style_data_boxjitter's new style arguments override their previous
 
 
 test_that("er_style_data_overlay returns a single geom, jittered only for a binary response", {
-  skip_if_not_installed("erglm")
-
   p_binary  <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_data()
   p_bin_str <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_add_data()
   p_cont    <- er_plot(er_test_data, aucss, biomarker_change) |> er_plot_add_data()
@@ -161,8 +155,6 @@ test_that("er_style_data_overlay returns a single geom, jittered only for a bina
 
 
 test_that("er_style_data_overlay's new style arguments override their defaults", {
-  skip_if_not_installed("erglm")
-
   p_binary <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_data()
   p_cont   <- er_plot(er_test_data, aucss, biomarker_change) |> er_plot_add_data()
 
@@ -200,7 +192,6 @@ test_that("er_style_data_overlay's new style arguments override their defaults",
 
 
 test_that("er_style_data_hex returns a hex geom plus its default fill scale for any response type", {
-  skip_if_not_installed("erglm")
   skip_if_not_installed("hexbin")
 
   p_binary <- er_plot(er_test_data, aucss, ae1) |>
@@ -238,7 +229,6 @@ test_that("er_style_data_hex returns a hex geom plus its default fill scale for 
 })
 
 test_that("er_style_data_hex informs (not warns/errors) that strata aren't encoded", {
-  skip_if_not_installed("erglm")
   skip_if_not_installed("hexbin")
 
   p_strat <- er_plot(er_test_data, aucss, biomarker_change, sex) |>
@@ -261,7 +251,6 @@ test_that("er_style_data_hex informs (not warns/errors) that strata aren't encod
 })
 
 test_that("er_style_data_hex's bins argument overrides the previous fixed default", {
-  skip_if_not_installed("erglm")
   skip_if_not_installed("hexbin")
 
   p_cont <- er_plot(er_test_data, aucss, biomarker_change) |>
@@ -291,8 +280,6 @@ test_that("er_style_data_hex's bins argument overrides the previous fixed defaul
 
 
 test_that("er_plot_add_data() forwards new style arguments through `...` to the builder", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
@@ -309,7 +296,6 @@ test_that("er_plot_add_data() forwards new style arguments through `...` to the 
 
 
 test_that("er_plot_add_data() builds and renders with style = er_style_data_hex", {
-  skip_if_not_installed("erglm")
   skip_if_not_installed("hexbin")
 
   plt <- er_test_data |>

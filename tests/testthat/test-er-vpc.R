@@ -12,8 +12,7 @@ vpc_sim_fixture <- function(model, data, response, nsim = 5, seed = NULL) {
 }
 
 test_that("er_vpc_plot returns a ggplot", {
-  skip_if_not_installed("erglm")
-  mod <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
   sim <- vpc_sim_fixture(mod, er_test_data, "ae1")
 
   expect_no_error(er_vpc_plot(er_test_data, sim, aucss, ae1, group_by = aucss))
@@ -24,7 +23,6 @@ test_that("er_vpc_plot returns a ggplot", {
 })
 
 test_that("er_vpc_plot supports a continuous response with mean/t-interval summaries", {
-  skip_if_not_installed("erglm")
   sim <- vpc_sim_fixture(er_test_mod_gaussian, er_test_data, "biomarker_change")
 
   expect_no_error(
@@ -76,8 +74,7 @@ test_that("er_vpc_plot uses an exact Poisson interval when response_type = \"cou
 })
 
 test_that("er_vpc_plot's response_type argument overrides auto-detection", {
-  skip_if_not_installed("erglm")
-  mod <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
   sim <- vpc_sim_fixture(mod, er_test_data, "ae1")
 
   # a 0/1 response explicitly declared continuous should use the

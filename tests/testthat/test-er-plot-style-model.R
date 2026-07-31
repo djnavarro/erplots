@@ -1,6 +1,5 @@
 test_that("er_style_model_ribbonline returns 2 geoms", {
-  skip_if_not_installed("erglm")
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
@@ -48,8 +47,7 @@ test_that("er_style_model_ribbonline returns 2 geoms", {
 
 
 test_that("er_style_model_ribbonline's new style arguments override their previous fixed defaults", {
-  skip_if_not_installed("erglm")
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_model(er_test_mod1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_add_model(mod2)
@@ -118,8 +116,7 @@ test_that("er_style_model_ribbonline's new style arguments override their previo
 
 
 test_that("er_style_model_line returns 1 geom", {
-  skip_if_not_installed("erglm")
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
@@ -164,8 +161,6 @@ test_that("er_style_model_line returns 1 geom", {
 
 
 test_that("er_style_model_line's linewidth argument overrides its previous fixed default", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_model(er_test_mod1, style = er_style_model_line)
 
   args <- function(...) {
@@ -192,8 +187,7 @@ test_that("er_style_model_line's linewidth argument overrides its previous fixed
 
 
 test_that("er_style_model_spaghetti returns 2 geoms", {
-  skip_if_not_installed("erglm")
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
@@ -240,8 +234,7 @@ test_that("er_style_model_spaghetti returns 2 geoms", {
 })
 
 test_that("er_style_model_spaghetti's new style arguments override their previous fixed defaults", {
-  skip_if_not_installed("erglm")
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_model(er_test_mod1, style = er_style_model_spaghetti)
   p2 <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_add_model(mod2, style = er_style_model_spaghetti)
@@ -295,8 +288,7 @@ test_that("er_style_model_spaghetti's new style arguments override their previou
 
 
 test_that("er_style_model_spaghetti does not warn about unused fill aesthetic", {
-  skip_if_not_installed("erglm")
-  mod2 <- erglm::erglm_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
+  mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = binomial())
 
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
@@ -333,8 +325,6 @@ test_that("er_style_model_spaghetti does not warn about unused fill aesthetic", 
 })
 
 test_that("er_style_model_spaghetti falls back to ribbonline when er_simulate is unavailable", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_model(er_test_mod1)
 
   config <- p1$layer$model$config
@@ -356,8 +346,6 @@ test_that("er_style_model_spaghetti falls back to ribbonline when er_simulate is
 })
 
 test_that("er_style_model_spaghetti's fallback to ribbonline forwards linewidth", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_model(er_test_mod1)
 
   config <- p1$layer$model$config

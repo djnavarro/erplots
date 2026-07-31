@@ -1,6 +1,4 @@
 test_that("er_style_group_boxplot returns geom + coord", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
@@ -47,8 +45,6 @@ test_that("er_style_group_boxplot returns geom + coord", {
 
 
 test_that("er_style_group_histogram returns geom + facet + coord", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
@@ -98,8 +94,6 @@ test_that("er_style_group_histogram returns geom + facet + coord", {
 })
 
 test_that("er_style_group_histogram rotates strip text to avoid clipping long level labels", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_groups(treatment, style = er_style_group_histogram)
 
@@ -119,8 +113,6 @@ test_that("er_style_group_histogram rotates strip text to avoid clipping long le
 })
 
 test_that("er_plot_add_groups() builds and renders with style = er_style_group_histogram", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
@@ -131,8 +123,6 @@ test_that("er_plot_add_groups() builds and renders with style = er_style_group_h
 
 
 test_that("er_style_group_violin returns geom + coord", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
@@ -180,8 +170,6 @@ test_that("er_style_group_violin returns geom + coord", {
 # ---- new arguments: alpha, bins, quantiles/quantile_linetype ----
 
 test_that("er_style_group_boxplot() alpha argument overrides the default 0.5", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_groups(treatment)
   args <- list(
     data     = p1$data,
@@ -201,8 +189,6 @@ test_that("er_style_group_boxplot() alpha argument overrides the default 0.5", {
 })
 
 test_that("er_style_group_violin() alpha argument overrides the default 0.5", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_groups(treatment, style = er_style_group_violin)
   args <- list(
@@ -223,8 +209,6 @@ test_that("er_style_group_violin() alpha argument overrides the default 0.5", {
 })
 
 test_that("er_style_group_violin() quantiles argument maps to draw_quantiles", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_groups(treatment, style = er_style_group_violin)
   args <- list(
@@ -251,8 +235,6 @@ test_that("er_style_group_violin() quantiles argument maps to draw_quantiles", {
 })
 
 test_that("er_style_group_histogram() bins argument overrides the default 30", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_groups(treatment, style = er_style_group_histogram)
   args <- list(
@@ -273,8 +255,6 @@ test_that("er_style_group_histogram() bins argument overrides the default 30", {
 })
 
 test_that("er_style_group_histogram() alpha = NULL gives conditional default; explicit alpha overrides", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_groups(treatment, style = er_style_group_histogram)
   p2 <- er_plot(er_test_data, aucss, ae1, sex) |>

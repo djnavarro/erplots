@@ -1,6 +1,4 @@
 test_that("er_style_quantile_errorbar returns 3 geoms", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
@@ -48,8 +46,6 @@ test_that("er_style_quantile_errorbar returns 3 geoms", {
 })
 
 test_that("er_style_quantile_errorbar dodges stratified points/bars/labels horizontally", {
-  skip_if_not_installed("erglm")
-
   p2 <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_add_quantiles()
 
   args2 <- list(
@@ -89,8 +85,6 @@ test_that("er_style_quantile_errorbar dodges stratified points/bars/labels horiz
 })
 
 test_that("er_style_quantile_errorbar leaves x unmodified (no x_dodge column) when unstratified", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles()
 
   args1 <- list(
@@ -108,8 +102,6 @@ test_that("er_style_quantile_errorbar leaves x unmodified (no x_dodge column) wh
 })
 
 test_that("er_style_quantile_errorbar returns 3 geoms for a continuous response", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, biomarker_change)
   p2 <- er_plot(er_test_data, aucss, biomarker_change, sex)
 
@@ -155,8 +147,6 @@ test_that("er_style_quantile_errorbar returns 3 geoms for a continuous response"
 
 
 test_that("er_style_quantile_pointrange returns 2 geoms", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
 
@@ -205,8 +195,6 @@ test_that("er_style_quantile_pointrange returns 2 geoms", {
 })
 
 test_that("er_plot_add_quantiles() builds and renders with style = er_style_quantile_pointrange", {
-  skip_if_not_installed("erglm")
-
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
@@ -217,8 +205,6 @@ test_that("er_plot_add_quantiles() builds and renders with style = er_style_quan
 
 
 test_that(".layer_quantile() stores interior quantile breaks in config$breaks", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
 
   breaks <- p1$layer$quantile$config$breaks
@@ -227,8 +213,6 @@ test_that(".layer_quantile() stores interior quantile breaks in config$breaks", 
 })
 
 test_that("er_style_quantile_errorbar_vlines adds a geom_vline at interior breaks", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
 
   args1 <- list(
@@ -255,8 +239,6 @@ test_that("er_style_quantile_errorbar_vlines adds a geom_vline at interior break
 })
 
 test_that("er_style_quantile_pointrange_vlines adds a geom_vline at interior breaks", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
 
   args1 <- list(
@@ -279,8 +261,6 @@ test_that("er_style_quantile_pointrange_vlines adds a geom_vline at interior bre
 })
 
 test_that("er_plot_add_quantiles() builds and renders with the _vlines builders", {
-  skip_if_not_installed("erglm")
-
   plt1 <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
@@ -297,8 +277,6 @@ test_that("er_plot_add_quantiles() builds and renders with the _vlines builders"
 # ---- new arguments: point_size / errorbar_width / label_size ----
 
 test_that("er_style_quantile_errorbar() respects point_size, errorbar_width, label_size overrides", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles()
   args <- list(
     data     = p1$data,
@@ -329,8 +307,6 @@ test_that("er_style_quantile_errorbar() respects point_size, errorbar_width, lab
 })
 
 test_that("er_style_quantile_errorbar() overrides also apply in the stratified branch", {
-  skip_if_not_installed("erglm")
-
   p2 <- er_plot(er_test_data, aucss, ae1, sex) |> er_plot_add_quantiles()
   args <- list(
     data     = p2$data,
@@ -353,8 +329,6 @@ test_that("er_style_quantile_errorbar() overrides also apply in the stratified b
 })
 
 test_that("er_style_quantile_errorbar_vlines() respects vline_colour and vline_linetype overrides", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
   args <- list(
     data     = p1$data,
@@ -378,8 +352,6 @@ test_that("er_style_quantile_errorbar_vlines() respects vline_colour and vline_l
 })
 
 test_that("er_style_quantile_errorbar_vlines() forwards point_size / label_size to the inner builder", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
   args <- list(
     data     = p1$data,
@@ -400,8 +372,6 @@ test_that("er_style_quantile_errorbar_vlines() forwards point_size / label_size 
 })
 
 test_that("er_style_quantile_pointrange() respects label_size, pointrange_size, pointrange_linewidth", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_quantiles(style = er_style_quantile_pointrange)
   args <- list(
@@ -431,8 +401,6 @@ test_that("er_style_quantile_pointrange() respects label_size, pointrange_size, 
 })
 
 test_that("er_style_quantile_pointrange() label_size also applies in the stratified branch", {
-  skip_if_not_installed("erglm")
-
   p2 <- er_plot(er_test_data, aucss, ae1, sex) |>
     er_plot_add_quantiles(style = er_style_quantile_pointrange)
   args <- list(
@@ -453,8 +421,6 @@ test_that("er_style_quantile_pointrange() label_size also applies in the stratif
 })
 
 test_that("er_style_quantile_pointrange_vlines() forwards all new args and passes vline params", {
-  skip_if_not_installed("erglm")
-
   p1 <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_quantiles(bins = 4, style = er_style_quantile_pointrange_vlines)
   args <- list(
