@@ -5,6 +5,7 @@
 \alias{er_style_group_boxplot}
 \alias{er_style_group_histogram}
 \alias{er_style_group_violin}
+\alias{er_style_group_linerange}
 \title{Group panel builders for exposure-response plots}
 \usage{
 er_style_group_boxplot(
@@ -45,6 +46,23 @@ er_style_group_violin(
   quantile_linetype = "solid",
   ...
 )
+
+er_style_group_linerange(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  size = 1,
+  inner_range = c(0.25, 0.75),
+  outer_range = c(0.05, 0.95),
+  alpha_dot = 1,
+  alpha_inner = 0.8,
+  alpha_outer = 0.4,
+  ...
+)
 }
 \arguments{
 \item{data}{The original data frame.}
@@ -68,6 +86,12 @@ er_style_group_violin(
 \item{bins}{Number of histogram bins for \code{er_style_group_histogram()}.}
 
 \item{quantiles, quantile_linetype}{Violin quantile positions and linetype for \code{er_style_group_violin()}.}
+
+\item{size}{Overall size multiplier for \code{er_style_group_linerange()}'s dot and lines.}
+
+\item{inner_range, outer_range}{Quantile probabilities (length 2) for \code{er_style_group_linerange()}'s thick and thin lines.}
+
+\item{alpha_dot, alpha_inner, alpha_outer}{Per-part transparency for \code{er_style_group_linerange()}'s dot, inner line, and outer line.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -78,7 +102,7 @@ the exposure distribution for a grouping variable as a boxplot, violin, or
 histogram panel.
 }
 \details{
-Builders for the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}) draw exposure distributions for grouping variables. \code{er_style_group_boxplot()} and \code{er_style_group_violin()} put group levels on the y-axis; \code{er_style_group_histogram()} puts them on facet strips and frees the y-axis for counts. All built-in group builders are tagged \code{layer = "group"}, so \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} errors if given one tagged for another layer.
+Builders for the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}}) draw exposure distributions for grouping variables. \code{er_style_group_boxplot()} and \code{er_style_group_violin()} put group levels on the y-axis; \code{er_style_group_histogram()} puts them on facet strips and frees the y-axis for counts; \code{er_style_group_linerange()} also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. All built-in group builders are tagged \code{layer = "group"}, so \code{\link[=er_plot_add_groups]{er_plot_add_groups()}} errors if given one tagged for another layer.
 
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions implement.
 }
@@ -107,6 +131,14 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot(aucss, ae1) |>
     er_plot_add_model(mod) |>
     er_plot_add_groups(aucss, style = er_style_group_histogram) |>
+    plot()
+
+  # er_style_group_linerange(): median dot + inner/outer range lines,
+  # instead of a full boxplot/violin shape
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_groups(aucss, style = er_style_group_linerange) |>
     plot()
 }
 
