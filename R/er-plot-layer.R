@@ -80,30 +80,11 @@
   # annotation), based on the raw observed data rather than any model's
   # fitted curve -- this works whether or not a model was supplied, and
   # avoids overlapping the raw points a data/quantile layer might also be
-  # showing. `x`/`y` are rescaled onto [0, 1] using the exposure/response
-  # variables' own limits before computing corner distances.
-  exposure_lo <- object$exposure$limits[1]
-  exposure_hi <- object$exposure$limits[2]
-  response_lo <- object$response$limits[1]
-  response_hi <- object$response$limits[2]
-  config$corner_distance <- object$data |> 
-    dplyr::select(dplyr::all_of(c(object$exposure$name, object$response$name))) |> 
-    dplyr::rename(y = dplyr::all_of(object$response$name), x = dplyr::all_of(object$exposure$name)) |> 
-    dplyr::mutate(
-      x = (x - exposure_lo) / (exposure_hi - exposure_lo),
-      y = (y - response_lo) / (response_hi - response_lo),
-      tl_dist = sqrt(x^2 + (1-y)^2),
-      tr_dist = sqrt((1-x)^2 + (1-y)^2),
-      bl_dist = sqrt(x^2 + y^2),
-      br_dist = sqrt((1-x)^2 + y^2)
-    ) |> 
-    dplyr::summarise(
-      top_left     = min(tl_dist, na.rm = TRUE),
-      top_right    = min(tr_dist, na.rm = TRUE),
-      bottom_left  = min(bl_dist, na.rm = TRUE),
-      bottom_right = min(br_dist, na.rm = TRUE)
-    ) |> 
-    unlist()
+  # showing. See `.compute_corner_distance()` -- shared with
+  # `.layer_quantile()`, which uses the same calculation to keep a
+  # quantile boundary-vline label out of the summary annotation's corner
+  # (see `?er_style_quantile`).
+  config$corner_distance <- .compute_corner_distance(object$data, object$exposure, object$response)
 
   # `style` is the escape hatch documented in `?er_style`; `er_plot_add_summary()`
   # has already resolved a default when the caller didn't supply one.
@@ -145,6 +126,14 @@
   # bin-boundary separators (e.g. `er_style_quantile_errorbar_vlines()`)
   # -- see `cut_exposure_quantile()`'s `"breaks"` attribute
   config$breaks <- attr(binned$exposure_bins, "breaks")
+
+  # visual distance from corners, identical to `.layer_summary()`'s own
+  # computation -- lets `er_style_quantile_errorbar_vlines()`/
+  # `er_style_quantile_pointrange_vlines()`'s optional vline labels pick
+  # the vertical half *opposite* wherever a summary annotation would
+  # render (if one is present), without either layer needing to know
+  # about the other. See `.compute_corner_distance()`.
+  config$corner_distance <- .compute_corner_distance(object$data, object$exposure, object$response)
 
   # binary response: response *rate* per bin, via a Clopper-Pearson CI.
   # count response, when explicitly declared (`response_type = "count"`):

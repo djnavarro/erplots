@@ -35,6 +35,12 @@ er_style_quantile_errorbar_vlines(
   label_size = 3,
   vline_colour = "grey50",
   vline_linetype = "dotted",
+  vline_labels = FALSE,
+  vline_label_position = c("auto", "top", "bottom"),
+  vline_label_size = 3,
+  vline_label_colour = NULL,
+  vline_label_fill = NULL,
+  vline_label_inset = 0.05,
   ...
 )
 
@@ -65,6 +71,12 @@ er_style_quantile_pointrange_vlines(
   pointrange_linewidth = NULL,
   vline_colour = "grey50",
   vline_linetype = "dotted",
+  vline_labels = FALSE,
+  vline_label_position = c("auto", "top", "bottom"),
+  vline_label_size = 3,
+  vline_label_colour = NULL,
+  vline_label_fill = NULL,
+  vline_label_inset = 0.05,
   ...
 )
 }
@@ -93,6 +105,14 @@ er_style_quantile_pointrange_vlines(
 
 \item{vline_colour, vline_linetype}{Colour and linetype of interior quantile boundary lines.}
 
+\item{vline_labels}{Logical: whether the \verb{_vlines} builders also label each interior boundary with its exposure value.}
+
+\item{vline_label_position}{One of \code{"auto"}, \code{"top"}, \code{"bottom"} -- vertical placement of \code{vline_labels}.}
+
+\item{vline_label_size, vline_label_colour, vline_label_fill}{Size, text colour, and background fill for \code{vline_labels}.}
+
+\item{vline_label_inset}{Fraction of the response range \code{vline_labels} are inset from the panel edge.}
+
 \item{pointrange_size, pointrange_linewidth}{Size and linewidth for \code{ggplot2::geom_pointrange()}.}
 }
 \value{
@@ -111,6 +131,19 @@ uncertainty interval. \code{er_style_quantile_errorbar()} and
 \verb{_vlines} variants add interior quantile-bin boundary lines. All
 built-in quantile builders are tagged \code{er_style_tag(fn, layer = "quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} errors informatively if
 handed a builder tagged for a different layer.
+
+The \verb{_vlines} variants can also label each interior boundary with its
+exposure value (\code{vline_labels = TRUE}, off by default). Labels are
+drawn with \code{\link[ggplot2:geom_label]{ggplot2::geom_label()}} (an opaque background, since a
+label sits directly on a vline spanning the full panel height) along
+either the top or bottom edge of the panel. \code{vline_label_position = "auto"} (the default) picks whichever vertical half doesn't contain
+the corner a summary annotation (\code{\link[=er_plot_add_summary]{er_plot_add_summary()}}) would place
+itself in -- based on the same raw-data corner-crowdedness
+calculation the summary layer itself uses -- so the two don't
+collide; this works whether or not a summary layer is actually
+present, since both layers compute the same deterministic quantity
+independently. Override with \code{"top"}/\code{"bottom"} to place labels
+manually instead.
 
 When stratified, all four builders horizontally dodge each quantile
 bin's points/bars/labels apart by \code{\link[=er_plot_theme]{er_plot_theme()}}'s \code{dodge_width}
@@ -179,6 +212,15 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_add_model(mod2) |>
     er_plot_add_quantiles(style = er_style_quantile_errorbar) |>
     er_plot_theme(dodge_width = 0.15) |>
+    plot()
+
+  # labeling each interior quantile-bin boundary with its exposure
+  # value, placed automatically to avoid the summary annotation
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_summary(mod) |>
+    er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines, vline_labels = TRUE) |>
     plot()
 }
 
