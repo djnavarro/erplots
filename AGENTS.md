@@ -1375,6 +1375,49 @@ installed, CRAN-released `emaxnls` and the GitHub dev version erplots'
 own `@examples` expect, unrelated to this change and present identically
 before and after it; 0 warnings, 0 notes, both before and after).
 
+## Fixed: `er_style_group_boxjitter()` double-drew true outliers (once as a boxplot outlier point, once jittered)
+
+`er_style_data_boxjitter()` has always suppressed `geom_boxplot()`'s own
+outlier points by default (`show_outliers = FALSE`), on the reasoning
+that its accompanying jitter layer already shows every raw value,
+outliers included, so drawing both would show a genuine outlier twice.
+`er_style_group_boxjitter()` -- the analogous wrapper for the group
+layer, added later (see "`er_style_group_boxjitter()`/
+`er_style_group_violinjitter()`" above) -- was found to have missed this:
+it called `er_style_group_boxplot()` with no outlier suppression at all,
+so a true outlier rendered as an unjittered dot from `geom_boxplot()`
+*and* a jittered duplicate from the wrapper's own overlay, at visually
+different positions, looking like two distinct data points rather than
+one. `er_style_group_violinjitter()` was never affected -- `geom_violin()`
+has no outlier concept to begin with.
+
+Fixed by giving `er_style_group_boxplot()` itself a `show_outliers`
+parameter (default `TRUE`, so its own standalone/non-jitter behaviour is
+unchanged -- this mirrors `er_style_data_boxjitter()`'s own default
+argument name, though that builder takes it directly rather than via a
+wrapped base builder), controlling `outlier.shape` (`19` vs. `NA`) the
+same way `er_style_data_boxjitter()` already does; `er_style_group_boxjitter()`
+now passes `show_outliers = FALSE` in its call to `er_style_group_boxplot()`.
+There is currently no way for a caller of `er_style_group_boxjitter()` to
+opt back into showing outliers via its own `...`, since `show_outliers =
+FALSE` is a hardcoded named argument in that internal call -- passing
+`show_outliers = TRUE` through `er_plot_add_groups(..., style =
+er_style_group_boxjitter)`'s `...` errors ("formal argument matched by
+multiple actual arguments") rather than overriding it. This wasn't
+closed as part of the fix, since it wasn't part of the reported bug and
+no one has asked for that override yet.
+
+Covered by a new regression test in
+`tests/testthat/test-er-plot-style-group.R` (`"er_style_group_boxjitter
+suppresses the wrapped boxplot's own outlier points"`), checking
+`outlier_gp$shape` (this ggplot2 version's actual storage location for
+`geom_boxplot()`'s outlier shape -- not `geom_params$outlier.shape`
+directly, despite that being the argument name passed to `geom_boxplot()`)
+is `NA` for `er_style_group_boxjitter()`'s wrapped boxplot layer and `19`
+for `er_style_group_boxplot()` used standalone. `devtools::test()` (908
+passing, up from 906) and `devtools::document()` (regenerated
+`er_style_group.Rd` for the new `show_outliers` `@param`) both clean.
+
 ## Planned work
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed

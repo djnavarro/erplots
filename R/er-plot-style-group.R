@@ -13,6 +13,7 @@
 #' @param strata Stratification variable.
 #' @param theme Theme components.
 #' @param alpha Transparency of the geom.
+#' @param show_outliers Logical: whether `er_style_group_boxplot()` draws the boxplot's own outlier points. Defaults to `TRUE`; `er_style_group_boxjitter()` sets this to `FALSE` when it wraps this builder, since its own jittered points already show every raw value, outliers included.
 #' @param bins Number of histogram bins for `er_style_group_histogram()`.
 #' @param quantiles,quantile_linetype Violin quantile positions and linetype for `er_style_group_violin()`.
 #' @param size Overall size multiplier for `er_style_group_linerange()`'s dot and lines.
@@ -86,7 +87,7 @@ NULL
 #' @rdname er_style_group
 #' @export
 er_style_group_boxplot <- function(data, config, stratify, exposure, response, strata, theme,
-                                    alpha = 0.5, ...) {
+                                    alpha = 0.5, show_outliers = TRUE, ...) {
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(
@@ -102,11 +103,18 @@ er_style_group_boxplot <- function(data, config, stratify, exposure, response, s
     )
   }
 
+  # `er_style_group_boxjitter()` sets `show_outliers = FALSE` when wrapping
+  # this builder, since its raw points are already shown via its own jitter
+  # layer -- the boxplot's own outlier points would otherwise be redundant
+  # and, once jittered, indistinguishable from a second, spurious point.
+  outlier_shape <- if (show_outliers) 19 else NA
+
   geoms <- list(
     ggplot2::geom_boxplot(
       data = config$data,
       mapping = plot_map,
       alpha = alpha, 
+      outlier.shape = outlier_shape,
       key_glyph = theme$draw_key
     ),
     ggplot2::coord_cartesian(
@@ -383,9 +391,13 @@ er_style_group_linerange <- er_style_tag(er_style_group_linerange, layer = "grou
 er_style_group_boxjitter <- function(data, config, stratify, exposure, response, strata, theme,
                                       alpha = 0.5, jitter_height = 0.15, jitter_size = 1, jitter_alpha = 0.6, ...) {
 
+  # raw points are already shown via the jitter layer below, so the
+  # wrapped boxplot's own outlier points are suppressed -- otherwise a
+  # true outlier would appear twice: once (unjittered) as the boxplot's
+  # own outlier point, and again (jittered) from the jitter layer.
   geoms <- er_style_group_boxplot(
     data, config, stratify, exposure, response, strata, theme,
-    alpha = alpha, ...
+    alpha = alpha, show_outliers = FALSE, ...
   )
 
   if (stratify == FALSE) {

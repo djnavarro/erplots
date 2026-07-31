@@ -19,6 +19,7 @@ er_style_group_boxplot(
   strata,
   theme,
   alpha = 0.5,
+  show_outliers = TRUE,
   ...
 )
 
@@ -114,6 +115,8 @@ er_style_group_violinjitter(
 \item{theme}{Theme components.}
 
 \item{alpha}{Transparency of the geom.}
+
+\item{show_outliers}{Logical: whether \code{er_style_group_boxplot()} draws the boxplot's own outlier points. Defaults to \code{TRUE}; \code{er_style_group_boxjitter()} sets this to \code{FALSE} when it wraps this builder, since its own jittered points already show every raw value, outliers included.}
 
 \item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}'s own \code{...}.}
 

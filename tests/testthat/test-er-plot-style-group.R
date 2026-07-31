@@ -470,6 +470,45 @@ test_that("er_style_group_boxjitter returns boxplot geoms + jitter geom + coord"
   expect_true(inherits(p2_out[[3]], "LayerInstance"))
 })
 
+test_that("er_style_group_boxjitter suppresses the wrapped boxplot's own outlier points", {
+  # Regression test: without suppression, a true outlier would be drawn
+  # twice -- once (unjittered) as the boxplot's own outlier point, and
+  # again (jittered) by er_style_group_boxjitter()'s own overlay.
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_boxjitter)
+  p2 <- er_plot(er_test_data, aucss, ae1, sex) |>
+    er_plot_add_groups(treatment, style = er_style_group_boxjitter)
+
+  args1 <- list(
+    data = p1$data,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata = p1$strata,
+    theme = p1$theme
+  )
+  args2 <- list(
+    data = p2$data,
+    config = p2$layer$group$config[[1]],
+    stratify = p2$layer$group$stratify,
+    exposure = p2$exposure,
+    response = p2$response,
+    strata = p2$strata,
+    theme = p2$theme
+  )
+
+  boxjitter_box1 <- do.call(er_style_group_boxjitter, args1)[[1]]
+  boxjitter_box2 <- do.call(er_style_group_boxjitter, args2)[[1]]
+
+  expect_true(is.na(boxjitter_box1$geom_params$outlier_gp$shape))
+  expect_true(is.na(boxjitter_box2$geom_params$outlier_gp$shape))
+
+  # er_style_group_boxplot() used standalone still shows outliers by default
+  standalone_box <- do.call(er_style_group_boxplot, args1)[[1]]
+  expect_equal(standalone_box$geom_params$outlier_gp$shape, 19)
+})
+
 test_that("er_style_group_violinjitter returns violin geoms + jitter geom + coord", {
   p1 <- er_plot(er_test_data, aucss, ae1)
   p2 <- er_plot(er_test_data, aucss, ae1, sex)
