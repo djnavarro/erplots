@@ -177,7 +177,7 @@ er_style_group_violin <- function(data, config, stratify, exposure, response, st
     key_glyph = theme$draw_key
   )
   if (!is.null(quantiles)) {
-    geom_args$draw_quantiles <- quantiles
+    geom_args$quantiles <- quantiles
     geom_args$quantile.linetype <- quantile_linetype
   }
 
