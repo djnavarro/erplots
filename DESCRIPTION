@@ -44,3 +44,20 @@ LazyData: true
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0
 Config/Needs/website: djnavarro/waeponwifestre
+Collate: 
+    'data.R'
+    'er-generics.R'
+    'er-plot-add.R'
+    'er-plot-api.R'
+    'er-plot-build.R'
+    'er-plot-compose.R'
+    'er-plot-layer.R'
+    'er-plot-style.R'
+    'er-plot-style-data.R'
+    'er-plot-style-group.R'
+    'er-plot-style-model.R'
+    'er-plot-style-quantile.R'
+    'er-plot-style-summary.R'
+    'er-plot-theme.R'
+    'er-vpc.R'
+    'utils-helpers.R'

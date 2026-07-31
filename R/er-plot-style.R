@@ -163,3 +163,172 @@
 #' [er_style_data()], [er_style_group()], [er_style_tag()]
 #' 
 NULL
+
+
+#' Tag a builder with structural/aesthetic metadata
+#'
+#' Attaches the self-declared metadata a custom `er_style_*()`-style
+#' function can carry.
+#' 
+#' @param style A function matching the standard `er_style_*()` signature
+#'   (see [er_style()]).
+#' @param layout One of `"overlay"` or `"panel"`, or `NULL` (the default) to
+#'   leave this tag unset. See [er_plot_add_data()] for what each
+#'   structural family means.
+#' @param fill_role A string naming what the builder's `fill` aesthetic
+#'   represents, or `NULL` (the default) to leave this tag unset.
+#' @param y_role A string naming what the builder's y-axis represents, 
+#'   or `NULL` (the default) to leave this tag unset.
+#' @param layer One of `"model"`, `"summary"`, `"quantile"`, `"data"`, or
+#'   `"group"`, naming which `er_plot_add_*()` layer the builder is meant
+#'   to be used with, or `NULL` (the default) to leave this tag unset.
+#'   See "Details".
+#' @param zorder One of `"foreground"` or `"background"`, or `NULL` (the
+#'   default, equivalent to `"foreground"`) to leave this tag unset. Only
+#'   meaningful for an overlay-layout data builder; see "Details".
+#'
+#' @returns `style`, with whichever of the `"er_style_layout"`/
+#'   `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`/
+#'   `"er_style_zorder"` attributes were requested attached.
+#'
+
+#' @details
+#' The metadata to be supplied indicate which *structural* family a
+#' data-layer builder belongs to (`layout`), what a builder's `fill`
+#' aesthetic means when it isn't strata (`fill_role`), what a group-layer
+#' builder's y-axis means when it isn't the group variable itself
+#' (`y_role`), which layer a builder is meant to be plugged into
+#' (`layer`), and where an overlay-layout data builder's geoms sit
+#' relative to the model/summary/quantile layers when they share the main
+#' panel (`zorder`). All five arguments are optional and independent --
+#' pass only the ones a given builder needs, in one call, rather than
+#' chaining separate setters.
+#'
+#' `layout` is a required tag for a data-layer builder:
+#' [er_plot_add_data()] reads it off `style` to decide whether to place 
+#' the output geoms into the main panel (`layout = "overlay"`) or to put them into
+#' separate strip-like panels above and below the main panel (`layout = "panel"`)
+#'
+#' `fill_role` and `y_role` are both optional, and can be used
+#' to title a legend/axis correctly: `fill_role = "density"` (used by
+#' [er_style_data_hex()]) says a builder's `fill` aesthetic encodes bin
+#' density rather than strata; `y_role = "count"` (used by
+#' [er_style_group_histogram()]) says a group-layer builder's y-axis
+#' means counts rather than the group variable itself. A builder that
+#' omits either tag keeps the default behaviour (`fill` means strata;
+#' the y-axis is titled with the group variable's label), which is
+#' correct for most builders.
+#'
+#' `layer` is also optional, but unlike `fill_role`/`y_role` it isn't read
+#' for labelling. It's read by every `er_plot_add_*()` function
+#' (`er_plot_add_model()` checks `style` against `"model"`;
+#' `er_plot_add_summary()` checks `style` against `"summary"`;
+#' `er_plot_add_quantiles()`
+#' against `"quantile"`; `er_plot_add_data()` against `"data"`;
+#' `er_plot_add_groups()` against `"group"`) to catch a builder plugged
+#' into the wrong layer -- e.g. passing a quantile builder to
+#' `er_plot_add_data()` -- with an informative error instead of whatever
+#' failure results from that layer's `config` shape not matching what the
+#' builder expects. All built-in builders carry this tag. A custom
+#' builder that omits it is never checked: `layer` is opt-in, not a
+#' requirement like `layout` is for a data-layer builder.
+#'
+#' `zorder` only applies to an overlay-layout data builder (`layout =
+#' "overlay"`), and controls whether its geoms are drawn before or after
+#' the model/summary/quantile layers when they share the main panel.
+#' `"foreground"`, the default for a builder that omits this tag (e.g.
+#' `er_style_data_overlay()`), draws the data geoms last, on top of
+#' everything else -- appropriate for a sparse layer like individual
+#' points, which should never be hidden behind a model ribbon.
+#' `"background"` (used by `er_style_data_hex()`) draws the data geoms
+#' first, so a builder whose geoms cover the whole panel (leaving no gaps
+#' for what's underneath to show through) doesn't bury the model curve or
+#' summary annotation. `zorder` has no effect on a panel-layout data
+#' builder (e.g. `er_style_data_boxjitter()`), since those geoms are
+#' drawn in their own separate panels, never sharing space with the model/
+#' summary/quantile layers.
+#'
+#' @seealso [er_plot_add_data()], [er_style()]
+#'
+#' @examples
+#' build_data_density <- er_style_tag(
+#'   function(data, config, stratify, exposure, response, strata, theme, ...) {
+#'     ggplot2::geom_density_2d(
+#'       data = data,
+#'       mapping = ggplot2::aes(x = .data[[exposure$name]], y = .data[[response$name]])
+#'     )
+#'   },
+#'   layout = "overlay",
+#'   layer = "data"
+#' )
+#'
+#' @export
+er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL) {
+  if (!is.function(style)) rlang::abort("`style` must be a function")
+
+  if (!is.null(layout)) {
+    layout <- match.arg(layout, c("overlay", "panel"))
+    attr(style, "er_style_layout") <- layout
+  }
+  if (!is.null(fill_role)) {
+    attr(style, "er_style_fill_role") <- fill_role
+  }
+  if (!is.null(y_role)) {
+    attr(style, "er_style_y_role") <- y_role
+  }
+  if (!is.null(layer)) {
+    layer <- match.arg(layer, c("model", "summary", "quantile", "data", "group"))
+    attr(style, "er_style_layer") <- layer
+  }
+  if (!is.null(zorder)) {
+    zorder <- match.arg(zorder, c("foreground", "background"))
+    attr(style, "er_style_zorder") <- zorder
+  }
+
+  style
+}
+
+#' @noRd
+.style_layout <- function(style) {
+  layout <- attr(style, "er_style_layout")
+  if (is.null(layout)) {
+    rlang::abort(c(
+      "`style` must declare its structural layout.",
+      "i" = "Wrap a custom data-layer builder with `er_style_tag(style, layout = \"overlay\")` or `er_style_tag(style, layout = \"panel\")`.",
+      "i" = "The built-in builders (`er_style_data_overlay()`, `er_style_data_boxjitter()`) already do this."
+    ))
+  }
+  layout
+}
+
+#' @noRd
+.style_fill_role <- function(style) {
+  attr(style, "er_style_fill_role")
+}
+
+#' @noRd
+.style_y_role <- function(style) {
+  attr(style, "er_style_y_role")
+}
+
+#' @noRd
+.style_layer <- function(style) {
+  attr(style, "er_style_layer")
+}
+
+#' @noRd
+.style_zorder <- function(style) {
+  zorder <- attr(style, "er_style_zorder")
+  if (is.null(zorder)) "foreground" else zorder
+}
+
+#' @noRd
+.check_style_layer <- function(style, layer, arg = "style") {
+  declared <- .style_layer(style)
+  if (is.null(declared) || identical(declared, layer)) return(invisible(NULL))
+
+  rlang::abort(c(
+    paste0("`", arg, "` is tagged for the \"", declared, "\" layer, but was passed to a \"", layer, "\" layer function."),
+    "i" = paste0("Use a builder tagged `er_style_tag(fn, layer = \"", layer, "\")` (or with no `layer` tag at all).")
+  ))
+}

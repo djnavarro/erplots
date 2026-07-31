@@ -4,6 +4,7 @@
 #' drawing a text/label annotation from a model's p-value, coefficients,
 #' goodness-of-fit statistics, or observation counts.
 #'
+#' @include er-plot-style.R
 #' @param data The original data frame.
 #' @param config Configuration for the specific plot.
 #' @param stratify Logical: whether to stratify.

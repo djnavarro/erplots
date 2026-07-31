@@ -1,10 +1,10 @@
-
 #' Quantile summary builders for exposure-response plots
 #'
 #' Builder functions for the `quantile` layer ([er_plot_add_quantiles()]),
 #' drawing a point/interval summary per exposure quantile bin as an error bar
 #' or a pointrange, optionally with bin-boundary vlines.
 #'
+#' @include er-plot-style.R
 #' @param data The original data frame.
 #' @param config Configuration for the specific plot.
 #' @param stratify Logical: whether to stratify.

@@ -1492,16 +1492,17 @@ this was additive), and `devtools::check()` (0 errors/warnings/notes).
 
 - `R/er-generics.R` -- the model interface: `er_predict()`,
   `er_simulate()`, `er_summary()` generics and their default methods.
-- `R/er-plot-api.R` -- the public plot-building API: `er_plot()`,
-  `er_plot_add_model()`, `er_plot_add_summary()`,
-  `er_plot_add_quantiles()`,
-  `er_plot_add_data()`, `er_plot_add_groups()`, `er_plot_build()`,
-  plus `print`/`plot` methods for the `er_plot` S3 class, and (also
-  defined here, not in a separate file) `er_style_tag()` and its
-  internal attribute readers (`.style_layout()`, `.style_fill_role()`,
-  `.style_y_role()`, `.style_layer()`, `.check_style_layer()`). Each
-  layer function (except `er_plot()` itself) has its own dedicated Rd
-  topic (no shared `@rdname`).
+- `R/er-plot-api.R` -- the `er_plot` object's core lifecycle only:
+  `er_plot()`, `er_plot_build()`, and `print`/`plot` methods for the
+  `er_plot` S3 class.
+- `R/er-plot-add.R` -- the five pipeline verbs, `er_plot_add_model()`,
+  `er_plot_add_summary()`, `er_plot_add_quantiles()`,
+  `er_plot_add_data()`, `er_plot_add_groups()`. Each has its own
+  dedicated Rd topic (no shared `@rdname`). Split out of
+  `er-plot-api.R` in a file-organisation review -- see "File
+  reorganisation" below.
+- `R/er-plot-theme.R` -- `er_plot_theme()` and its `.check_theme_*()`
+  validation helpers. Also split out of `er-plot-api.R`.
 - `R/er-plot-layer.R` -- internal `.layer_*()` functions that assemble the
   configuration for each plot layer (this is where `er_predict()` /
   `er_simulate()` / `er_summary()` get called on the user-supplied model).
@@ -1512,23 +1513,97 @@ this was additive), and `devtools::check()` (0 errors/warnings/notes).
   (one file per component: `er-plot-style-model.R`,
   `er-plot-style-summary.R`, `er-plot-style-quantile.R`,
   `er-plot-style-data.R`, `er-plot-style-group.R`), plus
-  `R/er-plot-style.R` (the shared-interface doc page, `?er_style`, with
-  no builder functions of its own). See `?er_style` for the interface
-  these builders share.
+  `R/er-plot-style.R` (the shared-interface doc page, `?er_style`).
+  `er-plot-style.R` also holds the actual builder-tagging code --
+  `er_style_tag()` and its internal attribute readers/checker
+  (`.style_layout()`, `.style_fill_role()`, `.style_y_role()`,
+  `.style_layer()`, `.style_zorder()`, `.check_style_layer()`) --
+  moved here (from `er-plot-api.R`) since this is the file that already
+  documents the tagging concept; see "File reorganisation" below for
+  why each `er-plot-style-{data,group,model,quantile,summary}.R` file
+  carries a roxygen `@include er-plot-style.R` tag. See `?er_style` for
+  the interface these builders share.
 - `R/er-vpc.R` -- `er_vpc_plot()`, a model-agnostic VPC-style plot
   operating on plain observed/simulated data frames, or (preferred) a
   `model` argument that goes through `er_simulate()`'s `sim_resp`
   extension -- see "`er_vpc_plot()` and the `sim_resp` extension to
   `er_simulate()`" above.
-- `R/utils-helpers.R`, `R/utils-global.R` -- small internal helpers
-  (including the binary-response-only `ci_clopper_pearson()`,
-  `ci_t()`, `ci_poisson()`, `cut_quantile()`,
-  `cut_exposure_quantile()`, and the response-type detector
-  `.detect_response_type()`) and `globalVariables()` declarations for
-  NSE.
+- `R/utils-helpers.R` -- small internal helpers (including the
+  binary-response-only `ci_clopper_pearson()`, `ci_t()`,
+  `ci_poisson()`, `cut_quantile()`, `cut_exposure_quantile()`, and the
+  response-type detector `.detect_response_type()`) and, at the bottom
+  of the file, the `globalVariables()` declarations for NSE (folded in
+  from the former `R/utils-global.R` -- see "File reorganisation"
+  below).
 - `R/data.R` -- roxygen documentation for the bundled `erplots_data`
   dataset (the object itself lives in `data/erplots_data.rda`, generated
   by `data-raw/erplots_data.R`; see "Bundled example dataset" above).
+
+## File reorganisation: splitting up `er-plot-api.R`
+
+A file-organisation review found that `R/er-plot-api.R` had grown to
+1255 lines and drifted into mixing four distinct concerns: the
+`er_plot` object's core lifecycle (`er_plot()`, `er_plot_build()`,
+`print`/`plot` methods), theming (`er_plot_theme()` plus its
+`.check_theme_*()` validators), the builder-tagging machinery
+(`er_style_tag()` plus its attribute readers), and the five
+`er_plot_add_*()` pipeline verbs. Every other `R/` file was checked at
+the same time and found to already match its filename/purpose, so no
+other splits were made. This was a pure move -- no code or roxygen
+content changed, only which file each function lives in.
+
+`er-plot-api.R` was trimmed to just the lifecycle functions.
+`er_plot_theme()` and its validators moved to a new `R/er-plot-theme.R`.
+The five `er_plot_add_*()` verbs moved to a new `R/er-plot-add.R`,
+kept together (rather than split one-per-layer) since they share a
+common validation pattern and this mirrors how `er-plot-layer.R`/
+`er-plot-build.R` already hold all five layers' internals in one file
+each. `er_style_tag()` and its attribute readers moved into the
+existing `R/er-plot-style.R` -- previously pure roxygen documentation
+(the `?er_style` topic) with no code of its own -- making it the actual
+home of the tagging machinery it already documented.
+
+That last move surfaced a genuine load-order bug: `er_style_tag()` is
+called at *package load time* (not just inside a function body) by
+every built-in `er_style_*()` builder, e.g. `er_style_data_overlay <-
+er_style_tag(function(...) ..., layout = "overlay", layer = "data")`
+at the top level of `er-plot-style-data.R`. R sources `R/*.R` files in
+alphabetical order by default (no `Collate` field existed before this
+change), and `"er-plot-style-data.R"` (etc.) sort *before*
+`"er-plot-style.R"` (`-` sorts before `.`) -- so moving `er_style_tag()`
+into `er-plot-style.R` broke every other style file's load, each
+failing with `could not find function "er_style_tag"`. This worked
+by accident before the split, only because `er-plot-api.R` happened to
+sort alphabetically before all five `er-plot-style-*.R` files.
+
+Fixed properly rather than by renaming files to force a lucky sort
+order: each of `er-plot-style-{data,group,model,quantile,summary}.R`
+now carries a roxygen `#' @include er-plot-style.R` tag (placed after
+each file's title/description, alongside its `@param`s -- putting
+`@include` as the literal first line of the block instead breaks
+roxygen2's title detection, silently producing a title-less/
+description-less `.Rd` page). `devtools::document()` reads these tags
+and writes the resulting order into `DESCRIPTION`'s `Collate` field
+automatically, so load order is now explicit and enforced rather than
+an accident of alphabetical filenames. If a future builder file is
+added that calls `er_style_tag()` (or anything else from
+`er-plot-style.R`) at its own top level, it needs the same `@include`
+tag.
+
+In the same pass, `R/utils-global.R` (a 30-line file holding only a
+single `utils::globalVariables()` call) was folded into the end of
+`R/utils-helpers.R` and deleted, since a whole file for one
+declaration was its own small case of over-fragmentation.
+
+Verified: `devtools::document()` (regenerated `Collate` cleanly, no
+broken `@include`/link warnings once run in a fresh session --
+roxygen2 raised transient "could not resolve link" warnings when
+re-run in an R session that already had an older `erplots` loaded,
+which cleared up on a fresh `Rscript -e 'devtools::document()'`; not a
+real problem, just a reminder that repeated in-session
+`devtools::document()` calls can show stale-link noise),
+`devtools::test()` (847 passing, unchanged), and `devtools::check()`
+(0 errors/warnings/notes).
 
 ## Development workflow
 

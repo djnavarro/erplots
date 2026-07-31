@@ -1,10 +1,10 @@
-
 #' Model curve builders for exposure-response plots
 #'
 #' Builder functions for the `model` layer ([er_plot_add_model()]), drawing
 #' the fitted exposure-response curve as a ribbon-and-line, a line alone, or a
 #' spaghetti plot of simulated draws.
 #'
+#' @include er-plot-style.R
 #' @param data The original data frame
 #' @param config Configuration for the specific plot
 #' @param stratify Logical indicating whether to stratify
