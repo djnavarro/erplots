@@ -41,6 +41,7 @@ er_style_quantile_errorbar_vlines(
   vline_label_colour = NULL,
   vline_label_fill = NULL,
   vline_label_inset = 0.05,
+  vline_label_digits = 0,
   ...
 )
 
@@ -77,6 +78,7 @@ er_style_quantile_pointrange_vlines(
   vline_label_colour = NULL,
   vline_label_fill = NULL,
   vline_label_inset = 0.05,
+  vline_label_digits = 0,
   ...
 )
 }
@@ -112,6 +114,8 @@ er_style_quantile_pointrange_vlines(
 \item{vline_label_size, vline_label_colour, vline_label_fill}{Size, text colour, and background fill for \code{vline_labels}.}
 
 \item{vline_label_inset}{Fraction of the response range \code{vline_labels} are inset from the panel edge.}
+
+\item{vline_label_digits}{Number of decimal places \code{vline_labels} are rounded to.}
 
 \item{pointrange_size, pointrange_linewidth}{Size and linewidth for \code{ggplot2::geom_pointrange()}.}
 }

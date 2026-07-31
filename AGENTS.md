@@ -571,6 +571,38 @@ Not done as part of this change: no vignette updates (matching how
 issues #2/#3 were scoped); `angle = 90` for the label text wasn't made
 user-configurable (a fixed visual choice, not exposed as an argument).
 
+**Follow-up fix: vline label centering and default rounding.** Two bugs/gaps
+in the vline labels above were fixed in a later pass. First, the label's
+`vjust`/`hjust` roles were backwards for `angle = 90` text: for text
+rotated 90 degrees, `vjust` controls the *perpendicular* (thickness)
+offset -- i.e. the horizontal position relative to the vline -- while
+`hjust` controls the offset *along* the (now-vertical) text, i.e. which
+way the label hangs relative to its anchor point. The original code set
+only `vjust` (to `0`/`1` for top/bottom) and left `hjust` at its default
+(`0.5`), which centered the label vertically along the wrong axis and
+left it visibly offset to one side of the vline rather than centered on
+it. Fixed by setting `vjust = 0.5` unconditionally (centers the label on
+the vline) and moving the top/bottom logic to `hjust` (`1` for `"top"`,
+so the label hangs down into the panel from the top edge; `0` for
+`"bottom"`, so it hangs up from the bottom edge). Second,
+`.quantile_boundary_vline_labels()` used to format the label text via
+`theme$format_number` (default `scales::label_number(accuracy = 0.01)`,
+i.e. 2 decimal places) with no way to show fewer digits independent of
+that global theme setting. Both `_vlines` builders gained a new
+`vline_label_digits` argument (default `0`, i.e. whole numbers), passed
+through as `.quantile_boundary_vline_labels()`'s new `digits` parameter
+and applied via `scales::label_number(accuracy = 10^(-digits))` --
+independent of `theme$format_number`, since the two needn't necessarily
+agree (e.g. a plot's `y_mid_lbl` percentages and its exposure-axis vline
+cutpoints are different quantities that don't need the same precision).
+Covered by new tests in `tests/testthat/test-er-plot-style-quantile.R`:
+`aes_params$vjust`/`hjust` checks for both `"top"`/`"bottom"` (note:
+these are stored under `aes_params`, not `geom_params`, since they're
+passed as constants rather than mapped aesthetics), and a
+`vline_label_digits` test confirming both the `0`-digit default and an
+explicit override. `devtools::test()` (935 passing) and
+`devtools::document()` both clean.
+
 ## `er_style_group_boxjitter()`/`er_style_group_violinjitter()`: jitter overlays for the group layer's box/violin builders
 
 `er_style_group_boxplot()`/`er_style_group_violin()` had no way to show

@@ -21,6 +21,7 @@
 #' @param vline_label_position One of `"auto"`, `"top"`, `"bottom"` -- vertical placement of `vline_labels`.
 #' @param vline_label_size,vline_label_colour,vline_label_fill Size, text colour, and background fill for `vline_labels`.
 #' @param vline_label_inset Fraction of the response range `vline_labels` are inset from the panel edge.
+#' @param vline_label_digits Number of decimal places `vline_labels` are rounded to.
 #' @param ... Additional named arguments forwarded from [er_plot_add_quantiles()]'s own `...`.
 #'
 #' @details Builders for the `quantile` layer ([er_plot_add_quantiles()])
@@ -193,12 +194,14 @@ NULL
 #' @param size,colour,fill Passed to [ggplot2::geom_label()].
 #' @param inset Fraction of the response range the label is inset from
 #'   the panel edge.
+#' @param digits Number of decimal places the label text is rounded to.
 #'
 #' @returns A single [ggplot2::geom_label()], or `NULL` if there are no
 #'   interior boundaries to label.
 #' @noRd
 .quantile_boundary_vline_labels <- function(config, exposure, response, theme, position = "auto",
-                                             size = 3, colour = NULL, fill = NULL, inset = 0.05) {
+                                             size = 3, colour = NULL, fill = NULL, inset = 0.05,
+                                             digits = 0) {
 
   breaks <- config$breaks
   if (is.null(breaks) || length(breaks) <= 2) return(NULL)
@@ -217,14 +220,20 @@ NULL
   label_data <- data.frame(
     x = interior_breaks,
     y = if (side == "top") response_hi - margin else response_lo + margin,
-    lbl = theme$format_number(interior_breaks)
+    lbl = scales::label_number(accuracy = 10^(-digits))(interior_breaks)
   )
 
   args <- list(
     data = label_data,
     mapping = ggplot2::aes(x = x, y = y, label = lbl),
     angle = 90,
-    vjust = if (side == "top") 1 else 0,
+    # `vjust` controls the perpendicular (thickness) offset for text
+    # rotated 90 degrees, so 0.5 centers the label on the vline itself;
+    # `hjust` controls the along-the-line offset, so it's what picks
+    # whether the label hangs down from the top edge or up from the
+    # bottom edge, into the panel rather than off of it.
+    vjust = 0.5,
+    hjust = if (side == "top") 1 else 0,
     inherit.aes = FALSE,
     show.legend = FALSE
   )
@@ -335,7 +344,8 @@ er_style_quantile_errorbar_vlines <- function(data, config, stratify, exposure, 
                                                vline_label_size = 3,
                                                vline_label_colour = NULL,
                                                vline_label_fill = NULL,
-                                               vline_label_inset = 0.05, ...) {
+                                               vline_label_inset = 0.05,
+                                               vline_label_digits = 0, ...) {
   vline_label_position <- match.arg(vline_label_position)
   vlines <- .quantile_boundary_vlines(config, exposure, vline_colour, vline_linetype)
   geoms <- er_style_quantile_errorbar(
@@ -347,7 +357,8 @@ er_style_quantile_errorbar_vlines <- function(data, config, stratify, exposure, 
     labels <- .quantile_boundary_vline_labels(
       config, exposure, response, theme,
       position = vline_label_position, size = vline_label_size,
-      colour = vline_label_colour, fill = vline_label_fill, inset = vline_label_inset
+      colour = vline_label_colour, fill = vline_label_fill, inset = vline_label_inset,
+      digits = vline_label_digits
     )
     out <- c(out, list(labels))
   }
@@ -436,7 +447,8 @@ er_style_quantile_pointrange_vlines <- function(data, config, stratify, exposure
                                                   vline_label_size = 3,
                                                   vline_label_colour = NULL,
                                                   vline_label_fill = NULL,
-                                                  vline_label_inset = 0.05, ...) {
+                                                  vline_label_inset = 0.05,
+                                                  vline_label_digits = 0, ...) {
   vline_label_position <- match.arg(vline_label_position)
   vlines <- .quantile_boundary_vlines(config, exposure, vline_colour, vline_linetype)
   geoms <- er_style_quantile_pointrange(
@@ -449,7 +461,8 @@ er_style_quantile_pointrange_vlines <- function(data, config, stratify, exposure
     labels <- .quantile_boundary_vline_labels(
       config, exposure, response, theme,
       position = vline_label_position, size = vline_label_size,
-      colour = vline_label_colour, fill = vline_label_fill, inset = vline_label_inset
+      colour = vline_label_colour, fill = vline_label_fill, inset = vline_label_inset,
+      digits = vline_label_digits
     )
     out <- c(out, list(labels))
   }

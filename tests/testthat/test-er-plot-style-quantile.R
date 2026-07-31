@@ -552,6 +552,52 @@ test_that("vline_label_size/vline_label_colour/vline_label_fill override default
   expect_equal(label_layer$aes_params$fill, "yellow")
 })
 
+test_that("vline_labels are centered on their vline (vjust = 0.5) with hjust picking top/bottom", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_top <- do.call(er_style_quantile_errorbar_vlines,
+                      c(args, list(vline_labels = TRUE, vline_label_position = "top")))
+  out_bottom <- do.call(er_style_quantile_errorbar_vlines,
+                         c(args, list(vline_labels = TRUE, vline_label_position = "bottom")))
+
+  expect_equal(out_top[[5]]$aes_params$vjust, 0.5)
+  expect_equal(out_bottom[[5]]$aes_params$vjust, 0.5)
+  expect_equal(out_top[[5]]$aes_params$hjust, 1)
+  expect_equal(out_bottom[[5]]$aes_params$hjust, 0)
+})
+
+test_that("vline_label_digits controls rounding of the label text (default 0)", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  breaks <- p1$layer$quantile$config$breaks
+  interior_breaks <- unname(breaks[-c(1, length(breaks))])
+
+  out_default <- do.call(er_style_quantile_errorbar_vlines, c(args, list(vline_labels = TRUE)))
+  expect_equal(out_default[[5]]$data$lbl, scales::label_number(accuracy = 1)(interior_breaks))
+
+  out_digits2 <- do.call(er_style_quantile_errorbar_vlines,
+                          c(args, list(vline_labels = TRUE, vline_label_digits = 2)))
+  expect_equal(out_digits2[[5]]$data$lbl, scales::label_number(accuracy = 0.01)(interior_breaks))
+})
+
 test_that(".layer_summary()'s corner_distance output is unchanged after the .compute_corner_distance() extraction", {
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
