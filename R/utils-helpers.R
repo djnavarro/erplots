@@ -355,5 +355,10 @@ utils::globalVariables(c(
   "y_mid_lbl",
   "response",
   "strata_value",
+  "med",
+  "inner_lo",
+  "inner_hi",
+  "outer_lo",
+  "outer_hi",
   ":="
 ))

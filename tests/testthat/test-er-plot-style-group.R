@@ -280,3 +280,145 @@ test_that("er_style_group_histogram() alpha = NULL gives conditional default; ex
   out_custom <- do.call(er_style_group_histogram, c(args(p1), list(alpha = 0.3)))
   expect_equal(out_custom[[1]]$aes_params$alpha, 0.3)
 })
+
+# ---- er_style_group_linerange ----
+
+test_that("er_style_group_linerange returns three geoms + coord", {
+  p1 <- er_plot(er_test_data, aucss, ae1)
+  p2 <- er_plot(er_test_data, aucss, ae1, sex)
+
+  expect_no_error(p1 |> er_plot_add_groups(treatment, style = er_style_group_linerange))
+  expect_no_error(p2 |> er_plot_add_groups(treatment, style = er_style_group_linerange))
+
+  p1 <- p1 |> er_plot_add_groups(treatment, style = er_style_group_linerange)
+  p2 <- p2 |> er_plot_add_groups(treatment, style = er_style_group_linerange)
+
+  args1 <- list(
+    data = p1$data,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata = p1$strata,
+    theme = p1$theme
+  )
+  args2 <- list(
+    data = p2$data,
+    config = p2$layer$group$config[[1]],
+    stratify = p2$layer$group$stratify,
+    exposure = p2$exposure,
+    response = p2$response,
+    strata = p2$strata,
+    theme = p2$theme
+  )
+
+  p1_out <- do.call(er_style_group_linerange, args1)
+  p2_out <- do.call(er_style_group_linerange, args2)
+
+  expect_length(p1_out, 4)
+  expect_length(p2_out, 4)
+
+  expect_true(all(vapply(p1_out[1:3], inherits, logical(1), "LayerInstance")))
+  expect_true(inherits(p1_out[[4]], "CoordCartesian"))
+
+  expect_true(all(vapply(p2_out[1:3], inherits, logical(1), "LayerInstance")))
+  expect_true(inherits(p2_out[[4]], "CoordCartesian"))
+})
+
+test_that("er_style_group_linerange() computes correct median/quantile values", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_linerange)
+  args1 <- list(
+    data = p1$data,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata = p1$strata,
+    theme = p1$theme
+  )
+
+  p1_out <- do.call(er_style_group_linerange, args1)
+  dot_data <- p1_out[[3]]$data
+  drug_row <- dot_data[dot_data$lvl == "Drug (N=200)", ]
+
+  drug_aucss <- er_test_data$aucss[er_test_data$treatment == "Drug"]
+  expect_equal(drug_row$med, stats::median(drug_aucss))
+  expect_equal(drug_row$inner_lo, unname(stats::quantile(drug_aucss, 0.25)))
+  expect_equal(drug_row$inner_hi, unname(stats::quantile(drug_aucss, 0.75)))
+  expect_equal(drug_row$outer_lo, unname(stats::quantile(drug_aucss, 0.05)))
+  expect_equal(drug_row$outer_hi, unname(stats::quantile(drug_aucss, 0.95)))
+})
+
+test_that("er_style_group_linerange() size argument scales dot/line sizes together", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_linerange)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_group_linerange, args)
+  out_double  <- do.call(er_style_group_linerange, c(args, list(size = 2)))
+
+  expect_equal(out_double[[1]]$aes_params$linewidth, out_default[[1]]$aes_params$linewidth * 2)
+  expect_equal(out_double[[2]]$aes_params$linewidth, out_default[[2]]$aes_params$linewidth * 2)
+  expect_equal(out_double[[3]]$aes_params$size, out_default[[3]]$aes_params$size * 2)
+})
+
+test_that("er_style_group_linerange() alpha_dot/alpha_inner/alpha_outer override defaults", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_linerange)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_default <- do.call(er_style_group_linerange, args)
+  expect_equal(out_default[[1]]$aes_params$alpha, 0.4)
+  expect_equal(out_default[[2]]$aes_params$alpha, 0.8)
+  expect_equal(out_default[[3]]$aes_params$alpha, 1)
+
+  out_custom <- do.call(er_style_group_linerange, c(args, list(
+    alpha_dot = 0.9, alpha_inner = 0.6, alpha_outer = 0.2
+  )))
+  expect_equal(out_custom[[1]]$aes_params$alpha, 0.2)
+  expect_equal(out_custom[[2]]$aes_params$alpha, 0.6)
+  expect_equal(out_custom[[3]]$aes_params$alpha, 0.9)
+})
+
+test_that("er_style_group_linerange() validates inner_range/outer_range", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_linerange, inner_range = c(0.75, 0.25))
+  expect_error(er_plot_build(p1), "inner_range")
+
+  p2 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_linerange, outer_range = c(-0.1, 0.9))
+  expect_error(er_plot_build(p2), "outer_range")
+})
+
+test_that("er_plot_add_groups() builds and renders with style = er_style_group_linerange", {
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_groups(treatment, style = er_style_group_linerange)
+
+  expect_no_error(er_plot_build(plt))
+
+  plt_strat <- er_test_data |>
+    er_plot(aucss, ae1, sex) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_groups(treatment, style = er_style_group_linerange)
+
+  expect_no_error(er_plot_build(plt_strat))
+})
