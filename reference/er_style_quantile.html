@@ -95,6 +95,7 @@ or a pointrange, optionally with bin-boundary vlines.</p>
 <span>  vline_label_colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  vline_label_fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  vline_label_inset <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  vline_label_digits <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -131,6 +132,7 @@ or a pointrange, optionally with bin-boundary vlines.</p>
 <span>  vline_label_colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  vline_label_fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  vline_label_inset <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  vline_label_digits <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -184,11 +186,11 @@ or a pointrange, optionally with bin-boundary vlines.</p>
 
 
 <dt id="arg-vline-colour-vline-linetype">vline_colour, vline_linetype<a class="anchor" aria-label="anchor" href="#arg-vline-colour-vline-linetype"></a></dt>
-<dd><p>Colour and linetype of interior quantile boundary lines.</p></dd>
+<dd><p>Colour and linetype of quantile-bin boundary lines.</p></dd>
 
 
 <dt id="arg-vline-labels">vline_labels<a class="anchor" aria-label="anchor" href="#arg-vline-labels"></a></dt>
-<dd><p>Logical: whether the <code>_vlines</code> builders also label each interior boundary with its exposure value.</p></dd>
+<dd><p>Logical: whether the <code>_vlines</code> builders also label each bin boundary with its exposure value.</p></dd>
 
 
 <dt id="arg-vline-label-position">vline_label_position<a class="anchor" aria-label="anchor" href="#arg-vline-label-position"></a></dt>
@@ -201,6 +203,10 @@ or a pointrange, optionally with bin-boundary vlines.</p>
 
 <dt id="arg-vline-label-inset">vline_label_inset<a class="anchor" aria-label="anchor" href="#arg-vline-label-inset"></a></dt>
 <dd><p>Fraction of the response range <code>vline_labels</code> are inset from the panel edge.</p></dd>
+
+
+<dt id="arg-vline-label-digits">vline_label_digits<a class="anchor" aria-label="anchor" href="#arg-vline-label-digits"></a></dt>
+<dd><p>Number of decimal places <code>vline_labels</code> are rounded to.</p></dd>
 
 
 <dt id="arg-pointrange-size-pointrange-linewidth">pointrange_size, pointrange_linewidth<a class="anchor" aria-label="anchor" href="#arg-pointrange-size-pointrange-linewidth"></a></dt>
@@ -217,10 +223,15 @@ or a pointrange, optionally with bin-boundary vlines.</p>
 bin exposure into quantile groups and plot a response summary with an
 uncertainty interval. <code>er_style_quantile_errorbar()</code> and
 <code>er_style_quantile_pointrange()</code> are the base builders; their
-<code>_vlines</code> variants add interior quantile-bin boundary lines. All
-built-in quantile builders are tagged <code>er_style_tag(fn, layer = "quantile")</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code> errors informatively if
-handed a builder tagged for a different layer.</p>
-<p>The <code>_vlines</code> variants can also label each interior boundary with its
+<code>_vlines</code> variants add a line at every quantile-bin boundary –
+including the two outer boundaries at the minimum non-placebo
+exposure and the overall maximum exposure, not just the boundaries
+shared between two adjacent bins – so a reader can see every bin
+edge from the plot alone. All built-in quantile builders are tagged
+<code>er_style_tag(fn, layer = "quantile")</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>
+errors informatively if handed a builder tagged for a different
+layer.</p>
+<p>The <code>_vlines</code> variants can also label each boundary with its
 exposure value (<code>vline_labels = TRUE</code>, off by default). Labels are
 drawn with <code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code> (an opaque background, since a
 label sits directly on a vline spanning the full panel height) along
@@ -267,7 +278,8 @@ implement, including how to write a custom builder of your own.</p>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># er_style_quantile_errorbar_vlines(): the default, plus dotted</span></span></span>
-<span class="r-in"><span>  <span class="co"># lines marking the interior quantile-bin boundaries</span></span></span>
+<span class="r-in"><span>  <span class="co"># lines marking every quantile-bin boundary, including the outer</span></span></span>
+<span class="r-in"><span>  <span class="co"># edges at the minimum non-placebo and maximum exposure</span></span></span>
 <span class="r-in"><span>  <span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
@@ -306,8 +318,9 @@ implement, including how to write a custom builder of your own.</p>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_theme.html">er_plot_theme</a></span><span class="op">(</span>dodge_width <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="co"># labeling each interior quantile-bin boundary with its exposure</span></span></span>
-<span class="r-in"><span>  <span class="co"># value, placed automatically to avoid the summary annotation</span></span></span>
+<span class="r-in"><span>  <span class="co"># labeling every quantile-bin boundary (including the outer edges)</span></span></span>
+<span class="r-in"><span>  <span class="co"># with its exposure value, placed automatically to avoid the</span></span></span>
+<span class="r-in"><span>  <span class="co"># summary annotation</span></span></span>
 <span class="r-in"><span>  <span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>

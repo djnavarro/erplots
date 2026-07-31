@@ -41,6 +41,7 @@ er_style_quantile_errorbar_vlines(
   vline_label_colour = NULL,
   vline_label_fill = NULL,
   vline_label_inset = 0.05,
+  vline_label_digits = 0,
   ...
 )
 
@@ -77,6 +78,7 @@ er_style_quantile_pointrange_vlines(
   vline_label_colour = NULL,
   vline_label_fill = NULL,
   vline_label_inset = 0.05,
+  vline_label_digits = 0,
   ...
 )
 ```
@@ -131,12 +133,12 @@ er_style_quantile_pointrange_vlines(
 
 - vline_colour, vline_linetype:
 
-  Colour and linetype of interior quantile boundary lines.
+  Colour and linetype of quantile-bin boundary lines.
 
 - vline_labels:
 
-  Logical: whether the `_vlines` builders also label each interior
-  boundary with its exposure value.
+  Logical: whether the `_vlines` builders also label each bin boundary
+  with its exposure value.
 
 - vline_label_position:
 
@@ -151,6 +153,10 @@ er_style_quantile_pointrange_vlines(
 
   Fraction of the response range `vline_labels` are inset from the panel
   edge.
+
+- vline_label_digits:
+
+  Number of decimal places `vline_labels` are rounded to.
 
 - pointrange_size, pointrange_linewidth:
 
@@ -169,14 +175,17 @@ Builders for the `quantile` layer
 bin exposure into quantile groups and plot a response summary with an
 uncertainty interval. `er_style_quantile_errorbar()` and
 `er_style_quantile_pointrange()` are the base builders; their `_vlines`
-variants add interior quantile-bin boundary lines. All built-in quantile
-builders are tagged `er_style_tag(fn, layer = "quantile")`, so
+variants add a line at every quantile-bin boundary – including the two
+outer boundaries at the minimum non-placebo exposure and the overall
+maximum exposure, not just the boundaries shared between two adjacent
+bins – so a reader can see every bin edge from the plot alone. All
+built-in quantile builders are tagged
+`er_style_tag(fn, layer = "quantile")`, so
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 errors informatively if handed a builder tagged for a different layer.
 
-The `_vlines` variants can also label each interior boundary with its
-exposure value (`vline_labels = TRUE`, off by default). Labels are drawn
-with
+The `_vlines` variants can also label each boundary with its exposure
+value (`vline_labels = TRUE`, off by default). Labels are drawn with
 [`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
 (an opaque background, since a label sits directly on a vline spanning
 the full panel height) along either the top or bottom edge of the panel.
@@ -229,7 +238,8 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     plot()
 
   # er_style_quantile_errorbar_vlines(): the default, plus dotted
-  # lines marking the interior quantile-bin boundaries
+  # lines marking every quantile-bin boundary, including the outer
+  # edges at the minimum non-placebo and maximum exposure
   erglm_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(mod) |>
@@ -268,8 +278,9 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_theme(dodge_width = 0.15) |>
     plot()
 
-  # labeling each interior quantile-bin boundary with its exposure
-  # value, placed automatically to avoid the summary annotation
+  # labeling every quantile-bin boundary (including the outer edges)
+  # with its exposure value, placed automatically to avoid the
+  # summary annotation
   erglm_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(mod) |>
