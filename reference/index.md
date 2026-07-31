@@ -64,6 +64,8 @@ plot
   [`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md)
   [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md)
   [`er_style_group_linerange()`](https://erplots.djnavarro.net/reference/er_style_group.md)
+  [`er_style_group_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md)
+  [`er_style_group_violinjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md)
   : Group panel builders for exposure-response plots
 
 ## Model interface

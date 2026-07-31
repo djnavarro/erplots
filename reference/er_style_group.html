@@ -116,6 +116,38 @@ histogram panel.</p>
 <span>  alpha_inner <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  alpha_outer <span class="op">=</span> <span class="fl">0.4</span>,</span>
 <span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">er_style_group_boxjitter</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">config</span>,</span>
+<span>  <span class="va">stratify</span>,</span>
+<span>  <span class="va">exposure</span>,</span>
+<span>  <span class="va">response</span>,</span>
+<span>  <span class="va">strata</span>,</span>
+<span>  <span class="va">theme</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  jitter_height <span class="op">=</span> <span class="fl">0.15</span>,</span>
+<span>  jitter_size <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  jitter_alpha <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">er_style_group_violinjitter</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">config</span>,</span>
+<span>  <span class="va">stratify</span>,</span>
+<span>  <span class="va">exposure</span>,</span>
+<span>  <span class="va">response</span>,</span>
+<span>  <span class="va">strata</span>,</span>
+<span>  <span class="va">theme</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  quantiles <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  quantile_linetype <span class="op">=</span> <span class="st">"solid"</span>,</span>
+<span>  jitter_height <span class="op">=</span> <span class="fl">0.15</span>,</span>
+<span>  jitter_size <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  jitter_alpha <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -178,6 +210,10 @@ histogram panel.</p>
 <dt id="arg-alpha-dot-alpha-inner-alpha-outer">alpha_dot, alpha_inner, alpha_outer<a class="anchor" aria-label="anchor" href="#arg-alpha-dot-alpha-inner-alpha-outer"></a></dt>
 <dd><p>Per-part transparency for <code>er_style_group_linerange()</code>'s dot, inner line, and outer line.</p></dd>
 
+
+<dt id="arg-jitter-height-jitter-size-jitter-alpha">jitter_height, jitter_size, jitter_alpha<a class="anchor" aria-label="anchor" href="#arg-jitter-height-jitter-size-jitter-alpha"></a></dt>
+<dd><p>Vertical jitter, point size, and transparency for <code>er_style_group_boxjitter()</code>/<code>er_style_group_violinjitter()</code>'s overlaid points.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -185,7 +221,7 @@ histogram panel.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for the <code>group</code> layer (<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>) draw exposure distributions for grouping variables. <code>er_style_group_boxplot()</code> and <code>er_style_group_violin()</code> put group levels on the y-axis; <code>er_style_group_histogram()</code> puts them on facet strips and frees the y-axis for counts; <code>er_style_group_linerange()</code> also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. All built-in group builders are tagged <code>layer = "group"</code>, so <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> errors if given one tagged for another layer.</p>
+    <p>Builders for the <code>group</code> layer (<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>) draw exposure distributions for grouping variables. <code>er_style_group_boxplot()</code> and <code>er_style_group_violin()</code> put group levels on the y-axis; <code>er_style_group_histogram()</code> puts them on facet strips and frees the y-axis for counts; <code>er_style_group_linerange()</code> also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. <code>er_style_group_boxjitter()</code>/<code>er_style_group_violinjitter()</code> are thin wrappers around <code>er_style_group_boxplot()</code>/<code>er_style_group_violin()</code> that additionally overlay jittered raw exposure values (vertical jitter only – exposure position on the x-axis is never perturbed), the same idea <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code> applies to the data layer. All built-in group builders are tagged <code>layer = "group"</code>, so <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code> errors if given one tagged for another layer.</p>
 <p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions implement.</p>
     </div>
     <div class="section level2">
@@ -228,11 +264,29 @@ histogram panel.</p>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">aucss</span>, style <span class="op">=</span> <span class="va">er_style_group_linerange</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># er_style_group_boxjitter(): the boxplot, with jittered raw</span></span></span>
+<span class="r-in"><span>  <span class="co"># exposure values overlaid on top</span></span></span>
+<span class="r-in"><span>  <span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">aucss</span>, style <span class="op">=</span> <span class="va">er_style_group_boxjitter</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># er_style_group_violinjitter(): the violin, with jittered raw</span></span></span>
+<span class="r-in"><span>  <span class="co"># exposure values overlaid on top</span></span></span>
+<span class="r-in"><span>  <span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span><span class="va">aucss</span>, style <span class="op">=</span> <span class="va">er_style_group_violinjitter</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-plt img"><img src="er_style_group-1.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="er_style_group-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="er_style_group-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="er_style_group-4.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="er_style_group-5.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="er_style_group-6.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -63,6 +63,38 @@ er_style_group_linerange(
   alpha_outer = 0.4,
   ...
 )
+
+er_style_group_boxjitter(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  alpha = 0.5,
+  jitter_height = 0.15,
+  jitter_size = 1,
+  jitter_alpha = 0.6,
+  ...
+)
+
+er_style_group_violinjitter(
+  data,
+  config,
+  stratify,
+  exposure,
+  response,
+  strata,
+  theme,
+  alpha = 0.5,
+  quantiles = NULL,
+  quantile_linetype = "solid",
+  jitter_height = 0.15,
+  jitter_size = 1,
+  jitter_alpha = 0.6,
+  ...
+)
 ```
 
 ## Arguments
@@ -128,6 +160,12 @@ er_style_group_linerange(
   Per-part transparency for `er_style_group_linerange()`'s dot, inner
   line, and outer line.
 
+- jitter_height, jitter_size, jitter_alpha:
+
+  Vertical jitter, point size, and transparency for
+  `er_style_group_boxjitter()`/`er_style_group_violinjitter()`'s
+  overlaid points.
+
 ## Value
 
 A geom, or a list of geoms; see
@@ -143,8 +181,15 @@ levels on the y-axis; `er_style_group_histogram()` puts them on facet
 strips and frees the y-axis for counts; `er_style_group_linerange()`
 also puts group levels on the y-axis, summarising each level's exposure
 distribution as a median dot flanked by an inner-range and outer-range
-line rather than a full boxplot/violin shape. All built-in group
-builders are tagged `layer = "group"`, so
+line rather than a full boxplot/violin shape.
+`er_style_group_boxjitter()`/`er_style_group_violinjitter()` are thin
+wrappers around `er_style_group_boxplot()`/`er_style_group_violin()`
+that additionally overlay jittered raw exposure values (vertical jitter
+only – exposure position on the x-axis is never perturbed), the same
+idea
+[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+applies to the data layer. All built-in group builders are tagged
+`layer = "group"`, so
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
 errors if given one tagged for another layer.
 
@@ -191,7 +236,25 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_add_model(mod) |>
     er_plot_add_groups(aucss, style = er_style_group_linerange) |>
     plot()
+
+  # er_style_group_boxjitter(): the boxplot, with jittered raw
+  # exposure values overlaid on top
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_groups(aucss, style = er_style_group_boxjitter) |>
+    plot()
+
+  # er_style_group_violinjitter(): the violin, with jittered raw
+  # exposure values overlaid on top
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_groups(aucss, style = er_style_group_violinjitter) |>
+    plot()
 }
+
+
 
 
 
