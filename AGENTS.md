@@ -495,6 +495,82 @@ falling through to nothing. Covered by a new test in
 `tests/testthat/test-er-plot-api.R`, alongside the existing "group-only"/
 "panel-layout data-only" no-base-layer tests it sits next to.
 
+## Quantile boundary-vline value labels, with collision avoidance against the summary layer
+
+`er_style_quantile_errorbar_vlines()`/`er_style_quantile_pointrange_vlines()`
+drew interior quantile-bin boundary lines but never labelled them with
+the actual exposure cutpoint value, leaving readers to eyeball the
+vline against the x-axis. Both builders gained five new arguments,
+default off (`vline_labels = FALSE`, so existing plots render
+byte-for-byte unchanged): `vline_label_position` (`"auto"`/`"top"`/
+`"bottom"`), `vline_label_size`, `vline_label_colour`,
+`vline_label_fill`, `vline_label_inset`. This was added as new
+arguments on the existing `_vlines` builders rather than a further tier
+of wrapper builders (e.g. `..._vlines_labelled()`) -- the `_vlines`
+functions are already thin wrappers over the base point/errorbar
+builders, and a wrapper-of-a-wrapper felt like unneeded indirection for
+what's a detail of how the vlines themselves render, unlike the
+group layer's boxjitter/violinjitter (a materially different visual
+idiom, warranting a dedicated builder -- see above).
+
+Labels are drawn with `ggplot2::geom_label()` (opaque background),
+distinct from the plain `geom_text()` the existing point/errorbar value
+labels use -- a vline label sits directly on top of a line spanning the
+full panel height, so a background keeps it legible the way the
+summary annotation's own `geom_label()` already is, whereas the
+point/errorbar labels sit in relatively open space near their CI
+bounds. Label text is `theme$format_number(breaks)`, the same
+formatter convention `y_mid_lbl`/`p_value` labels already follow with
+`format_percent`/`format_p`. Labels are placed in **data units** (not
+the summary annotation's normalized `[0, 1]` plot-fraction space),
+since each label's `x` must line up exactly with its own vline's
+`xintercept`; `angle = 90` rotates the text to run alongside its
+vertical line.
+
+**Collision avoidance.** `er_plot_add_summary()`'s p-value/n/
+coefficients/gof annotations place themselves in whichever of the 4
+panel corners is least crowded by raw data points (a Euclidean
+distance-to-corner calculation on rescaled `[0, 1]` coordinates). Vline
+labels risk colliding with that annotation if placed carelessly. Rather
+than coupling the two layers directly (a quantile builder would need to
+know whether a summary layer exists and where it landed), the same
+corner-distance calculation was extracted into a new shared helper,
+`.compute_corner_distance(data, exposure, response)`
+(`R/utils-helpers.R`, `@noRd` -- pure refactor of `.layer_summary()`'s
+previously-inline computation, no behaviour change there), and
+`.layer_quantile()` now calls it too, storing the identical result as
+`config$corner_distance` on the quantile layer's own config. A new
+internal `.quantile_label_side()` (`R/er-plot-style-quantile.R`)
+finds the single least-crowded corner (`names(sort(x))[4]`, the same
+selection `er_style_summary_pvalue()` uses) and returns the *opposite*
+vertical half (`"top"` if that corner is in the bottom half, else
+`"bottom"`). Since both layers compute the exact same deterministic,
+data-driven quantity independently, this correctly avoids the
+summary's corner whether or not a summary layer is actually present in
+the plot -- no cross-layer coupling needed. `vline_label_position =
+"auto"` (the default) uses this heuristic; `"top"`/`"bottom"` override
+it manually.
+
+Covered by new tests in `tests/testthat/test-er-plot-style-quantile.R`:
+`.quantile_label_side()` unit tests against constructed
+corner-distance vectors (all 4 corners), a `vline_labels = FALSE`
+regression test confirming byte-for-byte-unchanged output length, a
+`vline_labels = TRUE` test checking the label geom's `x`/data shape, a
+`vline_label_position` override test, `vline_label_size`/`_colour`/
+`_fill` override tests, a regression test confirming
+`.layer_summary()`'s own `config$corner_distance` is unchanged after
+the extraction, a check that `.layer_quantile()` also now computes it,
+and full `er_plot_build()` integration tests (with and without a
+paired summary layer, stratified and not). One pre-existing test in
+`test-er-plot-layer.R` asserting `.layer_quantile()`'s exact config
+field count/names needed updating for the new `corner_distance` field.
+Verified: `devtools::test()` (926 passing, up from 905) and
+`devtools::check()` (0 errors/warnings/notes).
+
+Not done as part of this change: no vignette updates (matching how
+issues #2/#3 were scoped); `angle = 90` for the label text wasn't made
+user-configurable (a fixed visual choice, not exposed as an argument).
+
 ## `er_style_group_boxjitter()`/`er_style_group_violinjitter()`: jitter overlays for the group layer's box/violin builders
 
 `er_style_group_boxplot()`/`er_style_group_violin()` had no way to show

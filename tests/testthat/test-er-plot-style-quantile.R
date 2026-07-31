@@ -441,3 +441,150 @@ test_that("er_style_quantile_pointrange_vlines() forwards all new args and passe
   expect_equal(out[[1]]$aes_params$linetype, "dashed")
   expect_equal(out[[3]]$aes_params$size, 6)
 })
+
+# ---- vline_labels (issue #1) ----
+
+test_that(".quantile_label_side() picks the vertical half opposite the least-crowded corner", {
+  expect_equal(
+    erplots:::.quantile_label_side(c(top_left = 0.1, top_right = 0.2, bottom_left = 0.3, bottom_right = 0.9)),
+    "top"
+  )
+  expect_equal(
+    erplots:::.quantile_label_side(c(top_left = 0.1, top_right = 0.2, bottom_left = 0.9, bottom_right = 0.3)),
+    "top"
+  )
+  expect_equal(
+    erplots:::.quantile_label_side(c(top_left = 0.9, top_right = 0.2, bottom_left = 0.3, bottom_right = 0.1)),
+    "bottom"
+  )
+  expect_equal(
+    erplots:::.quantile_label_side(c(top_left = 0.1, top_right = 0.9, bottom_left = 0.3, bottom_right = 0.2)),
+    "bottom"
+  )
+})
+
+test_that("vline_labels = FALSE (the default) leaves _vlines builders' output unchanged", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out_errorbar <- do.call(er_style_quantile_errorbar_vlines, args)
+  expect_length(out_errorbar, 4) # vline, point, bar, label
+
+  out_pointrange <- do.call(er_style_quantile_pointrange_vlines, args)
+  expect_length(out_pointrange, 3) # vline, pointrange, label
+})
+
+test_that("vline_labels = TRUE adds a geom_label at the interior breaks", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out <- do.call(er_style_quantile_errorbar_vlines, c(args, list(vline_labels = TRUE)))
+  expect_length(out, 5) # vline, point, bar, label, vline label
+
+  label_layer <- out[[5]]
+  expect_true(inherits(label_layer, "LayerInstance"))
+  expect_s3_class(label_layer$geom, "GeomLabel")
+
+  breaks <- p1$layer$quantile$config$breaks
+  interior_breaks <- breaks[-c(1, length(breaks))]
+  expect_equal(label_layer$data$x, unname(interior_breaks))
+})
+
+test_that("vline_label_position overrides the automatic top/bottom heuristic", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  response_lo <- p1$response$limits[1]
+  response_hi <- p1$response$limits[2]
+  margin <- 0.05 * (response_hi - response_lo)
+
+  out_top <- do.call(er_style_quantile_errorbar_vlines,
+                      c(args, list(vline_labels = TRUE, vline_label_position = "top")))
+  out_bottom <- do.call(er_style_quantile_errorbar_vlines,
+                         c(args, list(vline_labels = TRUE, vline_label_position = "bottom")))
+
+  expect_equal(unique(out_top[[5]]$data$y), response_hi - margin)
+  expect_equal(unique(out_bottom[[5]]$data$y), response_lo + margin)
+})
+
+test_that("vline_label_size/vline_label_colour/vline_label_fill override defaults", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out <- do.call(er_style_quantile_errorbar_vlines, c(args, list(
+    vline_labels = TRUE, vline_label_size = 6, vline_label_colour = "red", vline_label_fill = "yellow"
+  )))
+  label_layer <- out[[5]]
+  expect_equal(label_layer$aes_params$size, 6)
+  expect_equal(label_layer$aes_params$colour, "red")
+  expect_equal(label_layer$aes_params$fill, "yellow")
+})
+
+test_that(".layer_summary()'s corner_distance output is unchanged after the .compute_corner_distance() extraction", {
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_summary(er_test_mod1)
+
+  expect_equal(names(plt$layer$summary$config$corner_distance), c("top_left", "top_right", "bottom_left", "bottom_right"))
+  expect_true(all(plt$layer$summary$config$corner_distance >= 0))
+})
+
+test_that(".layer_quantile() also computes corner_distance", {
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  expect_equal(names(plt$layer$quantile$config$corner_distance), c("top_left", "top_right", "bottom_left", "bottom_right"))
+})
+
+test_that("er_plot_add_quantiles() builds and renders with vline_labels = TRUE, with and without a summary layer", {
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_summary(er_test_mod1) |>
+    er_plot_add_quantiles(bins = 4, style = er_style_quantile_errorbar_vlines, vline_labels = TRUE)
+  expect_no_error(er_plot_build(plt))
+
+  plt_pointrange <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_quantiles(bins = 4, style = er_style_quantile_pointrange_vlines, vline_labels = TRUE)
+  expect_no_error(er_plot_build(plt_pointrange))
+
+  plt_strat <- er_test_data |>
+    er_plot(aucss, ae1, sex) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_quantiles(bins = 4, style = er_style_quantile_errorbar_vlines, vline_labels = TRUE) |>
+    er_plot_add_summary(er_test_mod1)
+  expect_no_error(er_plot_build(plt_strat))
+})

@@ -123,10 +123,10 @@ test_that(".layer_quantile constructs the correct data structure", {
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
 
-  expect_length(cfg1, 6)
-  expect_length(cfg2, 6)
+  expect_length(cfg1, 7)
+  expect_length(cfg2, 7)
 
-  cfg_names <- c("n_quantiles", "conf_level", "breaks", "summary", "style", "dots")
+  cfg_names <- c("n_quantiles", "conf_level", "breaks", "corner_distance", "summary", "style", "dots")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 

@@ -325,6 +325,54 @@ cut_quantile <- function(x, n = 4) {
 }
 
 
+#' Visual distance from a plot's raw data points to each of its 4 corners
+#'
+#' @details Rescales `data`'s exposure/response columns onto `[0, 1]`
+#' using `exposure`/`response`'s own `limits`, then computes each point's
+#' Euclidean distance to each of the 4 corners of the unit square,
+#' returning the minimum (i.e. the closest a point comes to each corner --
+#' a large value means that corner is uncrowded). Shared by
+#' `.layer_summary()` (used to place the summary annotation in the
+#' least-crowded corner) and `.layer_quantile()` (used by
+#' `er_style_quantile_errorbar_vlines()`/`er_style_quantile_pointrange_vlines()`
+#' to place boundary-vline labels in the *opposite* vertical half from
+#' wherever a summary annotation would render, avoiding a collision
+#' without either layer needing to know whether the other is present).
+#'
+#' @param data A data frame with the exposure/response columns.
+#' @param exposure,response `er_plot` exposure/response variable lists
+#'   (`name`, `limits`).
+#' @returns A named numeric vector of length 4: `top_left`, `top_right`,
+#'   `bottom_left`, `bottom_right`.
+#' @noRd
+.compute_corner_distance <- function(data, exposure, response) {
+
+  exposure_lo <- exposure$limits[1]
+  exposure_hi <- exposure$limits[2]
+  response_lo <- response$limits[1]
+  response_hi <- response$limits[2]
+
+  data |>
+    dplyr::select(dplyr::all_of(c(exposure$name, response$name))) |>
+    dplyr::rename(y = dplyr::all_of(response$name), x = dplyr::all_of(exposure$name)) |>
+    dplyr::mutate(
+      x = (x - exposure_lo) / (exposure_hi - exposure_lo),
+      y = (y - response_lo) / (response_hi - response_lo),
+      tl_dist = sqrt(x^2 + (1 - y)^2),
+      tr_dist = sqrt((1 - x)^2 + (1 - y)^2),
+      bl_dist = sqrt(x^2 + y^2),
+      br_dist = sqrt((1 - x)^2 + y^2)
+    ) |>
+    dplyr::summarise(
+      top_left     = min(tl_dist, na.rm = TRUE),
+      top_right    = min(tr_dist, na.rm = TRUE),
+      bottom_left  = min(bl_dist, na.rm = TRUE),
+      bottom_right = min(br_dist, na.rm = TRUE)
+    ) |>
+    unlist()
+}
+
+
 # globalVariables declarations -------------------------------------------
 
 utils::globalVariables(c(
