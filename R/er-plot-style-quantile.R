@@ -208,6 +208,13 @@ NULL
 #' same set `.quantile_boundary_vlines()` draws lines at -- including
 #' the two outer boundaries at the minimum non-placebo and maximum
 #' exposure, not just the interior boundaries shared between two bins.
+#' The two outer labels are justified to hang inward (toward the panel's
+#' interior) rather than centered on their vline like every interior
+#' label, since an outer boundary can sit right at (or very close to)
+#' the exposure axis's own limits -- most commonly when there's no
+#' placebo arm, so `config$breaks`' own min/max coincide exactly with
+#' `exposure$limits` -- and a label centered there would have roughly
+#' half its width hanging off the edge of the panel.
 #'
 #' @returns A single [ggplot2::geom_label()], or `NULL` if there are no
 #'   breaks to label.
@@ -235,16 +242,32 @@ NULL
     lbl = scales::label_number(accuracy = 10^(-digits))(breaks)
   )
 
+  # `vjust` controls the perpendicular (thickness) offset for text
+  # rotated 90 degrees -- 0.5 centers a label on its vline, `0`/`1` hang
+  # it to one side. The leftmost/rightmost boundary each hang inward
+  # (toward the panel's interior) rather than centering, so they don't
+  # risk overflowing past the exposure axis's own limits; every interior
+  # boundary still centers, since it's never at risk of running off the
+  # panel edge.
+  n_breaks <- length(breaks)
+  label_vjust <- rep(0.5, n_breaks)
+  # vjust = 0 hangs a rotated label to the *left* of its line (toward
+  # smaller x); vjust = 1 hangs it to the *right* (toward larger x) --
+  # see the internal helper's own tests for a from-scratch derivation.
+  # The leftmost boundary should hang right (into the panel), so it's
+  # vjust = 1; the rightmost should hang left (also into the panel), so
+  # it's vjust = 0.
+  label_vjust[1] <- 1
+  label_vjust[n_breaks] <- 0
+
   args <- list(
     data = label_data,
     mapping = ggplot2::aes(x = x, y = y, label = lbl),
     angle = 90,
-    # `vjust` controls the perpendicular (thickness) offset for text
-    # rotated 90 degrees, so 0.5 centers the label on the vline itself;
+    vjust = label_vjust,
     # `hjust` controls the along-the-line offset, so it's what picks
     # whether the label hangs down from the top edge or up from the
     # bottom edge, into the panel rather than off of it.
-    vjust = 0.5,
     hjust = if (side == "top") 1 else 0,
     inherit.aes = FALSE,
     show.legend = FALSE

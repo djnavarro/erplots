@@ -630,6 +630,56 @@ vline-label data-shape tests now assert against the full `breaks`
 vector rather than `breaks[-c(1, length(breaks))]`). `devtools::test()`
 (936 passing) and `devtools::document()` both clean.
 
+**Follow-up fix: the two outermost `vline_labels` no longer risk
+clipping off the panel edge.** Once every boundary got a label
+(including the outer two, above), a new risk appeared: `object$exposure$limits`
+is `range()` of the *entire* exposure column (`er_plot()`, unchanged),
+while `config$breaks`' own min/max come from the *non-placebo* exposure
+values only ([cut_exposure_quantile()]). Whenever there's no placebo
+arm (`is_placebo` all `FALSE`, e.g. a purely observational dataset),
+these coincide exactly -- so the leftmost/rightmost boundary vlines can
+sit right at `object$exposure$limits` itself. Every label used to be
+centered on its own vline (`vjust = 0.5`, the centering fix above), so
+for those two boundaries roughly half of the label's rendered width
+would fall *outside* the axis limits; the base plot's own
+`coord_cartesian(..., clip = "off")` means this isn't clipped by the
+panel border itself, but a real device/output region is still finite,
+and confirmed by an actual stress-test render (a large `vline_label_size`
+combined with a no-placebo dataset and a narrow output device) that the
+overflowing half of the outermost label can be genuinely cut off.
+
+Fixed by justifying only the first and last label to hang *inward*
+(toward the panel's interior) instead of centering: `vjust` is now a
+per-row vector (`0.5` for every interior boundary, unchanged) rather
+than one scalar applied to every label, with the first element set so
+the leftmost label hangs toward larger x and the last set so the
+rightmost label hangs toward smaller x. (`ggplot2::geom_label()` accepts
+a vector for a fixed, non-mapped parameter like `vjust`/`hjust`,
+recycled one value per row of `data` -- confirmed empirically before
+relying on it.) Getting the direction right took a genuine, deliberate
+derivation, not a guess: for text rotated `angle = 90`, `vjust` moves
+the label *left* (toward smaller x) at `vjust = 0`, and *right* (toward
+larger x) at `vjust = 1` (verified with a small script pinning a
+single rotated label between two colour-coded reference vlines and
+reading off which side the rendered box fell on) -- the opposite of
+what "hang the leftmost label rightward, into the panel" naively
+suggests if you reason from the *unrotated* meaning of `vjust`. Only
+the two outer labels needed re-justifying; every interior label is
+never at risk of running past an axis limit; and the fix doesn't
+require knowing anything about the plot's actual expansion/margins, an
+explicit `xlim`, or whether a placebo arm exists.
+
+Covered by new tests in `tests/testthat/test-er-plot-style-quantile.R`:
+the existing "centered" test was narrowed to only check the *interior*
+labels' `vjust`, and a new test confirms the first/last `vjust` values
+specifically (`1` for the leftmost label, `0` for the rightmost).
+Verified visually with a from-scratch stress-test render (a
+no-placebo toy dataset, `vline_label_size = 8`, `vline_label_digits =
+2`, a narrow `png()` device) confirming both outer labels render fully
+inside the panel, with rounded corners intact, before and after
+comparison images. `devtools::test()` (939 passing) and
+`devtools::document()` both clean.
+
 ## `er_style_group_boxjitter()`/`er_style_group_violinjitter()`: jitter overlays for the group layer's box/violin builders
 
 `er_style_group_boxplot()`/`er_style_group_violin()` had no way to show

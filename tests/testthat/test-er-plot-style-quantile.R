@@ -553,7 +553,7 @@ test_that("vline_label_size/vline_label_colour/vline_label_fill override default
   expect_equal(label_layer$aes_params$fill, "yellow")
 })
 
-test_that("vline_labels are centered on their vline (vjust = 0.5) with hjust picking top/bottom", {
+test_that("interior vline_labels are centered on their vline (vjust = 0.5) with hjust picking top/bottom", {
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
   args <- list(
     data     = p1$data,
@@ -570,10 +570,36 @@ test_that("vline_labels are centered on their vline (vjust = 0.5) with hjust pic
   out_bottom <- do.call(er_style_quantile_errorbar_vlines,
                          c(args, list(vline_labels = TRUE, vline_label_position = "bottom")))
 
-  expect_equal(out_top[[5]]$aes_params$vjust, 0.5)
-  expect_equal(out_bottom[[5]]$aes_params$vjust, 0.5)
+  # interior breaks (everything but the first/last) stay centered
+  n_breaks <- length(p1$layer$quantile$config$breaks)
+  interior_idx <- seq(2, n_breaks - 1)
+  expect_equal(out_top[[5]]$aes_params$vjust[interior_idx], rep(0.5, length(interior_idx)))
+  expect_equal(out_bottom[[5]]$aes_params$vjust[interior_idx], rep(0.5, length(interior_idx)))
   expect_equal(out_top[[5]]$aes_params$hjust, 1)
   expect_equal(out_bottom[[5]]$aes_params$hjust, 0)
+})
+
+test_that("the outermost two vline_labels hang inward, to avoid overflowing the exposure axis limits", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  args <- list(
+    data     = p1$data,
+    config   = p1$layer$quantile$config,
+    stratify = p1$layer$quantile$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata   = p1$strata,
+    theme    = p1$theme
+  )
+
+  out <- do.call(er_style_quantile_errorbar_vlines, c(args, list(vline_labels = TRUE)))
+  vjust <- out[[5]]$aes_params$vjust
+  n_breaks <- length(p1$layer$quantile$config$breaks)
+
+  expect_length(vjust, n_breaks)
+  # leftmost boundary (lowest exposure) hangs right, into the panel
+  expect_equal(vjust[1], 1)
+  # rightmost boundary (highest exposure) hangs left, into the panel
+  expect_equal(vjust[n_breaks], 0)
 })
 
 test_that("vline_label_digits controls rounding of the label text (default 0)", {
