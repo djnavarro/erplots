@@ -36,7 +36,7 @@ The count-response analogue of
 used by the quantile-binned summary layer (see
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md))
 and
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
 when `response_type = "count"` is explicitly declared. Unlike
 [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md) (the
 default, opt-in-required approximation used when a count response

@@ -227,7 +227,7 @@ and a `fit_resp` column giving that replicate’s simulated prediction.
 Don’t implement this generic at all if your model can’t support it – the
 default method returns `NULL`, and every caller
 ([`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md),
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md))
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md))
 checks for `NULL` and treats it as “simulation isn’t available for this
 model”, not an error.
 
@@ -248,8 +248,9 @@ integer draw for a count response, a draw that includes residual
 variance for a continuous response). A method can return `fit_resp`
 alone, or both columns from the same call; there’s no reason to compute
 `sim_resp` if you only care about spaghetti plots, but
-`er_vpc_plot(model = ...)` will refuse to run (with an informative
-error, not a silently-too-narrow VPC band) if `sim_resp` is missing.
+`er_vpc_add_simulated(model = ...)` will refuse to run (with an
+informative error, not a silently-too-narrow VPC band) if `sim_resp` is
+missing.
 
 ### A worked example
 
@@ -301,17 +302,18 @@ erglm_data |>
 ``` r
 
 
-er_vpc_plot(
-  erglm_data, exposure = aucss, response = ae1, group_by = aucss,
-  model = mod, nsim = 50, seed = 4471
-)
+erglm_data |>
+  er_vpc(aucss, ae1) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, nsim = 50, seed = 4471) |>
+  plot()
 ```
 
 ![](model-interface_files/figure-html/toy-simulate-plot-2.png)
 
 Had `er_simulate.toy_model()` only ever populated `fit_resp`, the
 spaghetti plot above would still work unchanged, but the
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
 call would error, naming `sim_resp` as the missing ingredient, rather
 than quietly drawing a too-narrow band from `fit_resp` alone.
 
@@ -448,7 +450,7 @@ call them:
   additionally exercises
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
   `fit_resp`.
-- `er_vpc_plot(model = your_model, ...)` additionally exercises
+- `er_vpc_add_simulated(model = your_model, ...)` additionally exercises
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
   `sim_resp`.
 - `er_plot_add_summary(model = your_model)` (paired with whichever

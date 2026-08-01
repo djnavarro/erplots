@@ -86,8 +86,9 @@ number of observations in the bin); the rate being estimated is
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The count-response analogue of <code><a href="ci_clopper_pearson.html">ci_clopper_pearson()</a></code>, used by
 the quantile-binned summary layer (see <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>)
-and <code><a href="er_vpc_plot.html">er_vpc_plot()</a></code> when <code>response_type = "count"</code> is explicitly
-declared. Unlike <code><a href="ci_t.html">ci_t()</a></code> (the default, opt-in-required
+and <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/<code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> when
+<code>response_type = "count"</code> is explicitly declared. Unlike <code><a href="ci_t.html">ci_t()</a></code>
+(the default, opt-in-required
 approximation used when a count response auto-detects or is declared
 <code>"continuous"</code>), this interval is exact and never produces a
 negative lower bound. Uses the standard exact ("Garwood") Poisson

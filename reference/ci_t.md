@@ -29,7 +29,8 @@ non-missing values are supplied.
 Used by the quantile-binned summary layer (see
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md))
 and
-[`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
 to compute a confidence interval for the mean response within an
 exposure bin, for continuous (and, as an approximation, count)
 responses. This is the continuous-response analogue of

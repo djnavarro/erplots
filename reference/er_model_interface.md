@@ -62,7 +62,7 @@ er_summary(model, ...)
   binary response, an integer draw for a count response, a draw
   including residual variance for a continuous response) – not just the
   fitted mean/probability. This is what
-  [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)'s
+  [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)'s
   `model` argument requires: a visual predictive check needs simulated
   observations comparable to the actually observed data, not points on
   the mean curve, which is a genuinely different question from the one
@@ -72,7 +72,7 @@ er_summary(model, ...)
   `fit_resp` alone (as every implementation did before `sim_resp`
   existed, and as remains sufficient for spaghetti plots), or both
   columns from the same call.
-  [`er_vpc_plot()`](https://erplots.djnavarro.net/reference/er_vpc_plot.md)
+  [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
   treats a `sim_resp`-less result the same way it treats an outright
   `NULL`: "predictive simulation not available for this model."
 

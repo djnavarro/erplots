@@ -269,8 +269,9 @@ column identifying which replicate each row belongs to, and a
 prediction. Don’t implement this generic at all if your model can’t
 support it – the default method returns <code>NULL</code>, and every
 caller (<code><a href="../reference/er_style_model.html">er_style_model_spaghetti()</a></code>,
-<code><a href="../reference/er_vpc_plot.html">er_vpc_plot()</a></code>) checks for <code>NULL</code> and treats it
-as “simulation isn’t available for this model”, not an error.</p>
+<code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>) checks for <code>NULL</code> and
+treats it as “simulation isn’t available for this model”, not an
+error.</p>
 <p>The one subtlety worth understanding is that <code>fit_resp</code>
 here means something narrower than it sounds like. It’s a draw from the
 <em>parameter uncertainty</em> in the model – “if the true parameters
@@ -288,9 +289,10 @@ binary response, an integer draw for a count response, a draw that
 includes residual variance for a continuous response). A method can
 return <code>fit_resp</code> alone, or both columns from the same call;
 there’s no reason to compute <code>sim_resp</code> if you only care
-about spaghetti plots, but <code>er_vpc_plot(model = ...)</code> will
-refuse to run (with an informative error, not a silently-too-narrow VPC
-band) if <code>sim_resp</code> is missing.</p>
+about spaghetti plots, but
+<code>er_vpc_add_simulated(model = ...)</code> will refuse to run (with
+an informative error, not a silently-too-narrow VPC band) if
+<code>sim_resp</code> is missing.</p>
 <div class="section level3">
 <h3 id="a-worked-example-1">A worked example<a class="anchor" aria-label="anchor" href="#a-worked-example-1"></a>
 </h3>
@@ -333,16 +335,17 @@ the draws:</p>
 <p><img src="model-interface_files/figure-html/toy-simulate-plot-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="../reference/er_vpc_plot.html">er_vpc_plot</a></span><span class="op">(</span></span>
-<span>  <span class="va">erglm_data</span>, exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span>, group_by <span class="op">=</span> <span class="va">aucss</span>,</span>
-<span>  model <span class="op">=</span> <span class="va">mod</span>, nsim <span class="op">=</span> <span class="fl">50</span>, seed <span class="op">=</span> <span class="fl">4471</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, nsim <span class="op">=</span> <span class="fl">50</span>, seed <span class="op">=</span> <span class="fl">4471</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="model-interface_files/figure-html/toy-simulate-plot-2.png" class="r-plt" alt="" width="700"></p>
 <p>Had <code>er_simulate.toy_model()</code> only ever populated
 <code>fit_resp</code>, the spaghetti plot above would still work
-unchanged, but the <code><a href="../reference/er_vpc_plot.html">er_vpc_plot()</a></code> call would error, naming
-<code>sim_resp</code> as the missing ingredient, rather than quietly
-drawing a too-narrow band from <code>fit_resp</code> alone.</p>
+unchanged, but the <code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> call would error,
+naming <code>sim_resp</code> as the missing ingredient, rather than
+quietly drawing a too-narrow band from <code>fit_resp</code> alone.</p>
 <p>The <code>seed</code> handling above is a plain
 <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> for readability; erglm’s own
 <code>er_simulate.erglm_model()</code> additionally auto-picks and
@@ -482,8 +485,9 @@ call them:</p>
 additionally exercises <code><a href="../reference/er_model_interface.html">er_simulate()</a></code>’s
 <code>fit_resp</code>.</li>
 <li>
-<code>er_vpc_plot(model = your_model, ...)</code> additionally
-exercises <code><a href="../reference/er_model_interface.html">er_simulate()</a></code>’s <code>sim_resp</code>.</li>
+<code>er_vpc_add_simulated(model = your_model, ...)</code>
+additionally exercises <code><a href="../reference/er_model_interface.html">er_simulate()</a></code>’s
+<code>sim_resp</code>.</li>
 <li>
 <code>er_plot_add_summary(model = your_model)</code> (paired with
 whichever summary builder matches what your <code><a href="../reference/er_model_interface.html">er_summary()</a></code>

@@ -42,9 +42,11 @@ er_style_tag(
 
 - layer:
 
-  One of `"model"`, `"summary"`, `"quantile"`, `"data"`, or `"group"`,
-  naming which `er_plot_add_*()` layer the builder is meant to be used
-  with, or `NULL` (the default) to leave this tag unset. See "Details".
+  One of `"model"`, `"summary"`, `"quantile"`, `"data"`, `"group"`,
+  `"observed"`, or `"simulated"`, naming which
+  `er_plot_add_*()`/`er_vpc_add_*()` layer the builder is meant to be
+  used with, or `NULL` (the default) to leave this tag unset. See
+  "Details".
 
 - zorder:
 
