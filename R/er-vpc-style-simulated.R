@@ -22,6 +22,22 @@
 #'   `er_style_vpc_simulated_quantile_errorbar()`'s error bars when
 #'   `plot_by` is numeric.
 #' @param ribbon_alpha Fill transparency for `er_style_vpc_simulated_quantile_ribbon()`'s bands.
+#' @param ribbon_edges Whether `er_style_vpc_simulated_quantile_ribbon()`
+#'   additionally draws a line along each band's own `ci_lower`/`ci_upper`
+#'   bounds, on top of the shaded ribbon fill -- mirrors
+#'   [er_style_model_ribbonline()]'s own `ribbon_edges` argument. Default
+#'   `FALSE` (ribbon fill only). Useful when several requested percentiles'
+#'   bands overlap: the edge lines stay legible even where the fills merge
+#'   into an indistinguishable blob.
+#' @param edge_linetype,edge_linewidth,edge_colour Styling for
+#'   `er_style_vpc_simulated_quantile_ribbon()`'s optional edge lines
+#'   (only drawn when `ribbon_edges = TRUE`). Defaults to a thin, light
+#'   dotted line (`"dotted"`, `0.5`, `"grey50"`) that stays unobtrusive
+#'   even when several bands' edges overlap.
+#' @param median_linetype,median_linewidth,median_colour Styling for
+#'   `er_style_vpc_simulated_quantile_ribbon()`'s median line, drawn at
+#'   each band's `y_mid`. Defaults match the previous fixed styling
+#'   (`"dashed"`, `0.5`, `"grey30"`).
 #' @param ... Additional named arguments forwarded from
 #'   [er_vpc_add_simulated()]'s own `...`.
 #'
@@ -64,6 +80,17 @@
 #' aesthetic) into one combined legend; the ribbon's `fill` legend is
 #' separate from the point/errorbar builders' `color` legend.
 #'
+#' When several requested percentiles' bands sit close together (small
+#' per-bin samples, few simulated replicates, or `probs` values close to
+#' one another), `er_style_vpc_simulated_quantile_ribbon()`'s bands can
+#' overlap enough that the shaded fills merge into a single
+#' indistinguishable region, and its median lines -- all styled
+#' identically -- become the only way to tell the bands apart, which
+#' fails wherever two of them cross. `ribbon_edges = TRUE` mitigates this
+#' by drawing each band's own `ci_lower`/`ci_upper` bounds as a line (see
+#' `edge_linetype`/`edge_linewidth`/`edge_colour`), which stays legible
+#' even where the fills themselves are illegible.
+#'
 #' @returns A list of geoms; see [er_style()].
 #'
 #' @name er_style_vpc_simulated
@@ -73,7 +100,15 @@ NULL
 #' @rdname er_style_vpc_simulated
 #' @export
 er_style_vpc_simulated_quantile_ribbon <- function(data, config, exposure, response, theme,
-                                           ribbon_alpha = 0.3, ...) {
+                                           ribbon_alpha = 0.3,
+                                           ribbon_edges = FALSE,
+                                           edge_linetype = "dotted",
+                                           edge_linewidth = 0.5,
+                                           edge_colour = "grey50",
+                                           median_linetype = "dashed",
+                                           median_linewidth = 0.5,
+                                           median_colour = "grey30",
+                                           ...) {
   if (is.null(config$percentiles)) {
     rlang::abort(c(
       "`er_style_vpc_simulated_quantile_ribbon()` requires `config$percentiles`, which is not available here.",
@@ -81,22 +116,60 @@ er_style_vpc_simulated_quantile_ribbon <- function(data, config, exposure, respo
       "i" = "Use `er_style_vpc_simulated_mean_errorbar()` instead for a binary response or a categorical `plot_by`."
     ))
   }
-  list(
+
+  geoms <- list(
     ggplot2::geom_ribbon(
       data = config$percentiles,
       mapping = ggplot2::aes(x = x_mid, ymin = ci_lower, ymax = ci_upper, group = factor(prob), fill = "Simulated"),
       alpha = ribbon_alpha,
       inherit.aes = FALSE
-    ),
-    ggplot2::geom_line(
-      data = config$percentiles,
-      mapping = ggplot2::aes(x = x_mid, y = y_mid, group = factor(prob)),
-      linetype = "dashed",
-      colour = "grey30",
-      inherit.aes = FALSE
-    ),
-    ggplot2::labs(fill = "Source")
+    )
   )
+
+  # only ever included when requested, rather than as `NULL`
+  # placeholders -- mirrors `er_style_model_ribbonline()`'s own
+  # `ribbon_edges` handling and its rationale (this builder's return
+  # length is asserted on directly in tests)
+  if (ribbon_edges) {
+    geoms <- c(
+      geoms,
+      list(
+        ggplot2::geom_line(
+          data = config$percentiles,
+          mapping = ggplot2::aes(x = x_mid, y = ci_lower, group = factor(prob)),
+          linetype = edge_linetype,
+          linewidth = edge_linewidth,
+          colour = edge_colour,
+          inherit.aes = FALSE
+        ),
+        ggplot2::geom_line(
+          data = config$percentiles,
+          mapping = ggplot2::aes(x = x_mid, y = ci_upper, group = factor(prob)),
+          linetype = edge_linetype,
+          linewidth = edge_linewidth,
+          colour = edge_colour,
+          inherit.aes = FALSE
+        )
+      )
+    )
+  }
+
+  geoms <- c(
+    geoms,
+    list(
+      ggplot2::geom_line(
+        data = config$percentiles,
+        mapping = ggplot2::aes(x = x_mid, y = y_mid, group = factor(prob)),
+        linetype = median_linetype,
+        linewidth = median_linewidth,
+        colour = median_colour,
+        inherit.aes = FALSE
+      ),
+      ggplot2::labs(fill = "Source")
+    )
+  )
+
+  return(geoms)
 }
 er_style_vpc_simulated_quantile_ribbon <- er_style_tag(
   er_style_vpc_simulated_quantile_ribbon,

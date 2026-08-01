@@ -14,6 +14,13 @@ er_style_vpc_simulated_quantile_ribbon(
   response,
   theme,
   ribbon_alpha = 0.3,
+  ribbon_edges = FALSE,
+  edge_linetype = "dotted",
+  edge_linewidth = 0.5,
+  edge_colour = "grey50",
+  median_linetype = "dashed",
+  median_linewidth = 0.5,
+  median_colour = "grey30",
   ...
 )
 
@@ -53,6 +60,25 @@ er_style_vpc_simulated_mean_errorbar(
 \item{theme}{Theme components.}
 
 \item{ribbon_alpha}{Fill transparency for \code{er_style_vpc_simulated_quantile_ribbon()}'s bands.}
+
+\item{ribbon_edges}{Whether \code{er_style_vpc_simulated_quantile_ribbon()}
+additionally draws a line along each band's own \code{ci_lower}/\code{ci_upper}
+bounds, on top of the shaded ribbon fill -- mirrors
+\code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}}'s own \code{ribbon_edges} argument. Default
+\code{FALSE} (ribbon fill only). Useful when several requested percentiles'
+bands overlap: the edge lines stay legible even where the fills merge
+into an indistinguishable blob.}
+
+\item{edge_linetype, edge_linewidth, edge_colour}{Styling for
+\code{er_style_vpc_simulated_quantile_ribbon()}'s optional edge lines
+(only drawn when \code{ribbon_edges = TRUE}). Defaults to a thin, light
+dotted line (\code{"dotted"}, \code{0.5}, \code{"grey50"}) that stays unobtrusive
+even when several bands' edges overlap.}
+
+\item{median_linetype, median_linewidth, median_colour}{Styling for
+\code{er_style_vpc_simulated_quantile_ribbon()}'s median line, drawn at
+each band's \code{y_mid}. Defaults match the previous fixed styling
+(\code{"dashed"}, \code{0.5}, \code{"grey30"}).}
 
 \item{...}{Additional named arguments forwarded from
 \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}'s own \code{...}.}
@@ -118,6 +144,17 @@ maps a constant \code{fill = "Simulated"}. ggplot2 merges either into the
 paired observed builder's own \code{"Observed"} legend entry (same
 aesthetic) into one combined legend; the ribbon's \code{fill} legend is
 separate from the point/errorbar builders' \code{color} legend.
+
+When several requested percentiles' bands sit close together (small
+per-bin samples, few simulated replicates, or \code{probs} values close to
+one another), \code{er_style_vpc_simulated_quantile_ribbon()}'s bands can
+overlap enough that the shaded fills merge into a single
+indistinguishable region, and its median lines -- all styled
+identically -- become the only way to tell the bands apart, which
+fails wherever two of them cross. \code{ribbon_edges = TRUE} mitigates this
+by drawing each band's own \code{ci_lower}/\code{ci_upper} bounds as a line (see
+\code{edge_linetype}/\code{edge_linewidth}/\code{edge_colour}), which stays legible
+even where the fills themselves are illegible.
 }
 \seealso{
 \code{\link[=er_style]{er_style()}}, \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}
