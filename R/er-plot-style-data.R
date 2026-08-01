@@ -137,38 +137,32 @@ er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposur
 
   if (is.null(jitter_height)) jitter_height <- if (stratify) 0.3 else 0.15
 
-  withr::with_seed( # TODO: setting seed here isn't correct
-    seed = config$seed,
-    code = {
-      geoms <- list(
-        ggplot2::geom_boxplot(
-          data = dat,
-          mapping = box_map,
-          orientation = "y",
-          width = box_width,
-          alpha = box_alpha,
-          outlier.shape = outlier_shape,
-          key_glyph = theme$draw_key
-        ),
-        ggplot2::geom_jitter(
-          data = dat,
-          mapping = jitter_map,
-          width = 0,
-          height = jitter_height,
-          size = jitter_size,
-          alpha = jitter_alpha,
-          key_glyph = theme$draw_key
-        ),
-        ggplot2::coord_cartesian(
-          xlim = exposure$limits,
-          clip = "off"
-        ),
-        if (stratify) {
-          ggplot2::scale_y_discrete(breaks = NULL)
-        } else {
-          ggplot2::scale_y_continuous(breaks = NULL, minor_breaks = NULL, limits = c(-0.3, 0.3))
-        }
-      )
+  geoms <- list(
+    ggplot2::geom_boxplot(
+      data = dat,
+      mapping = box_map,
+      orientation = "y",
+      width = box_width,
+      alpha = box_alpha,
+      outlier.shape = outlier_shape,
+      key_glyph = theme$draw_key
+    ),
+    ggplot2::geom_jitter(
+      data = dat,
+      mapping = jitter_map,
+      position = ggplot2::position_jitter(width = 0, height = jitter_height, seed = config$seed),
+      size = jitter_size,
+      alpha = jitter_alpha,
+      key_glyph = theme$draw_key
+    ),
+    ggplot2::coord_cartesian(
+      xlim = exposure$limits,
+      clip = "off"
+    ),
+    if (stratify) {
+      ggplot2::scale_y_discrete(breaks = NULL)
+    } else {
+      ggplot2::scale_y_continuous(breaks = NULL, minor_breaks = NULL, limits = c(-0.3, 0.3))
     }
   )
 
@@ -212,21 +206,15 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
     jitter_height <- if (config$response_type == "binary") 0.015 else 0
   }
 
-  withr::with_seed( # TODO: setting seed here isn't correct
-    seed = config$seed,
-    code = {
-      geoms <- list(
-        ggplot2::geom_jitter(
-          data = data,
-          mapping = plot_map,
-          width = 0,
-          height = jitter_height,
-          alpha = alpha,
-          size = size,
-          key_glyph = theme$draw_key
-        )
-      )
-    }
+  geoms <- list(
+    ggplot2::geom_jitter(
+      data = data,
+      mapping = plot_map,
+      position = ggplot2::position_jitter(width = 0, height = jitter_height, seed = config$seed),
+      alpha = alpha,
+      size = size,
+      key_glyph = theme$draw_key
+    )
   )
 
   return(geoms)

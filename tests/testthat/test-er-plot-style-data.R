@@ -305,3 +305,96 @@ test_that("er_plot_add_data() builds and renders with style = er_style_data_hex"
 
   expect_no_error(er_plot_build(plt))
 })
+
+
+test_that("er_style_data_overlay()'s jitter is seeded via position_jitter(), not withr::with_seed()", {
+  p_binary <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_data()
+
+  args <- function(seed) {
+    config <- p_binary$layer$overlay$config
+    config$seed <- seed
+    list(
+      data = p_binary$data,
+      config = config,
+      stratify = p_binary$layer$overlay$stratify,
+      exposure = p_binary$exposure,
+      response = p_binary$response,
+      strata = p_binary$strata,
+      theme = p_binary$theme
+    )
+  }
+
+  out_a <- do.call(er_style_data_overlay, args(1234L))
+  out_b <- do.call(er_style_data_overlay, args(1234L))
+  out_c <- do.call(er_style_data_overlay, args(9999L))
+
+  # the geom's own position object carries the seed (this is what actually
+  # makes the jitter reproducible, unlike the old withr::with_seed() wrapper
+  # around geom construction, which had no effect on the render-time draw)
+  expect_true(inherits(out_a[[1]]$position, "PositionJitter"))
+  expect_equal(out_a[[1]]$position$seed, 1234L)
+  expect_equal(out_c[[1]]$position$seed, 9999L)
+
+  # rendering (not just constructing) the layer with a fixed seed is
+  # reproducible, and a different seed gives a different draw
+  y_a <- ggplot2::ggplot_build(ggplot2::ggplot() + out_a[[1]])$data[[1]]$y
+  y_b <- ggplot2::ggplot_build(ggplot2::ggplot() + out_b[[1]])$data[[1]]$y
+  y_c <- ggplot2::ggplot_build(ggplot2::ggplot() + out_c[[1]])$data[[1]]$y
+
+  expect_identical(y_a, y_b)
+  expect_false(identical(y_a, y_c))
+})
+
+
+test_that("er_style_data_boxjitter()'s jitter is seeded via position_jitter(), not withr::with_seed()", {
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_data(style = er_style_data_boxjitter)
+
+  args <- function(seed) {
+    config <- p1$layer$data$config
+    config$panel <- "upper"
+    config$seed <- seed
+    list(
+      data = p1$data,
+      config = config,
+      stratify = p1$layer$data$stratify,
+      exposure = p1$exposure,
+      response = p1$response,
+      strata = p1$strata,
+      theme = p1$theme
+    )
+  }
+
+  out_a <- do.call(er_style_data_boxjitter, args(1234L))
+  out_b <- do.call(er_style_data_boxjitter, args(1234L))
+  out_c <- do.call(er_style_data_boxjitter, args(9999L))
+
+  jitter_a <- out_a[[2]]
+  jitter_c <- out_c[[2]]
+  expect_true(inherits(jitter_a$position, "PositionJitter"))
+  expect_equal(jitter_a$position$seed, 1234L)
+  expect_equal(jitter_c$position$seed, 9999L)
+
+  # width = 0 here, so it's the *y* position (height jitter) that varies
+  y_a <- ggplot2::ggplot_build(ggplot2::ggplot() + out_a[[2]])$data[[1]]$y
+  y_b <- ggplot2::ggplot_build(ggplot2::ggplot() + out_b[[2]])$data[[1]]$y
+  y_c <- ggplot2::ggplot_build(ggplot2::ggplot() + out_c[[2]])$data[[1]]$y
+
+  expect_identical(y_a, y_b)
+  expect_false(identical(y_a, y_c))
+})
+
+
+test_that("er_plot_build() produces reproducible jitter across repeated builds of the same er_plot", {
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_data(style = er_style_data_overlay)
+
+  built_a <- er_plot_build(plt)
+  built_b <- er_plot_build(plt)
+
+  y_a <- ggplot2::ggplot_build(built_a$plot$base)$data[[length(built_a$plot$base$layers)]]$y
+  y_b <- ggplot2::ggplot_build(built_b$plot$base)$data[[length(built_b$plot$base$layers)]]$y
+
+  expect_identical(y_a, y_b)
+})

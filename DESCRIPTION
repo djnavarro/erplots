@@ -22,8 +22,7 @@ Imports:
     scales,
     stats,
     tibble,
-    tidyselect,
-    withr
+    tidyselect
 Suggests: 
     emaxnls (>= 0.1.1.9000),
     erglm,
@@ -32,7 +31,8 @@ Suggests:
     MASS,
     mvtnorm,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 URL: https://github.com/djnavarro/erplots, https://erplots.djnavarro.net/
 BugReports: https://github.com/djnavarro/erplots/issues
 Remotes: 

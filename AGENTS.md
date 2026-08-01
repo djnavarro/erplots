@@ -1527,6 +1527,59 @@ for `er_style_group_boxplot()` used standalone. `devtools::test()` (908
 passing, up from 906) and `devtools::document()` (regenerated
 `er_style_group.Rd` for the new `show_outliers` `@param`) both clean.
 
+## Fixed: `er_style_data_overlay()`/`er_style_data_boxjitter()`'s jitter seed had no effect (`withr::with_seed()` wrapped geom construction, not the render-time draw)
+
+Both data-layer jitter builders used to wrap their `geom_jitter()` call in
+`withr::with_seed(seed = config$seed, code = { ... })` (each flagged with
+its own `# TODO: setting seed here isn't correct` comment). This looked
+plausible but did nothing: `geom_jitter()` only builds a layer spec at
+construction time -- it calls no RNG itself -- and the actual jitter draw
+happens later, inside `PositionJitter$compute_layer()`, when the plot is
+rendered/printed (`print()`, `plot()`, `ggplot2::ggplot_build()`). By
+render time, `with_seed()`'s temporary RNG state had long since been
+restored, so `config$seed` (hardcoded to `1234L` in both `.layer_data()`
+and `.layer_overlay()`, `R/er-plot-layer.R`) never influenced the
+rendered jitter at all -- two builds of the same `er_plot` object could
+(and did) render different jittered positions.
+
+`ggplot2::position_jitter()` does take a working `seed` argument (applied
+correctly, inside `compute_layer()`, at the right time) -- but
+`geom_jitter()` doesn't forward `...` into it. Passing `width`/`height`
+directly to `geom_jitter()` (as both builders did) makes it construct its
+*own* internal `position_jitter(width, height)` with no `seed`, and
+supplying both a `position` object and `width`/`height` errors ("Both
+`position` and `width`/`height` were supplied"). So the fix wasn't simply
+"trust `geom_jitter()`'s own seed handling" -- it required dropping the
+`width`/`height` shortcut entirely in favor of building the
+`position_jitter()` object explicitly: both builders now pass
+`position = ggplot2::position_jitter(width = 0, height = jitter_height,
+seed = config$seed)` straight to `geom_jitter()`, with the
+`withr::with_seed()` wrapper removed.
+
+This left `withr` with no remaining use anywhere in `R/` -- its only
+other appearances are in three test-only RNG-wrapping helpers
+(`tests/testthat/helper-data.R`, `tests/testthat/helper-toy-model.R`),
+which wrap direct calls to `stats::rbinom()`/`mvtnorm::rmvnorm()`/
+`stats::rnorm()` synchronously inside the block, the pattern
+`with_seed()` actually works correctly for. `DESCRIPTION`'s `Imports:
+withr` was moved to `Suggests: withr` accordingly.
+
+Covered by four new tests in `tests/testthat/test-er-plot-style-data.R`:
+two builder-level tests (one per jitter builder) asserting the returned
+geom's `position` is a `PositionJitter` carrying `config$seed`, that
+rendering (via `ggplot2::ggplot_build()`) the same builder call twice
+with the same seed produces byte-identical jittered coordinates, and
+that a different seed produces a different draw -- the last check
+matters as much as the first, since without it a regression reintroducing
+the old bug could still pass a same-seed-only test vacuously (ambient
+global RNG state can coincidentally make two un-seeded draws agree or
+disagree, so asserting *both* directions is what actually pins the
+behavior to `config$seed` specifically, not some other source of
+determinism); and one end-to-end integration test confirming two
+independent `er_plot_build()` calls on the same `er_plot` object render
+identical jittered points. `devtools::test()` (950 passing, up from 939)
+and `devtools::document()` both clean.
+
 ## Planned work
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed
