@@ -26,8 +26,7 @@
 #' -- at each bin's numeric midpoint on the exposure scale, for pairing
 #' with [er_style_vpc_observed_line()]. `config$percentiles` is only
 #' computed for a continuous/count response binned on a numeric
-#' `group_by` (see [er_vpc_add_observed()]'s `probs` argument, which
-#' should match what was passed to [er_vpc_add_simulated()]); calling
+#' `group_by` (see [er_vpc()]'s `probs` argument); calling
 #' `er_style_vpc_simulated_ribbon()` without it errors.
 #' `er_style_vpc_simulated_errorbar_continuous()` plots the same mean +
 #' percentile interval as `er_style_vpc_simulated_errorbar()`, at the

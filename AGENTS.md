@@ -151,25 +151,28 @@ Built-in builders, by layer:
 
 ### The VPC mini-grammar
 
-`er_vpc(data, exposure, response, response_type)` |>
+`er_vpc(data, exposure, response, response_type, group_by = NULL, n_bins
+= 4, conf_level = 0.95, probs = c(0.1, 0.5, 0.9))` |>
 `er_vpc_add_observed()` |> `er_vpc_add_simulated()` |> `plot()` mirrors
 `er_plot()`'s object/layer/builder architecture, scoped deliberately
-narrower: no stratification, always a single panel.
+narrower: no stratification, always a single panel. `group_by`/`n_bins`/
+`conf_level`/`probs` all live on `er_vpc()` itself (stored on
+`object$group`), not on either add-verb, since the observed and
+simulated layers must always agree on them -- `group_by` defaults to the
+plot's exposure variable; numeric `group_by` is quantile-binned
+(`cut_exposure_quantile()`, placebo separated when `group_by` is the
+exposure variable itself), categorical is used as-is.
 
-- **`er_vpc_add_observed(object, group_by = NULL, n_bins = 4, conf_level
-  = 0.95, probs = c(0.1, 0.5, 0.9), style = ...)`** -- bins the observed
-  data and computes its response summary. `group_by` defaults to the
-  plot's exposure variable; numeric `group_by` is quantile-binned
-  (`cut_exposure_quantile()`, placebo separated when `group_by` is the
-  exposure variable itself), categorical is used as-is.
+- **`er_vpc_add_observed(object, style = ...)`** -- bins the observed
+  data (using `object$group`) and computes its response summary.
 - **`er_vpc_add_simulated(object, model = NULL, sim = NULL, nsim = 100,
-  seed = NULL, conf_level = 0.95, probs = c(0.1, 0.5, 0.9), style =
-  ...)`** -- must be called after `er_vpc_add_observed()`; bins
-  simulated rows against the *observed* layer's own stored cutpoints
-  (`obs_config$breaks`, via `.apply_exposure_breaks()`), guaranteeing
-  both sides share identical bin boundaries. `model`/`sim` are mutually
-  exclusive; exactly one is required. When `model` is supplied, calls
-  `er_simulate()` internally and requires a `sim_resp` column.
+  seed = NULL, style = ...)`** -- must be called after
+  `er_vpc_add_observed()`; bins simulated rows against the *observed*
+  layer's own stored cutpoints (`obs_config$breaks`, via
+  `.apply_exposure_breaks()`), guaranteeing both sides share identical
+  bin boundaries. `model`/`sim` are mutually exclusive; exactly one is
+  required. When `model` is supplied, calls `er_simulate()` internally
+  and requires a `sim_resp` column.
 
 Two visual idioms, chosen by `style`, tagged via `er_style_tag(fn, layout
 = ...)` with `layout` values `"categorical"`/`"continuous"` (reusing the
@@ -205,15 +208,10 @@ different pair of allowed values):
 `er_style_vpc_simulated_ribbon()`'s numeric midpoints would otherwise
 silently plot the two layers at inconsistent x-positions for the same
 bin. An untagged custom builder on either side skips this check, the
-same opt-in treatment the `layer` tag gets. When both builders resolve
-to `layout = "continuous"` (so both sides actually render
-`config$percentiles`), `er_vpc_add_simulated()` additionally checks
-(`.check_vpc_probs_match()`) that its own `probs` argument matches
-`er_vpc_add_observed()`'s own `probs` (order-independent), erroring if
-they disagree -- mismatched `probs` would otherwise silently produce two
-percentile sets that don't correspond to the same nominal percentile.
-`er_vpc_add_observed()` stores its `probs` on `config$probs` for this
-comparison.
+same opt-in treatment the `layer` tag gets. `probs` can't diverge
+between the two layers the way `layout` still can, since it's set once
+on `er_vpc()` and read from `object$group` by both `.layer_vpc_*()`
+functions.
 
 The simulated layer's geoms are always added before the observed layer's,
 so a simulated ribbon never buries the observed points/line.

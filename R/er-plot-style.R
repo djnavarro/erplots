@@ -382,24 +382,3 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   ))
 }
 
-#' @noRd
-.check_vpc_probs_match <- function(observed_config, observed_style, simulated_probs, simulated_style) {
-  # only matters when both sides actually render `config$percentiles` --
-  # an untagged builder on either side is never checked (same opt-in
-  # treatment as `.check_vpc_layout_match()`)
-  observed_layout <- .style_vpc_layout(observed_style)
-  simulated_layout <- .style_vpc_layout(simulated_style)
-  uses_percentiles <- identical(observed_layout, "continuous") && identical(simulated_layout, "continuous")
-  if (!uses_percentiles) return(invisible(NULL))
-
-  observed_probs <- observed_config$probs
-  if (is.null(observed_probs) || is.null(simulated_probs)) return(invisible(NULL))
-  if (isTRUE(all.equal(sort(observed_probs), sort(simulated_probs)))) return(invisible(NULL))
-
-  rlang::abort(c(
-    "The observed and simulated layers were given different `probs`, so their percentile bands don't line up.",
-    "i" = paste0("`er_vpc_add_observed()`'s `probs`: ", paste(observed_probs, collapse = ", ")),
-    "i" = paste0("`er_vpc_add_simulated()`'s `probs`: ", paste(simulated_probs, collapse = ", ")),
-    "i" = "Pass the same `probs` to both calls."
-  ))
-}

@@ -53,10 +53,10 @@ test_that("er_style_vpc_simulated_errorbar_continuous() plots at the numeric bin
 })
 
 test_that("er_style_vpc_simulated_errorbar_continuous() adds dashed percentile pointranges for a continuous response", {
-  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
-    er_vpc_add_observed(probs = c(0.1, 0.5, 0.9), style = er_style_vpc_observed_pointrange_continuous) |>
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_pointrange_continuous) |>
     er_vpc_add_simulated(
-      model = er_test_mod_gaussian, nsim = 5, seed = 808, probs = c(0.1, 0.5, 0.9),
+      model = er_test_mod_gaussian, nsim = 5, seed = 808,
       style = er_style_vpc_simulated_errorbar_continuous
     )
 
@@ -80,8 +80,8 @@ test_that("er_style_vpc_simulated_errorbar_continuous() stays mean-only for a bi
 })
 
 test_that("er_style_vpc_simulated_errorbar_continuous() errors for a categorical group_by", {
-  vpc <- er_vpc(er_test_data, aucss, ae1) |>
-    er_vpc_add_observed(group_by = sex) |>
+  vpc <- er_vpc(er_test_data, aucss, ae1, group_by = sex) |>
+    er_vpc_add_observed() |>
     er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 806, style = er_style_vpc_simulated_errorbar)
 
   expect_error(

@@ -75,7 +75,7 @@ interval. \code{er_style_vpc_observed_line()} instead plots
 bin's numeric midpoint on the exposure scale, for pairing with
 \code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}}. \code{config$percentiles} is only
 computed for a continuous/count response binned on a numeric
-\code{group_by} (see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s \code{probs} argument); calling
+\code{group_by} (see \code{\link[=er_vpc]{er_vpc()}}'s \code{probs} argument); calling
 \code{er_style_vpc_observed_line()} without it errors.
 \code{er_style_vpc_observed_pointrange_continuous()} plots the same
 rate/mean + confidence interval as \code{er_style_vpc_observed_pointrange()},
@@ -86,7 +86,7 @@ layout mismatch. It always plots the mean (from \code{config$summary}, so
 it works for a binary response too); when \code{config$percentiles} is
 also available (continuous/count response, numeric \code{group_by}), it
 additionally plots a dashed pointrange/errorbar for each requested
-percentile (see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s \code{probs} argument), with a
+percentile (see \code{\link[=er_vpc]{er_vpc()}}'s \code{probs} argument), with a
 confidence interval from \code{\link[=ci_quantile]{ci_quantile()}} -- the observed-side analogue
 of the across-replicate interval \code{er_style_vpc_simulated_ribbon()}
 shows as a band.

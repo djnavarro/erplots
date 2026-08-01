@@ -24,7 +24,7 @@
 #' bin's numeric midpoint on the exposure scale, for pairing with
 #' [er_style_vpc_simulated_ribbon()]. `config$percentiles` is only
 #' computed for a continuous/count response binned on a numeric
-#' `group_by` (see [er_vpc_add_observed()]'s `probs` argument); calling
+#' `group_by` (see [er_vpc()]'s `probs` argument); calling
 #' `er_style_vpc_observed_line()` without it errors.
 #' `er_style_vpc_observed_pointrange_continuous()` plots the same
 #' rate/mean + confidence interval as `er_style_vpc_observed_pointrange()`,
@@ -35,7 +35,7 @@
 #' it works for a binary response too); when `config$percentiles` is
 #' also available (continuous/count response, numeric `group_by`), it
 #' additionally plots a dashed pointrange/errorbar for each requested
-#' percentile (see [er_vpc_add_observed()]'s `probs` argument), with a
+#' percentile (see [er_vpc()]'s `probs` argument), with a
 #' confidence interval from [ci_quantile()] -- the observed-side analogue
 #' of the across-replicate interval `er_style_vpc_simulated_ribbon()`
 #' shows as a band.

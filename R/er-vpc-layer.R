@@ -1,16 +1,21 @@
 
 # layer_vpc_observed -----------------------------------------------------------
 
-.layer_vpc_observed <- function(object, group_var, n_bins, conf_level, probs, style, dots = list()) {
+.layer_vpc_observed <- function(object, style, dots = list()) {
 
   layer <- list()
   config <- list()
+
+  group_var <- object$group$var
+  n_bins <- object$group$n_bins
+  conf_level <- object$group$conf_level
+  probs <- object$group$probs
 
   config$group_var <- group_var
   config$n_bins <- n_bins
   config$conf_level <- conf_level
   config$probs <- probs
-  config$group_label <- .get_label(object$data[[group_var]]) %||% group_var
+  config$group_label <- object$group$label
 
   exp_var <- object$exposure$name
   rsp_var <- object$response$name
@@ -119,13 +124,15 @@
 
 # layer_vpc_simulated ------------------------------------------------------------
 
-.layer_vpc_simulated <- function(object, sim, conf_level, probs, style, dots = list()) {
+.layer_vpc_simulated <- function(object, sim, style, dots = list()) {
 
   layer <- list()
   config <- list()
 
   obs_config <- object$layer$observed$config
-  group_var <- obs_config$group_var
+  group_var <- object$group$var
+  conf_level <- object$group$conf_level
+  probs <- object$group$probs
   exp_var <- object$exposure$name
   rsp_var <- object$response$name
   response_type <- object$response$type

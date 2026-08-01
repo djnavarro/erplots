@@ -7,7 +7,7 @@ test_that(".layer_vpc_observed() computes rate + Clopper-Pearson CI for a binary
 })
 
 test_that(".layer_vpc_observed() computes mean + t-interval and percentiles for a continuous response", {
-  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |> er_vpc_add_observed(probs = c(0.1, 0.5, 0.9))
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |> er_vpc_add_observed()
   smm <- vpc$layer$observed$config$summary
   expect_true(all(smm$ci_lower <= smm$y_mid & smm$y_mid <= smm$ci_upper))
 
@@ -40,9 +40,9 @@ test_that(".layer_vpc_simulated() bins simulated rows against the observed layer
 })
 
 test_that(".layer_vpc_simulated() computes percentile bands matching config$percentiles' shape", {
-  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
-    er_vpc_add_observed(probs = c(0.1, 0.5, 0.9)) |>
-    er_vpc_add_simulated(model = er_test_mod_gaussian, nsim = 5, seed = 602, probs = c(0.1, 0.5, 0.9))
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod_gaussian, nsim = 5, seed = 602)
 
   pct <- vpc$layer$simulated$config$percentiles
   expect_true(all(c(".vpc_bin", "x_mid", "prob", "y_mid", "ci_lower", "ci_upper") %in% names(pct)))
@@ -50,8 +50,8 @@ test_that(".layer_vpc_simulated() computes percentile bands matching config$perc
 })
 
 test_that(".layer_vpc_observed()/.layer_vpc_simulated() skip percentiles for a categorical group_by", {
-  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
-    er_vpc_add_observed(group_by = sex) |>
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, group_by = sex) |>
+    er_vpc_add_observed() |>
     er_vpc_add_simulated(model = er_test_mod_gaussian, nsim = 5, seed = 603)
 
   expect_null(vpc$layer$observed$config$percentiles)

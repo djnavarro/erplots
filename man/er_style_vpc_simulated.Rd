@@ -78,8 +78,7 @@ observed layer's own point + interval.
 -- at each bin's numeric midpoint on the exposure scale, for pairing
 with \code{\link[=er_style_vpc_observed_line]{er_style_vpc_observed_line()}}. \code{config$percentiles} is only
 computed for a continuous/count response binned on a numeric
-\code{group_by} (see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s \code{probs} argument, which
-should match what was passed to \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}); calling
+\code{group_by} (see \code{\link[=er_vpc]{er_vpc()}}'s \code{probs} argument); calling
 \code{er_style_vpc_simulated_ribbon()} without it errors.
 \code{er_style_vpc_simulated_errorbar_continuous()} plots the same mean +
 percentile interval as \code{er_style_vpc_simulated_errorbar()}, at the

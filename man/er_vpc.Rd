@@ -4,7 +4,16 @@
 \alias{er_vpc}
 \title{The exposure-response VPC mini-language}
 \usage{
-er_vpc(data, exposure, response, response_type = "auto")
+er_vpc(
+  data,
+  exposure,
+  response,
+  response_type = "auto",
+  group_by = NULL,
+  n_bins = 4,
+  conf_level = 0.95,
+  probs = c(0.1, 0.5, 0.9)
+)
 }
 \arguments{
 \item{data}{Data frame or tibble containing the observed data.}
@@ -14,6 +23,23 @@ er_vpc(data, exposure, response, response_type = "auto")
 \item{response}{Response variable (one variable, unquoted).}
 
 \item{response_type}{One of \code{"auto"}, \code{"binary"}, \code{"continuous"}, or \code{"count"}.}
+
+\item{group_by}{Variable (unquoted) used to bin/group the observed vs.
+simulated comparison. Defaults to \code{exposure}. A numeric variable is
+split into \code{n_bins} quantile bins (placebo, i.e. \code{0}, kept in its own
+bin when \code{group_by} is the exposure variable itself); a categorical
+variable is used as-is, with no binning.}
+
+\item{n_bins}{Number of quantile bins, when \code{group_by} is numeric.}
+
+\item{conf_level}{Confidence level for both the observed- and
+simulated-side intervals. Must be strictly between 0 and 1.}
+
+\item{probs}{Percentiles to compute for a \code{"continuous"}-layout builder
+(e.g. \code{\link[=er_style_vpc_observed_line]{er_style_vpc_observed_line()}}/\code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}};
+ignored by a \code{"categorical"}-layout builder like the default
+pointrange/errorbar pair). Only computed for a continuous/count
+response binned on a numeric \code{group_by}.}
 }
 \value{
 An (empty) plot object of class \code{er_vpc}.
@@ -41,8 +67,8 @@ library(erglm)
 mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 
 erglm_data |>
-  er_vpc(aucss, ae2) |>
-  er_vpc_add_observed(group_by = aucss) |>
+  er_vpc(aucss, ae2, group_by = aucss) |>
+  er_vpc_add_observed() |>
   er_vpc_add_simulated(model = mod, seed = 9984) |>
   plot()
 }

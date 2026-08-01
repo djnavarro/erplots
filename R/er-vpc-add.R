@@ -1,45 +1,27 @@
 
 #' Add the observed-data layer to an `er_vpc` VPC
 #'
-#' Bins the observed data by `group_by` and computes its response summary
-#' (rate/mean + confidence interval, plus empirical percentiles for a
-#' continuous/count response), for later comparison against a simulated
-#' layer added via [er_vpc_add_simulated()].
+#' Bins the observed data by `group_by` (see [er_vpc()]) and computes its
+#' response summary (rate/mean + confidence interval, plus empirical
+#' percentiles for a continuous/count response), for later comparison
+#' against a simulated layer added via [er_vpc_add_simulated()].
 #'
 #' @param object Partially constructed VPC (has S3 class `er_vpc`).
-#' @param group_by Variable (unquoted) used to bin/group the comparison.
-#'   Defaults to the plot's own exposure variable. A numeric variable is
-#'   split into `n_bins` quantile bins (placebo, i.e. `0`, kept in its own
-#'   bin when `group_by` is the exposure variable itself); a categorical
-#'   variable is used as-is, with no binning.
-#' @param n_bins Number of quantile bins, when `group_by` is numeric.
-#' @param conf_level Confidence level for the observed-side interval.
-#' @param probs Percentiles to compute for a `"continuous"`-layout builder
-#'   (e.g. [er_style_vpc_observed_line()]/
-#'   [er_style_vpc_observed_pointrange_continuous()]; ignored by a
-#'   `"categorical"`-layout builder like the default pointrange). Only
-#'   computed for a continuous/count response binned on a numeric
-#'   `group_by`. Should match whatever `probs` is passed to
-#'   [er_vpc_add_simulated()] -- see "Details".
 #' @param style A function determining how the observed layer is drawn;
 #'   see [er_style_vpc_observed()].
 #' @param ... Additional named arguments forwarded to `style`.
 #'
 #' @returns `object`, with `object$layer$observed` populated.
 #'
-#' @details When both the observed and simulated layers use a
-#' `"continuous"`-layout builder (see [er_style_tag()]'s `layout`
-#' argument), [er_vpc_add_simulated()] checks this `probs` against its
-#' own and errors if they disagree, since mismatched `probs` would
-#' otherwise silently plot two sets of percentile bands that don't
-#' correspond to the same nominal percentile.
+#' @details `group_by`/`n_bins`/`conf_level`/`probs` are set once on
+#' [er_vpc()] itself (rather than here) so the observed and simulated
+#' layers can't disagree about how the comparison is binned or
+#' summarized.
 #'
 #' @seealso [er_vpc()], [er_vpc_add_simulated()], [er_style_vpc_observed()]
 #'
 #' @export
-er_vpc_add_observed <- function(object, group_by = NULL, n_bins = 4, conf_level = 0.95,
-                                 probs = c(0.1, 0.5, 0.9),
-                                 style = er_style_vpc_observed_pointrange, ...) {
+er_vpc_add_observed <- function(object, style = er_style_vpc_observed_pointrange, ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
@@ -48,23 +30,8 @@ er_vpc_add_observed <- function(object, group_by = NULL, n_bins = 4, conf_level 
   if (!is.function(style)) rlang::abort("`style` must be a function.")
   .check_style_layer(style, "observed", arg = "style")
 
-  group_quo <- rlang::enquo(group_by)
-  group_var <- if (rlang::quo_is_null(group_quo)) object$exposure$name else rlang::as_name(group_quo)
-
-  if (!(group_var %in% names(object$data))) {
-    rlang::abort(sprintf("Column `%s` not found in the data used to build `object`.", group_var))
-  }
-
-  if (!is.numeric(n_bins) || length(n_bins) != 1L || !is.finite(n_bins) || n_bins < 1 || n_bins != round(n_bins)) {
-    rlang::abort("`n_bins` must be a single positive whole number.")
-  }
-
   object$layer$observed <- .layer_vpc_observed(
     object = object,
-    group_var = group_var,
-    n_bins = n_bins,
-    conf_level = conf_level,
-    probs = probs,
     style = style,
     dots = dots
   )
@@ -88,15 +55,6 @@ er_vpc_add_observed <- function(object, group_by = NULL, n_bins = 4, conf_level 
 #'   columns and `sim_id`. Mutually exclusive with `model`.
 #' @param nsim Number of simulation replicates, only used with `model`.
 #' @param seed Optional RNG seed, only used with `model`.
-#' @param conf_level Confidence level for the simulated-side interval.
-#' @param probs Percentiles to compute for a `"continuous"`-layout builder
-#'   (e.g. [er_style_vpc_simulated_ribbon()]/
-#'   [er_style_vpc_simulated_errorbar_continuous()]; ignored by a
-#'   `"categorical"`-layout builder like the default errorbar). Must
-#'   match whatever `probs` was passed to [er_vpc_add_observed()] when
-#'   both layers use a `"continuous"`-layout builder -- this function
-#'   errors if they disagree (see [er_vpc_add_observed()]'s `probs`
-#'   documentation).
 #' @param style A function determining how the simulated layer is drawn;
 #'   see [er_style_vpc_simulated()].
 #' @param ... Additional named arguments forwarded to `style`.
@@ -110,11 +68,13 @@ er_vpc_add_observed <- function(object, group_by = NULL, n_bins = 4, conf_level 
 #' only mean predictions -- this function errors informatively if
 #' `sim_resp` isn't available.
 #'
+#' `conf_level`/`probs` are set once on [er_vpc()] itself (rather than
+#' here), so the observed and simulated layers always agree on them.
+#'
 #' @seealso [er_vpc()], [er_vpc_add_observed()], [er_style_vpc_simulated()]
 #'
 #' @export
 er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, seed = NULL,
-                                  conf_level = 0.95, probs = c(0.1, 0.5, 0.9),
                                   style = er_style_vpc_simulated_errorbar, ...) {
 
   dots <- rlang::list2(...)
@@ -130,7 +90,6 @@ er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, s
   if (!is.function(style)) rlang::abort("`style` must be a function.")
   .check_style_layer(style, "simulated", arg = "style")
   .check_vpc_layout_match(object$layer$observed$config$style, style)
-  .check_vpc_probs_match(object$layer$observed$config, object$layer$observed$config$style, probs, style)
 
   if (is.null(sim) && is.null(model)) {
     rlang::abort("Supply exactly one of `sim` or `model` to `er_vpc_add_simulated()`.")
@@ -169,8 +128,6 @@ er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, s
   object$layer$simulated <- .layer_vpc_simulated(
     object = object,
     sim = sim,
-    conf_level = conf_level,
-    probs = probs,
     style = style,
     dots = dots
   )

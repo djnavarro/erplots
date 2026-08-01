@@ -42,7 +42,7 @@ test_that("er_style_vpc_observed_pointrange_continuous() plots at the numeric bi
 })
 
 test_that("er_style_vpc_observed_pointrange_continuous() adds dashed percentile pointranges for a continuous response", {
-  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |> er_vpc_add_observed(probs = c(0.1, 0.5, 0.9))
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |> er_vpc_add_observed()
   geoms <- er_style_vpc_observed_pointrange_continuous(
     er_test_data, vpc$layer$observed$config, vpc$exposure, vpc$response, vpc$theme
   )
@@ -61,7 +61,7 @@ test_that("er_style_vpc_observed_pointrange_continuous() stays mean-only for a b
 })
 
 test_that("er_style_vpc_observed_pointrange_continuous() errors for a categorical group_by", {
-  vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed(group_by = sex)
+  vpc <- er_vpc(er_test_data, aucss, ae1, group_by = sex) |> er_vpc_add_observed()
   expect_error(
     er_style_vpc_observed_pointrange_continuous(
       er_test_data, vpc$layer$observed$config, vpc$exposure, vpc$response, vpc$theme
