@@ -17,6 +17,13 @@ er_style_vpc_simulated_quantile_ribbon(
   response,
   theme,
   ribbon_alpha = 0.3,
+  ribbon_edges = FALSE,
+  edge_linetype = "dotted",
+  edge_linewidth = 0.5,
+  edge_colour = "grey50",
+  median_linetype = "dashed",
+  median_linewidth = 0.5,
+  median_colour = "grey30",
   ...
 )
 
@@ -71,6 +78,30 @@ er_style_vpc_simulated_mean_errorbar(
 
   Fill transparency for `er_style_vpc_simulated_quantile_ribbon()`'s
   bands.
+
+- ribbon_edges:
+
+  Whether `er_style_vpc_simulated_quantile_ribbon()` additionally draws
+  a line along each band's own `ci_lower`/`ci_upper` bounds, on top of
+  the shaded ribbon fill – mirrors
+  [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md)'s
+  own `ribbon_edges` argument. Default `FALSE` (ribbon fill only).
+  Useful when several requested percentiles' bands overlap: the edge
+  lines stay legible even where the fills merge into an
+  indistinguishable blob.
+
+- edge_linetype, edge_linewidth, edge_colour:
+
+  Styling for `er_style_vpc_simulated_quantile_ribbon()`'s optional edge
+  lines (only drawn when `ribbon_edges = TRUE`). Defaults to a thin,
+  light dotted line (`"dotted"`, `0.5`, `"grey50"`) that stays
+  unobtrusive even when several bands' edges overlap.
+
+- median_linetype, median_linewidth, median_colour:
+
+  Styling for `er_style_vpc_simulated_quantile_ribbon()`'s median line,
+  drawn at each band's `y_mid`. Defaults match the previous fixed
+  styling (`"dashed"`, `0.5`, `"grey30"`).
 
 - ...:
 
@@ -143,6 +174,17 @@ map a constant `color = "Simulated"`;
 builder's own `"Observed"` legend entry (same aesthetic) into one
 combined legend; the ribbon's `fill` legend is separate from the
 point/errorbar builders' `color` legend.
+
+When several requested percentiles' bands sit close together (small
+per-bin samples, few simulated replicates, or `probs` values close to
+one another), `er_style_vpc_simulated_quantile_ribbon()`'s bands can
+overlap enough that the shaded fills merge into a single
+indistinguishable region, and its median lines – all styled identically
+– become the only way to tell the bands apart, which fails wherever two
+of them cross. `ribbon_edges = TRUE` mitigates this by drawing each
+band's own `ci_lower`/`ci_upper` bounds as a line (see
+`edge_linetype`/`edge_linewidth`/`edge_colour`), which stays legible
+even where the fills themselves are illegible.
 
 ## See also
 

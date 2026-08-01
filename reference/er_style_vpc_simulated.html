@@ -76,6 +76,13 @@ point/interval per bin <em>and</em> per requested percentile.</p>
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">theme</span>,</span>
 <span>  ribbon_alpha <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span>  ribbon_edges <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  edge_linetype <span class="op">=</span> <span class="st">"dotted"</span>,</span>
+<span>  edge_linewidth <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  edge_colour <span class="op">=</span> <span class="st">"grey50"</span>,</span>
+<span>  median_linetype <span class="op">=</span> <span class="st">"dashed"</span>,</span>
+<span>  median_linewidth <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  median_colour <span class="op">=</span> <span class="st">"grey30"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -130,6 +137,31 @@ point/interval per bin <em>and</em> per requested percentile.</p>
 
 <dt id="arg-ribbon-alpha">ribbon_alpha<a class="anchor" aria-label="anchor" href="#arg-ribbon-alpha"></a></dt>
 <dd><p>Fill transparency for <code>er_style_vpc_simulated_quantile_ribbon()</code>'s bands.</p></dd>
+
+
+<dt id="arg-ribbon-edges">ribbon_edges<a class="anchor" aria-label="anchor" href="#arg-ribbon-edges"></a></dt>
+<dd><p>Whether <code>er_style_vpc_simulated_quantile_ribbon()</code>
+additionally draws a line along each band's own <code>ci_lower</code>/<code>ci_upper</code>
+bounds, on top of the shaded ribbon fill – mirrors
+<code><a href="er_style_model.html">er_style_model_ribbonline()</a></code>'s own <code>ribbon_edges</code> argument. Default
+<code>FALSE</code> (ribbon fill only). Useful when several requested percentiles'
+bands overlap: the edge lines stay legible even where the fills merge
+into an indistinguishable blob.</p></dd>
+
+
+<dt id="arg-edge-linetype-edge-linewidth-edge-colour">edge_linetype, edge_linewidth, edge_colour<a class="anchor" aria-label="anchor" href="#arg-edge-linetype-edge-linewidth-edge-colour"></a></dt>
+<dd><p>Styling for
+<code>er_style_vpc_simulated_quantile_ribbon()</code>'s optional edge lines
+(only drawn when <code>ribbon_edges = TRUE</code>). Defaults to a thin, light
+dotted line (<code>"dotted"</code>, <code>0.5</code>, <code>"grey50"</code>) that stays unobtrusive
+even when several bands' edges overlap.</p></dd>
+
+
+<dt id="arg-median-linetype-median-linewidth-median-colour">median_linetype, median_linewidth, median_colour<a class="anchor" aria-label="anchor" href="#arg-median-linetype-median-linewidth-median-colour"></a></dt>
+<dd><p>Styling for
+<code>er_style_vpc_simulated_quantile_ribbon()</code>'s median line, drawn at
+each band's <code>y_mid</code>. Defaults match the previous fixed styling
+(<code>"dashed"</code>, <code>0.5</code>, <code>"grey30"</code>).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -196,6 +228,16 @@ maps a constant <code>fill = "Simulated"</code>. ggplot2 merges either into the
 paired observed builder's own <code>"Observed"</code> legend entry (same
 aesthetic) into one combined legend; the ribbon's <code>fill</code> legend is
 separate from the point/errorbar builders' <code>color</code> legend.</p>
+<p>When several requested percentiles' bands sit close together (small
+per-bin samples, few simulated replicates, or <code>probs</code> values close to
+one another), <code>er_style_vpc_simulated_quantile_ribbon()</code>'s bands can
+overlap enough that the shaded fills merge into a single
+indistinguishable region, and its median lines – all styled
+identically – become the only way to tell the bands apart, which
+fails wherever two of them cross. <code>ribbon_edges = TRUE</code> mitigates this
+by drawing each band's own <code>ci_lower</code>/<code>ci_upper</code> bounds as a line (see
+<code>edge_linetype</code>/<code>edge_linewidth</code>/<code>edge_colour</code>), which stays legible
+even where the fills themselves are illegible.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
