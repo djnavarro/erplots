@@ -17,7 +17,9 @@ library(erglm)
 
 The mini-grammar for VPC plots is considerably simpler than the one for exposure-response plots.
 
-## Binary response, continuous `plot_by`
+## Binary response 
+
+### By exposure
 
 ```{r}
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
@@ -35,7 +37,20 @@ erglm_data |>
 
 In this approach, the quantiles are displayed as discrete categories, and not plotted at the median exposure associated with the bin. 
 
-## Binary response, discrete `plot_by`
+### By continuous covariate
+
+Continuous `plot_by` does not have to be the same as the exposure variable:
+
+```{r}
+erglm_data |> 
+  er_vpc(exposure = aucss, response = ae1, plot_by = weight) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  plot()
+``` 
+
+
+### By discrete covariate
 
 ```{r}
 mod <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
@@ -47,7 +62,9 @@ erglm_data |>
   plot()
 ``` 
 
-## Continuous response, continuous `plot_by`
+## Continuous response 
+
+### By exposure
 
 ```{r}
 mod <- emax_nls(
@@ -105,6 +122,8 @@ emax_df |>
   plot()
 ```
 
+### By continuous covariate
+
 Continuous `plot_by` variables can be something other than the exposure:
 
 ```{r}
@@ -143,6 +162,21 @@ emax_df |>
     seed = 1234, 
     style = er_style_vpc_simulated_quantile_ribbon
   ) |>
+  plot()
+
+```
+
+### By discrete covariate
+
+```{r}
+mod <- erglm_model(
+  biomarker_change ~ aucss + sex, erglm_data, family = gaussian()
+)
+
+erglm_data |> 
+  er_vpc(exposure = aucss, response = biomarker_change, plot_by = sex) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
   plot()
 
 ```
