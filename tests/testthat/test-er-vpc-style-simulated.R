@@ -75,7 +75,7 @@ test_that("the default mean_errorbar pair shares consistent x-positions for a co
   )
 })
 
-test_that("er_style_vpc_simulated_quantile_errorbar() returns point + errorbar geoms, dodged per prob", {
+test_that("er_style_vpc_simulated_quantile_errorbar() returns point + errorbar geoms per prob", {
   vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
     er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |>
     er_vpc_add_simulated(

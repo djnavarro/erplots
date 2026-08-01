@@ -236,9 +236,12 @@ Three visual idioms, chosen by `style`:
 - **Categorical-bin quantile idiom** (`layout = "categorical"`):
   `er_style_vpc_observed_quantile_errorbar()` /
   `er_style_vpc_simulated_quantile_errorbar()` -- a point/errorbar per
-  requested percentile (see [er_vpc()]'s `probs` argument), dodged at
-  each bin's discrete `.vpc_bin` location. Unlike the percentile-band
-  idiom above, `config$percentiles` (and so this idiom) supports a
+  requested percentile (see [er_vpc()]'s `probs` argument), plotted at
+  each bin's discrete `.vpc_bin` location. When more than one percentile
+  is requested they currently overplot at the same x-position within a
+  bin rather than being dodged apart -- dodging support is deferred to a
+  future PR. Unlike the percentile-band idiom above, `config$percentiles`
+  (and so this idiom) supports a
   categorical `plot_by` as well as a numeric one -- tagged
   `response_types = c("continuous", "count")`, `plot_by_types =
   c("continuous", "discrete")` -- since it never needs a numeric

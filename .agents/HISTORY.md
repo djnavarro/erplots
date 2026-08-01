@@ -848,3 +848,36 @@ Tests and docs that used the removed builders purely as a stand-in for
 "any observed/simulated-tagged style" (e.g. wrong-layer-rejection tests)
 were repointed at `er_style_vpc_observed_mean_errorbar()`/
 `er_style_vpc_simulated_mean_errorbar()` instead.
+
+## Dropping dodging from the categorical-bin quantile idiom (and the mean/errorbar default's categorical branch)
+
+`er_style_vpc_observed_quantile_errorbar()`/
+`er_style_vpc_simulated_quantile_errorbar()` used
+`ggplot2::position_dodge2()` to separate each bin's requested
+percentiles horizontally, applied independently to the `geom_errorbar()`
+and `geom_point()` calls within each builder. This was buggy in
+practice: `position_dodge2()` computes each geom's dodge offsets from
+that geom's own layer data, and a bare `geom_point()` (no natural
+width) doesn't dodge consistently with a `geom_errorbar()` in the same
+position family, so the point and its own error bar end up offset by
+different amounts. Because the observed and simulated builders are
+also two entirely separate ggplot2 layers plotted at the same
+`.vpc_bin` x locations, they dodge independently of each other too,
+compounding the misalignment.
+
+Getting dodging right here needs a shared dodge computation across all
+four geoms (both builders' points and error bars), which is more
+involved than a quick fix and out of scope for this PR. Dodging was
+removed outright rather than patched: `er_style_vpc_observed_mean_errorbar()`/
+`er_style_vpc_simulated_mean_errorbar()`'s categorical branch (which
+separated the observed and simulated point/errorbar at the same
+`.vpc_bin`) and `er_style_vpc_observed_quantile_errorbar()`/
+`er_style_vpc_simulated_quantile_errorbar()` (which separated each
+bin's requested percentiles) now all plot directly at `.vpc_bin` with
+no `position_dodge2()` call and no `dodge_width` parameter. When more
+than one percentile is requested, its points/error bars currently
+overplot at the same x position within a bin -- distinguishable only by
+their differing y-values, not by any horizontal offset. Revisiting
+proper dodging (likely via an explicit shared offset computed once and
+applied to all four geoms, similar in spirit to `er_plot()`'s own
+`.dodge_quantile_strata()`) is deferred to a future PR.

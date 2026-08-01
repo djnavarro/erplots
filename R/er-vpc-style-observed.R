@@ -4,7 +4,7 @@
 #' drawing the observed side of a visual predictive check as a
 #' mean/rate + confidence interval per bin (the default, adaptive to
 #' `plot_by`'s type), a continuous-x line of empirical percentiles, or a
-#' dodged point/interval per bin *and* per requested percentile.
+#' point/interval per bin *and* per requested percentile.
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame.
@@ -19,8 +19,6 @@
 #' @param errorbar_width_continuous Width (as a fraction of the exposure
 #'   range) of `er_style_vpc_observed_mean_errorbar()`'s error bars when
 #'   `plot_by` is numeric.
-#' @param dodge_width Dodge width separating each bin's requested
-#'   percentiles in `er_style_vpc_observed_quantile_errorbar()`.
 #' @param ... Additional named arguments forwarded from
 #'   [er_vpc_add_observed()]'s own `...`.
 #'
@@ -45,15 +43,19 @@
 #'
 #' `er_style_vpc_observed_quantile_errorbar()` plots `config$percentiles`
 #' -- a point + confidence interval (via [ci_quantile()]) for each
-#' requested percentile -- dodged at each bin's categorical (or
-#' quantile-bin) label, for pairing with
-#' [er_style_vpc_simulated_quantile_errorbar()]. Unlike
-#' `er_style_vpc_observed_quantile_line()`/`er_style_vpc_simulated_quantile_ribbon()`,
-#' it supports both a numeric and a categorical `plot_by` (it always
-#' plots at the discrete `.vpc_bin` label rather than a continuous
-#' numeric midpoint); like it, it requires a continuous/count response (a
-#' binary response's distribution is already fully described by its
-#' rate) and errors informatively without `config$percentiles`.
+#' requested percentile -- at each bin's categorical (or quantile-bin)
+#' label, for pairing with [er_style_vpc_simulated_quantile_errorbar()].
+#' Unlike `er_style_vpc_observed_quantile_line()`/
+#' `er_style_vpc_simulated_quantile_ribbon()`, it supports both a numeric
+#' and a categorical `plot_by` (it always plots at the discrete
+#' `.vpc_bin` label rather than a continuous numeric midpoint); like it,
+#' it requires a continuous/count response (a binary response's
+#' distribution is already fully described by its rate) and errors
+#' informatively without `config$percentiles`. When more than one
+#' percentile is requested, all of them are currently plotted at the
+#' same `.vpc_bin` x-position within a bin rather than dodged apart, so
+#' overlapping error bars/points are only distinguishable by their
+#' y-position -- dodging support may be added in a future release.
 #'
 #' Each builder maps a constant `color = "Observed"`, so ggplot2 merges
 #' its legend entry with whatever the paired simulated-layer builder
@@ -101,8 +103,7 @@ er_style_vpc_observed_quantile_line <- er_style_tag(
 #' @rdname er_style_vpc_observed
 #' @export
 er_style_vpc_observed_quantile_errorbar <- function(data, config, exposure, response, theme,
-                                                     point_size = 1.5, errorbar_width = 0.15,
-                                                     dodge_width = 0.5, ...) {
+                                                     point_size = 1.5, errorbar_width = 0.15, ...) {
   if (is.null(config$percentiles)) {
     rlang::abort(c(
       "`er_style_vpc_observed_quantile_errorbar()` requires `config$percentiles`, which is not available here.",
@@ -114,14 +115,12 @@ er_style_vpc_observed_quantile_errorbar <- function(data, config, exposure, resp
     ggplot2::geom_errorbar(
       data = config$percentiles,
       mapping = ggplot2::aes(x = .vpc_bin, ymin = ci_lower, ymax = ci_upper, group = factor(prob), color = "Observed"),
-      position = ggplot2::position_dodge2(width = dodge_width),
       width = errorbar_width,
       inherit.aes = FALSE
     ),
     ggplot2::geom_point(
       data = config$percentiles,
       mapping = ggplot2::aes(x = .vpc_bin, y = y, group = factor(prob), color = "Observed"),
-      position = ggplot2::position_dodge2(width = dodge_width),
       size = point_size,
       inherit.aes = FALSE
     )
@@ -161,14 +160,12 @@ er_style_vpc_observed_mean_errorbar <- function(data, config, exposure, response
       ggplot2::geom_errorbar(
         data = config$summary,
         mapping = ggplot2::aes(x = .vpc_bin, ymin = ci_lower, ymax = ci_upper, color = "Observed"),
-        position = ggplot2::position_dodge2(width = .2),
         width = errorbar_width,
         inherit.aes = FALSE
       ),
       ggplot2::geom_point(
         data = config$summary,
         mapping = ggplot2::aes(x = .vpc_bin, y = y_mid, color = "Observed"),
-        position = ggplot2::position_dodge2(width = .2),
         size = point_size,
         inherit.aes = FALSE
       )

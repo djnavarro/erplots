@@ -60,6 +60,7 @@ articles:
       - articles/plot-binary
       - articles/plot-continuous
       - articles/plot-count
+      - articles/plot-vpc
       - articles/design
       - articles/theming
       - articles/extending

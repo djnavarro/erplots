@@ -25,7 +25,6 @@ er_style_vpc_simulated_quantile_errorbar(
   theme,
   point_size = 1.5,
   errorbar_width = 0.15,
-  dodge_width = 0.5,
   ...
 )
 
@@ -63,9 +62,6 @@ er_style_vpc_simulated_mean_errorbar(
 error bars when \code{plot_by} is categorical, and of
 \code{er_style_vpc_simulated_quantile_errorbar()}'s.}
 
-\item{dodge_width}{Dodge width separating each bin's requested
-percentiles in \code{er_style_vpc_simulated_quantile_errorbar()}.}
-
 \item{errorbar_width_continuous}{Width (as a fraction of the exposure
 range) of \code{er_style_vpc_simulated_mean_errorbar()}'s error bars when
 \code{plot_by} is numeric.}
@@ -77,7 +73,7 @@ A list of geoms; see \code{\link[=er_style]{er_style()}}.
 Builder functions for the \code{simulated} layer (\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}),
 drawing the simulated side of a visual predictive check as a
 mean + percentile interval per bin (the default, adaptive to
-\code{plot_by}'s type), continuous-x percentile bands, or a dodged
+\code{plot_by}'s type), continuous-x percentile bands, or a
 point/interval per bin \emph{and} per requested percentile.
 }
 \details{
@@ -103,11 +99,13 @@ without it errors.
 
 \code{er_style_vpc_simulated_quantile_errorbar()} plots \code{config$percentiles}
 -- a point + across-replicate percentile interval for each requested
-percentile -- dodged at each bin's categorical (or quantile-bin)
-label, for pairing with \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}.
-Like that builder, it supports both a numeric and a categorical
-\code{plot_by} and requires a continuous/count response, erroring
-informatively without \code{config$percentiles}.
+percentile -- at each bin's categorical (or quantile-bin) label, for
+pairing with \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}. Like that
+builder, it supports both a numeric and a categorical \code{plot_by} and
+requires a continuous/count response, erroring informatively without
+\code{config$percentiles}. As with the observed-layer counterpart, when
+more than one percentile is requested they are currently all plotted
+at the same \code{.vpc_bin} x-position rather than dodged apart.
 
 \code{er_style_vpc_simulated_mean_errorbar()}/\code{er_style_vpc_simulated_quantile_errorbar()}
 map a constant \code{color = "Simulated"}; \code{er_style_vpc_simulated_quantile_ribbon()}

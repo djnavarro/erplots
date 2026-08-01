@@ -3,7 +3,7 @@
 #' Builder functions for the `simulated` layer ([er_vpc_add_simulated()]),
 #' drawing the simulated side of a visual predictive check as a
 #' mean + percentile interval per bin (the default, adaptive to
-#' `plot_by`'s type), continuous-x percentile bands, or a dodged
+#' `plot_by`'s type), continuous-x percentile bands, or a
 #' point/interval per bin *and* per requested percentile.
 #'
 #' @include er-plot-style.R
@@ -19,8 +19,6 @@
 #' @param errorbar_width_continuous Width (as a fraction of the exposure
 #'   range) of `er_style_vpc_simulated_mean_errorbar()`'s error bars when
 #'   `plot_by` is numeric.
-#' @param dodge_width Dodge width separating each bin's requested
-#'   percentiles in `er_style_vpc_simulated_quantile_errorbar()`.
 #' @param ribbon_alpha Fill transparency for `er_style_vpc_simulated_quantile_ribbon()`'s bands.
 #' @param ... Additional named arguments forwarded from
 #'   [er_vpc_add_simulated()]'s own `...`.
@@ -47,11 +45,13 @@
 #'
 #' `er_style_vpc_simulated_quantile_errorbar()` plots `config$percentiles`
 #' -- a point + across-replicate percentile interval for each requested
-#' percentile -- dodged at each bin's categorical (or quantile-bin)
-#' label, for pairing with [er_style_vpc_observed_quantile_errorbar()].
-#' Like that builder, it supports both a numeric and a categorical
-#' `plot_by` and requires a continuous/count response, erroring
-#' informatively without `config$percentiles`.
+#' percentile -- at each bin's categorical (or quantile-bin) label, for
+#' pairing with [er_style_vpc_observed_quantile_errorbar()]. Like that
+#' builder, it supports both a numeric and a categorical `plot_by` and
+#' requires a continuous/count response, erroring informatively without
+#' `config$percentiles`. As with the observed-layer counterpart, when
+#' more than one percentile is requested they are currently all plotted
+#' at the same `.vpc_bin` x-position rather than dodged apart.
 #'
 #' `er_style_vpc_simulated_mean_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()`
 #' map a constant `color = "Simulated"`; `er_style_vpc_simulated_quantile_ribbon()`
@@ -105,8 +105,7 @@ er_style_vpc_simulated_quantile_ribbon <- er_style_tag(
 #' @rdname er_style_vpc_simulated
 #' @export
 er_style_vpc_simulated_quantile_errorbar <- function(data, config, exposure, response, theme,
-                                                      point_size = 1.5, errorbar_width = 0.15,
-                                                      dodge_width = 0.5, ...) {
+                                                      point_size = 1.5, errorbar_width = 0.15, ...) {
   if (is.null(config$percentiles)) {
     rlang::abort(c(
       "`er_style_vpc_simulated_quantile_errorbar()` requires `config$percentiles`, which is not available here.",
@@ -118,14 +117,12 @@ er_style_vpc_simulated_quantile_errorbar <- function(data, config, exposure, res
     ggplot2::geom_errorbar(
       data = config$percentiles,
       mapping = ggplot2::aes(x = .vpc_bin, ymin = ci_lower, ymax = ci_upper, group = factor(prob), color = "Simulated"),
-      position = ggplot2::position_dodge2(width = dodge_width),
       width = errorbar_width,
       inherit.aes = FALSE
     ),
     ggplot2::geom_point(
       data = config$percentiles,
       mapping = ggplot2::aes(x = .vpc_bin, y = y_mid, group = factor(prob), color = "Simulated"),
-      position = ggplot2::position_dodge2(width = dodge_width),
       size = point_size,
       inherit.aes = FALSE
     )
@@ -165,14 +162,12 @@ er_style_vpc_simulated_mean_errorbar <- function(data, config, exposure, respons
       ggplot2::geom_errorbar(
         data = config$summary,
         mapping = ggplot2::aes(x = .vpc_bin, ymin = ci_lower, ymax = ci_upper, color = "Simulated"),
-        position = ggplot2::position_dodge2(width = .2),
         width = errorbar_width,
         inherit.aes = FALSE
       ),
       ggplot2::geom_point(
         data = config$summary,
         mapping = ggplot2::aes(x = .vpc_bin, y = y_mid, color = "Simulated"),
-        position = ggplot2::position_dodge2(width = .2),
         size = point_size,
         inherit.aes = FALSE
       )
