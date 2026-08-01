@@ -16,7 +16,22 @@
     # x-axis is `plot_by`, not necessarily `exposure` -- they coincide
     # only when the caller didn't supply `plot_by` (or supplied the
     # exposure variable itself)
-    ggplot2::labs(x = object$group$label, y = response$label, color = "Source")
+    # `fill = "Source"` is left to the individual builders that actually
+    # map fill (e.g. `er_style_vpc_simulated_quantile_ribbon()`) -- setting
+    # it here unconditionally would make `labs()` warn "ignoring unknown
+    # labels" whenever a builder pair never maps fill at all.
+    ggplot2::labs(x = object$group$label, y = response$label, color = "Source") +
+    # Fixed, shared `limits` on both the colour and fill scales -- not
+    # just their default palette -- so "Observed"/"Simulated" always
+    # land on the same two hues whether a given pair of builders maps
+    # the distinction via colour, fill, or one of each. Without this,
+    # colour and fill each train independently on whatever single level
+    # their own layer supplies (e.g. a colour-only observed builder
+    # paired with a fill-only simulated builder), and both scales
+    # independently assign the *first* hue in the default palette to
+    # their one level, making observed and simulated indistinguishable.
+    ggplot2::scale_colour_hue(limits = .vpc_source_levels) +
+    ggplot2::scale_fill_hue(limits = .vpc_source_levels)
 
   # the simulated layer is added first (drawn underneath), so a ribbon
   # band never buries the observed points/line on top of it -- there's

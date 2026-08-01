@@ -322,6 +322,18 @@ documented in `R/data.R`. Columns:
 A handful of non-obvious implementation details that would bite a future
 edit if forgotten:
 
+- **`.build_vpc_plot()` gives the colour and fill scales identical, fixed
+  `limits` (`.vpc_source_levels <- c("Observed", "Simulated")`, defined
+  in `R/er-vpc-layer.R`).** Without this, a builder pair that mixes
+  colour (e.g. `er_style_vpc_observed_quantile_line()`) and fill (e.g.
+  `er_style_vpc_simulated_quantile_ribbon()`) for the observed/simulated
+  distinction would have each scale train independently on the single
+  level its own layer supplies, and both would independently assign the
+  *first* hue in the default palette -- making observed and simulated
+  render as the same colour despite being on different aesthetics. Any
+  new VPC builder that maps a constant `"Observed"`/`"Simulated"` string
+  to colour or fill should reuse `.vpc_source_levels` rather than typing
+  the strings directly, so it stays in sync with this fix.
 - **In VPC code, never reach for `exposure$label`/`exposure$limits`
   when the intent is "the plot's x-axis variable."** `plot_by` (not
   `exposure`) drives the VPC's x-axis, and the two only coincide when

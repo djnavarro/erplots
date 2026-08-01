@@ -1,4 +1,14 @@
 
+# Shared, fixed level order for the observed/simulated legend distinction.
+# Used both by `.build_vpc_plot()` (to give the colour and fill scales
+# identical `limits`, keeping the two hues aligned across builders that
+# mix colour and fill for the same "Source" idea -- see there for why)
+# and can be relied on by custom builders that want to match built-in
+# colours exactly.
+#' @noRd
+.vpc_source_levels <- c("Observed", "Simulated")
+
+
 # layer_vpc_observed -----------------------------------------------------------
 
 .layer_vpc_observed <- function(object, style, dots = list()) {
