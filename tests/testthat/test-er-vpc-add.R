@@ -1,4 +1,4 @@
-test_that("er_vpc_add_observed() uses group_by/n_bins set on er_vpc()", {
+test_that("er_vpc_add_observed() uses plot_by/n_bins set on er_vpc()", {
   vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
   expect_equal(vpc$layer$observed$config$group_var, "aucss")
   expect_true(vpc$layer$observed$config$is_numeric_group)
@@ -10,18 +10,18 @@ test_that("er_vpc_add_observed() stores er_vpc()'s probs on the layer's config",
   expect_equal(vpc$layer$observed$config$probs, c(0.2, 0.5, 0.8))
 })
 
-test_that("er_vpc_add_observed() supports a categorical group_by with no binning", {
-  vpc <- er_vpc(er_test_data, aucss, ae1, group_by = sex) |> er_vpc_add_observed()
+test_that("er_vpc_add_observed() supports a categorical plot_by with no binning", {
+  vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |> er_vpc_add_observed()
   expect_equal(vpc$layer$observed$config$group_var, "sex")
   expect_false(vpc$layer$observed$config$is_numeric_group)
   expect_null(vpc$layer$observed$config$breaks)
   expect_null(vpc$layer$observed$config$percentiles)
 })
 
-test_that("er_vpc() validates n_bins and group_by", {
+test_that("er_vpc() validates n_bins and plot_by", {
   expect_error(er_vpc(er_test_data, aucss, ae1, n_bins = 0), "positive whole number")
   expect_error(er_vpc(er_test_data, aucss, ae1, n_bins = 2.5), "positive whole number")
-  expect_error(er_vpc(er_test_data, aucss, ae1, group_by = not_a_column), "not found")
+  expect_error(er_vpc(er_test_data, aucss, ae1, plot_by = not_a_column), "not found")
 })
 
 test_that("er_vpc() validates conf_level", {

@@ -1,7 +1,7 @@
 
 #' Add the observed-data layer to an `er_vpc` VPC
 #'
-#' Bins the observed data by `group_by` (see [er_vpc()]) and computes its
+#' Bins the observed data by `plot_by` (see [er_vpc()]) and computes its
 #' response summary (rate/mean + confidence interval, plus empirical
 #' percentiles for a continuous/count response), for later comparison
 #' against a simulated layer added via [er_vpc_add_simulated()].
@@ -13,7 +13,7 @@
 #'
 #' @returns `object`, with `object$layer$observed` populated.
 #'
-#' @details `group_by`/`n_bins`/`conf_level`/`probs` are set once on
+#' @details `plot_by`/`n_bins`/`conf_level`/`probs` are set once on
 #' [er_vpc()] itself (rather than here) so the observed and simulated
 #' layers can't disagree about how the comparison is binned or
 #' summarized.
@@ -51,7 +51,7 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_pointrange
 #'   must already have an observed layer (see [er_vpc_add_observed()]).
 #' @param model A fitted model implementing [er_simulate()] with
 #'   `sim_resp`. Mutually exclusive with `sim`.
-#' @param sim Simulated data with matching exposure/response/`group_by`
+#' @param sim Simulated data with matching exposure/response/`plot_by`
 #'   columns and `sim_id`. Mutually exclusive with `model`.
 #' @param nsim Number of simulation replicates, only used with `model`.
 #' @param seed Optional RNG seed, only used with `model`.

@@ -60,8 +60,8 @@ test_that("er_style_vpc_observed_pointrange_continuous() stays mean-only for a b
   expect_length(geoms, 2)
 })
 
-test_that("er_style_vpc_observed_pointrange_continuous() errors for a categorical group_by", {
-  vpc <- er_vpc(er_test_data, aucss, ae1, group_by = sex) |> er_vpc_add_observed()
+test_that("er_style_vpc_observed_pointrange_continuous() errors for a categorical plot_by", {
+  vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |> er_vpc_add_observed()
   expect_error(
     er_style_vpc_observed_pointrange_continuous(
       er_test_data, vpc$layer$observed$config, vpc$exposure, vpc$response, vpc$theme

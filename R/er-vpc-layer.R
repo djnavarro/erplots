@@ -77,7 +77,7 @@
 
   # empirical response percentiles per bin, for the continuous-x
   # line/ribbon builders -- meaningful only for a continuous/count
-  # response binned on a numeric `group_by` (a categorical `group_by`,
+  # response binned on a numeric `plot_by` (a categorical `plot_by`,
   # e.g. sex, has no continuous x-axis to plot percentiles against; a
   # binary response's full distribution is already captured by its rate,
   # so there's nothing more informative a percentile would show)
@@ -173,7 +173,7 @@
   config$summary <- summary_tbl
 
   # simulated percentile bands -- same scoping as the observed side
-  # (continuous/count response, numeric `group_by` only)
+  # (continuous/count response, numeric `plot_by` only)
   config$percentiles <- NULL
   if (response_type != "binary" && obs_config$is_numeric_group) {
     stage1 <- sim |>

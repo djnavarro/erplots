@@ -21,7 +21,7 @@ must already have an observed layer (see \code{\link[=er_vpc_add_observed]{er_vp
 \item{model}{A fitted model implementing \code{\link[=er_simulate]{er_simulate()}} with
 \code{sim_resp}. Mutually exclusive with \code{sim}.}
 
-\item{sim}{Simulated data with matching exposure/response/\code{group_by}
+\item{sim}{Simulated data with matching exposure/response/\code{plot_by}
 columns and \code{sim_id}. Mutually exclusive with \code{model}.}
 
 \item{nsim}{Number of simulation replicates, only used with \code{model}.}

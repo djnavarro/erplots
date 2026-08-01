@@ -79,8 +79,8 @@ test_that("er_style_vpc_simulated_errorbar_continuous() stays mean-only for a bi
   expect_length(geoms, 2)
 })
 
-test_that("er_style_vpc_simulated_errorbar_continuous() errors for a categorical group_by", {
-  vpc <- er_vpc(er_test_data, aucss, ae1, group_by = sex) |>
+test_that("er_style_vpc_simulated_errorbar_continuous() errors for a categorical plot_by", {
+  vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |>
     er_vpc_add_observed() |>
     er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 806, style = er_style_vpc_simulated_errorbar)
 

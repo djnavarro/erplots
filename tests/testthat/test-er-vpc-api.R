@@ -9,14 +9,14 @@ test_that("er_vpc() constructs an er_vpc object with the right variable metadata
   expect_null(vpc$layer$simulated)
 })
 
-test_that("er_vpc() defaults group_by to the exposure variable and stores n_bins/conf_level/probs", {
+test_that("er_vpc() defaults plot_by to the exposure variable and stores n_bins/conf_level/probs", {
   vpc <- er_vpc(er_test_data, aucss, ae1)
   expect_equal(vpc$group$var, "aucss")
   expect_equal(vpc$group$n_bins, 4)
   expect_equal(vpc$group$conf_level, 0.95)
   expect_equal(vpc$group$probs, c(0.1, 0.5, 0.9))
 
-  vpc2 <- er_vpc(er_test_data, aucss, ae1, group_by = sex, n_bins = 6, conf_level = 0.9, probs = c(0.2, 0.8))
+  vpc2 <- er_vpc(er_test_data, aucss, ae1, plot_by = sex, n_bins = 6, conf_level = 0.9, probs = c(0.2, 0.8))
   expect_equal(vpc2$group$var, "sex")
   expect_equal(vpc2$group$n_bins, 6)
   expect_equal(vpc2$group$conf_level, 0.9)

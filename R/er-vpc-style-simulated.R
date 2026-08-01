@@ -26,7 +26,7 @@
 #' -- at each bin's numeric midpoint on the exposure scale, for pairing
 #' with [er_style_vpc_observed_line()]. `config$percentiles` is only
 #' computed for a continuous/count response binned on a numeric
-#' `group_by` (see [er_vpc()]'s `probs` argument); calling
+#' `plot_by` (see [er_vpc()]'s `probs` argument); calling
 #' `er_style_vpc_simulated_ribbon()` without it errors.
 #' `er_style_vpc_simulated_errorbar_continuous()` plots the same mean +
 #' percentile interval as `er_style_vpc_simulated_errorbar()`, at the
@@ -36,7 +36,7 @@
 #' `"continuous"`-layout observed builder without a layout mismatch. It
 #' always plots the mean (from `config$summary`, so it works for a
 #' binary response too); when `config$percentiles` is also available
-#' (continuous/count response, numeric `group_by`), it additionally
+#' (continuous/count response, numeric `plot_by`), it additionally
 #' plots a dashed pointrange/errorbar for each requested percentile --
 #' the same across-replicate interval `er_style_vpc_simulated_ribbon()`
 #' shows as a band.
@@ -84,8 +84,8 @@ er_style_vpc_simulated_errorbar_continuous <- function(data, config, exposure, r
                                                          point_size = 2, errorbar_width = 0.025, ...) {
   if (!isTRUE(config$is_numeric_group)) {
     rlang::abort(c(
-      "`er_style_vpc_simulated_errorbar_continuous()` requires a numeric `group_by`, so that each bin has a numeric midpoint to plot at.",
-      "i" = "Use `er_style_vpc_simulated_errorbar()` instead for a categorical `group_by`."
+      "`er_style_vpc_simulated_errorbar_continuous()` requires a numeric `plot_by`, so that each bin has a numeric midpoint to plot at.",
+      "i" = "Use `er_style_vpc_simulated_errorbar()` instead for a categorical `plot_by`."
     ))
   }
   width <- errorbar_width * (exposure$limits[2] - exposure$limits[1])
@@ -135,8 +135,8 @@ er_style_vpc_simulated_ribbon <- function(data, config, exposure, response, them
   if (is.null(config$percentiles)) {
     rlang::abort(c(
       "`er_style_vpc_simulated_ribbon()` requires `config$percentiles`, which is not available here.",
-      "i" = "Percentiles are only computed for a continuous/count response binned on a numeric `group_by` -- see `er_vpc_add_observed()`/`er_vpc_add_simulated()`.",
-      "i" = "Use `er_style_vpc_simulated_errorbar()` instead for a binary response or a categorical `group_by`."
+      "i" = "Percentiles are only computed for a continuous/count response binned on a numeric `plot_by` -- see `er_vpc_add_observed()`/`er_vpc_add_simulated()`.",
+      "i" = "Use `er_style_vpc_simulated_errorbar()` instead for a binary response or a categorical `plot_by`."
     ))
   }
   list(

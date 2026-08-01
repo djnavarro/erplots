@@ -14,26 +14,27 @@
 #'
 #' Unlike [er_plot()], `er_vpc()` has no stratification concept and
 #' always renders a single panel -- see [er_vpc_add_observed()] for
-#' `group_by`, the (orthogonal) variable used to bin/group the
-#' comparison.
+#' `plot_by`, the (orthogonal) variable plotted on the x-axis and used
+#' to bin/group the comparison.
 #'
 #' @param data Data frame or tibble containing the observed data.
 #' @param exposure Exposure variable (one variable, unquoted).
 #' @param response Response variable (one variable, unquoted).
 #' @param response_type One of `"auto"`, `"binary"`, `"continuous"`, or `"count"`.
-#' @param group_by Variable (unquoted) used to bin/group the observed vs.
-#'   simulated comparison. Defaults to `exposure`. A numeric variable is
-#'   split into `n_bins` quantile bins (placebo, i.e. `0`, kept in its own
-#'   bin when `group_by` is the exposure variable itself); a categorical
-#'   variable is used as-is, with no binning.
-#' @param n_bins Number of quantile bins, when `group_by` is numeric.
+#' @param plot_by Variable (unquoted) plotted on the x-axis and used to
+#'   bin/group the observed vs. simulated comparison. Defaults to
+#'   `exposure`. A numeric variable is split into `n_bins` quantile bins
+#'   (placebo, i.e. `0`, kept in its own bin when `plot_by` is the
+#'   exposure variable itself); a categorical variable is used as-is,
+#'   with no binning.
+#' @param n_bins Number of quantile bins, when `plot_by` is numeric.
 #' @param conf_level Confidence level for both the observed- and
 #'   simulated-side intervals. Must be strictly between 0 and 1.
 #' @param probs Percentiles to compute for a `"continuous"`-layout builder
 #'   (e.g. [er_style_vpc_observed_line()]/[er_style_vpc_simulated_ribbon()];
 #'   ignored by a `"categorical"`-layout builder like the default
 #'   pointrange/errorbar pair). Only computed for a continuous/count
-#'   response binned on a numeric `group_by`.
+#'   response binned on a numeric `plot_by`.
 #'
 #' @returns An (empty) plot object of class `er_vpc`.
 #'
@@ -43,7 +44,7 @@
 #' mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 #'
 #' erglm_data |>
-#'   er_vpc(aucss, ae2, group_by = aucss) |>
+#'   er_vpc(aucss, ae2, plot_by = aucss) |>
 #'   er_vpc_add_observed() |>
 #'   er_vpc_add_simulated(model = mod, seed = 9984) |>
 #'   plot()
@@ -58,7 +59,7 @@ NULL
 #' @rdname er_vpc
 #' @export
 er_vpc <- function(data, exposure, response, response_type = "auto",
-                    group_by = NULL, n_bins = 4, conf_level = 0.95,
+                    plot_by = NULL, n_bins = 4, conf_level = 0.95,
                     probs = c(0.1, 0.5, 0.9)) {
 
   # see `er_plot()`'s identical `dplyr::ungroup()` call for the rationale
@@ -91,7 +92,7 @@ er_vpc <- function(data, exposure, response, response_type = "auto",
     ))
   }
 
-  group_quo <- rlang::enquo(group_by)
+  group_quo <- rlang::enquo(plot_by)
   group_var <- if (rlang::quo_is_null(group_quo)) exposure_name else rlang::as_name(group_quo)
 
   if (!(group_var %in% names(data))) {
@@ -167,7 +168,7 @@ print.er_vpc <- function(x, ...) {
   cat("  plot variables:\n")
   cat("    - exposure:  ", x$exposure$name %||% "<none>", "\n", sep = "")
   cat("    - response:  ", x$response$name %||% "<none>", "\n", sep = "")
-  cat("    - group_by:  ", x$group$var %||% "<none>", ", ", x$group$n_bins %||% "<none>", " bins\n", sep = "")
+  cat("    - plot_by:   ", x$group$var %||% "<none>", ", ", x$group$n_bins %||% "<none>", " bins\n", sep = "")
 
   if (any(layer_set)) {
     cat("  plot layers:\n")

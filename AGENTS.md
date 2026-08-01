@@ -151,16 +151,16 @@ Built-in builders, by layer:
 
 ### The VPC mini-grammar
 
-`er_vpc(data, exposure, response, response_type, group_by = NULL, n_bins
+`er_vpc(data, exposure, response, response_type, plot_by = NULL, n_bins
 = 4, conf_level = 0.95, probs = c(0.1, 0.5, 0.9))` |>
 `er_vpc_add_observed()` |> `er_vpc_add_simulated()` |> `plot()` mirrors
 `er_plot()`'s object/layer/builder architecture, scoped deliberately
-narrower: no stratification, always a single panel. `group_by`/`n_bins`/
+narrower: no stratification, always a single panel. `plot_by`/`n_bins`/
 `conf_level`/`probs` all live on `er_vpc()` itself (stored on
 `object$group`), not on either add-verb, since the observed and
-simulated layers must always agree on them -- `group_by` defaults to the
-plot's exposure variable; numeric `group_by` is quantile-binned
-(`cut_exposure_quantile()`, placebo separated when `group_by` is the
+simulated layers must always agree on them -- `plot_by` defaults to the
+plot's exposure variable; numeric `plot_by` is quantile-binned
+(`cut_exposure_quantile()`, placebo separated when `plot_by` is the
 exposure variable itself), categorical is used as-is.
 
 - **`er_vpc_add_observed(object, style = ...)`** -- bins the observed
@@ -189,7 +189,7 @@ different pair of allowed values):
   x-axis (bin midpoint, `x_mid`). Continuous/count responses only (a
   binary response's distribution is fully described by its rate
   already); both error informatively if `config$percentiles` is
-  unavailable (binary response, or categorical `group_by`).
+  unavailable (binary response, or categorical `plot_by`).
 - **Continuous-x pointrange/errorbar idiom** (`layout = "continuous"`):
   `er_style_vpc_observed_pointrange_continuous()` /
   `er_style_vpc_simulated_errorbar_continuous()` -- the same mean/CI as
@@ -197,8 +197,8 @@ different pair of allowed values):
   `.vpc_bin`, for pairing with the percentile-band idiom (or with each
   other, on a continuous x-axis) without a layout mismatch. Unlike the
   percentile-band idiom, these only need `config$summary` (already
-  carries `x_mid` for a numeric `group_by`), so they work for a binary
-  response too; they error if `group_by` is categorical (no numeric
+  carries `x_mid` for a numeric `plot_by`), so they work for a binary
+  response too; they error if `plot_by` is categorical (no numeric
   midpoint to plot at).
 
 `er_vpc_add_simulated()` checks the observed and simulated builders'

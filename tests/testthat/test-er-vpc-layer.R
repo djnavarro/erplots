@@ -49,8 +49,8 @@ test_that(".layer_vpc_simulated() computes percentile bands matching config$perc
   expect_true(all(pct$ci_lower <= pct$y_mid & pct$y_mid <= pct$ci_upper))
 })
 
-test_that(".layer_vpc_observed()/.layer_vpc_simulated() skip percentiles for a categorical group_by", {
-  vpc <- er_vpc(er_test_data, aucss, biomarker_change, group_by = sex) |>
+test_that(".layer_vpc_observed()/.layer_vpc_simulated() skip percentiles for a categorical plot_by", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex) |>
     er_vpc_add_observed() |>
     er_vpc_add_simulated(model = er_test_mod_gaussian, nsim = 5, seed = 603)
 

@@ -9,7 +9,7 @@ er_vpc(
   exposure,
   response,
   response_type = "auto",
-  group_by = NULL,
+  plot_by = NULL,
   n_bins = 4,
   conf_level = 0.95,
   probs = c(0.1, 0.5, 0.9)
@@ -24,13 +24,14 @@ er_vpc(
 
 \item{response_type}{One of \code{"auto"}, \code{"binary"}, \code{"continuous"}, or \code{"count"}.}
 
-\item{group_by}{Variable (unquoted) used to bin/group the observed vs.
-simulated comparison. Defaults to \code{exposure}. A numeric variable is
-split into \code{n_bins} quantile bins (placebo, i.e. \code{0}, kept in its own
-bin when \code{group_by} is the exposure variable itself); a categorical
-variable is used as-is, with no binning.}
+\item{plot_by}{Variable (unquoted) plotted on the x-axis and used to
+bin/group the observed vs. simulated comparison. Defaults to
+\code{exposure}. A numeric variable is split into \code{n_bins} quantile bins
+(placebo, i.e. \code{0}, kept in its own bin when \code{plot_by} is the
+exposure variable itself); a categorical variable is used as-is,
+with no binning.}
 
-\item{n_bins}{Number of quantile bins, when \code{group_by} is numeric.}
+\item{n_bins}{Number of quantile bins, when \code{plot_by} is numeric.}
 
 \item{conf_level}{Confidence level for both the observed- and
 simulated-side intervals. Must be strictly between 0 and 1.}
@@ -39,7 +40,7 @@ simulated-side intervals. Must be strictly between 0 and 1.}
 (e.g. \code{\link[=er_style_vpc_observed_line]{er_style_vpc_observed_line()}}/\code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}};
 ignored by a \code{"categorical"}-layout builder like the default
 pointrange/errorbar pair). Only computed for a continuous/count
-response binned on a numeric \code{group_by}.}
+response binned on a numeric \code{plot_by}.}
 }
 \value{
 An (empty) plot object of class \code{er_vpc}.
@@ -58,8 +59,8 @@ second call replaces the previous one).
 
 Unlike \code{\link[=er_plot]{er_plot()}}, \code{er_vpc()} has no stratification concept and
 always renders a single panel -- see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}} for
-\code{group_by}, the (orthogonal) variable used to bin/group the
-comparison.
+\code{plot_by}, the (orthogonal) variable plotted on the x-axis and used
+to bin/group the comparison.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
@@ -67,7 +68,7 @@ library(erglm)
 mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 
 erglm_data |>
-  er_vpc(aucss, ae2, group_by = aucss) |>
+  er_vpc(aucss, ae2, plot_by = aucss) |>
   er_vpc_add_observed() |>
   er_vpc_add_simulated(model = mod, seed = 9984) |>
   plot()

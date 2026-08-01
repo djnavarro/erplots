@@ -24,7 +24,7 @@
 #' bin's numeric midpoint on the exposure scale, for pairing with
 #' [er_style_vpc_simulated_ribbon()]. `config$percentiles` is only
 #' computed for a continuous/count response binned on a numeric
-#' `group_by` (see [er_vpc()]'s `probs` argument); calling
+#' `plot_by` (see [er_vpc()]'s `probs` argument); calling
 #' `er_style_vpc_observed_line()` without it errors.
 #' `er_style_vpc_observed_pointrange_continuous()` plots the same
 #' rate/mean + confidence interval as `er_style_vpc_observed_pointrange()`,
@@ -33,7 +33,7 @@
 #' simulated builder (e.g. [er_style_vpc_simulated_ribbon()]) without a
 #' layout mismatch. It always plots the mean (from `config$summary`, so
 #' it works for a binary response too); when `config$percentiles` is
-#' also available (continuous/count response, numeric `group_by`), it
+#' also available (continuous/count response, numeric `plot_by`), it
 #' additionally plots a dashed pointrange/errorbar for each requested
 #' percentile (see [er_vpc()]'s `probs` argument), with a
 #' confidence interval from [ci_quantile()] -- the observed-side analogue
@@ -80,8 +80,8 @@ er_style_vpc_observed_pointrange_continuous <- function(data, config, exposure, 
                                                           point_size = 2, errorbar_width = 0.025, ...) {
   if (!isTRUE(config$is_numeric_group)) {
     rlang::abort(c(
-      "`er_style_vpc_observed_pointrange_continuous()` requires a numeric `group_by`, so that each bin has a numeric midpoint to plot at.",
-      "i" = "Use `er_style_vpc_observed_pointrange()` instead for a categorical `group_by`."
+      "`er_style_vpc_observed_pointrange_continuous()` requires a numeric `plot_by`, so that each bin has a numeric midpoint to plot at.",
+      "i" = "Use `er_style_vpc_observed_pointrange()` instead for a categorical `plot_by`."
     ))
   }
   width <- errorbar_width * (exposure$limits[2] - exposure$limits[1])
@@ -131,8 +131,8 @@ er_style_vpc_observed_line <- function(data, config, exposure, response, theme,
   if (is.null(config$percentiles)) {
     rlang::abort(c(
       "`er_style_vpc_observed_line()` requires `config$percentiles`, which is not available here.",
-      "i" = "Percentiles are only computed for a continuous/count response binned on a numeric `group_by` -- see `er_vpc_add_observed()`.",
-      "i" = "Use `er_style_vpc_observed_pointrange()` instead for a binary response or a categorical `group_by`."
+      "i" = "Percentiles are only computed for a continuous/count response binned on a numeric `plot_by` -- see `er_vpc_add_observed()`.",
+      "i" = "Use `er_style_vpc_observed_pointrange()` instead for a binary response or a categorical `plot_by`."
     ))
   }
   list(

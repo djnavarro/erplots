@@ -18,13 +18,13 @@ see \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}.}
 \code{object}, with \code{object$layer$observed} populated.
 }
 \description{
-Bins the observed data by \code{group_by} (see \code{\link[=er_vpc]{er_vpc()}}) and computes its
+Bins the observed data by \code{plot_by} (see \code{\link[=er_vpc]{er_vpc()}}) and computes its
 response summary (rate/mean + confidence interval, plus empirical
 percentiles for a continuous/count response), for later comparison
 against a simulated layer added via \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}.
 }
 \details{
-\code{group_by}/\code{n_bins}/\code{conf_level}/\code{probs} are set once on
+\code{plot_by}/\code{n_bins}/\code{conf_level}/\code{probs} are set once on
 \code{\link[=er_vpc]{er_vpc()}} itself (rather than here) so the observed and simulated
 layers can't disagree about how the comparison is binned or
 summarized.

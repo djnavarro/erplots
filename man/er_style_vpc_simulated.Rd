@@ -78,7 +78,7 @@ observed layer's own point + interval.
 -- at each bin's numeric midpoint on the exposure scale, for pairing
 with \code{\link[=er_style_vpc_observed_line]{er_style_vpc_observed_line()}}. \code{config$percentiles} is only
 computed for a continuous/count response binned on a numeric
-\code{group_by} (see \code{\link[=er_vpc]{er_vpc()}}'s \code{probs} argument); calling
+\code{plot_by} (see \code{\link[=er_vpc]{er_vpc()}}'s \code{probs} argument); calling
 \code{er_style_vpc_simulated_ribbon()} without it errors.
 \code{er_style_vpc_simulated_errorbar_continuous()} plots the same mean +
 percentile interval as \code{er_style_vpc_simulated_errorbar()}, at the
@@ -88,7 +88,7 @@ for pairing with
 \code{"continuous"}-layout observed builder without a layout mismatch. It
 always plots the mean (from \code{config$summary}, so it works for a
 binary response too); when \code{config$percentiles} is also available
-(continuous/count response, numeric \code{group_by}), it additionally
+(continuous/count response, numeric \code{plot_by}), it additionally
 plots a dashed pointrange/errorbar for each requested percentile --
 the same across-replicate interval \code{er_style_vpc_simulated_ribbon()}
 shows as a band.
