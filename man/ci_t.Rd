@@ -21,11 +21,12 @@ Computes a t-distribution confidence interval for a sample mean.
 }
 \details{
 Used by the quantile-binned summary layer (see
-\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}) and \code{er_vpc_plot()} to compute a
-confidence interval for the mean response within an exposure bin, for
-continuous (and, as an approximation, count) responses. This is the
-continuous-response analogue of \code{\link[=ci_clopper_pearson]{ci_clopper_pearson()}}. \code{NA}s in \code{x} are
-dropped before computing the interval.
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}) and \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}/
+\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}} to compute a confidence interval for the mean
+response within an exposure bin, for continuous (and, as an
+approximation, count) responses. This is the continuous-response
+analogue of \code{\link[=ci_clopper_pearson]{ci_clopper_pearson()}}. \code{NA}s in \code{x} are dropped before
+computing the interval.
 }
 \examples{
 ci_t(rnorm(20))

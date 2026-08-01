@@ -59,9 +59,9 @@ er_summary.er_test_partial_gof_model <- function(model, ...) {
 registerS3method("er_summary", "er_test_fake_summary_model", er_summary.er_test_fake_summary_model)
 registerS3method("er_summary", "er_test_partial_gof_model", er_summary.er_test_partial_gof_model)
 
-# test-only fixture used to exercise `er_vpc_plot(model = ...)` without
-# depending on erglm/emaxnls implementing the `sim_resp` extension to
-# `er_simulate()` -- see `?er_model_interface`. `prob` is the (constant,
+# test-only fixture used to exercise `er_vpc_add_simulated(model = ...)`
+# without depending on erglm/emaxnls implementing the `sim_resp` extension
+# to `er_simulate()` -- see `?er_model_interface`. `prob` is the (constant,
 # covariate-independent) response probability used to draw simulated
 # binary responses; `fit_resp` is included alongside `sim_resp` in the
 # returned data frame to mirror the real contract (a method can supply
@@ -80,8 +80,8 @@ er_simulate.er_test_fake_vpc_model <- function(model, newdata, nsim = 100, seed 
   dplyr::bind_rows(reps)
 }
 # a second fixture with only `fit_resp` (no `sim_resp`), used to exercise
-# `er_vpc_plot(model = ...)`'s "predictive simulation not available"
-# error path -- this is the shape every `er_simulate()` method had before
+# `er_vpc_add_simulated(model = ...)`'s "predictive simulation not
+# available" error path -- this is the shape every `er_simulate()` method had before
 # `sim_resp` was added to the contract (e.g. still true of erglm/emaxnls
 # at the time this fixture was written).
 er_simulate.er_test_fake_spaghetti_only_model <- function(model, newdata, nsim = 100, seed = NULL, ...) {

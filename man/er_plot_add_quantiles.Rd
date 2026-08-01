@@ -115,6 +115,6 @@ erglm_data |>
 }
 \seealso{
 \code{\link[=er_plot]{er_plot()}}, \code{\link[=er_plot_add_model]{er_plot_add_model()}}, \code{\link[=er_plot_add_summary]{er_plot_add_summary()}},
-\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, \code{\link[=er_vpc_plot]{er_vpc_plot()}},
+\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, \code{\link[=er_vpc]{er_vpc()}},
 \code{\link[=er_style]{er_style()}}
 }

@@ -248,7 +248,7 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' }
 #'
 #' @seealso [er_plot()], [er_plot_add_model()], [er_plot_add_summary()],
-#'   [er_plot_add_data()], [er_plot_add_groups()], [er_vpc_plot()],
+#'   [er_plot_add_data()], [er_plot_add_groups()], [er_vpc()],
 #'   [er_style()]
 #'
 #' @export

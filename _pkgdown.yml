@@ -28,10 +28,18 @@ reference:
   desc: The generics a model must (or may) implement to work with erplots
 - contents:
   - er_model_interface
+- title: VPC plots
+  desc: Functions to build visual predictive check plots
+- contents:
+  - er_vpc
+  - er_vpc_add_observed
+  - er_vpc_add_simulated
+  - er_style_vpc_observed
+  - er_style_vpc_simulated
+  - er_vpc_build
 - title: Other
   desc: Other functions and objects
 - contents:
-  - er_vpc_plot
   - ci_clopper_pearson
   - ci_poisson
   - ci_t

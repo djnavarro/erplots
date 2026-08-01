@@ -191,8 +191,9 @@ row-wise, with a `sim_id` column identifying which replicate each row
 belongs to, and a `fit_resp` column giving that replicate's simulated
 prediction. Don't implement this generic at all if your model can't
 support it -- the default method returns `NULL`, and every caller
-(`er_style_model_spaghetti()`, `er_vpc_plot()`) checks for `NULL` and
-treats it as "simulation isn't available for this model", not an error.
+(`er_style_model_spaghetti()`, `er_vpc_add_simulated()`) checks for
+`NULL` and treats it as "simulation isn't available for this model",
+not an error.
 
 The one subtlety worth understanding is that `fit_resp` here means
 something narrower than it sounds like. It's a draw from the *parameter
@@ -210,8 +211,9 @@ binary response, an integer draw for a count response, a draw that
 includes residual variance for a continuous response). A method can
 return `fit_resp` alone, or both columns from the same call; there's no
 reason to compute `sim_resp` if you only care about spaghetti plots, but
-`er_vpc_plot(model = ...)` will refuse to run (with an informative error,
-not a silently-too-narrow VPC band) if `sim_resp` is missing.
+`er_vpc_add_simulated(model = ...)` will refuse to run (with an
+informative error, not a silently-too-narrow VPC band) if `sim_resp` is
+missing.
 
 ### A worked example
 
@@ -255,16 +257,18 @@ erglm_data |>
   er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 8213) |>
   plot()
 
-er_vpc_plot(
-  erglm_data, exposure = aucss, response = ae1, group_by = aucss,
-  model = mod, nsim = 50, seed = 4471
-)
+erglm_data |>
+  er_vpc(aucss, ae1) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, nsim = 50, seed = 4471) |>
+  plot()
 ```
 
 Had `er_simulate.toy_model()` only ever populated `fit_resp`, the
-spaghetti plot above would still work unchanged, but the `er_vpc_plot()`
-call would error, naming `sim_resp` as the missing ingredient, rather
-than quietly drawing a too-narrow band from `fit_resp` alone.
+spaghetti plot above would still work unchanged, but the
+`er_vpc_add_simulated()` call would error, naming `sim_resp` as the
+missing ingredient, rather than quietly drawing a too-narrow band from
+`fit_resp` alone.
 
 The `seed` handling above is a plain `set.seed()` for readability;
 erglm's own `er_simulate.erglm_model()` additionally auto-picks and
@@ -379,7 +383,7 @@ call them:
 - `er_plot_add_model(your_model)` exercises `er_predict()` alone.
 - `er_plot_add_model(your_model, style = er_style_model_spaghetti)`
   additionally exercises `er_simulate()`'s `fit_resp`.
-- `er_vpc_plot(model = your_model, ...)` additionally exercises
+- `er_vpc_add_simulated(model = your_model, ...)` additionally exercises
   `er_simulate()`'s `sim_resp`.
 - `er_plot_add_summary(model = your_model)` (paired with whichever
   summary builder matches what your `er_summary()` populates) exercises

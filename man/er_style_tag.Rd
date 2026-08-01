@@ -27,10 +27,11 @@ represents, or \code{NULL} (the default) to leave this tag unset.}
 \item{y_role}{A string naming what the builder's y-axis represents,
 or \code{NULL} (the default) to leave this tag unset.}
 
-\item{layer}{One of \code{"model"}, \code{"summary"}, \code{"quantile"}, \code{"data"}, or
-\code{"group"}, naming which \verb{er_plot_add_*()} layer the builder is meant
-to be used with, or \code{NULL} (the default) to leave this tag unset.
-See "Details".}
+\item{layer}{One of \code{"model"}, \code{"summary"}, \code{"quantile"}, \code{"data"},
+\code{"group"}, \code{"observed"}, or \code{"simulated"}, naming which
+\verb{er_plot_add_*()}/\verb{er_vpc_add_*()} layer the builder is meant to be
+used with, or \code{NULL} (the default) to leave this tag unset. See
+"Details".}
 
 \item{zorder}{One of \code{"foreground"} or \code{"background"}, or \code{NULL} (the
 default, equivalent to \code{"foreground"}) to leave this tag unset. Only

@@ -25,8 +25,9 @@ Computes an exact Poisson confidence interval for a count rate.
 \details{
 The count-response analogue of \code{\link[=ci_clopper_pearson]{ci_clopper_pearson()}}, used by
 the quantile-binned summary layer (see \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}})
-and \code{\link[=er_vpc_plot]{er_vpc_plot()}} when \code{response_type = "count"} is explicitly
-declared. Unlike \code{\link[=ci_t]{ci_t()}} (the default, opt-in-required
+and \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}/\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}} when
+\code{response_type = "count"} is explicitly declared. Unlike \code{\link[=ci_t]{ci_t()}}
+(the default, opt-in-required
 approximation used when a count response auto-detects or is declared
 \code{"continuous"}), this interval is exact and never produces a
 negative lower bound. Uses the standard exact ("Garwood") Poisson

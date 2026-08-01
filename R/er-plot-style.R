@@ -179,10 +179,11 @@ NULL
 #'   represents, or `NULL` (the default) to leave this tag unset.
 #' @param y_role A string naming what the builder's y-axis represents, 
 #'   or `NULL` (the default) to leave this tag unset.
-#' @param layer One of `"model"`, `"summary"`, `"quantile"`, `"data"`, or
-#'   `"group"`, naming which `er_plot_add_*()` layer the builder is meant
-#'   to be used with, or `NULL` (the default) to leave this tag unset.
-#'   See "Details".
+#' @param layer One of `"model"`, `"summary"`, `"quantile"`, `"data"`,
+#'   `"group"`, `"observed"`, or `"simulated"`, naming which
+#'   `er_plot_add_*()`/`er_vpc_add_*()` layer the builder is meant to be
+#'   used with, or `NULL` (the default) to leave this tag unset. See
+#'   "Details".
 #' @param zorder One of `"foreground"` or `"background"`, or `NULL` (the
 #'   default, equivalent to `"foreground"`) to leave this tag unset. Only
 #'   meaningful for an overlay-layout data builder; see "Details".
@@ -277,7 +278,7 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
     attr(style, "er_style_y_role") <- y_role
   }
   if (!is.null(layer)) {
-    layer <- match.arg(layer, c("model", "summary", "quantile", "data", "group"))
+    layer <- match.arg(layer, c("model", "summary", "quantile", "data", "group", "observed", "simulated"))
     attr(style, "er_style_layer") <- layer
   }
   if (!is.null(zorder)) {

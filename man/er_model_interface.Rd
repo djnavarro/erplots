@@ -44,17 +44,17 @@ parameter uncertainty (as \code{fit_resp} already does) and
 observation-level sampling/residual noise (e.g. a 0/1 draw for a
 binary response, an integer draw for a count response, a draw
 including residual variance for a continuous response) -- not just
-the fitted mean/probability. This is what \code{\link[=er_vpc_plot]{er_vpc_plot()}}'s \code{model}
-argument requires: a visual predictive check needs simulated
+the fitted mean/probability. This is what \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}'s
+\code{model} argument requires: a visual predictive check needs simulated
 observations comparable to the actually observed data, not points on
 the mean curve, which is a genuinely different question from the one
 \code{fit_resp} (used by \code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}}) answers. \code{sim_resp}
 is independently optional -- a method can supply \code{fit_resp} alone (as
 every implementation did before \code{sim_resp} existed, and as remains
 sufficient for spaghetti plots), or both columns from the same call.
-\code{\link[=er_vpc_plot]{er_vpc_plot()}} treats a \code{sim_resp}-less result the same way it
-treats an outright \code{NULL}: "predictive simulation not available for
-this model."
+\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}} treats a \code{sim_resp}-less result the same way
+it treats an outright \code{NULL}: "predictive simulation not available
+for this model."
 \item \code{er_summary()} returns \code{NULL} (nothing available -- the default method's
 behaviour), or a named list with any of the following independently
 optional keys. Unrecognized keys are permitted and ignored by built-in

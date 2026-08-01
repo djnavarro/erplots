@@ -28,6 +28,79 @@
 .set_label <- function(x, lbl) {attr(x, "label") <- lbl; x}
 .set_names <- function(x, nm) {names(x) <- nm; x}
 
+# Shared response-value validation, used by both `er_plot()` and
+# `er_vpc()`: a declared `response_type = "binary"` response with values
+# outside {0, 1} silently shrinks the rate calculation's denominator
+# (warn); a declared `response_type = "count"` response with a negative
+# value breaks `ci_poisson()`'s exact interval outright (error).
+#' @noRd
+.validate_response_values <- function(response_type, response_vals, response_name) {
+  if (response_type == "binary" && !is.logical(response_vals)) {
+    n_out_of_range <- sum(!is.na(response_vals) & !(response_vals %in% c(0, 1)))
+    if (n_out_of_range > 0) {
+      rlang::warn(c(
+        sprintf(
+          "`response_type = \"binary\"` was declared for `%s`, but %d value%s outside {0, 1}.",
+          response_name, n_out_of_range, if (n_out_of_range == 1) " is" else "s are"
+        ),
+        "i" = "Rows with an out-of-range value are silently excluded from the rate calculation (neither a responder nor a non-responder), shrinking the effective denominator.",
+        "i" = "Pass `response_type = \"continuous\"` if this isn't actually a binary response."
+      ))
+    }
+  }
+  if (response_type == "count") {
+    n_negative <- sum(!is.na(response_vals) & response_vals < 0)
+    if (n_negative > 0) {
+      rlang::abort(c(
+        sprintf(
+          "`response_type = \"count\"` was declared for `%s`, but %d value%s negative.",
+          response_name, n_negative, if (n_negative == 1) " is" else "s are"
+        ),
+        "i" = "A count response must be non-negative -- the exact Poisson interval (`ci_poisson()`) is undefined for a negative total.",
+        "i" = "Pass `response_type = \"continuous\"` if this isn't actually a count response."
+      ))
+    }
+  }
+  invisible(NULL)
+}
+
+# Validates `nsim` up front for `er_vpc_add_simulated(model = ...)` --
+# without this, `nsim = 0`/negative/fractional values ran to completion
+# but failed deep inside whatever matrix/vector machinery a model's
+# `er_simulate()` method happens to use, with no indication that `nsim`
+# itself was the problem.
+#' @noRd
+.check_nsim <- function(nsim) {
+  if (!is.numeric(nsim) || length(nsim) != 1L) {
+    rlang::abort("`nsim` must be a single number.")
+  }
+  if (!is.finite(nsim) || nsim < 1 || nsim != round(nsim)) {
+    rlang::abort(c(
+      sprintf("`nsim` must be a positive whole number, not %s.", format(nsim)),
+      "i" = "`nsim` is the number of simulation replicates drawn via `er_simulate()`."
+    ))
+  }
+  invisible(NULL)
+}
+
+# Assigns each element of `x` to a bin using pre-computed `breaks` (rather
+# than re-deriving quantiles from `x` itself, as `cut_exposure_quantile()`
+# does) -- used by `.layer_vpc_simulated()` to bin simulated exposure
+# values against the *same* cutpoints the observed layer already
+# computed, so the two sides are guaranteed to share bin boundaries.
+# Mirrors `cut_exposure_quantile()`'s own placebo-handling/labelling.
+#' @noRd
+.apply_exposure_breaks <- function(x, breaks, is_placebo = NULL) {
+  if (is.null(is_placebo)) is_placebo <- rep(FALSE, length(x))
+  n <- length(breaks) - 1
+  exp_bin <- as.numeric(dplyr::case_when(
+    is_placebo ~ "0",
+    is.na(x) ~ NA_character_,
+    TRUE ~ cut(x, breaks, labels = 1:n, include.lowest = TRUE)
+  ))
+  factor(exp_bin, levels = 0:n, labels = c("Placebo", paste0("Q", 1:n)))
+}
+
 # simple helpers ----------------------------------------------------------
 
 #' Clopper-Pearson confidence interval for binary data
@@ -70,11 +143,12 @@ ci_clopper_pearson <- function(x, n, conf_level = 0.95) {
 #'   than 2 non-missing values are supplied.
 #'
 #' @details Used by the quantile-binned summary layer (see
-#'   [er_plot_add_quantiles()]) and `er_vpc_plot()` to compute a
-#'   confidence interval for the mean response within an exposure bin, for
-#'   continuous (and, as an approximation, count) responses. This is the
-#'   continuous-response analogue of [ci_clopper_pearson()]. `NA`s in `x` are
-#'   dropped before computing the interval.
+#'   [er_plot_add_quantiles()]) and [er_vpc_add_observed()]/
+#'   [er_vpc_add_simulated()] to compute a confidence interval for the mean
+#'   response within an exposure bin, for continuous (and, as an
+#'   approximation, count) responses. This is the continuous-response
+#'   analogue of [ci_clopper_pearson()]. `NA`s in `x` are dropped before
+#'   computing the interval.
 #'
 #' @export
 #' @examples
@@ -113,8 +187,9 @@ ci_t <- function(x, conf_level = 0.95) {
 #'
 #' @details The count-response analogue of [ci_clopper_pearson()], used by
 #'   the quantile-binned summary layer (see [er_plot_add_quantiles()])
-#'   and [er_vpc_plot()] when `response_type = "count"` is explicitly
-#'   declared. Unlike [ci_t()] (the default, opt-in-required
+#'   and [er_vpc_add_observed()]/[er_vpc_add_simulated()] when
+#'   `response_type = "count"` is explicitly declared. Unlike [ci_t()]
+#'   (the default, opt-in-required
 #'   approximation used when a count response auto-detects or is declared
 #'   `"continuous"`), this interval is exact and never produces a
 #'   negative lower bound. Uses the standard exact ("Garwood") Poisson
@@ -409,5 +484,7 @@ utils::globalVariables(c(
   "outer_lo",
   "outer_hi",
   "y_jitter",
+  ".vpc_bin",
+  "prob",
   ":="
 ))

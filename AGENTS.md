@@ -20,8 +20,10 @@ declared explicitly), stored on `object$response$type`/
 `object$response$limits`. The model curve/ribbon
 (`er_plot_add_model()`) and group panel (`er_plot_add_groups()`)
 layers work for any response type with no dispatch needed. The
-quantile summary layer (`er_plot_add_quantiles()`) and `er_vpc_plot()`
-are now fully generalised across all three response types (rate +
+quantile summary layer (`er_plot_add_quantiles()`) and the VPC
+mini-grammar (`er_vpc_add_observed()`/`er_vpc_add_simulated()` --
+formerly the single `er_vpc_plot()` function; see "The VPC mini-grammar"
+below) are now fully generalised across all three response types (rate +
 Clopper-Pearson for `"binary"`; mean + t-interval for `"continuous"`;
 mean + exact Poisson interval for `"count"`). The data layer
 (`er_plot_add_data()`, renamed from `er_plot_show_datastrip()`) also
@@ -1661,6 +1663,150 @@ silently ungroups rather than telling the user to do it themselves) --
 consistent with tibble's own `dplyr::ungroup()` being a normal, expected
 step in a pipeline rather than a user mistake worth flagging.
 
+## The VPC mini-grammar: `er_vpc_plot()` replaced by `er_vpc()`/`er_vpc_add_observed()`/`er_vpc_add_simulated()`
+
+`er_vpc_plot()` was a single monolithic function from back when erplots
+only supported binary outcomes: no `style`/builder pluggability,
+binning strategy/x-axis treatment/visual idiom all hardcoded together,
+and always a quartile-binned, dodged point + error-bar-of-the-mean
+plot -- adequate for most exposure-response VPC use, but with no way to
+render the continuous-x, percentile-band VPC idiom common in
+population-PK work (e.g. the tidyvpc package's own default plot) without
+forking the function. A review promoted it to its own mini-grammar,
+mirroring `er_plot()`'s object/layer/builder architecture, and added a
+genuinely new visual idiom alongside the existing one as an opt-in
+alternative -- both scoped deliberately narrower than `er_plot()`
+itself: **no stratification and always a single panel** (no `group`-layer
+analogue, no patchwork composition), since VPCs are used far less often
+in exposure-response work than the main `er_plot()` pipeline and didn't
+warrant replicating that much machinery speculatively.
+
+**The two layers.** `er_vpc(data, exposure, response, response_type)`
+constructs an (empty) `er_vpc` object -- the same variable-metadata/
+response-type-validation logic as `er_plot()`, factored out into a
+shared `.validate_response_values()` helper (`R/utils-helpers.R`) so the
+binary-out-of-range-warning/count-negative-error checks don't drift
+between the two constructors. Two singleton layers, added in a fixed
+order:
+
+- `er_vpc_add_observed(object, group_by = NULL, n_bins = 4, conf_level
+  = 0.95, probs = c(0.1, 0.5, 0.9), style = ...)` bins the observed data
+  and computes its response summary. `group_by` defaults to the plot's
+  own exposure variable, and preserves `er_vpc_plot()`'s old
+  flexibility: a numeric `group_by` is quantile-binned (via
+  `cut_exposure_quantile()`, placebo separated when `group_by` is the
+  exposure variable itself); a categorical `group_by` (e.g. a covariate
+  like sex) is used as-is, with no binning.
+- `er_vpc_add_simulated(object, model = NULL, sim = NULL, nsim = 100,
+  seed = NULL, conf_level = 0.95, probs = c(0.1, 0.5, 0.9), style =
+  ...)` errors immediately if called before `er_vpc_add_observed()` --
+  its whole design depends on reusing the observed layer's own binning
+  decision, not re-deriving one independently. The `model`/`sim`
+  mutual-exclusivity check, `nsim` validation, and the `sim_resp`-missing
+  error message are carried over from `er_vpc_plot()` essentially
+  verbatim (now behind shared `.check_nsim()`/inline checks in
+  `R/er-vpc-add.R`).
+
+**A correctness fix, not just a refactor.** `er_vpc_plot()` used to bin
+observed and simulated rows *independently* -- `dat |> mutate(.quantile
+= cut_exposure_quantile(...), .by = "Source")` re-derived fresh quantile
+breaks separately for each `Source` value. This happened to produce
+matching bins in every existing use, since `newdata` is always the
+observed `data` itself (so the same exposure values, just replicated
+`nsim` times, feed both quantile computations) -- but it was
+correct by coincidence, not by construction. The new `.layer_vpc_simulated()`
+instead bins simulated rows against the *observed* layer's own stored
+cutpoints (`obs_config$breaks`), via a new internal
+`.apply_exposure_breaks()` (`R/utils-helpers.R`) that mirrors
+`cut_exposure_quantile()`'s own placebo-handling/labelling but takes
+fixed breaks rather than computing new ones. This guarantees the two
+sides share identical bin boundaries regardless of how `newdata` might
+someday differ from `data`.
+
+**The new visual idiom: continuous-x percentile bands.** Two new
+builders, `er_style_vpc_observed_line()`/`er_style_vpc_simulated_ribbon()`,
+sit alongside the existing (now-renamed, behaviour-preserved)
+`er_style_vpc_observed_pointrange()`/`er_style_vpc_simulated_errorbar()`.
+The percentile-band idiom keeps exposure on a continuous x-axis (bin
+midpoint, `config$x_mid`) rather than a categorical bin label
+(`config$.vpc_bin`), and shows the *shape* of the response distribution
+within each bin -- one line (observed) or shaded ribbon + median line
+(simulated) per requested percentile (default 10th/50th/90th, matching
+tidyvpc's own default) -- rather than only a central-tendency point +
+interval. This is deliberately scoped to continuous/count responses
+only: a binary response's full distribution is already completely
+described by its rate (what the pointrange/errorbar idiom already
+shows), so a percentile of a 0/1 variable adds no information; both new
+builders error informatively (naming the pointrange/errorbar builders as
+the alternative) if `config$percentiles` is unavailable, which is also
+the case for a categorical `group_by` (no continuous x-axis to plot
+percentiles against, regardless of response type). `config$percentiles`
+is computed unconditionally by `.layer_vpc_observed()`/`.layer_vpc_simulated()`
+whenever it's meaningful (continuous/count response, numeric
+`group_by`) -- the standard "compute once, let the builder decide
+whether to use it" split every other layer already follows -- so
+switching between the two idioms is just a matter of passing a
+different `style` (and matching `probs`) to each `er_vpc_add_*()` call.
+
+Every builder maps a constant string (`color = "Observed"`/`"Simulated"`
+for the point/line builders, `fill = "Simulated"` for the ribbon), so
+ggplot2 merges the observed/simulated legend entries automatically
+without either layer needing to know about the other's data. The
+simulated layer's geoms are always added to the base plot before the
+observed layer's (`.build_vpc_plot()`, `R/er-vpc-build.R`), so a
+simulated ribbon never buries the observed points/line drawn on top of
+it -- unlike `er_plot()`'s overlay `zorder` tag, there's no alternative
+ordering to choose from here, so no tag/config was needed to control it.
+
+**Reused machinery.** `er_style_tag()`/`.check_style_layer()`
+(`R/er-plot-style.R`) needed no new machinery, just two new values added
+to `layer`'s allowed set (`"observed"`, `"simulated"`) -- both new
+builder families are tagged the same way every `er_plot_add_*()`
+builder already is, and `er_vpc_add_observed()`/`er_vpc_add_simulated()`
+check a wrongly-tagged builder the same way. `cut_exposure_quantile()`,
+`ci_clopper_pearson()`/`ci_t()`/`ci_poisson()`, and
+`.compute_corner_distance()` are all reused unchanged from
+`R/utils-helpers.R`.
+
+**Removed, no shim**, per this package's usual convention (pre-CRAN,
+GitHub-only, no installed user base to break silently):
+`er_vpc_plot()` itself (`R/er-vpc.R`, deleted). Every reference to it in
+`R/`, `tests/`, and `vignettes/articles/model-interface.Rmd` (the one
+vignette with a runnable `er_vpc_plot()` example) was updated to the new
+pipeline; `AGENTS.md`'s own historical sections describing
+`er_vpc_plot()`'s past design work were left as-is (accurate history,
+not current-state documentation -- see this file's own stated purpose).
+
+**Explicitly out of scope for this round** (deferred, not scheduled):
+stratified/faceted VPC panels (one panel per stratum level, the
+`er_plot()` `group`-layer analogue); a dedicated `er_vpc_theme()`
+(ordinary `+ theme()`/`+ labs()` on the built/returned ggplot2 object
+remains the escape hatch); a "binless"/LOESS-smoothed alternative to
+quantile binning (tidyvpc supports this); prediction-correction (pcVPC);
+a dedicated `vignettes/articles/vpc.Rmd` worked example (the existing
+worked example lives only in `model-interface.Rmd`'s `er_simulate()`
+section, demonstrating the default builders -- not the new percentile-band
+idiom).
+
+Covered by five new test files (`test-er-vpc-api.R`, `test-er-vpc-add.R`,
+`test-er-vpc-layer.R`, `test-er-vpc-style-observed.R`,
+`test-er-vpc-style-simulated.R`, replacing the old `test-er-vpc.R`):
+object construction/validation (including the shared
+`.validate_response_values()` behaviour and grouped/rowwise-input
+ungrouping), both layers' add-time validation (ordering requirement,
+style/layer-tag mismatches, `nsim`/`sim_resp` checks carried over from
+the old tests), the binning-consistency correctness fix (observed and
+simulated summaries share identical bin labels), `config$percentiles`'
+shape and scoping (binary/categorical-`group_by` cases return `NULL`),
+and both new builders' geoms/error paths, plus end-to-end
+`er_vpc_build()` integration tests for both the default and the new
+percentile-band idiom. `devtools::test()` (999 passing) and
+`devtools::check()` (0 errors/warnings/notes) both clean; also
+visually spot-checked against `erplots_data` (a binary response with
+the default builders, and a continuous response with the new
+percentile-band builders) via direct `plot()`/`ggplot2::ggplot_build()`
+rendering.
+
 ## Planned work
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed
@@ -1720,6 +1866,11 @@ the missing-covariate `newdata` crash fix, and continuous
 `erglm_vpc_sim()` upstream) that nothing in erplots -- code, tests,
 docs, or vignettes -- still depended on it -- each covered in its own
 section above, and each also recorded in PLAN.md as a completed entry.
+Most recently, `er_vpc_plot()` was replaced entirely by a VPC
+mini-grammar (`er_vpc()`/`er_vpc_add_observed()`/`er_vpc_add_simulated()`),
+mirroring `er_plot()`'s own object/layer/builder architecture and adding
+a new continuous-x, percentile-band visual idiom alongside the existing
+quartile-binned one -- see "The VPC mini-grammar" above.
 The remaining genuinely-deferred items (not scheduled, no concrete need
 yet) are in PLAN.md's "Open / deferred" section: an additive `model`
 layer for overlaying two fitted curves; and whether a future
@@ -1958,11 +2109,12 @@ this was additive), and `devtools::check()` (0 errors/warnings/notes).
   why each `er-plot-style-{data,group,model,quantile,summary}.R` file
   carries a roxygen `@include er-plot-style.R` tag. See `?er_style` for
   the interface these builders share.
-- `R/er-vpc.R` -- `er_vpc_plot()`, a model-agnostic VPC-style plot
-  operating on plain observed/simulated data frames, or (preferred) a
-  `model` argument that goes through `er_simulate()`'s `sim_resp`
-  extension -- see "`er_vpc_plot()` and the `sim_resp` extension to
-  `er_simulate()`" above.
+- `R/er-vpc-api.R`, `R/er-vpc-add.R`, `R/er-vpc-layer.R`,
+  `R/er-vpc-build.R`, `R/er-vpc-style-observed.R`,
+  `R/er-vpc-style-simulated.R` -- the VPC mini-grammar (`er_vpc()` |>
+  `er_vpc_add_observed()` |> `er_vpc_add_simulated()` |> `plot()`),
+  mirroring `er_plot()`'s own file split (api/add/layer/build, plus one
+  style file per layer). See "The VPC mini-grammar" below.
 - `R/utils-helpers.R` -- small internal helpers (including the
   binary-response-only `ci_clopper_pearson()`, `ci_t()`,
   `ci_poisson()`, `cut_quantile()`, `cut_exposure_quantile()`, and the

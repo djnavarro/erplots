@@ -144,50 +144,11 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   }
   object$response$type <- response_type
 
-  # `response_type = "binary"` was explicitly declared but the response
-  # column isn't actually confined to {0, 1} (impossible when "auto"
-  # resolves to "binary", since `.detect_response_type()` already checks
-  # this) -- warn, since a row with an out-of-range value is silently
-  # excluded from both `n0`/`n1` in the quantile layer's rate calculation
-  # (shrinking the denominator with no other indication), rather than
-  # erroring or being counted
-  if (object$response$type == "binary") {
-    resp_vals <- object$data[[object$response$name]]
-    if (!is.logical(resp_vals)) {
-      n_out_of_range <- sum(!is.na(resp_vals) & !(resp_vals %in% c(0, 1)))
-      if (n_out_of_range > 0) {
-        rlang::warn(c(
-          sprintf(
-            "`response_type = \"binary\"` was declared for `%s`, but %d value%s outside {0, 1}.",
-            object$response$name, n_out_of_range, if (n_out_of_range == 1) " is" else "s are"
-          ),
-          "i" = "Rows with an out-of-range value are silently excluded from the quantile layer's rate calculation (neither a responder nor a non-responder), shrinking the effective denominator.",
-          "i" = "Pass `response_type = \"continuous\"` if this isn't actually a binary response."
-        ))
-      }
-    }
-  }
-
-  # `response_type = "count"` was declared but the response contains a
-  # negative value -- unlike the binary case above, this isn't a silent
-  # exclusion, it's a genuinely broken computation: `ci_poisson()`'s
-  # exact Poisson interval is undefined for a negative total (its
-  # internal `qgamma()` call returns `NaN`), so this errors rather than
-  # warns
-  if (object$response$type == "count") {
-    resp_vals <- object$data[[object$response$name]]
-    n_negative <- sum(!is.na(resp_vals) & resp_vals < 0)
-    if (n_negative > 0) {
-      rlang::abort(c(
-        sprintf(
-          "`response_type = \"count\"` was declared for `%s`, but %d value%s negative.",
-          object$response$name, n_negative, if (n_negative == 1) " is" else "s are"
-        ),
-        "i" = "A count response must be non-negative -- the exact Poisson interval used by the quantile and VPC layers (`ci_poisson()`) is undefined for a negative total.",
-        "i" = "Pass `response_type = \"continuous\"` if this isn't actually a count response."
-      ))
-    }
-  }
+  # see `.validate_response_values()` for the rationale: a declared
+  # "binary" response with out-of-range values warns (silent denominator
+  # shrinkage in the quantile layer); a declared "count" response with a
+  # negative value errors (breaks `ci_poisson()` outright)
+  .validate_response_values(object$response$type, object$data[[object$response$name]], object$response$name)
 
   # store limits
   object$exposure$limits <- range(object$data[[object$exposure$name]])

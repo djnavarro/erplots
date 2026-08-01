@@ -32,17 +32,17 @@
 #'   observation-level sampling/residual noise (e.g. a 0/1 draw for a
 #'   binary response, an integer draw for a count response, a draw
 #'   including residual variance for a continuous response) -- not just
-#'   the fitted mean/probability. This is what [er_vpc_plot()]'s `model`
-#'   argument requires: a visual predictive check needs simulated
+#'   the fitted mean/probability. This is what [er_vpc_add_simulated()]'s
+#'   `model` argument requires: a visual predictive check needs simulated
 #'   observations comparable to the actually observed data, not points on
 #'   the mean curve, which is a genuinely different question from the one
 #'   `fit_resp` (used by [er_style_model_spaghetti()]) answers. `sim_resp`
 #'   is independently optional -- a method can supply `fit_resp` alone (as
 #'   every implementation did before `sim_resp` existed, and as remains
 #'   sufficient for spaghetti plots), or both columns from the same call.
-#'   [er_vpc_plot()] treats a `sim_resp`-less result the same way it
-#'   treats an outright `NULL`: "predictive simulation not available for
-#'   this model."
+#'   [er_vpc_add_simulated()] treats a `sim_resp`-less result the same way
+#'   it treats an outright `NULL`: "predictive simulation not available
+#'   for this model."
 #' - `er_summary()` returns `NULL` (nothing available -- the default method's
 #'   behaviour), or a named list with any of the following independently
 #'   optional keys. Unrecognized keys are permitted and ignored by built-in
