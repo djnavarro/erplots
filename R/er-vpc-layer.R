@@ -16,13 +16,17 @@
   config$conf_level <- conf_level
   config$probs <- probs
   config$group_label <- object$group$label
+  config$group_type <- object$group$type
 
   exp_var <- object$exposure$name
   rsp_var <- object$response$name
   response_type <- object$response$type
 
   dat <- object$data
-  config$is_numeric_group <- is.numeric(dat[[group_var]])
+  # `object$group$type` (`"continuous"`/`"discrete"`) is the source of
+  # truth, detected once in `er_vpc()`; `is_numeric_group` remains as a
+  # convenience boolean derived from it for builders/summaries below
+  config$is_numeric_group <- config$group_type == "continuous"
 
   if (config$is_numeric_group) {
     is_placebo <- if (group_var == exp_var) dat[[exp_var]] == 0 else rep(FALSE, nrow(dat))
@@ -139,6 +143,7 @@
 
   config$conf_level <- conf_level
   config$n_sim_rows <- nrow(sim)
+  config$group_type <- obs_config$group_type
   config$is_numeric_group <- obs_config$is_numeric_group
 
   # bin simulated rows against the *observed* layer's own cutpoints,

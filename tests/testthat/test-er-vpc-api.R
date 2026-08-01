@@ -23,6 +23,14 @@ test_that("er_vpc() defaults plot_by to the exposure variable and stores n_bins/
   expect_equal(vpc2$group$probs, c(0.2, 0.8))
 })
 
+test_that("er_vpc() auto-detects plot_by's type as continuous or discrete", {
+  vpc_numeric <- er_vpc(er_test_data, aucss, ae1)
+  expect_equal(vpc_numeric$group$type, "continuous")
+
+  vpc_categorical <- er_vpc(er_test_data, aucss, ae1, plot_by = sex)
+  expect_equal(vpc_categorical$group$type, "discrete")
+})
+
 test_that("er_vpc() resolves response_type = 'auto' and honours explicit overrides", {
   vpc_auto <- er_vpc(er_test_data, aucss, biomarker_change)
   expect_equal(vpc_auto$response$type, "continuous")

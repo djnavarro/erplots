@@ -1,6 +1,7 @@
 test_that("er_vpc_add_observed() uses plot_by/n_bins set on er_vpc()", {
   vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
   expect_equal(vpc$layer$observed$config$group_var, "aucss")
+  expect_equal(vpc$layer$observed$config$group_type, "continuous")
   expect_true(vpc$layer$observed$config$is_numeric_group)
   expect_length(vpc$layer$observed$config$breaks, vpc$layer$observed$config$n_bins + 1)
 })
@@ -13,6 +14,7 @@ test_that("er_vpc_add_observed() stores er_vpc()'s probs on the layer's config",
 test_that("er_vpc_add_observed() supports a categorical plot_by with no binning", {
   vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |> er_vpc_add_observed()
   expect_equal(vpc$layer$observed$config$group_var, "sex")
+  expect_equal(vpc$layer$observed$config$group_type, "discrete")
   expect_false(vpc$layer$observed$config$is_numeric_group)
   expect_null(vpc$layer$observed$config$breaks)
   expect_null(vpc$layer$observed$config$percentiles)

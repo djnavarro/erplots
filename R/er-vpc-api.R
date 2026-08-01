@@ -15,7 +15,11 @@
 #' Unlike [er_plot()], `er_vpc()` has no stratification concept and
 #' always renders a single panel -- see [er_vpc_add_observed()] for
 #' `plot_by`, the (orthogonal) variable plotted on the x-axis and used
-#' to bin/group the comparison.
+#' to bin/group the comparison. Whether `plot_by` is `"continuous"`
+#' (numeric, quantile-binned) or `"discrete"` (used as-is) is
+#' auto-detected from the column's type and stored on
+#' `object$group$type`, mirroring how `object$response$type` records
+#' the response's type.
 #'
 #' @param data Data frame or tibble containing the observed data.
 #' @param exposure Exposure variable (one variable, unquoted).
@@ -142,6 +146,7 @@ er_vpc <- function(data, exposure, response, response_type = "auto",
 
   object$group$var <- group_var
   object$group$label <- .get_label(object$data[[group_var]]) %||% group_var
+  object$group$type <- if (is.numeric(object$data[[group_var]])) "continuous" else "discrete"
   object$group$n_bins <- n_bins
   object$group$conf_level <- conf_level
   object$group$probs <- probs
@@ -168,7 +173,8 @@ print.er_vpc <- function(x, ...) {
   cat("  plot variables:\n")
   cat("    - exposure:  ", x$exposure$name %||% "<none>", "\n", sep = "")
   cat("    - response:  ", x$response$name %||% "<none>", "\n", sep = "")
-  cat("    - plot_by:   ", x$group$var %||% "<none>", ", ", x$group$n_bins %||% "<none>", " bins\n", sep = "")
+  cat("    - plot_by:   ", x$group$var %||% "<none>", " (", x$group$type %||% "<none>", "), ",
+    x$group$n_bins %||% "<none>", " bins\n", sep = "")
 
   if (any(layer_set)) {
     cat("  plot layers:\n")

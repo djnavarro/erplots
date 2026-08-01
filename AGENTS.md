@@ -161,7 +161,12 @@ narrower: no stratification, always a single panel. `plot_by`/`n_bins`/
 simulated layers must always agree on them -- `plot_by` defaults to the
 plot's exposure variable; numeric `plot_by` is quantile-binned
 (`cut_exposure_quantile()`, placebo separated when `plot_by` is the
-exposure variable itself), categorical is used as-is.
+exposure variable itself), categorical is used as-is. Whether `plot_by`
+is numeric or categorical is auto-detected once in `er_vpc()` and
+stored as `object$group$type` (`"continuous"`/`"discrete"`), mirroring
+`object$response$type`; both `.layer_vpc_*()` functions copy it onto
+their `config$group_type` (with `config$is_numeric_group` kept as a
+convenience boolean derived from it) for builders to read.
 
 - **`er_vpc_add_observed(object, style = ...)`** -- bins the observed
   data (using `object$group`) and computes its response summary.

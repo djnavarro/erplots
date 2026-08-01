@@ -60,7 +60,11 @@ second call replaces the previous one).
 Unlike \code{\link[=er_plot]{er_plot()}}, \code{er_vpc()} has no stratification concept and
 always renders a single panel -- see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}} for
 \code{plot_by}, the (orthogonal) variable plotted on the x-axis and used
-to bin/group the comparison.
+to bin/group the comparison. Whether \code{plot_by} is \code{"continuous"}
+(numeric, quantile-binned) or \code{"discrete"} (used as-is) is
+auto-detected from the column's type and stored on
+\code{object$group$type}, mirroring how \code{object$response$type} records
+the response's type.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
