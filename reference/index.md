@@ -68,15 +68,6 @@ plot
   [`er_style_group_violinjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md)
   : Group panel builders for exposure-response plots
 
-## Model interface
-
-The generics a model must (or may) implement to work with erplots
-
-- [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  : Model interface for exposure-response plots
-
 ## VPC plots
 
 Functions to build visual predictive check plots
@@ -94,18 +85,30 @@ Functions to build visual predictive check plots
 
   Add the simulated-data layer to an `er_vpc` VPC
 
-- [`er_style_vpc_observed_pointrange()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
-  [`er_style_vpc_observed_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
-  : Observed-layer builders for VPC plots
-
-- [`er_style_vpc_simulated_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
-  [`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
-  : Simulated-layer builders for VPC plots
-
 - [`er_vpc_build()`](https://erplots.djnavarro.net/reference/er_vpc_build.md)
   :
 
   Build and render an `er_vpc` object
+
+## VPC plot builder functions
+
+Low level functions to draw specific components of a VPC plot
+
+- [`er_style_vpc_observed_pointrange()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+  [`er_style_vpc_observed_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+  : Observed-layer builders for VPC plots
+- [`er_style_vpc_simulated_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+  [`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+  : Simulated-layer builders for VPC plots
+
+## Model interface
+
+The generics a model must (or may) implement to work with erplots
+
+- [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  : Model interface for exposure-response plots
 
 ## Other
 
