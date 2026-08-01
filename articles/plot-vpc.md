@@ -34,9 +34,6 @@ erglm_data |>
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-3-1.png)
 
-In this approach, the quantiles are displayed as discrete categories,
-and not plotted at the median exposure associated with the bin.
-
 ### By continuous covariate
 
 Continuous `plot_by` does not have to be the same as the exposure
@@ -122,10 +119,7 @@ emax_df |>
 For more detailed examination, it is also possible to display
 nonparametric confidence intervals for the observed data quantiles,
 plotted (like the default mean/errorbar pair) at each bin’s numeric
-median on the exposure scale. (Note: when more than one percentile is
-requested, they are currently plotted at the same x-position within a
-bin rather than dodged apart – dodging support for this idiom is
-deferred to a future release.)
+median on the exposure scale.
 
 ``` r
 

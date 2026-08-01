@@ -106,8 +106,6 @@ response rate for both observed and simulated:</p>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-vpc_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700"></p>
-<p>In this approach, the quantiles are displayed as discrete categories,
-and not plotted at the median exposure associated with the bin.</p>
 </div>
 <div class="section level3">
 <h3 id="by-continuous-covariate">By continuous covariate<a class="anchor" aria-label="anchor" href="#by-continuous-covariate"></a>
@@ -179,10 +177,7 @@ predicting the mean response within each bin.</p>
 <p>For more detailed examination, it is also possible to display
 nonparametric confidence intervals for the observed data quantiles,
 plotted (like the default mean/errorbar pair) at each bin’s numeric
-median on the exposure scale. (Note: when more than one percentile is
-requested, they are currently plotted at the same x-position within a
-bin rather than dodged apart – dodging support for this idiom is
-deferred to a future release.)</p>
+median on the exposure scale.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
