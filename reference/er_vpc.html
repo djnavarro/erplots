@@ -26,6 +26,7 @@ and render with plot()/print() or er_vpc_build()."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/plot-binary.html">Plotting binary responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
+    <li><a class="dropdown-item" href="../articles/plot-vpc.html">Visual predictive checks</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
     <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
@@ -62,7 +63,16 @@ and render with <code><a href="https://rdrr.io/r/graphics/plot.default.html" cla
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_vpc</span><span class="op">(</span><span class="va">data</span>, <span class="va">exposure</span>, <span class="va">response</span>, response_type <span class="op">=</span> <span class="st">"auto"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_vpc</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">exposure</span>,</span>
+<span>  <span class="va">response</span>,</span>
+<span>  response_type <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  plot_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_bins <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -84,6 +94,32 @@ and render with <code><a href="https://rdrr.io/r/graphics/plot.default.html" cla
 <dt id="arg-response-type">response_type<a class="anchor" aria-label="anchor" href="#arg-response-type"></a></dt>
 <dd><p>One of <code>"auto"</code>, <code>"binary"</code>, <code>"continuous"</code>, or <code>"count"</code>.</p></dd>
 
+
+<dt id="arg-plot-by">plot_by<a class="anchor" aria-label="anchor" href="#arg-plot-by"></a></dt>
+<dd><p>Variable (unquoted) plotted on the x-axis and used to
+bin/group the observed vs. simulated comparison. Defaults to
+<code>exposure</code>. A numeric variable is split into <code>n_bins</code> quantile bins
+(placebo, i.e. <code>0</code>, kept in its own bin when <code>plot_by</code> is the
+exposure variable itself); a categorical variable is used as-is,
+with no binning.</p></dd>
+
+
+<dt id="arg-n-bins">n_bins<a class="anchor" aria-label="anchor" href="#arg-n-bins"></a></dt>
+<dd><p>Number of quantile bins, when <code>plot_by</code> is numeric.</p></dd>
+
+
+<dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
+<dd><p>Confidence level for both the observed- and
+simulated-side intervals. Must be strictly between 0 and 1.</p></dd>
+
+
+<dt id="arg-probs">probs<a class="anchor" aria-label="anchor" href="#arg-probs"></a></dt>
+<dd><p>Percentiles to compute for a percentile-based builder
+(e.g. <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_line()</a></code>/<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_ribbon()</a></code>/
+<code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_errorbar()</a></code>/<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_errorbar()</a></code>;
+ignored by the default adaptive mean/errorbar pair). Only computed
+for a continuous/count response.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -98,8 +134,12 @@ sides share identical bin boundaries. Both layers are singletons (a
 second call replaces the previous one).</p>
 <p>Unlike <code><a href="er_plot.html">er_plot()</a></code>, <code>er_vpc()</code> has no stratification concept and
 always renders a single panel – see <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code> for
-<code>group_by</code>, the (orthogonal) variable used to bin/group the
-comparison.</p>
+<code>plot_by</code>, the (orthogonal) variable plotted on the x-axis and used
+to bin/group the comparison. Whether <code>plot_by</code> is <code>"continuous"</code>
+(numeric, quantile-binned) or <code>"discrete"</code> (used as-is) is
+auto-detected from the column's type and stored on
+<code>object$group$type</code>, mirroring how <code>object$response$type</code> records
+the response's type.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -114,8 +154,8 @@ comparison.</p>
 <span class="r-in"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae2</span> <span class="op">~</span> <span class="va">aucss</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">er_vpc</span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">er_vpc</span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae2</span>, plot_by <span class="op">=</span> <span class="va">aucss</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">9984</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>

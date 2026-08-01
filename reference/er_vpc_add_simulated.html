@@ -28,6 +28,7 @@ continuous/count response)."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/plot-binary.html">Plotting binary responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
+    <li><a class="dropdown-item" href="../articles/plot-vpc.html">Visual predictive checks</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
     <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
@@ -71,9 +72,7 @@ continuous/count response).</p>
 <span>  sim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nsim <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span>,</span>
-<span>  style <span class="op">=</span> <span class="va">er_style_vpc_simulated_errorbar</span>,</span>
+<span>  style <span class="op">=</span> <span class="va">er_style_vpc_simulated_mean_errorbar</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -93,7 +92,7 @@ must already have an observed layer (see <code><a href="er_vpc_add_observed.html
 
 
 <dt id="arg-sim">sim<a class="anchor" aria-label="anchor" href="#arg-sim"></a></dt>
-<dd><p>Simulated data with matching exposure/response/<code>group_by</code>
+<dd><p>Simulated data with matching exposure/response/<code>plot_by</code>
 columns and <code>sim_id</code>. Mutually exclusive with <code>model</code>.</p></dd>
 
 
@@ -103,21 +102,6 @@ columns and <code>sim_id</code>. Mutually exclusive with <code>model</code>.</p>
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Optional RNG seed, only used with <code>model</code>.</p></dd>
-
-
-<dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
-<dd><p>Confidence level for the simulated-side interval.</p></dd>
-
-
-<dt id="arg-probs">probs<a class="anchor" aria-label="anchor" href="#arg-probs"></a></dt>
-<dd><p>Percentiles to compute for a <code>"continuous"</code>-layout builder
-(e.g. <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_ribbon()</a></code>/
-<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_errorbar_continuous()</a></code>; ignored by a
-<code>"categorical"</code>-layout builder like the default errorbar). Must
-match whatever <code>probs</code> was passed to <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code> when
-both layers use a <code>"continuous"</code>-layout builder – this function
-errors if they disagree (see <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>'s <code>probs</code>
-documentation).</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
@@ -140,6 +124,8 @@ is preferred when it implements <code><a href="er_model_interface.html">er_simul
 since a VPC needs response-level simulated observations rather than
 only mean predictions – this function errors informatively if
 <code>sim_resp</code> isn't available.</p>
+<p><code>conf_level</code>/<code>probs</code> are set once on <code><a href="er_vpc.html">er_vpc()</a></code> itself (rather than
+here), so the observed and simulated layers always agree on them.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

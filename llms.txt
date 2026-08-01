@@ -163,13 +163,13 @@ Functions to build visual predictive check plots
 
 Low level functions to draw specific components of a VPC plot
 
-- [`er_style_vpc_observed_pointrange()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
-  [`er_style_vpc_observed_pointrange_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
-  [`er_style_vpc_observed_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+- [`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+  [`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+  [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
   : Observed-layer builders for VPC plots
-- [`er_style_vpc_simulated_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
-  [`er_style_vpc_simulated_errorbar_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
-  [`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+- [`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+  [`er_style_vpc_simulated_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+  [`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
   : Simulated-layer builders for VPC plots
 
 ## Confidence intervals

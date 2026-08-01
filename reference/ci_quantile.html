@@ -30,6 +30,7 @@ about the shape of x's distribution."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/plot-binary.html">Plotting binary responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
+    <li><a class="dropdown-item" href="../articles/plot-vpc.html">Visual predictive checks</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
     <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
@@ -99,7 +100,7 @@ than 2 non-missing values are supplied.</p>
 for each requested percentile of the observed response within an
 exposure bin (the observed-side analogue of the across-replicate
 percentile interval <code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> gets from simulated data,
-powering <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange_continuous()</a></code>). Like
+powering <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_errorbar()</a></code>). Like
 <code><a href="ci_clopper_pearson.html">ci_clopper_pearson()</a></code>, this interval is exact for its target coverage
 but conservative – the discreteness of the binomial rank distribution
 means the achieved coverage can exceed the nominal <code>conf_level</code>,

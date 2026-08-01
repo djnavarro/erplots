@@ -15,9 +15,7 @@ er_vpc_add_simulated(
   sim = NULL,
   nsim = 100,
   seed = NULL,
-  conf_level = 0.95,
-  probs = c(0.1, 0.5, 0.9),
-  style = er_style_vpc_simulated_errorbar,
+  style = er_style_vpc_simulated_mean_errorbar,
   ...
 )
 ```
@@ -38,7 +36,7 @@ er_vpc_add_simulated(
 
 - sim:
 
-  Simulated data with matching exposure/response/`group_by` columns and
+  Simulated data with matching exposure/response/`plot_by` columns and
   `sim_id`. Mutually exclusive with `model`.
 
 - nsim:
@@ -48,23 +46,6 @@ er_vpc_add_simulated(
 - seed:
 
   Optional RNG seed, only used with `model`.
-
-- conf_level:
-
-  Confidence level for the simulated-side interval.
-
-- probs:
-
-  Percentiles to compute for a `"continuous"`-layout builder (e.g.
-  [`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)/
-  [`er_style_vpc_simulated_errorbar_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md);
-  ignored by a `"categorical"`-layout builder like the default
-  errorbar). Must match whatever `probs` was passed to
-  [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)
-  when both layers use a `"continuous"`-layout builder – this function
-  errors if they disagree (see
-  [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)'s
-  `probs` documentation).
 
 - style:
 
@@ -87,6 +68,11 @@ preferred when it implements
 with `sim_resp`, since a VPC needs response-level simulated observations
 rather than only mean predictions – this function errors informatively
 if `sim_resp` isn't available.
+
+`conf_level`/`probs` are set once on
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) itself
+(rather than here), so the observed and simulated layers always agree on
+them.
 
 ## See also
 

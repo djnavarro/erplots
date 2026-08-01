@@ -24,6 +24,7 @@ function can carry."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/plot-binary.html">Plotting binary responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
+    <li><a class="dropdown-item" href="../articles/plot-vpc.html">Visual predictive checks</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
     <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
@@ -65,7 +66,9 @@ function can carry.</p>
 <span>  fill_role <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  y_role <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  layer <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  zorder <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  zorder <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  response_types <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  plot_by_types <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -112,12 +115,29 @@ used with, or <code>NULL</code> (the default) to leave this tag unset. See
 default, equivalent to <code>"foreground"</code>) to leave this tag unset. Only
 meaningful for an overlay-layout data builder; see "Details".</p></dd>
 
+
+<dt id="arg-response-types">response_types<a class="anchor" aria-label="anchor" href="#arg-response-types"></a></dt>
+<dd><p>A character vector with one or more of
+<code>"binary"</code>, <code>"continuous"</code>, <code>"count"</code>, or <code>NULL</code> (the default) to
+leave this tag unset (no restriction declared). For a VPC
+observed/simulated builder, declares which of <code><a href="er_vpc.html">er_vpc()</a></code>'s
+<code>response_type</code> values the builder supports; see "Details".</p></dd>
+
+
+<dt id="arg-plot-by-types">plot_by_types<a class="anchor" aria-label="anchor" href="#arg-plot-by-types"></a></dt>
+<dd><p>A character vector with one or more of
+<code>"continuous"</code>, <code>"discrete"</code>, or <code>NULL</code> (the default) to leave this
+tag unset. For a VPC observed/simulated builder, declares which of
+<code>object$group$type</code> values (see <code><a href="er_vpc.html">er_vpc()</a></code>'s <code>plot_by</code> argument)
+the builder supports; see "Details".</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>style</code>, with whichever of the <code>"er_style_layout"</code>/
 <code>"er_style_fill_role"</code>/<code>"er_style_y_role"</code>/<code>"er_style_layer"</code>/
-<code>"er_style_zorder"</code> attributes were requested attached.</p>
+<code>"er_style_zorder"</code>/<code>"er_style_response_types"</code>/
+<code>"er_style_plot_by_types"</code> attributes were requested attached.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -139,20 +159,20 @@ separate strip-like panels above and below the main panel (<code>layout = "panel
 present on both the observed and simulated builder passed to a given
 <code>er_vpc</code> object, is checked for agreement: <code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>
 errors if the simulated builder's <code>layout</code> (<code>"categorical"</code>, discrete
-<code>.vpc_bin</code> locations, e.g. <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_errorbar()</a></code>; or
-<code>"continuous"</code>, numeric bin-midpoint locations, e.g.
-<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_ribbon()</a></code>) disagrees with the observed
-builder's own. This catches the case where the two families would
-otherwise silently plot at different x-positions for the same bin –
-e.g. pairing <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange()</a></code>'s discrete bin
-labels with <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_ribbon()</a></code>'s numeric midpoints.
-Use a layout-matched pair instead (built-ins already are), or, to get
-a pointrange/errorbar idiom that still plots at the numeric midpoint
-(so it can be paired with a <code>"continuous"</code>-layout builder), use
-<code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange_continuous()</a></code>/
-<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_errorbar_continuous()</a></code>. An untagged builder on
-either side skips this check entirely, the same opt-in treatment
-<code>layer</code> gets.</p>
+bin locations; or <code>"continuous"</code>, numeric bin-midpoint locations, e.g.
+<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_ribbon()</a></code>) disagrees with the
+observed builder's own. This catches the case where the two families
+would otherwise silently plot at different x-positions for the same
+bin – e.g. pairing a builder that always plots at discrete bin
+labels with <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_ribbon()</a></code>'s numeric
+midpoints. Use a layout-matched pair instead (built-ins already are),
+or leave <code>layout</code> untagged – as <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code>/
+<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_mean_errorbar()</a></code> and
+<code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_errorbar()</a></code>/
+<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_errorbar()</a></code> do, since both pairs
+adapt their x-position to <code>plot_by</code>'s type at build time rather than
+declaring one family statically – to skip the check entirely, the
+same opt-in treatment <code>layer</code> gets.</p>
 <p><code>fill_role</code> and <code>y_role</code> are both optional, and can be used
 to title a legend/axis correctly: <code>fill_role = "density"</code> (used by
 <code><a href="er_style_data.html">er_style_data_hex()</a></code>) says a builder's <code>fill</code> aesthetic encodes bin
@@ -188,6 +208,26 @@ summary annotation. <code>zorder</code> has no effect on a panel-layout data
 builder (e.g. <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code>), since those geoms are
 drawn in their own separate panels, never sharing space with the model/
 summary/quantile layers.</p>
+<p><code>response_types</code> and <code>plot_by_types</code> are both optional, and – unlike
+every other tag above – are checked against the <em>data</em>, not another
+builder: <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/<code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> each check
+<code>style</code>'s declared <code>response_types</code> against <code>object$response$type</code>
+and <code>plot_by_types</code> against <code>object$group$type</code>, erroring immediately
+if the object's data isn't one the builder declared support for –
+e.g. <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_line()</a></code> declares
+<code>response_types = c("continuous", "count")</code> (it needs
+<code>config$percentiles</code>, never computed for a binary response) and
+<code>plot_by_types = "continuous"</code> (it draws a <code>geom_line()</code> connecting
+bins along the numeric midpoint, meaningless for an unordered
+categorical <code>plot_by</code>). This catches an incompatible builder/data
+pairing at the <code>er_vpc_add_*()</code> call site, before any binning or
+summarising happens, rather than only when the builder itself is
+finally invoked by <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>/<code><a href="er_vpc_build.html">er_vpc_build()</a></code>. As with <code>layer</code>, both
+tags are opt-in – an untagged builder is never checked against
+either, so a custom builder that doesn't declare them keeps working
+unchanged (though it's then responsible for guarding against its own
+incompatible inputs, the way every built-in VPC builder still does
+internally as a fallback).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

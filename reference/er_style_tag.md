@@ -12,7 +12,9 @@ er_style_tag(
   fill_role = NULL,
   y_role = NULL,
   layer = NULL,
-  zorder = NULL
+  zorder = NULL,
+  response_types = NULL,
+  plot_by_types = NULL
 )
 ```
 
@@ -60,11 +62,30 @@ er_style_tag(
   equivalent to `"foreground"`) to leave this tag unset. Only meaningful
   for an overlay-layout data builder; see "Details".
 
+- response_types:
+
+  A character vector with one or more of `"binary"`, `"continuous"`,
+  `"count"`, or `NULL` (the default) to leave this tag unset (no
+  restriction declared). For a VPC observed/simulated builder, declares
+  which of
+  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)'s
+  `response_type` values the builder supports; see "Details".
+
+- plot_by_types:
+
+  A character vector with one or more of `"continuous"`, `"discrete"`,
+  or `NULL` (the default) to leave this tag unset. For a VPC
+  observed/simulated builder, declares which of `object$group$type`
+  values (see
+  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)'s
+  `plot_by` argument) the builder supports; see "Details".
+
 ## Value
 
 `style`, with whichever of the `"er_style_layout"`/
 `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`/
-`"er_style_zorder"` attributes were requested attached.
+`"er_style_zorder"`/`"er_style_response_types"`/
+`"er_style_plot_by_types"` attributes were requested attached.
 
 ## Details
 
@@ -89,24 +110,23 @@ present on both the observed and simulated builder passed to a given
 `er_vpc` object, is checked for agreement:
 [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
 errors if the simulated builder's `layout` (`"categorical"`, discrete
-`.vpc_bin` locations, e.g.
-[`er_style_vpc_simulated_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md);
-or `"continuous"`, numeric bin-midpoint locations, e.g.
-[`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md))
+bin locations; or `"continuous"`, numeric bin-midpoint locations, e.g.
+[`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md))
 disagrees with the observed builder's own. This catches the case where
 the two families would otherwise silently plot at different x-positions
-for the same bin – e.g. pairing
-[`er_style_vpc_observed_pointrange()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)'s
-discrete bin labels with
-[`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)'s
+for the same bin – e.g. pairing a builder that always plots at discrete
+bin labels with
+[`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)'s
 numeric midpoints. Use a layout-matched pair instead (built-ins already
-are), or, to get a pointrange/errorbar idiom that still plots at the
-numeric midpoint (so it can be paired with a `"continuous"`-layout
-builder), use
-[`er_style_vpc_observed_pointrange_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/
-[`er_style_vpc_simulated_errorbar_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md).
-An untagged builder on either side skips this check entirely, the same
-opt-in treatment `layer` gets.
+are), or leave `layout` untagged – as
+[`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/
+[`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+and
+[`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/
+[`er_style_vpc_simulated_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+do, since both pairs adapt their x-position to `plot_by`'s type at build
+time rather than declaring one family statically – to skip the check
+entirely, the same opt-in treatment `layer` gets.
 
 `fill_role` and `y_role` are both optional, and can be used to title a
 legend/axis correctly: `fill_role = "density"` (used by
@@ -156,6 +176,29 @@ panel-layout data builder (e.g.
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)),
 since those geoms are drawn in their own separate panels, never sharing
 space with the model/ summary/quantile layers.
+
+`response_types` and `plot_by_types` are both optional, and – unlike
+every other tag above – are checked against the *data*, not another
+builder:
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+each check `style`'s declared `response_types` against
+`object$response$type` and `plot_by_types` against `object$group$type`,
+erroring immediately if the object's data isn't one the builder declared
+support for – e.g.
+[`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+declares `response_types = c("continuous", "count")` (it needs
+`config$percentiles`, never computed for a binary response) and
+`plot_by_types = "continuous"` (it draws a `geom_line()` connecting bins
+along the numeric midpoint, meaningless for an unordered categorical
+`plot_by`). This catches an incompatible builder/data pairing at the
+`er_vpc_add_*()` call site, before any binning or summarising happens,
+rather than only when the builder itself is finally invoked by
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`er_vpc_build()`](https://erplots.djnavarro.net/reference/er_vpc_build.md).
+As with `layer`, both tags are opt-in – an untagged builder is never
+checked against either, so a custom builder that doesn't declare them
+keeps working unchanged (though it's then responsible for guarding
+against its own incompatible inputs, the way every built-in VPC builder
+still does internally as a fallback).
 
 ## See also
 

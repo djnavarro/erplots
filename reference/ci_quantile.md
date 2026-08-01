@@ -41,7 +41,7 @@ observed response within an exposure bin (the observed-side analogue of
 the across-replicate percentile interval
 [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
 gets from simulated data, powering
-[`er_style_vpc_observed_pointrange_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)).
+[`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)).
 Like
 [`ci_clopper_pearson()`](https://erplots.djnavarro.net/reference/ci_clopper_pearson.md),
 this interval is exact for its target coverage but conservative – the
