@@ -10,7 +10,9 @@ er_style_tag(
   fill_role = NULL,
   y_role = NULL,
   layer = NULL,
-  zorder = NULL
+  zorder = NULL,
+  response_types = NULL,
+  plot_by_types = NULL
 )
 }
 \arguments{
@@ -41,11 +43,24 @@ used with, or \code{NULL} (the default) to leave this tag unset. See
 \item{zorder}{One of \code{"foreground"} or \code{"background"}, or \code{NULL} (the
 default, equivalent to \code{"foreground"}) to leave this tag unset. Only
 meaningful for an overlay-layout data builder; see "Details".}
+
+\item{response_types}{A character vector with one or more of
+\code{"binary"}, \code{"continuous"}, \code{"count"}, or \code{NULL} (the default) to
+leave this tag unset (no restriction declared). For a VPC
+observed/simulated builder, declares which of \code{er_vpc()}'s
+\code{response_type} values the builder supports; see "Details".}
+
+\item{plot_by_types}{A character vector with one or more of
+\code{"continuous"}, \code{"discrete"}, or \code{NULL} (the default) to leave this
+tag unset. For a VPC observed/simulated builder, declares which of
+\code{object$group$type} values (see \code{\link[=er_vpc]{er_vpc()}}'s \code{plot_by} argument)
+the builder supports; see "Details".}
 }
 \value{
 \code{style}, with whichever of the \code{"er_style_layout"}/
 \code{"er_style_fill_role"}/\code{"er_style_y_role"}/\code{"er_style_layer"}/
-\code{"er_style_zorder"} attributes were requested attached.
+\code{"er_style_zorder"}/\code{"er_style_response_types"}/
+\code{"er_style_plot_by_types"} attributes were requested attached.
 }
 \description{
 Attaches the self-declared metadata a custom \verb{er_style_*()}-style
@@ -72,20 +87,20 @@ For a VPC observed/simulated builder, \code{layout} is optional but, when
 present on both the observed and simulated builder passed to a given
 \code{er_vpc} object, is checked for agreement: \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}
 errors if the simulated builder's \code{layout} (\code{"categorical"}, discrete
-\code{.vpc_bin} locations, e.g. \code{\link[=er_style_vpc_simulated_errorbar]{er_style_vpc_simulated_errorbar()}}; or
-\code{"continuous"}, numeric bin-midpoint locations, e.g.
-\code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}}) disagrees with the observed
-builder's own. This catches the case where the two families would
-otherwise silently plot at different x-positions for the same bin --
-e.g. pairing \code{\link[=er_style_vpc_observed_pointrange]{er_style_vpc_observed_pointrange()}}'s discrete bin
-labels with \code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}}'s numeric midpoints.
-Use a layout-matched pair instead (built-ins already are), or, to get
-a pointrange/errorbar idiom that still plots at the numeric midpoint
-(so it can be paired with a \code{"continuous"}-layout builder), use
-\code{\link[=er_style_vpc_observed_pointrange_continuous]{er_style_vpc_observed_pointrange_continuous()}}/
-\code{\link[=er_style_vpc_simulated_errorbar_continuous]{er_style_vpc_simulated_errorbar_continuous()}}. An untagged builder on
-either side skips this check entirely, the same opt-in treatment
-\code{layer} gets.
+bin locations; or \code{"continuous"}, numeric bin-midpoint locations, e.g.
+\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}) disagrees with the
+observed builder's own. This catches the case where the two families
+would otherwise silently plot at different x-positions for the same
+bin -- e.g. pairing a builder that always plots at discrete bin
+labels with \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}'s numeric
+midpoints. Use a layout-matched pair instead (built-ins already are),
+or leave \code{layout} untagged -- as \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}/
+\code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}} and
+\code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}/
+\code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}} do, since both pairs
+adapt their x-position to \code{plot_by}'s type at build time rather than
+declaring one family statically -- to skip the check entirely, the
+same opt-in treatment \code{layer} gets.
 
 \code{fill_role} and \code{y_role} are both optional, and can be used
 to title a legend/axis correctly: \code{fill_role = "density"} (used by
@@ -124,6 +139,27 @@ summary annotation. \code{zorder} has no effect on a panel-layout data
 builder (e.g. \code{er_style_data_boxjitter()}), since those geoms are
 drawn in their own separate panels, never sharing space with the model/
 summary/quantile layers.
+
+\code{response_types} and \code{plot_by_types} are both optional, and -- unlike
+every other tag above -- are checked against the \emph{data}, not another
+builder: \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}/\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}} each check
+\code{style}'s declared \code{response_types} against \code{object$response$type}
+and \code{plot_by_types} against \code{object$group$type}, erroring immediately
+if the object's data isn't one the builder declared support for --
+e.g. \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}} declares
+\code{response_types = c("continuous", "count")} (it needs
+\code{config$percentiles}, never computed for a binary response) and
+\code{plot_by_types = "continuous"} (it draws a \code{geom_line()} connecting
+bins along the numeric midpoint, meaningless for an unordered
+categorical \code{plot_by}). This catches an incompatible builder/data
+pairing at the \verb{er_vpc_add_*()} call site, before any binning or
+summarising happens, rather than only when the builder itself is
+finally invoked by \code{plot()}/\code{er_vpc_build()}. As with \code{layer}, both
+tags are opt-in -- an untagged builder is never checked against
+either, so a custom builder that doesn't declare them keeps working
+unchanged (though it's then responsible for guarding against its own
+incompatible inputs, the way every built-in VPC builder still does
+internally as a fallback).
 }
 \examples{
 build_data_density <- er_style_tag(

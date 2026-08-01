@@ -30,7 +30,7 @@ Used by \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}} to compute a c
 for each requested percentile of the observed response within an
 exposure bin (the observed-side analogue of the across-replicate
 percentile interval \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}} gets from simulated data,
-powering \code{\link[=er_style_vpc_observed_pointrange_continuous]{er_style_vpc_observed_pointrange_continuous()}}). Like
+powering \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}). Like
 \code{\link[=ci_clopper_pearson]{ci_clopper_pearson()}}, this interval is exact for its target coverage
 but conservative -- the discreteness of the binomial rank distribution
 means the achieved coverage can exceed the nominal \code{conf_level},

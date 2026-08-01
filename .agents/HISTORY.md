@@ -549,7 +549,7 @@ new `.layer_vpc_simulated()` instead bins simulated rows against the
 boundaries regardless of how `newdata` might someday differ from `data`.
 
 **The new visual idiom.** Two new builders,
-`er_style_vpc_observed_line()`/`er_style_vpc_simulated_ribbon()`, keep
+`er_style_vpc_observed_quantile_line()`/`er_style_vpc_simulated_quantile_ribbon()`, keep
 exposure on a continuous x-axis and show percentile lines/ribbons rather
 than only a central-tendency point + interval -- deliberately scoped to
 continuous/count responses only, since a binary response's distribution
@@ -755,7 +755,7 @@ builder is touched.
 ## VPC categorical/continuous layout mismatch
 
 `er_style_vpc_observed_pointrange()` (discrete `.vpc_bin` locations) and
-`er_style_vpc_simulated_ribbon()` (numeric `x_mid` locations) could be
+`er_style_vpc_simulated_quantile_ribbon()` (numeric `x_mid` locations) could be
 freely mixed via `style`, but doing so silently plotted the two layers
 at inconsistent x-positions for the same bin -- the pointrange stayed at
 evenly-spaced categorical slots while the ribbon used the bin's actual
@@ -817,3 +817,121 @@ is order-independent (`sort()` before `all.equal()`). This required
 `.layer_vpc_observed()` to start storing its own `probs` on
 `config$probs` so the simulated-side call has something to compare
 against.
+
+## VPC builder pruning: dropping the plain mean pointrange/errorbar idiom
+
+After `er_vpc_add_observed()`/`er_vpc_add_simulated()` gained the
+adaptive `er_style_vpc_observed_mean_errorbar()`/
+`er_style_vpc_simulated_mean_errorbar()` default (which already covers
+the plain mean/rate + CI idiom for every response type and both
+`plot_by` types) and `er_style_vpc_observed_quantile_line()`/
+`er_style_vpc_simulated_quantile_ribbon()` were renamed to make clear
+they're a percentile-band idiom, four builders no longer fit the
+resulting scheme: `er_style_vpc_observed_pointrange()` and
+`er_style_vpc_simulated_errorbar()` (the categorical-bin mean idiom --
+functionally superseded by the adaptive default's categorical branch)
+and `er_style_vpc_observed_pointrange_continuous()`/
+`er_style_vpc_simulated_errorbar_continuous()` (the continuous-x mean
+idiom -- superseded by the adaptive default's numeric-median branch,
+plus an optional dashed percentile overlay that didn't fit anywhere
+else in the naming scheme). All four were removed outright (no
+deprecation shim, per project convention for this pre-CRAN package).
+
+This leaves three VPC visual idioms: the adaptive mean/errorbar default
+(no `layout` tag), the continuous-x percentile-band idiom
+(`er_style_vpc_observed_quantile_line()`/
+`er_style_vpc_simulated_quantile_ribbon()`, `layout = "continuous"`),
+and the categorical-bin quantile idiom
+(`er_style_vpc_observed_quantile_errorbar()`/
+`er_style_vpc_simulated_quantile_errorbar()`, `layout = "categorical"`).
+Tests and docs that used the removed builders purely as a stand-in for
+"any observed/simulated-tagged style" (e.g. wrong-layer-rejection tests)
+were repointed at `er_style_vpc_observed_mean_errorbar()`/
+`er_style_vpc_simulated_mean_errorbar()` instead.
+
+## Dropping dodging from the categorical-bin quantile idiom (and the mean/errorbar default's categorical branch)
+
+`er_style_vpc_observed_quantile_errorbar()`/
+`er_style_vpc_simulated_quantile_errorbar()` used
+`ggplot2::position_dodge2()` to separate each bin's requested
+percentiles horizontally, applied independently to the `geom_errorbar()`
+and `geom_point()` calls within each builder. This was buggy in
+practice: `position_dodge2()` computes each geom's dodge offsets from
+that geom's own layer data, and a bare `geom_point()` (no natural
+width) doesn't dodge consistently with a `geom_errorbar()` in the same
+position family, so the point and its own error bar end up offset by
+different amounts. Because the observed and simulated builders are
+also two entirely separate ggplot2 layers plotted at the same
+`.vpc_bin` x locations, they dodge independently of each other too,
+compounding the misalignment.
+
+Getting dodging right here needs a shared dodge computation across all
+four geoms (both builders' points and error bars), which is more
+involved than a quick fix and out of scope for this PR. Dodging was
+removed outright rather than patched: `er_style_vpc_observed_mean_errorbar()`/
+`er_style_vpc_simulated_mean_errorbar()`'s categorical branch (which
+separated the observed and simulated point/errorbar at the same
+`.vpc_bin`) and `er_style_vpc_observed_quantile_errorbar()`/
+`er_style_vpc_simulated_quantile_errorbar()` (which separated each
+bin's requested percentiles) now all plot directly at `.vpc_bin` with
+no `position_dodge2()` call and no `dodge_width` parameter. When more
+than one percentile is requested, its points/error bars currently
+overplot at the same x position within a bin -- distinguishable only by
+their differing y-values, not by any horizontal offset. Revisiting
+proper dodging (likely via an explicit shared offset computed once and
+applied to all four geoms, similar in spirit to `er_plot()`'s own
+`.dodge_quantile_strata()`) is deferred to a future PR.
+
+## Making the quantile-errorbar idiom adapt to `plot_by`'s type, like the mean/errorbar default
+
+`er_style_vpc_observed_quantile_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()`
+always plotted at the discrete `.vpc_bin` label, even for a numeric
+`plot_by` -- a bug, since a continuous `plot_by` should show up on a
+continuous exposure-scale x-axis (as every other continuous-`plot_by`
+idiom does), not as evenly-spaced categorical positions. Fixed by
+giving both builders the same adaptive x-position logic
+`er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()`
+already use: `.vpc_bin` for a categorical `plot_by`, each bin's numeric
+median (`x_median`) on the exposure scale for a numeric one. This
+required adding `x_median` to `config$percentiles` in both
+`.layer_vpc_observed()`/`.layer_vpc_simulated()` (previously only
+`config$summary` carried it), and adding an `errorbar_width_continuous`
+parameter to both builders (mirroring the mean/errorbar pair's own),
+since a numeric x-axis needs a width in exposure units rather than a
+constant categorical-bar width.
+
+Since the builders' x-position family is now chosen from the data at
+build time rather than fixed, they were untagged for `layout` (dropping
+their previous static `layout = "categorical"`) -- the same reasoning
+that already left the mean/errorbar default untagged. This is a pure
+bugfix, not a new idiom: two visual idioms remain conceptually (adaptive
+point/errorbar vs. continuous-x percentile-band), just with the plain
+mean and the per-percentile point/errorbar builders sharing the same
+adaptive x-position logic.
+
+## `plot_by != exposure`: x-axis mislabelled and errorbar width scaled by the wrong variable
+
+When a caller set `plot_by` to a numeric variable other than `exposure`
+(e.g. a covariate), the VPC's binning/positioning logic itself was
+already correct (`.layer_vpc_observed()`/`.layer_vpc_simulated()` bin
+and compute `x_mid`/`x_median` from `group_var`, never `exp_var`, except
+when they're the same column). Two things downstream of that were
+still wrong, though, both because they reached for `exposure$label`/
+`exposure$limits` unconditionally rather than the plot's actual x-axis
+variable:
+
+- `.build_vpc_plot()` always labelled the x-axis `exposure$label`, so a
+  plot binned by, say, `bodyweight_kg` still showed the exposure
+  variable's name on the axis.
+- `er_style_vpc_*_mean_errorbar()`/`er_style_vpc_*_quantile_errorbar()`
+  sized their numeric-x error bars as `errorbar_width_continuous *
+  (exposure$limits[2] - exposure$limits[1])`, so the bar width was a
+  fraction of the exposure's range rather than `plot_by`'s -- harmless
+  when they coincide, but wrong (often absurdly too wide or too narrow)
+  whenever `plot_by`'s scale differs from the exposure's.
+
+Fixed by using `object$group$label` for the x-axis label, and by adding
+`config$group_limits` (computed once in `.layer_vpc_observed()` from
+`range(data[[group_var]])`, copied onto the simulated config the same
+way `breaks` already is) for the four error-bar builders to size against
+instead of `exposure$limits`.

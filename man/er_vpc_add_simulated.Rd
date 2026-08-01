@@ -10,9 +10,7 @@ er_vpc_add_simulated(
   sim = NULL,
   nsim = 100,
   seed = NULL,
-  conf_level = 0.95,
-  probs = c(0.1, 0.5, 0.9),
-  style = er_style_vpc_simulated_errorbar,
+  style = er_style_vpc_simulated_mean_errorbar,
   ...
 )
 }
@@ -23,23 +21,12 @@ must already have an observed layer (see \code{\link[=er_vpc_add_observed]{er_vp
 \item{model}{A fitted model implementing \code{\link[=er_simulate]{er_simulate()}} with
 \code{sim_resp}. Mutually exclusive with \code{sim}.}
 
-\item{sim}{Simulated data with matching exposure/response/\code{group_by}
+\item{sim}{Simulated data with matching exposure/response/\code{plot_by}
 columns and \code{sim_id}. Mutually exclusive with \code{model}.}
 
 \item{nsim}{Number of simulation replicates, only used with \code{model}.}
 
 \item{seed}{Optional RNG seed, only used with \code{model}.}
-
-\item{conf_level}{Confidence level for the simulated-side interval.}
-
-\item{probs}{Percentiles to compute for a \code{"continuous"}-layout builder
-(e.g. \code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}}/
-\code{\link[=er_style_vpc_simulated_errorbar_continuous]{er_style_vpc_simulated_errorbar_continuous()}}; ignored by a
-\code{"categorical"}-layout builder like the default errorbar). Must
-match whatever \code{probs} was passed to \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}} when
-both layers use a \code{"continuous"}-layout builder -- this function
-errors if they disagree (see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s \code{probs}
-documentation).}
 
 \item{style}{A function determining how the simulated layer is drawn;
 see \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}.}
@@ -61,6 +48,9 @@ is preferred when it implements \code{\link[=er_simulate]{er_simulate()}} with \
 since a VPC needs response-level simulated observations rather than
 only mean predictions -- this function errors informatively if
 \code{sim_resp} isn't available.
+
+\code{conf_level}/\code{probs} are set once on \code{\link[=er_vpc]{er_vpc()}} itself (rather than
+here), so the observed and simulated layers always agree on them.
 }
 \seealso{
 \code{\link[=er_vpc]{er_vpc()}}, \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}, \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}

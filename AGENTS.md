@@ -112,9 +112,10 @@ full custom-builder walkthrough, including what `config` contains per
 layer.
 
 A builder self-declares metadata via `er_style_tag(fn, layout = NULL,
-fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL)` -- five
-independent, optional attributes (only `layout` is mandatory, and only
-for a data-layer builder):
+fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL,
+response_types = NULL, plot_by_types = NULL)` -- seven independent,
+optional attributes (only `layout` is mandatory, and only for a
+data-layer builder):
 
 - **`layout`** (`"overlay"`/`"panel"`) -- which structural family a data
   builder belongs to (see above). Mandatory for data-layer builders;
@@ -138,6 +139,23 @@ for a data-layer builder):
   the overlay's geoms *before* model/summary/quantile (so a
   full-panel-coverage builder like `er_style_data_hex()` doesn't bury
   them); `"foreground"` (the default) draws them after.
+- **`response_types`** (subset of `"binary"`/`"continuous"`/`"count"`)
+  and **`plot_by_types`** (subset of `"continuous"`/`"discrete"`) --
+  VPC-specific; declare which `object$response$type`/`object$group$type`
+  values a builder supports. Checked, not just stored:
+  `er_vpc_add_observed()`/`er_vpc_add_simulated()` each error
+  immediately (`.check_style_response_type()`/`.check_style_plot_by_type()`
+  in `R/er-plot-style.R`) if `style` is tagged for a type the `er_vpc`
+  object doesn't have -- e.g. `er_style_vpc_observed_quantile_line()` declares
+  `response_types = c("continuous", "count")` (needs
+  `config$percentiles`, never computed for a binary response) and
+  `plot_by_types = "continuous"` (its `geom_line()` connects bins along
+  a numeric midpoint, meaningless for an unordered categorical
+  `plot_by`). Both optional -- an untagged builder is never checked
+  against either, the same opt-in treatment `layer` gets; a custom
+  builder that skips these tags is responsible for guarding against
+  incompatible inputs itself, the way every built-in VPC builder still
+  does internally as a fallback.
 
 Built-in builders, by layer:
 
@@ -151,69 +169,101 @@ Built-in builders, by layer:
 
 ### The VPC mini-grammar
 
-`er_vpc(data, exposure, response, response_type)` |>
+`er_vpc(data, exposure, response, response_type, plot_by = NULL, n_bins
+= 4, conf_level = 0.95, probs = c(0.1, 0.5, 0.9))` |>
 `er_vpc_add_observed()` |> `er_vpc_add_simulated()` |> `plot()` mirrors
 `er_plot()`'s object/layer/builder architecture, scoped deliberately
-narrower: no stratification, always a single panel.
+narrower: no stratification, always a single panel. `plot_by`/`n_bins`/
+`conf_level`/`probs` all live on `er_vpc()` itself (stored on
+`object$group`), not on either add-verb, since the observed and
+simulated layers must always agree on them -- `plot_by` defaults to the
+plot's exposure variable; numeric `plot_by` is quantile-binned
+(`cut_exposure_quantile()`, placebo separated when `plot_by` is the
+exposure variable itself), categorical is used as-is. Whether `plot_by`
+is numeric or categorical is auto-detected once in `er_vpc()` and
+stored as `object$group$type` (`"continuous"`/`"discrete"`), mirroring
+`object$response$type`; both `.layer_vpc_*()` functions copy it onto
+their `config$group_type` (with `config$is_numeric_group` kept as a
+convenience boolean derived from it) for builders to read. When
+`plot_by` is numeric, both `.layer_vpc_*()` functions also compute
+`x_median` alongside `x_mid` on `config$summary` (the per-bin median,
+vs. mean, of `plot_by`'s values) -- `x_mid` remains what the
+percentile-band idiom plots at, while `x_median` is what the default
+`_mean_errorbar()` pair plots at instead.
 
-- **`er_vpc_add_observed(object, group_by = NULL, n_bins = 4, conf_level
-  = 0.95, probs = c(0.1, 0.5, 0.9), style = ...)`** -- bins the observed
-  data and computes its response summary. `group_by` defaults to the
-  plot's exposure variable; numeric `group_by` is quantile-binned
-  (`cut_exposure_quantile()`, placebo separated when `group_by` is the
-  exposure variable itself), categorical is used as-is.
+- **`er_vpc_add_observed(object, style = ...)`** -- bins the observed
+  data (using `object$group`) and computes its response summary.
 - **`er_vpc_add_simulated(object, model = NULL, sim = NULL, nsim = 100,
-  seed = NULL, conf_level = 0.95, probs = c(0.1, 0.5, 0.9), style =
-  ...)`** -- must be called after `er_vpc_add_observed()`; bins
-  simulated rows against the *observed* layer's own stored cutpoints
-  (`obs_config$breaks`, via `.apply_exposure_breaks()`), guaranteeing
-  both sides share identical bin boundaries. `model`/`sim` are mutually
-  exclusive; exactly one is required. When `model` is supplied, calls
-  `er_simulate()` internally and requires a `sim_resp` column.
+  seed = NULL, style = ...)`** -- must be called after
+  `er_vpc_add_observed()`; bins simulated rows against the *observed*
+  layer's own stored cutpoints (`obs_config$breaks`, via
+  `.apply_exposure_breaks()`), guaranteeing both sides share identical
+  bin boundaries. `model`/`sim` are mutually exclusive; exactly one is
+  required. When `model` is supplied, calls `er_simulate()` internally
+  and requires a `sim_resp` column.
 
-Two visual idioms, chosen by `style`, tagged via `er_style_tag(fn, layout
-= ...)` with `layout` values `"categorical"`/`"continuous"` (reusing the
-same `layout` tag data builders use for `"overlay"`/`"panel"`, just a
-different pair of allowed values):
+Three visual idioms, chosen by `style`:
 
-- **Categorical-bin idiom** (`layout = "categorical"`, default):
-  `er_style_vpc_observed_pointrange()` / `er_style_vpc_simulated_errorbar()`
-  -- point/errorbar of the mean plotted at each bin's discrete `.vpc_bin`
-  location.
+- **Adaptive mean/errorbar idiom** (default): `er_style_vpc_observed_mean_errorbar()`
+  / `er_style_vpc_simulated_mean_errorbar()` -- point/errorbar of the
+  mean/rate + CI, with an x-position that adapts to `object$group$type`
+  at build time rather than declaring one `layout` statically:
+  equally-spaced at each bin's discrete `.vpc_bin` location when
+  `plot_by` is categorical, or at each bin's numeric *median*
+  (`x_median`, computed alongside `x_mid` in both `.layer_vpc_*()`
+  functions) on `plot_by`'s own numeric scale when `plot_by` is
+  numeric -- distinct from the exposure scale whenever `plot_by` isn't
+  the exposure variable itself; see `config$group_limits` below. Both
+  support every response type and both `plot_by` types
+  (`response_types = c("binary", "continuous", "count")`,
+  `plot_by_types = c("continuous", "discrete")`), and neither carries a
+  `layout` tag -- since the x-position family is chosen dynamically from
+  the data rather than fixed per builder, `.check_vpc_layout_match()`
+  can't meaningfully check it statically, so it's skipped (the same
+  opt-in treatment an untagged custom builder gets). Pair the two
+  together; pairing either with a builder from one of the two idioms
+  below risks an x-position mismatch that `.check_vpc_layout_match()`
+  won't catch.
 - **Continuous-x percentile-band idiom** (`layout = "continuous"`):
-  `er_style_vpc_observed_line()` / `er_style_vpc_simulated_ribbon()` --
+  `er_style_vpc_observed_quantile_line()` / `er_style_vpc_simulated_quantile_ribbon()` --
   one line/ribbon per requested percentile against a continuous exposure
   x-axis (bin midpoint, `x_mid`). Continuous/count responses only (a
   binary response's distribution is fully described by its rate
-  already); both error informatively if `config$percentiles` is
-  unavailable (binary response, or categorical `group_by`).
-- **Continuous-x pointrange/errorbar idiom** (`layout = "continuous"`):
-  `er_style_vpc_observed_pointrange_continuous()` /
-  `er_style_vpc_simulated_errorbar_continuous()` -- the same mean/CI as
-  the categorical-bin idiom, but plotted at `x_mid` instead of
-  `.vpc_bin`, for pairing with the percentile-band idiom (or with each
-  other, on a continuous x-axis) without a layout mismatch. Unlike the
-  percentile-band idiom, these only need `config$summary` (already
-  carries `x_mid` for a numeric `group_by`), so they work for a binary
-  response too; they error if `group_by` is categorical (no numeric
-  midpoint to plot at).
+  already) and a numeric `plot_by` only -- tagged
+  `response_types = c("continuous", "count")`, `plot_by_types =
+  "continuous"`, so `er_vpc_add_observed()`/`er_vpc_add_simulated()`
+  reject an incompatible object up front; each also keeps its own
+  internal `config$percentiles`-unavailable guard as a fallback for an
+  untagged custom builder.
+- **Adaptive quantile-errorbar idiom**: `er_style_vpc_observed_quantile_errorbar()`
+  / `er_style_vpc_simulated_quantile_errorbar()` -- a point/errorbar per
+  requested percentile (see [er_vpc()]'s `probs` argument), with the
+  same adaptive x-position as the mean/errorbar default (`.vpc_bin` for
+  a categorical `plot_by`, `x_median` -- computed alongside `x_mid` in
+  `config$percentiles` -- for a numeric one); like the mean/errorbar
+  pair, neither carries a `layout` tag. When more than one percentile is
+  requested they currently overplot at the same x-position within a bin
+  rather than being dodged apart -- dodging support is deferred to a
+  future PR. Unlike the percentile-band idiom above, `config$percentiles`
+  (and so this idiom) supports a categorical `plot_by` as well as a
+  numeric one -- tagged `response_types = c("continuous", "count")`,
+  `plot_by_types = c("continuous", "discrete")`; each builder still
+  errors informatively without `config$percentiles` (continuous/count
+  response only) as a fallback.
 
 `er_vpc_add_simulated()` checks the observed and simulated builders'
 `layout` tags against each other (`.check_vpc_layout_match()` in
-`R/er-plot-style.R`) and errors if they disagree -- e.g. pairing
-`er_style_vpc_observed_pointrange()`'s discrete locations with
-`er_style_vpc_simulated_ribbon()`'s numeric midpoints would otherwise
-silently plot the two layers at inconsistent x-positions for the same
-bin. An untagged custom builder on either side skips this check, the
-same opt-in treatment the `layer` tag gets. When both builders resolve
-to `layout = "continuous"` (so both sides actually render
-`config$percentiles`), `er_vpc_add_simulated()` additionally checks
-(`.check_vpc_probs_match()`) that its own `probs` argument matches
-`er_vpc_add_observed()`'s own `probs` (order-independent), erroring if
-they disagree -- mismatched `probs` would otherwise silently produce two
-percentile sets that don't correspond to the same nominal percentile.
-`er_vpc_add_observed()` stores its `probs` on `config$probs` for this
-comparison.
+`R/er-plot-style.R`) and errors if they disagree -- e.g. pairing a
+builder that always plots at discrete bin locations with
+`er_style_vpc_simulated_quantile_ribbon()`'s numeric midpoints would
+otherwise silently plot the two layers at inconsistent x-positions for
+the same bin. An untagged builder on either side skips this check --
+the same opt-in treatment the `layer` tag gets -- which is why both the
+mean/errorbar and quantile-errorbar idioms above are untagged: their
+x-position family is chosen from the data at build time, not declared
+statically. `probs` can't diverge between the two layers the way
+`layout` still can, since it's set once on `er_vpc()` and read from
+`object$group` by both `.layer_vpc_*()` functions.
 
 The simulated layer's geoms are always added before the observed layer's,
 so a simulated ribbon never buries the observed points/line.
@@ -271,6 +321,15 @@ documented in `R/data.R`. Columns:
 
 A handful of non-obvious implementation details that would bite a future
 edit if forgotten:
+
+- **In VPC code, never reach for `exposure$label`/`exposure$limits`
+  when the intent is "the plot's x-axis variable."** `plot_by` (not
+  `exposure`) drives the VPC's x-axis, and the two only coincide when
+  the caller didn't override `plot_by`. Use `object$group$label` for
+  the axis label and `config$group_limits` (set in
+  `.layer_vpc_observed()`, copied onto the simulated config the same
+  way `config$breaks` already is) for anything that needs `plot_by`'s
+  own numeric range, e.g. sizing a continuous-x error bar.
 
 - **Rotated-label `vjust`/`hjust` are swapped.** For `geom_label(angle =
   90)` text, `vjust` controls the *horizontal* offset relative to the

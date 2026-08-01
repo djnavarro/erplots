@@ -9,6 +9,28 @@ test_that("er_vpc() constructs an er_vpc object with the right variable metadata
   expect_null(vpc$layer$simulated)
 })
 
+test_that("er_vpc() defaults plot_by to the exposure variable and stores n_bins/conf_level/probs", {
+  vpc <- er_vpc(er_test_data, aucss, ae1)
+  expect_equal(vpc$group$var, "aucss")
+  expect_equal(vpc$group$n_bins, 4)
+  expect_equal(vpc$group$conf_level, 0.95)
+  expect_equal(vpc$group$probs, c(0.1, 0.5, 0.9))
+
+  vpc2 <- er_vpc(er_test_data, aucss, ae1, plot_by = sex, n_bins = 6, conf_level = 0.9, probs = c(0.2, 0.8))
+  expect_equal(vpc2$group$var, "sex")
+  expect_equal(vpc2$group$n_bins, 6)
+  expect_equal(vpc2$group$conf_level, 0.9)
+  expect_equal(vpc2$group$probs, c(0.2, 0.8))
+})
+
+test_that("er_vpc() auto-detects plot_by's type as continuous or discrete", {
+  vpc_numeric <- er_vpc(er_test_data, aucss, ae1)
+  expect_equal(vpc_numeric$group$type, "continuous")
+
+  vpc_categorical <- er_vpc(er_test_data, aucss, ae1, plot_by = sex)
+  expect_equal(vpc_categorical$group$type, "discrete")
+})
+
 test_that("er_vpc() resolves response_type = 'auto' and honours explicit overrides", {
   vpc_auto <- er_vpc(er_test_data, aucss, biomarker_change)
   expect_equal(vpc_auto$response$type, "continuous")
@@ -69,4 +91,17 @@ test_that("er_vpc_build()/plot() produce a ggplot object", {
 
 test_that("er_vpc_build() requires an er_vpc object", {
   expect_error(er_vpc_build(list()), "er_vpc")
+})
+
+test_that("er_vpc_build() labels the x-axis with plot_by's label, not exposure's, when they differ", {
+  # regression test: the x-axis is `plot_by`, which only coincides with
+  # `exposure` when the caller didn't override it
+  vpc <- er_test_data |>
+    er_vpc(aucss, ae1, plot_by = weight) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 606)
+
+  built <- er_vpc_build(vpc)
+  expect_equal(ggplot2::get_labs(built$output)$x, vpc$group$label)
+  expect_false(identical(ggplot2::get_labs(built$output)$x, vpc$exposure$label))
 })

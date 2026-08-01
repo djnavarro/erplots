@@ -14,13 +14,31 @@
 #'
 #' Unlike [er_plot()], `er_vpc()` has no stratification concept and
 #' always renders a single panel -- see [er_vpc_add_observed()] for
-#' `group_by`, the (orthogonal) variable used to bin/group the
-#' comparison.
+#' `plot_by`, the (orthogonal) variable plotted on the x-axis and used
+#' to bin/group the comparison. Whether `plot_by` is `"continuous"`
+#' (numeric, quantile-binned) or `"discrete"` (used as-is) is
+#' auto-detected from the column's type and stored on
+#' `object$group$type`, mirroring how `object$response$type` records
+#' the response's type.
 #'
 #' @param data Data frame or tibble containing the observed data.
 #' @param exposure Exposure variable (one variable, unquoted).
 #' @param response Response variable (one variable, unquoted).
 #' @param response_type One of `"auto"`, `"binary"`, `"continuous"`, or `"count"`.
+#' @param plot_by Variable (unquoted) plotted on the x-axis and used to
+#'   bin/group the observed vs. simulated comparison. Defaults to
+#'   `exposure`. A numeric variable is split into `n_bins` quantile bins
+#'   (placebo, i.e. `0`, kept in its own bin when `plot_by` is the
+#'   exposure variable itself); a categorical variable is used as-is,
+#'   with no binning.
+#' @param n_bins Number of quantile bins, when `plot_by` is numeric.
+#' @param conf_level Confidence level for both the observed- and
+#'   simulated-side intervals. Must be strictly between 0 and 1.
+#' @param probs Percentiles to compute for a percentile-based builder
+#'   (e.g. [er_style_vpc_observed_quantile_line()]/[er_style_vpc_simulated_quantile_ribbon()]/
+#'   [er_style_vpc_observed_quantile_errorbar()]/[er_style_vpc_simulated_quantile_errorbar()];
+#'   ignored by the default adaptive mean/errorbar pair). Only computed
+#'   for a continuous/count response.
 #'
 #' @returns An (empty) plot object of class `er_vpc`.
 #'
@@ -30,8 +48,8 @@
 #' mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 #'
 #' erglm_data |>
-#'   er_vpc(aucss, ae2) |>
-#'   er_vpc_add_observed(group_by = aucss) |>
+#'   er_vpc(aucss, ae2, plot_by = aucss) |>
+#'   er_vpc_add_observed() |>
 #'   er_vpc_add_simulated(model = mod, seed = 9984) |>
 #'   plot()
 #' }
@@ -44,7 +62,9 @@ NULL
 
 #' @rdname er_vpc
 #' @export
-er_vpc <- function(data, exposure, response, response_type = "auto") {
+er_vpc <- function(data, exposure, response, response_type = "auto",
+                    plot_by = NULL, n_bins = 4, conf_level = 0.95,
+                    probs = c(0.1, 0.5, 0.9)) {
 
   # see `er_plot()`'s identical `dplyr::ungroup()` call for the rationale
   data <- dplyr::ungroup(data)
@@ -76,11 +96,27 @@ er_vpc <- function(data, exposure, response, response_type = "auto") {
     ))
   }
 
+  group_quo <- rlang::enquo(plot_by)
+  group_var <- if (rlang::quo_is_null(group_quo)) exposure_name else rlang::as_name(group_quo)
+
+  if (!(group_var %in% names(data))) {
+    rlang::abort(sprintf("Column `%s` not found in `data`.", group_var))
+  }
+
+  if (!is.numeric(n_bins) || length(n_bins) != 1L || !is.finite(n_bins) || n_bins < 1 || n_bins != round(n_bins)) {
+    rlang::abort("`n_bins` must be a single positive whole number.")
+  }
+
+  if (!is.numeric(conf_level) || length(conf_level) != 1L || !is.finite(conf_level) || conf_level <= 0 || conf_level >= 1) {
+    rlang::abort("`conf_level` must be a single number strictly between 0 and 1.")
+  }
+
   object <- structure(
     list(
       data = NULL,
       exposure = .plot_variable(role = "exposure"),
       response = .plot_variable(role = "response"),
+      group = list(),
       layer = list(observed = NULL, simulated = NULL),
       theme = list(),
       output = NULL
@@ -108,6 +144,13 @@ er_vpc <- function(data, exposure, response, response_type = "auto") {
     object$response$limits <- range(object$data[[object$response$name]], na.rm = TRUE)
   }
 
+  object$group$var <- group_var
+  object$group$label <- .get_label(object$data[[group_var]]) %||% group_var
+  object$group$type <- if (is.numeric(object$data[[group_var]])) "continuous" else "discrete"
+  object$group$n_bins <- n_bins
+  object$group$conf_level <- conf_level
+  object$group$probs <- probs
+
   object$theme$format_percent <- scales::label_percent(accuracy = 1)
   object$theme$format_number <- scales::label_number(accuracy = 0.01)
   object$theme$theme_base <- ggplot2::theme_bw()
@@ -130,10 +173,12 @@ print.er_vpc <- function(x, ...) {
   cat("  plot variables:\n")
   cat("    - exposure:  ", x$exposure$name %||% "<none>", "\n", sep = "")
   cat("    - response:  ", x$response$name %||% "<none>", "\n", sep = "")
+  cat("    - plot_by:   ", x$group$var %||% "<none>", " (", x$group$type %||% "<none>", "), ",
+    x$group$n_bins %||% "<none>", " bins\n", sep = "")
 
   if (any(layer_set)) {
     cat("  plot layers:\n")
-    if (layer_set["observed"])  cat("    - observed:  group_by = ", x$layer$observed$config$group_var, ", ", x$layer$observed$config$n_bins, " bins\n", sep = "")
+    if (layer_set["observed"])  cat("    - observed:  layer built\n", sep = "")
     if (layer_set["simulated"]) cat("    - simulated: ", x$layer$simulated$config$n_sim_rows, " simulated rows\n", sep = "")
   } else {
     cat("  plot layers: <none>\n")

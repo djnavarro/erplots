@@ -4,7 +4,16 @@
 \alias{er_vpc}
 \title{The exposure-response VPC mini-language}
 \usage{
-er_vpc(data, exposure, response, response_type = "auto")
+er_vpc(
+  data,
+  exposure,
+  response,
+  response_type = "auto",
+  plot_by = NULL,
+  n_bins = 4,
+  conf_level = 0.95,
+  probs = c(0.1, 0.5, 0.9)
+)
 }
 \arguments{
 \item{data}{Data frame or tibble containing the observed data.}
@@ -14,6 +23,24 @@ er_vpc(data, exposure, response, response_type = "auto")
 \item{response}{Response variable (one variable, unquoted).}
 
 \item{response_type}{One of \code{"auto"}, \code{"binary"}, \code{"continuous"}, or \code{"count"}.}
+
+\item{plot_by}{Variable (unquoted) plotted on the x-axis and used to
+bin/group the observed vs. simulated comparison. Defaults to
+\code{exposure}. A numeric variable is split into \code{n_bins} quantile bins
+(placebo, i.e. \code{0}, kept in its own bin when \code{plot_by} is the
+exposure variable itself); a categorical variable is used as-is,
+with no binning.}
+
+\item{n_bins}{Number of quantile bins, when \code{plot_by} is numeric.}
+
+\item{conf_level}{Confidence level for both the observed- and
+simulated-side intervals. Must be strictly between 0 and 1.}
+
+\item{probs}{Percentiles to compute for a percentile-based builder
+(e.g. \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}}/\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}/
+\code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}/\code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}};
+ignored by the default adaptive mean/errorbar pair). Only computed
+for a continuous/count response.}
 }
 \value{
 An (empty) plot object of class \code{er_vpc}.
@@ -32,8 +59,12 @@ second call replaces the previous one).
 
 Unlike \code{\link[=er_plot]{er_plot()}}, \code{er_vpc()} has no stratification concept and
 always renders a single panel -- see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}} for
-\code{group_by}, the (orthogonal) variable used to bin/group the
-comparison.
+\code{plot_by}, the (orthogonal) variable plotted on the x-axis and used
+to bin/group the comparison. Whether \code{plot_by} is \code{"continuous"}
+(numeric, quantile-binned) or \code{"discrete"} (used as-is) is
+auto-detected from the column's type and stored on
+\code{object$group$type}, mirroring how \code{object$response$type} records
+the response's type.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
@@ -41,8 +72,8 @@ library(erglm)
 mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
 
 erglm_data |>
-  er_vpc(aucss, ae2) |>
-  er_vpc_add_observed(group_by = aucss) |>
+  er_vpc(aucss, ae2, plot_by = aucss) |>
+  er_vpc_add_observed() |>
   er_vpc_add_simulated(model = mod, seed = 9984) |>
   plot()
 }

@@ -43,7 +43,7 @@ Depends:
 LazyData: true
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0
-Config/Needs/website: djnavarro/waeponwifestre
+Config/Needs/website: djnavarro/waeponwifestre, rmarkdown
 Collate: 
     'data.R'
     'er-generics.R'
