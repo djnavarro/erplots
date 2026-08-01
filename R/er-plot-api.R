@@ -47,6 +47,17 @@ NULL
 #' @export
 er_plot <- function(data, exposure, response, stratify_by = NULL, response_type = "auto") {
 
+  # a grouped/rowwise tibble (dplyr::group_by()/dplyr::rowwise()) is a
+  # realistic accidental input -- e.g. piping straight from a `group_by()`
+  # call -- but every internal `.by = `/`dplyr::mutate()` computation
+  # downstream assumes an ungrouped frame. Left ungrouped, a grouped
+  # tibble either errors opaquely ("Can't supply `.by` when `.data` is a
+  # grouped data frame") or, worse, silently changes what gets computed
+  # (e.g. a rowwise tibble runs `cut_exposure_quantile()` once per row).
+  # `dplyr::ungroup()` is a no-op for a plain data.frame or an
+  # already-ungrouped tibble, so this is safe to call unconditionally.
+  data <- dplyr::ungroup(data)
+
   response_type <- match.arg(response_type, c("auto", "binary", "continuous", "count"))
 
   # validate that exposure/response/stratify_by actually name columns of

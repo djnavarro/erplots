@@ -108,7 +108,6 @@ er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposur
   # uses via `y = lvl`), and `geom_jitter()`'s usual height-jitter spreads
   # points within that row without needing any dodge machinery.
   if (stratify == TRUE) {
-    .set_label(dat[[strata$name]], strata$label)
     box_map <- ggplot2::aes(
       x = .data[[exposure$name]],
       y = .data[[strata$name]],
@@ -186,7 +185,6 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
   # all, always means strata, since the response is already shown via
   # y-position.
   if (stratify == TRUE) {
-    .set_label(data[[strata$name]], strata$label)
     plot_map <- ggplot2::aes(
       x = .data[[exposure$name]],
       y = .data[[response$name]],

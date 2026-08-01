@@ -94,6 +94,13 @@ er_vpc_plot <- function(data, sim = NULL, exposure, response, group_by, model = 
 
   response_type <- match.arg(response_type)
 
+  # see `er_plot()`'s identical `dplyr::ungroup()` call for the rationale
+  # -- a grouped/rowwise tibble breaks the `.by = ` summaries below
+  # (either erroring opaquely or, for a rowwise tibble, silently changing
+  # what's computed), and `dplyr::ungroup()` is a no-op for anything else
+  data <- dplyr::ungroup(data)
+  if (!is.null(sim)) sim <- dplyr::ungroup(sim)
+
   exp_var <- rlang::as_name(rlang::enquo(exposure))
   rsp_var <- rlang::as_name(rlang::enquo(response))
   grp_var <- rlang::as_name(rlang::enquo(group_by))
@@ -135,7 +142,9 @@ er_vpc_plot <- function(data, sim = NULL, exposure, response, group_by, model = 
         "i" = "Alternatively, pass a pre-built `sim` data frame directly."
       ))
     }
-    sim <- raw_sim
+    # defensive: a model's own `er_simulate()` method controls `raw_sim`'s
+    # class, not erplots -- ungroup it too in case it comes back grouped
+    sim <- dplyr::ungroup(raw_sim)
     sim[[rsp_var]] <- sim[["sim_resp"]]
   }
 

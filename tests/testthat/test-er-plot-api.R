@@ -929,3 +929,68 @@ test_that("a style with no `layer` tag is never checked, in any layer", {
   expect_no_error(er_plot_add_summary(plt, model = er_test_mod1, style = untagged))
   expect_no_error(er_plot_add_quantiles(er_plot_add_model(plt, er_test_mod1), style = untagged))
 })
+
+test_that("er_plot() ungroups a grouped tibble, so downstream `.by = ` layers don't error", {
+  grouped_data <- er_test_data |> dplyr::group_by(sex)
+
+  plt <- grouped_data |> er_plot(aucss, ae1, stratify_by = sex)
+  expect_false(dplyr::is_grouped_df(plt$data))
+
+  # the full pipeline used to fail inside `.layer_quantile()` with
+  # "Can't supply `.by` when `.data` is a grouped data frame."
+  expect_no_error({
+    built <- plt |>
+      er_plot_add_model(er_test_mod2) |>
+      er_plot_add_summary(model = er_test_mod2) |>
+      er_plot_add_quantiles() |>
+      er_plot_add_data() |>
+      er_plot_add_groups(aucss) |>
+      er_plot_build()
+  })
+  expect_true(inherits(built$output, "patchwork"))
+})
+
+test_that("er_plot() ungroups a rowwise tibble, so per-row `dplyr::mutate()` calls aren't run row-by-row", {
+  rowwise_data <- er_test_data |> dplyr::rowwise()
+
+  plt <- rowwise_data |> er_plot(aucss, ae1)
+  expect_false(inherits(plt$data, "rowwise_df"))
+
+  # a rowwise input used to make `cut_exposure_quantile()` run once per
+  # row (each call seeing a length-1 vector), failing with "found only 0
+  # distinct non-missing, non-placebo exposure values"
+  expect_no_error({
+    built <- plt |>
+      er_plot_add_model(er_test_mod1) |>
+      er_plot_add_quantiles() |>
+      er_plot_build()
+  })
+  expect_true(inherits(built$output, "patchwork"))
+})
+
+test_that("er_plot() with grouped/rowwise input produces the same summary-corner placement as ungrouped input", {
+  # regression test for the silent-corruption failure mode: with grouped
+  # input, `.compute_corner_distance()` used to retain the grouping
+  # column and return one row per group instead of one, producing a
+  # garbled `corner_distance` vector (mixed character/numeric, duplicated
+  # names) rather than erroring -- this surfaced downstream as an opaque
+  # "object 'geoms' not found" inside `er_style_summary_pvalue()`.
+  plain_plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_summary(model = er_test_mod1)
+
+  grouped_plt <- er_test_data |>
+    dplyr::group_by(sex) |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_summary(model = er_test_mod1)
+
+  expect_no_error(grouped_built <- er_plot_build(grouped_plt))
+  plain_built <- er_plot_build(plain_plt)
+
+  expect_identical(
+    grouped_built$layer$summary$config$corner_distance,
+    plain_built$layer$summary$config$corner_distance
+  )
+})

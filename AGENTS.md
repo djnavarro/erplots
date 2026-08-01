@@ -1580,6 +1580,87 @@ independent `er_plot_build()` calls on the same `er_plot` object render
 identical jittered points. `devtools::test()` (950 passing, up from 939)
 and `devtools::document()` both clean.
 
+## Fixed: `er_plot()`/`er_vpc_plot()` broke on grouped/rowwise tibble input
+
+A tibble/data.frame robustness sweep (prompted by the observation that
+erplots never validates or normalises which of the two `data` could be,
+only that it behaves like one) found that a grouped or rowwise tibble
+(`dplyr::group_by()`/`dplyr::rowwise()`) -- a realistic accidental input,
+e.g. piping straight out of a `group_by()` call without remembering to
+`ungroup()` first -- broke multiple layers. This is a failure mode a
+plain `data.frame` can never hit (it has no grouping concept at all),
+so it had gone uncaught. Confirmed empirically (not just by reading
+code) by running the full layer pipeline and `er_vpc_plot()` against
+matched `data.frame`/tibble/grouped-tibble/rowwise-tibble fixtures and
+diffing the results.
+
+Three concrete symptoms, all traced to the same root cause -- several
+internal `dplyr::summarise()`/`dplyr::mutate()` calls assume an
+ungrouped frame:
+
+- `.layer_quantile()` (`R/er-plot-layer.R`) and `er_vpc_plot()`
+  (`R/er-vpc.R`) both call `dplyr::summarise(..., .by = ...)`, which
+  errors outright on a grouped tibble ("Can't supply `.by` when `.data`
+  is a grouped data frame").
+- A rowwise tibble doesn't hit that error, but silently changes what's
+  computed: `dplyr::mutate()` on a `rowwise_df` evaluates its expression
+  once per row, so `cut_exposure_quantile()` -- meant to see the whole
+  exposure column at once -- instead ran once per row on a length-1
+  vector, failing with an unrelated-looking "found only 0 distinct
+  non-missing, non-placebo exposure values" error.
+- Worse, `.compute_corner_distance()` (`R/utils-helpers.R`, shared by
+  `.layer_summary()` and `.layer_quantile()`) had no `.by`/grouping
+  guard at all and doesn't error on grouped input -- `dplyr::summarise()`
+  retains the existing group column, returning one row per stratum
+  level instead of one row overall. `unlist()` then produces a garbled,
+  partly-character vector (`top_left1`, `top_left2`, ... instead of
+  `top_left`, `top_right`, `bottom_left`, `bottom_right`) rather than
+  erroring at the point of the actual problem. This surfaced several
+  calls later as an opaque `object 'geoms' not found` inside
+  `er_style_summary_pvalue()`, once `names(sort(config$corner_distance)[4])`
+  no longer matched any of its four corner branches -- a plot with a
+  summary layer but no quantile layer hit this with no indication
+  grouping was the cause.
+
+Fixed by calling `dplyr::ungroup()` once, at the top of `er_plot()`
+(`R/er-plot-api.R`) and `er_vpc_plot()` (`R/er-vpc.R`), on the incoming
+`data` argument -- and, in `er_vpc_plot()`, also on `sim` (whether
+user-supplied directly, or produced internally via `er_simulate()`,
+since a model's own `er_simulate()` method controls that return value's
+class, not erplots). This was chosen over patching every individual
+`.by = `-using call site individually, since `dplyr::ungroup()` is a
+no-op for a plain `data.frame` or an already-ungrouped tibble and
+closes all three symptoms above from one place, with no risk of a
+future `.by = ` call site reintroducing the same class of bug.
+
+The same sweep also found (and, since it was unrelated to the grouping
+bug, fixed separately) two no-op calls in `R/er-plot-style-data.R`:
+`er_style_data_boxjitter()`/`er_style_data_overlay()`'s stratified
+branches each called `.set_label(dat[[strata$name]], strata$label)` /
+`.set_label(data[[strata$name]], strata$label)` without assigning the
+result anywhere, so the call computed a labelled copy of the column and
+immediately discarded it -- dead code, not a correctness bug (the
+strata legend's actual label comes from `.polish_labels()` elsewhere),
+removed for clarity.
+
+Covered by six new regression tests: three in `test-er-plot-api.R`
+(the full layer pipeline succeeds against both grouped and rowwise
+input; a plot's `corner_distance` computed from grouped input is
+`identical()` to the same plot's `corner_distance` computed from plain
+input, pinning the silent-corruption fix specifically rather than just
+checking "no error") and three in `test-er-vpc.R` (grouped/rowwise
+`data`, and a grouped `sim`, all produce output matching the plain-input
+case). `devtools::test()` (962 passing, up from 950) clean.
+
+Not done as part of this fix: no equivalent ungroup was added inside
+individual `.layer_*()`/builder functions themselves (only at the two
+public entry points) -- since `object$data` is set once, in `er_plot()`,
+every internal consumer downstream already sees the ungrouped result;
+no validation error was added for grouped/rowwise input (i.e. erplots
+silently ungroups rather than telling the user to do it themselves) --
+consistent with tibble's own `dplyr::ungroup()` being a normal, expected
+step in a pipeline rather than a user mistake worth flagging.
+
 ## Planned work
 
 See [PLAN.md](PLAN.md) for a condensed historical record of completed

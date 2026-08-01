@@ -193,3 +193,33 @@ test_that("er_vpc_plot requires exactly one of `sim`/`model`", {
     "exactly one"
   )
 })
+
+test_that("er_vpc_plot() ungroups a grouped/rowwise `data` argument", {
+  mod <- er_test_toy_model(ae1 ~ aucss, er_test_data, family = binomial())
+
+  grouped_data <- er_test_data |> dplyr::group_by(sex)
+  rowwise_data <- er_test_data |> dplyr::rowwise()
+
+  # both used to fail inside the `.by = ` summaries below
+  # `dplyr::mutate(dat, .quantile = cut_exposure_quantile(...), .by = "Source")`
+  # with "Can't supply `.by` when `.data` is a grouped data frame."
+  expect_no_error(
+    er_vpc_plot(grouped_data, exposure = aucss, response = ae1, group_by = aucss, model = mod, seed = 123)
+  )
+  expect_no_error(
+    er_vpc_plot(rowwise_data, exposure = aucss, response = ae1, group_by = aucss, model = mod, seed = 123)
+  )
+
+  p_grouped <- er_vpc_plot(grouped_data, exposure = aucss, response = ae1, group_by = aucss, model = mod, seed = 123)
+  p_plain <- er_vpc_plot(er_test_data, exposure = aucss, response = ae1, group_by = aucss, model = mod, seed = 123)
+  expect_equal(p_grouped$data, p_plain$data)
+})
+
+test_that("er_vpc_plot() ungroups a grouped `sim` argument", {
+  mod <- er_test_toy_model(ae1 ~ aucss, er_test_data, family = binomial())
+  sim <- vpc_sim_fixture(mod, er_test_data, "ae1") |> dplyr::group_by(sex)
+
+  expect_no_error(
+    er_vpc_plot(er_test_data, sim, aucss, ae1, group_by = aucss)
+  )
+})
