@@ -13,7 +13,10 @@
   p <- ggplot2::ggplot() +
     theme$theme_base +
     theme$theme_extra +
-    ggplot2::labs(x = exposure$label, y = response$label, color = "Source")
+    # x-axis is `plot_by`, not necessarily `exposure` -- they coincide
+    # only when the caller didn't supply `plot_by` (or supplied the
+    # exposure variable itself)
+    ggplot2::labs(x = object$group$label, y = response$label, color = "Source")
 
   # the simulated layer is added first (drawn underneath), so a ribbon
   # band never buries the observed points/line on top of it -- there's

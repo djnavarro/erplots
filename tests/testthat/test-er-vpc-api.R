@@ -92,3 +92,16 @@ test_that("er_vpc_build()/plot() produce a ggplot object", {
 test_that("er_vpc_build() requires an er_vpc object", {
   expect_error(er_vpc_build(list()), "er_vpc")
 })
+
+test_that("er_vpc_build() labels the x-axis with plot_by's label, not exposure's, when they differ", {
+  # regression test: the x-axis is `plot_by`, which only coincides with
+  # `exposure` when the caller didn't override it
+  vpc <- er_test_data |>
+    er_vpc(aucss, ae1, plot_by = weight) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 606)
+
+  built <- er_vpc_build(vpc)
+  expect_equal(ggplot2::get_labs(built$output)$x, vpc$group$label)
+  expect_false(identical(ggplot2::get_labs(built$output)$x, vpc$exposure$label))
+})

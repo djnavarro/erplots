@@ -63,8 +63,9 @@ er_style_vpc_simulated_mean_errorbar(
 and \code{er_style_vpc_simulated_quantile_errorbar()}'s error bars when
 \code{plot_by} is categorical.}
 
-\item{errorbar_width_continuous}{Width (as a fraction of the exposure
-range) of \code{er_style_vpc_simulated_mean_errorbar()}'s and
+\item{errorbar_width_continuous}{Width (as a fraction of \code{plot_by}'s
+own range, \code{config$group_limits}) of
+\code{er_style_vpc_simulated_mean_errorbar()}'s and
 \code{er_style_vpc_simulated_quantile_errorbar()}'s error bars when
 \code{plot_by} is numeric.}
 }
@@ -85,7 +86,7 @@ replicates), adapting its x-position to \code{plot_by}'s type
 (\code{config$is_numeric_group}): equally spaced at each bin's categorical
 (or quantile-bin) label when \code{plot_by} is categorical, or at each
 bin's numeric median (\code{x_median}, from \code{config$summary}) on the
-exposure scale when \code{plot_by} is numeric. Because it adapts its
+\code{plot_by}'s own numeric scale when \code{plot_by} is numeric. Because it adapts its
 x-position family at build time rather than declaring one statically,
 it carries no \code{layout} tag -- pair it with
 \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}, which mirrors the same
@@ -93,7 +94,7 @@ adaptive logic.
 
 \code{er_style_vpc_simulated_quantile_ribbon()} plots \code{config$percentiles}
 -- one shaded band (median line + interval) per requested percentile
--- at each bin's numeric midpoint on the exposure scale, for pairing
+-- at each bin's numeric midpoint on \code{plot_by}'s own numeric scale, for pairing
 with \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}}. \code{config$percentiles} is
 only computed for a continuous/count response (see \code{\link[=er_vpc]{er_vpc()}}'s
 \code{probs} argument); calling \code{er_style_vpc_simulated_quantile_ribbon()}

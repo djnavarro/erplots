@@ -16,8 +16,9 @@
 #' @param errorbar_width Width of `er_style_vpc_observed_mean_errorbar()`'s
 #'   and `er_style_vpc_observed_quantile_errorbar()`'s error bars when
 #'   `plot_by` is categorical.
-#' @param errorbar_width_continuous Width (as a fraction of the exposure
-#'   range) of `er_style_vpc_observed_mean_errorbar()`'s and
+#' @param errorbar_width_continuous Width (as a fraction of `plot_by`'s
+#'   own range, `config$group_limits`) of
+#'   `er_style_vpc_observed_mean_errorbar()`'s and
 #'   `er_style_vpc_observed_quantile_errorbar()`'s error bars when
 #'   `plot_by` is numeric.
 #' @param ... Additional named arguments forwarded from
@@ -28,7 +29,7 @@
 #' x-position to `plot_by`'s type (`config$is_numeric_group`): equally
 #' spaced at each bin's categorical (or quantile-bin) label when
 #' `plot_by` is categorical, or at each bin's numeric median (`x_median`,
-#' from `config$summary`) on the exposure scale when `plot_by` is
+#' from `config$summary`) on `plot_by`'s own numeric scale when `plot_by` is
 #' numeric. Because it adapts its x-position family at build time rather
 #' than declaring one statically, it carries no `layout` tag -- pair it
 #' with [er_style_vpc_simulated_mean_errorbar()], which mirrors the same
@@ -36,7 +37,7 @@
 #'
 #' `er_style_vpc_observed_quantile_line()` plots `config$percentiles` --
 #' one line per requested percentile -- at each bin's numeric midpoint on
-#' the exposure scale, for pairing with
+#' `plot_by`'s own numeric scale, for pairing with
 #' [er_style_vpc_simulated_quantile_ribbon()]. `config$percentiles` is
 #' only computed for a continuous/count response (see [er_vpc()]'s
 #' `probs` argument); calling `er_style_vpc_observed_quantile_line()`
@@ -50,7 +51,7 @@
 #' `plot_by`'s type (`config$is_numeric_group`): equally spaced at each
 #' bin's categorical (or quantile-bin) label when `plot_by` is
 #' categorical, or at each bin's numeric median (`x_median`, from
-#' `config$percentiles`) on the exposure scale when `plot_by` is
+#' `config$percentiles`) on `plot_by`'s own numeric scale when `plot_by` is
 #' numeric. Because it adapts its x-position family at build time rather
 #' than declaring one statically, it carries no `layout` tag. Unlike
 #' `er_style_vpc_observed_quantile_line()`/
@@ -120,7 +121,7 @@ er_style_vpc_observed_quantile_errorbar <- function(data, config, exposure, resp
     ))
   }
   if (config$is_numeric_group) {
-    width <- errorbar_width_continuous * (exposure$limits[2] - exposure$limits[1])
+    width <- errorbar_width_continuous * (config$group_limits[2] - config$group_limits[1])
     list(
       ggplot2::geom_errorbar(
         data = config$percentiles,
@@ -166,7 +167,7 @@ er_style_vpc_observed_mean_errorbar <- function(data, config, exposure, response
                                                  point_size = 2, errorbar_width = 0.2,
                                                  errorbar_width_continuous = 0.025, ...) {
   if (config$is_numeric_group) {
-    width <- errorbar_width_continuous * (exposure$limits[2] - exposure$limits[1])
+    width <- errorbar_width_continuous * (config$group_limits[2] - config$group_limits[1])
     list(
       ggplot2::geom_errorbar(
         data = config$summary,

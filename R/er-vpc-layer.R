@@ -17,6 +17,15 @@
   config$probs <- probs
   config$group_label <- object$group$label
   config$group_type <- object$group$type
+  # `plot_by`'s own range, for builders that size a continuous-x
+  # errorbar as a fraction of the plotted variable's range -- distinct
+  # from `exposure$limits`, which only coincides with this when
+  # `plot_by` is the exposure variable itself
+  config$group_limits <- if (config$group_type == "continuous") {
+    range(object$data[[group_var]], na.rm = TRUE)
+  } else {
+    NULL
+  }
 
   exp_var <- object$exposure$name
   rsp_var <- object$response$name
@@ -150,6 +159,7 @@
   config$n_sim_rows <- nrow(sim)
   config$group_type <- obs_config$group_type
   config$is_numeric_group <- obs_config$is_numeric_group
+  config$group_limits <- obs_config$group_limits
 
   # bin simulated rows against the *observed* layer's own cutpoints,
   # rather than re-deriving fresh quantiles from the simulated data --

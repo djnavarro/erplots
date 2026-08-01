@@ -69,6 +69,30 @@ test_that(".layer_vpc_observed()/.layer_vpc_simulated() still compute percentile
   expect_false(any(is.na(sim_pct$y_mid)))
 })
 
+test_that(".layer_vpc_observed()/.layer_vpc_simulated() bin by a numeric plot_by different from exposure, not by exposure itself", {
+  # regression test: `group_var` (`weight`) must drive both the binning
+  # and the continuous-x positions/limits, never `exp_var` (`aucss`)
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = weight, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod_gaussian, nsim = 5, seed = 605)
+
+  obs_config <- vpc$layer$observed$config
+  sim_config <- vpc$layer$simulated$config
+
+  # `x_mid`/`x_median` are computed from `weight`, so they must fall
+  # within `weight`'s range, not `aucss`'s
+  weight_range <- range(er_test_data$weight)
+  expect_true(all(obs_config$summary$x_mid >= weight_range[1] & obs_config$summary$x_mid <= weight_range[2]))
+  expect_true(all(obs_config$percentiles$x_median >= weight_range[1] & obs_config$percentiles$x_median <= weight_range[2]))
+  expect_true(all(sim_config$summary$x_mid >= weight_range[1] & sim_config$summary$x_mid <= weight_range[2]))
+
+  # `group_limits` (used to size continuous-x error bars) reflects
+  # `weight`'s own range, distinct from `object$exposure$limits`
+  expect_equal(obs_config$group_limits, weight_range)
+  expect_equal(sim_config$group_limits, weight_range)
+  expect_false(isTRUE(all.equal(obs_config$group_limits, vpc$exposure$limits)))
+})
+
 test_that(".layer_vpc_observed()/.layer_vpc_simulated() still skip percentiles for a binary response with a categorical plot_by", {
   vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |>
     er_vpc_add_observed() |>

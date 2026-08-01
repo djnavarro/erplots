@@ -211,8 +211,10 @@ Three visual idioms, chosen by `style`:
   equally-spaced at each bin's discrete `.vpc_bin` location when
   `plot_by` is categorical, or at each bin's numeric *median*
   (`x_median`, computed alongside `x_mid` in both `.layer_vpc_*()`
-  functions) on the continuous exposure scale when `plot_by` is
-  numeric. Both support every response type and both `plot_by` types
+  functions) on `plot_by`'s own numeric scale when `plot_by` is
+  numeric -- distinct from the exposure scale whenever `plot_by` isn't
+  the exposure variable itself; see `config$group_limits` below. Both
+  support every response type and both `plot_by` types
   (`response_types = c("binary", "continuous", "count")`,
   `plot_by_types = c("continuous", "discrete")`), and neither carries a
   `layout` tag -- since the x-position family is chosen dynamically from
@@ -319,6 +321,15 @@ documented in `R/data.R`. Columns:
 
 A handful of non-obvious implementation details that would bite a future
 edit if forgotten:
+
+- **In VPC code, never reach for `exposure$label`/`exposure$limits`
+  when the intent is "the plot's x-axis variable."** `plot_by` (not
+  `exposure`) drives the VPC's x-axis, and the two only coincide when
+  the caller didn't override `plot_by`. Use `object$group$label` for
+  the axis label and `config$group_limits` (set in
+  `.layer_vpc_observed()`, copied onto the simulated config the same
+  way `config$breaks` already is) for anything that needs `plot_by`'s
+  own numeric range, e.g. sizing a continuous-x error bar.
 
 - **Rotated-label `vjust`/`hjust` are swapped.** For `geom_label(angle =
   90)` text, `vjust` controls the *horizontal* offset relative to the

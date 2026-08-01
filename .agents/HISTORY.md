@@ -908,3 +908,30 @@ bugfix, not a new idiom: two visual idioms remain conceptually (adaptive
 point/errorbar vs. continuous-x percentile-band), just with the plain
 mean and the per-percentile point/errorbar builders sharing the same
 adaptive x-position logic.
+
+## `plot_by != exposure`: x-axis mislabelled and errorbar width scaled by the wrong variable
+
+When a caller set `plot_by` to a numeric variable other than `exposure`
+(e.g. a covariate), the VPC's binning/positioning logic itself was
+already correct (`.layer_vpc_observed()`/`.layer_vpc_simulated()` bin
+and compute `x_mid`/`x_median` from `group_var`, never `exp_var`, except
+when they're the same column). Two things downstream of that were
+still wrong, though, both because they reached for `exposure$label`/
+`exposure$limits` unconditionally rather than the plot's actual x-axis
+variable:
+
+- `.build_vpc_plot()` always labelled the x-axis `exposure$label`, so a
+  plot binned by, say, `bodyweight_kg` still showed the exposure
+  variable's name on the axis.
+- `er_style_vpc_*_mean_errorbar()`/`er_style_vpc_*_quantile_errorbar()`
+  sized their numeric-x error bars as `errorbar_width_continuous *
+  (exposure$limits[2] - exposure$limits[1])`, so the bar width was a
+  fraction of the exposure's range rather than `plot_by`'s -- harmless
+  when they coincide, but wrong (often absurdly too wide or too narrow)
+  whenever `plot_by`'s scale differs from the exposure's.
+
+Fixed by using `object$group$label` for the x-axis label, and by adding
+`config$group_limits` (computed once in `.layer_vpc_observed()` from
+`range(data[[group_var]])`, copied onto the simulated config the same
+way `breaks` already is) for the four error-bar builders to size against
+instead of `exposure$limits`.
