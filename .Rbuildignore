@@ -8,5 +8,5 @@
 ^\.github$
 ^vignettes/articles$
 ^AGENTS\.md$
-^PLAN\.md$
+^\.agents$
 ^data-raw$

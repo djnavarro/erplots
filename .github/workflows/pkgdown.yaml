@@ -42,8 +42,8 @@ jobs:
 
       - name: Remove internal-only pages from the built site
         run: |
-          rm -f docs/AGENTS.html docs/PLAN.html docs/AGENTS.md docs/PLAN.md
-          sed -i '/AGENTS\.html\|PLAN\.html/d' docs/sitemap.xml
+          rm -f docs/AGENTS.html docs/AGENTS.md
+          sed -i '/AGENTS\.html/d' docs/sitemap.xml
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
