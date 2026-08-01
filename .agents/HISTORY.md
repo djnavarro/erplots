@@ -817,3 +817,34 @@ is order-independent (`sort()` before `all.equal()`). This required
 `.layer_vpc_observed()` to start storing its own `probs` on
 `config$probs` so the simulated-side call has something to compare
 against.
+
+## VPC builder pruning: dropping the plain mean pointrange/errorbar idiom
+
+After `er_vpc_add_observed()`/`er_vpc_add_simulated()` gained the
+adaptive `er_style_vpc_observed_mean_errorbar()`/
+`er_style_vpc_simulated_mean_errorbar()` default (which already covers
+the plain mean/rate + CI idiom for every response type and both
+`plot_by` types) and `er_style_vpc_observed_quantile_line()`/
+`er_style_vpc_simulated_quantile_ribbon()` were renamed to make clear
+they're a percentile-band idiom, four builders no longer fit the
+resulting scheme: `er_style_vpc_observed_pointrange()` and
+`er_style_vpc_simulated_errorbar()` (the categorical-bin mean idiom --
+functionally superseded by the adaptive default's categorical branch)
+and `er_style_vpc_observed_pointrange_continuous()`/
+`er_style_vpc_simulated_errorbar_continuous()` (the continuous-x mean
+idiom -- superseded by the adaptive default's numeric-median branch,
+plus an optional dashed percentile overlay that didn't fit anywhere
+else in the naming scheme). All four were removed outright (no
+deprecation shim, per project convention for this pre-CRAN package).
+
+This leaves three VPC visual idioms: the adaptive mean/errorbar default
+(no `layout` tag), the continuous-x percentile-band idiom
+(`er_style_vpc_observed_quantile_line()`/
+`er_style_vpc_simulated_quantile_ribbon()`, `layout = "continuous"`),
+and the categorical-bin quantile idiom
+(`er_style_vpc_observed_quantile_errorbar()`/
+`er_style_vpc_simulated_quantile_errorbar()`, `layout = "categorical"`).
+Tests and docs that used the removed builders purely as a stand-in for
+"any observed/simulated-tagged style" (e.g. wrong-layer-rejection tests)
+were repointed at `er_style_vpc_observed_mean_errorbar()`/
+`er_style_vpc_simulated_mean_errorbar()` instead.

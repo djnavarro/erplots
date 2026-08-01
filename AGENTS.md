@@ -188,9 +188,8 @@ convenience boolean derived from it) for builders to read. When
 `plot_by` is numeric, both `.layer_vpc_*()` functions also compute
 `x_median` alongside `x_mid` on `config$summary` (the per-bin median,
 vs. mean, of `plot_by`'s values) -- `x_mid` remains what the
-mean-anchored builders (`_pointrange_continuous()`/`_errorbar_continuous()`/
-the percentile-band idiom) plot at, while `x_median` is what the
-default `_mean_errorbar()` pair plots at instead.
+percentile-band idiom plots at, while `x_median` is what the default
+`_mean_errorbar()` pair plots at instead.
 
 - **`er_vpc_add_observed(object, style = ...)`** -- bins the observed
   data (using `object$group`) and computes its response summary.
@@ -203,31 +202,26 @@ default `_mean_errorbar()` pair plots at instead.
   required. When `model` is supplied, calls `er_simulate()` internally
   and requires a `sim_resp` column.
 
-Five visual idioms, chosen by `style`:
+Three visual idioms, chosen by `style`:
 
 - **Adaptive mean/errorbar idiom** (default): `er_style_vpc_observed_mean_errorbar()`
   / `er_style_vpc_simulated_mean_errorbar()` -- point/errorbar of the
   mean/rate + CI, with an x-position that adapts to `object$group$type`
   at build time rather than declaring one `layout` statically:
   equally-spaced at each bin's discrete `.vpc_bin` location when
-  `plot_by` is categorical (like the categorical-bin idiom below), or at
-  each bin's numeric *median* (`x_median`, computed alongside `x_mid` in
-  both `.layer_vpc_*()` functions) on the continuous exposure scale when
-  `plot_by` is numeric (like the continuous-x pointrange/errorbar idiom
-  below, which uses the mean instead of the median). Both support every
-  response type and both `plot_by` types (`response_types = c("binary",
-  "continuous", "count")`, `plot_by_types = c("continuous",
-  "discrete")`), and neither carries a `layout` tag -- since the
-  x-position family is chosen dynamically from the data rather than
-  fixed per builder, `.check_vpc_layout_match()` can't meaningfully
-  check it statically, so it's skipped (the same opt-in treatment an
-  untagged custom builder gets). Pair the two together; pairing either
-  with a builder from one of the three idioms below risks an x-position
-  mismatch that `.check_vpc_layout_match()` won't catch.
-- **Categorical-bin idiom** (`layout = "categorical"`):
-  `er_style_vpc_observed_pointrange()` / `er_style_vpc_simulated_errorbar()`
-  -- point/errorbar of the mean plotted at each bin's discrete `.vpc_bin`
-  location, always (even for a numeric `plot_by`).
+  `plot_by` is categorical, or at each bin's numeric *median*
+  (`x_median`, computed alongside `x_mid` in both `.layer_vpc_*()`
+  functions) on the continuous exposure scale when `plot_by` is
+  numeric. Both support every response type and both `plot_by` types
+  (`response_types = c("binary", "continuous", "count")`,
+  `plot_by_types = c("continuous", "discrete")`), and neither carries a
+  `layout` tag -- since the x-position family is chosen dynamically from
+  the data rather than fixed per builder, `.check_vpc_layout_match()`
+  can't meaningfully check it statically, so it's skipped (the same
+  opt-in treatment an untagged custom builder gets). Pair the two
+  together; pairing either with a builder from one of the two idioms
+  below risks an x-position mismatch that `.check_vpc_layout_match()`
+  won't catch.
 - **Continuous-x percentile-band idiom** (`layout = "continuous"`):
   `er_style_vpc_observed_quantile_line()` / `er_style_vpc_simulated_quantile_ribbon()` --
   one line/ribbon per requested percentile against a continuous exposure
@@ -239,32 +233,23 @@ Five visual idioms, chosen by `style`:
   reject an incompatible object up front; each also keeps its own
   internal `config$percentiles`-unavailable guard as a fallback for an
   untagged custom builder.
-- **Continuous-x pointrange/errorbar idiom** (`layout = "continuous"`):
-  `er_style_vpc_observed_pointrange_continuous()` /
-  `er_style_vpc_simulated_errorbar_continuous()` -- the same mean/CI as
-  the categorical-bin idiom, but plotted at `x_mid` instead of
-  `.vpc_bin`, for pairing with the percentile-band idiom (or with each
-  other, on a continuous x-axis) without a layout mismatch. Unlike the
-  percentile-band idiom, these only need `config$summary` (already
-  carries `x_mid` for a numeric `plot_by`), so they work for a binary
-  response too; they error if `plot_by` is categorical (no numeric
-  midpoint to plot at).
 - **Categorical-bin quantile idiom** (`layout = "categorical"`):
   `er_style_vpc_observed_quantile_errorbar()` /
   `er_style_vpc_simulated_quantile_errorbar()` -- a point/errorbar per
   requested percentile (see [er_vpc()]'s `probs` argument), dodged at
-  each bin's discrete `.vpc_bin` location. Unlike the two idioms above,
-  `config$percentiles` (and so this idiom) supports a categorical
-  `plot_by` as well as a numeric one -- tagged `response_types =
-  c("continuous", "count")`, `plot_by_types = c("continuous",
-  "discrete")` -- since it never needs a numeric midpoint, only the
-  discrete bin label; each builder still errors informatively without
-  `config$percentiles` (continuous/count response only) as a fallback.
+  each bin's discrete `.vpc_bin` location. Unlike the percentile-band
+  idiom above, `config$percentiles` (and so this idiom) supports a
+  categorical `plot_by` as well as a numeric one -- tagged
+  `response_types = c("continuous", "count")`, `plot_by_types =
+  c("continuous", "discrete")` -- since it never needs a numeric
+  midpoint, only the discrete bin label; each builder still errors
+  informatively without `config$percentiles` (continuous/count response
+  only) as a fallback.
 
 `er_vpc_add_simulated()` checks the observed and simulated builders'
 `layout` tags against each other (`.check_vpc_layout_match()` in
 `R/er-plot-style.R`) and errors if they disagree -- e.g. pairing
-`er_style_vpc_observed_pointrange()`'s discrete locations with
+`er_style_vpc_observed_quantile_errorbar()`'s discrete locations with
 `er_style_vpc_simulated_quantile_ribbon()`'s numeric midpoints would otherwise
 silently plot the two layers at inconsistent x-positions for the same
 bin. An untagged custom builder on either side skips this check, the

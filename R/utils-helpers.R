@@ -231,7 +231,7 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #'   for each requested percentile of the observed response within an
 #'   exposure bin (the observed-side analogue of the across-replicate
 #'   percentile interval [er_vpc_add_simulated()] gets from simulated data,
-#'   powering [er_style_vpc_observed_pointrange_continuous()]). Like
+#'   powering [er_style_vpc_observed_quantile_errorbar()]). Like
 #'   [ci_clopper_pearson()], this interval is exact for its target coverage
 #'   but conservative -- the discreteness of the binomial rank distribution
 #'   means the achieved coverage can exceed the nominal `conf_level`,

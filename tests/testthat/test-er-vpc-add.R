@@ -38,7 +38,7 @@ test_that("er_vpc() validates conf_level", {
 test_that("er_vpc_add_observed() rejects a style tagged for the wrong layer", {
   vpc <- er_vpc(er_test_data, aucss, ae1)
   expect_error(
-    er_vpc_add_observed(vpc, style = er_style_vpc_simulated_errorbar),
+    er_vpc_add_observed(vpc, style = er_style_vpc_simulated_mean_errorbar),
     "simulated"
   )
 })
@@ -46,7 +46,7 @@ test_that("er_vpc_add_observed() rejects a style tagged for the wrong layer", {
 test_that("er_vpc_add_observed() requires named ... arguments", {
   vpc <- er_vpc(er_test_data, aucss, ae1)
   expect_error(
-    er_vpc_add_observed(vpc, er_style_vpc_observed_pointrange, "oops"),
+    er_vpc_add_observed(vpc, er_style_vpc_observed_mean_errorbar, "oops"),
     "named"
   )
 })
@@ -62,7 +62,7 @@ test_that("er_vpc_add_simulated() requires an observed layer first", {
 test_that("er_vpc_add_simulated() rejects a style tagged for the wrong layer", {
   vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
   expect_error(
-    er_vpc_add_simulated(vpc, model = er_test_mod1, seed = 1, style = er_style_vpc_observed_pointrange),
+    er_vpc_add_simulated(vpc, model = er_test_mod1, seed = 1, style = er_style_vpc_observed_mean_errorbar),
     "observed"
   )
 })
@@ -99,8 +99,8 @@ test_that("er_vpc_add_simulated() errors informatively when sim_resp is unavaila
 })
 
 test_that("er_vpc_add_simulated() errors on a categorical/continuous layout mismatch", {
-  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
-    er_vpc_add_observed(style = er_style_vpc_observed_pointrange)
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar)
   expect_error(
     er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 901, style = er_style_vpc_simulated_quantile_ribbon),
     "categorical.*continuous|continuous.*categorical"
@@ -109,16 +109,8 @@ test_that("er_vpc_add_simulated() errors on a categorical/continuous layout mism
   vpc2 <- er_vpc(er_test_data, aucss, biomarker_change) |>
     er_vpc_add_observed(style = er_style_vpc_observed_quantile_line)
   expect_error(
-    er_vpc_add_simulated(vpc2, model = er_test_mod_gaussian, nsim = 5, seed = 902, style = er_style_vpc_simulated_errorbar),
+    er_vpc_add_simulated(vpc2, model = er_test_mod_gaussian, nsim = 5, seed = 902, style = er_style_vpc_simulated_quantile_errorbar),
     "categorical.*continuous|continuous.*categorical"
-  )
-})
-
-test_that("er_vpc_add_simulated() allows layout-matched pairs, including the continuous pointrange/errorbar builders", {
-  vpc <- er_vpc(er_test_data, aucss, ae1) |>
-    er_vpc_add_observed(style = er_style_vpc_observed_pointrange_continuous)
-  expect_no_error(
-    er_vpc_add_simulated(vpc, model = er_test_mod1, nsim = 5, seed = 903, style = er_style_vpc_simulated_errorbar_continuous)
   )
 })
 
@@ -148,7 +140,7 @@ test_that("er_vpc_add_observed() catches an incompatible response_types/plot_by_
 
 test_that("er_vpc_add_simulated() rejects a builder whose response_types tag excludes the response", {
   vpc <- er_vpc(er_test_data, aucss, ae1) |> # binary response
-    er_vpc_add_observed(style = er_style_vpc_observed_pointrange)
+    er_vpc_add_observed(style = er_style_vpc_observed_mean_errorbar)
   expect_error(
     er_vpc_add_simulated(vpc, model = er_test_mod1, nsim = 5, seed = 904, style = er_style_vpc_simulated_quantile_ribbon),
     "binary"
@@ -157,23 +149,11 @@ test_that("er_vpc_add_simulated() rejects a builder whose response_types tag exc
 
 test_that("er_vpc_add_simulated() rejects a builder whose plot_by_types tag excludes plot_by's type", {
   vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex) |> # categorical plot_by
-    er_vpc_add_observed(style = er_style_vpc_observed_pointrange)
+    er_vpc_add_observed(style = er_style_vpc_observed_mean_errorbar)
   expect_error(
     er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 905, style = er_style_vpc_simulated_quantile_ribbon),
     "discrete"
   )
-})
-
-test_that("the default pointrange/errorbar builders support every response type and plot_by type", {
-  vpc_binary <- er_vpc(er_test_data, aucss, ae1)
-  vpc_continuous <- er_vpc(er_test_data, aucss, biomarker_change)
-  vpc_count <- er_vpc(er_test_data, aucss, ae_count, response_type = "count")
-  vpc_discrete <- er_vpc(er_test_data, aucss, ae1, plot_by = sex)
-
-  expect_no_error(er_vpc_add_observed(vpc_binary, style = er_style_vpc_observed_pointrange))
-  expect_no_error(er_vpc_add_observed(vpc_continuous, style = er_style_vpc_observed_pointrange))
-  expect_no_error(er_vpc_add_observed(vpc_count, style = er_style_vpc_observed_pointrange))
-  expect_no_error(er_vpc_add_observed(vpc_discrete, style = er_style_vpc_observed_pointrange))
 })
 
 test_that("er_vpc_add_simulated() ungroups a grouped sim argument", {

@@ -230,20 +230,17 @@ NULL
 #' present on both the observed and simulated builder passed to a given
 #' `er_vpc` object, is checked for agreement: [er_vpc_add_simulated()]
 #' errors if the simulated builder's `layout` (`"categorical"`, discrete
-#' `.vpc_bin` locations, e.g. [er_style_vpc_simulated_errorbar()]; or
-#' `"continuous"`, numeric bin-midpoint locations, e.g.
+#' `.vpc_bin` locations, e.g. [er_style_vpc_simulated_quantile_errorbar()];
+#' or `"continuous"`, numeric bin-midpoint locations, e.g.
 #' [er_style_vpc_simulated_quantile_ribbon()]) disagrees with the observed
 #' builder's own. This catches the case where the two families would
 #' otherwise silently plot at different x-positions for the same bin --
-#' e.g. pairing [er_style_vpc_observed_pointrange()]'s discrete bin
+#' e.g. pairing [er_style_vpc_observed_quantile_errorbar()]'s discrete bin
 #' labels with [er_style_vpc_simulated_quantile_ribbon()]'s numeric midpoints.
-#' Use a layout-matched pair instead (built-ins already are), or, to get
-#' a pointrange/errorbar idiom that still plots at the numeric midpoint
-#' (so it can be paired with a `"continuous"`-layout builder), use
-#' [er_style_vpc_observed_pointrange_continuous()]/
-#' [er_style_vpc_simulated_errorbar_continuous()]. An untagged builder on
-#' either side skips this check entirely, the same opt-in treatment
-#' `layer` gets.
+#' Use a layout-matched pair instead (built-ins already are), or leave
+#' `layout` untagged (as [er_style_vpc_observed_mean_errorbar()]/
+#' [er_style_vpc_simulated_mean_errorbar()] do) to skip the check
+#' entirely, the same opt-in treatment `layer` gets.
 #'
 #' `fill_role` and `y_role` are both optional, and can be used
 #' to title a legend/axis correctly: `fill_role = "density"` (used by
@@ -450,8 +447,8 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
       "\", but the simulated layer's builder is tagged layout = \"", simulated_layout, "\"."
     ),
     "i" = "A \"categorical\" builder plots at discrete bin locations; a \"continuous\" builder plots at each bin's numeric midpoint -- pairing them plots the two layers at inconsistent x-positions.",
-    "i" = "Use a layout-matched pair (e.g. `er_style_vpc_observed_pointrange()` + `er_style_vpc_simulated_errorbar()`, or `er_style_vpc_observed_quantile_line()` + `er_style_vpc_simulated_quantile_ribbon()`).",
-    "i" = "To pair a pointrange/errorbar idiom with a \"continuous\" builder, use `er_style_vpc_observed_pointrange_continuous()`/`er_style_vpc_simulated_errorbar_continuous()` instead."
+    "i" = "Use a layout-matched pair (e.g. `er_style_vpc_observed_quantile_errorbar()` + `er_style_vpc_simulated_quantile_errorbar()`, or `er_style_vpc_observed_quantile_line()` + `er_style_vpc_simulated_quantile_ribbon()`).",
+    "i" = "Or leave `layout` untagged, like `er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()` do, to skip this check entirely."
   ))
 }
 
