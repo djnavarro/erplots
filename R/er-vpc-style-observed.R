@@ -71,7 +71,12 @@ er_style_vpc_observed_pointrange <- function(data, config, exposure, response, t
     )
   )
 }
-er_style_vpc_observed_pointrange <- er_style_tag(er_style_vpc_observed_pointrange, layer = "observed", layout = "categorical")
+er_style_vpc_observed_pointrange <- er_style_tag(
+  er_style_vpc_observed_pointrange,
+  layer = "observed", layout = "categorical",
+  response_types = c("binary", "continuous", "count"),
+  plot_by_types = c("continuous", "discrete")
+)
 
 
 #' @rdname er_style_vpc_observed
@@ -120,7 +125,9 @@ er_style_vpc_observed_pointrange_continuous <- function(data, config, exposure, 
 }
 er_style_vpc_observed_pointrange_continuous <- er_style_tag(
   er_style_vpc_observed_pointrange_continuous,
-  layer = "observed", layout = "continuous"
+  layer = "observed", layout = "continuous",
+  response_types = c("binary", "continuous", "count"),
+  plot_by_types = "continuous"
 )
 
 
@@ -149,4 +156,9 @@ er_style_vpc_observed_line <- function(data, config, exposure, response, theme,
     )
   )
 }
-er_style_vpc_observed_line <- er_style_tag(er_style_vpc_observed_line, layer = "observed", layout = "continuous")
+er_style_vpc_observed_line <- er_style_tag(
+  er_style_vpc_observed_line,
+  layer = "observed", layout = "continuous",
+  response_types = c("continuous", "count"),
+  plot_by_types = "continuous"
+)

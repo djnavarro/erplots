@@ -122,6 +122,60 @@ test_that("er_vpc_add_simulated() allows layout-matched pairs, including the con
   )
 })
 
+test_that("er_vpc_add_observed() rejects a builder whose response_types tag excludes the response", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) # binary response
+  expect_error(
+    er_vpc_add_observed(vpc, style = er_style_vpc_observed_line),
+    "binary"
+  )
+})
+
+test_that("er_vpc_add_observed() rejects a builder whose plot_by_types tag excludes plot_by's type", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex) # categorical plot_by
+  expect_error(
+    er_vpc_add_observed(vpc, style = er_style_vpc_observed_line),
+    "discrete"
+  )
+})
+
+test_that("er_vpc_add_observed() catches an incompatible response_types/plot_by_types tag before any binning happens", {
+  # a binary response *and* a categorical plot_by both disqualify
+  # er_style_vpc_observed_line() -- either check alone should stop the
+  # call before `.layer_vpc_observed()` runs
+  vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex)
+  expect_error(er_vpc_add_observed(vpc, style = er_style_vpc_observed_line))
+})
+
+test_that("er_vpc_add_simulated() rejects a builder whose response_types tag excludes the response", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) |> # binary response
+    er_vpc_add_observed(style = er_style_vpc_observed_pointrange)
+  expect_error(
+    er_vpc_add_simulated(vpc, model = er_test_mod1, nsim = 5, seed = 904, style = er_style_vpc_simulated_ribbon),
+    "binary"
+  )
+})
+
+test_that("er_vpc_add_simulated() rejects a builder whose plot_by_types tag excludes plot_by's type", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex) |> # categorical plot_by
+    er_vpc_add_observed(style = er_style_vpc_observed_pointrange)
+  expect_error(
+    er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 905, style = er_style_vpc_simulated_ribbon),
+    "discrete"
+  )
+})
+
+test_that("the default pointrange/errorbar builders support every response type and plot_by type", {
+  vpc_binary <- er_vpc(er_test_data, aucss, ae1)
+  vpc_continuous <- er_vpc(er_test_data, aucss, biomarker_change)
+  vpc_count <- er_vpc(er_test_data, aucss, ae_count, response_type = "count")
+  vpc_discrete <- er_vpc(er_test_data, aucss, ae1, plot_by = sex)
+
+  expect_no_error(er_vpc_add_observed(vpc_binary, style = er_style_vpc_observed_pointrange))
+  expect_no_error(er_vpc_add_observed(vpc_continuous, style = er_style_vpc_observed_pointrange))
+  expect_no_error(er_vpc_add_observed(vpc_count, style = er_style_vpc_observed_pointrange))
+  expect_no_error(er_vpc_add_observed(vpc_discrete, style = er_style_vpc_observed_pointrange))
+})
+
 test_that("er_vpc_add_simulated() ungroups a grouped sim argument", {
   vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
   sim <- er_simulate(er_test_mod1, newdata = er_test_data, nsim = 3, seed = 13)

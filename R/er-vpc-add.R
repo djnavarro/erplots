@@ -29,6 +29,8 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_pointrange
   if (!inherits(object, "er_vpc")) rlang::abort("`object` must be an er_vpc object.")
   if (!is.function(style)) rlang::abort("`style` must be a function.")
   .check_style_layer(style, "observed", arg = "style")
+  .check_style_response_type(style, object$response$type, arg = "style")
+  .check_style_plot_by_type(style, object$group$type, arg = "style")
 
   object$layer$observed <- .layer_vpc_observed(
     object = object,
@@ -89,6 +91,8 @@ er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, s
   }
   if (!is.function(style)) rlang::abort("`style` must be a function.")
   .check_style_layer(style, "simulated", arg = "style")
+  .check_style_response_type(style, object$response$type, arg = "style")
+  .check_style_plot_by_type(style, object$group$type, arg = "style")
   .check_vpc_layout_match(object$layer$observed$config$style, style)
 
   if (is.null(sim) && is.null(model)) {

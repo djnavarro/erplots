@@ -112,9 +112,10 @@ full custom-builder walkthrough, including what `config` contains per
 layer.
 
 A builder self-declares metadata via `er_style_tag(fn, layout = NULL,
-fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL)` -- five
-independent, optional attributes (only `layout` is mandatory, and only
-for a data-layer builder):
+fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL,
+response_types = NULL, plot_by_types = NULL)` -- seven independent,
+optional attributes (only `layout` is mandatory, and only for a
+data-layer builder):
 
 - **`layout`** (`"overlay"`/`"panel"`) -- which structural family a data
   builder belongs to (see above). Mandatory for data-layer builders;
@@ -138,6 +139,23 @@ for a data-layer builder):
   the overlay's geoms *before* model/summary/quantile (so a
   full-panel-coverage builder like `er_style_data_hex()` doesn't bury
   them); `"foreground"` (the default) draws them after.
+- **`response_types`** (subset of `"binary"`/`"continuous"`/`"count"`)
+  and **`plot_by_types`** (subset of `"continuous"`/`"discrete"`) --
+  VPC-specific; declare which `object$response$type`/`object$group$type`
+  values a builder supports. Checked, not just stored:
+  `er_vpc_add_observed()`/`er_vpc_add_simulated()` each error
+  immediately (`.check_style_response_type()`/`.check_style_plot_by_type()`
+  in `R/er-plot-style.R`) if `style` is tagged for a type the `er_vpc`
+  object doesn't have -- e.g. `er_style_vpc_observed_line()` declares
+  `response_types = c("continuous", "count")` (needs
+  `config$percentiles`, never computed for a binary response) and
+  `plot_by_types = "continuous"` (its `geom_line()` connects bins along
+  a numeric midpoint, meaningless for an unordered categorical
+  `plot_by`). Both optional -- an untagged builder is never checked
+  against either, the same opt-in treatment `layer` gets; a custom
+  builder that skips these tags is responsible for guarding against
+  incompatible inputs itself, the way every built-in VPC builder still
+  does internally as a fallback.
 
 Built-in builders, by layer:
 
@@ -193,8 +211,12 @@ different pair of allowed values):
   one line/ribbon per requested percentile against a continuous exposure
   x-axis (bin midpoint, `x_mid`). Continuous/count responses only (a
   binary response's distribution is fully described by its rate
-  already); both error informatively if `config$percentiles` is
-  unavailable (binary response, or categorical `plot_by`).
+  already) and a numeric `plot_by` only -- tagged
+  `response_types = c("continuous", "count")`, `plot_by_types =
+  "continuous"`, so `er_vpc_add_observed()`/`er_vpc_add_simulated()`
+  reject an incompatible object up front; each also keeps its own
+  internal `config$percentiles`-unavailable guard as a fallback for an
+  untagged custom builder.
 - **Continuous-x pointrange/errorbar idiom** (`layout = "continuous"`):
   `er_style_vpc_observed_pointrange_continuous()` /
   `er_style_vpc_simulated_errorbar_continuous()` -- the same mean/CI as

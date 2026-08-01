@@ -192,10 +192,21 @@ NULL
 #' @param zorder One of `"foreground"` or `"background"`, or `NULL` (the
 #'   default, equivalent to `"foreground"`) to leave this tag unset. Only
 #'   meaningful for an overlay-layout data builder; see "Details".
+#' @param response_types A character vector with one or more of
+#'   `"binary"`, `"continuous"`, `"count"`, or `NULL` (the default) to
+#'   leave this tag unset (no restriction declared). For a VPC
+#'   observed/simulated builder, declares which of `er_vpc()`'s
+#'   `response_type` values the builder supports; see "Details".
+#' @param plot_by_types A character vector with one or more of
+#'   `"continuous"`, `"discrete"`, or `NULL` (the default) to leave this
+#'   tag unset. For a VPC observed/simulated builder, declares which of
+#'   `object$group$type` values (see [er_vpc()]'s `plot_by` argument)
+#'   the builder supports; see "Details".
 #'
 #' @returns `style`, with whichever of the `"er_style_layout"`/
 #'   `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`/
-#'   `"er_style_zorder"` attributes were requested attached.
+#'   `"er_style_zorder"`/`"er_style_response_types"`/
+#'   `"er_style_plot_by_types"` attributes were requested attached.
 #'
 
 #' @details
@@ -273,6 +284,27 @@ NULL
 #' drawn in their own separate panels, never sharing space with the model/
 #' summary/quantile layers.
 #'
+#' `response_types` and `plot_by_types` are both optional, and -- unlike
+#' every other tag above -- are checked against the *data*, not another
+#' builder: [er_vpc_add_observed()]/[er_vpc_add_simulated()] each check
+#' `style`'s declared `response_types` against `object$response$type`
+#' and `plot_by_types` against `object$group$type`, erroring immediately
+#' if the object's data isn't one the builder declared support for --
+#' e.g. [er_style_vpc_observed_line()] declares
+#' `response_types = c("continuous", "count")` (it needs
+#' `config$percentiles`, never computed for a binary response) and
+#' `plot_by_types = "continuous"` (it draws a `geom_line()` connecting
+#' bins along the numeric midpoint, meaningless for an unordered
+#' categorical `plot_by`). This catches an incompatible builder/data
+#' pairing at the `er_vpc_add_*()` call site, before any binning or
+#' summarising happens, rather than only when the builder itself is
+#' finally invoked by `plot()`/`er_vpc_build()`. As with `layer`, both
+#' tags are opt-in -- an untagged builder is never checked against
+#' either, so a custom builder that doesn't declare them keeps working
+#' unchanged (though it's then responsible for guarding against its own
+#' incompatible inputs, the way every built-in VPC builder still does
+#' internally as a fallback).
+#'
 #' @seealso [er_plot_add_data()], [er_style()]
 #'
 #' @examples
@@ -288,7 +320,8 @@ NULL
 #' )
 #'
 #' @export
-er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL) {
+er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL,
+                          response_types = NULL, plot_by_types = NULL) {
   if (!is.function(style)) rlang::abort("`style` must be a function")
 
   if (!is.null(layout)) {
@@ -308,6 +341,14 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   if (!is.null(zorder)) {
     zorder <- match.arg(zorder, c("foreground", "background"))
     attr(style, "er_style_zorder") <- zorder
+  }
+  if (!is.null(response_types)) {
+    response_types <- match.arg(response_types, c("binary", "continuous", "count"), several.ok = TRUE)
+    attr(style, "er_style_response_types") <- response_types
+  }
+  if (!is.null(plot_by_types)) {
+    plot_by_types <- match.arg(plot_by_types, c("continuous", "discrete"), several.ok = TRUE)
+    attr(style, "er_style_plot_by_types") <- plot_by_types
   }
 
   style
@@ -353,6 +394,16 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 }
 
 #' @noRd
+.style_response_types <- function(style) {
+  attr(style, "er_style_response_types")
+}
+
+#' @noRd
+.style_plot_by_types <- function(style) {
+  attr(style, "er_style_plot_by_types")
+}
+
+#' @noRd
 .check_style_layer <- function(style, layer, arg = "style") {
   declared <- .style_layer(style)
   if (is.null(declared) || identical(declared, layer)) return(invisible(NULL))
@@ -360,6 +411,28 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   rlang::abort(c(
     paste0("`", arg, "` is tagged for the \"", declared, "\" layer, but was passed to a \"", layer, "\" layer function."),
     "i" = paste0("Use a builder tagged `er_style_tag(fn, layer = \"", layer, "\")` (or with no `layer` tag at all).")
+  ))
+}
+
+#' @noRd
+.check_style_response_type <- function(style, response_type, arg = "style") {
+  declared <- .style_response_types(style)
+  if (is.null(declared) || response_type %in% declared) return(invisible(NULL))
+
+  rlang::abort(c(
+    paste0("`", arg, "` does not support a \"", response_type, "\" response."),
+    "i" = paste0("It only supports: ", paste(paste0("\"", declared, "\""), collapse = ", "), ".")
+  ))
+}
+
+#' @noRd
+.check_style_plot_by_type <- function(style, group_type, arg = "style") {
+  declared <- .style_plot_by_types(style)
+  if (is.null(declared) || group_type %in% declared) return(invisible(NULL))
+
+  rlang::abort(c(
+    paste0("`", arg, "` does not support a \"", group_type, "\" `plot_by` variable."),
+    "i" = paste0("It only supports: ", paste(paste0("\"", declared, "\""), collapse = ", "), ".")
   ))
 }
 

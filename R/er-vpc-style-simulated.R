@@ -75,7 +75,12 @@ er_style_vpc_simulated_errorbar <- function(data, config, exposure, response, th
     )
   )
 }
-er_style_vpc_simulated_errorbar <- er_style_tag(er_style_vpc_simulated_errorbar, layer = "simulated", layout = "categorical")
+er_style_vpc_simulated_errorbar <- er_style_tag(
+  er_style_vpc_simulated_errorbar,
+  layer = "simulated", layout = "categorical",
+  response_types = c("binary", "continuous", "count"),
+  plot_by_types = c("continuous", "discrete")
+)
 
 
 #' @rdname er_style_vpc_simulated
@@ -124,7 +129,9 @@ er_style_vpc_simulated_errorbar_continuous <- function(data, config, exposure, r
 }
 er_style_vpc_simulated_errorbar_continuous <- er_style_tag(
   er_style_vpc_simulated_errorbar_continuous,
-  layer = "simulated", layout = "continuous"
+  layer = "simulated", layout = "continuous",
+  response_types = c("binary", "continuous", "count"),
+  plot_by_types = "continuous"
 )
 
 
@@ -156,4 +163,9 @@ er_style_vpc_simulated_ribbon <- function(data, config, exposure, response, them
     ggplot2::labs(fill = "Source")
   )
 }
-er_style_vpc_simulated_ribbon <- er_style_tag(er_style_vpc_simulated_ribbon, layer = "simulated", layout = "continuous")
+er_style_vpc_simulated_ribbon <- er_style_tag(
+  er_style_vpc_simulated_ribbon,
+  layer = "simulated", layout = "continuous",
+  response_types = c("continuous", "count"),
+  plot_by_types = "continuous"
+)
