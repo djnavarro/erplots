@@ -49,10 +49,26 @@ test_that(".layer_vpc_simulated() computes percentile bands matching config$perc
   expect_true(all(pct$ci_lower <= pct$y_mid & pct$y_mid <= pct$ci_upper))
 })
 
-test_that(".layer_vpc_observed()/.layer_vpc_simulated() skip percentiles for a categorical plot_by", {
-  vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex) |>
+test_that(".layer_vpc_observed()/.layer_vpc_simulated() still compute percentiles for a categorical plot_by", {
+  # needed by the categorical-bin quantile idiom
+  # (er_style_vpc_observed_quantile_errorbar()/er_style_vpc_simulated_quantile_errorbar()),
+  # which supports a categorical plot_by unlike the continuous-x idioms
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex, probs = c(0.1, 0.5, 0.9)) |>
     er_vpc_add_observed() |>
     er_vpc_add_simulated(model = er_test_mod_gaussian, nsim = 5, seed = 603)
+
+  obs_pct <- vpc$layer$observed$config$percentiles
+  sim_pct <- vpc$layer$simulated$config$percentiles
+  expect_true(all(is.na(obs_pct$x_mid)))
+  expect_true(all(is.na(sim_pct$x_mid)))
+  expect_false(any(is.na(obs_pct$y)))
+  expect_false(any(is.na(sim_pct$y_mid)))
+})
+
+test_that(".layer_vpc_observed()/.layer_vpc_simulated() still skip percentiles for a binary response with a categorical plot_by", {
+  vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 604)
 
   expect_null(vpc$layer$observed$config$percentiles)
   expect_null(vpc$layer$simulated$config$percentiles)

@@ -152,6 +152,73 @@ test_that("the default mean_errorbar pair shares consistent x-positions for a co
   )
 })
 
+test_that("er_style_vpc_simulated_quantile_errorbar() returns point + errorbar geoms, dodged per prob", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |>
+    er_vpc_add_simulated(
+      model = er_test_mod_gaussian, nsim = 5, seed = 815,
+      style = er_style_vpc_simulated_quantile_errorbar
+    )
+
+  geoms <- er_style_vpc_simulated_quantile_errorbar(
+    er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme
+  )
+  expect_length(geoms, 2)
+  expect_true(rlang::quo_get_expr(geoms[[2]]$mapping$x) == ".vpc_bin")
+})
+
+test_that("er_style_vpc_simulated_quantile_errorbar() works for a categorical plot_by", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |>
+    er_vpc_add_simulated(
+      model = er_test_mod_gaussian, nsim = 5, seed = 816,
+      style = er_style_vpc_simulated_quantile_errorbar
+    )
+
+  geoms <- er_style_vpc_simulated_quantile_errorbar(
+    er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme
+  )
+  expect_length(geoms, 2)
+  expect_false(any(is.na(vpc$layer$simulated$config$percentiles$y_mid)))
+})
+
+test_that("er_style_vpc_simulated_quantile_errorbar() errors when percentiles aren't available", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 817)
+
+  expect_error(
+    er_style_vpc_simulated_quantile_errorbar(
+      er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme
+    ),
+    "percentiles"
+  )
+})
+
+test_that("er_vpc_add_simulated() rejects er_style_vpc_simulated_quantile_errorbar() for a binary response", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
+  expect_error(
+    er_vpc_add_simulated(
+      vpc, model = er_test_mod1, nsim = 5, seed = 818,
+      style = er_style_vpc_simulated_quantile_errorbar
+    ),
+    "binary"
+  )
+})
+
+test_that("built-in simulated builders are tagged appropriately, including quantile_errorbar", {
+  expect_equal(attr(er_style_vpc_simulated_quantile_errorbar, "er_style_layer"), "simulated")
+  expect_equal(attr(er_style_vpc_simulated_quantile_errorbar, "er_style_layout"), "categorical")
+  expect_equal(
+    attr(er_style_vpc_simulated_quantile_errorbar, "er_style_response_types"),
+    c("continuous", "count")
+  )
+  expect_equal(
+    attr(er_style_vpc_simulated_quantile_errorbar, "er_style_plot_by_types"),
+    c("continuous", "discrete")
+  )
+})
+
 test_that("the simulated layer's geoms are drawn before the observed layer's in the base plot", {
   vpc <- er_test_data |>
     er_vpc(aucss, ae1) |>

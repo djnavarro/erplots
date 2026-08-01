@@ -83,13 +83,14 @@
   config$summary <- summary_tbl
 
   # empirical response percentiles per bin, for the continuous-x
-  # line/ribbon builders -- meaningful only for a continuous/count
-  # response binned on a numeric `plot_by` (a categorical `plot_by`,
-  # e.g. sex, has no continuous x-axis to plot percentiles against; a
-  # binary response's full distribution is already captured by its rate,
-  # so there's nothing more informative a percentile would show)
+  # line/ribbon builders and the categorical-bin quantile-errorbar
+  # builders -- meaningful only for a continuous/count response (a
+  # binary response's full distribution is already captured by its
+  # rate, so there's nothing more informative a percentile would show).
+  # Computed for both a numeric and a categorical `plot_by`; only the
+  # numeric-only continuous-x builders additionally require `x_mid`.
   config$percentiles <- NULL
-  if (response_type != "binary" && config$is_numeric_group) {
+  if (response_type != "binary") {
     config$percentiles <- dat |>
       dplyr::reframe(
         {
@@ -106,7 +107,7 @@
           # computes from simulated data
           ci <- vapply(probs, function(p) ci_quantile(resp, p, conf_level), numeric(2))
           tibble::tibble(
-            x_mid = mean(grp, na.rm = TRUE),
+            x_mid = if (config$is_numeric_group) mean(grp, na.rm = TRUE) else NA_real_,
             prob = probs,
             y = unname(stats::quantile(resp, probs = probs, na.rm = TRUE)),
             ci_lower = ci["lower", ],
@@ -187,9 +188,10 @@
   config$summary <- summary_tbl
 
   # simulated percentile bands -- same scoping as the observed side
-  # (continuous/count response, numeric `plot_by` only)
+  # (continuous/count response; numeric and categorical `plot_by` both
+  # supported, see `.layer_vpc_observed()`)
   config$percentiles <- NULL
-  if (response_type != "binary" && obs_config$is_numeric_group) {
+  if (response_type != "binary") {
     stage1 <- sim |>
       dplyr::reframe(
         x_mid = if (obs_config$is_numeric_group) mean(.data[[group_var]], na.rm = TRUE) else NA_real_,

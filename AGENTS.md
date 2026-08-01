@@ -203,7 +203,7 @@ default `_mean_errorbar()` pair plots at instead.
   required. When `model` is supplied, calls `er_simulate()` internally
   and requires a `sim_resp` column.
 
-Four visual idioms, chosen by `style`:
+Five visual idioms, chosen by `style`:
 
 - **Adaptive mean/errorbar idiom** (default): `er_style_vpc_observed_mean_errorbar()`
   / `er_style_vpc_simulated_mean_errorbar()` -- point/errorbar of the
@@ -249,6 +249,17 @@ Four visual idioms, chosen by `style`:
   carries `x_mid` for a numeric `plot_by`), so they work for a binary
   response too; they error if `plot_by` is categorical (no numeric
   midpoint to plot at).
+- **Categorical-bin quantile idiom** (`layout = "categorical"`):
+  `er_style_vpc_observed_quantile_errorbar()` /
+  `er_style_vpc_simulated_quantile_errorbar()` -- a point/errorbar per
+  requested percentile (see [er_vpc()]'s `probs` argument), dodged at
+  each bin's discrete `.vpc_bin` location. Unlike the two idioms above,
+  `config$percentiles` (and so this idiom) supports a categorical
+  `plot_by` as well as a numeric one -- tagged `response_types =
+  c("continuous", "count")`, `plot_by_types = c("continuous",
+  "discrete")` -- since it never needs a numeric midpoint, only the
+  discrete bin label; each builder still errors informatively without
+  `config$percentiles` (continuous/count response only) as a fallback.
 
 `er_vpc_add_simulated()` checks the observed and simulated builders'
 `layout` tags against each other (`.check_vpc_layout_match()` in
