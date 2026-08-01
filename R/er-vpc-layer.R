@@ -9,6 +9,39 @@
 .vpc_source_levels <- c("Observed", "Simulated")
 
 
+# Manual dodging for the VPC errorbar builders -- deliberately opt-in
+# (default `0`, reproducing the previous fully-overlapping layout) rather
+# than automatic, because the right amount (if any) depends on which of
+# several distinct collisions is happening: observed-vs-simulated at the
+# same bin, several `probs` within one layer at the same bin, or both at
+# once. Currently only supported for a numeric `plot_by` -- see the
+# `dodge`/`prob_dodge_width` argument docs on the four
+# `er_style_vpc_*_{mean,quantile}_errorbar()` builders for why a
+# categorical `plot_by` isn't (yet) supported, and each builder's own
+# discrete-branch warning.
+
+# `dodge` -> an absolute x-offset, expressed (like `errorbar_width_continuous`)
+# as a fraction of `plot_by`'s own range.
+#' @noRd
+.vpc_dodge_step <- function(dodge, group_limits) {
+  dodge * (group_limits[2] - group_limits[1])
+}
+
+# `prob_dodge_width` -> a vector of per-row offsets, one per element of
+# `probs`, spreading the distinct `probs` values symmetrically around 0
+# using the same offset formula as `.dodge_quantile_strata()` (the
+# non-VPC quantile layer's own stratification-dodge helper).
+#' @noRd
+.vpc_dodge_probs_offset <- function(probs, prob_dodge_width, group_limits) {
+  step <- prob_dodge_width * (group_limits[2] - group_limits[1])
+  u <- sort(unique(probs))
+  n <- length(u)
+  offsets <- (seq_len(n) - (n + 1) / 2) * step
+  names(offsets) <- as.character(u)
+  unname(offsets[as.character(probs)])
+}
+
+
 # layer_vpc_observed -----------------------------------------------------------
 
 .layer_vpc_observed <- function(object, style, dots = list()) {

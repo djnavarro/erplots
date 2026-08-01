@@ -26,6 +26,8 @@ er_style_vpc_observed_quantile_errorbar(
   point_size = 1.5,
   errorbar_width = 0.15,
   errorbar_width_continuous = 0.025,
+  dodge = 0,
+  prob_dodge_width = 0,
   ...
 )
 
@@ -38,6 +40,7 @@ er_style_vpc_observed_mean_errorbar(
   point_size = 2,
   errorbar_width = 0.2,
   errorbar_width_continuous = 0.025,
+  dodge = 0,
   ...
 )
 }
@@ -66,6 +69,27 @@ own range, \code{config$group_limits}) of
 \code{er_style_vpc_observed_mean_errorbar()}'s and
 \code{er_style_vpc_observed_quantile_errorbar()}'s error bars when
 \code{plot_by} is numeric.}
+
+\item{dodge}{Horizontal offset (as a fraction of \code{plot_by}'s own
+range, like \code{errorbar_width_continuous}) applied to all of this
+builder's error bars/points, for both \code{er_style_vpc_observed_mean_errorbar()}
+and \code{er_style_vpc_observed_quantile_errorbar()}. Default \code{0}
+(no offset, the previous behaviour). Useful for manually separating
+the observed layer from an overlapping simulated one at the same
+bin -- e.g. \code{dodge = -0.01} on the observed builder paired with
+\code{dodge = 0.01} on the corresponding simulated builder. Only
+supported when \code{plot_by} is numeric; a nonzero value is ignored
+with a warning for a categorical \code{plot_by}, where dodging isn't
+implemented yet.}
+
+\item{prob_dodge_width}{Horizontal spread (as a fraction of \code{plot_by}'s
+own range) applied to \code{er_style_vpc_observed_quantile_errorbar()}'s
+requested \code{probs} within a single bin, symmetrically centred on
+that bin's own position (added on top of \code{dodge}, if also
+supplied). Default \code{0} (all \code{probs} plotted at the same position,
+the previous behaviour). Useful when several \code{probs}' error bars
+overlap enough to be unreadable. Same numeric-\code{plot_by}-only
+restriction as \code{dodge}.}
 }
 \value{
 A list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -122,6 +146,18 @@ in a future release.
 Each builder maps a constant \code{color = "Observed"}, so ggplot2 merges
 its legend entry with whatever the paired simulated-layer builder
 maps for \code{"Simulated"} into a single combined legend.
+
+In the worst case -- \code{er_style_vpc_observed_quantile_errorbar()}
+paired with \code{er_style_vpc_simulated_quantile_errorbar()} for a
+numeric \code{plot_by} with several \code{probs} -- up to \code{2 * length(probs)}
+error bars land at the exact same x-position within a bin (every
+\code{probs} value, for both the observed and simulated layers), which can
+be unreadable. \code{dodge} (separating the observed and simulated layers)
+and \code{prob_dodge_width} (spreading a single layer's own \code{probs} apart)
+are both opt-in, manual escape hatches for this -- see their own
+argument docs above. Neither is automatic, because which collision is
+actually occurring (source-vs-source, \code{probs}-vs-\code{probs}, or both)
+depends on the data at hand.
 }
 \seealso{
 \code{\link[=er_style]{er_style()}}, \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}

@@ -33,6 +33,8 @@ er_style_vpc_simulated_quantile_errorbar(
   point_size = 1.5,
   errorbar_width = 0.15,
   errorbar_width_continuous = 0.025,
+  dodge = 0,
+  prob_dodge_width = 0,
   ...
 )
 
@@ -45,6 +47,7 @@ er_style_vpc_simulated_mean_errorbar(
   point_size = 2,
   errorbar_width = 0.2,
   errorbar_width_continuous = 0.025,
+  dodge = 0,
   ...
 )
 }
@@ -94,6 +97,22 @@ own range, \code{config$group_limits}) of
 \code{er_style_vpc_simulated_mean_errorbar()}'s and
 \code{er_style_vpc_simulated_quantile_errorbar()}'s error bars when
 \code{plot_by} is numeric.}
+
+\item{dodge}{Horizontal offset (as a fraction of \code{plot_by}'s own
+range, like \code{errorbar_width_continuous}) applied to all of this
+builder's error bars/points, for both \code{er_style_vpc_simulated_mean_errorbar()}
+and \code{er_style_vpc_simulated_quantile_errorbar()}. Default \code{0}
+(no offset, the previous behaviour); pair with an opposite-signed
+\code{dodge} on the corresponding observed builder to manually separate
+the two layers where they'd otherwise overlap at the same bin. See
+\code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}'s own \code{dodge} docs for the full
+explanation, including the categorical-\code{plot_by} restriction.}
+
+\item{prob_dodge_width}{Horizontal spread (as a fraction of \code{plot_by}'s
+own range) applied to \code{er_style_vpc_simulated_quantile_errorbar()}'s
+requested \code{probs} within a single bin. Default \code{0} (the previous
+behaviour); see \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}'s own \code{prob_dodge_width}
+docs.}
 }
 \value{
 A list of geoms; see \code{\link[=er_style]{er_style()}}.

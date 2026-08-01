@@ -21,6 +21,25 @@
 #'   `er_style_vpc_observed_mean_errorbar()`'s and
 #'   `er_style_vpc_observed_quantile_errorbar()`'s error bars when
 #'   `plot_by` is numeric.
+#' @param dodge Horizontal offset (as a fraction of `plot_by`'s own
+#'   range, like `errorbar_width_continuous`) applied to all of this
+#'   builder's error bars/points, for both `er_style_vpc_observed_mean_errorbar()`
+#'   and `er_style_vpc_observed_quantile_errorbar()`. Default `0`
+#'   (no offset, the previous behaviour). Useful for manually separating
+#'   the observed layer from an overlapping simulated one at the same
+#'   bin -- e.g. `dodge = -0.01` on the observed builder paired with
+#'   `dodge = 0.01` on the corresponding simulated builder. Only
+#'   supported when `plot_by` is numeric; a nonzero value is ignored
+#'   with a warning for a categorical `plot_by`, where dodging isn't
+#'   implemented yet.
+#' @param prob_dodge_width Horizontal spread (as a fraction of `plot_by`'s
+#'   own range) applied to `er_style_vpc_observed_quantile_errorbar()`'s
+#'   requested `probs` within a single bin, symmetrically centred on
+#'   that bin's own position (added on top of `dodge`, if also
+#'   supplied). Default `0` (all `probs` plotted at the same position,
+#'   the previous behaviour). Useful when several `probs`' error bars
+#'   overlap enough to be unreadable. Same numeric-`plot_by`-only
+#'   restriction as `dodge`.
 #' @param ... Additional named arguments forwarded from
 #'   [er_vpc_add_observed()]'s own `...`.
 #'
@@ -69,6 +88,18 @@
 #' its legend entry with whatever the paired simulated-layer builder
 #' maps for `"Simulated"` into a single combined legend.
 #'
+#' In the worst case -- `er_style_vpc_observed_quantile_errorbar()`
+#' paired with `er_style_vpc_simulated_quantile_errorbar()` for a
+#' numeric `plot_by` with several `probs` -- up to `2 * length(probs)`
+#' error bars land at the exact same x-position within a bin (every
+#' `probs` value, for both the observed and simulated layers), which can
+#' be unreadable. `dodge` (separating the observed and simulated layers)
+#' and `prob_dodge_width` (spreading a single layer's own `probs` apart)
+#' are both opt-in, manual escape hatches for this -- see their own
+#' argument docs above. Neither is automatic, because which collision is
+#' actually occurring (source-vs-source, `probs`-vs-`probs`, or both)
+#' depends on the data at hand.
+#'
 #' @returns A list of geoms; see [er_style()].
 #'
 #' @name er_style_vpc_observed
@@ -112,7 +143,8 @@ er_style_vpc_observed_quantile_line <- er_style_tag(
 #' @export
 er_style_vpc_observed_quantile_errorbar <- function(data, config, exposure, response, theme,
                                                      point_size = 1.5, errorbar_width = 0.15,
-                                                     errorbar_width_continuous = 0.025, ...) {
+                                                     errorbar_width_continuous = 0.025,
+                                                     dodge = 0, prob_dodge_width = 0, ...) {
   if (is.null(config$percentiles)) {
     rlang::abort(c(
       "`er_style_vpc_observed_quantile_errorbar()` requires `config$percentiles`, which is not available here.",
@@ -122,21 +154,35 @@ er_style_vpc_observed_quantile_errorbar <- function(data, config, exposure, resp
   }
   if (config$is_numeric_group) {
     width <- errorbar_width_continuous * (config$group_limits[2] - config$group_limits[1])
+    # a local copy, not a mutation of `config$percentiles` itself -- at
+    # the `dodge = 0`/`prob_dodge_width = 0` defaults both offsets are
+    # zero, so `x_median` is numerically unchanged and this stays
+    # equivalent to plotting `config$percentiles` directly
+    percentiles <- config$percentiles
+    percentiles$x_median <- percentiles$x_median +
+      .vpc_dodge_step(dodge, config$group_limits) +
+      .vpc_dodge_probs_offset(percentiles$prob, prob_dodge_width, config$group_limits)
     list(
       ggplot2::geom_errorbar(
-        data = config$percentiles,
+        data = percentiles,
         mapping = ggplot2::aes(x = x_median, ymin = ci_lower, ymax = ci_upper, group = factor(prob), color = "Observed"),
         width = width,
         inherit.aes = FALSE
       ),
       ggplot2::geom_point(
-        data = config$percentiles,
+        data = percentiles,
         mapping = ggplot2::aes(x = x_median, y = y, group = factor(prob), color = "Observed"),
         size = point_size,
         inherit.aes = FALSE
       )
     )
   } else {
+    if (dodge != 0 || prob_dodge_width != 0) {
+      rlang::warn(c(
+        "`dodge`/`prob_dodge_width` are only supported for a numeric `plot_by`; ignoring them for a categorical one.",
+        "i" = "Dodging a categorical `plot_by`'s bin positions isn't implemented yet."
+      ))
+    }
     list(
       ggplot2::geom_errorbar(
         data = config$percentiles,
@@ -165,24 +211,37 @@ er_style_vpc_observed_quantile_errorbar <- er_style_tag(
 #' @export
 er_style_vpc_observed_mean_errorbar <- function(data, config, exposure, response, theme,
                                                  point_size = 2, errorbar_width = 0.2,
-                                                 errorbar_width_continuous = 0.025, ...) {
+                                                 errorbar_width_continuous = 0.025,
+                                                 dodge = 0, ...) {
   if (config$is_numeric_group) {
     width <- errorbar_width_continuous * (config$group_limits[2] - config$group_limits[1])
+    # a local copy, not a mutation of `config$summary` itself -- at the
+    # `dodge = 0` default the offset is zero, so `x_median` is
+    # numerically unchanged and this stays equivalent to plotting
+    # `config$summary` directly
+    summary <- config$summary
+    summary$x_median <- summary$x_median + .vpc_dodge_step(dodge, config$group_limits)
     list(
       ggplot2::geom_errorbar(
-        data = config$summary,
+        data = summary,
         mapping = ggplot2::aes(x = x_median, ymin = ci_lower, ymax = ci_upper, color = "Observed"),
         width = width,
         inherit.aes = FALSE
       ),
       ggplot2::geom_point(
-        data = config$summary,
+        data = summary,
         mapping = ggplot2::aes(x = x_median, y = y_mid, color = "Observed"),
         size = point_size,
         inherit.aes = FALSE
       )
     )
   } else {
+    if (dodge != 0) {
+      rlang::warn(c(
+        "`dodge` is only supported for a numeric `plot_by`; ignoring it for a categorical one.",
+        "i" = "Dodging a categorical `plot_by`'s bin positions isn't implemented yet."
+      ))
+    }
     list(
       ggplot2::geom_errorbar(
         data = config$summary,
