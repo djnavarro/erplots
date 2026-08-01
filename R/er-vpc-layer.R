@@ -9,6 +9,7 @@
   config$group_var <- group_var
   config$n_bins <- n_bins
   config$conf_level <- conf_level
+  config$probs <- probs
   config$group_label <- .get_label(object$data[[group_var]]) %||% group_var
 
   exp_var <- object$exposure$name
@@ -79,9 +80,27 @@
   if (response_type != "binary" && config$is_numeric_group) {
     config$percentiles <- dat |>
       dplyr::reframe(
-        x_mid = if (config$is_numeric_group) mean(.data[[group_var]], na.rm = TRUE) else NA_real_,
-        prob = probs,
-        y = unname(stats::quantile(.data[[rsp_var]], probs = probs, na.rm = TRUE)),
+        {
+          # captured as plain locals rather than referenced via `.data`
+          # inside the `tibble::tibble()` call below -- `tibble()` has
+          # its own `.data` pronoun (referring to columns already built
+          # within that same call), which would shadow dplyr's per-group
+          # data mask
+          resp <- .data[[rsp_var]]
+          grp <- .data[[group_var]]
+          # per-percentile CI via the order-statistic method (see
+          # `ci_quantile()`) -- the observed-side analogue of the
+          # across-replicate percentile interval `.layer_vpc_simulated()`
+          # computes from simulated data
+          ci <- vapply(probs, function(p) ci_quantile(resp, p, conf_level), numeric(2))
+          tibble::tibble(
+            x_mid = mean(grp, na.rm = TRUE),
+            prob = probs,
+            y = unname(stats::quantile(resp, probs = probs, na.rm = TRUE)),
+            ci_lower = ci["lower", ],
+            ci_upper = ci["upper", ]
+          )
+        },
         .by = ".vpc_bin"
       )
   }
@@ -113,6 +132,7 @@
 
   config$conf_level <- conf_level
   config$n_sim_rows <- nrow(sim)
+  config$is_numeric_group <- obs_config$is_numeric_group
 
   # bin simulated rows against the *observed* layer's own cutpoints,
   # rather than re-deriving fresh quantiles from the simulated data --

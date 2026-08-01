@@ -32,9 +32,14 @@ columns and \code{sim_id}. Mutually exclusive with \code{model}.}
 
 \item{conf_level}{Confidence level for the simulated-side interval.}
 
-\item{probs}{Percentiles to compute for the continuous-x ribbon
-builder; should match whatever \code{probs} was passed to
-\code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}} (ignored by the default errorbar builder).}
+\item{probs}{Percentiles to compute for a \code{"continuous"}-layout builder
+(e.g. \code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}}/
+\code{\link[=er_style_vpc_simulated_errorbar_continuous]{er_style_vpc_simulated_errorbar_continuous()}}; ignored by a
+\code{"categorical"}-layout builder like the default errorbar). Must
+match whatever \code{probs} was passed to \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}} when
+both layers use a \code{"continuous"}-layout builder -- this function
+errors if they disagree (see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s \code{probs}
+documentation).}
 
 \item{style}{A function determining how the simulated layer is drawn;
 see \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}.}

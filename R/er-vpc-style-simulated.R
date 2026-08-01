@@ -29,13 +29,25 @@
 #' `group_by` (see [er_vpc_add_observed()]'s `probs` argument, which
 #' should match what was passed to [er_vpc_add_simulated()]); calling
 #' `er_style_vpc_simulated_ribbon()` without it errors.
+#' `er_style_vpc_simulated_errorbar_continuous()` plots the same mean +
+#' percentile interval as `er_style_vpc_simulated_errorbar()`, at the
+#' bin's numeric midpoint like `er_style_vpc_simulated_ribbon()` does --
+#' for pairing with
+#' [er_style_vpc_observed_pointrange_continuous()] or any other
+#' `"continuous"`-layout observed builder without a layout mismatch. It
+#' always plots the mean (from `config$summary`, so it works for a
+#' binary response too); when `config$percentiles` is also available
+#' (continuous/count response, numeric `group_by`), it additionally
+#' plots a dashed pointrange/errorbar for each requested percentile --
+#' the same across-replicate interval `er_style_vpc_simulated_ribbon()`
+#' shows as a band.
 #'
-#' `er_style_vpc_simulated_errorbar()` maps a constant `color =
-#' "Simulated"`; `er_style_vpc_simulated_ribbon()` maps a constant `fill
-#' = "Simulated"`. ggplot2 merges either into the paired observed
-#' builder's own `"Observed"` legend entry (same aesthetic) into one
-#' combined legend; the ribbon's `fill` legend is separate from the
-#' point/errorbar builders' `color` legend.
+#' `er_style_vpc_simulated_errorbar()`/`er_style_vpc_simulated_errorbar_continuous()`
+#' map a constant `color = "Simulated"`; `er_style_vpc_simulated_ribbon()`
+#' maps a constant `fill = "Simulated"`. ggplot2 merges either into the
+#' paired observed builder's own `"Observed"` legend entry (same
+#' aesthetic) into one combined legend; the ribbon's `fill` legend is
+#' separate from the point/errorbar builders' `color` legend.
 #'
 #' @returns A list of geoms; see [er_style()].
 #'
@@ -64,7 +76,57 @@ er_style_vpc_simulated_errorbar <- function(data, config, exposure, response, th
     )
   )
 }
-er_style_vpc_simulated_errorbar <- er_style_tag(er_style_vpc_simulated_errorbar, layer = "simulated")
+er_style_vpc_simulated_errorbar <- er_style_tag(er_style_vpc_simulated_errorbar, layer = "simulated", layout = "categorical")
+
+
+#' @rdname er_style_vpc_simulated
+#' @export
+er_style_vpc_simulated_errorbar_continuous <- function(data, config, exposure, response, theme,
+                                                         point_size = 2, errorbar_width = 0.025, ...) {
+  if (!isTRUE(config$is_numeric_group)) {
+    rlang::abort(c(
+      "`er_style_vpc_simulated_errorbar_continuous()` requires a numeric `group_by`, so that each bin has a numeric midpoint to plot at.",
+      "i" = "Use `er_style_vpc_simulated_errorbar()` instead for a categorical `group_by`."
+    ))
+  }
+  width <- errorbar_width * (exposure$limits[2] - exposure$limits[1])
+  geoms <- list(
+    ggplot2::geom_errorbar(
+      data = config$summary,
+      mapping = ggplot2::aes(x = x_mid, ymin = ci_lower, ymax = ci_upper, color = "Simulated"),
+      width = width,
+      inherit.aes = FALSE
+    ),
+    ggplot2::geom_point(
+      data = config$summary,
+      mapping = ggplot2::aes(x = x_mid, y = y_mid, color = "Simulated"),
+      size = point_size,
+      inherit.aes = FALSE
+    )
+  )
+  if (!is.null(config$percentiles)) {
+    geoms <- c(geoms, list(
+      ggplot2::geom_errorbar(
+        data = config$percentiles,
+        mapping = ggplot2::aes(x = x_mid, ymin = ci_lower, ymax = ci_upper, color = "Simulated"),
+        linetype = "dashed",
+        width = width,
+        inherit.aes = FALSE
+      ),
+      ggplot2::geom_point(
+        data = config$percentiles,
+        mapping = ggplot2::aes(x = x_mid, y = y_mid, color = "Simulated"),
+        size = point_size * 0.75,
+        inherit.aes = FALSE
+      )
+    ))
+  }
+  geoms
+}
+er_style_vpc_simulated_errorbar_continuous <- er_style_tag(
+  er_style_vpc_simulated_errorbar_continuous,
+  layer = "simulated", layout = "continuous"
+)
 
 
 #' @rdname er_style_vpc_simulated
@@ -95,4 +157,4 @@ er_style_vpc_simulated_ribbon <- function(data, config, exposure, response, them
     ggplot2::labs(fill = "Source")
   )
 }
-er_style_vpc_simulated_ribbon <- er_style_tag(er_style_vpc_simulated_ribbon, layer = "simulated")
+er_style_vpc_simulated_ribbon <- er_style_tag(er_style_vpc_simulated_ribbon, layer = "simulated", layout = "continuous")

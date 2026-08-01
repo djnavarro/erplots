@@ -172,9 +172,14 @@ NULL
 #' 
 #' @param style A function matching the standard `er_style_*()` signature
 #'   (see [er_style()]).
-#' @param layout One of `"overlay"` or `"panel"`, or `NULL` (the default) to
-#'   leave this tag unset. See [er_plot_add_data()] for what each
-#'   structural family means.
+#' @param layout One of `"overlay"`, `"panel"`, `"categorical"`, or
+#'   `"continuous"`, or `NULL` (the default) to leave this tag unset. The
+#'   `"overlay"`/`"panel"` pair is for a data-layer builder ([er_plot_add_data()]
+#'   documents what each structural family means); the `"categorical"`/
+#'   `"continuous"` pair is for a VPC observed/simulated builder
+#'   ([er_vpc_add_observed()]/[er_vpc_add_simulated()]) and marks whether it
+#'   plots at discrete bin locations or at each bin's numeric exposure
+#'   midpoint -- see [er_style_vpc_observed()]/[er_style_vpc_simulated()].
 #' @param fill_role A string naming what the builder's `fill` aesthetic
 #'   represents, or `NULL` (the default) to leave this tag unset.
 #' @param y_role A string naming what the builder's y-axis represents, 
@@ -209,6 +214,25 @@ NULL
 #' [er_plot_add_data()] reads it off `style` to decide whether to place 
 #' the output geoms into the main panel (`layout = "overlay"`) or to put them into
 #' separate strip-like panels above and below the main panel (`layout = "panel"`)
+#'
+#' For a VPC observed/simulated builder, `layout` is optional but, when
+#' present on both the observed and simulated builder passed to a given
+#' `er_vpc` object, is checked for agreement: [er_vpc_add_simulated()]
+#' errors if the simulated builder's `layout` (`"categorical"`, discrete
+#' `.vpc_bin` locations, e.g. [er_style_vpc_simulated_errorbar()]; or
+#' `"continuous"`, numeric bin-midpoint locations, e.g.
+#' [er_style_vpc_simulated_ribbon()]) disagrees with the observed
+#' builder's own. This catches the case where the two families would
+#' otherwise silently plot at different x-positions for the same bin --
+#' e.g. pairing [er_style_vpc_observed_pointrange()]'s discrete bin
+#' labels with [er_style_vpc_simulated_ribbon()]'s numeric midpoints.
+#' Use a layout-matched pair instead (built-ins already are), or, to get
+#' a pointrange/errorbar idiom that still plots at the numeric midpoint
+#' (so it can be paired with a `"continuous"`-layout builder), use
+#' [er_style_vpc_observed_pointrange_continuous()]/
+#' [er_style_vpc_simulated_errorbar_continuous()]. An untagged builder on
+#' either side skips this check entirely, the same opt-in treatment
+#' `layer` gets.
 #'
 #' `fill_role` and `y_role` are both optional, and can be used
 #' to title a legend/axis correctly: `fill_role = "density"` (used by
@@ -268,7 +292,7 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   if (!is.function(style)) rlang::abort("`style` must be a function")
 
   if (!is.null(layout)) {
-    layout <- match.arg(layout, c("overlay", "panel"))
+    layout <- match.arg(layout, c("overlay", "panel", "categorical", "continuous"))
     attr(style, "er_style_layout") <- layout
   }
   if (!is.null(fill_role)) {
@@ -303,6 +327,11 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 }
 
 #' @noRd
+.style_vpc_layout <- function(style) {
+  attr(style, "er_style_layout")
+}
+
+#' @noRd
 .style_fill_role <- function(style) {
   attr(style, "er_style_fill_role")
 }
@@ -331,5 +360,46 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   rlang::abort(c(
     paste0("`", arg, "` is tagged for the \"", declared, "\" layer, but was passed to a \"", layer, "\" layer function."),
     "i" = paste0("Use a builder tagged `er_style_tag(fn, layer = \"", layer, "\")` (or with no `layer` tag at all).")
+  ))
+}
+
+#' @noRd
+.check_vpc_layout_match <- function(observed_style, simulated_style) {
+  observed_layout <- .style_vpc_layout(observed_style)
+  simulated_layout <- .style_vpc_layout(simulated_style)
+  if (is.null(observed_layout) || is.null(simulated_layout) || identical(observed_layout, simulated_layout)) {
+    return(invisible(NULL))
+  }
+
+  rlang::abort(c(
+    paste0(
+      "The observed layer's builder is tagged layout = \"", observed_layout,
+      "\", but the simulated layer's builder is tagged layout = \"", simulated_layout, "\"."
+    ),
+    "i" = "A \"categorical\" builder plots at discrete bin locations; a \"continuous\" builder plots at each bin's numeric midpoint -- pairing them plots the two layers at inconsistent x-positions.",
+    "i" = "Use a layout-matched pair (e.g. `er_style_vpc_observed_pointrange()` + `er_style_vpc_simulated_errorbar()`, or `er_style_vpc_observed_line()` + `er_style_vpc_simulated_ribbon()`).",
+    "i" = "To pair a pointrange/errorbar idiom with a \"continuous\" builder, use `er_style_vpc_observed_pointrange_continuous()`/`er_style_vpc_simulated_errorbar_continuous()` instead."
+  ))
+}
+
+#' @noRd
+.check_vpc_probs_match <- function(observed_config, observed_style, simulated_probs, simulated_style) {
+  # only matters when both sides actually render `config$percentiles` --
+  # an untagged builder on either side is never checked (same opt-in
+  # treatment as `.check_vpc_layout_match()`)
+  observed_layout <- .style_vpc_layout(observed_style)
+  simulated_layout <- .style_vpc_layout(simulated_style)
+  uses_percentiles <- identical(observed_layout, "continuous") && identical(simulated_layout, "continuous")
+  if (!uses_percentiles) return(invisible(NULL))
+
+  observed_probs <- observed_config$probs
+  if (is.null(observed_probs) || is.null(simulated_probs)) return(invisible(NULL))
+  if (isTRUE(all.equal(sort(observed_probs), sort(simulated_probs)))) return(invisible(NULL))
+
+  rlang::abort(c(
+    "The observed and simulated layers were given different `probs`, so their percentile bands don't line up.",
+    "i" = paste0("`er_vpc_add_observed()`'s `probs`: ", paste(observed_probs, collapse = ", ")),
+    "i" = paste0("`er_vpc_add_simulated()`'s `probs`: ", paste(simulated_probs, collapse = ", ")),
+    "i" = "Pass the same `probs` to both calls."
   ))
 }

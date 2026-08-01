@@ -3,6 +3,7 @@
 \name{er_style_vpc_simulated}
 \alias{er_style_vpc_simulated}
 \alias{er_style_vpc_simulated_errorbar}
+\alias{er_style_vpc_simulated_errorbar_continuous}
 \alias{er_style_vpc_simulated_ribbon}
 \title{Simulated-layer builders for VPC plots}
 \usage{
@@ -14,6 +15,17 @@ er_style_vpc_simulated_errorbar(
   theme,
   point_size = 2,
   errorbar_width = 0.2,
+  ...
+)
+
+er_style_vpc_simulated_errorbar_continuous(
+  data,
+  config,
+  exposure,
+  response,
+  theme,
+  point_size = 2,
+  errorbar_width = 0.025,
   ...
 )
 
@@ -69,11 +81,25 @@ computed for a continuous/count response binned on a numeric
 \code{group_by} (see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s \code{probs} argument, which
 should match what was passed to \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}); calling
 \code{er_style_vpc_simulated_ribbon()} without it errors.
+\code{er_style_vpc_simulated_errorbar_continuous()} plots the same mean +
+percentile interval as \code{er_style_vpc_simulated_errorbar()}, at the
+bin's numeric midpoint like \code{er_style_vpc_simulated_ribbon()} does --
+for pairing with
+\code{\link[=er_style_vpc_observed_pointrange_continuous]{er_style_vpc_observed_pointrange_continuous()}} or any other
+\code{"continuous"}-layout observed builder without a layout mismatch. It
+always plots the mean (from \code{config$summary}, so it works for a
+binary response too); when \code{config$percentiles} is also available
+(continuous/count response, numeric \code{group_by}), it additionally
+plots a dashed pointrange/errorbar for each requested percentile --
+the same across-replicate interval \code{er_style_vpc_simulated_ribbon()}
+shows as a band.
 
-\code{er_style_vpc_simulated_errorbar()} maps a constant \code{color = "Simulated"}; \code{er_style_vpc_simulated_ribbon()} maps a constant \code{fill = "Simulated"}. ggplot2 merges either into the paired observed
-builder's own \code{"Observed"} legend entry (same aesthetic) into one
-combined legend; the ribbon's \code{fill} legend is separate from the
-point/errorbar builders' \code{color} legend.
+\code{er_style_vpc_simulated_errorbar()}/\code{er_style_vpc_simulated_errorbar_continuous()}
+map a constant \code{color = "Simulated"}; \code{er_style_vpc_simulated_ribbon()}
+maps a constant \code{fill = "Simulated"}. ggplot2 merges either into the
+paired observed builder's own \code{"Observed"} legend entry (same
+aesthetic) into one combined legend; the ribbon's \code{fill} legend is
+separate from the point/errorbar builders' \code{color} legend.
 }
 \seealso{
 \code{\link[=er_style]{er_style()}}, \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}

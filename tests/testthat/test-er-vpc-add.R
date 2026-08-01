@@ -5,6 +5,11 @@ test_that("er_vpc_add_observed() defaults group_by to the exposure variable", {
   expect_length(vpc$layer$observed$config$breaks, vpc$layer$observed$config$n_bins + 1)
 })
 
+test_that("er_vpc_add_observed() stores probs on the layer's config", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed(probs = c(0.2, 0.5, 0.8))
+  expect_equal(vpc$layer$observed$config$probs, c(0.2, 0.5, 0.8))
+})
+
 test_that("er_vpc_add_observed() supports a categorical group_by with no binning", {
   vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed(group_by = sex)
   expect_equal(vpc$layer$observed$config$group_var, "sex")
@@ -81,6 +86,74 @@ test_that("er_vpc_add_simulated() errors informatively when sim_resp is unavaila
 
   expect_error(er_vpc_add_simulated(vpc, model = spaghetti_only_mod), "sim_resp")
   expect_error(er_vpc_add_simulated(vpc, model = no_method_mod), "sim_resp")
+})
+
+test_that("er_vpc_add_simulated() errors on a categorical/continuous layout mismatch", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_pointrange)
+  expect_error(
+    er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 901, style = er_style_vpc_simulated_ribbon),
+    "categorical.*continuous|continuous.*categorical"
+  )
+
+  vpc2 <- er_vpc(er_test_data, aucss, biomarker_change) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_line)
+  expect_error(
+    er_vpc_add_simulated(vpc2, model = er_test_mod_gaussian, nsim = 5, seed = 902, style = er_style_vpc_simulated_errorbar),
+    "categorical.*continuous|continuous.*categorical"
+  )
+})
+
+test_that("er_vpc_add_simulated() errors when probs disagree between continuous-layout builders", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_line, probs = c(0.1, 0.5, 0.9))
+  expect_error(
+    er_vpc_add_simulated(
+      vpc, model = er_test_mod_gaussian, nsim = 5, seed = 911,
+      style = er_style_vpc_simulated_ribbon, probs = c(0.2, 0.5, 0.8)
+    ),
+    "probs"
+  )
+
+  vpc2 <- er_vpc(er_test_data, aucss, biomarker_change) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_pointrange_continuous, probs = c(0.1, 0.5, 0.9))
+  expect_error(
+    er_vpc_add_simulated(
+      vpc2, model = er_test_mod_gaussian, nsim = 5, seed = 912,
+      style = er_style_vpc_simulated_errorbar_continuous, probs = c(0.25, 0.75)
+    ),
+    "probs"
+  )
+})
+
+test_that("er_vpc_add_simulated() allows matching probs (order-independent) and identical default probs", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_line, probs = c(0.9, 0.1, 0.5))
+  expect_no_error(
+    er_vpc_add_simulated(
+      vpc, model = er_test_mod_gaussian, nsim = 5, seed = 913,
+      style = er_style_vpc_simulated_ribbon, probs = c(0.1, 0.5, 0.9)
+    )
+  )
+})
+
+test_that("er_vpc_add_simulated() ignores probs mismatches for categorical-layout builders", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_pointrange, probs = c(0.1, 0.5, 0.9))
+  expect_no_error(
+    er_vpc_add_simulated(
+      vpc, model = er_test_mod_gaussian, nsim = 5, seed = 914,
+      style = er_style_vpc_simulated_errorbar, probs = c(0.2, 0.8)
+    )
+  )
+})
+
+test_that("er_vpc_add_simulated() allows layout-matched pairs, including the continuous pointrange/errorbar builders", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_pointrange_continuous)
+  expect_no_error(
+    er_vpc_add_simulated(vpc, model = er_test_mod1, nsim = 5, seed = 903, style = er_style_vpc_simulated_errorbar_continuous)
+  )
 })
 
 test_that("er_vpc_add_simulated() ungroups a grouped sim argument", {

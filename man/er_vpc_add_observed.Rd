@@ -27,9 +27,13 @@ variable is used as-is, with no binning.}
 
 \item{conf_level}{Confidence level for the observed-side interval.}
 
-\item{probs}{Percentiles to compute for the continuous-x line/ribbon
-builders (ignored by the default pointrange builder). Only computed
-for a continuous/count response binned on a numeric \code{group_by}.}
+\item{probs}{Percentiles to compute for a \code{"continuous"}-layout builder
+(e.g. \code{\link[=er_style_vpc_observed_line]{er_style_vpc_observed_line()}}/
+\code{\link[=er_style_vpc_observed_pointrange_continuous]{er_style_vpc_observed_pointrange_continuous()}}; ignored by a
+\code{"categorical"}-layout builder like the default pointrange). Only
+computed for a continuous/count response binned on a numeric
+\code{group_by}. Should match whatever \code{probs} is passed to
+\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}} -- see "Details".}
 
 \item{style}{A function determining how the observed layer is drawn;
 see \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}.}
@@ -44,6 +48,14 @@ Bins the observed data by \code{group_by} and computes its response summary
 (rate/mean + confidence interval, plus empirical percentiles for a
 continuous/count response), for later comparison against a simulated
 layer added via \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}.
+}
+\details{
+When both the observed and simulated layers use a
+\code{"continuous"}-layout builder (see \code{\link[=er_style_tag]{er_style_tag()}}'s \code{layout}
+argument), \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}} checks this \code{probs} against its
+own and errors if they disagree, since mismatched \code{probs} would
+otherwise silently plot two sets of percentile bands that don't
+correspond to the same nominal percentile.
 }
 \seealso{
 \code{\link[=er_vpc]{er_vpc()}}, \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}, \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}

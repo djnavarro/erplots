@@ -17,9 +17,14 @@ er_style_tag(
 \item{style}{A function matching the standard \verb{er_style_*()} signature
 (see \code{\link[=er_style]{er_style()}}).}
 
-\item{layout}{One of \code{"overlay"} or \code{"panel"}, or \code{NULL} (the default) to
-leave this tag unset. See \code{\link[=er_plot_add_data]{er_plot_add_data()}} for what each
-structural family means.}
+\item{layout}{One of \code{"overlay"}, \code{"panel"}, \code{"categorical"}, or
+\code{"continuous"}, or \code{NULL} (the default) to leave this tag unset. The
+\code{"overlay"}/\code{"panel"} pair is for a data-layer builder (\code{\link[=er_plot_add_data]{er_plot_add_data()}}
+documents what each structural family means); the \code{"categorical"}/
+\code{"continuous"} pair is for a VPC observed/simulated builder
+(\code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}/\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}) and marks whether it
+plots at discrete bin locations or at each bin's numeric exposure
+midpoint -- see \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}/\code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}.}
 
 \item{fill_role}{A string naming what the builder's \code{fill} aesthetic
 represents, or \code{NULL} (the default) to leave this tag unset.}
@@ -62,6 +67,25 @@ chaining separate setters.
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} reads it off \code{style} to decide whether to place
 the output geoms into the main panel (\code{layout = "overlay"}) or to put them into
 separate strip-like panels above and below the main panel (\code{layout = "panel"})
+
+For a VPC observed/simulated builder, \code{layout} is optional but, when
+present on both the observed and simulated builder passed to a given
+\code{er_vpc} object, is checked for agreement: \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}
+errors if the simulated builder's \code{layout} (\code{"categorical"}, discrete
+\code{.vpc_bin} locations, e.g. \code{\link[=er_style_vpc_simulated_errorbar]{er_style_vpc_simulated_errorbar()}}; or
+\code{"continuous"}, numeric bin-midpoint locations, e.g.
+\code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}}) disagrees with the observed
+builder's own. This catches the case where the two families would
+otherwise silently plot at different x-positions for the same bin --
+e.g. pairing \code{\link[=er_style_vpc_observed_pointrange]{er_style_vpc_observed_pointrange()}}'s discrete bin
+labels with \code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}}'s numeric midpoints.
+Use a layout-matched pair instead (built-ins already are), or, to get
+a pointrange/errorbar idiom that still plots at the numeric midpoint
+(so it can be paired with a \code{"continuous"}-layout builder), use
+\code{\link[=er_style_vpc_observed_pointrange_continuous]{er_style_vpc_observed_pointrange_continuous()}}/
+\code{\link[=er_style_vpc_simulated_errorbar_continuous]{er_style_vpc_simulated_errorbar_continuous()}}. An untagged builder on
+either side skips this check entirely, the same opt-in treatment
+\code{layer} gets.
 
 \code{fill_role} and \code{y_role} are both optional, and can be used
 to title a legend/axis correctly: \code{fill_role = "density"} (used by

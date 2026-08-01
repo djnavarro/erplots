@@ -14,14 +14,25 @@
 #'   variable is used as-is, with no binning.
 #' @param n_bins Number of quantile bins, when `group_by` is numeric.
 #' @param conf_level Confidence level for the observed-side interval.
-#' @param probs Percentiles to compute for the continuous-x line/ribbon
-#'   builders (ignored by the default pointrange builder). Only computed
-#'   for a continuous/count response binned on a numeric `group_by`.
+#' @param probs Percentiles to compute for a `"continuous"`-layout builder
+#'   (e.g. [er_style_vpc_observed_line()]/
+#'   [er_style_vpc_observed_pointrange_continuous()]; ignored by a
+#'   `"categorical"`-layout builder like the default pointrange). Only
+#'   computed for a continuous/count response binned on a numeric
+#'   `group_by`. Should match whatever `probs` is passed to
+#'   [er_vpc_add_simulated()] -- see "Details".
 #' @param style A function determining how the observed layer is drawn;
 #'   see [er_style_vpc_observed()].
 #' @param ... Additional named arguments forwarded to `style`.
 #'
 #' @returns `object`, with `object$layer$observed` populated.
+#'
+#' @details When both the observed and simulated layers use a
+#' `"continuous"`-layout builder (see [er_style_tag()]'s `layout`
+#' argument), [er_vpc_add_simulated()] checks this `probs` against its
+#' own and errors if they disagree, since mismatched `probs` would
+#' otherwise silently plot two sets of percentile bands that don't
+#' correspond to the same nominal percentile.
 #'
 #' @seealso [er_vpc()], [er_vpc_add_simulated()], [er_style_vpc_observed()]
 #'
@@ -78,9 +89,14 @@ er_vpc_add_observed <- function(object, group_by = NULL, n_bins = 4, conf_level 
 #' @param nsim Number of simulation replicates, only used with `model`.
 #' @param seed Optional RNG seed, only used with `model`.
 #' @param conf_level Confidence level for the simulated-side interval.
-#' @param probs Percentiles to compute for the continuous-x ribbon
-#'   builder; should match whatever `probs` was passed to
-#'   [er_vpc_add_observed()] (ignored by the default errorbar builder).
+#' @param probs Percentiles to compute for a `"continuous"`-layout builder
+#'   (e.g. [er_style_vpc_simulated_ribbon()]/
+#'   [er_style_vpc_simulated_errorbar_continuous()]; ignored by a
+#'   `"categorical"`-layout builder like the default errorbar). Must
+#'   match whatever `probs` was passed to [er_vpc_add_observed()] when
+#'   both layers use a `"continuous"`-layout builder -- this function
+#'   errors if they disagree (see [er_vpc_add_observed()]'s `probs`
+#'   documentation).
 #' @param style A function determining how the simulated layer is drawn;
 #'   see [er_style_vpc_simulated()].
 #' @param ... Additional named arguments forwarded to `style`.
@@ -113,6 +129,8 @@ er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, s
   }
   if (!is.function(style)) rlang::abort("`style` must be a function.")
   .check_style_layer(style, "simulated", arg = "style")
+  .check_vpc_layout_match(object$layer$observed$config$style, style)
+  .check_vpc_probs_match(object$layer$observed$config, object$layer$observed$config$style, probs, style)
 
   if (is.null(sim) && is.null(model)) {
     rlang::abort("Supply exactly one of `sim` or `model` to `er_vpc_add_simulated()`.")

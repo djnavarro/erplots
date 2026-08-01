@@ -751,3 +751,69 @@ lines in `geom_violin()`) is never set. Whether to wire it up (add a
 `quantile.linetype` entirely was left as an open call -- **status as of
 this writing: still unresolved**, worth a decision next time that
 builder is touched.
+
+## VPC categorical/continuous layout mismatch
+
+`er_style_vpc_observed_pointrange()` (discrete `.vpc_bin` locations) and
+`er_style_vpc_simulated_ribbon()` (numeric `x_mid` locations) could be
+freely mixed via `style`, but doing so silently plotted the two layers
+at inconsistent x-positions for the same bin -- the pointrange stayed at
+evenly-spaced categorical slots while the ribbon used the bin's actual
+exposure midpoint.
+
+Considered: (A) a new `x = c("bin", "midpoint")` argument on the
+pointrange/errorbar builders, opt-in on both sides; (B) auto-reconciling
+mismatched layouts at build time by silently switching the categorical
+builder to plot at `x_mid`; (C) tagging builders with a `layout`
+(reusing the data-layer builder's tag machinery, with a new
+`"categorical"`/`"continuous"` value pair) and failing fast on a
+mismatch; (D) a dedicated pointrange/errorbar builder pair that plots at
+`x_mid` for explicit pairing with the continuous-x idiom. Went with C+D
+together: B was rejected as too implicit (the same builder rendering
+differently depending on what's paired with it undermines "which layer
+was added never affects how another layer renders"); A alone leaves the
+original bug fully reproducible if the user forgets to set `x` on both
+sides.
+
+`layout`'s allowed values were widened from `c("overlay", "panel")` to
+also accept `"categorical"`/`"continuous"`, since it's the same concept
+(which structural family a builder belongs to) applied to a different
+layer pair. Unlike the data-layer case, VPC `layout` is optional
+(`.style_vpc_layout()` returns `NULL` silently rather than erroring),
+matching how the `layer` tag is already opt-in -- an untagged custom VPC
+builder keeps working unchecked. `er_vpc_add_simulated()` calls
+`.check_vpc_layout_match()` right after the existing `layer`-tag check.
+
+The two new builders (`er_style_vpc_observed_pointrange_continuous()`,
+`er_style_vpc_simulated_errorbar_continuous()`) only need
+`config$summary`'s existing `x_mid` column (already computed for a
+numeric `group_by`, previously just unused by the categorical-bin
+builders) -- no new layer-computation work was needed, and as a side
+effect these two work for a binary response too (unlike the percentile-
+based line/ribbon idiom, which needs `config$percentiles` and is
+continuous/count-only).
+
+## VPC observed/simulated `probs` consistency check
+
+Following the `layout` mismatch fail-fast check (see "VPC
+categorical/continuous layout mismatch" above), a second silent
+correctness gap remained: `er_vpc_add_observed()` and
+`er_vpc_add_simulated()` each take their own `probs` argument, and
+nothing stopped them from disagreeing (e.g. `c(0.1, 0.5, 0.9)` on one
+side, `c(0.05, 0.5, 0.95)` on the other) -- both sides would compute and
+render percentile bands/pointranges just fine, but the two sets
+wouldn't correspond to the same nominal percentile, defeating the point
+of a visual predictive check.
+
+Added `.check_vpc_probs_match()` (`R/er-plot-style.R`, alongside
+`.check_vpc_layout_match()`), called from `er_vpc_add_simulated()` right
+after the layout check. It only fires when both builders resolve to
+`layout = "continuous"` (i.e. `config$percentiles` is actually rendered
+by both sides) -- a `probs` mismatch is harmless and silently ignored
+for `"categorical"`-layout builders (the default pointrange/errorbar),
+which never look at `config$percentiles` at all, and for untagged
+custom builders (same opt-in treatment as `layer`/`layout`). Comparison
+is order-independent (`sort()` before `all.equal()`). This required
+`.layer_vpc_observed()` to start storing its own `probs` on
+`config$probs` so the simulated-side call has something to compare
+against.

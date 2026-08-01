@@ -171,18 +171,49 @@ narrower: no stratification, always a single panel.
   exclusive; exactly one is required. When `model` is supplied, calls
   `er_simulate()` internally and requires a `sim_resp` column.
 
-Two visual idioms, chosen by `style`:
+Two visual idioms, chosen by `style`, tagged via `er_style_tag(fn, layout
+= ...)` with `layout` values `"categorical"`/`"continuous"` (reusing the
+same `layout` tag data builders use for `"overlay"`/`"panel"`, just a
+different pair of allowed values):
 
-- **Categorical-bin idiom** (default): `er_style_vpc_observed_pointrange()`
-  / `er_style_vpc_simulated_errorbar()` -- point/errorbar of the mean per
-  discrete bin.
-- **Continuous-x percentile-band idiom**:
+- **Categorical-bin idiom** (`layout = "categorical"`, default):
+  `er_style_vpc_observed_pointrange()` / `er_style_vpc_simulated_errorbar()`
+  -- point/errorbar of the mean plotted at each bin's discrete `.vpc_bin`
+  location.
+- **Continuous-x percentile-band idiom** (`layout = "continuous"`):
   `er_style_vpc_observed_line()` / `er_style_vpc_simulated_ribbon()` --
   one line/ribbon per requested percentile against a continuous exposure
-  x-axis (bin midpoint). Continuous/count responses only (a binary
-  response's distribution is fully described by its rate already); both
-  error informatively if `config$percentiles` is unavailable (binary
-  response, or categorical `group_by`).
+  x-axis (bin midpoint, `x_mid`). Continuous/count responses only (a
+  binary response's distribution is fully described by its rate
+  already); both error informatively if `config$percentiles` is
+  unavailable (binary response, or categorical `group_by`).
+- **Continuous-x pointrange/errorbar idiom** (`layout = "continuous"`):
+  `er_style_vpc_observed_pointrange_continuous()` /
+  `er_style_vpc_simulated_errorbar_continuous()` -- the same mean/CI as
+  the categorical-bin idiom, but plotted at `x_mid` instead of
+  `.vpc_bin`, for pairing with the percentile-band idiom (or with each
+  other, on a continuous x-axis) without a layout mismatch. Unlike the
+  percentile-band idiom, these only need `config$summary` (already
+  carries `x_mid` for a numeric `group_by`), so they work for a binary
+  response too; they error if `group_by` is categorical (no numeric
+  midpoint to plot at).
+
+`er_vpc_add_simulated()` checks the observed and simulated builders'
+`layout` tags against each other (`.check_vpc_layout_match()` in
+`R/er-plot-style.R`) and errors if they disagree -- e.g. pairing
+`er_style_vpc_observed_pointrange()`'s discrete locations with
+`er_style_vpc_simulated_ribbon()`'s numeric midpoints would otherwise
+silently plot the two layers at inconsistent x-positions for the same
+bin. An untagged custom builder on either side skips this check, the
+same opt-in treatment the `layer` tag gets. When both builders resolve
+to `layout = "continuous"` (so both sides actually render
+`config$percentiles`), `er_vpc_add_simulated()` additionally checks
+(`.check_vpc_probs_match()`) that its own `probs` argument matches
+`er_vpc_add_observed()`'s own `probs` (order-independent), erroring if
+they disagree -- mismatched `probs` would otherwise silently produce two
+percentile sets that don't correspond to the same nominal percentile.
+`er_vpc_add_observed()` stores its `probs` on `config$probs` for this
+comparison.
 
 The simulated layer's geoms are always added before the observed layer's,
 so a simulated ribbon never buries the observed points/line.

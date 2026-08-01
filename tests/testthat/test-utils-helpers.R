@@ -181,3 +181,27 @@ test_that(".dodge_quantile_strata handles non-factor strata and a single stratum
   dodged_one <- .dodge_quantile_strata(summary_one, exposure_limits = c(0, 10))
   expect_equal(dodged_one$x_dodge, dodged_one$x_mid)
 })
+
+test_that("ci_quantile() brackets the sample quantile with a wider interval at lower conf_level", {
+  set.seed(9142)
+  x <- rnorm(200)
+  ci90 <- ci_quantile(x, prob = 0.1, conf_level = 0.90)
+  ci99 <- ci_quantile(x, prob = 0.1, conf_level = 0.99)
+  q10 <- unname(stats::quantile(x, 0.1))
+
+  expect_true(ci90["lower"] <= q10 && q10 <= ci90["upper"])
+  expect_true(ci99["lower"] <= ci90["lower"])
+  expect_true(ci99["upper"] >= ci90["upper"])
+  expect_equal(unname(attr(ci90, "conf_level")), 0.90)
+})
+
+test_that("ci_quantile() returns NA for fewer than 2 non-missing values", {
+  ci <- ci_quantile(c(1, NA), prob = 0.5)
+  expect_true(all(is.na(ci)))
+})
+
+test_that("ci_quantile() clips to the available order statistics for a small/extreme case", {
+  x <- 1:5
+  ci <- ci_quantile(x, prob = 0.9, conf_level = 0.99)
+  expect_true(ci["lower"] >= min(x) && ci["upper"] <= max(x))
+})
