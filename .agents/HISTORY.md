@@ -549,7 +549,7 @@ new `.layer_vpc_simulated()` instead bins simulated rows against the
 boundaries regardless of how `newdata` might someday differ from `data`.
 
 **The new visual idiom.** Two new builders,
-`er_style_vpc_observed_line()`/`er_style_vpc_simulated_ribbon()`, keep
+`er_style_vpc_observed_quantile_line()`/`er_style_vpc_simulated_quantile_ribbon()`, keep
 exposure on a continuous x-axis and show percentile lines/ribbons rather
 than only a central-tendency point + interval -- deliberately scoped to
 continuous/count responses only, since a binary response's distribution
@@ -755,7 +755,7 @@ builder is touched.
 ## VPC categorical/continuous layout mismatch
 
 `er_style_vpc_observed_pointrange()` (discrete `.vpc_bin` locations) and
-`er_style_vpc_simulated_ribbon()` (numeric `x_mid` locations) could be
+`er_style_vpc_simulated_quantile_ribbon()` (numeric `x_mid` locations) could be
 freely mixed via `style`, but doing so silently plotted the two layers
 at inconsistent x-positions for the same bin -- the pointrange stayed at
 evenly-spaced categorical slots while the ribbon used the bin's actual

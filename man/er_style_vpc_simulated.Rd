@@ -4,7 +4,7 @@
 \alias{er_style_vpc_simulated}
 \alias{er_style_vpc_simulated_errorbar}
 \alias{er_style_vpc_simulated_errorbar_continuous}
-\alias{er_style_vpc_simulated_ribbon}
+\alias{er_style_vpc_simulated_quantile_ribbon}
 \alias{er_style_vpc_simulated_quantile_errorbar}
 \alias{er_style_vpc_simulated_mean_errorbar}
 \title{Simulated-layer builders for VPC plots}
@@ -31,7 +31,7 @@ er_style_vpc_simulated_errorbar_continuous(
   ...
 )
 
-er_style_vpc_simulated_ribbon(
+er_style_vpc_simulated_quantile_ribbon(
   data,
   config,
   exposure,
@@ -86,7 +86,7 @@ error bars, of \code{er_style_vpc_simulated_mean_errorbar()}'s when
 \item{...}{Additional named arguments forwarded from
 \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}'s own \code{...}.}
 
-\item{ribbon_alpha}{Fill transparency for \code{er_style_vpc_simulated_ribbon()}'s bands.}
+\item{ribbon_alpha}{Fill transparency for \code{er_style_vpc_simulated_quantile_ribbon()}'s bands.}
 
 \item{dodge_width}{Dodge width separating each bin's requested
 percentiles in \code{er_style_vpc_simulated_quantile_errorbar()}.}
@@ -124,15 +124,15 @@ which mirrors the same adaptive logic.
 mean + percentile interval (of the mean, across replicates) at each
 bin's categorical (or quantile-bin) label, dodged alongside the
 observed layer's own point + interval.
-\code{er_style_vpc_simulated_ribbon()} instead plots \code{config$percentiles}
+\code{er_style_vpc_simulated_quantile_ribbon()} instead plots \code{config$percentiles}
 -- one shaded band (median line + interval) per requested percentile
 -- at each bin's numeric midpoint on the exposure scale, for pairing
-with \code{\link[=er_style_vpc_observed_line]{er_style_vpc_observed_line()}}. \code{config$percentiles} is only
+with \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}}. \code{config$percentiles} is only
 computed for a continuous/count response (see \code{\link[=er_vpc]{er_vpc()}}'s \code{probs}
-argument); calling \code{er_style_vpc_simulated_ribbon()} without it errors.
+argument); calling \code{er_style_vpc_simulated_quantile_ribbon()} without it errors.
 \code{er_style_vpc_simulated_errorbar_continuous()} plots the same mean +
 percentile interval as \code{er_style_vpc_simulated_errorbar()}, at the
-bin's numeric midpoint like \code{er_style_vpc_simulated_ribbon()} does --
+bin's numeric midpoint like \code{er_style_vpc_simulated_quantile_ribbon()} does --
 for pairing with
 \code{\link[=er_style_vpc_observed_pointrange_continuous]{er_style_vpc_observed_pointrange_continuous()}} or any other
 \code{"continuous"}-layout observed builder without a layout mismatch. It
@@ -140,7 +140,7 @@ always plots the mean (from \code{config$summary}, so it works for a
 binary response too); when \code{config$percentiles} is also available
 (continuous/count response), it additionally
 plots a dashed pointrange/errorbar for each requested percentile --
-the same across-replicate interval \code{er_style_vpc_simulated_ribbon()}
+the same across-replicate interval \code{er_style_vpc_simulated_quantile_ribbon()}
 shows as a band.
 
 \code{er_style_vpc_simulated_quantile_errorbar()} plots \code{config$percentiles}
@@ -153,7 +153,7 @@ informatively without \code{config$percentiles}.
 
 \code{er_style_vpc_simulated_errorbar()}/\code{er_style_vpc_simulated_errorbar_continuous()}/
 \code{er_style_vpc_simulated_mean_errorbar()}/\code{er_style_vpc_simulated_quantile_errorbar()}
-map a constant \code{color = "Simulated"}; \code{er_style_vpc_simulated_ribbon()}
+map a constant \code{color = "Simulated"}; \code{er_style_vpc_simulated_quantile_ribbon()}
 maps a constant \code{fill = "Simulated"}. ggplot2 merges either into the
 paired observed builder's own \code{"Observed"} legend entry (same
 aesthetic) into one combined legend; the ribbon's \code{fill} legend is

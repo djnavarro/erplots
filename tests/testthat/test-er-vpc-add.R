@@ -102,12 +102,12 @@ test_that("er_vpc_add_simulated() errors on a categorical/continuous layout mism
   vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
     er_vpc_add_observed(style = er_style_vpc_observed_pointrange)
   expect_error(
-    er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 901, style = er_style_vpc_simulated_ribbon),
+    er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 901, style = er_style_vpc_simulated_quantile_ribbon),
     "categorical.*continuous|continuous.*categorical"
   )
 
   vpc2 <- er_vpc(er_test_data, aucss, biomarker_change) |>
-    er_vpc_add_observed(style = er_style_vpc_observed_line)
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_line)
   expect_error(
     er_vpc_add_simulated(vpc2, model = er_test_mod_gaussian, nsim = 5, seed = 902, style = er_style_vpc_simulated_errorbar),
     "categorical.*continuous|continuous.*categorical"
@@ -125,7 +125,7 @@ test_that("er_vpc_add_simulated() allows layout-matched pairs, including the con
 test_that("er_vpc_add_observed() rejects a builder whose response_types tag excludes the response", {
   vpc <- er_vpc(er_test_data, aucss, ae1) # binary response
   expect_error(
-    er_vpc_add_observed(vpc, style = er_style_vpc_observed_line),
+    er_vpc_add_observed(vpc, style = er_style_vpc_observed_quantile_line),
     "binary"
   )
 })
@@ -133,24 +133,24 @@ test_that("er_vpc_add_observed() rejects a builder whose response_types tag excl
 test_that("er_vpc_add_observed() rejects a builder whose plot_by_types tag excludes plot_by's type", {
   vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex) # categorical plot_by
   expect_error(
-    er_vpc_add_observed(vpc, style = er_style_vpc_observed_line),
+    er_vpc_add_observed(vpc, style = er_style_vpc_observed_quantile_line),
     "discrete"
   )
 })
 
 test_that("er_vpc_add_observed() catches an incompatible response_types/plot_by_types tag before any binning happens", {
   # a binary response *and* a categorical plot_by both disqualify
-  # er_style_vpc_observed_line() -- either check alone should stop the
+  # er_style_vpc_observed_quantile_line() -- either check alone should stop the
   # call before `.layer_vpc_observed()` runs
   vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex)
-  expect_error(er_vpc_add_observed(vpc, style = er_style_vpc_observed_line))
+  expect_error(er_vpc_add_observed(vpc, style = er_style_vpc_observed_quantile_line))
 })
 
 test_that("er_vpc_add_simulated() rejects a builder whose response_types tag excludes the response", {
   vpc <- er_vpc(er_test_data, aucss, ae1) |> # binary response
     er_vpc_add_observed(style = er_style_vpc_observed_pointrange)
   expect_error(
-    er_vpc_add_simulated(vpc, model = er_test_mod1, nsim = 5, seed = 904, style = er_style_vpc_simulated_ribbon),
+    er_vpc_add_simulated(vpc, model = er_test_mod1, nsim = 5, seed = 904, style = er_style_vpc_simulated_quantile_ribbon),
     "binary"
   )
 })
@@ -159,7 +159,7 @@ test_that("er_vpc_add_simulated() rejects a builder whose plot_by_types tag excl
   vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex) |> # categorical plot_by
     er_vpc_add_observed(style = er_style_vpc_observed_pointrange)
   expect_error(
-    er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 905, style = er_style_vpc_simulated_ribbon),
+    er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 905, style = er_style_vpc_simulated_quantile_ribbon),
     "discrete"
   )
 })

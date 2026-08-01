@@ -43,24 +43,24 @@
 #' `er_style_vpc_observed_pointrange()` plots `config$summary`'s
 #' rate/mean + confidence interval at each bin's categorical (or
 #' quantile-bin) label, dodged alongside the simulated layer's own point +
-#' interval. `er_style_vpc_observed_line()` instead plots
+#' interval. `er_style_vpc_observed_quantile_line()` instead plots
 #' `config$percentiles` -- one line per requested percentile -- at each
 #' bin's numeric midpoint on the exposure scale, for pairing with
-#' [er_style_vpc_simulated_ribbon()]. `config$percentiles` is only
+#' [er_style_vpc_simulated_quantile_ribbon()]. `config$percentiles` is only
 #' computed for a continuous/count response (see [er_vpc()]'s `probs`
-#' argument); calling `er_style_vpc_observed_line()` without it errors.
+#' argument); calling `er_style_vpc_observed_quantile_line()` without it errors.
 #' `er_style_vpc_observed_pointrange_continuous()` plots the same
 #' rate/mean + confidence interval as `er_style_vpc_observed_pointrange()`,
-#' at the bin's numeric midpoint like `er_style_vpc_observed_line()` does
+#' at the bin's numeric midpoint like `er_style_vpc_observed_quantile_line()` does
 #' -- for pairing a pointrange/errorbar idiom with a `"continuous"`-layout
-#' simulated builder (e.g. [er_style_vpc_simulated_ribbon()]) without a
+#' simulated builder (e.g. [er_style_vpc_simulated_quantile_ribbon()]) without a
 #' layout mismatch. It always plots the mean (from `config$summary`, so
 #' it works for a binary response too); when `config$percentiles` is
 #' also available (continuous/count response), it
 #' additionally plots a dashed pointrange/errorbar for each requested
 #' percentile (see [er_vpc()]'s `probs` argument), with a
 #' confidence interval from [ci_quantile()] -- the observed-side analogue
-#' of the across-replicate interval `er_style_vpc_simulated_ribbon()`
+#' of the across-replicate interval `er_style_vpc_simulated_quantile_ribbon()`
 #' shows as a band.
 #'
 #' `er_style_vpc_observed_quantile_errorbar()` plots `config$percentiles`
@@ -68,7 +68,7 @@
 #' requested percentile -- dodged at each bin's categorical (or
 #' quantile-bin) label, for pairing with
 #' [er_style_vpc_simulated_quantile_errorbar()]. Unlike
-#' `er_style_vpc_observed_line()`/`er_style_vpc_simulated_ribbon()`, it
+#' `er_style_vpc_observed_quantile_line()`/`er_style_vpc_simulated_quantile_ribbon()`, it
 #' supports both a numeric and a categorical `plot_by` (it always plots
 #' at the discrete `.vpc_bin` label rather than a continuous numeric
 #' midpoint); like them, it requires a continuous/count response (a
@@ -168,11 +168,11 @@ er_style_vpc_observed_pointrange_continuous <- er_style_tag(
 
 #' @rdname er_style_vpc_observed
 #' @export
-er_style_vpc_observed_line <- function(data, config, exposure, response, theme,
+er_style_vpc_observed_quantile_line <- function(data, config, exposure, response, theme,
                                         point_size = 1.5, ...) {
   if (is.null(config$percentiles)) {
     rlang::abort(c(
-      "`er_style_vpc_observed_line()` requires `config$percentiles`, which is not available here.",
+      "`er_style_vpc_observed_quantile_line()` requires `config$percentiles`, which is not available here.",
       "i" = "Percentiles are only computed for a continuous/count response binned on a numeric `plot_by` -- see `er_vpc_add_observed()`.",
       "i" = "Use `er_style_vpc_observed_pointrange()` instead for a binary response or a categorical `plot_by`."
     ))
@@ -191,8 +191,8 @@ er_style_vpc_observed_line <- function(data, config, exposure, response, theme,
     )
   )
 }
-er_style_vpc_observed_line <- er_style_tag(
-  er_style_vpc_observed_line,
+er_style_vpc_observed_quantile_line <- er_style_tag(
+  er_style_vpc_observed_quantile_line,
   layer = "observed", layout = "continuous",
   response_types = c("continuous", "count"),
   plot_by_types = "continuous"

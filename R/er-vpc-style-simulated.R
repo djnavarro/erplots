@@ -23,7 +23,7 @@
 #'   `plot_by` is numeric.
 #' @param dodge_width Dodge width separating each bin's requested
 #'   percentiles in `er_style_vpc_simulated_quantile_errorbar()`.
-#' @param ribbon_alpha Fill transparency for `er_style_vpc_simulated_ribbon()`'s bands.
+#' @param ribbon_alpha Fill transparency for `er_style_vpc_simulated_quantile_ribbon()`'s bands.
 #' @param ... Additional named arguments forwarded from
 #'   [er_vpc_add_simulated()]'s own `...`.
 #'
@@ -44,15 +44,15 @@
 #' mean + percentile interval (of the mean, across replicates) at each
 #' bin's categorical (or quantile-bin) label, dodged alongside the
 #' observed layer's own point + interval.
-#' `er_style_vpc_simulated_ribbon()` instead plots `config$percentiles`
+#' `er_style_vpc_simulated_quantile_ribbon()` instead plots `config$percentiles`
 #' -- one shaded band (median line + interval) per requested percentile
 #' -- at each bin's numeric midpoint on the exposure scale, for pairing
-#' with [er_style_vpc_observed_line()]. `config$percentiles` is only
+#' with [er_style_vpc_observed_quantile_line()]. `config$percentiles` is only
 #' computed for a continuous/count response (see [er_vpc()]'s `probs`
-#' argument); calling `er_style_vpc_simulated_ribbon()` without it errors.
+#' argument); calling `er_style_vpc_simulated_quantile_ribbon()` without it errors.
 #' `er_style_vpc_simulated_errorbar_continuous()` plots the same mean +
 #' percentile interval as `er_style_vpc_simulated_errorbar()`, at the
-#' bin's numeric midpoint like `er_style_vpc_simulated_ribbon()` does --
+#' bin's numeric midpoint like `er_style_vpc_simulated_quantile_ribbon()` does --
 #' for pairing with
 #' [er_style_vpc_observed_pointrange_continuous()] or any other
 #' `"continuous"`-layout observed builder without a layout mismatch. It
@@ -60,7 +60,7 @@
 #' binary response too); when `config$percentiles` is also available
 #' (continuous/count response), it additionally
 #' plots a dashed pointrange/errorbar for each requested percentile --
-#' the same across-replicate interval `er_style_vpc_simulated_ribbon()`
+#' the same across-replicate interval `er_style_vpc_simulated_quantile_ribbon()`
 #' shows as a band.
 #'
 #' `er_style_vpc_simulated_quantile_errorbar()` plots `config$percentiles`
@@ -73,7 +73,7 @@
 #'
 #' `er_style_vpc_simulated_errorbar()`/`er_style_vpc_simulated_errorbar_continuous()`/
 #' `er_style_vpc_simulated_mean_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()`
-#' map a constant `color = "Simulated"`; `er_style_vpc_simulated_ribbon()`
+#' map a constant `color = "Simulated"`; `er_style_vpc_simulated_quantile_ribbon()`
 #' maps a constant `fill = "Simulated"`. ggplot2 merges either into the
 #' paired observed builder's own `"Observed"` legend entry (same
 #' aesthetic) into one combined legend; the ribbon's `fill` legend is
@@ -168,11 +168,11 @@ er_style_vpc_simulated_errorbar_continuous <- er_style_tag(
 
 #' @rdname er_style_vpc_simulated
 #' @export
-er_style_vpc_simulated_ribbon <- function(data, config, exposure, response, theme,
+er_style_vpc_simulated_quantile_ribbon <- function(data, config, exposure, response, theme,
                                            ribbon_alpha = 0.3, ...) {
   if (is.null(config$percentiles)) {
     rlang::abort(c(
-      "`er_style_vpc_simulated_ribbon()` requires `config$percentiles`, which is not available here.",
+      "`er_style_vpc_simulated_quantile_ribbon()` requires `config$percentiles`, which is not available here.",
       "i" = "Percentiles are only computed for a continuous/count response binned on a numeric `plot_by` -- see `er_vpc_add_observed()`/`er_vpc_add_simulated()`.",
       "i" = "Use `er_style_vpc_simulated_errorbar()` instead for a binary response or a categorical `plot_by`."
     ))
@@ -194,8 +194,8 @@ er_style_vpc_simulated_ribbon <- function(data, config, exposure, response, them
     ggplot2::labs(fill = "Source")
   )
 }
-er_style_vpc_simulated_ribbon <- er_style_tag(
-  er_style_vpc_simulated_ribbon,
+er_style_vpc_simulated_quantile_ribbon <- er_style_tag(
+  er_style_vpc_simulated_quantile_ribbon,
   layer = "simulated", layout = "continuous",
   response_types = c("continuous", "count"),
   plot_by_types = "continuous"

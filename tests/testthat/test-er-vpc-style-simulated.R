@@ -9,34 +9,34 @@ test_that("er_style_vpc_simulated_errorbar() returns point + errorbar geoms", {
   expect_length(geoms, 2)
 })
 
-test_that("er_style_vpc_simulated_ribbon() returns ribbon + line geoms for a continuous response", {
+test_that("er_style_vpc_simulated_quantile_ribbon() returns ribbon + line geoms for a continuous response", {
   vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
     er_vpc_add_observed() |>
     er_vpc_add_simulated(model = er_test_mod_gaussian, nsim = 5, seed = 802)
 
-  geoms <- er_style_vpc_simulated_ribbon(
+  geoms <- er_style_vpc_simulated_quantile_ribbon(
     er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme
   )
   expect_length(geoms, 3)
 })
 
-test_that("er_style_vpc_simulated_ribbon() errors when percentiles aren't available", {
+test_that("er_style_vpc_simulated_quantile_ribbon() errors when percentiles aren't available", {
   vpc <- er_vpc(er_test_data, aucss, ae1) |>
     er_vpc_add_observed() |>
     er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 803)
 
   expect_error(
-    er_style_vpc_simulated_ribbon(er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme),
+    er_style_vpc_simulated_quantile_ribbon(er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme),
     "percentiles"
   )
 })
 
 test_that("built-in simulated builders are tagged for the simulated layer and correct vpc layout", {
   expect_equal(attr(er_style_vpc_simulated_errorbar, "er_style_layer"), "simulated")
-  expect_equal(attr(er_style_vpc_simulated_ribbon, "er_style_layer"), "simulated")
+  expect_equal(attr(er_style_vpc_simulated_quantile_ribbon, "er_style_layer"), "simulated")
   expect_equal(attr(er_style_vpc_simulated_errorbar_continuous, "er_style_layer"), "simulated")
   expect_equal(attr(er_style_vpc_simulated_errorbar, "er_style_layout"), "categorical")
-  expect_equal(attr(er_style_vpc_simulated_ribbon, "er_style_layout"), "continuous")
+  expect_equal(attr(er_style_vpc_simulated_quantile_ribbon, "er_style_layout"), "continuous")
   expect_equal(attr(er_style_vpc_simulated_errorbar_continuous, "er_style_layout"), "continuous")
 })
 

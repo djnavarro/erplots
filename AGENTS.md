@@ -146,7 +146,7 @@ data-layer builder):
   `er_vpc_add_observed()`/`er_vpc_add_simulated()` each error
   immediately (`.check_style_response_type()`/`.check_style_plot_by_type()`
   in `R/er-plot-style.R`) if `style` is tagged for a type the `er_vpc`
-  object doesn't have -- e.g. `er_style_vpc_observed_line()` declares
+  object doesn't have -- e.g. `er_style_vpc_observed_quantile_line()` declares
   `response_types = c("continuous", "count")` (needs
   `config$percentiles`, never computed for a binary response) and
   `plot_by_types = "continuous"` (its `geom_line()` connects bins along
@@ -229,7 +229,7 @@ Five visual idioms, chosen by `style`:
   -- point/errorbar of the mean plotted at each bin's discrete `.vpc_bin`
   location, always (even for a numeric `plot_by`).
 - **Continuous-x percentile-band idiom** (`layout = "continuous"`):
-  `er_style_vpc_observed_line()` / `er_style_vpc_simulated_ribbon()` --
+  `er_style_vpc_observed_quantile_line()` / `er_style_vpc_simulated_quantile_ribbon()` --
   one line/ribbon per requested percentile against a continuous exposure
   x-axis (bin midpoint, `x_mid`). Continuous/count responses only (a
   binary response's distribution is fully described by its rate
@@ -265,7 +265,7 @@ Five visual idioms, chosen by `style`:
 `layout` tags against each other (`.check_vpc_layout_match()` in
 `R/er-plot-style.R`) and errors if they disagree -- e.g. pairing
 `er_style_vpc_observed_pointrange()`'s discrete locations with
-`er_style_vpc_simulated_ribbon()`'s numeric midpoints would otherwise
+`er_style_vpc_simulated_quantile_ribbon()`'s numeric midpoints would otherwise
 silently plot the two layers at inconsistent x-positions for the same
 bin. An untagged custom builder on either side skips this check, the
 same opt-in treatment the `layer` tag gets. `probs` can't diverge

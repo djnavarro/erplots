@@ -37,7 +37,7 @@ with no binning.}
 simulated-side intervals. Must be strictly between 0 and 1.}
 
 \item{probs}{Percentiles to compute for a \code{"continuous"}-layout builder
-(e.g. \code{\link[=er_style_vpc_observed_line]{er_style_vpc_observed_line()}}/\code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}};
+(e.g. \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}}/\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}};
 ignored by a \code{"categorical"}-layout builder like the default
 pointrange/errorbar pair). Only computed for a continuous/count
 response binned on a numeric \code{plot_by}.}

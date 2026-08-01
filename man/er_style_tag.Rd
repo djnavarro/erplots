@@ -89,11 +89,11 @@ present on both the observed and simulated builder passed to a given
 errors if the simulated builder's \code{layout} (\code{"categorical"}, discrete
 \code{.vpc_bin} locations, e.g. \code{\link[=er_style_vpc_simulated_errorbar]{er_style_vpc_simulated_errorbar()}}; or
 \code{"continuous"}, numeric bin-midpoint locations, e.g.
-\code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}}) disagrees with the observed
+\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}) disagrees with the observed
 builder's own. This catches the case where the two families would
 otherwise silently plot at different x-positions for the same bin --
 e.g. pairing \code{\link[=er_style_vpc_observed_pointrange]{er_style_vpc_observed_pointrange()}}'s discrete bin
-labels with \code{\link[=er_style_vpc_simulated_ribbon]{er_style_vpc_simulated_ribbon()}}'s numeric midpoints.
+labels with \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}'s numeric midpoints.
 Use a layout-matched pair instead (built-ins already are), or, to get
 a pointrange/errorbar idiom that still plots at the numeric midpoint
 (so it can be paired with a \code{"continuous"}-layout builder), use
@@ -146,7 +146,7 @@ builder: \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}/\code{\link[=
 \code{style}'s declared \code{response_types} against \code{object$response$type}
 and \code{plot_by_types} against \code{object$group$type}, erroring immediately
 if the object's data isn't one the builder declared support for --
-e.g. \code{\link[=er_style_vpc_observed_line]{er_style_vpc_observed_line()}} declares
+e.g. \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}} declares
 \code{response_types = c("continuous", "count")} (it needs
 \code{config$percentiles}, never computed for a binary response) and
 \code{plot_by_types = "continuous"} (it draws a \code{geom_line()} connecting

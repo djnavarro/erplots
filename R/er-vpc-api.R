@@ -35,7 +35,7 @@
 #' @param conf_level Confidence level for both the observed- and
 #'   simulated-side intervals. Must be strictly between 0 and 1.
 #' @param probs Percentiles to compute for a `"continuous"`-layout builder
-#'   (e.g. [er_style_vpc_observed_line()]/[er_style_vpc_simulated_ribbon()];
+#'   (e.g. [er_style_vpc_observed_quantile_line()]/[er_style_vpc_simulated_quantile_ribbon()];
 #'   ignored by a `"categorical"`-layout builder like the default
 #'   pointrange/errorbar pair). Only computed for a continuous/count
 #'   response binned on a numeric `plot_by`.
