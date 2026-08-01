@@ -256,6 +256,103 @@ the exposure:</p>
 <p><img src="plot-vpc_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
+<div class="section level2">
+<h2 id="troubleshooting-overlapping-quantile-bands">Troubleshooting: overlapping quantile bands<a class="anchor" aria-label="anchor" href="#troubleshooting-overlapping-quantile-bands"></a>
+</h2>
+<p>The quantile idioms
+(<code>er_style_vpc_*_quantile_line()</code>/<code>_ribbon()</code>/<code>_errorbar()</code>)
+plot several <code>probs</code> at once, and none of them use anything
+besides y-position to tell those percentiles apart. When the underlying
+bands sit close together – a small sample per bin, few simulated
+replicates, or several <code>probs</code> requested close to one another
+– this can make a plot illegible. The <code>_errorbar()</code> idiom is
+the most exposed to this: it plots every requested percentile at the
+<em>same</em> x-position within a bin, so pairing
+<code><a href="../reference/er_style_vpc_observed.html">er_style_vpc_observed_quantile_errorbar()</a></code> with
+<code><a href="../reference/er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_errorbar()</a></code> can stack up to
+<code>2 * length(probs)</code> error bars on top of one another. Here it
+is with five requested percentiles:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://emaxnls.djnavarro.net/reference/emax_nls.html" class="external-link">emax_nls</a></span><span class="op">(</span></span>
+<span>  structural_model <span class="op">=</span> <span class="va">rsp_1</span> <span class="op">~</span> <span class="va">exp_1</span>,</span>
+<span>  covariate_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">E0</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">Emax</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">logEC50</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">emax_df</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
+<span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
+<span>    response <span class="op">=</span> <span class="va">rsp_1</span>,</span>
+<span>    response_type <span class="op">=</span> <span class="st">"continuous"</span>,</span>
+<span>    n_bins <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_errorbar</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
+<span>    model <span class="op">=</span> <span class="va">mod</span>,</span>
+<span>    seed <span class="op">=</span> <span class="fl">1234</span>,</span>
+<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_errorbar</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="700"></p>
+<p>There’s no automatic fix for this: whether the collision is between
+the observed and simulated layers, between the individual
+<code>probs</code> within one layer, or both at once depends entirely on
+the data at hand, so any heuristic dodge would risk distorting some
+plots it wasn’t meant to touch. Instead, both <code>_errorbar()</code>
+builders take two manual, opt-in arguments (default <code>0</code>,
+reproducing the layout above) for a numeric <code>plot_by</code>:</p>
+<ul>
+<li>
+<code>dodge</code> shifts a whole builder’s error bars sideways –
+pair an equal and opposite <code>dodge</code> on the observed and
+simulated builders to pull the two layers apart.</li>
+<li>
+<code>prob_dodge_width</code> spreads a single builder’s own
+<code>probs</code> apart, symmetrically around the bin’s true
+position.</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
+<span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
+<span>    response <span class="op">=</span> <span class="va">rsp_1</span>,</span>
+<span>    response_type <span class="op">=</span> <span class="st">"continuous"</span>,</span>
+<span>    n_bins <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span></span>
+<span>    style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_errorbar</span>,</span>
+<span>    dodge <span class="op">=</span> <span class="op">-</span><span class="fl">0.02</span>, prob_dodge_width <span class="op">=</span> <span class="fl">0.012</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
+<span>    model <span class="op">=</span> <span class="va">mod</span>,</span>
+<span>    seed <span class="op">=</span> <span class="fl">1234</span>,</span>
+<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_errorbar</span>,</span>
+<span>    dodge <span class="op">=</span> <span class="fl">0.02</span>, prob_dodge_width <span class="op">=</span> <span class="fl">0.012</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="700"></p>
+<p>Both arguments are expressed as a fraction of <code>plot_by</code>’s
+own range (like <code>errorbar_width_continuous</code>), so the same
+value scales sensibly across datasets; picking a good value is
+inherently a bit of trial and error, since it depends on how many
+bins/<code>probs</code> are requested and how spread out the data is.
+Neither argument is supported for a categorical <code>plot_by</code> yet
+– there, adjacent bins are already spaced apart, so this kind of
+collision is confined to the <code>probs</code>-within-a-bin case, which
+currently has no dodge option (a nonzero
+<code>dodge</code>/<code>prob_dodge_width</code> is ignored with a
+warning rather than silently distorting the categorical axis).</p>
+<p>The ribbon/line idiom has the same underlying problem – overlapping
+bands merge into a single shaded region, and the identically-styled
+median lines become the only (unreliable) way to tell them apart – but a
+different fix:
+<code>er_style_vpc_simulated_quantile_ribbon(ribbon_edges = TRUE)</code>
+draws each band’s own bounds as a line, which stays traceable across the
+plot even where the fills themselves overlap into an indistinguishable
+blob.</p>
+</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>

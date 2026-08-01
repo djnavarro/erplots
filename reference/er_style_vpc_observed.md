@@ -29,6 +29,8 @@ er_style_vpc_observed_quantile_errorbar(
   point_size = 1.5,
   errorbar_width = 0.15,
   errorbar_width_continuous = 0.025,
+  dodge = 0,
+  prob_dodge_width = 0,
   ...
 )
 
@@ -41,6 +43,7 @@ er_style_vpc_observed_mean_errorbar(
   point_size = 2,
   errorbar_width = 0.2,
   errorbar_width_continuous = 0.025,
+  dodge = 0,
   ...
 )
 ```
@@ -89,6 +92,29 @@ er_style_vpc_observed_mean_errorbar(
   of `er_style_vpc_observed_mean_errorbar()`'s and
   `er_style_vpc_observed_quantile_errorbar()`'s error bars when
   `plot_by` is numeric.
+
+- dodge:
+
+  Horizontal offset (as a fraction of `plot_by`'s own range, like
+  `errorbar_width_continuous`) applied to all of this builder's error
+  bars/points, for both `er_style_vpc_observed_mean_errorbar()` and
+  `er_style_vpc_observed_quantile_errorbar()`. Default `0` (no offset,
+  the previous behaviour). Useful for manually separating the observed
+  layer from an overlapping simulated one at the same bin – e.g.
+  `dodge = -0.01` on the observed builder paired with `dodge = 0.01` on
+  the corresponding simulated builder. Only supported when `plot_by` is
+  numeric; a nonzero value is ignored with a warning for a categorical
+  `plot_by`, where dodging isn't implemented yet.
+
+- prob_dodge_width:
+
+  Horizontal spread (as a fraction of `plot_by`'s own range) applied to
+  `er_style_vpc_observed_quantile_errorbar()`'s requested `probs` within
+  a single bin, symmetrically centred on that bin's own position (added
+  on top of `dodge`, if also supplied). Default `0` (all `probs` plotted
+  at the same position, the previous behaviour). Useful when several
+  `probs`' error bars overlap enough to be unreadable. Same
+  numeric-`plot_by`-only restriction as `dodge`.
 
 ## Value
 
@@ -143,6 +169,19 @@ support may be added in a future release.
 Each builder maps a constant `color = "Observed"`, so ggplot2 merges its
 legend entry with whatever the paired simulated-layer builder maps for
 `"Simulated"` into a single combined legend.
+
+In the worst case – `er_style_vpc_observed_quantile_errorbar()` paired
+with
+[`er_style_vpc_simulated_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+for a numeric `plot_by` with several `probs` – up to `2 * length(probs)`
+error bars land at the exact same x-position within a bin (every `probs`
+value, for both the observed and simulated layers), which can be
+unreadable. `dodge` (separating the observed and simulated layers) and
+`prob_dodge_width` (spreading a single layer's own `probs` apart) are
+both opt-in, manual escape hatches for this – see their own argument
+docs above. Neither is automatic, because which collision is actually
+occurring (source-vs-source, `probs`-vs-`probs`, or both) depends on the
+data at hand.
 
 ## See also
 

@@ -95,6 +95,8 @@ point/interval per bin <em>and</em> per requested percentile.</p>
 <span>  point_size <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>  errorbar_width <span class="op">=</span> <span class="fl">0.15</span>,</span>
 <span>  errorbar_width_continuous <span class="op">=</span> <span class="fl">0.025</span>,</span>
+<span>  dodge <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  prob_dodge_width <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -107,6 +109,7 @@ point/interval per bin <em>and</em> per requested percentile.</p>
 <span>  point_size <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  errorbar_width <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  errorbar_width_continuous <span class="op">=</span> <span class="fl">0.025</span>,</span>
+<span>  dodge <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -185,6 +188,26 @@ own range, <code>config$group_limits</code>) of
 <code>er_style_vpc_simulated_mean_errorbar()</code>'s and
 <code>er_style_vpc_simulated_quantile_errorbar()</code>'s error bars when
 <code>plot_by</code> is numeric.</p></dd>
+
+
+<dt id="arg-dodge">dodge<a class="anchor" aria-label="anchor" href="#arg-dodge"></a></dt>
+<dd><p>Horizontal offset (as a fraction of <code>plot_by</code>'s own
+range, like <code>errorbar_width_continuous</code>) applied to all of this
+builder's error bars/points, for both <code>er_style_vpc_simulated_mean_errorbar()</code>
+and <code>er_style_vpc_simulated_quantile_errorbar()</code>. Default <code>0</code>
+(no offset, the previous behaviour); pair with an opposite-signed
+<code>dodge</code> on the corresponding observed builder to manually separate
+the two layers where they'd otherwise overlap at the same bin. See
+<code><a href="er_style_vpc_observed.html">er_style_vpc_observed()</a></code>'s own <code>dodge</code> docs for the full
+explanation, including the categorical-<code>plot_by</code> restriction.</p></dd>
+
+
+<dt id="arg-prob-dodge-width">prob_dodge_width<a class="anchor" aria-label="anchor" href="#arg-prob-dodge-width"></a></dt>
+<dd><p>Horizontal spread (as a fraction of <code>plot_by</code>'s
+own range) applied to <code>er_style_vpc_simulated_quantile_errorbar()</code>'s
+requested <code>probs</code> within a single bin. Default <code>0</code> (the previous
+behaviour); see <code><a href="er_style_vpc_observed.html">er_style_vpc_observed()</a></code>'s own <code>prob_dodge_width</code>
+docs.</p></dd>
 
 </dl></div>
     <div class="section level2">

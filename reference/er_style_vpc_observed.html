@@ -88,6 +88,8 @@ point/interval per bin <em>and</em> per requested percentile.</p>
 <span>  point_size <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>  errorbar_width <span class="op">=</span> <span class="fl">0.15</span>,</span>
 <span>  errorbar_width_continuous <span class="op">=</span> <span class="fl">0.025</span>,</span>
+<span>  dodge <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  prob_dodge_width <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -100,6 +102,7 @@ point/interval per bin <em>and</em> per requested percentile.</p>
 <span>  point_size <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  errorbar_width <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  errorbar_width_continuous <span class="op">=</span> <span class="fl">0.025</span>,</span>
+<span>  dodge <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -150,6 +153,31 @@ own range, <code>config$group_limits</code>) of
 <code>er_style_vpc_observed_quantile_errorbar()</code>'s error bars when
 <code>plot_by</code> is numeric.</p></dd>
 
+
+<dt id="arg-dodge">dodge<a class="anchor" aria-label="anchor" href="#arg-dodge"></a></dt>
+<dd><p>Horizontal offset (as a fraction of <code>plot_by</code>'s own
+range, like <code>errorbar_width_continuous</code>) applied to all of this
+builder's error bars/points, for both <code>er_style_vpc_observed_mean_errorbar()</code>
+and <code>er_style_vpc_observed_quantile_errorbar()</code>. Default <code>0</code>
+(no offset, the previous behaviour). Useful for manually separating
+the observed layer from an overlapping simulated one at the same
+bin – e.g. <code>dodge = -0.01</code> on the observed builder paired with
+<code>dodge = 0.01</code> on the corresponding simulated builder. Only
+supported when <code>plot_by</code> is numeric; a nonzero value is ignored
+with a warning for a categorical <code>plot_by</code>, where dodging isn't
+implemented yet.</p></dd>
+
+
+<dt id="arg-prob-dodge-width">prob_dodge_width<a class="anchor" aria-label="anchor" href="#arg-prob-dodge-width"></a></dt>
+<dd><p>Horizontal spread (as a fraction of <code>plot_by</code>'s
+own range) applied to <code>er_style_vpc_observed_quantile_errorbar()</code>'s
+requested <code>probs</code> within a single bin, symmetrically centred on
+that bin's own position (added on top of <code>dodge</code>, if also
+supplied). Default <code>0</code> (all <code>probs</code> plotted at the same position,
+the previous behaviour). Useful when several <code>probs</code>' error bars
+overlap enough to be unreadable. Same numeric-<code>plot_by</code>-only
+restriction as <code>dodge</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -198,6 +226,17 @@ in a future release.</p>
 <p>Each builder maps a constant <code>color = "Observed"</code>, so ggplot2 merges
 its legend entry with whatever the paired simulated-layer builder
 maps for <code>"Simulated"</code> into a single combined legend.</p>
+<p>In the worst case – <code>er_style_vpc_observed_quantile_errorbar()</code>
+paired with <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_errorbar()</a></code> for a
+numeric <code>plot_by</code> with several <code>probs</code> – up to <code>2 * length(probs)</code>
+error bars land at the exact same x-position within a bin (every
+<code>probs</code> value, for both the observed and simulated layers), which can
+be unreadable. <code>dodge</code> (separating the observed and simulated layers)
+and <code>prob_dodge_width</code> (spreading a single layer's own <code>probs</code> apart)
+are both opt-in, manual escape hatches for this – see their own
+argument docs above. Neither is automatic, because which collision is
+actually occurring (source-vs-source, <code>probs</code>-vs-<code>probs</code>, or both)
+depends on the data at hand.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

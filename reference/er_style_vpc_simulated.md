@@ -36,6 +36,8 @@ er_style_vpc_simulated_quantile_errorbar(
   point_size = 1.5,
   errorbar_width = 0.15,
   errorbar_width_continuous = 0.025,
+  dodge = 0,
+  prob_dodge_width = 0,
   ...
 )
 
@@ -48,6 +50,7 @@ er_style_vpc_simulated_mean_errorbar(
   point_size = 2,
   errorbar_width = 0.2,
   errorbar_width_continuous = 0.025,
+  dodge = 0,
   ...
 )
 ```
@@ -125,6 +128,27 @@ er_style_vpc_simulated_mean_errorbar(
   of `er_style_vpc_simulated_mean_errorbar()`'s and
   `er_style_vpc_simulated_quantile_errorbar()`'s error bars when
   `plot_by` is numeric.
+
+- dodge:
+
+  Horizontal offset (as a fraction of `plot_by`'s own range, like
+  `errorbar_width_continuous`) applied to all of this builder's error
+  bars/points, for both `er_style_vpc_simulated_mean_errorbar()` and
+  `er_style_vpc_simulated_quantile_errorbar()`. Default `0` (no offset,
+  the previous behaviour); pair with an opposite-signed `dodge` on the
+  corresponding observed builder to manually separate the two layers
+  where they'd otherwise overlap at the same bin. See
+  [`er_style_vpc_observed()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)'s
+  own `dodge` docs for the full explanation, including the
+  categorical-`plot_by` restriction.
+
+- prob_dodge_width:
+
+  Horizontal spread (as a fraction of `plot_by`'s own range) applied to
+  `er_style_vpc_simulated_quantile_errorbar()`'s requested `probs`
+  within a single bin. Default `0` (the previous behaviour); see
+  [`er_style_vpc_observed()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)'s
+  own `prob_dodge_width` docs.
 
 ## Value
 
