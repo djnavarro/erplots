@@ -25,6 +25,7 @@ er_style_vpc_observed_quantile_errorbar(
   theme,
   point_size = 1.5,
   errorbar_width = 0.15,
+  errorbar_width_continuous = 0.025,
   ...
 )
 
@@ -57,11 +58,12 @@ er_style_vpc_observed_mean_errorbar(
 \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s own \code{...}.}
 
 \item{errorbar_width}{Width of \code{er_style_vpc_observed_mean_errorbar()}'s
-error bars when \code{plot_by} is categorical, and of
-\code{er_style_vpc_observed_quantile_errorbar()}'s.}
+and \code{er_style_vpc_observed_quantile_errorbar()}'s error bars when
+\code{plot_by} is categorical.}
 
 \item{errorbar_width_continuous}{Width (as a fraction of the exposure
-range) of \code{er_style_vpc_observed_mean_errorbar()}'s error bars when
+range) of \code{er_style_vpc_observed_mean_errorbar()}'s and
+\code{er_style_vpc_observed_quantile_errorbar()}'s error bars when
 \code{plot_by} is numeric.}
 }
 \value{
@@ -96,19 +98,25 @@ without it errors.
 
 \code{er_style_vpc_observed_quantile_errorbar()} plots \code{config$percentiles}
 -- a point + confidence interval (via \code{\link[=ci_quantile]{ci_quantile()}}) for each
-requested percentile -- at each bin's categorical (or quantile-bin)
-label, for pairing with \code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}}.
-Unlike \code{er_style_vpc_observed_quantile_line()}/
-\code{er_style_vpc_simulated_quantile_ribbon()}, it supports both a numeric
-and a categorical \code{plot_by} (it always plots at the discrete
-\code{.vpc_bin} label rather than a continuous numeric midpoint); like it,
-it requires a continuous/count response (a binary response's
-distribution is already fully described by its rate) and errors
-informatively without \code{config$percentiles}. When more than one
-percentile is requested, all of them are currently plotted at the
-same \code{.vpc_bin} x-position within a bin rather than dodged apart, so
-overlapping error bars/points are only distinguishable by their
-y-position -- dodging support may be added in a future release.
+requested percentile -- for pairing with
+\code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}}. Like
+\code{er_style_vpc_observed_mean_errorbar()}, it adapts its x-position to
+\code{plot_by}'s type (\code{config$is_numeric_group}): equally spaced at each
+bin's categorical (or quantile-bin) label when \code{plot_by} is
+categorical, or at each bin's numeric median (\code{x_median}, from
+\code{config$percentiles}) on the exposure scale when \code{plot_by} is
+numeric. Because it adapts its x-position family at build time rather
+than declaring one statically, it carries no \code{layout} tag. Unlike
+\code{er_style_vpc_observed_quantile_line()}/
+\code{er_style_vpc_simulated_quantile_ribbon()}, it supports a categorical
+\code{plot_by} as well as a numeric one; like it, it requires a
+continuous/count response (a binary response's distribution is
+already fully described by its rate) and errors informatively without
+\code{config$percentiles}. When more than one percentile is requested, all
+of them are currently plotted at the same x-position within a bin
+rather than dodged apart, so overlapping error bars/points are only
+distinguishable by their y-position -- dodging support may be added
+in a future release.
 
 Each builder maps a constant \code{color = "Observed"}, so ggplot2 merges
 its legend entry with whatever the paired simulated-layer builder

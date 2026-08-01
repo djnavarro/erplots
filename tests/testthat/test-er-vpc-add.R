@@ -99,17 +99,19 @@ test_that("er_vpc_add_simulated() errors informatively when sim_resp is unavaila
 })
 
 test_that("er_vpc_add_simulated() errors on a categorical/continuous layout mismatch", {
-  vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
-    er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar)
-  expect_error(
-    er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 901, style = er_style_vpc_simulated_quantile_ribbon),
-    "categorical.*continuous|continuous.*categorical"
+  # `er_style_vpc_observed_quantile_line()`/`er_style_vpc_simulated_quantile_ribbon()`
+  # are the only built-ins that still statically declare a `layout` tag
+  # (both `"continuous"`); a locally-tagged `"categorical"` stand-in
+  # exercises the mismatch check against them.
+  categorical_stub <- er_style_tag(
+    function(data, config, exposure, response, theme, ...) list(),
+    layer = "simulated", layout = "categorical"
   )
 
-  vpc2 <- er_vpc(er_test_data, aucss, biomarker_change) |>
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
     er_vpc_add_observed(style = er_style_vpc_observed_quantile_line)
   expect_error(
-    er_vpc_add_simulated(vpc2, model = er_test_mod_gaussian, nsim = 5, seed = 902, style = er_style_vpc_simulated_quantile_errorbar),
+    er_vpc_add_simulated(vpc, model = er_test_mod_gaussian, nsim = 5, seed = 901, style = categorical_stub),
     "categorical.*continuous|continuous.*categorical"
   )
 })

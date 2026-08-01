@@ -108,6 +108,7 @@
           ci <- vapply(probs, function(p) ci_quantile(resp, p, conf_level), numeric(2))
           tibble::tibble(
             x_mid = if (config$is_numeric_group) mean(grp, na.rm = TRUE) else NA_real_,
+            x_median = if (config$is_numeric_group) stats::median(grp, na.rm = TRUE) else NA_real_,
             prob = probs,
             y = unname(stats::quantile(resp, probs = probs, na.rm = TRUE)),
             ci_lower = ci["lower", ],
@@ -195,6 +196,10 @@
     stage1 <- sim |>
       dplyr::reframe(
         x_mid = if (obs_config$is_numeric_group) mean(.data[[group_var]], na.rm = TRUE) else NA_real_,
+        # exposure values don't vary across `sim_id` replicates, so this
+        # collapses to the same value in stage 2 -- mirrors
+        # `.layer_vpc_observed()`'s `config$percentiles$x_median`
+        x_median = if (obs_config$is_numeric_group) stats::median(.data[[group_var]], na.rm = TRUE) else NA_real_,
         prob = probs,
         y = unname(stats::quantile(.data[[rsp_var]], probs = probs, na.rm = TRUE)),
         .by = c(".vpc_bin", "sim_id")
@@ -202,6 +207,7 @@
     config$percentiles <- stage1 |>
       dplyr::summarise(
         x_mid = if (obs_config$is_numeric_group) mean(x_mid, na.rm = TRUE) else NA_real_,
+        x_median = if (obs_config$is_numeric_group) mean(x_median, na.rm = TRUE) else NA_real_,
         y_mid = stats::median(y, na.rm = TRUE),
         ci_lower = stats::quantile(y, probs = alpha, na.rm = TRUE),
         ci_upper = stats::quantile(y, probs = 1 - alpha, na.rm = TRUE),

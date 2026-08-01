@@ -881,3 +881,30 @@ their differing y-values, not by any horizontal offset. Revisiting
 proper dodging (likely via an explicit shared offset computed once and
 applied to all four geoms, similar in spirit to `er_plot()`'s own
 `.dodge_quantile_strata()`) is deferred to a future PR.
+
+## Making the quantile-errorbar idiom adapt to `plot_by`'s type, like the mean/errorbar default
+
+`er_style_vpc_observed_quantile_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()`
+always plotted at the discrete `.vpc_bin` label, even for a numeric
+`plot_by` -- a bug, since a continuous `plot_by` should show up on a
+continuous exposure-scale x-axis (as every other continuous-`plot_by`
+idiom does), not as evenly-spaced categorical positions. Fixed by
+giving both builders the same adaptive x-position logic
+`er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()`
+already use: `.vpc_bin` for a categorical `plot_by`, each bin's numeric
+median (`x_median`) on the exposure scale for a numeric one. This
+required adding `x_median` to `config$percentiles` in both
+`.layer_vpc_observed()`/`.layer_vpc_simulated()` (previously only
+`config$summary` carried it), and adding an `errorbar_width_continuous`
+parameter to both builders (mirroring the mean/errorbar pair's own),
+since a numeric x-axis needs a width in exposure units rather than a
+constant categorical-bar width.
+
+Since the builders' x-position family is now chosen from the data at
+build time rather than fixed, they were untagged for `layout` (dropping
+their previous static `layout = "categorical"`) -- the same reasoning
+that already left the mean/errorbar default untagged. This is a pure
+bugfix, not a new idiom: two visual idioms remain conceptually (adaptive
+point/errorbar vs. continuous-x percentile-band), just with the plain
+mean and the per-percentile point/errorbar builders sharing the same
+adaptive x-position logic.

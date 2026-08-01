@@ -87,17 +87,20 @@ For a VPC observed/simulated builder, \code{layout} is optional but, when
 present on both the observed and simulated builder passed to a given
 \code{er_vpc} object, is checked for agreement: \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}
 errors if the simulated builder's \code{layout} (\code{"categorical"}, discrete
-\code{.vpc_bin} locations, e.g. \code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}};
-or \code{"continuous"}, numeric bin-midpoint locations, e.g.
-\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}) disagrees with the observed
-builder's own. This catches the case where the two families would
-otherwise silently plot at different x-positions for the same bin --
-e.g. pairing \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}'s discrete bin
-labels with \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}'s numeric midpoints.
-Use a layout-matched pair instead (built-ins already are), or leave
-\code{layout} untagged (as \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}/
-\code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}} do) to skip the check
-entirely, the same opt-in treatment \code{layer} gets.
+bin locations; or \code{"continuous"}, numeric bin-midpoint locations, e.g.
+\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}) disagrees with the
+observed builder's own. This catches the case where the two families
+would otherwise silently plot at different x-positions for the same
+bin -- e.g. pairing a builder that always plots at discrete bin
+labels with \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}'s numeric
+midpoints. Use a layout-matched pair instead (built-ins already are),
+or leave \code{layout} untagged -- as \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}/
+\code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}} and
+\code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}/
+\code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}} do, since both pairs
+adapt their x-position to \code{plot_by}'s type at build time rather than
+declaring one family statically -- to skip the check entirely, the
+same opt-in treatment \code{layer} gets.
 
 \code{fill_role} and \code{y_role} are both optional, and can be used
 to title a legend/axis correctly: \code{fill_role = "density"} (used by

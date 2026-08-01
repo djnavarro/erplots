@@ -12,10 +12,11 @@ test_that(".layer_vpc_observed() computes mean + t-interval and percentiles for 
   expect_true(all(smm$ci_lower <= smm$y_mid & smm$y_mid <= smm$ci_upper))
 
   pct <- vpc$layer$observed$config$percentiles
-  expect_true(all(c(".vpc_bin", "x_mid", "prob", "y", "ci_lower", "ci_upper") %in% names(pct)))
+  expect_true(all(c(".vpc_bin", "x_mid", "x_median", "prob", "y", "ci_lower", "ci_upper") %in% names(pct)))
   expect_setequal(unique(pct$prob), c(0.1, 0.5, 0.9))
   expect_equal(nrow(pct), 3 * length(unique(pct$.vpc_bin)))
   expect_true(all(pct$ci_lower <= pct$y & pct$y <= pct$ci_upper))
+  expect_false(any(is.na(pct$x_median)))
 })
 
 test_that(".layer_vpc_observed() uses an exact Poisson interval for response_type = 'count'", {
@@ -45,8 +46,9 @@ test_that(".layer_vpc_simulated() computes percentile bands matching config$perc
     er_vpc_add_simulated(model = er_test_mod_gaussian, nsim = 5, seed = 602)
 
   pct <- vpc$layer$simulated$config$percentiles
-  expect_true(all(c(".vpc_bin", "x_mid", "prob", "y_mid", "ci_lower", "ci_upper") %in% names(pct)))
+  expect_true(all(c(".vpc_bin", "x_mid", "x_median", "prob", "y_mid", "ci_lower", "ci_upper") %in% names(pct)))
   expect_true(all(pct$ci_lower <= pct$y_mid & pct$y_mid <= pct$ci_upper))
+  expect_false(any(is.na(pct$x_median)))
 })
 
 test_that(".layer_vpc_observed()/.layer_vpc_simulated() still compute percentiles for a categorical plot_by", {
@@ -61,6 +63,8 @@ test_that(".layer_vpc_observed()/.layer_vpc_simulated() still compute percentile
   sim_pct <- vpc$layer$simulated$config$percentiles
   expect_true(all(is.na(obs_pct$x_mid)))
   expect_true(all(is.na(sim_pct$x_mid)))
+  expect_true(all(is.na(obs_pct$x_median)))
+  expect_true(all(is.na(sim_pct$x_median)))
   expect_false(any(is.na(obs_pct$y)))
   expect_false(any(is.na(sim_pct$y_mid)))
 })

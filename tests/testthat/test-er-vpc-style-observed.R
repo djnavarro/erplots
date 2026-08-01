@@ -85,24 +85,26 @@ test_that("er_vpc pipeline builds with the default mean_errorbar pair for a cate
   expect_true(inherits(built$output, "ggplot"))
 })
 
-test_that("er_style_vpc_observed_quantile_errorbar() returns point + errorbar geoms per prob", {
+test_that("er_style_vpc_observed_quantile_errorbar() plots at each bin's numeric median for a continuous plot_by", {
   vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
     er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar)
   geoms <- er_style_vpc_observed_quantile_errorbar(
     er_test_data, vpc$layer$observed$config, vpc$exposure, vpc$response, vpc$theme
   )
   expect_length(geoms, 2)
-  expect_true(rlang::quo_get_expr(geoms[[2]]$mapping$x) == ".vpc_bin")
+  expect_true(rlang::quo_get_expr(geoms[[2]]$mapping$x) == "x_median")
   expect_equal(geoms[[2]]$data, vpc$layer$observed$config$percentiles)
+  expect_false(any(is.na(vpc$layer$observed$config$percentiles$x_median)))
 })
 
-test_that("er_style_vpc_observed_quantile_errorbar() works for a categorical plot_by", {
+test_that("er_style_vpc_observed_quantile_errorbar() plots at the discrete .vpc_bin label for a categorical plot_by", {
   vpc <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex, probs = c(0.1, 0.5, 0.9)) |>
     er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar)
   geoms <- er_style_vpc_observed_quantile_errorbar(
     er_test_data, vpc$layer$observed$config, vpc$exposure, vpc$response, vpc$theme
   )
   expect_length(geoms, 2)
+  expect_true(rlang::quo_get_expr(geoms[[2]]$mapping$x) == ".vpc_bin")
   expect_false(any(is.na(vpc$layer$observed$config$percentiles$y)))
 })
 
@@ -126,7 +128,7 @@ test_that("er_vpc_add_observed() rejects er_style_vpc_observed_quantile_errorbar
 
 test_that("built-in observed builders are tagged appropriately, including quantile_errorbar", {
   expect_equal(attr(er_style_vpc_observed_quantile_errorbar, "er_style_layer"), "observed")
-  expect_equal(attr(er_style_vpc_observed_quantile_errorbar, "er_style_layout"), "categorical")
+  expect_null(attr(er_style_vpc_observed_quantile_errorbar, "er_style_layout"))
   expect_equal(
     attr(er_style_vpc_observed_quantile_errorbar, "er_style_response_types"),
     c("continuous", "count")

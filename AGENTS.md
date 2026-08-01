@@ -233,33 +233,35 @@ Three visual idioms, chosen by `style`:
   reject an incompatible object up front; each also keeps its own
   internal `config$percentiles`-unavailable guard as a fallback for an
   untagged custom builder.
-- **Categorical-bin quantile idiom** (`layout = "categorical"`):
-  `er_style_vpc_observed_quantile_errorbar()` /
-  `er_style_vpc_simulated_quantile_errorbar()` -- a point/errorbar per
-  requested percentile (see [er_vpc()]'s `probs` argument), plotted at
-  each bin's discrete `.vpc_bin` location. When more than one percentile
-  is requested they currently overplot at the same x-position within a
-  bin rather than being dodged apart -- dodging support is deferred to a
+- **Adaptive quantile-errorbar idiom**: `er_style_vpc_observed_quantile_errorbar()`
+  / `er_style_vpc_simulated_quantile_errorbar()` -- a point/errorbar per
+  requested percentile (see [er_vpc()]'s `probs` argument), with the
+  same adaptive x-position as the mean/errorbar default (`.vpc_bin` for
+  a categorical `plot_by`, `x_median` -- computed alongside `x_mid` in
+  `config$percentiles` -- for a numeric one); like the mean/errorbar
+  pair, neither carries a `layout` tag. When more than one percentile is
+  requested they currently overplot at the same x-position within a bin
+  rather than being dodged apart -- dodging support is deferred to a
   future PR. Unlike the percentile-band idiom above, `config$percentiles`
-  (and so this idiom) supports a
-  categorical `plot_by` as well as a numeric one -- tagged
-  `response_types = c("continuous", "count")`, `plot_by_types =
-  c("continuous", "discrete")` -- since it never needs a numeric
-  midpoint, only the discrete bin label; each builder still errors
-  informatively without `config$percentiles` (continuous/count response
-  only) as a fallback.
+  (and so this idiom) supports a categorical `plot_by` as well as a
+  numeric one -- tagged `response_types = c("continuous", "count")`,
+  `plot_by_types = c("continuous", "discrete")`; each builder still
+  errors informatively without `config$percentiles` (continuous/count
+  response only) as a fallback.
 
 `er_vpc_add_simulated()` checks the observed and simulated builders'
 `layout` tags against each other (`.check_vpc_layout_match()` in
-`R/er-plot-style.R`) and errors if they disagree -- e.g. pairing
-`er_style_vpc_observed_quantile_errorbar()`'s discrete locations with
-`er_style_vpc_simulated_quantile_ribbon()`'s numeric midpoints would otherwise
-silently plot the two layers at inconsistent x-positions for the same
-bin. An untagged custom builder on either side skips this check, the
-same opt-in treatment the `layer` tag gets. `probs` can't diverge
-between the two layers the way `layout` still can, since it's set once
-on `er_vpc()` and read from `object$group` by both `.layer_vpc_*()`
-functions.
+`R/er-plot-style.R`) and errors if they disagree -- e.g. pairing a
+builder that always plots at discrete bin locations with
+`er_style_vpc_simulated_quantile_ribbon()`'s numeric midpoints would
+otherwise silently plot the two layers at inconsistent x-positions for
+the same bin. An untagged builder on either side skips this check --
+the same opt-in treatment the `layer` tag gets -- which is why both the
+mean/errorbar and quantile-errorbar idioms above are untagged: their
+x-position family is chosen from the data at build time, not declared
+statically. `probs` can't diverge between the two layers the way
+`layout` still can, since it's set once on `er_vpc()` and read from
+`object$group` by both `.layer_vpc_*()` functions.
 
 The simulated layer's geoms are always added before the observed layer's,
 so a simulated ribbon never buries the observed points/line.

@@ -25,6 +25,7 @@ er_style_vpc_simulated_quantile_errorbar(
   theme,
   point_size = 1.5,
   errorbar_width = 0.15,
+  errorbar_width_continuous = 0.025,
   ...
 )
 
@@ -59,11 +60,12 @@ er_style_vpc_simulated_mean_errorbar(
 \item{point_size}{Point size for both point/interval builders.}
 
 \item{errorbar_width}{Width of \code{er_style_vpc_simulated_mean_errorbar()}'s
-error bars when \code{plot_by} is categorical, and of
-\code{er_style_vpc_simulated_quantile_errorbar()}'s.}
+and \code{er_style_vpc_simulated_quantile_errorbar()}'s error bars when
+\code{plot_by} is categorical.}
 
 \item{errorbar_width_continuous}{Width (as a fraction of the exposure
-range) of \code{er_style_vpc_simulated_mean_errorbar()}'s error bars when
+range) of \code{er_style_vpc_simulated_mean_errorbar()}'s and
+\code{er_style_vpc_simulated_quantile_errorbar()}'s error bars when
 \code{plot_by} is numeric.}
 }
 \value{
@@ -99,13 +101,15 @@ without it errors.
 
 \code{er_style_vpc_simulated_quantile_errorbar()} plots \code{config$percentiles}
 -- a point + across-replicate percentile interval for each requested
-percentile -- at each bin's categorical (or quantile-bin) label, for
-pairing with \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}. Like that
-builder, it supports both a numeric and a categorical \code{plot_by} and
-requires a continuous/count response, erroring informatively without
+percentile -- for pairing with
+\code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}. Like that builder (and
+like \code{er_style_vpc_simulated_mean_errorbar()}), it adapts its
+x-position to \code{plot_by}'s type, carries no \code{layout} tag, supports
+both a numeric and a categorical \code{plot_by}, and requires a
+continuous/count response, erroring informatively without
 \code{config$percentiles}. As with the observed-layer counterpart, when
 more than one percentile is requested they are currently all plotted
-at the same \code{.vpc_bin} x-position rather than dodged apart.
+at the same x-position within a bin rather than dodged apart.
 
 \code{er_style_vpc_simulated_mean_errorbar()}/\code{er_style_vpc_simulated_quantile_errorbar()}
 map a constant \code{color = "Simulated"}; \code{er_style_vpc_simulated_quantile_ribbon()}

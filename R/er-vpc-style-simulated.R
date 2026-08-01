@@ -14,10 +14,11 @@
 #' @param theme Theme components.
 #' @param point_size Point size for both point/interval builders.
 #' @param errorbar_width Width of `er_style_vpc_simulated_mean_errorbar()`'s
-#'   error bars when `plot_by` is categorical, and of
-#'   `er_style_vpc_simulated_quantile_errorbar()`'s.
+#'   and `er_style_vpc_simulated_quantile_errorbar()`'s error bars when
+#'   `plot_by` is categorical.
 #' @param errorbar_width_continuous Width (as a fraction of the exposure
-#'   range) of `er_style_vpc_simulated_mean_errorbar()`'s error bars when
+#'   range) of `er_style_vpc_simulated_mean_errorbar()`'s and
+#'   `er_style_vpc_simulated_quantile_errorbar()`'s error bars when
 #'   `plot_by` is numeric.
 #' @param ribbon_alpha Fill transparency for `er_style_vpc_simulated_quantile_ribbon()`'s bands.
 #' @param ... Additional named arguments forwarded from
@@ -45,13 +46,15 @@
 #'
 #' `er_style_vpc_simulated_quantile_errorbar()` plots `config$percentiles`
 #' -- a point + across-replicate percentile interval for each requested
-#' percentile -- at each bin's categorical (or quantile-bin) label, for
-#' pairing with [er_style_vpc_observed_quantile_errorbar()]. Like that
-#' builder, it supports both a numeric and a categorical `plot_by` and
-#' requires a continuous/count response, erroring informatively without
+#' percentile -- for pairing with
+#' [er_style_vpc_observed_quantile_errorbar()]. Like that builder (and
+#' like `er_style_vpc_simulated_mean_errorbar()`), it adapts its
+#' x-position to `plot_by`'s type, carries no `layout` tag, supports
+#' both a numeric and a categorical `plot_by`, and requires a
+#' continuous/count response, erroring informatively without
 #' `config$percentiles`. As with the observed-layer counterpart, when
 #' more than one percentile is requested they are currently all plotted
-#' at the same `.vpc_bin` x-position rather than dodged apart.
+#' at the same x-position within a bin rather than dodged apart.
 #'
 #' `er_style_vpc_simulated_mean_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()`
 #' map a constant `color = "Simulated"`; `er_style_vpc_simulated_quantile_ribbon()`
@@ -105,7 +108,8 @@ er_style_vpc_simulated_quantile_ribbon <- er_style_tag(
 #' @rdname er_style_vpc_simulated
 #' @export
 er_style_vpc_simulated_quantile_errorbar <- function(data, config, exposure, response, theme,
-                                                      point_size = 1.5, errorbar_width = 0.15, ...) {
+                                                      point_size = 1.5, errorbar_width = 0.15,
+                                                      errorbar_width_continuous = 0.025, ...) {
   if (is.null(config$percentiles)) {
     rlang::abort(c(
       "`er_style_vpc_simulated_quantile_errorbar()` requires `config$percentiles`, which is not available here.",
@@ -113,24 +117,42 @@ er_style_vpc_simulated_quantile_errorbar <- function(data, config, exposure, res
       "i" = "Use `er_style_vpc_simulated_mean_errorbar()` instead for a binary response."
     ))
   }
-  list(
-    ggplot2::geom_errorbar(
-      data = config$percentiles,
-      mapping = ggplot2::aes(x = .vpc_bin, ymin = ci_lower, ymax = ci_upper, group = factor(prob), color = "Simulated"),
-      width = errorbar_width,
-      inherit.aes = FALSE
-    ),
-    ggplot2::geom_point(
-      data = config$percentiles,
-      mapping = ggplot2::aes(x = .vpc_bin, y = y_mid, group = factor(prob), color = "Simulated"),
-      size = point_size,
-      inherit.aes = FALSE
+  if (config$is_numeric_group) {
+    width <- errorbar_width_continuous * (exposure$limits[2] - exposure$limits[1])
+    list(
+      ggplot2::geom_errorbar(
+        data = config$percentiles,
+        mapping = ggplot2::aes(x = x_median, ymin = ci_lower, ymax = ci_upper, group = factor(prob), color = "Simulated"),
+        width = width,
+        inherit.aes = FALSE
+      ),
+      ggplot2::geom_point(
+        data = config$percentiles,
+        mapping = ggplot2::aes(x = x_median, y = y_mid, group = factor(prob), color = "Simulated"),
+        size = point_size,
+        inherit.aes = FALSE
+      )
     )
-  )
+  } else {
+    list(
+      ggplot2::geom_errorbar(
+        data = config$percentiles,
+        mapping = ggplot2::aes(x = .vpc_bin, ymin = ci_lower, ymax = ci_upper, group = factor(prob), color = "Simulated"),
+        width = errorbar_width,
+        inherit.aes = FALSE
+      ),
+      ggplot2::geom_point(
+        data = config$percentiles,
+        mapping = ggplot2::aes(x = .vpc_bin, y = y_mid, group = factor(prob), color = "Simulated"),
+        size = point_size,
+        inherit.aes = FALSE
+      )
+    )
+  }
 }
 er_style_vpc_simulated_quantile_errorbar <- er_style_tag(
   er_style_vpc_simulated_quantile_errorbar,
-  layer = "simulated", layout = "categorical",
+  layer = "simulated",
   response_types = c("continuous", "count"),
   plot_by_types = c("continuous", "discrete")
 )

@@ -34,11 +34,11 @@
 #' @param n_bins Number of quantile bins, when `plot_by` is numeric.
 #' @param conf_level Confidence level for both the observed- and
 #'   simulated-side intervals. Must be strictly between 0 and 1.
-#' @param probs Percentiles to compute for a `"continuous"`-layout builder
-#'   (e.g. [er_style_vpc_observed_quantile_line()]/[er_style_vpc_simulated_quantile_ribbon()];
-#'   ignored by a `"categorical"`-layout builder like the default
-#'   pointrange/errorbar pair). Only computed for a continuous/count
-#'   response binned on a numeric `plot_by`.
+#' @param probs Percentiles to compute for a percentile-based builder
+#'   (e.g. [er_style_vpc_observed_quantile_line()]/[er_style_vpc_simulated_quantile_ribbon()]/
+#'   [er_style_vpc_observed_quantile_errorbar()]/[er_style_vpc_simulated_quantile_errorbar()];
+#'   ignored by the default adaptive mean/errorbar pair). Only computed
+#'   for a continuous/count response.
 #'
 #' @returns An (empty) plot object of class `er_vpc`.
 #'
