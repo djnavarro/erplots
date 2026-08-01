@@ -220,37 +220,21 @@
 
       <dl><dt>
 
-          <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange()</a></code> <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_line()</a></code>
+          <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange()</a></code> <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange_continuous()</a></code> <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_line()</a></code>
 
         </dt>
         <dd>Observed-layer builders for VPC plots</dd>
 
         <dt>
 
-          <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_errorbar()</a></code> <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_ribbon()</a></code>
+          <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_errorbar()</a></code> <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_errorbar_continuous()</a></code> <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_ribbon()</a></code>
 
         </dt>
         <dd>Simulated-layer builders for VPC plots</dd>
       </dl></div><div class="section level2">
-      <h2 id="model-interface">Model interface<a class="anchor" aria-label="anchor" href="#model-interface"></a></h2>
+      <h2 id="confidence-intervals">Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"></a></h2>
 
-      <div class="section-desc"><p>The generics a model must (or may) implement to work with erplots</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="er_model_interface.html">er_predict()</a></code> <code><a href="er_model_interface.html">er_simulate()</a></code> <code><a href="er_model_interface.html">er_summary()</a></code>
-
-        </dt>
-        <dd>Model interface for exposure-response plots</dd>
-      </dl></div><div class="section level2">
-      <h2 id="other">Other<a class="anchor" aria-label="anchor" href="#other"></a></h2>
-
-      <div class="section-desc"><p>Other functions and objects</p></div>
+      <div class="section-desc"><p>Helper functions to compute confidence intervals</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -279,6 +263,38 @@
         <dd>t-interval confidence interval for the mean of continuous data</dd>
 
         <dt>
+
+          <code><a href="ci_quantile.html">ci_quantile()</a></code>
+
+        </dt>
+        <dd>Distribution-free confidence interval for a sample quantile</dd>
+      </dl></div><div class="section level2">
+      <h2 id="model-interface">Model interface<a class="anchor" aria-label="anchor" href="#model-interface"></a></h2>
+
+      <div class="section-desc"><p>The generics a model must (or may) implement to work with erplots</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="er_model_interface.html">er_predict()</a></code> <code><a href="er_model_interface.html">er_simulate()</a></code> <code><a href="er_model_interface.html">er_summary()</a></code>
+
+        </dt>
+        <dd>Model interface for exposure-response plots</dd>
+      </dl></div><div class="section level2">
+      <h2 id="other">Other<a class="anchor" aria-label="anchor" href="#other"></a></h2>
+
+      <div class="section-desc"><p>Other functions and objects</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
 
           <code><a href="cut_quantile.html">cut_exposure_quantile()</a></code> <code><a href="cut_quantile.html">cut_quantile()</a></code>
 

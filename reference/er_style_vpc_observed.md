@@ -20,6 +20,17 @@ er_style_vpc_observed_pointrange(
   ...
 )
 
+er_style_vpc_observed_pointrange_continuous(
+  data,
+  config,
+  exposure,
+  response,
+  theme,
+  point_size = 2,
+  errorbar_width = 0.025,
+  ...
+)
+
 er_style_vpc_observed_line(
   data,
   config,
@@ -85,11 +96,27 @@ numeric midpoint on the exposure scale, for pairing with
 binned on a numeric `group_by` (see
 [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)'s
 `probs` argument); calling `er_style_vpc_observed_line()` without it
-errors.
+errors. `er_style_vpc_observed_pointrange_continuous()` plots the same
+rate/mean + confidence interval as `er_style_vpc_observed_pointrange()`,
+at the bin's numeric midpoint like `er_style_vpc_observed_line()` does –
+for pairing a pointrange/errorbar idiom with a `"continuous"`-layout
+simulated builder (e.g.
+[`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md))
+without a layout mismatch. It always plots the mean (from
+`config$summary`, so it works for a binary response too); when
+`config$percentiles` is also available (continuous/count response,
+numeric `group_by`), it additionally plots a dashed pointrange/errorbar
+for each requested percentile (see
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)'s
+`probs` argument), with a confidence interval from
+[`ci_quantile()`](https://erplots.djnavarro.net/reference/ci_quantile.md)
+– the observed-side analogue of the across-replicate interval
+[`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+shows as a band.
 
-Both builders map a constant `color = "Observed"`, so ggplot2 merges
-their legend entry with whatever the paired simulated-layer builder maps
-for `"Simulated"` into a single combined legend.
+Each builder maps a constant `color = "Observed"`, so ggplot2 merges its
+legend entry with whatever the paired simulated-layer builder maps for
+`"Simulated"` into a single combined legend.
 
 ## See also
 

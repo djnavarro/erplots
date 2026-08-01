@@ -110,9 +110,14 @@ columns and <code>sim_id</code>. Mutually exclusive with <code>model</code>.</p>
 
 
 <dt id="arg-probs">probs<a class="anchor" aria-label="anchor" href="#arg-probs"></a></dt>
-<dd><p>Percentiles to compute for the continuous-x ribbon
-builder; should match whatever <code>probs</code> was passed to
-<code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code> (ignored by the default errorbar builder).</p></dd>
+<dd><p>Percentiles to compute for a <code>"continuous"</code>-layout builder
+(e.g. <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_ribbon()</a></code>/
+<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_errorbar_continuous()</a></code>; ignored by a
+<code>"categorical"</code>-layout builder like the default errorbar). Must
+match whatever <code>probs</code> was passed to <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code> when
+both layers use a <code>"continuous"</code>-layout builder – this function
+errors if they disagree (see <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>'s <code>probs</code>
+documentation).</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>

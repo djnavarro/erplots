@@ -25,10 +25,16 @@ er_style_tag(
 
 - layout:
 
-  One of `"overlay"` or `"panel"`, or `NULL` (the default) to leave this
-  tag unset. See
-  [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-  for what each structural family means.
+  One of `"overlay"`, `"panel"`, `"categorical"`, or `"continuous"`, or
+  `NULL` (the default) to leave this tag unset. The
+  `"overlay"`/`"panel"` pair is for a data-layer builder
+  ([`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
+  documents what each structural family means); the `"categorical"`/
+  `"continuous"` pair is for a VPC observed/simulated builder
+  ([`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md))
+  and marks whether it plots at discrete bin locations or at each bin's
+  numeric exposure midpoint – see
+  [`er_style_vpc_observed()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/[`er_style_vpc_simulated()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md).
 
 - fill_role:
 
@@ -77,6 +83,30 @@ given builder needs, in one call, rather than chaining separate setters.
 reads it off `style` to decide whether to place the output geoms into
 the main panel (`layout = "overlay"`) or to put them into separate
 strip-like panels above and below the main panel (`layout = "panel"`)
+
+For a VPC observed/simulated builder, `layout` is optional but, when
+present on both the observed and simulated builder passed to a given
+`er_vpc` object, is checked for agreement:
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+errors if the simulated builder's `layout` (`"categorical"`, discrete
+`.vpc_bin` locations, e.g.
+[`er_style_vpc_simulated_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md);
+or `"continuous"`, numeric bin-midpoint locations, e.g.
+[`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md))
+disagrees with the observed builder's own. This catches the case where
+the two families would otherwise silently plot at different x-positions
+for the same bin – e.g. pairing
+[`er_style_vpc_observed_pointrange()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)'s
+discrete bin labels with
+[`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)'s
+numeric midpoints. Use a layout-matched pair instead (built-ins already
+are), or, to get a pointrange/errorbar idiom that still plots at the
+numeric midpoint (so it can be paired with a `"continuous"`-layout
+builder), use
+[`er_style_vpc_observed_pointrange_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/
+[`er_style_vpc_simulated_errorbar_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md).
+An untagged builder on either side skips this check entirely, the same
+opt-in treatment `layer` gets.
 
 `fill_role` and `y_role` are both optional, and can be used to title a
 legend/axis correctly: `fill_role = "density"` (used by

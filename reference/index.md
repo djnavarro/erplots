@@ -95,11 +95,26 @@ Functions to build visual predictive check plots
 Low level functions to draw specific components of a VPC plot
 
 - [`er_style_vpc_observed_pointrange()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+  [`er_style_vpc_observed_pointrange_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
   [`er_style_vpc_observed_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
   : Observed-layer builders for VPC plots
 - [`er_style_vpc_simulated_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+  [`er_style_vpc_simulated_errorbar_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
   [`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
   : Simulated-layer builders for VPC plots
+
+## Confidence intervals
+
+Helper functions to compute confidence intervals
+
+- [`ci_clopper_pearson()`](https://erplots.djnavarro.net/reference/ci_clopper_pearson.md)
+  : Clopper-Pearson confidence interval for binary data
+- [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)
+  : Exact Poisson confidence interval for a count rate
+- [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md) :
+  t-interval confidence interval for the mean of continuous data
+- [`ci_quantile()`](https://erplots.djnavarro.net/reference/ci_quantile.md)
+  : Distribution-free confidence interval for a sample quantile
 
 ## Model interface
 
@@ -114,12 +129,6 @@ The generics a model must (or may) implement to work with erplots
 
 Other functions and objects
 
-- [`ci_clopper_pearson()`](https://erplots.djnavarro.net/reference/ci_clopper_pearson.md)
-  : Clopper-Pearson confidence interval for binary data
-- [`ci_poisson()`](https://erplots.djnavarro.net/reference/ci_poisson.md)
-  : Exact Poisson confidence interval for a count rate
-- [`ci_t()`](https://erplots.djnavarro.net/reference/ci_t.md) :
-  t-interval confidence interval for the mean of continuous data
 - [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   : Cut a continuous variable into quantiles

@@ -20,6 +20,17 @@ er_style_vpc_simulated_errorbar(
   ...
 )
 
+er_style_vpc_simulated_errorbar_continuous(
+  data,
+  config,
+  exposure,
+  response,
+  theme,
+  point_size = 2,
+  errorbar_width = 0.025,
+  ...
+)
+
 er_style_vpc_simulated_ribbon(
   data,
   config,
@@ -92,13 +103,25 @@ binned on a numeric `group_by` (see
 `probs` argument, which should match what was passed to
 [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md));
 calling `er_style_vpc_simulated_ribbon()` without it errors.
+`er_style_vpc_simulated_errorbar_continuous()` plots the same mean +
+percentile interval as `er_style_vpc_simulated_errorbar()`, at the bin's
+numeric midpoint like `er_style_vpc_simulated_ribbon()` does – for
+pairing with
+[`er_style_vpc_observed_pointrange_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+or any other `"continuous"`-layout observed builder without a layout
+mismatch. It always plots the mean (from `config$summary`, so it works
+for a binary response too); when `config$percentiles` is also available
+(continuous/count response, numeric `group_by`), it additionally plots a
+dashed pointrange/errorbar for each requested percentile – the same
+across-replicate interval `er_style_vpc_simulated_ribbon()` shows as a
+band.
 
-`er_style_vpc_simulated_errorbar()` maps a constant
-`color = "Simulated"`; `er_style_vpc_simulated_ribbon()` maps a constant
-`fill = "Simulated"`. ggplot2 merges either into the paired observed
-builder's own `"Observed"` legend entry (same aesthetic) into one
-combined legend; the ribbon's `fill` legend is separate from the
-point/errorbar builders' `color` legend.
+`er_style_vpc_simulated_errorbar()`/`er_style_vpc_simulated_errorbar_continuous()`
+map a constant `color = "Simulated"`; `er_style_vpc_simulated_ribbon()`
+maps a constant `fill = "Simulated"`. ggplot2 merges either into the
+paired observed builder's own `"Observed"` legend entry (same aesthetic)
+into one combined legend; the ribbon's `fill` legend is separate from
+the point/errorbar builders' `color` legend.
 
 ## See also
 

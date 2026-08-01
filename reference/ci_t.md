@@ -42,7 +42,7 @@ responses. This is the continuous-response analogue of
 ``` r
 ci_t(rnorm(20))
 #>      lower      upper 
-#> -0.8364036  0.2163432 
+#> -0.6760526  0.2365877 
 #> attr(,"conf_level")
 #> [1] 0.95
 ```

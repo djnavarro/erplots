@@ -44,9 +44,14 @@ er_vpc_add_observed(
 
 - probs:
 
-  Percentiles to compute for the continuous-x line/ribbon builders
-  (ignored by the default pointrange builder). Only computed for a
-  continuous/count response binned on a numeric `group_by`.
+  Percentiles to compute for a `"continuous"`-layout builder (e.g.
+  [`er_style_vpc_observed_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/
+  [`er_style_vpc_observed_pointrange_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md);
+  ignored by a `"categorical"`-layout builder like the default
+  pointrange). Only computed for a continuous/count response binned on a
+  numeric `group_by`. Should match whatever `probs` is passed to
+  [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+  – see "Details".
 
 - style:
 
@@ -60,6 +65,17 @@ er_vpc_add_observed(
 ## Value
 
 `object`, with `object$layer$observed` populated.
+
+## Details
+
+When both the observed and simulated layers use a `"continuous"`-layout
+builder (see
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)'s
+`layout` argument),
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+checks this `probs` against its own and errors if they disagree, since
+mismatched `probs` would otherwise silently plot two sets of percentile
+bands that don't correspond to the same nominal percentile.
 
 ## See also
 

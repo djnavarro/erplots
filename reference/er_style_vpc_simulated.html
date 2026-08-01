@@ -76,6 +76,17 @@ bands.</p>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">er_style_vpc_simulated_errorbar_continuous</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">config</span>,</span>
+<span>  <span class="va">exposure</span>,</span>
+<span>  <span class="va">response</span>,</span>
+<span>  <span class="va">theme</span>,</span>
+<span>  point_size <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  errorbar_width <span class="op">=</span> <span class="fl">0.025</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">er_style_vpc_simulated_ribbon</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">config</span>,</span>
@@ -145,11 +156,25 @@ with <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_line()</a>
 computed for a continuous/count response binned on a numeric
 <code>group_by</code> (see <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>'s <code>probs</code> argument, which
 should match what was passed to <code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>); calling
-<code>er_style_vpc_simulated_ribbon()</code> without it errors.</p>
-<p><code>er_style_vpc_simulated_errorbar()</code> maps a constant <code>color = "Simulated"</code>; <code>er_style_vpc_simulated_ribbon()</code> maps a constant <code>fill = "Simulated"</code>. ggplot2 merges either into the paired observed
-builder's own <code>"Observed"</code> legend entry (same aesthetic) into one
-combined legend; the ribbon's <code>fill</code> legend is separate from the
-point/errorbar builders' <code>color</code> legend.</p>
+<code>er_style_vpc_simulated_ribbon()</code> without it errors.
+<code>er_style_vpc_simulated_errorbar_continuous()</code> plots the same mean +
+percentile interval as <code>er_style_vpc_simulated_errorbar()</code>, at the
+bin's numeric midpoint like <code>er_style_vpc_simulated_ribbon()</code> does –
+for pairing with
+<code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange_continuous()</a></code> or any other
+<code>"continuous"</code>-layout observed builder without a layout mismatch. It
+always plots the mean (from <code>config$summary</code>, so it works for a
+binary response too); when <code>config$percentiles</code> is also available
+(continuous/count response, numeric <code>group_by</code>), it additionally
+plots a dashed pointrange/errorbar for each requested percentile –
+the same across-replicate interval <code>er_style_vpc_simulated_ribbon()</code>
+shows as a band.</p>
+<p><code>er_style_vpc_simulated_errorbar()</code>/<code>er_style_vpc_simulated_errorbar_continuous()</code>
+map a constant <code>color = "Simulated"</code>; <code>er_style_vpc_simulated_ribbon()</code>
+maps a constant <code>fill = "Simulated"</code>. ggplot2 merges either into the
+paired observed builder's own <code>"Observed"</code> legend entry (same
+aesthetic) into one combined legend; the ribbon's <code>fill</code> legend is
+separate from the point/errorbar builders' <code>color</code> legend.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

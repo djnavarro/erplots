@@ -55,10 +55,16 @@ er_vpc_add_simulated(
 
 - probs:
 
-  Percentiles to compute for the continuous-x ribbon builder; should
-  match whatever `probs` was passed to
+  Percentiles to compute for a `"continuous"`-layout builder (e.g.
+  [`er_style_vpc_simulated_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)/
+  [`er_style_vpc_simulated_errorbar_continuous()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md);
+  ignored by a `"categorical"`-layout builder like the default
+  errorbar). Must match whatever `probs` was passed to
   [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)
-  (ignored by the default errorbar builder).
+  when both layers use a `"continuous"`-layout builder – this function
+  errors if they disagree (see
+  [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)'s
+  `probs` documentation).
 
 - style:
 

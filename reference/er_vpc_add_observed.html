@@ -101,9 +101,13 @@ variable is used as-is, with no binning.</p></dd>
 
 
 <dt id="arg-probs">probs<a class="anchor" aria-label="anchor" href="#arg-probs"></a></dt>
-<dd><p>Percentiles to compute for the continuous-x line/ribbon
-builders (ignored by the default pointrange builder). Only computed
-for a continuous/count response binned on a numeric <code>group_by</code>.</p></dd>
+<dd><p>Percentiles to compute for a <code>"continuous"</code>-layout builder
+(e.g. <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_line()</a></code>/
+<code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange_continuous()</a></code>; ignored by a
+<code>"categorical"</code>-layout builder like the default pointrange). Only
+computed for a continuous/count response binned on a numeric
+<code>group_by</code>. Should match whatever <code>probs</code> is passed to
+<code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> – see "Details".</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
@@ -118,6 +122,15 @@ see <code><a href="er_style_vpc_observed.html">er_style_vpc_observed()</a></code
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>object</code>, with <code>object$layer$observed</code> populated.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>When both the observed and simulated layers use a
+<code>"continuous"</code>-layout builder (see <code><a href="er_style_tag.html">er_style_tag()</a></code>'s <code>layout</code>
+argument), <code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> checks this <code>probs</code> against its
+own and errors if they disagree, since mismatched <code>probs</code> would
+otherwise silently plot two sets of percentile bands that don't
+correspond to the same nominal percentile.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

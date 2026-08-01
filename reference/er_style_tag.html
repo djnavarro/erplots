@@ -79,9 +79,14 @@ function can carry.</p>
 
 
 <dt id="arg-layout">layout<a class="anchor" aria-label="anchor" href="#arg-layout"></a></dt>
-<dd><p>One of <code>"overlay"</code> or <code>"panel"</code>, or <code>NULL</code> (the default) to
-leave this tag unset. See <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> for what each
-structural family means.</p></dd>
+<dd><p>One of <code>"overlay"</code>, <code>"panel"</code>, <code>"categorical"</code>, or
+<code>"continuous"</code>, or <code>NULL</code> (the default) to leave this tag unset. The
+<code>"overlay"</code>/<code>"panel"</code> pair is for a data-layer builder (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>
+documents what each structural family means); the <code>"categorical"</code>/
+<code>"continuous"</code> pair is for a VPC observed/simulated builder
+(<code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/<code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>) and marks whether it
+plots at discrete bin locations or at each bin's numeric exposure
+midpoint – see <code><a href="er_style_vpc_observed.html">er_style_vpc_observed()</a></code>/<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated()</a></code>.</p></dd>
 
 
 <dt id="arg-fill-role">fill_role<a class="anchor" aria-label="anchor" href="#arg-fill-role"></a></dt>
@@ -130,6 +135,24 @@ chaining separate setters.</p>
 <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> reads it off <code>style</code> to decide whether to place
 the output geoms into the main panel (<code>layout = "overlay"</code>) or to put them into
 separate strip-like panels above and below the main panel (<code>layout = "panel"</code>)</p>
+<p>For a VPC observed/simulated builder, <code>layout</code> is optional but, when
+present on both the observed and simulated builder passed to a given
+<code>er_vpc</code> object, is checked for agreement: <code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>
+errors if the simulated builder's <code>layout</code> (<code>"categorical"</code>, discrete
+<code>.vpc_bin</code> locations, e.g. <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_errorbar()</a></code>; or
+<code>"continuous"</code>, numeric bin-midpoint locations, e.g.
+<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_ribbon()</a></code>) disagrees with the observed
+builder's own. This catches the case where the two families would
+otherwise silently plot at different x-positions for the same bin –
+e.g. pairing <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange()</a></code>'s discrete bin
+labels with <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_ribbon()</a></code>'s numeric midpoints.
+Use a layout-matched pair instead (built-ins already are), or, to get
+a pointrange/errorbar idiom that still plots at the numeric midpoint
+(so it can be paired with a <code>"continuous"</code>-layout builder), use
+<code><a href="er_style_vpc_observed.html">er_style_vpc_observed_pointrange_continuous()</a></code>/
+<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_errorbar_continuous()</a></code>. An untagged builder on
+either side skips this check entirely, the same opt-in treatment
+<code>layer</code> gets.</p>
 <p><code>fill_role</code> and <code>y_role</code> are both optional, and can be used
 to title a legend/axis correctly: <code>fill_role = "density"</code> (used by
 <code><a href="er_style_data.html">er_style_data_hex()</a></code>) says a builder's <code>fill</code> aesthetic encodes bin
