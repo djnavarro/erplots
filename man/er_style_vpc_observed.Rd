@@ -5,6 +5,7 @@
 \alias{er_style_vpc_observed_pointrange}
 \alias{er_style_vpc_observed_pointrange_continuous}
 \alias{er_style_vpc_observed_line}
+\alias{er_style_vpc_observed_mean_errorbar}
 \title{Observed-layer builders for VPC plots}
 \usage{
 er_style_vpc_observed_pointrange(
@@ -38,6 +39,18 @@ er_style_vpc_observed_line(
   point_size = 1.5,
   ...
 )
+
+er_style_vpc_observed_mean_errorbar(
+  data,
+  config,
+  exposure,
+  response,
+  theme,
+  point_size = 2,
+  errorbar_width = 0.2,
+  errorbar_width_continuous = 0.025,
+  ...
+)
 }
 \arguments{
 \item{data}{The original data frame.}
@@ -50,23 +63,44 @@ er_style_vpc_observed_line(
 
 \item{theme}{Theme components.}
 
-\item{point_size}{Point size for both builders.}
+\item{point_size}{Point size for all three point/interval builders.}
 
-\item{errorbar_width}{Width of \code{er_style_vpc_observed_pointrange()}'s error bars.}
+\item{errorbar_width}{Width of \code{er_style_vpc_observed_pointrange()}'s
+error bars, and of \code{er_style_vpc_observed_mean_errorbar()}'s when
+\code{plot_by} is categorical.}
 
 \item{...}{Additional named arguments forwarded from
 \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s own \code{...}.}
+
+\item{errorbar_width_continuous}{Width (as a fraction of the exposure
+range) of \code{er_style_vpc_observed_mean_errorbar()}'s error bars when
+\code{plot_by} is numeric.}
 }
 \value{
 A list of geoms; see \code{\link[=er_style]{er_style()}}.
 }
 \description{
 Builder functions for the \code{observed} layer (\code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}),
-drawing the observed side of a visual predictive check as a dodged
-point/interval per bin (the default) or as a continuous-x line of
-empirical percentiles.
+drawing the observed side of a visual predictive check as a
+mean/rate + confidence interval per bin (the default, adaptive to
+\code{plot_by}'s type), a dodged point/interval per categorical (or
+quantile-bin) bin label, or as a continuous-x line of empirical
+percentiles.
 }
 \details{
+\code{er_style_vpc_observed_mean_errorbar()} (the default) plots
+\code{config$summary}'s rate/mean + confidence interval, adapting its
+x-position to \code{plot_by}'s type (\code{config$is_numeric_group}): equally
+spaced at each bin's categorical (or quantile-bin) label when
+\code{plot_by} is categorical (like \code{er_style_vpc_observed_pointrange()}),
+or at each bin's numeric median (\code{x_median}, from \code{config$summary})
+on the exposure scale when \code{plot_by} is numeric (like
+\code{er_style_vpc_observed_pointrange_continuous()}, which uses the mean
+instead). Because it adapts its x-position family at build time
+rather than declaring one statically, it carries no \code{layout} tag --
+pair it with \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}, which mirrors
+the same adaptive logic.
+
 \code{er_style_vpc_observed_pointrange()} plots \code{config$summary}'s
 rate/mean + confidence interval at each bin's categorical (or
 quantile-bin) label, dodged alongside the simulated layer's own point +

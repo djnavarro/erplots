@@ -47,6 +47,7 @@
         n1 = sum(.data[[rsp_var]] == 1, na.rm = TRUE),
         n0 = sum(.data[[rsp_var]] == 0, na.rm = TRUE),
         x_mid = if (config$is_numeric_group) mean(.data[[group_var]], na.rm = TRUE) else NA_real_,
+        x_median = if (config$is_numeric_group) stats::median(.data[[group_var]], na.rm = TRUE) else NA_real_,
         y_mid = n1 / (n0 + n1),
         ci_lower = ci_clopper_pearson(n1, n0 + n1, conf_level)["lower"],
         ci_upper = ci_clopper_pearson(n1, n0 + n1, conf_level)["upper"],
@@ -59,6 +60,7 @@
       dplyr::summarise(
         n_units = sum(!is.na(.data[[rsp_var]])),
         x_mid = if (config$is_numeric_group) mean(.data[[group_var]], na.rm = TRUE) else NA_real_,
+        x_median = if (config$is_numeric_group) stats::median(.data[[group_var]], na.rm = TRUE) else NA_real_,
         y_mid = mean(.data[[rsp_var]], na.rm = TRUE),
         ci_lower = ci_poisson(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["lower"],
         ci_upper = ci_poisson(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["upper"],
@@ -70,6 +72,7 @@
     summary_tbl <- dat |>
       dplyr::summarise(
         x_mid = if (config$is_numeric_group) mean(.data[[group_var]], na.rm = TRUE) else NA_real_,
+        x_median = if (config$is_numeric_group) stats::median(.data[[group_var]], na.rm = TRUE) else NA_real_,
         y_mid = mean(.data[[rsp_var]], na.rm = TRUE),
         ci_lower = ci_t(.data[[rsp_var]], conf_level)["lower"],
         ci_upper = ci_t(.data[[rsp_var]], conf_level)["upper"],
@@ -164,11 +167,17 @@
   summary_tbl <- sim |>
     dplyr::summarise(
       x_mid = if (obs_config$is_numeric_group) mean(.data[[group_var]], na.rm = TRUE) else NA_real_,
+      # exposure values don't vary across `sim_id` replicates (only the
+      # simulated response does), so the per-replicate median in stage 1
+      # and the mean-of-medians in stage 2 both collapse to the same
+      # value -- mirrors `.layer_vpc_observed()`'s `x_median`
+      x_median = if (obs_config$is_numeric_group) stats::median(.data[[group_var]], na.rm = TRUE) else NA_real_,
       y = mean(.data[[rsp_var]], na.rm = TRUE),
       .by = c(".vpc_bin", "sim_id")
     ) |>
     dplyr::summarise(
       x_mid = if (obs_config$is_numeric_group) mean(x_mid, na.rm = TRUE) else NA_real_,
+      x_median = if (obs_config$is_numeric_group) mean(x_median, na.rm = TRUE) else NA_real_,
       y_mid = mean(y, na.rm = TRUE),
       ci_lower = stats::quantile(y, probs = alpha, na.rm = TRUE),
       ci_upper = stats::quantile(y, probs = 1 - alpha, na.rm = TRUE),

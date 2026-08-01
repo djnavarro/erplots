@@ -4,7 +4,7 @@
 \alias{er_vpc_add_observed}
 \title{Add the observed-data layer to an \code{er_vpc} VPC}
 \usage{
-er_vpc_add_observed(object, style = er_style_vpc_observed_pointrange, ...)
+er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
 }
 \arguments{
 \item{object}{Partially constructed VPC (has S3 class \code{er_vpc}).}

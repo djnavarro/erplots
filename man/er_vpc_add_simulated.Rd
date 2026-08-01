@@ -10,7 +10,7 @@ er_vpc_add_simulated(
   sim = NULL,
   nsim = 100,
   seed = NULL,
-  style = er_style_vpc_simulated_errorbar,
+  style = er_style_vpc_simulated_mean_errorbar,
   ...
 )
 }

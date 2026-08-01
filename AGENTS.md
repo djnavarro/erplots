@@ -184,7 +184,13 @@ is numeric or categorical is auto-detected once in `er_vpc()` and
 stored as `object$group$type` (`"continuous"`/`"discrete"`), mirroring
 `object$response$type`; both `.layer_vpc_*()` functions copy it onto
 their `config$group_type` (with `config$is_numeric_group` kept as a
-convenience boolean derived from it) for builders to read.
+convenience boolean derived from it) for builders to read. When
+`plot_by` is numeric, both `.layer_vpc_*()` functions also compute
+`x_median` alongside `x_mid` on `config$summary` (the per-bin median,
+vs. mean, of `plot_by`'s values) -- `x_mid` remains what the
+mean-anchored builders (`_pointrange_continuous()`/`_errorbar_continuous()`/
+the percentile-band idiom) plot at, while `x_median` is what the
+default `_mean_errorbar()` pair plots at instead.
 
 - **`er_vpc_add_observed(object, style = ...)`** -- bins the observed
   data (using `object$group`) and computes its response summary.
@@ -197,15 +203,31 @@ convenience boolean derived from it) for builders to read.
   required. When `model` is supplied, calls `er_simulate()` internally
   and requires a `sim_resp` column.
 
-Two visual idioms, chosen by `style`, tagged via `er_style_tag(fn, layout
-= ...)` with `layout` values `"categorical"`/`"continuous"` (reusing the
-same `layout` tag data builders use for `"overlay"`/`"panel"`, just a
-different pair of allowed values):
+Four visual idioms, chosen by `style`:
 
-- **Categorical-bin idiom** (`layout = "categorical"`, default):
+- **Adaptive mean/errorbar idiom** (default): `er_style_vpc_observed_mean_errorbar()`
+  / `er_style_vpc_simulated_mean_errorbar()` -- point/errorbar of the
+  mean/rate + CI, with an x-position that adapts to `object$group$type`
+  at build time rather than declaring one `layout` statically:
+  equally-spaced at each bin's discrete `.vpc_bin` location when
+  `plot_by` is categorical (like the categorical-bin idiom below), or at
+  each bin's numeric *median* (`x_median`, computed alongside `x_mid` in
+  both `.layer_vpc_*()` functions) on the continuous exposure scale when
+  `plot_by` is numeric (like the continuous-x pointrange/errorbar idiom
+  below, which uses the mean instead of the median). Both support every
+  response type and both `plot_by` types (`response_types = c("binary",
+  "continuous", "count")`, `plot_by_types = c("continuous",
+  "discrete")`), and neither carries a `layout` tag -- since the
+  x-position family is chosen dynamically from the data rather than
+  fixed per builder, `.check_vpc_layout_match()` can't meaningfully
+  check it statically, so it's skipped (the same opt-in treatment an
+  untagged custom builder gets). Pair the two together; pairing either
+  with a builder from one of the three idioms below risks an x-position
+  mismatch that `.check_vpc_layout_match()` won't catch.
+- **Categorical-bin idiom** (`layout = "categorical"`):
   `er_style_vpc_observed_pointrange()` / `er_style_vpc_simulated_errorbar()`
   -- point/errorbar of the mean plotted at each bin's discrete `.vpc_bin`
-  location.
+  location, always (even for a numeric `plot_by`).
 - **Continuous-x percentile-band idiom** (`layout = "continuous"`):
   `er_style_vpc_observed_line()` / `er_style_vpc_simulated_ribbon()` --
   one line/ribbon per requested percentile against a continuous exposure

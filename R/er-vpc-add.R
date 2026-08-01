@@ -21,7 +21,7 @@
 #' @seealso [er_vpc()], [er_vpc_add_simulated()], [er_style_vpc_observed()]
 #'
 #' @export
-er_vpc_add_observed <- function(object, style = er_style_vpc_observed_pointrange, ...) {
+er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_errorbar, ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
@@ -77,7 +77,7 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_pointrange
 #'
 #' @export
 er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, seed = NULL,
-                                  style = er_style_vpc_simulated_errorbar, ...) {
+                                  style = er_style_vpc_simulated_mean_errorbar, ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)

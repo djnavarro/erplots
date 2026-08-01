@@ -508,6 +508,7 @@ utils::globalVariables(c(
   "n0",
   "n_units",
   "x_mid",
+  "x_median",
   "x_dodge",
   "y_mid",
   ".data",

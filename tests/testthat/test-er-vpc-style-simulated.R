@@ -102,6 +102,56 @@ test_that("er_vpc pipeline builds with the continuous-x pointrange/errorbar buil
   expect_true(inherits(built$output, "ggplot"))
 })
 
+test_that("er_style_vpc_simulated_mean_errorbar() is the default and carries no layout tag", {
+  expect_identical(eval(formals(er_vpc_add_simulated)$style), er_style_vpc_simulated_mean_errorbar)
+  expect_null(attr(er_style_vpc_simulated_mean_errorbar, "er_style_layout"))
+  expect_equal(attr(er_style_vpc_simulated_mean_errorbar, "er_style_layer"), "simulated")
+  expect_equal(
+    attr(er_style_vpc_simulated_mean_errorbar, "er_style_response_types"),
+    c("binary", "continuous", "count")
+  )
+  expect_equal(
+    attr(er_style_vpc_simulated_mean_errorbar, "er_style_plot_by_types"),
+    c("continuous", "discrete")
+  )
+})
+
+test_that("er_style_vpc_simulated_mean_errorbar() plots at the numeric bin median for a continuous plot_by", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 810)
+
+  geoms <- er_style_vpc_simulated_mean_errorbar(
+    er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme
+  )
+  expect_length(geoms, 2)
+  expect_true(rlang::quo_get_expr(geoms[[2]]$mapping$x) == "x_median")
+})
+
+test_that("er_style_vpc_simulated_mean_errorbar() plots at the equally-spaced bin label for a categorical plot_by", {
+  vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 811)
+
+  geoms <- er_style_vpc_simulated_mean_errorbar(
+    er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme
+  )
+  expect_length(geoms, 2)
+  expect_true(rlang::quo_get_expr(geoms[[2]]$mapping$x) == ".vpc_bin")
+})
+
+test_that("the default mean_errorbar pair shares consistent x-positions for a continuous plot_by", {
+  vpc <- er_test_data |>
+    er_vpc(aucss, ae1) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 812)
+
+  expect_equal(
+    sort(vpc$layer$observed$config$summary$x_median),
+    sort(vpc$layer$simulated$config$summary$x_median)
+  )
+})
+
 test_that("the simulated layer's geoms are drawn before the observed layer's in the base plot", {
   vpc <- er_test_data |>
     er_vpc(aucss, ae1) |>
