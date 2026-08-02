@@ -38,9 +38,14 @@
 #'   strings), applied via `patchwork::plot_annotation()` in
 #'   [er_plot_build()].
 #' @param xlim,ylim Exposure/response axis limits (length-2, increasing
-#'   numeric vectors). These are read lazily by every builder at
+#'   numeric vectors, no `NA`). These are read lazily by every builder at
 #'   build time, so it doesn't matter whether `er_plot_theme()` is called
-#'   before or after the layers that use them.
+#'   before or after the layers that use them. Unlike
+#'   [ggplot2::coord_cartesian()]'s `xlim`/`ylim`, `NA` isn't accepted for
+#'   either endpoint: `object$exposure$limits`/`object$response$limits`
+#'   also drive non-cosmetic computations (e.g. the model curve's
+#'   prediction grid, quantile-bin boundaries), where a `NA` bound has no
+#'   well-defined meaning.
 #' @param theme_base A ggplot2 theme object (e.g. [ggplot2::theme_minimal()])
 #'   -- the swappable overall visual
 #'   theme, defaulting to [ggplot2::theme_bw()].
@@ -163,6 +168,20 @@ er_plot_theme <- function(object,
 #' @noRd
 .check_theme_limits <- function(x, arg) {
   if (is.null(x)) return(invisible(NULL))
+  # Checked before the `length(x) != 2L` short-circuit even runs the
+  # `x[2] > x[1]` comparison: unlike `ggplot2::coord_cartesian()`'s
+  # `xlim`/`ylim`, `NA` isn't a supported "leave this bound alone" value
+  # here (`object$exposure$limits`/`response$limits` also drive
+  # non-cosmetic computations such as the model curve's prediction grid),
+  # and `x[2] > x[1]` silently evaluates to `NA` for an `NA` endpoint,
+  # which would otherwise crash the `if()` below with an opaque "missing
+  # value where TRUE/FALSE needed" instead of erroring informatively.
+  # `c(NA, NA)` is a logical vector (not numeric), so this check can't
+  # require `is.numeric(x)` first the way the length/ordering check below
+  # does -- only `length(x) == 2L` is required to catch it here.
+  if (length(x) == 2L && anyNA(x)) {
+    rlang::abort(paste0("`", arg, "` cannot contain `NA`."))
+  }
   if (!is.numeric(x) || length(x) != 2L || !(x[2] > x[1])) {
     rlang::abort(paste0("`", arg, "` must be a length-2, increasing numeric vector."))
   }

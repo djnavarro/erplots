@@ -21,11 +21,13 @@ cases found two real bugs:
 - `.check_theme_limits()` crashing with an opaque "missing value where
   TRUE/FALSE needed" when `xlim`/`ylim` contains `NA` (e.g. `xlim =
   c(0, NA)`, the standard ggplot2 idiom for "float this bound") --
-  **still open**. `object$exposure$limits`/`response$limits` also drive
-  internal computations (prediction grids, quantile-bin ranges), not
-  just axis display, so `NA` may not be meaningfully supportable
-  end-to-end; at minimum this needs a clear validation error instead of
-  the current crash.
+  **fixed**, see `.agents/HISTORY.md`. `NA` is rejected outright (not
+  supported) rather than threaded through to the internal computations
+  that also consume these limits.
+
+Both bugs found so far are fixed; no further stress-test follow-ups are
+currently queued here, but this section stays open in case another pass
+turns up more before submission.
 
 ### CRAN release strategy
 

@@ -54,6 +54,20 @@ test_that("er_plot_theme() validates xlim/ylim", {
   expect_error(er_plot_theme(plt, xlim = c(5, 1)), "increasing")
 })
 
+test_that("er_plot_theme() rejects NA in xlim/ylim with an informative error", {
+  # regression test: `x[2] > x[1]` evaluates to `NA` when either endpoint
+  # is `NA`, which used to crash the length/ordering check's bare `if()`
+  # with an opaque "missing value where TRUE/FALSE needed" instead of
+  # erroring informatively -- `NA` isn't accepted here (unlike
+  # `ggplot2::coord_cartesian()`'s `xlim`/`ylim`) because the limits also
+  # drive non-cosmetic computations such as the model curve's prediction
+  # grid.
+  plt <- er_test_data |> er_plot(aucss, ae1)
+  expect_error(er_plot_theme(plt, xlim = c(0, NA)), "cannot contain `NA`")
+  expect_error(er_plot_theme(plt, xlim = c(NA, 1)), "cannot contain `NA`")
+  expect_error(er_plot_theme(plt, ylim = c(NA, NA)), "cannot contain `NA`")
+})
+
 test_that("er_plot_theme() writes and validates theme_base/theme_extra", {
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>

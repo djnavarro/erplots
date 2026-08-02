@@ -1129,3 +1129,27 @@ Fixed both: `"summary"` and `"overlay"` now map to `"base"` in the
 as the original one-plot case), and the loop iterates `has_legend[-1]`
 directly instead of a coincidental positional range. Regression test in
 `tests/testthat/test-er-plot-api.R`.
+
+## Pre-0.1 stress test: `.check_theme_limits()` crash on `NA` in `xlim`/`ylim`
+
+The same stress-testing pass found a second crash: `er_plot_theme(xlim =
+c(0, NA))` -- the standard ggplot2 idiom (mirroring
+`ggplot2::coord_cartesian()`'s own `xlim`/`ylim`) for "fix one bound, let
+the other float" -- raised an opaque `"missing value where TRUE/FALSE
+needed"` instead of a clear error. `.check_theme_limits()`'s validation
+was `!(x[2] > x[1])`, which evaluates to `NA` (not `TRUE`/`FALSE`) when
+either endpoint is `NA`, crashing the enclosing `if()`.
+
+Decided against actually *supporting* `NA` the way
+`coord_cartesian()` does: unlike a pure display-only axis limit,
+`object$exposure$limits`/`object$response$limits` also drive non-cosmetic
+computations elsewhere (the model curve's prediction grid, quantile-bin
+boundaries), where a `NA` bound has no well-defined meaning without
+auditing and updating every consumer -- out of scope for a validation
+bugfix. Instead, `.check_theme_limits()` now explicitly rejects `NA`
+with `` `xlim`/`ylim` cannot contain `NA`. `` before the
+length/ordering check runs (checked via `length(x) == 2L && anyNA(x)`
+rather than requiring `is.numeric(x)` first, since `c(NA, NA)` alone is
+a logical vector). Documented as a caveat on `?er_plot_theme`'s
+`xlim`/`ylim` params. Regression test in
+`tests/testthat/test-er-plot-theme.R`.

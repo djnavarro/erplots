@@ -44,9 +44,14 @@ strings), applied via \code{patchwork::plot_annotation()} in
 \code{\link[=er_plot_build]{er_plot_build()}}.}
 
 \item{xlim, ylim}{Exposure/response axis limits (length-2, increasing
-numeric vectors). These are read lazily by every builder at
+numeric vectors, no \code{NA}). These are read lazily by every builder at
 build time, so it doesn't matter whether \code{er_plot_theme()} is called
-before or after the layers that use them.}
+before or after the layers that use them. Unlike
+\code{\link[ggplot2:coord_cartesian]{ggplot2::coord_cartesian()}}'s \code{xlim}/\code{ylim}, \code{NA} isn't accepted for
+either endpoint: \code{object$exposure$limits}/\code{object$response$limits}
+also drive non-cosmetic computations (e.g. the model curve's
+prediction grid, quantile-bin boundaries), where a \code{NA} bound has no
+well-defined meaning.}
 
 \item{theme_base}{A ggplot2 theme object (e.g. \code{\link[ggplot2:theme_minimal]{ggplot2::theme_minimal()}})
 -- the swappable overall visual
