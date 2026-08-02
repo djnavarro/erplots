@@ -621,6 +621,23 @@ test_that("er_plot_add_data() with the default er_style_data_overlay merges into
   expect_equal(ggplot2::get_labs(built_strat$output)$colour, plt_strat$strata$label)
 })
 
+test_that(".polish_legends() doesn't crash when an overlay/summary layer is the only stratified layer", {
+  # regression test: `.polish_legends()` used to look up legend-bearing
+  # plots via a `dplyr::case_when()` that only mapped the "quantile" and
+  # "model" layers onto the shared "base" panel -- an "overlay"-layout
+  # data builder or the summary layer, stratified with nothing else
+  # stratified alongside it, produced a `stratified_plots` value with no
+  # match in `composition$info`, leaving `has_legend` empty and crashing
+  # the old `for (ind in 2:length(has_legend))` loop on `2:0`.
+  plt_strat <- er_test_data |> er_plot(aucss, ae1, sex)
+
+  expect_no_error(plt_strat |> er_plot_add_data() |> er_plot_build())
+  expect_no_error(plt_strat |> er_plot_add_summary() |> er_plot_build())
+
+  skip_if_not_installed("hexbin")
+  expect_no_error(plt_strat |> er_plot_add_data(style = er_style_data_hex) |> er_plot_build())
+})
+
 
 # style escape hatch ---------------------------------------------------------
 

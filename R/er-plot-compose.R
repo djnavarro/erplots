@@ -286,17 +286,30 @@
 
   if (!any(has_strata)) return(composition)
   stratified_parts <- names(has_strata[has_strata])
+  # `model`/`summary`/`quantile`/an `"overlay"`-layout data builder all draw
+  # into the single base panel (`composition$info`'s `"base"` row), not a
+  # panel of their own -- so all four need mapping onto `"base"` here.
+  # Missing one of these means `stratified_plots` can end up naming a plot
+  # that isn't actually a row in `composition$info` (e.g. a plot with only
+  # a stratified overlay data layer and nothing else stratified), leaving
+  # `has_legend` empty and crashing the `for()` loop below on `2:0`.
   stratified_plots <- dplyr::case_when(
     stratified_parts == "quantile" ~ "base",
     stratified_parts == "model" ~ "base",
+    stratified_parts == "summary" ~ "base",
+    stratified_parts == "overlay" ~ "base",
     TRUE ~ stratified_parts
   )
   stratified_plots <- unique(stratified_plots)
   has_legend <- composition$info |>
     dplyr::filter(plot %in% stratified_plots) |> 
     dplyr::pull(id)
-  if (length(has_legend) == 1L) return(composition)
-  for(ind in 2:length(has_legend)) {
+  # Fewer than two legend-bearing plots means there's nothing to
+  # deduplicate against (zero can happen if a future layer's `stratify`
+  # flag is set but never mapped above; one means a single shared legend
+  # already, nothing to strip).
+  if (length(has_legend) <= 1L) return(composition)
+  for(ind in has_legend[-1]) {
     composition$plots[[ind]] <- composition$plots[[ind]] + 
       ggplot2::guides(
         color = ggplot2::guide_none(),

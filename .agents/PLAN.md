@@ -11,9 +11,21 @@ rather than marked "done" in place. Items are grouped by target release.
 ### Stress test before submission
 
 A fresh round of stress testing against the full breadth of layers/
-builders/response types added since the last pass -- looking for
-validation gaps, unhelpful errors, and outright bugs surfaced by
-combinations that haven't been exercised in `tests/testthat/`.
+builders/response types (150+ combinations across `er_plot`/`er_vpc`)
+turned up no failures in the main sweep, but targeted single-layer edge
+cases found two real bugs:
+
+- `.polish_legends()` crashing when a lone stratified overlay/summary
+  layer is the only stratified thing on the plot -- **fixed**, see
+  `.agents/HISTORY.md`.
+- `.check_theme_limits()` crashing with an opaque "missing value where
+  TRUE/FALSE needed" when `xlim`/`ylim` contains `NA` (e.g. `xlim =
+  c(0, NA)`, the standard ggplot2 idiom for "float this bound") --
+  **still open**. `object$exposure$limits`/`response$limits` also drive
+  internal computations (prediction grids, quantile-bin ranges), not
+  just axis display, so `NA` may not be meaningfully supportable
+  end-to-end; at minimum this needs a clear validation error instead of
+  the current crash.
 
 ### CRAN release strategy
 

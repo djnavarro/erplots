@@ -1089,3 +1089,43 @@ the gap the item flagged (the percentile-band idiom via
 plus the errorbar variant) alongside binary/continuous responses across
 every `plot_by` type, the newer `stratify_by` faceting and
 `er_vpc_theme()` sections, and a troubleshooting-legibility section.
+
+## Pre-0.1 stress test: `.polish_legends()` crash on a lone stratified overlay/summary layer
+
+A stress-testing pass across the full builder/response-type/VPC matrix
+(150+ combinations) found no failures, but a set of targeted single-layer
+edge cases surfaced a real crash: `er_plot(..., stratify_by = ...) |>
+er_plot_add_data() |> er_plot_build()` -- the default, "overlay"-layout
+`er_style_data_overlay()` as the *only* stratified layer, with no
+stratified model/quantile layer alongside it -- raised `"subscript out
+of bounds"`. Same crash for `er_style_data_hex()` and for
+`er_plot_add_summary()` used alone.
+
+Root cause was two bugs stacked in `.polish_legends()`
+(`R/er-plot-compose.R`), the function that strips the legend from every
+stratified plot but the first so a shared legend isn't duplicated across
+panels:
+
+1. Its `dplyr::case_when()` mapped the `"quantile"` and `"model"` layers
+   onto the shared `"base"` panel (since both draw into it, not a panel
+   of their own) but never mapped `"summary"` or an `"overlay"`-layout
+   data builder the same way, even though both also draw into `"base"`.
+   When one of the unmapped two was the *only* stratified layer,
+   `stratified_plots` ended up naming a plot (`"overlay"`) that's never a
+   row in `composition$info`, leaving `has_legend` empty.
+2. The subsequent `for (ind in 2:length(has_legend))` loop assumed
+   `has_legend`'s *values* were valid indices into `composition$plots`
+   simply by iterating `2:length(has_legend)` rather than
+   `has_legend[-1]` -- coincidentally correct only when the stratified
+   plots' ids happened to be exactly `1:length(has_legend)`. Combined
+   with (1), `length(has_legend) == 0` produced `2:0 == c(2, 1, 0)` and
+   an out-of-bounds subscript; even without (1), a non-contiguous
+   `has_legend` (e.g. `c(2, 4)`) would have stripped the legend from the
+   wrong plot.
+
+Fixed both: `"summary"` and `"overlay"` now map to `"base"` in the
+`case_when()`, the early-return guard is `length(has_legend) <= 1L`
+(covers the now-impossible-but-still-worth-guarding zero case as well
+as the original one-plot case), and the loop iterates `has_legend[-1]`
+directly instead of a coincidental positional range. Regression test in
+`tests/testthat/test-er-plot-api.R`.
