@@ -92,9 +92,11 @@ visual predictive checks (VPCs). A VPC compares what a model predicts
 against what was actually observed, binned by exposure (or some other
 variable of interest), so that any systematic mismatch between model and
 data is easy to spot. The grammar is deliberately narrower than
-<code><a href="../reference/er_plot.html">er_plot()</a></code>’s: there’s no stratification, and the plot is
-always a single panel. But the same model-agnostic philosophy still
-applies – any model implementing
+<code><a href="../reference/er_plot.html">er_plot()</a></code>’s in one respect: there’s no color/facet
+precedence rule to reconcile across builders, since an optional
+<code>stratify_by</code> splits the plot into facet panels only (see
+<code><a href="../reference/er_vpc.html">?er_vpc</a></code>), never color. But the same model-agnostic
+philosophy still applies – any model implementing
 <code><a href="../reference/er_model_interface.html">er_predict()</a></code>/<code><a href="../reference/er_model_interface.html">er_simulate()</a></code> (see <a href="model-interface.html">Implementing the model interface</a>) can be
 visualised this way, and this article uses the same erglm and emaxnls
 models as the other articles to demonstrate it. As with
@@ -167,6 +169,59 @@ the two groups:</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="stratified-panels">Stratified panels<a class="anchor" aria-label="anchor" href="#stratified-panels"></a>
+</h2>
+<p><code>plot_by</code> changes <em>what’s binned</em> along the x-axis;
+<code>stratify_by</code> instead keeps the x-axis as-is and splits the
+plot into one facet panel per level of some other variable, via
+<code><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">ggplot2::facet_wrap()</a></code>. It’s useful when you want to check
+the model against a covariate without giving up the usual
+exposure-response view. Unlike <code>plot_by</code>,
+<code>stratify_by</code> never changes what’s plotted on the x-axis or
+how it’s binned – both <code><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed()</a></code> and
+<code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> behave exactly as before within each
+panel.</p>
+<div class="section level3">
+<h3 id="discrete-stratify_by">Discrete <code>stratify_by</code><a class="anchor" aria-label="anchor" href="#discrete-stratify_by"></a>
+</h3>
+<p>A categorical <code>stratify_by</code> is used as-is, one panel per
+level. Here we reuse the <code>ae1 ~ aucss + sex</code> model from
+above, faceting by <code>sex</code> while keeping <code>aucss</code> on
+the x-axis:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="continuous-stratify_by">Continuous <code>stratify_by</code><a class="anchor" aria-label="anchor" href="#continuous-stratify_by"></a>
+</h3>
+<p>A numeric <code>stratify_by</code> is automatically split into
+<code>n_strata</code> quantile bins (4 by default), and
+<code><a href="../reference/er_vpc.html">er_vpc()</a></code> reports a message when it does this, since it’s a
+decision made on your behalf. Here we facet by <code>weight</code>,
+overriding the default with <code>n_strata = 3</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">weight</span>, n_strata <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `stratify_by` (`weight`) is numeric; splitting into 3 quantile bins for</span></span>
+<span><span class="co">#&gt; faceting. Pass a categorical variable to `stratify_by`, or set `n_strata` to</span></span>
+<span><span class="co">#&gt; change the bin count.</span></span></code></pre></div>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
+<p><code>stratify_by</code> must resolve to a different variable than
+<code>plot_by</code> (which defaults to the exposure variable) –
+faceting by the exact variable already driving the x-axis binning would
+give each panel a single bin, so <code><a href="../reference/er_vpc.html">er_vpc()</a></code> errors rather
+than allow it.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="continuous-response">Continuous response<a class="anchor" aria-label="anchor" href="#continuous-response"></a>
 </h2>
 <p>A continuous response supports the same mean/errorbar comparison used
@@ -177,7 +232,7 @@ just its mean.</p>
 <div class="section level3">
 <h3 id="vpc-by-exposure-1">VPC by exposure<a class="anchor" aria-label="anchor" href="#vpc-by-exposure-1"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://emaxnls.djnavarro.net/reference/emax_nls.html" class="external-link">emax_nls</a></span><span class="op">(</span></span>
 <span>  structural_model <span class="op">=</span> <span class="va">rsp_1</span> <span class="op">~</span> <span class="va">exp_1</span>,</span>
 <span>  covariate_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">E0</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">Emax</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">logEC50</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -190,13 +245,13 @@ VPCs because it has the virtue of working regardless of whether the
 of whether the <code>response</code> variable is binary, continous or
 counts. But as you can see from the plot below, it’s not the best choice
 for a continuous response variable:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">exp_1</span>, response <span class="op">=</span> <span class="va">rsp_1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
 <p>The plot renders correctly, but the only thing it shows is whether
 the model can correctly predict the mean response within each bin.
 Because of this, it’s almost never the best choice when the
@@ -207,7 +262,7 @@ ribbons showing the corresponding simulated quantiles. This style is the
 most commonly used approach when VPCs are applied for pharmacokinetic
 models, and works well for the exposure-response case with a continuous
 response variable:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>, </span>
@@ -221,14 +276,14 @@ response variable:</p>
 <span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_ribbon</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
 <p>This works well, and is usually the best choice, but one thing that
 is missing in this plot is an expression of uncertainty about the
 observed quantiles. Sometimes that is useful to have, in which case you
 can do something like this, where the <code><a href="../reference/ci_quantile.html">ci_quantile()</a></code>
 function is used under the hood to construct confidence intervals for
 observed quantiles:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>, </span>
@@ -242,7 +297,7 @@ observed quantiles:</p>
 <span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_errorbar</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="vpc-by-continuous-covariate-1">VPC by continuous covariate<a class="anchor" aria-label="anchor" href="#vpc-by-continuous-covariate-1"></a>
@@ -253,7 +308,7 @@ covariate effect of <code>cnt_a</code> on the baseline parameter
 <code>E0</code>, so we bin on <code>cnt_a</code> directly to check the
 model’s percentile predictions against it. Here is the VPC plotted in an
 errorbar style:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://emaxnls.djnavarro.net/reference/emax_nls.html" class="external-link">emax_nls</a></span><span class="op">(</span></span>
 <span>  structural_model <span class="op">=</span> <span class="va">rsp_1</span> <span class="op">~</span> <span class="va">exp_1</span>,</span>
 <span>  covariate_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">E0</span> <span class="op">~</span> <span class="va">cnt_a</span>, <span class="va">Emax</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">logEC50</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -274,12 +329,12 @@ errorbar style:</p>
 <span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_errorbar</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="700"></p>
 <p>For comparison, the plot below shows the same VPC in the ribbon
 style. The two show the same underlying comparison styled differently;
 which one to use is mostly a matter of taste (and, as covered below,
 legibility):</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>, </span>
@@ -294,7 +349,7 @@ legibility):</p>
 <span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_ribbon</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="vpc-by-discrete-covariate-1">VPC by discrete covariate<a class="anchor" aria-label="anchor" href="#vpc-by-discrete-covariate-1"></a>
@@ -302,7 +357,7 @@ legibility):</p>
 <p>As before, a categorical <code>plot_by</code> works with the default
 mean/errorbar pair too, this time using a model that includes
 <code>sex</code> as a covariate on the continuous response:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span></span>
 <span>  <span class="va">biomarker_change</span> <span class="op">~</span> <span class="va">aucss</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -312,8 +367,41 @@ mean/errorbar pair too, this time using a model that includes
 <span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="700"></p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="theming">Theming<a class="anchor" aria-label="anchor" href="#theming"></a>
+</h2>
+<p><code><a href="../reference/er_vpc_theme.html">er_vpc_theme()</a></code> adjusts labels, titles, axis limits, and
+the overall ggplot2 theme, without changing which variable drives which
+aesthetic. Every argument defaults to <code>NULL</code> (“leave
+unchanged”), so repeated calls only touch the fields they supply:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_theme.html">er_vpc_theme</a></span><span class="op">(</span></span>
+<span>    xlab <span class="op">=</span> <span class="st">"AUC at steady state"</span>,</span>
+<span>    ylab <span class="op">=</span> <span class="st">"Probability of event"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Visual predictive check"</span>,</span>
+<span>    theme_base <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="700"></p>
+<p>Note that <code>xlab</code> labels <code>plot_by</code> (the VPC’s
+actual x-axis variable), not necessarily <code>exposure</code> – the two
+only coincide when <code>plot_by</code> wasn’t overridden.
+<code><a href="../reference/er_vpc_theme.html">er_vpc_theme()</a></code> doesn’t cover everything: there’s no
+argument for the observed/simulated colour scale, for instance, since
+it’s fixed to keep the two aligned across builders that mix colour and
+fill for the same distinction. For anything not covered,
+<code>+ ggplot2::theme(...)</code>/<code>+ ggplot2::labs(...)</code> on
+the object returned by <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> remains the general-purpose
+escape hatch.</p>
 </div>
 <div class="section level2">
 <h2 id="troubleshooting-plot-legibility">Troubleshooting plot legibility<a class="anchor" aria-label="anchor" href="#troubleshooting-plot-legibility"></a>
@@ -328,7 +416,7 @@ attempting an automated fix that will very likely not work, the
 <code><a href="../reference/er_vpc.html">er_vpc()</a></code> mini-grammar exposes some customization tools that
 you can use to clean up a VPC plot that doesn’t look very nice. In this
 section, we outline some of the options that you have.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://emaxnls.djnavarro.net/reference/emax_nls.html" class="external-link">emax_nls</a></span><span class="op">(</span></span>
 <span>  structural_model <span class="op">=</span> <span class="va">rsp_1</span> <span class="op">~</span> <span class="va">exp_1</span>,</span>
 <span>  covariate_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">E0</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">Emax</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">logEC50</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -344,7 +432,7 @@ for this model rather than the usual three. This is rarely a good idea
 because it leads to terrible crowding in the plot. Here’s what happens
 if we do this, using errorbar styling for both the observed data and the
 model simulations:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
@@ -360,7 +448,7 @@ model simulations:</p>
 <span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_errorbar</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="700"></p>
 <p>There’s no simple fix for this: in this plot we have unpleasant
 collisions between the observed and simulated layers, <em>and</em>
 between the five individual <code>probs</code> within each layer.
@@ -383,7 +471,7 @@ position.</li>
 themselves, giving the eye more room to separate bars that remain close
 together after dodging</li>
 </ul>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
@@ -407,7 +495,7 @@ together after dodging</li>
 <span>    errorbar_width <span class="op">=</span> <span class="fl">0.0025</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="" width="700"></p>
 <p>It takes a little bit of trial and error to find values that work in
 any specific case (and it does help to take a close look at the
 documentation to see how the different arguments are interpreted), but
@@ -425,7 +513,7 @@ quantiles, and then ribbons to show model predictions and uncertainty at
 each quantile. In this case, however, the confidence bands are so
 closely packed together that they blend together visually and it is
 impossible to tell where the boundaries are:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
@@ -441,12 +529,12 @@ impossible to tell where the boundaries are:</p>
 <span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_ribbon</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" alt="" width="700"></p>
 <p>Sometimes you can improve legibility in this case by placing more
 emphasis on the edges of the bands, and reducing the salience of the
 band shading. The code below illustrates this, and it helps somewhat,
 but the plot is still difficult to read:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
@@ -464,10 +552,10 @@ but the plot is still difficult to read:</p>
 <span>    ribbon_edges <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="" width="700"></p>
 <p>Ultimately, in this situation the most likely resolution is that you
 would have to revert from five quantile bands to the usual three:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
@@ -485,7 +573,7 @@ would have to revert from five quantile bands to the usual three:</p>
 <span>    ribbon_edges <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plot-vpc_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="plot-vpc_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" alt="" width="700"></p>
 <p>Some of the distributional information is lost, but overall the plot
 is a lot easier to understand.</p>
 </div>

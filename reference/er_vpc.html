@@ -70,6 +70,8 @@ and render with <code><a href="https://rdrr.io/r/graphics/plot.default.html" cla
 <span>  response_type <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  plot_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_bins <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  stratify_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_strata <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -106,6 +108,22 @@ with no binning.</p></dd>
 
 <dt id="arg-n-bins">n_bins<a class="anchor" aria-label="anchor" href="#arg-n-bins"></a></dt>
 <dd><p>Number of quantile bins, when <code>plot_by</code> is numeric.</p></dd>
+
+
+<dt id="arg-stratify-by">stratify_by<a class="anchor" aria-label="anchor" href="#arg-stratify-by"></a></dt>
+<dd><p>Optional variable (unquoted) splitting the VPC into
+one facet panel per level, via <code><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">ggplot2::facet_wrap()</a></code>. A
+categorical variable is used as-is; a numeric variable is
+automatically split into <code>n_strata</code> quantile bins (placebo, i.e.
+<code>0</code>, kept in its own bin when <code>stratify_by</code> is the exposure variable
+itself), with a message reporting that this happened. Must resolve
+to a different variable than <code>plot_by</code>. Defaults to <code>NULL</code> (no
+faceting, a single panel, matching prior behaviour).</p></dd>
+
+
+<dt id="arg-n-strata">n_strata<a class="anchor" aria-label="anchor" href="#arg-n-strata"></a></dt>
+<dd><p>Number of quantile bins, when <code>stratify_by</code> is
+numeric. Ignored when <code>stratify_by</code> is <code>NULL</code> or categorical.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>

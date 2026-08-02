@@ -110,9 +110,14 @@ strings), applied via <code><a href="https://patchwork.data-imaginist.com/refere
 
 <dt id="arg-xlim-ylim">xlim, ylim<a class="anchor" aria-label="anchor" href="#arg-xlim-ylim"></a></dt>
 <dd><p>Exposure/response axis limits (length-2, increasing
-numeric vectors). These are read lazily by every builder at
+numeric vectors, no <code>NA</code>). These are read lazily by every builder at
 build time, so it doesn't matter whether <code>er_plot_theme()</code> is called
-before or after the layers that use them.</p></dd>
+before or after the layers that use them. Unlike
+<code><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">ggplot2::coord_cartesian()</a></code>'s <code>xlim</code>/<code>ylim</code>, <code>NA</code> isn't accepted for
+either endpoint: <code>object$exposure$limits</code>/<code>object$response$limits</code>
+also drive non-cosmetic computations (e.g. the model curve's
+prediction grid, quantile-bin boundaries), where a <code>NA</code> bound has no
+well-defined meaning.</p></dd>
 
 
 <dt id="arg-theme-base">theme_base<a class="anchor" aria-label="anchor" href="#arg-theme-base"></a></dt>

@@ -85,6 +85,11 @@ Functions to build visual predictive check plots
 
   Add the simulated-data layer to an `er_vpc` VPC
 
+- [`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)
+  :
+
+  Adjust theme/labels for an `er_vpc` object
+
 - [`er_vpc_build()`](https://erplots.djnavarro.net/reference/er_vpc_build.md)
   :
 

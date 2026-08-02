@@ -20,9 +20,12 @@ model predicts against what was actually observed, binned by exposure
 (or some other variable of interest), so that any systematic mismatch
 between model and data is easy to spot. The grammar is deliberately
 narrower than
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s:
-there’s no stratification, and the plot is always a single panel. But
-the same model-agnostic philosophy still applies – any model
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s in
+one respect: there’s no color/facet precedence rule to reconcile across
+builders, since an optional `stratify_by` splits the plot into facet
+panels only (see
+[`?er_vpc`](https://erplots.djnavarro.net/reference/er_vpc.md)), never
+color. But the same model-agnostic philosophy still applies – any model
 implementing
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 (see [Implementing the model
@@ -110,6 +113,66 @@ erglm_data |>
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-5-1.png)
 
+## Stratified panels
+
+`plot_by` changes *what’s binned* along the x-axis; `stratify_by`
+instead keeps the x-axis as-is and splits the plot into one facet panel
+per level of some other variable, via
+[`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html).
+It’s useful when you want to check the model against a covariate without
+giving up the usual exposure-response view. Unlike `plot_by`,
+`stratify_by` never changes what’s plotted on the x-axis or how it’s
+binned – both
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)
+and
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+behave exactly as before within each panel.
+
+### Discrete `stratify_by`
+
+A categorical `stratify_by` is used as-is, one panel per level. Here we
+reuse the `ae1 ~ aucss + sex` model from above, faceting by `sex` while
+keeping `aucss` on the x-axis:
+
+``` r
+
+erglm_data |> 
+  er_vpc(exposure = aucss, response = ae1, stratify_by = sex) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  plot()
+```
+
+![](plot-vpc_files/figure-html/unnamed-chunk-6-1.png)
+
+### Continuous `stratify_by`
+
+A numeric `stratify_by` is automatically split into `n_strata` quantile
+bins (4 by default), and
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) reports
+a message when it does this, since it’s a decision made on your behalf.
+Here we facet by `weight`, overriding the default with `n_strata = 3`:
+
+``` r
+
+erglm_data |> 
+  er_vpc(exposure = aucss, response = ae1, stratify_by = weight, n_strata = 3) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  plot()
+#> `stratify_by` (`weight`) is numeric; splitting into 3 quantile bins for
+#> faceting. Pass a categorical variable to `stratify_by`, or set `n_strata` to
+#> change the bin count.
+```
+
+![](plot-vpc_files/figure-html/unnamed-chunk-7-1.png)
+
+`stratify_by` must resolve to a different variable than `plot_by` (which
+defaults to the exposure variable) – faceting by the exact variable
+already driving the x-axis binning would give each panel a single bin,
+so [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)
+errors rather than allow it.
+
 ## Continuous response
 
 A continuous response supports the same mean/errorbar comparison used
@@ -146,7 +209,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-7-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-9-1.png)
 
 The plot renders correctly, but the only thing it shows is whether the
 model can correctly predict the mean response within each bin. Because
@@ -177,7 +240,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-8-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-10-1.png)
 
 This works well, and is usually the best choice, but one thing that is
 missing in this plot is an expression of uncertainty about the observed
@@ -204,7 +267,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-9-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-11-1.png)
 
 ### VPC by continuous covariate
 
@@ -238,7 +301,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-10-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-12-1.png)
 
 For comparison, the plot below shows the same VPC in the ribbon style.
 The two show the same underlying comparison styled differently; which
@@ -263,7 +326,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-11-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-13-1.png)
 
 ### VPC by discrete covariate
 
@@ -284,7 +347,46 @@ erglm_data |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-12-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-14-1.png)
+
+## Theming
+
+[`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)
+adjusts labels, titles, axis limits, and the overall ggplot2 theme,
+without changing which variable drives which aesthetic. Every argument
+defaults to `NULL` (“leave unchanged”), so repeated calls only touch the
+fields they supply:
+
+``` r
+
+mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+
+erglm_data |> 
+  er_vpc(exposure = aucss, response = ae1) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  er_vpc_theme(
+    xlab = "AUC at steady state",
+    ylab = "Probability of event",
+    title = "Visual predictive check",
+    theme_base = ggplot2::theme_minimal()
+  ) |>
+  plot()
+```
+
+![](plot-vpc_files/figure-html/unnamed-chunk-15-1.png)
+
+Note that `xlab` labels `plot_by` (the VPC’s actual x-axis variable),
+not necessarily `exposure` – the two only coincide when `plot_by` wasn’t
+overridden.
+[`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)
+doesn’t cover everything: there’s no argument for the observed/simulated
+colour scale, for instance, since it’s fixed to keep the two aligned
+across builders that mix colour and fill for the same distinction. For
+anything not covered, `+ ggplot2::theme(...)`/`+ ggplot2::labs(...)` on
+the object returned by
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) remains the
+general-purpose escape hatch.
 
 ## Troubleshooting plot legibility
 
@@ -337,7 +439,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-14-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-17-1.png)
 
 There’s no simple fix for this: in this plot we have unpleasant
 collisions between the observed and simulated layers, *and* between the
@@ -383,7 +485,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-15-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-18-1.png)
 
 It takes a little bit of trial and error to find values that work in any
 specific case (and it does help to take a close look at the
@@ -421,7 +523,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-16-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-19-1.png)
 
 Sometimes you can improve legibility in this case by placing more
 emphasis on the edges of the bands, and reducing the salience of the
@@ -449,7 +551,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-17-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-20-1.png)
 
 Ultimately, in this situation the most likely resolution is that you
 would have to revert from five quantile bands to the usual three:
@@ -475,7 +577,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-18-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-21-1.png)
 
 Some of the distributional information is lost, but overall the plot is
 a lot easier to understand.

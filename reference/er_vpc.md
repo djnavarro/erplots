@@ -17,6 +17,8 @@ er_vpc(
   response_type = "auto",
   plot_by = NULL,
   n_bins = 4,
+  stratify_by = NULL,
+  n_strata = 4,
   conf_level = 0.95,
   probs = c(0.1, 0.5, 0.9)
 )
@@ -51,6 +53,23 @@ er_vpc(
 - n_bins:
 
   Number of quantile bins, when `plot_by` is numeric.
+
+- stratify_by:
+
+  Optional variable (unquoted) splitting the VPC into one facet panel
+  per level, via
+  [`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html).
+  A categorical variable is used as-is; a numeric variable is
+  automatically split into `n_strata` quantile bins (placebo, i.e. `0`,
+  kept in its own bin when `stratify_by` is the exposure variable
+  itself), with a message reporting that this happened. Must resolve to
+  a different variable than `plot_by`. Defaults to `NULL` (no faceting,
+  a single panel, matching prior behaviour).
+
+- n_strata:
+
+  Number of quantile bins, when `stratify_by` is numeric. Ignored when
+  `stratify_by` is `NULL` or categorical.
 
 - conf_level:
 

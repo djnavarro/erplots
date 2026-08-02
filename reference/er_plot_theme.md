@@ -61,10 +61,16 @@ er_plot_theme(
 
 - xlim, ylim:
 
-  Exposure/response axis limits (length-2, increasing numeric vectors).
-  These are read lazily by every builder at build time, so it doesn't
-  matter whether `er_plot_theme()` is called before or after the layers
-  that use them.
+  Exposure/response axis limits (length-2, increasing numeric vectors,
+  no `NA`). These are read lazily by every builder at build time, so it
+  doesn't matter whether `er_plot_theme()` is called before or after the
+  layers that use them. Unlike
+  [`ggplot2::coord_cartesian()`](https://ggplot2.tidyverse.org/reference/coord_cartesian.html)'s
+  `xlim`/`ylim`, `NA` isn't accepted for either endpoint:
+  `object$exposure$limits`/`object$response$limits` also drive
+  non-cosmetic computations (e.g. the model curve's prediction grid,
+  quantile-bin boundaries), where a `NA` bound has no well-defined
+  meaning.
 
 - theme_base:
 
