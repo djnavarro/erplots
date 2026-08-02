@@ -1074,3 +1074,18 @@ absent for `er_vpc` entirely) -- unlike `er_plot()`, a VPC is always
 exactly one ggplot2 object, so no `patchwork::plot_annotation()`
 indirection was needed for the title/subtitle/caption the way
 `er_plot_theme()` requires.
+
+## Dedicated `vignettes/articles/vpc.Rmd` worked example
+
+`PLAN.md` had carried an item since the VPC mini-grammar was built: the
+only existing worked example lived in `model-interface.Rmd`'s
+`er_simulate()` section and only demonstrated the default builders, not
+the percentile-band idiom.
+
+Closed out without further work needed -- `vignettes/articles/plot-vpc.Rmd`
+already exists, is wired into `_pkgdown.yml`'s navigation, and covers
+the gap the item flagged (the percentile-band idiom via
+`er_style_vpc_observed_quantile_line()`/`er_style_vpc_simulated_quantile_ribbon()`,
+plus the errorbar variant) alongside binary/continuous responses across
+every `plot_by` type, the newer `stratify_by` faceting and
+`er_vpc_theme()` sections, and a troubleshooting-legibility section.

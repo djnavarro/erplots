@@ -8,17 +8,6 @@ rather than marked "done" in place. Items are grouped by target release.
 
 ## 0.1 release (initial CRAN submission)
 
-### VPC mini-grammar follow-ons
-
-Scoped out but not started when the VPC mini-grammar
-(`er_vpc()`/`er_vpc_add_observed()`/`er_vpc_add_simulated()`) was built,
-deliberately narrower than `er_plot()` itself:
-
-- A dedicated `vignettes/articles/vpc.Rmd` worked example -- the only
-  existing worked example lives in `model-interface.Rmd`'s
-  `er_simulate()` section and only demonstrates the default builders,
-  not the percentile-band idiom.
-
 ### `erplots_data` documentation/test gaps
 
 - A dedicated `vignettes/articles/erplots-data.Rmd` walkthrough of all
