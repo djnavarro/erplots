@@ -7,12 +7,47 @@ library(emaxnls)
 library(erglm)
 ```
 
-The mini-grammar for VPC plots is considerably simpler than the one for
-exposure-response plots.
+Alongside the
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
+mini-grammar covered in the
+[binary](https://erplots.djnavarro.net/articles/plot-binary.md),
+[continuous](https://erplots.djnavarro.net/articles/plot-continuous.md),
+and [count](https://erplots.djnavarro.net/articles/plot-count.md)
+articles, erplots supplies a second, smaller mini-grammar built around
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) for
+constructing visual predictive checks (VPCs). A VPC compares what a
+model predicts against what was actually observed, binned by exposure
+(or some other variable of interest), so that any systematic mismatch
+between model and data is easy to spot. The grammar is deliberately
+narrower than
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s:
+there’s no stratification, and the plot is always a single panel. But
+the same model-agnostic philosophy still applies – any model
+implementing
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+(see [Implementing the model
+interface](https://erplots.djnavarro.net/articles/model-interface.md))
+can be visualised this way, and this article uses the same erglm and
+emaxnls models as the other articles to demonstrate it. As with
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) itself
+only sets up the plot’s variables and bins; nothing is drawn until
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)
+and
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+are added and the pipeline is plotted.
 
 ## Binary response
 
-### By exposure
+For a binary response,
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)
+bins the data and computes the observed response rate (plus a confidence
+interval) in each bin, and
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+draws `nsim` replicate datasets from the model and summarises those the
+same way – so the two rates can be compared directly, bin by bin.
+
+### VPC by exposure
 
 ``` r
 
@@ -34,10 +69,14 @@ erglm_data |>
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-3-1.png)
 
-### By continuous covariate
+### VPC by continuous covariate
 
-Continuous `plot_by` does not have to be the same as the exposure
-variable:
+The variable used to bin the data and position the x-axis, `plot_by`,
+defaults to the exposure variable, but it doesn’t have to be. Setting it
+to a different continuous variable lets you check whether the model’s
+predictions track the observed data as *that* variable changes, even
+when it isn’t part of the fitted model itself. Here we bin by `weight`
+instead of `aucss`, using the same exposure-only model as above:
 
 ``` r
 
@@ -50,7 +89,13 @@ erglm_data |>
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-4-1.png)
 
-### By discrete covariate
+### VPC by discrete covariate
+
+The same idea applies to a categorical `plot_by`: there’s no x-axis
+binning to do, since the categories already partition the data, and each
+level gets its own position. Here we bin by `sex`, using a model that
+actually includes `sex` as a covariate, so the simulated layer’s
+predictions can differ between the two groups:
 
 ``` r
 
@@ -67,7 +112,13 @@ erglm_data |>
 
 ## Continuous response
 
-### By exposure
+A continuous response supports the same mean/errorbar comparison used
+above for binary outcomes, but it also supports a genuinely
+distributional comparison: checking whether the model reproduces the
+*shape* of the response distribution at each exposure level, not just
+its mean.
+
+### VPC by exposure
 
 ``` r
 
@@ -78,8 +129,13 @@ mod <- emax_nls(
 )
 ```
 
-For continuous outcomes, more options are available. It is possible to
-adopt the same approach as we did for binary outcomes, and it does work:
+We’ll start by showing the limitations of the default “mean plus
+confidence interval” visual style. This is set as the default style for
+VPCs because it has the virtue of working regardless of whether the
+`plot_by` variable is continuous or discrete, and regardless of whether
+the `response` variable is binary, continous or counts. But as you can
+see from the plot below, it’s not the best choice for a continuous
+response variable:
 
 ``` r
 
@@ -92,10 +148,17 @@ emax_df |>
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-7-1.png)
 
-However, this approach only considers whether the model is correctly
-predicting the mean response within each bin.
+The plot renders correctly, but the only thing it shows is whether the
+model can correctly predict the mean response within each bin. Because
+of this, it’s almost never the best choice when the `response` is
+continuous or count data.
 
-As an alternative, we can switch to a distributional approach:
+As an alternative, we can switch to a genuinely distributional
+comparison: connected lines for several observed quantiles, and shaded
+ribbons showing the corresponding simulated quantiles. This style is the
+most commonly used approach when VPCs are applied for pharmacokinetic
+models, and works well for the exposure-response case with a continuous
+response variable:
 
 ``` r
 
@@ -116,10 +179,13 @@ emax_df |>
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-8-1.png)
 
-For more detailed examination, it is also possible to display
-nonparametric confidence intervals for the observed data quantiles,
-plotted (like the default mean/errorbar pair) at each bin’s numeric
-median on the exposure scale.
+This works well, and is usually the best choice, but one thing that is
+missing in this plot is an expression of uncertainty about the observed
+quantiles. Sometimes that is useful to have, in which case you can do
+something like this, where the
+[`ci_quantile()`](https://erplots.djnavarro.net/reference/ci_quantile.md)
+function is used under the hood to construct confidence intervals for
+observed quantiles:
 
 ``` r
 
@@ -140,9 +206,13 @@ emax_df |>
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-9-1.png)
 
-### By continuous covariate
+### VPC by continuous covariate
 
-Continuous `plot_by` variables can be something other than the exposure:
+As with the binary case, a continuous `plot_by` doesn’t have to be the
+exposure variable. Here the Emax model includes a covariate effect of
+`cnt_a` on the baseline parameter `E0`, so we bin on `cnt_a` directly to
+check the model’s percentile predictions against it. Here is the VPC
+plotted in an errorbar style:
 
 ``` r
 
@@ -170,9 +240,12 @@ emax_df |>
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-10-1.png)
 
+For comparison, the plot below shows the same VPC in the ribbon style.
+The two show the same underlying comparison styled differently; which
+one to use is mostly a matter of taste (and, as covered below,
+legibility):
+
 ``` r
-
-
 
 emax_df |> 
   er_vpc(
@@ -190,9 +263,13 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-10-2.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-11-1.png)
 
-### By discrete covariate
+### VPC by discrete covariate
+
+As before, a categorical `plot_by` works with the default mean/errorbar
+pair too, this time using a model that includes `sex` as a covariate on
+the continuous response:
 
 ``` r
 
@@ -207,7 +284,7 @@ erglm_data |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-11-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-12-1.png)
 
 ## Troubleshooting plot legibility
 
@@ -260,7 +337,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-13-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-14-1.png)
 
 There’s no simple fix for this: in this plot we have unpleasant
 collisions between the observed and simulated layers, *and* between the
@@ -306,7 +383,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-14-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-15-1.png)
 
 It takes a little bit of trial and error to find values that work in any
 specific case (and it does help to take a close look at the
@@ -344,7 +421,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-15-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-16-1.png)
 
 Sometimes you can improve legibility in this case by placing more
 emphasis on the edges of the bands, and reducing the salience of the
@@ -372,7 +449,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-16-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-17-1.png)
 
 Ultimately, in this situation the most likely resolution is that you
 would have to revert from five quantile bands to the usual three:
@@ -398,7 +475,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-17-1.png)
+![](plot-vpc_files/figure-html/unnamed-chunk-18-1.png)
 
 Some of the distributional information is lost, but overall the plot is
 a lot easier to understand.
