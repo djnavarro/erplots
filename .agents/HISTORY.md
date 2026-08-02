@@ -1046,3 +1046,31 @@ boundaries. `.build_vpc_plot()` adds a single
 `facet_wrap(vars(.vpc_stratum))` (with a labeller prefixing the strata
 label) only when `object$strata` is non-`NULL`, so the dummy
 single-level column is otherwise inert and produces no spurious facet.
+
+## `er_vpc_theme()`
+
+Added a dedicated theming function for `er_vpc`, mirroring
+`er_plot_theme()`'s "every argument defaults to `NULL`, meaning leave
+unchanged" design so repeated calls accumulate. Scoped deliberately
+narrower than `er_plot_theme()`: `xlab`/`ylab`/`strata_lab`,
+`title`/`subtitle`/`caption`, `xlim`/`ylim`, `theme_base`/`theme_extra`,
+and `format_percent`/`format_number` are covered, but there's no
+`color_discrete`/`fill_discrete`/`draw_key` equivalent -- the
+observed-vs-simulated colour/fill distinction uses a fixed, shared scale
+(`.vpc_source_levels`, see the "Gotchas" section) to keep the two
+aligned across builders that mix colour and fill for the same idea, and
+no built-in VPC builder wires up `draw_key` in the first place. Ordinary
+`+ ggplot2::scale_colour_manual(...)`/`+ theme()` on the built/returned
+ggplot2 object remains the escape hatch for those.
+
+`xlab` deliberately labels `plot_by` (`object$group$label`), not
+`exposure` -- the same "never reach for `exposure$label` when the intent
+is the plot's x-axis variable" gotcha that already applied to VPC
+builder code now applies to this function too. `title`/`subtitle`/
+`caption` and `xlim`/`ylim` needed new plumbing in `.build_vpc_plot()`
+(added to the existing single `ggplot2::labs()` call, and a new
+`ggplot2::coord_cartesian(xlim, ylim, clip = "off")`, both previously
+absent for `er_vpc` entirely) -- unlike `er_plot()`, a VPC is always
+exactly one ggplot2 object, so no `patchwork::plot_annotation()`
+indirection was needed for the title/subtitle/caption the way
+`er_plot_theme()` requires.

@@ -1,8 +1,8 @@
 
 # Assembles an `er_vpc` object's observed/simulated layers into a single
-# ggplot2 object. Unlike `er_plot()`'s multi-panel machinery, a VPC is
-# always a single panel in v1 (no stratification/faceting), so there's
-# no patchwork composition step here.
+# ggplot2 object. Unlike `er_plot()`'s multi-panel machinery, a VPC never
+# needs `patchwork` composition -- even with `stratify_by` faceting (see
+# below), it's still exactly one ggplot2 object.
 #' @noRd
 .build_vpc_plot <- function(object) {
 
@@ -20,7 +20,10 @@
     # map fill (e.g. `er_style_vpc_simulated_quantile_ribbon()`) -- setting
     # it here unconditionally would make `labs()` warn "ignoring unknown
     # labels" whenever a builder pair never maps fill at all.
-    ggplot2::labs(x = object$group$label, y = response$label, color = "Source") +
+    ggplot2::labs(
+      x = object$group$label, y = response$label, color = "Source",
+      title = theme$title, subtitle = theme$subtitle, caption = theme$caption
+    ) +
     # Fixed, shared `limits` on both the colour and fill scales -- not
     # just their default palette -- so "Observed"/"Simulated" always
     # land on the same two hues whether a given pair of builders maps
@@ -31,7 +34,12 @@
     # independently assign the *first* hue in the default palette to
     # their one level, making observed and simulated indistinguishable.
     ggplot2::scale_colour_hue(limits = .vpc_source_levels) +
-    ggplot2::scale_fill_hue(limits = .vpc_source_levels)
+    ggplot2::scale_fill_hue(limits = .vpc_source_levels) +
+    # `xlim`/`ylim` (set via `er_vpc_theme()`, `NULL` by default -- i.e.
+    # ggplot2's own automatic range) -- `clip = "off"` matches every
+    # `er_plot()` builder's own `coord_cartesian()` call, so a point
+    # sitting exactly on a supplied limit isn't clipped at the panel edge
+    ggplot2::coord_cartesian(xlim = theme$xlim, ylim = theme$ylim, clip = "off")
 
   # the simulated layer is added first (drawn underneath), so a ribbon
   # band never buries the observed points/line on top of it -- there's

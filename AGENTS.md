@@ -294,6 +294,25 @@ statically. `probs` can't diverge between the two layers the way
 The simulated layer's geoms are always added before the observed layer's,
 so a simulated ribbon never buries the observed points/line.
 
+### `er_vpc_theme()`
+
+Mirrors `er_plot_theme()`'s "every argument defaults to `NULL`, leave
+unchanged" accumulation design, scoped narrower to what a VPC actually
+renders: `xlab`/`ylab`/`strata_lab` (`xlab` deliberately labels
+`plot_by`, i.e. `object$group$label`, not `exposure` -- see the
+"Gotchas" section), `title`/`subtitle`/`caption` and `xlim`/`ylim` (both
+newly plumbed into `.build_vpc_plot()`'s single `ggplot2::labs()` call
+and a `ggplot2::coord_cartesian()` call respectively -- a VPC is always
+exactly one ggplot2 object, so unlike `er_plot_theme()` there's no
+`patchwork::plot_annotation()` indirection needed), `theme_base`/
+`theme_extra`, and `format_percent`/`format_number`. No
+`color_discrete`/`fill_discrete`/`draw_key` equivalent exists: the
+observed-vs-simulated colour/fill distinction uses the fixed, shared
+`.vpc_source_levels` scale (see "Gotchas"), and no built-in VPC builder
+wires up `draw_key` -- `+ ggplot2::scale_colour_manual(...)`/`+
+theme()` on the built/returned ggplot2 object remains the escape hatch
+for both.
+
 ### `er_plot_theme()`
 
 Styles the plot without remapping which variable drives which aesthetic
@@ -428,8 +447,8 @@ edit if forgotten:
   `?er_style` for the interface these builders share.
 - `R/er-vpc-api.R`, `R/er-vpc-add.R`, `R/er-vpc-layer.R`,
   `R/er-vpc-build.R`, `R/er-vpc-style-observed.R`,
-  `R/er-vpc-style-simulated.R` -- the VPC mini-grammar, mirroring
-  `er_plot()`'s own file split.
+  `R/er-vpc-style-simulated.R`, `R/er-vpc-theme.R` -- the VPC
+  mini-grammar, mirroring `er_plot()`'s own file split.
 - `R/utils-helpers.R` -- small internal helpers (including the
   binary-response-only `ci_clopper_pearson()`, `ci_t()`, `ci_poisson()`,
   `cut_quantile()`, `cut_exposure_quantile()`, the response-type

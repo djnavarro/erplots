@@ -65,4 +65,5 @@ Collate:
     'er-vpc-layer.R'
     'er-vpc-style-observed.R'
     'er-vpc-style-simulated.R'
+    'er-vpc-theme.R'
     'utils-helpers.R'

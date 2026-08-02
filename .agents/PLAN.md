@@ -14,8 +14,6 @@ Scoped out but not started when the VPC mini-grammar
 (`er_vpc()`/`er_vpc_add_observed()`/`er_vpc_add_simulated()`) was built,
 deliberately narrower than `er_plot()` itself:
 
-- A dedicated `er_vpc_theme()` -- ordinary `+ theme()`/`+ labs()` on the
-  built/returned ggplot2 object remains the escape hatch for now.
 - A dedicated `vignettes/articles/vpc.Rmd` worked example -- the only
   existing worked example lives in `model-interface.Rmd`'s
   `er_simulate()` section and only demonstrates the default builders,

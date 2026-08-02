@@ -218,6 +218,28 @@ erglm_data |>
   plot()
 ```
 
+## Theming
+
+`er_vpc_theme()` adjusts labels, titles, axis limits, and the overall ggplot2 theme, without changing which variable drives which aesthetic. Every argument defaults to `NULL` ("leave unchanged"), so repeated calls only touch the fields they supply:
+
+```{r}
+mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+
+erglm_data |> 
+  er_vpc(exposure = aucss, response = ae1) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  er_vpc_theme(
+    xlab = "AUC at steady state",
+    ylab = "Probability of event",
+    title = "Visual predictive check",
+    theme_base = ggplot2::theme_minimal()
+  ) |>
+  plot()
+```
+
+Note that `xlab` labels `plot_by` (the VPC's actual x-axis variable), not necessarily `exposure` -- the two only coincide when `plot_by` wasn't overridden. `er_vpc_theme()` doesn't cover everything: there's no argument for the observed/simulated colour scale, for instance, since it's fixed to keep the two aligned across builders that mix colour and fill for the same distinction. For anything not covered, `+ ggplot2::theme(...)`/`+ ggplot2::labs(...)` on the object returned by `plot()` remains the general-purpose escape hatch.
+
 ## Troubleshooting plot legibility
 
 A persistent problem when creating VPC plots is cleaning up an illegible plot. To an extent, this problem is unavoidable: VPC plots attempt to display a *lot* of information in a single image, and it has a tendency to make them difficult to read. Because the specific pattern of illegibility tends to vary from plot to plot, it is almost impossible to build in an automated fix to this problem. Instead of attempting an automated fix that will very likely not work, the `er_vpc()` mini-grammar exposes some customization tools that you can use to clean up a VPC plot that doesn't look very nice. In this section, we outline some of the options that you have. 
