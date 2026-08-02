@@ -11,6 +11,8 @@ er_vpc(
   response_type = "auto",
   plot_by = NULL,
   n_bins = 4,
+  stratify_by = NULL,
+  n_strata = 4,
   conf_level = 0.95,
   probs = c(0.1, 0.5, 0.9)
 )
@@ -32,6 +34,18 @@ exposure variable itself); a categorical variable is used as-is,
 with no binning.}
 
 \item{n_bins}{Number of quantile bins, when \code{plot_by} is numeric.}
+
+\item{stratify_by}{Optional variable (unquoted) splitting the VPC into
+one facet panel per level, via \code{ggplot2::facet_wrap()}. A
+categorical variable is used as-is; a numeric variable is
+automatically split into \code{n_strata} quantile bins (placebo, i.e.
+\code{0}, kept in its own bin when \code{stratify_by} is the exposure variable
+itself), with a message reporting that this happened. Must resolve
+to a different variable than \code{plot_by}. Defaults to \code{NULL} (no
+faceting, a single panel, matching prior behaviour).}
+
+\item{n_strata}{Number of quantile bins, when \code{stratify_by} is
+numeric. Ignored when \code{stratify_by} is \code{NULL} or categorical.}
 
 \item{conf_level}{Confidence level for both the observed- and
 simulated-side intervals. Must be strictly between 0 and 1.}

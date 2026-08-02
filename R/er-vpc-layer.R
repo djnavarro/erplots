@@ -90,6 +90,30 @@
     dat$.vpc_bin <- dat[[group_var]]
   }
 
+  # `stratify_by` (`object$strata`, `NULL` when the caller didn't supply
+  # one) splits the VPC into facet panels via `ggplot2::facet_wrap()` in
+  # `.build_vpc_plot()`. A constant `.vpc_stratum` is added even when
+  # unset, so every `.by = ` grouping below can unconditionally include
+  # it rather than branching on whether stratification is in use --
+  # `.build_vpc_plot()` only facets when `object$strata` is non-`NULL`,
+  # so the dummy single-level column is otherwise inert.
+  strata_var <- object$strata$var
+  config$strata_var <- strata_var
+  config$strata_label <- object$strata$label
+  config$strata_type <- object$strata$type
+  if (is.null(strata_var)) {
+    config$strata_breaks <- NULL
+    dat$.vpc_stratum <- 1L
+  } else if (config$strata_type == "continuous") {
+    is_placebo_strata <- if (strata_var == exp_var) dat[[exp_var]] == 0 else rep(FALSE, nrow(dat))
+    strata_bins <- cut_exposure_quantile(dat[[strata_var]], n = object$strata$n_strata, is_placebo = is_placebo_strata)
+    config$strata_breaks <- attr(strata_bins, "breaks")
+    dat$.vpc_stratum <- strata_bins
+  } else {
+    config$strata_breaks <- NULL
+    dat$.vpc_stratum <- dat[[strata_var]]
+  }
+
   # response-type-dispatched observed summary (rate/mean + CI) -- mirrors
   # `.layer_quantile()`'s own binary/continuous/count dispatch
   if (response_type == "binary") {
@@ -103,7 +127,7 @@
         y_mid = n1 / (n0 + n1),
         ci_lower = ci_clopper_pearson(n1, n0 + n1, conf_level)["lower"],
         ci_upper = ci_clopper_pearson(n1, n0 + n1, conf_level)["upper"],
-        .by = ".vpc_bin"
+        .by = c(".vpc_bin", ".vpc_stratum")
       ) |>
       dplyr::select(-n1, -n0)
   } else if (response_type == "count") {
@@ -116,7 +140,7 @@
         y_mid = mean(.data[[rsp_var]], na.rm = TRUE),
         ci_lower = ci_poisson(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["lower"],
         ci_upper = ci_poisson(sum(.data[[rsp_var]], na.rm = TRUE), n_units, conf_level)["upper"],
-        .by = ".vpc_bin"
+        .by = c(".vpc_bin", ".vpc_stratum")
       ) |>
       dplyr::select(-n_units)
   } else {
@@ -128,7 +152,7 @@
         y_mid = mean(.data[[rsp_var]], na.rm = TRUE),
         ci_lower = ci_t(.data[[rsp_var]], conf_level)["lower"],
         ci_upper = ci_t(.data[[rsp_var]], conf_level)["upper"],
-        .by = ".vpc_bin"
+        .by = c(".vpc_bin", ".vpc_stratum")
       )
   }
   summary_tbl$y_mid_lbl <- format_y_mid(summary_tbl$y_mid)
@@ -167,7 +191,7 @@
             ci_upper = ci["upper", ]
           )
         },
-        .by = ".vpc_bin"
+        .by = c(".vpc_bin", ".vpc_stratum")
       )
   }
 
@@ -214,6 +238,24 @@
     sim$.vpc_bin <- sim[[group_var]]
   }
 
+  # `.vpc_stratum`, mirroring `.vpc_bin` immediately above: binned
+  # against the observed layer's own cutpoints (`obs_config$strata_breaks`)
+  # when `stratify_by` is numeric, so both sides share identical facet
+  # boundaries; a constant `1L` when `stratify_by` is unset, so every
+  # `.by = ` grouping below can unconditionally include it (see
+  # `.layer_vpc_observed()`'s identical comment)
+  config$strata_var <- obs_config$strata_var
+  config$strata_label <- obs_config$strata_label
+  config$strata_type <- obs_config$strata_type
+  if (is.null(obs_config$strata_var)) {
+    sim$.vpc_stratum <- 1L
+  } else if (obs_config$strata_type == "continuous") {
+    is_placebo_strata <- if (obs_config$strata_var == exp_var) sim[[exp_var]] == 0 else rep(FALSE, nrow(sim))
+    sim$.vpc_stratum <- .apply_exposure_breaks(sim[[obs_config$strata_var]], obs_config$strata_breaks, is_placebo_strata)
+  } else {
+    sim$.vpc_stratum <- sim[[obs_config$strata_var]]
+  }
+
   alpha <- (1 - conf_level) / 2
   format_y_mid <- if (response_type == "binary") object$theme$format_percent else object$theme$format_number
 
@@ -228,7 +270,7 @@
       # value -- mirrors `.layer_vpc_observed()`'s `x_median`
       x_median = if (obs_config$is_numeric_group) stats::median(.data[[group_var]], na.rm = TRUE) else NA_real_,
       y = mean(.data[[rsp_var]], na.rm = TRUE),
-      .by = c(".vpc_bin", "sim_id")
+      .by = c(".vpc_bin", ".vpc_stratum", "sim_id")
     ) |>
     dplyr::summarise(
       x_mid = if (obs_config$is_numeric_group) mean(x_mid, na.rm = TRUE) else NA_real_,
@@ -236,7 +278,7 @@
       y_mid = mean(y, na.rm = TRUE),
       ci_lower = stats::quantile(y, probs = alpha, na.rm = TRUE),
       ci_upper = stats::quantile(y, probs = 1 - alpha, na.rm = TRUE),
-      .by = ".vpc_bin"
+      .by = c(".vpc_bin", ".vpc_stratum")
     )
   summary_tbl$y_mid_lbl <- format_y_mid(summary_tbl$y_mid)
   config$summary <- summary_tbl
@@ -255,7 +297,7 @@
         x_median = if (obs_config$is_numeric_group) stats::median(.data[[group_var]], na.rm = TRUE) else NA_real_,
         prob = probs,
         y = unname(stats::quantile(.data[[rsp_var]], probs = probs, na.rm = TRUE)),
-        .by = c(".vpc_bin", "sim_id")
+        .by = c(".vpc_bin", ".vpc_stratum", "sim_id")
       )
     config$percentiles <- stage1 |>
       dplyr::summarise(
@@ -264,7 +306,7 @@
         y_mid = stats::median(y, na.rm = TRUE),
         ci_lower = stats::quantile(y, probs = alpha, na.rm = TRUE),
         ci_upper = stats::quantile(y, probs = 1 - alpha, na.rm = TRUE),
-        .by = c(".vpc_bin", "prob")
+        .by = c(".vpc_bin", ".vpc_stratum", "prob")
       )
   }
 

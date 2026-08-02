@@ -170,10 +170,13 @@ Built-in builders, by layer:
 ### The VPC mini-grammar
 
 `er_vpc(data, exposure, response, response_type, plot_by = NULL, n_bins
-= 4, conf_level = 0.95, probs = c(0.1, 0.5, 0.9))` |>
-`er_vpc_add_observed()` |> `er_vpc_add_simulated()` |> `plot()` mirrors
-`er_plot()`'s object/layer/builder architecture, scoped deliberately
-narrower: no stratification, always a single panel. `plot_by`/`n_bins`/
+= 4, stratify_by = NULL, n_strata = 4, conf_level = 0.95, probs = c(0.1,
+0.5, 0.9))` |> `er_vpc_add_observed()` |> `er_vpc_add_simulated()` |>
+`plot()` mirrors `er_plot()`'s object/layer/builder architecture, scoped
+deliberately narrower in one respect that remains true even after
+`stratify_by` (below): always a single `plot_by` axis/binning scheme, no
+per-builder color/facet precedence rule to thread through (see
+"Stratification via `stratify_by`" below for why). `plot_by`/`n_bins`/
 `conf_level`/`probs` all live on `er_vpc()` itself (stored on
 `object$group`), not on either add-verb, since the observed and
 simulated layers must always agree on them -- `plot_by` defaults to the
@@ -190,6 +193,29 @@ convenience boolean derived from it) for builders to read. When
 vs. mean, of `plot_by`'s values) -- `x_mid` remains what the
 percentile-band idiom plots at, while `x_median` is what the default
 `_mean_errorbar()` pair plots at instead.
+
+**Stratification via `stratify_by`.** Optional, defaults to `NULL` (no
+faceting, a single panel -- prior behaviour unchanged). When supplied,
+`er_vpc()` splits the VPC into one `ggplot2::facet_wrap()` panel per
+level, stored as `object$strata` (`var`/`label`/`type`/`n_strata`,
+mirroring `object$group`). A categorical `stratify_by` is used as-is; a
+numeric one is quantile-binned into `n_strata` bins (`cut_exposure_quantile()`,
+placebo separated only when `stratify_by` is the exposure variable
+itself, exactly like `plot_by`), with `rlang::inform()` reporting that
+this happened. `er_vpc()` errors if `stratify_by` resolves to the same
+variable as `plot_by` -- faceting by the exact variable already driving
+the x-axis binning would give each panel a single bin. Unlike
+`er_plot()`'s stratification, this is facet-only (no color precedence
+rule to reconcile), and no `er_style_vpc_*()` builder needs to know it
+exists: `.layer_vpc_observed()` computes a `.vpc_stratum` column
+alongside `.vpc_bin` (a constant `1L` when `stratify_by` is unset, so
+every `.by = ` grouping can unconditionally include it rather than
+branching), `.layer_vpc_simulated()` bins simulated rows against the
+observed layer's own stored `config$strata_breaks` the same way it
+already does for `config$breaks`, and `.build_vpc_plot()` adds a single
+`facet_wrap(vars(.vpc_stratum))` when `object$strata` is non-`NULL` --
+every builder's `config$summary`/`config$percentiles` already carries
+the `.vpc_stratum` column needed for that facet to work.
 
 - **`er_vpc_add_observed(object, style = ...)`** -- bins the observed
   data (using `object$group`) and computes its response summary.

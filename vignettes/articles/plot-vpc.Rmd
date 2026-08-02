@@ -15,7 +15,7 @@ library(emaxnls)
 library(erglm)
 ```
 
-Alongside the `er_plot()` mini-grammar covered in the [binary](plot-binary.html), [continuous](plot-continuous.html), and [count](plot-count.html) articles, erplots supplies a second, smaller mini-grammar built around `er_vpc()` for constructing visual predictive checks (VPCs). A VPC compares what a model predicts against what was actually observed, binned by exposure (or some other variable of interest), so that any systematic mismatch between model and data is easy to spot. The grammar is deliberately narrower than `er_plot()`'s: there's no stratification, and the plot is always a single panel. But the same model-agnostic philosophy still applies -- any model implementing `er_predict()`/`er_simulate()` (see [Implementing the model interface](model-interface.html)) can be visualised this way, and this article uses the same erglm and emaxnls models as the other articles to demonstrate it. As with `er_plot()`, `er_vpc()` itself only sets up the plot's variables and bins; nothing is drawn until `er_vpc_add_observed()` and `er_vpc_add_simulated()` are added and the pipeline is plotted.
+Alongside the `er_plot()` mini-grammar covered in the [binary](plot-binary.html), [continuous](plot-continuous.html), and [count](plot-count.html) articles, erplots supplies a second, smaller mini-grammar built around `er_vpc()` for constructing visual predictive checks (VPCs). A VPC compares what a model predicts against what was actually observed, binned by exposure (or some other variable of interest), so that any systematic mismatch between model and data is easy to spot. The grammar is deliberately narrower than `er_plot()`'s in one respect: there's no color/facet precedence rule to reconcile across builders, since an optional `stratify_by` splits the plot into facet panels only (see `?er_vpc`), never color. But the same model-agnostic philosophy still applies -- any model implementing `er_predict()`/`er_simulate()` (see [Implementing the model interface](model-interface.html)) can be visualised this way, and this article uses the same erglm and emaxnls models as the other articles to demonstrate it. As with `er_plot()`, `er_vpc()` itself only sets up the plot's variables and bins; nothing is drawn until `er_vpc_add_observed()` and `er_vpc_add_simulated()` are added and the pipeline is plotted.
 
 ## Binary response 
 
@@ -63,6 +63,36 @@ erglm_data |>
   er_vpc_add_simulated(model = mod, seed = 1234) |>
   plot()
 ``` 
+
+## Stratified panels
+
+`plot_by` changes *what's binned* along the x-axis; `stratify_by` instead keeps the x-axis as-is and splits the plot into one facet panel per level of some other variable, via `ggplot2::facet_wrap()`. It's useful when you want to check the model against a covariate without giving up the usual exposure-response view. Unlike `plot_by`, `stratify_by` never changes what's plotted on the x-axis or how it's binned -- both `er_vpc_add_observed()` and `er_vpc_add_simulated()` behave exactly as before within each panel.
+
+### Discrete `stratify_by`
+
+A categorical `stratify_by` is used as-is, one panel per level. Here we reuse the `ae1 ~ aucss + sex` model from above, faceting by `sex` while keeping `aucss` on the x-axis:
+
+```{r}
+erglm_data |> 
+  er_vpc(exposure = aucss, response = ae1, stratify_by = sex) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  plot()
+```
+
+### Continuous `stratify_by`
+
+A numeric `stratify_by` is automatically split into `n_strata` quantile bins (4 by default), and `er_vpc()` reports a message when it does this, since it's a decision made on your behalf. Here we facet by `weight`, overriding the default with `n_strata = 3`:
+
+```{r}
+erglm_data |> 
+  er_vpc(exposure = aucss, response = ae1, stratify_by = weight, n_strata = 3) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  plot()
+```
+
+`stratify_by` must resolve to a different variable than `plot_by` (which defaults to the exposure variable) -- faceting by the exact variable already driving the x-axis binning would give each panel a single bin, so `er_vpc()` errors rather than allow it.
 
 ## Continuous response 
 

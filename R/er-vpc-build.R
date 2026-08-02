@@ -55,5 +55,17 @@
     p <- p + geoms
   }
 
+  # `object$strata` is `NULL` unless the caller supplied `stratify_by` --
+  # a `.vpc_stratum` column is always computed (see `.layer_vpc_observed()`),
+  # but it's a constant single-level column in that case, so faceting on
+  # it is skipped rather than producing a single, redundant facet panel.
+  if (!is.null(object$strata)) {
+    strata_label <- object$strata$label
+    p <- p + ggplot2::facet_wrap(
+      ggplot2::vars(.vpc_stratum),
+      labeller = ggplot2::as_labeller(function(x) paste0(strata_label, ": ", x))
+    )
+  }
+
   return(p)
 }

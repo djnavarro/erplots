@@ -536,6 +536,7 @@ utils::globalVariables(c(
   "outer_hi",
   "y_jitter",
   ".vpc_bin",
+  ".vpc_stratum",
   "prob",
   ":="
 ))

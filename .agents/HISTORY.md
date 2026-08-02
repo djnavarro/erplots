@@ -965,3 +965,84 @@ new idiom, just one argument doing what a caller would already expect
 shim, per the package's usual convention -- callers who were setting
 `errorbar_width_continuous` explicitly need to switch to
 `errorbar_width` (same value, same meaning for a numeric `plot_by`).
+
+## `er_style_group_violin()`'s `quantiles`/`quantile_linetype` arguments
+
+Previously flagged in `PLAN.md` as a dead-argument bug: a
+`quantile.linetype` parameter existed with no `draw_quantiles` argument
+ever set, so it had no effect. Resolved by the time this was revisited,
+because the underlying ggplot2 API itself moved: as of ggplot2 4.0 (the
+package's `Imports` floor), `geom_violin()`'s old `draw_quantiles`
+argument is deprecated in favor of a `quantiles` stat parameter plus
+`quantile.colour`/`quantile.linetype`/`quantile.linewidth` geom
+parameters. `er_style_group_violin()` (and the `_violinjitter()` wrapper
+that forwards to it) already exposes `quantiles = NULL` and
+`quantile_linetype = "solid"`, conditionally passed through to
+`geom_violin()` only when `quantiles` is non-`NULL` -- i.e. mirroring
+the *current* ggplot2 argument names rather than the deprecated
+`draw_quantiles` one. No further change was needed.
+
+## Decided against: a continuous/count `"panel"`-layout data builder
+
+`PLAN.md` had carried an open item since the `build_data_color()`
+removal: no built-in `"panel"`-layout data builder exists for a
+continuous/count response, only `er_style_data_boxjitter()`
+(binary-only), with two unresolved design questions (a deliberate
+continuous color scale vs. ggplot2's default gradient; a quantile-binned
+rug vs. a color-encoded scatter).
+
+Decided not to build one. `er_style_data_boxjitter()`'s panel layout
+earns its keep for a binary response because the main overlay panel is
+structurally degenerate there -- every point sits at `y = 0` or `y = 1`,
+so a scatter shows two overplotted lines and nothing about the exposure
+distribution within each outcome group. Splitting the panel on
+`response == 1`/`response == 0` (a natural, data-defined split) recovers
+distributional information the main panel can't show.
+
+For continuous/count responses, the main overlay panel isn't degenerate
+-- `er_style_data_overlay()`/`er_style_data_hex()` already show the full
+bivariate distribution directly. A panel builder would first need to
+collapse the continuous/count response into discrete groups to have
+something to panel by, and no such split is natural the way binary's 0/1
+is: any threshold (median split, quartiles, a clinical cutoff) is an
+arbitrary binning decision imposed on the response, and the resulting
+"exposure distribution conditional on binned response" view largely
+duplicates, in reverse, what `er_plot_add_quantiles()` already does
+better (response summarized within exposure bins). The closest genuine
+use case -- zero-inflated count data (any-event vs. none) -- is just a
+derived binary indicator a caller can already build with
+`dplyr::mutate()` and hand to the existing `er_style_data_boxjitter()`
+unchanged; it doesn't need a new builder. `.layer_data()`'s
+response-type dispatch is untouched, so a custom `"panel"`-layout
+builder for continuous/count remains possible via `er_style_tag()` if a
+concrete need ever surfaces.
+
+## Stratified/faceted VPC panels (`stratify_by`)
+
+Added a `stratify_by`/`n_strata` pair to `er_vpc()`, splitting the VPC
+into one `ggplot2::facet_wrap()` panel per level. Deliberately
+facet-only (unlike `er_plot()`'s stratification, which has to reconcile
+a color/facet precedence rule across every builder) -- a categorical
+`stratify_by` is used as-is, a numeric one is auto-binned into
+`n_strata` quantile bins via `cut_exposure_quantile()` (placebo
+separated only when `stratify_by` is the exposure variable itself,
+mirroring `plot_by`'s existing rule), with `rlang::inform()` reporting
+the auto-binning. `er_vpc()` errors if `stratify_by` resolves to the
+same variable as `plot_by`, since faceting by the exact variable already
+driving the x-axis binning would give each panel a single bin.
+
+Mechanically, this required no changes to any `er_style_vpc_*()`
+builder, because every one of them already reads exclusively from
+`config$summary`/`config$percentiles` rather than raw per-row data.
+`.layer_vpc_observed()` computes a `.vpc_stratum` column alongside the
+existing `.vpc_bin` -- a constant `1L` when `stratify_by` is unset, so
+every `.by = ` grouping in both `.layer_vpc_*()` functions could
+unconditionally include it rather than branching on whether
+stratification is active. `.layer_vpc_simulated()` bins simulated rows
+against the observed layer's own stored `config$strata_breaks`, the same
+way it already reused `config$breaks` for `.vpc_bin` (via
+`.apply_exposure_breaks()`), so both sides share identical facet
+boundaries. `.build_vpc_plot()` adds a single
+`facet_wrap(vars(.vpc_stratum))` (with a labeller prefixing the strata
+label) only when `object$strata` is non-`NULL`, so the dummy
+single-level column is otherwise inert and produces no spurious facet.
