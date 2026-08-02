@@ -8,15 +8,30 @@ rather than marked "done" in place. Items are grouped by target release.
 
 ## 0.1 release (initial CRAN submission)
 
-### `erplots_data` documentation/test gaps
+### Stress test before submission
 
-- A dedicated `vignettes/articles/erplots-data.Rmd` walkthrough of all
-  five modelling scenarios end-to-end -- currently just a one-sentence
-  pointer from `vignettes/erplots.Rmd` plus `?erplots_data`'s own
-  `@examples`.
-- Tests asserting `study_id`'s independence from dose/exposure/response
-  directly -- currently only eyeballed via `table(study_id, dose_group)`
-  during development, not asserted anywhere in `tests/testthat/`.
+A fresh round of stress testing against the full breadth of layers/
+builders/response types added since the last pass -- looking for
+validation gaps, unhelpful errors, and outright bugs surfaced by
+combinations that haven't been exercised in `tests/testthat/`.
+
+### CRAN release strategy
+
+Plan out submission order/dependency handling before submitting:
+
+- `erglm` as a `Suggests` dependency is fine *if* `erglm` 0.1.1 is
+  accepted to CRAN before `erplots` 0.1 is submitted -- confirm that
+  ordering holds, or fall back to gating erglm-dependent tests/examples
+  more defensively if it slips.
+- `emaxnls` is trickier: it's already on CRAN, but the CRAN release
+  doesn't register the `er_predict()`/`er_simulate()`/`er_summary()`
+  methods erplots relies on (only `Remotes: djnavarro/emaxnls`'s
+  GitHub version does, per the `>= 0.1.1.9000` floor in
+  `DESCRIPTION`). Need a plan for what erplots 0.1 says/does about
+  `emaxnls` on CRAN -- e.g. whether to wait for a new `emaxnls` CRAN
+  release that registers the methods, document the gap prominently,
+  or otherwise avoid implying CRAN's `emaxnls` works with erplots
+  out of the box.
 
 ## 0.2 release
 
