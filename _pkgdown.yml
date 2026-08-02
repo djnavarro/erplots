@@ -30,6 +30,7 @@ reference:
   - er_vpc
   - er_vpc_add_observed
   - er_vpc_add_simulated
+  - er_vpc_theme
   - er_vpc_build
 - title: VPC plot builder functions
   desc: Low level functions to draw specific components of a VPC plot
