@@ -8,27 +8,6 @@ rather than marked "done" in place. Items are grouped by target release.
 
 ## 0.1 release (initial CRAN submission)
 
-### Stress test before submission
-
-A fresh round of stress testing against the full breadth of layers/
-builders/response types (150+ combinations across `er_plot`/`er_vpc`)
-turned up no failures in the main sweep, but targeted single-layer edge
-cases found two real bugs:
-
-- `.polish_legends()` crashing when a lone stratified overlay/summary
-  layer is the only stratified thing on the plot -- **fixed**, see
-  `.agents/HISTORY.md`.
-- `.check_theme_limits()` crashing with an opaque "missing value where
-  TRUE/FALSE needed" when `xlim`/`ylim` contains `NA` (e.g. `xlim =
-  c(0, NA)`, the standard ggplot2 idiom for "float this bound") --
-  **fixed**, see `.agents/HISTORY.md`. `NA` is rejected outright (not
-  supported) rather than threaded through to the internal computations
-  that also consume these limits.
-
-Both bugs found so far are fixed; no further stress-test follow-ups are
-currently queued here, but this section stays open in case another pass
-turns up more before submission.
-
 ### CRAN release strategy
 
 Plan out submission order/dependency handling before submitting:
