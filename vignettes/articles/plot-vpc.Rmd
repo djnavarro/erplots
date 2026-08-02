@@ -179,9 +179,9 @@ erglm_data |>
 
 ```
 
-## Troubleshooting: overlapping quantile bands
+## Troubleshooting plot legibility
 
-The quantile idioms (`er_style_vpc_*_quantile_line()`/`_ribbon()`/`_errorbar()`) plot several `probs` at once, and none of them use anything besides y-position to tell those percentiles apart. When the underlying bands sit close together -- a small sample per bin, few simulated replicates, or several `probs` requested close to one another -- this can make a plot illegible. The `_errorbar()` idiom is the most exposed to this: it plots every requested percentile at the *same* x-position within a bin, so pairing `er_style_vpc_observed_quantile_errorbar()` with `er_style_vpc_simulated_quantile_errorbar()` can stack up to `2 * length(probs)` error bars on top of one another. Here it is with five requested percentiles:
+A persistent problem when creating VPC plots is cleaning up an illegible plot. To an extent, this problem is unavoidable: VPC plots attempt to display a *lot* of information in a single image, and it has a tendency to make them difficult to read. Because the specific pattern of illegibility tends to vary from plot to plot, it is almost impossible to build in an automated fix to this problem. Instead of attempting an automated fix that will very likely not work, the `er_vpc()` mini-grammar exposes some customization tools that you can use to clean up a VPC plot that doesn't look very nice. In this section, we outline some of the options that you have. 
 
 ```{r}
 mod <- emax_nls(
@@ -189,7 +189,13 @@ mod <- emax_nls(
   covariate_model = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
   data = emax_df
 )
+```
 
+### Errorbar collisions
+
+We'll start by creating a deliberately terrible VPC plot, using the Emax regression in the `mod` object. Suppose that, for one reason or another, you have been asked to show *five* quantiles for this model rather than the usual three. This is rarely a good idea because it leads to terrible crowding in the plot. Here's what happens if we do this, using errorbar styling for both the observed data and the model simulations: 
+
+```{r}
 emax_df |>
   er_vpc(
     exposure = exp_1,
@@ -207,10 +213,11 @@ emax_df |>
   plot()
 ```
 
-There's no automatic fix for this: whether the collision is between the observed and simulated layers, between the individual `probs` within one layer, or both at once depends entirely on the data at hand, so any heuristic dodge would risk distorting some plots it wasn't meant to touch. Instead, both `_errorbar()` builders take two manual, opt-in arguments (default `0`, reproducing the layout above) for a numeric `plot_by`:
+There's no simple fix for this: in this plot we have unpleasant collisions between the observed and simulated layers, *and* between the five individual `probs` within each layer. However, you do have some options. Assuming for the sake of this vignette that you really do need all five quantiles, and for the moment assuming that both the simulated and observed layers must be displayed in an errorbar style, there are three arguments we can tinker with to improve legibility:
 
 - `dodge` shifts a whole builder's error bars sideways -- pair an equal and opposite `dodge` on the observed and simulated builders to pull the two layers apart.
 - `prob_dodge_width` spreads a single builder's own `probs` apart, symmetrically around the bin's true position.
+- `errorbar_width` narrows or widens the error bars themselves, giving the eye more room to separate bars that remain close together after dodging
 
 ```{r}
 emax_df |>
@@ -223,17 +230,87 @@ emax_df |>
   ) |>
   er_vpc_add_observed(
     style = er_style_vpc_observed_quantile_errorbar,
-    dodge = -0.02, prob_dodge_width = 0.012
+    dodge = -0.005, 
+    prob_dodge_width = 0.005,
+    errorbar_width = 0.0025
   ) |>
   er_vpc_add_simulated(
     model = mod,
     seed = 1234,
     style = er_style_vpc_simulated_quantile_errorbar,
-    dodge = 0.02, prob_dodge_width = 0.012
+    dodge = 0.005, 
+    prob_dodge_width = 0.005,
+    errorbar_width = 0.0025
   ) |>
   plot()
 ```
 
-Both arguments are expressed as a fraction of `plot_by`'s own range (like `errorbar_width_continuous`), so the same value scales sensibly across datasets; picking a good value is inherently a bit of trial and error, since it depends on how many bins/`probs` are requested and how spread out the data is. Neither argument is supported for a categorical `plot_by` yet -- there, adjacent bins are already spaced apart, so this kind of collision is confined to the `probs`-within-a-bin case, which currently has no dodge option (a nonzero `dodge`/`prob_dodge_width` is ignored with a warning rather than silently distorting the categorical axis).
+It takes a little bit of trial and error to find values that work in any specific case (and it does help to take a close look at the documentation to see how the different arguments are interpreted), but nevertheless this is a substantial improvement. It is not perfect, but it works reasonably well.
 
-The ribbon/line idiom has the same underlying problem -- overlapping bands merge into a single shaded region, and the identically-styled median lines become the only (unreliable) way to tell them apart -- but a different fix: `er_style_vpc_simulated_quantile_ribbon(ribbon_edges = TRUE)` draws each band's own bounds as a line, which stays traceable across the plot even where the fills themselves overlap into an indistinguishable blob.
+### Ribbon collisions
+
+A different kind of legibility issue arises when ribbons are used to display confidence intervals. As before, we'll illustrate this using the extreme case when five quantiles are being displayed. A common visual style used for VPC plots is to use connected lines for the observed quantiles, and then ribbons to show model predictions and uncertainty at each quantile. In this case, however, the confidence bands are so closely packed together that they blend together visually and it is impossible to tell where the boundaries are:
+
+```{r}
+emax_df |>
+  er_vpc(
+    exposure = exp_1,
+    response = rsp_1,
+    response_type = "continuous",
+    n_bins = 5,
+    probs = c(0.1, 0.3, 0.5, 0.7, 0.9)
+  ) |>
+  er_vpc_add_observed(style = er_style_vpc_observed_quantile_line) |>
+  er_vpc_add_simulated(
+    model = mod,
+    seed = 1234,
+    style = er_style_vpc_simulated_quantile_ribbon
+  ) |>
+  plot()
+```
+
+Sometimes you can improve legibility in this case by placing more emphasis on the edges of the bands, and reducing the salience of the band shading. The code below illustrates this, and it helps somewhat, but the plot is still difficult to read:
+
+```{r}
+emax_df |>
+  er_vpc(
+    exposure = exp_1,
+    response = rsp_1,
+    response_type = "continuous",
+    n_bins = 5,
+    probs = c(0.1, 0.3, 0.5, 0.7, 0.9)
+  ) |>
+  er_vpc_add_observed(style = er_style_vpc_observed_quantile_line) |>
+  er_vpc_add_simulated(
+    model = mod,
+    seed = 1234,
+    style = er_style_vpc_simulated_quantile_ribbon,
+    ribbon_alpha = 0.1,
+    ribbon_edges = TRUE
+  ) |>
+  plot()
+```
+
+Ultimately, in this situation the most likely resolution is that you would have to revert from five quantile bands to the usual three:
+
+```{r}
+emax_df |>
+  er_vpc(
+    exposure = exp_1,
+    response = rsp_1,
+    response_type = "continuous",
+    n_bins = 5,
+    probs = c(0.1, 0.5, 0.9)
+  ) |>
+  er_vpc_add_observed(style = er_style_vpc_observed_quantile_line) |>
+  er_vpc_add_simulated(
+    model = mod,
+    seed = 1234,
+    style = er_style_vpc_simulated_quantile_ribbon,
+    ribbon_alpha = 0.2,
+    ribbon_edges = TRUE
+  ) |>
+  plot()
+```
+
+Some of the distributional information is lost, but overall the plot is a lot easier to understand.
