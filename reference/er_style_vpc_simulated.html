@@ -93,8 +93,7 @@ point/interval per bin <em>and</em> per requested percentile.</p>
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">theme</span>,</span>
 <span>  point_size <span class="op">=</span> <span class="fl">1.5</span>,</span>
-<span>  errorbar_width <span class="op">=</span> <span class="fl">0.15</span>,</span>
-<span>  errorbar_width_continuous <span class="op">=</span> <span class="fl">0.025</span>,</span>
+<span>  errorbar_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dodge <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  prob_dodge_width <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -107,8 +106,7 @@ point/interval per bin <em>and</em> per requested percentile.</p>
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">theme</span>,</span>
 <span>  point_size <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  errorbar_width <span class="op">=</span> <span class="fl">0.2</span>,</span>
-<span>  errorbar_width_continuous <span class="op">=</span> <span class="fl">0.025</span>,</span>
+<span>  errorbar_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dodge <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -178,21 +176,21 @@ each band's <code>y_mid</code>. Defaults match the previous fixed styling
 
 <dt id="arg-errorbar-width">errorbar_width<a class="anchor" aria-label="anchor" href="#arg-errorbar-width"></a></dt>
 <dd><p>Width of <code>er_style_vpc_simulated_mean_errorbar()</code>'s
-and <code>er_style_vpc_simulated_quantile_errorbar()</code>'s error bars when
-<code>plot_by</code> is categorical.</p></dd>
-
-
-<dt id="arg-errorbar-width-continuous">errorbar_width_continuous<a class="anchor" aria-label="anchor" href="#arg-errorbar-width-continuous"></a></dt>
-<dd><p>Width (as a fraction of <code>plot_by</code>'s
-own range, <code>config$group_limits</code>) of
-<code>er_style_vpc_simulated_mean_errorbar()</code>'s and
-<code>er_style_vpc_simulated_quantile_errorbar()</code>'s error bars when
-<code>plot_by</code> is numeric.</p></dd>
+and <code>er_style_vpc_simulated_quantile_errorbar()</code>'s error bars.
+Interpreted differently depending on <code>plot_by</code>'s type: for a
+categorical <code>plot_by</code>, it's a bar width in the same implied
+unit-scaled category-gap units <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_errorbar()</a></code> normally
+expects; for a numeric <code>plot_by</code>, it's a fraction of <code>plot_by</code>'s own
+range (<code>config$group_limits</code>), so <code>1</code> would span the full range.
+Defaults to <code>NULL</code>, which resolves to <code>0.15</code>
+(<code>er_style_vpc_simulated_quantile_errorbar()</code>) or <code>0.2</code>
+(<code>er_style_vpc_simulated_mean_errorbar()</code>) for a categorical
+<code>plot_by</code>, or <code>0.025</code> for a numeric one.</p></dd>
 
 
 <dt id="arg-dodge">dodge<a class="anchor" aria-label="anchor" href="#arg-dodge"></a></dt>
 <dd><p>Horizontal offset (as a fraction of <code>plot_by</code>'s own
-range, like <code>errorbar_width_continuous</code>) applied to all of this
+range, like <code>errorbar_width</code> for a numeric <code>plot_by</code>) applied to all of this
 builder's error bars/points, for both <code>er_style_vpc_simulated_mean_errorbar()</code>
 and <code>er_style_vpc_simulated_quantile_errorbar()</code>. Default <code>0</code>
 (no offset, the previous behaviour); pair with an opposite-signed
