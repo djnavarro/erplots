@@ -144,6 +144,71 @@ test_that("built-in simulated builders are tagged appropriately, including quant
   )
 })
 
+test_that("er_style_vpc_simulated_mean_errorbar()'s errorbar_width defaults resolve by plot_by type", {
+  vpc_numeric <- er_vpc(er_test_data, aucss, ae1) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 820)
+  geoms_numeric <- er_style_vpc_simulated_mean_errorbar(
+    er_test_data, vpc_numeric$layer$simulated$config, vpc_numeric$exposure, vpc_numeric$response, vpc_numeric$theme
+  )
+  range_numeric <- diff(vpc_numeric$layer$simulated$config$group_limits)
+  expect_equal(geoms_numeric[[1]]$geom_params$width, 0.025 * range_numeric)
+
+  vpc_discrete <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 821)
+  geoms_discrete <- er_style_vpc_simulated_mean_errorbar(
+    er_test_data, vpc_discrete$layer$simulated$config, vpc_discrete$exposure, vpc_discrete$response, vpc_discrete$theme
+  )
+  expect_equal(geoms_discrete[[1]]$geom_params$width, 0.2)
+})
+
+test_that("er_style_vpc_simulated_mean_errorbar()'s errorbar_width is interpreted per plot_by type when supplied", {
+  vpc_numeric <- er_vpc(er_test_data, aucss, ae1) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 822)
+  geoms_numeric <- er_style_vpc_simulated_mean_errorbar(
+    er_test_data, vpc_numeric$layer$simulated$config, vpc_numeric$exposure, vpc_numeric$response, vpc_numeric$theme,
+    errorbar_width = 0.1
+  )
+  range_numeric <- diff(vpc_numeric$layer$simulated$config$group_limits)
+  expect_equal(geoms_numeric[[1]]$geom_params$width, 0.1 * range_numeric)
+
+  vpc_discrete <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 823)
+  geoms_discrete <- er_style_vpc_simulated_mean_errorbar(
+    er_test_data, vpc_discrete$layer$simulated$config, vpc_discrete$exposure, vpc_discrete$response, vpc_discrete$theme,
+    errorbar_width = 0.1
+  )
+  expect_equal(geoms_discrete[[1]]$geom_params$width, 0.1)
+})
+
+test_that("er_style_vpc_simulated_quantile_errorbar()'s errorbar_width defaults resolve by plot_by type", {
+  vpc_numeric <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |>
+    er_vpc_add_simulated(
+      model = er_test_mod_gaussian, nsim = 5, seed = 824,
+      style = er_style_vpc_simulated_quantile_errorbar
+    )
+  geoms_numeric <- er_style_vpc_simulated_quantile_errorbar(
+    er_test_data, vpc_numeric$layer$simulated$config, vpc_numeric$exposure, vpc_numeric$response, vpc_numeric$theme
+  )
+  range_numeric <- diff(vpc_numeric$layer$simulated$config$group_limits)
+  expect_equal(geoms_numeric[[1]]$geom_params$width, 0.025 * range_numeric)
+
+  vpc_discrete <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |>
+    er_vpc_add_simulated(
+      model = er_test_mod_gaussian, nsim = 5, seed = 825,
+      style = er_style_vpc_simulated_quantile_errorbar
+    )
+  geoms_discrete <- er_style_vpc_simulated_quantile_errorbar(
+    er_test_data, vpc_discrete$layer$simulated$config, vpc_discrete$exposure, vpc_discrete$response, vpc_discrete$theme
+  )
+  expect_equal(geoms_discrete[[1]]$geom_params$width, 0.15)
+})
+
 test_that("the simulated layer's geoms are drawn before the observed layer's in the base plot", {
   vpc <- er_test_data |>
     er_vpc(aucss, ae1) |>

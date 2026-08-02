@@ -14,15 +14,18 @@
 #' @param theme Theme components.
 #' @param point_size Point size for all three point/interval builders.
 #' @param errorbar_width Width of `er_style_vpc_observed_mean_errorbar()`'s
-#'   and `er_style_vpc_observed_quantile_errorbar()`'s error bars when
-#'   `plot_by` is categorical.
-#' @param errorbar_width_continuous Width (as a fraction of `plot_by`'s
-#'   own range, `config$group_limits`) of
-#'   `er_style_vpc_observed_mean_errorbar()`'s and
-#'   `er_style_vpc_observed_quantile_errorbar()`'s error bars when
-#'   `plot_by` is numeric.
+#'   and `er_style_vpc_observed_quantile_errorbar()`'s error bars.
+#'   Interpreted differently depending on `plot_by`'s type: for a
+#'   categorical `plot_by`, it's a bar width in the same implied
+#'   unit-scaled category-gap units `ggplot2::geom_errorbar()` normally
+#'   expects; for a numeric `plot_by`, it's a fraction of `plot_by`'s own
+#'   range (`config$group_limits`), so `1` would span the full range.
+#'   Defaults to `NULL`, which resolves to `0.15`
+#'   (`er_style_vpc_observed_quantile_errorbar()`) or `0.2`
+#'   (`er_style_vpc_observed_mean_errorbar()`) for a categorical
+#'   `plot_by`, or `0.025` for a numeric one.
 #' @param dodge Horizontal offset (as a fraction of `plot_by`'s own
-#'   range, like `errorbar_width_continuous`) applied to all of this
+#'   range, like `errorbar_width` for a numeric `plot_by`) applied to all of this
 #'   builder's error bars/points, for both `er_style_vpc_observed_mean_errorbar()`
 #'   and `er_style_vpc_observed_quantile_errorbar()`. Default `0`
 #'   (no offset, the previous behaviour). Useful for manually separating
@@ -142,8 +145,7 @@ er_style_vpc_observed_quantile_line <- er_style_tag(
 #' @rdname er_style_vpc_observed
 #' @export
 er_style_vpc_observed_quantile_errorbar <- function(data, config, exposure, response, theme,
-                                                     point_size = 1.5, errorbar_width = 0.15,
-                                                     errorbar_width_continuous = 0.025,
+                                                     point_size = 1.5, errorbar_width = NULL,
                                                      dodge = 0, prob_dodge_width = 0, ...) {
   if (is.null(config$percentiles)) {
     rlang::abort(c(
@@ -152,8 +154,11 @@ er_style_vpc_observed_quantile_errorbar <- function(data, config, exposure, resp
       "i" = "Use `er_style_vpc_observed_mean_errorbar()` instead for a binary response."
     ))
   }
+  if (is.null(errorbar_width)) {
+    errorbar_width <- if (config$is_numeric_group) 0.025 else 0.15
+  }
   if (config$is_numeric_group) {
-    width <- errorbar_width_continuous * (config$group_limits[2] - config$group_limits[1])
+    width <- errorbar_width * (config$group_limits[2] - config$group_limits[1])
     # a local copy, not a mutation of `config$percentiles` itself -- at
     # the `dodge = 0`/`prob_dodge_width = 0` defaults both offsets are
     # zero, so `x_median` is numerically unchanged and this stays
@@ -210,11 +215,13 @@ er_style_vpc_observed_quantile_errorbar <- er_style_tag(
 #' @rdname er_style_vpc_observed
 #' @export
 er_style_vpc_observed_mean_errorbar <- function(data, config, exposure, response, theme,
-                                                 point_size = 2, errorbar_width = 0.2,
-                                                 errorbar_width_continuous = 0.025,
+                                                 point_size = 2, errorbar_width = NULL,
                                                  dodge = 0, ...) {
+  if (is.null(errorbar_width)) {
+    errorbar_width <- if (config$is_numeric_group) 0.025 else 0.2
+  }
   if (config$is_numeric_group) {
-    width <- errorbar_width_continuous * (config$group_limits[2] - config$group_limits[1])
+    width <- errorbar_width * (config$group_limits[2] - config$group_limits[1])
     # a local copy, not a mutation of `config$summary` itself -- at the
     # `dodge = 0` default the offset is zero, so `x_median` is
     # numerically unchanged and this stays equivalent to plotting

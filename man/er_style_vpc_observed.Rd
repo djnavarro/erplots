@@ -24,8 +24,7 @@ er_style_vpc_observed_quantile_errorbar(
   response,
   theme,
   point_size = 1.5,
-  errorbar_width = 0.15,
-  errorbar_width_continuous = 0.025,
+  errorbar_width = NULL,
   dodge = 0,
   prob_dodge_width = 0,
   ...
@@ -38,8 +37,7 @@ er_style_vpc_observed_mean_errorbar(
   response,
   theme,
   point_size = 2,
-  errorbar_width = 0.2,
-  errorbar_width_continuous = 0.025,
+  errorbar_width = NULL,
   dodge = 0,
   ...
 )
@@ -61,17 +59,19 @@ er_style_vpc_observed_mean_errorbar(
 \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s own \code{...}.}
 
 \item{errorbar_width}{Width of \code{er_style_vpc_observed_mean_errorbar()}'s
-and \code{er_style_vpc_observed_quantile_errorbar()}'s error bars when
-\code{plot_by} is categorical.}
-
-\item{errorbar_width_continuous}{Width (as a fraction of \code{plot_by}'s
-own range, \code{config$group_limits}) of
-\code{er_style_vpc_observed_mean_errorbar()}'s and
-\code{er_style_vpc_observed_quantile_errorbar()}'s error bars when
-\code{plot_by} is numeric.}
+and \code{er_style_vpc_observed_quantile_errorbar()}'s error bars.
+Interpreted differently depending on \code{plot_by}'s type: for a
+categorical \code{plot_by}, it's a bar width in the same implied
+unit-scaled category-gap units \code{ggplot2::geom_errorbar()} normally
+expects; for a numeric \code{plot_by}, it's a fraction of \code{plot_by}'s own
+range (\code{config$group_limits}), so \code{1} would span the full range.
+Defaults to \code{NULL}, which resolves to \code{0.15}
+(\code{er_style_vpc_observed_quantile_errorbar()}) or \code{0.2}
+(\code{er_style_vpc_observed_mean_errorbar()}) for a categorical
+\code{plot_by}, or \code{0.025} for a numeric one.}
 
 \item{dodge}{Horizontal offset (as a fraction of \code{plot_by}'s own
-range, like \code{errorbar_width_continuous}) applied to all of this
+range, like \code{errorbar_width} for a numeric \code{plot_by}) applied to all of this
 builder's error bars/points, for both \code{er_style_vpc_observed_mean_errorbar()}
 and \code{er_style_vpc_observed_quantile_errorbar()}. Default \code{0}
 (no offset, the previous behaviour). Useful for manually separating

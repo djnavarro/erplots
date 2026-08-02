@@ -935,3 +935,33 @@ Fixed by using `object$group$label` for the x-axis label, and by adding
 `range(data[[group_var]])`, copied onto the simulated config the same
 way `breaks` already is) for the four error-bar builders to size against
 instead of `exposure$limits`.
+
+## Collapsing `errorbar_width`/`errorbar_width_continuous` into a single argument
+
+The dual-parameter split introduced above (`errorbar_width` for a
+categorical `plot_by`, `errorbar_width_continuous` for a numeric one)
+turned out to be a usability trap: `plot_by` defaults to the exposure
+variable, which is numeric in the overwhelming majority of uses, so
+`errorbar_width` silently did nothing in the common case -- a user had
+to discover `errorbar_width_continuous` by reading the docs (or this
+file) rather than by the argument name they'd naturally reach for.
+Unlike `dodge`/`prob_dodge_width`, which warn when they're a no-op for
+the "wrong" `plot_by` type, the ignored `errorbar_width` produced no
+warning at all, so the silent-no-op read as a bug (and was reported as
+one).
+
+Fixed by collapsing the two into a single `errorbar_width` argument
+(default `NULL`) on all four errorbar builders
+(`er_style_vpc_{observed,simulated}_{mean,quantile}_errorbar()`).
+`NULL` resolves to the previous categorical/numeric defaults
+(`0.15`/`0.2` for categorical, `0.025` for numeric, matched to whichever
+builder previously had which default) based on `config$is_numeric_group`
+at call time; an explicit value is interpreted according to `plot_by`'s
+type exactly as the two old arguments were -- a raw
+`ggplot2::geom_errorbar()`-style bar width for a categorical `plot_by`,
+or a fraction of `plot_by`'s own range for a numeric one. This isn't a
+new idiom, just one argument doing what a caller would already expect
+`errorbar_width` to do, regardless of `plot_by`'s type. No deprecation
+shim, per the package's usual convention -- callers who were setting
+`errorbar_width_continuous` explicitly need to switch to
+`errorbar_width` (same value, same meaning for a numeric `plot_by`).

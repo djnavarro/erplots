@@ -165,6 +165,55 @@ test_that("er_vpc pipeline builds with the quantile_errorbar pair for a categori
   expect_true(inherits(built$output, "ggplot"))
 })
 
+test_that("er_style_vpc_observed_mean_errorbar()'s errorbar_width defaults resolve by plot_by type", {
+  vpc_numeric <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
+  geoms_numeric <- er_style_vpc_observed_mean_errorbar(
+    er_test_data, vpc_numeric$layer$observed$config, vpc_numeric$exposure, vpc_numeric$response, vpc_numeric$theme
+  )
+  range_numeric <- diff(vpc_numeric$layer$observed$config$group_limits)
+  expect_equal(geoms_numeric[[1]]$geom_params$width, 0.025 * range_numeric)
+
+  vpc_discrete <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |> er_vpc_add_observed()
+  geoms_discrete <- er_style_vpc_observed_mean_errorbar(
+    er_test_data, vpc_discrete$layer$observed$config, vpc_discrete$exposure, vpc_discrete$response, vpc_discrete$theme
+  )
+  expect_equal(geoms_discrete[[1]]$geom_params$width, 0.2)
+})
+
+test_that("er_style_vpc_observed_mean_errorbar()'s errorbar_width is interpreted per plot_by type when supplied", {
+  vpc_numeric <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
+  geoms_numeric <- er_style_vpc_observed_mean_errorbar(
+    er_test_data, vpc_numeric$layer$observed$config, vpc_numeric$exposure, vpc_numeric$response, vpc_numeric$theme,
+    errorbar_width = 0.1
+  )
+  range_numeric <- diff(vpc_numeric$layer$observed$config$group_limits)
+  expect_equal(geoms_numeric[[1]]$geom_params$width, 0.1 * range_numeric)
+
+  vpc_discrete <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |> er_vpc_add_observed()
+  geoms_discrete <- er_style_vpc_observed_mean_errorbar(
+    er_test_data, vpc_discrete$layer$observed$config, vpc_discrete$exposure, vpc_discrete$response, vpc_discrete$theme,
+    errorbar_width = 0.1
+  )
+  expect_equal(geoms_discrete[[1]]$geom_params$width, 0.1)
+})
+
+test_that("er_style_vpc_observed_quantile_errorbar()'s errorbar_width defaults resolve by plot_by type", {
+  vpc_numeric <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar)
+  geoms_numeric <- er_style_vpc_observed_quantile_errorbar(
+    er_test_data, vpc_numeric$layer$observed$config, vpc_numeric$exposure, vpc_numeric$response, vpc_numeric$theme
+  )
+  range_numeric <- diff(vpc_numeric$layer$observed$config$group_limits)
+  expect_equal(geoms_numeric[[1]]$geom_params$width, 0.025 * range_numeric)
+
+  vpc_discrete <- er_vpc(er_test_data, aucss, biomarker_change, plot_by = sex, probs = c(0.1, 0.5, 0.9)) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar)
+  geoms_discrete <- er_style_vpc_observed_quantile_errorbar(
+    er_test_data, vpc_discrete$layer$observed$config, vpc_discrete$exposure, vpc_discrete$response, vpc_discrete$theme
+  )
+  expect_equal(geoms_discrete[[1]]$geom_params$width, 0.15)
+})
+
 test_that("er_vpc pipeline builds with the continuous-x line builder", {
   vpc <- er_test_data |>
     er_vpc(aucss, biomarker_change) |>
