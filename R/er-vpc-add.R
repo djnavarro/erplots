@@ -59,6 +59,10 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #' @param seed Optional RNG seed, only used with `model`.
 #' @param style A function determining how the simulated layer is drawn;
 #'   see [er_style_vpc_simulated()].
+#' @param simulate_args A named list of additional arguments forwarded to
+#'   [er_simulate()], only used with `model`. Distinct from `...` the
+#'   same way [er_plot_add_model()]'s `predict_args` is distinct from its
+#'   own `...` -- see that function's "Details" for the rationale.
 #' @param ... Additional named arguments forwarded to `style`.
 #'
 #' @returns `object`, with `object$layer$simulated` populated.
@@ -77,10 +81,12 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #'
 #' @export
 er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, seed = NULL,
-                                  style = er_style_vpc_simulated_mean_errorbar, ...) {
+                                  style = er_style_vpc_simulated_mean_errorbar,
+                                  simulate_args = list(), ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
+  .check_dots_named(simulate_args, arg = "simulate_args")
 
   if (!inherits(object, "er_vpc")) rlang::abort("`object` must be an er_vpc object.")
   if (is.null(object$layer$observed)) {
@@ -106,7 +112,9 @@ er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, s
 
   if (!is.null(model)) {
     .check_nsim(nsim)
-    raw_sim <- er_simulate(model, newdata = object$data, nsim = nsim, seed = seed)
+    raw_sim <- rlang::exec(
+      er_simulate, model, newdata = object$data, nsim = nsim, seed = seed, !!!simulate_args
+    )
     if (is.null(raw_sim) || !("sim_resp" %in% names(raw_sim))) {
       rlang::abort(c(
         paste0(

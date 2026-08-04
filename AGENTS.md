@@ -78,6 +78,22 @@ color is already spoken for by something else.
 Three generics, defined in `R/er-generics.R`. Full contract in
 `?er_model_interface`.
 
+A method may rely on caller-supplied extra arguments being forwarded:
+`er_plot_add_model()`'s `predict_args`, `er_plot_add_summary()`'s
+`summary_args`, and `er_vpc_add_simulated()`'s `simulate_args` are each
+named lists spliced (via `rlang::exec()`) into the corresponding
+generic call, for a model-specific argument with no slot in the fixed
+`er_predict(model, newdata, conf_level)`/`er_summary(model,
+conf_level)`/`er_simulate(model, newdata, nsim, seed)` contract -- e.g.
+a landmark time for a time-to-event model's `er_predict()` method. Each
+is deliberately a separate argument from that same `_add_*()`/`_add_*()`
+function's own `...` (which reaches the `style` builder only, never the
+generic) -- reusing one `...` for both would risk a silent name
+collision between a style builder's argument and a model method's
+argument. `er_plot_add_summary()` also now always forwards `conf_level`
+to `er_summary()` (previously called with no arguments at all, despite
+`conf_level` being part of the documented contract).
+
 - **`er_predict(model, newdata, ...)`** -- point predictions + CI on the
   response scale, for the model curve/ribbon.
 - **`er_simulate(model, newdata, nsim, seed, ...)`** -- optional. Returns

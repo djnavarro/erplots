@@ -106,6 +106,90 @@ test_that("er_plot_add_groups() forwards `...` to style, identically for every g
   expect_equal(seen[["treatment"]], list(width = 0.5))
 })
 
+# `predict_args`/`summary_args`/`simulate_args` passthrough to the
+# model-interface generics (issue #10) -----------------------------------
+#
+# Distinct from the `...` passthrough tested above: these reach
+# `er_predict()`/`er_summary()`/`er_simulate()` themselves, not the style
+# builder. `er_test_landmark_model` (helper-data.R) requires a
+# `landmark_time` argument in each method, mirroring the `ertte`
+# landmark-binary use case that motivated the issue -- omitting it errors,
+# and supplying it via `predict_args`/`summary_args`/`simulate_args`
+# succeeds.
+
+test_that("er_plot_add_model() forwards predict_args to er_predict()", {
+  expect_error(
+    er_plot(er_test_data, aucss, ae1) |> er_plot_add_model(er_test_mod_landmark),
+    "landmark_time"
+  )
+
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_model(er_test_mod_landmark, predict_args = list(landmark_time = 90))
+
+  expect_no_error(er_plot_build(plt))
+  expect_true(all(plt$layer$model$config$predictions$fit_resp <= 1))
+})
+
+test_that("er_plot_add_model()'s predict_args and `...` reach different consumers", {
+  seen <- new.env()
+  stub_style <- function(data, config, stratify, exposure, response, strata, theme, ...) {
+    seen$style_dots <- rlang::list2(...)
+    list()
+  }
+
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_model(
+      er_test_mod_landmark,
+      style = stub_style,
+      predict_args = list(landmark_time = 90),
+      seed = 9626
+    )
+
+  expect_no_error(er_plot_build(plt))
+  # `landmark_time` reached `er_predict()`, not the style builder's `...`
+  expect_equal(seen$style_dots, list(seed = 9626))
+})
+
+test_that("er_plot_add_summary() forwards conf_level and summary_args to er_summary()", {
+  expect_error(
+    er_plot(er_test_data, aucss, ae1) |> er_plot_add_summary(model = er_test_mod_landmark),
+    "landmark_time"
+  )
+
+  plt <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_summary(model = er_test_mod_landmark, summary_args = list(landmark_time = 90))
+
+  expect_no_error(er_plot_build(plt))
+  expect_equal(plt$layer$summary$config$p_value, 90 / 1000)
+})
+
+test_that("er_vpc_add_simulated() forwards simulate_args to er_simulate()", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
+
+  expect_error(
+    er_vpc_add_simulated(vpc, model = er_test_mod_landmark, nsim = 10),
+    "landmark_time"
+  )
+
+  expect_no_error(
+    er_vpc_add_simulated(
+      vpc, model = er_test_mod_landmark, nsim = 10, simulate_args = list(landmark_time = 90)
+    )
+  )
+})
+
+test_that("er_plot_add_*()'s new *_args arguments must be named", {
+  plt <- er_test_data |> er_plot(aucss, ae1)
+
+  expect_error(er_plot_add_model(plt, er_test_mod1, predict_args = list(90)))
+  expect_error(er_plot_add_summary(plt, er_test_mod1, summary_args = list(90)))
+
+  vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
+  expect_error(
+    er_vpc_add_simulated(vpc, model = er_test_mod1, nsim = 10, simulate_args = list(90))
+  )
+})
+
 test_that("er_plot_add_*() error on an unnamed extra argument", {
   plt <- er_test_data |> er_plot(aucss, ae1)
   plt_mod <- plt |> er_plot_add_model(er_test_mod1)
@@ -117,7 +201,7 @@ test_that("er_plot_add_*() error on an unnamed extra argument", {
     er_plot_add_model(plt, er_test_mod1, NULL, NULL, 0.95, 9626)
   )
   expect_error(
-    er_plot_add_summary(plt_mod, er_test_mod1, NULL, NULL, 9626)
+    er_plot_add_summary(plt_mod, er_test_mod1, NULL, NULL, 0.95, list(), 9626)
   )
   expect_error(
     er_plot_add_quantiles(plt_mod, NULL, NULL, 4, 0.95, 4)
