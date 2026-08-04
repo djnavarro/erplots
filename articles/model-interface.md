@@ -99,6 +99,27 @@ wrong:
   [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
   unchanged.
 
+### Arguments beyond `model`/`newdata`/`conf_level`
+
+The fixed signature above covers every model this article’s two toy
+classes need, but some models need something else entirely – a landmark
+time for a model that reduces a survival curve to `P(event by t*)`, say,
+with nowhere else in `er_predict(model, newdata, conf_level, ...)`’s
+contract for that value to live. That’s what the trailing `...` in the
+generic’s own signature is for: implement your method as
+`er_predict.your_class(model, newdata, conf_level = 0.95, landmark_time = NULL, ...)`,
+and a caller reaches it via
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)’s
+`predict_args` argument, kept deliberately separate from that same
+function’s own `...` (which reaches the `style` builder instead – see
+[Extending
+erplots](https://erplots.djnavarro.net/articles/extending.md)):
+
+``` r
+
+er_plot_add_model(your_model, predict_args = list(landmark_time = 90))
+```
+
 ### A worked example
 
 Suppose you’re writing a small modelling package of your own. You fit
@@ -214,6 +235,93 @@ already has an analytic gradient available (as
 [`nls()`](https://rdrr.io/r/stats/nls.html) itself does, internally) –
 use that instead of finite differences.
 
+### A worked example: an argument beyond the fixed contract
+
+To see `predict_args` actually reach a method, extend `toy_model` with a
+landmark-style transform: a (deliberately simplistic) rescaling of the
+fitted probability by how far a caller-supplied `landmark_time` is from
+a fixed reference. `landmark_time` has no slot in
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+fixed `model`/`newdata`/`conf_level` contract, so it can only arrive
+through `...`:
+
+``` r
+
+er_predict.toy_landmark <- function(model, newdata, conf_level = 0.95, landmark_time = NULL, ...) {
+  if (is.null(landmark_time)) {
+    rlang::abort("`er_predict.toy_landmark()` requires `landmark_time`.")
+  }
+  out <- er_predict.toy_model(model, newdata, conf_level = conf_level)
+  scale <- landmark_time / 90
+  out$fit_resp <- pmin(out$fit_resp * scale, 1)
+  out$ci_lower <- pmin(out$ci_lower * scale, 1)
+  out$ci_upper <- pmin(out$ci_upper * scale, 1)
+  out
+}
+
+landmark_mod <- mod
+class(landmark_mod) <- c("toy_landmark", class(landmark_mod))
+```
+
+Omitting `landmark_time` errors, rather than silently plotting an
+unscaled curve:
+
+``` r
+
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(landmark_mod) |>
+  plot()
+#> Error:
+#> ! `er_predict.toy_landmark()` requires `landmark_time`.
+```
+
+Supplying it via `predict_args` reaches the method – and, since
+`landmark_time` genuinely changes what’s plotted (a shorter landmark
+means a lower probability of the event having happened by then), a
+smaller value visibly flattens the curve:
+
+``` r
+
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(landmark_mod, predict_args = list(landmark_time = 30)) |>
+  plot()
+```
+
+![](model-interface_files/figure-html/toy-landmark-plot-1.png)
+
+The same `predict_args` list happily coexists with a `style` builder
+that has its own, unrelated extra arguments via `...` – the two never
+collide, because they’re spliced into two different calls
+([`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+and `style`, respectively):
+
+``` r
+
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(
+    landmark_mod,
+    style = er_style_model_spaghetti,
+    predict_args = list(landmark_time = 90),
+    seed = 8213
+  ) |>
+  plot()
+#> `er_simulate()` is not implemented for objects of class
+#> <toy_landmark/toy_model/glm/lm>; falling back to `style =
+#> er_style_model_ribbonline`.
+```
+
+![](model-interface_files/figure-html/toy-landmark-plot-spaghetti-1.png)
+
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)’s
+`summary_args` and
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)’s
+`simulate_args` work the same way, for
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+methods that need an argument beyond what’s covered below.
+
 ## `er_simulate()`: for spaghetti plots and VPCs
 
 ``` r
@@ -326,6 +434,25 @@ plot is reproducible even when nobody thought to pass `seed =` – worth
 considering for your own implementation if reproducibility of un-seeded
 calls matters to your users.
 
+Like
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+may need an argument beyond `model`/`newdata`/`nsim`/`seed` – a
+`toy_landmark`-style
+`er_simulate.your_class(model, newdata, nsim, seed, landmark_time = NULL, ...)`,
+say.
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)’s
+`simulate_args` reaches it the same way
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)’s
+`predict_args` reaches
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+above:
+
+``` r
+
+er_vpc_add_simulated(vpc, model = your_model, simulate_args = list(landmark_time = 90))
+```
+
 ## `er_summary()`: annotation text
 
 ``` r
@@ -339,6 +466,15 @@ independently-optional keys: `p_value`, `coefficients`, `glance`.
 Unrecognized keys are permitted and ignored by the built-in summary
 builders, which gives your own package room to stash extra fields for a
 custom builder to read, without erplots ever needing to know about them.
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
+always forwards `conf_level` to
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+(useful for a `coefficients` result’s `conf_low`/`conf_high` columns –
+neither toy method below needs it, but `erglm::er_summary.erglm_model()`
+does), plus anything supplied via its `summary_args` argument – the same
+mechanism as
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+`predict_args`, for an argument beyond `model`/`conf_level`.
 
 - **`p_value`** – a single headline p-value (or `NULL`), for a model
   with one unambiguous exposure effect.
@@ -469,6 +605,13 @@ depends on
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 already has to handle “not available” gracefully, since the default
 method returns `NULL` for every model class that hasn’t implemented one.
+
+If your method requires an argument beyond the fixed contract (like
+`toy_landmark`’s `landmark_time` above), remember that exercising it
+means passing `predict_args`/`summary_args`/`simulate_args` explicitly –
+calling `er_plot_add_model(your_model)` with no `predict_args` will
+correctly error if your method has no default for that argument, the
+same way `toy_landmark`’s did above.
 
 ## Real-world implementations
 

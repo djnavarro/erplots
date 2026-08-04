@@ -12,6 +12,7 @@ er_plot_add_model(
   keep_strata = NULL,
   style = NULL,
   conf_level = 0.95,
+  predict_args = list(),
   ...
 )
 ```
@@ -40,6 +41,17 @@ er_plot_add_model(
 
   Confidence level for the prediction ribbon.
 
+- predict_args:
+
+  A named list of additional arguments forwarded to
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  (e.g. a model-specific argument its
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  method requires beyond `model`/`newdata`/`conf_level`). Distinct from
+  `...`: `predict_args` reaches
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+  `...` reaches `style` – see "Details".
+
 - ...:
 
   Additional named arguments forwarded unchanged to `style` at build
@@ -59,6 +71,22 @@ fills any additional covariates from the plot data with a reference
 value (first factor level or numeric mean) when building the prediction
 grid. erplots does not check that `model` was fit on the same
 exposure/response as the plot; the caller must ensure compatibility.
+
+`predict_args` and `...` serve two different consumers and are kept
+separate rather than sharing one `...`: `predict_args` is spliced into
+the
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+call (e.g. `predict_args = list(landmark_time = 90)` for a model whose
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+method needs a `landmark_time` argument with no other slot in the fixed
+`er_predict(model, newdata, conf_level)` contract), while `...` is
+forwarded to `style` alone (see
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+"Passing extra arguments to a builder" section). Reusing a single `...`
+for both would risk a silent name collision if a style builder and a
+model's
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+method happened to share an argument name for unrelated purposes.
 
 ## See also
 

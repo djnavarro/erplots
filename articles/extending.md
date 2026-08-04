@@ -104,6 +104,24 @@ and ignores it, as every builder in this article does; see
 [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)’s
 use of a `seed` passed this way) for a worked example.
 
+This `...` is for the *builder* only. It’s a different mechanism from
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)’s
+`predict_args`,
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)’s
+`summary_args`, and
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)’s
+`simulate_args` – those are spliced into the model-interface generics
+themselves
+([`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)),
+for a model-specific argument with no slot in their fixed contract
+(e.g. a landmark time for a time-to-event model). If you’re writing a
+custom builder, you’ll never see
+`predict_args`/`summary_args`/`simulate_args` – they never reach
+`config` or the builder’s own `...`. If you’re implementing the model
+interface for your own model class instead, see [Implementing the model
+interface](https://erplots.djnavarro.net/articles/model-interface.md),
+which covers that mechanism.
+
 ## Understanding the `config` argument
 
 `config` is where a custom builder actually gets its data from, and it

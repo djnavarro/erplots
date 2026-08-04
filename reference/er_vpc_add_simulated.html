@@ -73,6 +73,7 @@ continuous/count response).</p>
 <span>  nsim <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  style <span class="op">=</span> <span class="va">er_style_vpc_simulated_mean_errorbar</span>,</span>
+<span>  simulate_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -107,6 +108,13 @@ columns and <code>sim_id</code>. Mutually exclusive with <code>model</code>.</p>
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>A function determining how the simulated layer is drawn;
 see <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated()</a></code>.</p></dd>
+
+
+<dt id="arg-simulate-args">simulate_args<a class="anchor" aria-label="anchor" href="#arg-simulate-args"></a></dt>
+<dd><p>A named list of additional arguments forwarded to
+<code><a href="er_model_interface.html">er_simulate()</a></code>, only used with <code>model</code>. Distinct from <code>...</code> the
+same way <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>'s <code>predict_args</code> is distinct from its
+own <code>...</code> – see that function's "Details" for the rationale.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

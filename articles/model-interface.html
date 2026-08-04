@@ -164,13 +164,32 @@ column to survive the round trip through <code><a href="../reference/er_model_in
 unchanged.</li>
 </ul>
 <div class="section level3">
+<h3 id="arguments-beyond-modelnewdataconf_level">Arguments beyond
+<code>model</code>/<code>newdata</code>/<code>conf_level</code><a class="anchor" aria-label="anchor" href="#arguments-beyond-modelnewdataconf_level"></a>
+</h3>
+<p>The fixed signature above covers every model this article’s two toy
+classes need, but some models need something else entirely – a landmark
+time for a model that reduces a survival curve to
+<code>P(event by t*)</code>, say, with nowhere else in
+<code>er_predict(model, newdata, conf_level, ...)</code>’s contract for
+that value to live. That’s what the trailing <code>...</code> in the
+generic’s own signature is for: implement your method as
+<code>er_predict.your_class(model, newdata, conf_level = 0.95, landmark_time = NULL, ...)</code>,
+and a caller reaches it via <code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>’s
+<code>predict_args</code> argument, kept deliberately separate from that
+same function’s own <code>...</code> (which reaches the
+<code>style</code> builder instead – see <a href="extending.html">Extending erplots</a>):</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">your_model</span>, predict_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>landmark_time <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
 <h3 id="a-worked-example">A worked example<a class="anchor" aria-label="anchor" href="#a-worked-example"></a>
 </h3>
 <p>Suppose you’re writing a small modelling package of your own. You fit
 models with a thin wrapper around <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">stats::glm()</a></code>, and want
 those model objects to work with erplots. Tag the class first, so
 dispatch has something to catch:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_toy_model</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, <span class="va">family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">formula</span>, data <span class="op">=</span> <span class="va">data</span>, family <span class="op">=</span> <span class="va">family</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"toy_model"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
@@ -187,7 +206,7 @@ vector) keeps every existing <code>glm</code>/<code>lm</code> method –
 <code>er_predict.toy_model()</code> only needs to add the three columns
 erplots wants, using <code><a href="https://rdrr.io/r/stats/predict.glm.html" class="external-link">stats::predict.glm()</a></code> to do the actual
 work:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">er_predict.toy_model</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span>, <span class="va">conf_level</span> <span class="op">=</span> <span class="fl">0.95</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">z</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">qnorm</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">conf_level</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span></span>
 <span>  <span class="va">link</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, newdata <span class="op">=</span> <span class="va">newdata</span>, se.fit <span class="op">=</span> <span class="cn">TRUE</span>, type <span class="op">=</span> <span class="st">"link"</span><span class="op">)</span></span>
@@ -200,7 +219,7 @@ work:</p>
 <span><span class="op">}</span></span></code></pre></div>
 <p>That’s the whole method. It’s already enough to plug into the mini
 language:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -213,7 +232,7 @@ there’s no ready-made standard error, the delta method (a numerical
 gradient of the fitted-value function with respect to the parameters,
 combined with the parameter covariance matrix) is a general-purpose
 fallback that works for any differentiable mean function:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_fun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">par</span>, <span class="va">aucss</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">par</span><span class="op">[[</span><span class="st">"e0"</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> <span class="va">par</span><span class="op">[[</span><span class="st">"emax"</span><span class="op">]</span><span class="op">]</span> <span class="op">*</span> <span class="va">aucss</span> <span class="op">/</span> <span class="op">(</span><span class="va">par</span><span class="op">[[</span><span class="st">"ec50"</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> <span class="va">aucss</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -256,12 +275,80 @@ implementation would more likely reach for
 has an analytic gradient available (as <code><a href="https://rdrr.io/r/stats/nls.html" class="external-link">nls()</a></code> itself does,
 internally) – use that instead of finite differences.</p>
 </div>
+<div class="section level3">
+<h3 id="a-worked-example-an-argument-beyond-the-fixed-contract">A worked example: an argument beyond the fixed contract<a class="anchor" aria-label="anchor" href="#a-worked-example-an-argument-beyond-the-fixed-contract"></a>
+</h3>
+<p>To see <code>predict_args</code> actually reach a method, extend
+<code>toy_model</code> with a landmark-style transform: a (deliberately
+simplistic) rescaling of the fitted probability by how far a
+caller-supplied <code>landmark_time</code> is from a fixed reference.
+<code>landmark_time</code> has no slot in <code><a href="../reference/er_model_interface.html">er_predict()</a></code>’s
+fixed <code>model</code>/<code>newdata</code>/<code>conf_level</code>
+contract, so it can only arrive through <code>...</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">er_predict.toy_landmark</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span>, <span class="va">conf_level</span> <span class="op">=</span> <span class="fl">0.95</span>, <span class="va">landmark_time</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">landmark_time</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/abort.html" class="external-link">abort</a></span><span class="op">(</span><span class="st">"`er_predict.toy_landmark()` requires `landmark_time`."</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">er_predict.toy_model</span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span>, conf_level <span class="op">=</span> <span class="va">conf_level</span><span class="op">)</span></span>
+<span>  <span class="va">scale</span> <span class="op">&lt;-</span> <span class="va">landmark_time</span> <span class="op">/</span> <span class="fl">90</span></span>
+<span>  <span class="va">out</span><span class="op">$</span><span class="va">fit_resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">fit_resp</span> <span class="op">*</span> <span class="va">scale</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="va">out</span><span class="op">$</span><span class="va">ci_lower</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">ci_lower</span> <span class="op">*</span> <span class="va">scale</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="va">out</span><span class="op">$</span><span class="va">ci_upper</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">ci_upper</span> <span class="op">*</span> <span class="va">scale</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="va">out</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">landmark_mod</span> <span class="op">&lt;-</span> <span class="va">mod</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">landmark_mod</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"toy_landmark"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">landmark_mod</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Omitting <code>landmark_time</code> errors, rather than silently
+plotting an unscaled curve:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">landmark_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> `er_predict.toy_landmark()` requires `landmark_time`.</span></span></code></pre></div>
+<p>Supplying it via <code>predict_args</code> reaches the method – and,
+since <code>landmark_time</code> genuinely changes what’s plotted (a
+shorter landmark means a lower probability of the event having happened
+by then), a smaller value visibly flattens the curve:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">landmark_mod</span>, predict_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>landmark_time <span class="op">=</span> <span class="fl">30</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="model-interface_files/figure-html/toy-landmark-plot-1.png" class="r-plt" alt="" width="700"></p>
+<p>The same <code>predict_args</code> list happily coexists with a
+<code>style</code> builder that has its own, unrelated extra arguments
+via <code>...</code> – the two never collide, because they’re spliced
+into two different calls (<code><a href="../reference/er_model_interface.html">er_predict()</a></code> and
+<code>style</code>, respectively):</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span></span>
+<span>    <span class="va">landmark_mod</span>,</span>
+<span>    style <span class="op">=</span> <span class="va">er_style_model_spaghetti</span>,</span>
+<span>    predict_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>landmark_time <span class="op">=</span> <span class="fl">90</span><span class="op">)</span>,</span>
+<span>    seed <span class="op">=</span> <span class="fl">8213</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `er_simulate()` is not implemented for objects of class</span></span>
+<span><span class="co">#&gt; &lt;toy_landmark/toy_model/glm/lm&gt;; falling back to `style =</span></span>
+<span><span class="co">#&gt; er_style_model_ribbonline`.</span></span></code></pre></div>
+<p><img src="model-interface_files/figure-html/toy-landmark-plot-spaghetti-1.png" class="r-plt" alt="" width="700"></p>
+<p><code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code>’s <code>summary_args</code> and
+<code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>’s <code>simulate_args</code> work
+the same way, for <code><a href="../reference/er_model_interface.html">er_summary()</a></code>/<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>
+methods that need an argument beyond what’s covered below.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="er_simulate-for-spaghetti-plots-and-vpcs">
 <code>er_simulate()</code>: for spaghetti plots and VPCs<a class="anchor" aria-label="anchor" href="#er_simulate-for-spaghetti-plots-and-vpcs"></a>
 </h2>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/er_model_interface.html">er_simulate</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span>, nsim <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
 <p>Return a data frame of <code>nsim</code> replicates of
 <code>newdata</code>, stacked row-wise, with a <code>sim_id</code>
@@ -302,7 +389,7 @@ parameter vectors from a multivariate normal approximation to the
 sampling distribution of <code>coef(model)</code> is the standard move
 for a GLM, and gives you <code>fit_resp</code> for free once you have
 the draws:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">er_simulate.toy_model</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span>, <span class="va">nsim</span> <span class="op">=</span> <span class="fl">100</span>, <span class="va">seed</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">seed</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="va">seed</span><span class="op">)</span></span>
 <span></span>
@@ -328,13 +415,13 @@ the draws:</p>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">reps</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>With this in place, both the spaghetti plot and the VPC work:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span>, style <span class="op">=</span> <span class="va">er_style_model_spaghetti</span>, seed <span class="op">=</span> <span class="fl">8213</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="model-interface_files/figure-html/toy-simulate-plot-1.png" class="r-plt" alt="" width="700"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -355,13 +442,23 @@ quietly drawing a too-narrow band from <code>fit_resp</code> alone.</p>
 nobody thought to pass <code>seed =</code> – worth considering for your
 own implementation if reproducibility of un-seeded calls matters to your
 users.</p>
+<p>Like <code><a href="../reference/er_model_interface.html">er_predict()</a></code>, <code><a href="../reference/er_model_interface.html">er_simulate()</a></code> may need
+an argument beyond
+<code>model</code>/<code>newdata</code>/<code>nsim</code>/<code>seed</code>
+– a <code>toy_landmark</code>-style
+<code>er_simulate.your_class(model, newdata, nsim, seed, landmark_time = NULL, ...)</code>,
+say. <code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>’s <code>simulate_args</code>
+reaches it the same way <code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>’s
+<code>predict_args</code> reaches <code><a href="../reference/er_model_interface.html">er_predict()</a></code> above:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span><span class="va">vpc</span>, model <span class="op">=</span> <span class="va">your_model</span>, simulate_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>landmark_time <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="er_summary-annotation-text">
 <code>er_summary()</code>: annotation text<a class="anchor" aria-label="anchor" href="#er_summary-annotation-text"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/er_model_interface.html">er_summary</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
 <p>Return <code>NULL</code> (again, the default – don’t implement this
 generic if there’s nothing sensible to report) or a named list with any
@@ -369,7 +466,16 @@ of three independently-optional keys: <code>p_value</code>,
 <code>coefficients</code>, <code>glance</code>. Unrecognized keys are
 permitted and ignored by the built-in summary builders, which gives your
 own package room to stash extra fields for a custom builder to read,
-without erplots ever needing to know about them.</p>
+without erplots ever needing to know about them.
+<code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code> always forwards
+<code>conf_level</code> to <code><a href="../reference/er_model_interface.html">er_summary()</a></code> (useful for a
+<code>coefficients</code> result’s
+<code>conf_low</code>/<code>conf_high</code> columns – neither toy
+method below needs it, but <code>erglm::er_summary.erglm_model()</code>
+does), plus anything supplied via its <code>summary_args</code> argument
+– the same mechanism as <code><a href="../reference/er_model_interface.html">er_predict()</a></code>’s
+<code>predict_args</code>, for an argument beyond
+<code>model</code>/<code>conf_level</code>.</p>
 <ul>
 <li>
 <strong><code>p_value</code></strong> – a single headline p-value
@@ -415,7 +521,7 @@ hasn’t been updated yet”.</p>
 </h3>
 <p>For <code>toy_model</code>, <code>aucss</code>’s coefficient is the
 one term worth headlining:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">er_summary.toy_model</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">coefs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">$</span><span class="va">coefficients</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">coefs</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">2</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span>  <span class="co"># intercept only, nothing to report</span></span>
@@ -438,7 +544,7 @@ there’s no term you could headline with a lone p-value without implying
 the other two don’t matter. This is exactly the
 <code>coefficients</code>-instead-of-<code>p_value</code> case the
 contract exists for:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">er_summary.toy_emax</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">$</span><span class="va">coefficients</span></span>
 <span>  <span class="va">coefficients</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
@@ -502,6 +608,14 @@ choice, not a gap to apologise for: every erplots builder that depends
 on <code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/<code><a href="../reference/er_model_interface.html">er_summary()</a></code> already has to
 handle “not available” gracefully, since the default method returns
 <code>NULL</code> for every model class that hasn’t implemented one.</p>
+<p>If your method requires an argument beyond the fixed contract (like
+<code>toy_landmark</code>’s <code>landmark_time</code> above), remember
+that exercising it means passing
+<code>predict_args</code>/<code>summary_args</code>/<code>simulate_args</code>
+explicitly – calling <code>er_plot_add_model(your_model)</code> with no
+<code>predict_args</code> will correctly error if your method has no
+default for that argument, the same way <code>toy_landmark</code>’s did
+above.</p>
 </div>
 <div class="section level2">
 <h2 id="real-world-implementations">Real-world implementations<a class="anchor" aria-label="anchor" href="#real-world-implementations"></a>

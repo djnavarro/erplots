@@ -12,6 +12,8 @@ er_plot_add_summary(
   model = NULL,
   keep_strata = NULL,
   style = NULL,
+  conf_level = 0.95,
+  summary_args = list(),
   ...
 )
 ```
@@ -43,6 +45,23 @@ er_plot_add_summary(
 
   Function drawing the summary annotation, defaulting to
   [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md).
+
+- conf_level:
+
+  Confidence level forwarded to
+  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  (used, e.g., for the `conf_low`/`conf_high` columns of its
+  `coefficients` result – see
+  [`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+  Ignored when `model` is `NULL`.
+
+- summary_args:
+
+  A named list of additional arguments forwarded to
+  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+  distinct from `...` the same way
+  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+  `predict_args` is distinct from its own `...` – see "Details" there.
 
 - ...:
 

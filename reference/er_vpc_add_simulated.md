@@ -16,6 +16,7 @@ er_vpc_add_simulated(
   nsim = 100,
   seed = NULL,
   style = er_style_vpc_simulated_mean_errorbar,
+  simulate_args = list(),
   ...
 )
 ```
@@ -51,6 +52,15 @@ er_vpc_add_simulated(
 
   A function determining how the simulated layer is drawn; see
   [`er_style_vpc_simulated()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md).
+
+- simulate_args:
+
+  A named list of additional arguments forwarded to
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+  only used with `model`. Distinct from `...` the same way
+  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+  `predict_args` is distinct from its own `...` – see that function's
+  "Details" for the rationale.
 
 - ...:
 

@@ -122,6 +122,24 @@ builds `newdata`, it always includes the exposure and, if stratified,
 strata variables, plus reference values for any other covariates in the
 model's original fitting data.
 
+A method may rely on caller-supplied extra arguments being forwarded
+through `...`:
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+`predict_args`,
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)'s
+`summary_args`, and
+[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)'s
+`simulate_args` are each spliced into the corresponding generic call
+(`er_predict()`/`er_summary()`/`er_simulate()` respectively), so a
+model-specific argument beyond the fixed contract below (e.g. a landmark
+time for a time-to-event model) has a documented path to reach the
+method. These are deliberately kept separate from each
+`er_plot_add_*()`/`er_vpc_add_*()` function's own `...`, which is
+reserved for the `style` builder instead (see
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+"Passing extra arguments to a builder" section) – a method should not
+assume it receives anything passed via that `...`.
+
 `er_predict()` should return `newdata` with `fit_resp`, `ci_lower`, and
 `ci_upper`. `er_simulate()` should return `newdata` replicates with
 `sim_id` and `fit_resp`; it may additionally return `sim_resp` for

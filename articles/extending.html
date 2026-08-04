@@ -262,6 +262,21 @@ every builder in this article does; see <code><a href="../reference/er_style.htm
 “Passing extra arguments to a builder” section (and
 <code><a href="../reference/er_style_model.html">er_style_model_spaghetti()</a></code>’s use of a <code>seed</code>
 passed this way) for a worked example.</p>
+<p>This <code>...</code> is for the <em>builder</em> only. It’s a
+different mechanism from <code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>’s
+<code>predict_args</code>, <code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code>’s
+<code>summary_args</code>, and <code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>’s
+<code>simulate_args</code> – those are spliced into the model-interface
+generics themselves
+(<code><a href="../reference/er_model_interface.html">er_predict()</a></code>/<code><a href="../reference/er_model_interface.html">er_summary()</a></code>/<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>),
+for a model-specific argument with no slot in their fixed contract
+(e.g. a landmark time for a time-to-event model). If you’re writing a
+custom builder, you’ll never see
+<code>predict_args</code>/<code>summary_args</code>/<code>simulate_args</code>
+– they never reach <code>config</code> or the builder’s own
+<code>...</code>. If you’re implementing the model interface for your
+own model class instead, see <a href="model-interface.html">Implementing
+the model interface</a>, which covers that mechanism.</p>
 </div>
 <div class="section level2">
 <h2 id="understanding-the-config-argument">Understanding the <code>config</code> argument<a class="anchor" aria-label="anchor" href="#understanding-the-config-argument"></a>

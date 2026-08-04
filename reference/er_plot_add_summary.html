@@ -68,6 +68,8 @@ from the raw <code>(exposure, response)</code> coordinates of the data.</p>
 <span>  model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  summary_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -96,6 +98,19 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Function drawing the summary annotation, defaulting to
 <code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code>.</p></dd>
+
+
+<dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
+<dd><p>Confidence level forwarded to <code><a href="er_model_interface.html">er_summary()</a></code> (used,
+e.g., for the <code>conf_low</code>/<code>conf_high</code> columns of its <code>coefficients</code>
+result – see <code><a href="er_model_interface.html">?er_model_interface</a></code>). Ignored when <code>model</code> is <code>NULL</code>.</p></dd>
+
+
+<dt id="arg-summary-args">summary_args<a class="anchor" aria-label="anchor" href="#arg-summary-args"></a></dt>
+<dd><p>A named list of additional arguments forwarded to
+<code><a href="er_model_interface.html">er_summary()</a></code>, distinct from <code>...</code> the same way
+<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>'s <code>predict_args</code> is distinct from its own
+<code>...</code> – see "Details" there.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
