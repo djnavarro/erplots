@@ -1,7 +1,8 @@
 
 # layer_model ------------------------------------------------------------------
 
-.layer_model <- function(object, model, stratify, conf_level, style, dots = list()) {
+.layer_model <- function(object, model, stratify, conf_level, style,
+                          predict_args = list(), dots = list()) {
   
   layer_model <- list()
   config <- list()
@@ -13,14 +14,20 @@
   # confidence level
   config$conf_level <- conf_level
 
-  # model predictions, via the `er_predict()` generic
+  # model predictions, via the `er_predict()` generic. `predict_args`
+  # (from `er_plot_add_model()`'s own argument of the same name, kept
+  # separate from `dots`/`config$dots` below) is spliced into the
+  # `er_predict()` call itself, for model-specific arguments beyond the
+  # fixed `model`/`newdata`/`conf_level` contract -- see
+  # `?er_model_interface` and `?er_plot_add_model`'s "Details".
   config$predictions <- .get_model_predictions(
     config$model, 
     config$conf_level, 
     object$exposure, 
     object$strata, 
     stratify,
-    object$data
+    object$data,
+    predict_args = predict_args
   )
 
   # `style` is the escape hatch documented in `?er_style`: any function
@@ -44,7 +51,8 @@
 
 # layer_summary -----------------------------------------------------------------
 
-.layer_summary <- function(object, model, stratify, style, dots = list()) {
+.layer_summary <- function(object, model, stratify, style, conf_level = 0.95,
+                            summary_args = list(), dots = list()) {
 
   layer_summary <- list()
   config <- list()
@@ -68,10 +76,17 @@
   # `config$p_value` is kept as a separate, extracted field alongside it
   # purely so `er_style_summary_pvalue()`'s existing, simpler read
   # (`config$p_value`) doesn't need to change.
+  #
+  # `conf_level` is now always forwarded (previously `er_summary(model)`
+  # was called with no arguments at all, despite `conf_level` being part
+  # of the documented `?er_model_interface` contract); `summary_args`
+  # (from `er_plot_add_summary()`'s own argument of the same name, kept
+  # separate from `dots`/`config$dots` below) is spliced in alongside it
+  # for any further model-specific argument.
   config["summary"] <- list(NULL) # use `[` (not `$`) so the NULL is retained as a named element
   config["p_value"] <- list(NULL)
   if (!is.null(model)) {
-    model_summary <- er_summary(model)
+    model_summary <- rlang::exec(er_summary, model = model, conf_level = conf_level, !!!summary_args)
     config$summary <- model_summary
     config$p_value <- model_summary$p_value
   }
@@ -419,7 +434,8 @@
   data[[name]]
 }
 
-.get_model_predictions <- function(model, conf_level, exposure, strata, stratify, data) {
+.get_model_predictions <- function(model, conf_level, exposure, strata, stratify, data,
+                                    predict_args = list()) {
 
   pred_dat <- seq(exposure$limits[1], exposure$limits[2], length.out = 300L) |> 
     data.frame() |> .set_names(exposure$name)
@@ -437,7 +453,9 @@
   # crash inside `predict()` when it does 
   pred_dat <- .fill_reference_covariates(pred_dat, data)
 
-  model_predictions <- er_predict(model = model, newdata = pred_dat, conf_level = conf_level)
+  model_predictions <- rlang::exec(
+    er_predict, model = model, newdata = pred_dat, conf_level = conf_level, !!!predict_args
+  )
   return(model_predictions)
 }
 

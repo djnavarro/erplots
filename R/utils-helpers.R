@@ -4,21 +4,22 @@
   x
 }
 
-# Errors informatively if any element of `dots` (an already-captured
-# `rlang::list2(...)`) is unnamed. Extra arguments passed through
-# `er_plot_add_*()`'s `...` to a builder are spliced in positionally
-# after the seven standard builder arguments (see `?er_style`'s
-# "Passing extra arguments to a builder" section), so an unnamed one
-# would silently bind to the wrong parameter rather than reaching a
-# builder's own `...` -- this catches that at the call site instead.
+# Errors informatively if any element of a named-list-style argument
+# (either an already-captured `rlang::list2(...)`, or a `predict_args`/
+# `summary_args`/`simulate_args`-style list) is unnamed. Both kinds are
+# spliced (via `!!!`/`rlang::exec()`) into a call by name -- a builder's
+# standard positional arguments for the `...` case (see `?er_style`'s
+# "Passing extra arguments to a builder" section), or a model-interface
+# generic's own arguments for the `*_args` case -- so an unnamed element
+# would silently bind to the wrong parameter rather than erroring here.
 #' @noRd
-.check_dots_named <- function(dots) {
+.check_dots_named <- function(dots, arg = "...") {
   if (length(dots) == 0) return(invisible(NULL))
   nms <- names(dots)
   if (is.null(nms) || any(!nzchar(nms))) {
     rlang::abort(c(
-      "All arguments passed via `...` must be named.",
-      "i" = "These are forwarded to a builder alongside `data`/`config`/etc, so an unnamed argument would bind to the wrong parameter."
+      paste0("All arguments passed via `", arg, "` must be named."),
+      "i" = "These are spliced into a call by name, so an unnamed argument would bind to the wrong parameter."
     ))
   }
   invisible(NULL)

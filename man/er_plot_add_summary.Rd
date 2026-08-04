@@ -9,6 +9,8 @@ er_plot_add_summary(
   model = NULL,
   keep_strata = NULL,
   style = NULL,
+  conf_level = 0.95,
+  summary_args = list(),
   ...
 )
 }
@@ -26,6 +28,15 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 
 \item{style}{Function drawing the summary annotation, defaulting to
 \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}.}
+
+\item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (used,
+e.g., for the \code{conf_low}/\code{conf_high} columns of its \code{coefficients}
+result -- see \code{?er_model_interface}). Ignored when \code{model} is \code{NULL}.}
+
+\item{summary_args}{A named list of additional arguments forwarded to
+\code{\link[=er_summary]{er_summary()}}, distinct from \code{...} the same way
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args} is distinct from its own
+\code{...} -- see "Details" there.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
 when it's called at build time; see \code{\link[=er_style]{er_style()}}'s "Passing extra

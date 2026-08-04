@@ -13,6 +13,8 @@
 #' @details
 #' `er_plot_add_model()` does not verify that `model` was fit on the same exposure/response variables as the plot; that compatibility is the caller's responsibility. When `er_plot_add_model()` builds `newdata`, it always includes the exposure and, if stratified, strata variables, plus reference values for any other covariates in the model's original fitting data.
 #'
+#' A method may rely on caller-supplied extra arguments being forwarded through `...`: [er_plot_add_model()]'s `predict_args`, [er_plot_add_summary()]'s `summary_args`, and [er_vpc_add_simulated()]'s `simulate_args` are each spliced into the corresponding generic call (`er_predict()`/`er_summary()`/`er_simulate()` respectively), so a model-specific argument beyond the fixed contract below (e.g. a landmark time for a time-to-event model) has a documented path to reach the method. These are deliberately kept separate from each `er_plot_add_*()`/`er_vpc_add_*()` function's own `...`, which is reserved for the `style` builder instead (see [er_style()]'s "Passing extra arguments to a builder" section) -- a method should not assume it receives anything passed via that `...`.
+#'
 #' `er_predict()` should return `newdata` with `fit_resp`, `ci_lower`, and `ci_upper`. `er_simulate()` should return `newdata` replicates with `sim_id` and `fit_resp`; it may additionally return `sim_resp` for response-level simulations. `er_summary()` should return `NULL` or a named list with optional keys such as `p_value`, `coefficients`, and `glance`.
 #'
 #' @returns

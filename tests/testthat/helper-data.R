@@ -20,6 +20,12 @@ er_test_mod2 <- er_test_toy_model(ae1 ~ aucss + sex, er_test_data, family = bino
 # continuous-response fixture, used by the Stage 0 (and later) tests for
 # response-type detection/handling
 er_test_mod_gaussian <- er_test_toy_model(biomarker_change ~ aucss, er_test_data, family = gaussian())
+# landmark fixture (see `er_test_landmark_model`'s methods further down this
+# file, defined after `er_test_mod1`'s own class since they wrap the same
+# `er_test_toy_model()` shape) -- reuses `er_test_mod1`'s underlying `glm()`
+# fit, just tagged with a different class so its `er_predict()`/
+# `er_summary()`/`er_simulate()` methods require `landmark_time`
+er_test_mod_landmark <- structure(list(fit = er_test_mod1$fit), class = "er_test_landmark_model")
 
 if (requireNamespace("erglm", quietly = TRUE)) {
   # count-response fixture. `er_test_toy_model()` deliberately doesn't
@@ -98,3 +104,54 @@ er_simulate.er_test_fake_spaghetti_only_model <- function(model, newdata, nsim =
 }
 registerS3method("er_simulate", "er_test_fake_vpc_model", er_simulate.er_test_fake_vpc_model)
 registerS3method("er_simulate", "er_test_fake_spaghetti_only_model", er_simulate.er_test_fake_spaghetti_only_model)
+
+# test-only fixture mirroring the `ertte` landmark-binary use case that
+# motivated issue #10 (`predict_args`/`summary_args`/`simulate_args`): each
+# method *requires* a `landmark_time` argument with no other slot in the
+# fixed `er_predict()`/`er_summary()`/`er_simulate()` contract, and errors
+# informatively if it's missing -- exercising that
+# `er_plot_add_model(predict_args = ...)`/`er_plot_add_summary(summary_args
+# = ...)`/`er_vpc_add_simulated(simulate_args = ...)` actually reach the
+# generic, not just the style builder's `config$dots`.
+.check_landmark_time <- function(landmark_time) {
+  if (is.null(landmark_time)) {
+    rlang::abort("`landmark_time` is required (e.g. via `predict_args`/`summary_args`/`simulate_args`).")
+  }
+}
+er_predict.er_test_landmark_model <- function(model, newdata, conf_level = 0.95, landmark_time = NULL, ...) {
+  .check_landmark_time(landmark_time)
+  fit <- model$fit
+  z_scale <- -stats::qnorm((1 - conf_level) / 2)
+  # a deliberately simplistic "landmark" transform (scales the underlying
+  # toy model's fitted probability by how far `landmark_time` is from a
+  # fixed reference) -- realistic enough to prove `landmark_time` reached
+  # this method, nothing more is needed for the fixture's purpose
+  scale <- landmark_time / 90
+  link_pred <- stats::predict(fit, newdata, se.fit = TRUE, type = "link")
+  inverse_link <- stats::family(fit)$linkinv
+  newdata$fit_resp <- pmin(inverse_link(link_pred$fit) * scale, 1)
+  newdata$ci_lower <- pmin(inverse_link(link_pred$fit - z_scale * link_pred$se.fit) * scale, 1)
+  newdata$ci_upper <- pmin(inverse_link(link_pred$fit + z_scale * link_pred$se.fit) * scale, 1)
+  newdata
+}
+er_summary.er_test_landmark_model <- function(model, conf_level = 0.95, landmark_time = NULL, ...) {
+  .check_landmark_time(landmark_time)
+  list(p_value = landmark_time / 1000) # arbitrary, just needs to reflect `landmark_time`
+}
+er_simulate.er_test_landmark_model <- function(model, newdata, nsim = 100, seed = NULL, landmark_time = NULL, ...) {
+  .check_landmark_time(landmark_time)
+  reps <- vector("list", nsim)
+  withr::with_seed(seed %||% 1, {
+    for (ii in seq_len(nsim)) {
+      row <- newdata
+      row$sim_id <- ii
+      row$fit_resp <- landmark_time / 90
+      row$sim_resp <- stats::rbinom(nrow(newdata), size = 1, prob = min(landmark_time / 90, 1))
+      reps[[ii]] <- row
+    }
+  })
+  dplyr::bind_rows(reps)
+}
+registerS3method("er_predict", "er_test_landmark_model", er_predict.er_test_landmark_model)
+registerS3method("er_summary", "er_test_landmark_model", er_summary.er_test_landmark_model)
+registerS3method("er_simulate", "er_test_landmark_model", er_simulate.er_test_landmark_model)

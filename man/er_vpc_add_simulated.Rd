@@ -11,6 +11,7 @@ er_vpc_add_simulated(
   nsim = 100,
   seed = NULL,
   style = er_style_vpc_simulated_mean_errorbar,
+  simulate_args = list(),
   ...
 )
 }
@@ -30,6 +31,11 @@ columns and \code{sim_id}. Mutually exclusive with \code{model}.}
 
 \item{style}{A function determining how the simulated layer is drawn;
 see \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}.}
+
+\item{simulate_args}{A named list of additional arguments forwarded to
+\code{\link[=er_simulate]{er_simulate()}}, only used with \code{model}. Distinct from \code{...} the
+same way \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args} is distinct from its
+own \code{...} -- see that function's "Details" for the rationale.}
 
 \item{...}{Additional named arguments forwarded to \code{style}.}
 }

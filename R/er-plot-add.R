@@ -11,10 +11,26 @@
 #' @param keep_strata Logical; whether this layer should use stratification.
 #' @param style Function drawing the model curve/ribbon. Defaults to [er_style_model_ribbonline()].
 #' @param conf_level Confidence level for the prediction ribbon.
+#' @param predict_args A named list of additional arguments forwarded to
+#'   [er_predict()] (e.g. a model-specific argument its `er_predict()`
+#'   method requires beyond `model`/`newdata`/`conf_level`). Distinct
+#'   from `...`: `predict_args` reaches [er_predict()], `...` reaches
+#'   `style` -- see "Details".
 #' @param ... Additional named arguments forwarded unchanged to `style` at build time.
 #'
 #' @details
 #' This layer uses [er_predict()] to compute model predictions on the response scale. `model` may reference covariates beyond the exposure and strata variables. erplots fills any additional covariates from the plot data with a reference value (first factor level or numeric mean) when building the prediction grid. erplots does not check that `model` was fit on the same exposure/response as the plot; the caller must ensure compatibility.
+#'
+#' `predict_args` and `...` serve two different consumers and are kept
+#' separate rather than sharing one `...`: `predict_args` is spliced into
+#' the [er_predict()] call (e.g. `predict_args = list(landmark_time =
+#' 90)` for a model whose `er_predict()` method needs a `landmark_time`
+#' argument with no other slot in the fixed `er_predict(model, newdata,
+#' conf_level)` contract), while `...` is forwarded to `style` alone
+#' (see [er_style()]'s "Passing extra arguments to a builder" section).
+#' Reusing a single `...` for both would risk a silent name collision if
+#' a style builder and a model's `er_predict()` method happened to share
+#' an argument name for unrelated purposes.
 #'
 #' @returns The input `object`, with the model layer added.
 #'
@@ -61,10 +77,12 @@
 #'
 #' @export
 er_plot_add_model <- function(object, model, keep_strata = NULL,
-                                style = NULL, conf_level = 0.95, ...) {
+                                style = NULL, conf_level = 0.95,
+                                predict_args = list(), ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
+  .check_dots_named(predict_args, arg = "predict_args")
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
@@ -77,6 +95,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
     model = model,
     stratify = keep_strata, 
     conf_level = conf_level,
+    predict_args = predict_args,
     style = style,
     dots = dots
   )
@@ -103,6 +122,13 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
 #' @param style Function drawing the summary annotation, defaulting to
 #'   [er_style_summary_pvalue()].
+#' @param conf_level Confidence level forwarded to [er_summary()] (used,
+#'   e.g., for the `conf_low`/`conf_high` columns of its `coefficients`
+#'   result -- see `?er_model_interface`). Ignored when `model` is `NULL`.
+#' @param summary_args A named list of additional arguments forwarded to
+#'   [er_summary()], distinct from `...` the same way
+#'   [er_plot_add_model()]'s `predict_args` is distinct from its own
+#'   `...` -- see "Details" there.
 #' @param ... Additional named arguments forwarded, unchanged, to `style`
 #'   when it's called at build time; see [er_style()]'s "Passing extra
 #'   arguments to a builder" section. Must be named.
@@ -130,10 +156,12 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   [er_plot_add_data()], [er_plot_add_groups()], [er_style()]
 #'
 #' @export
-er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style = NULL, ...) {
+er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style = NULL,
+                                  conf_level = 0.95, summary_args = list(), ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
+  .check_dots_named(summary_args, arg = "summary_args")
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
   if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
@@ -145,6 +173,8 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
     object = object,
     model = model,
     stratify = keep_strata,
+    conf_level = conf_level,
+    summary_args = summary_args,
     style = style,
     dots = dots
   )
