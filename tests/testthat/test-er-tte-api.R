@@ -82,3 +82,66 @@ test_that("er_tte_build/print/plot don't error with no layers (blank canvas fall
 test_that("er_tte_build errors on a non-er_tte object", {
   expect_error(er_tte_build(list()), "er_tte object")
 })
+
+# stratification -----------------------------------------------------------
+
+test_that("er_tte stratifies by a categorical variable, matching a direct survfit() call", {
+  df <- survival::lung
+  df$sex <- factor(df$sex, labels = c("Male", "Female"))
+
+  obj <- df |> er_tte(time, status == 2, stratify_by = sex)
+  fit_direct <- survival::survfit(survival::Surv(time, status == 2) ~ sex, data = df)
+
+  expect_s3_class(obj, "er_tte")
+  expect_equal(obj$strata$var, "sex")
+  expect_equal(obj$strata$type, "discrete")
+  expect_setequal(unique(obj$km$table$strata), c("Male", "Female"))
+  expect_equal(sort(unname(obj$km$fit$surv)), sort(unname(fit_direct$surv)))
+  expect_equal(sort(unname(obj$km$fit$n)), sort(unname(fit_direct$n)))
+})
+
+test_that("er_tte stratifies by a numeric variable via quantile bins, matching a direct survfit() call", {
+  obj <- survival::lung |> er_tte(time, status == 2, stratify_by = age, n_strata = 3)
+
+  expect_equal(obj$strata$type, "continuous")
+  expect_equal(obj$strata$n_strata, 3)
+  expect_setequal(unique(obj$km$table$strata), c("Q1", "Q2", "Q3"))
+
+  fit_direct <- survival::survfit(
+    survival::Surv(time, status == 2) ~ obj$data$.er_tte_strata,
+    data = survival::lung
+  )
+  expect_equal(sort(unname(obj$km$fit$surv)), sort(unname(fit_direct$surv)))
+})
+
+test_that("er_tte's numeric stratify_by never carves out a placebo bin", {
+  # unlike `er_vpc()`'s `stratify_by`, `er_tte()` has no exposure argument
+  # to compare against, so a numeric `stratify_by` is always split into
+  # plain quantile bins with no separate placebo/zero bin
+  obj <- survival::lung |> er_tte(time, status == 2, stratify_by = age, n_strata = 3)
+  expect_false("Placebo" %in% unique(obj$km$table$strata))
+})
+
+test_that("er_tte informs when stratify_by is numeric", {
+  expect_message(
+    survival::lung |> er_tte(time, status == 2, stratify_by = age),
+    "quantile bins"
+  )
+})
+
+test_that("er_tte errors clearly on a bad stratify_by/n_strata", {
+  expect_error(survival::lung |> er_tte(time, status == 2, stratify_by = not_a_col), "not_a_col")
+  expect_error(survival::lung |> er_tte(time, status == 2, stratify_by = age, n_strata = 0), "n_strata")
+  expect_error(survival::lung |> er_tte(time, status == 2, stratify_by = age, n_strata = 1.5), "n_strata")
+})
+
+test_that("print/plot/build work when stratified", {
+  df <- survival::lung
+  df$sex <- factor(df$sex, labels = c("Male", "Female"))
+  obj <- df |> er_tte(time, status == 2, stratify_by = sex)
+
+  expect_output(print(obj), "stratify_by:\\s+sex")
+  expect_output(print(obj), "Male")
+  expect_output(print(obj), "Female")
+  expect_no_error(plot(obj))
+})

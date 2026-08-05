@@ -34,26 +34,45 @@
 #' (event) -- exactly the same binary encoding [er_plot()] requires of a
 #' `response_type = "binary"` response.
 #'
-#' Stratification (splitting the Kaplan-Meier estimate by exposure
-#' quantile or another grouping variable) is not yet implemented -- this
-#' is a single-arm-only scaffold. It will be added as a `stratify_by`
-#' argument in a later change, mirroring [er_vpc()]'s.
+#' Optional `stratify_by` splits the Kaplan-Meier estimate into one curve
+#' per level, via `survival::survfit()`'s `~ strata` formula side --
+#' mirroring [er_vpc()]'s `stratify_by`: a categorical variable is used
+#' as-is; a numeric variable is automatically split into `n_strata`
+#' quantile bins (via [cut_exposure_quantile()], so `0`/placebo is kept
+#' in its own bin), with a message reporting that this happened. Unlike
+#' `time`/`event`, `stratify_by` must be a bare column name (not an
+#' arbitrary expression), matching `exposure`/`response`/`stratify_by`
+#' elsewhere in the package. `object$km$table` gains a `strata` column
+#' when stratified; `object$strata` (`var`/`label`/`type`/`n_strata`)
+#' mirrors `er_vpc()`'s own `object$strata`.
 #'
 #' @param data Data frame or tibble containing the observed data.
 #' @param time Event/censoring time (unquoted expression, evaluated in
 #'   `data`). Must be non-negative.
 #' @param event Event indicator (unquoted expression, evaluated in
 #'   `data`): `TRUE`/`1` for an event, `FALSE`/`0` for censoring.
+#' @param stratify_by Optional stratification variable (unquoted, bare
+#'   column name). A categorical variable is used as-is; a numeric
+#'   variable is split into `n_strata` quantile bins. Defaults to `NULL`
+#'   (a single, unstratified curve).
+#' @param n_strata Number of quantile bins, when `stratify_by` is
+#'   numeric. Ignored when `stratify_by` is `NULL` or categorical.
 #' @param conf_level Confidence level for the Kaplan-Meier confidence
 #'   band. Must be strictly between 0 and 1.
 #'
 #' @returns An (empty of layers) plot object of class `er_tte`, with the
-#'   single-arm Kaplan-Meier fit already computed on `object$km`.
+#'   Kaplan-Meier fit already computed on `object$km`.
 #'
 #' @examples
 #' library(survival)
 #' lung |>
 #'   er_tte(time, status == 2)
+#'
+#' # `lung$sex` is coded numerically (1/2); convert to a factor first, or
+#' # a numeric `stratify_by` is quantile-binned instead of used as-is
+#' lung |>
+#'   transform(sex = factor(sex, labels = c("Male", "Female"))) |>
+#'   er_tte(time, status == 2, stratify_by = sex)
 #'
 #' @seealso [er_model_interface]
 #'
@@ -64,7 +83,7 @@ NULL
 
 #' @rdname er_tte
 #' @export
-er_tte <- function(data, time, event, conf_level = 0.95) {
+er_tte <- function(data, time, event, stratify_by = NULL, n_strata = 4, conf_level = 0.95) {
 
   # see `er_plot()`'s identical `dplyr::ungroup()` call for the rationale
   data <- dplyr::ungroup(data)
@@ -133,6 +152,22 @@ er_tte <- function(data, time, event, conf_level = 0.95) {
     rlang::abort("`conf_level` must be a single number strictly between 0 and 1.")
   }
 
+  # unlike `time`/`event`, `stratify_by` must be a bare column name --
+  # matches `exposure`/`response`/`stratify_by` elsewhere in the package,
+  # since it's used for quantile-binning/faceting decisions rather than
+  # evaluated as an arbitrary expression
+  strata_quo <- rlang::enquo(stratify_by)
+  strata_var <- if (rlang::quo_is_null(strata_quo)) NULL else rlang::as_name(strata_quo)
+
+  if (!is.null(strata_var)) {
+    if (!(strata_var %in% names(data))) {
+      rlang::abort(sprintf("Column `%s` not found in `data`.", strata_var))
+    }
+    if (!is.numeric(n_strata) || length(n_strata) != 1L || !is.finite(n_strata) || n_strata < 1 || n_strata != round(n_strata)) {
+      rlang::abort("`n_strata` must be a single positive whole number.")
+    }
+  }
+
   n_missing <- sum(is.na(time_vals) | is.na(event_vals))
   if (n_missing > 0) {
     rlang::warn(sprintf(
@@ -149,22 +184,53 @@ er_tte <- function(data, time, event, conf_level = 0.95) {
     rlang::abort("Cannot compute a Kaplan-Meier estimate: no non-missing `time`/`event` pairs remain.")
   }
 
-  # single-arm Kaplan-Meier fit -- computed once, here, and shared by
-  # every layer that reads `object$km` (none implemented yet)
-  km_fit <- survival::survfit(
-    survival::Surv(data[[".er_tte_time"]], data[[".er_tte_event"]]) ~ 1,
-    conf.int = conf_level
+  strata_info <- NULL
+  if (!is.null(strata_var)) {
+    strata_info <- list()
+    strata_info$var <- strata_var
+    strata_info$label <- .get_label(data[[strata_var]]) %||% strata_var
+    strata_info$type <- if (is.numeric(data[[strata_var]])) "continuous" else "discrete"
+    strata_info$n_strata <- n_strata
+
+    if (strata_info$type == "continuous") {
+      # unlike `er_vpc()`'s `stratify_by` (which special-cases placebo,
+      # i.e. `0`, only when `stratify_by` happens to be the exposure
+      # variable itself), `er_tte()` has no dedicated exposure argument
+      # to compare against -- so `stratify_by` never gets a separate
+      # placebo bin here, regardless of its values
+      data[[".er_tte_strata"]] <- cut_exposure_quantile(
+        data[[strata_var]], n = n_strata, is_placebo = rep(FALSE, nrow(data))
+      )
+      rlang::inform(paste0(
+        "`stratify_by` (`", strata_var, "`) is numeric; splitting into ", n_strata,
+        " quantile bins. Pass a categorical variable to `stratify_by`, ",
+        "or set `n_strata` to change the bin count."
+      ))
+    } else {
+      data[[".er_tte_strata"]] <- factor(data[[strata_var]])
+    }
+  }
+
+  # Kaplan-Meier fit -- computed once, here, and shared by every layer
+  # that reads `object$km` (none implemented yet). `reformulate()` builds
+  # `Surv(...) ~ 1` (single-arm) or `Surv(...) ~ .er_tte_strata`
+  # (stratified) so both cases share one `survfit()` call.
+  km_formula <- stats::reformulate(
+    termlabels = if (is.null(strata_info)) "1" else ".er_tte_strata",
+    response = "survival::Surv(.er_tte_time, .er_tte_event)"
   )
+  km_fit <- survival::survfit(km_formula, data = data, conf.int = conf_level)
 
   object <- structure(
     list(
       data  = NULL,
       time  = .plot_variable(name = ".er_tte_time",  label = time_label,  role = "time"),
       event = .plot_variable(name = ".er_tte_event", label = event_label, role = "event"),
-      strata = NULL, # reserved for a future `stratify_by` argument
+      strata = strata_info,
       km = list(
         fit        = km_fit,
         table      = .tidy_survfit(km_fit),
+        summary    = .km_summary(km_fit),
         conf_level = conf_level
       ),
       layer = list(
@@ -210,17 +276,32 @@ er_tte <- function(data, time, event, conf_level = 0.95) {
 print.er_tte <- function(x, ...) {
 
   layer_set <- !purrr::map_lgl(x$layer, is.null)
-  km_table <- x$km$table
-  median_surv <- unname(summary(x$km$fit)$table["median"])
+  km_summary <- x$km$summary
 
   cat("<er_tte>\n")
   cat("  tte variables:\n")
   cat("    - time:   ", x$time$label  %||% "<none>", "\n", sep = "")
   cat("    - event:  ", x$event$label %||% "<none>", "\n", sep = "")
-  cat("  kaplan-meier fit (single-arm):\n")
-  cat("    - n subjects:       ", x$km$fit$n, "\n", sep = "")
-  cat("    - n events:         ", sum(km_table$n_event), "\n", sep = "")
-  cat("    - median survival:  ", if (is.na(median_surv)) "not reached" else format(median_surv), "\n", sep = "")
+  if (!is.null(x$strata)) {
+    cat("    - stratify_by: ", x$strata$var, " (", x$strata$type, ")",
+      if (x$strata$type == "continuous") paste0(", ", x$strata$n_strata, " bins") else "",
+      "\n", sep = "")
+  }
+
+  if (is.null(x$strata)) {
+    row <- km_summary[1, ]
+    cat("  kaplan-meier fit (single-arm):\n")
+    cat("    - n subjects:       ", row$n, "\n", sep = "")
+    cat("    - n events:         ", row$n_event, "\n", sep = "")
+    cat("    - median survival:  ", if (is.na(row$median)) "not reached" else format(row$median), "\n", sep = "")
+  } else {
+    cat("  kaplan-meier fit:\n")
+    for (ii in seq_len(nrow(km_summary))) {
+      row <- km_summary[ii, ]
+      median_txt <- if (is.na(row$median)) "not reached" else format(row$median)
+      cat("    - ", row$stratum, ": n=", row$n, ", events=", row$n_event, ", median=", median_txt, "\n", sep = "")
+    }
+  }
 
   if (any(layer_set)) {
     cat("  plot layers:\n")
@@ -282,13 +363,19 @@ er_tte_build <- function(object) {
 
 # internal helpers --------------------------------------------------------
 
-# Tidies a single-arm (no `~ strata`) `survival::survfit()` object into a
+# Tidies a `survival::survfit()` object (single-arm or `~ strata`) into a
 # per-event-time data frame. `fit$lower`/`fit$upper` are already the
 # confidence band the caller requested via `survfit(..., conf.int =)`, so
-# no separate CI computation is needed here (unlike, say, `ci_t()`).
+# no separate CI computation is needed here (unlike, say, `ci_t()`). When
+# stratified, `fit$strata` is a named integer vector (row counts per
+# stratum, in the same order the flattened `fit$time`/etc. vectors are
+# concatenated) -- `rep()`-ed out to one label per row and stripped of
+# `survfit()`'s own `"variable=level"` prefix to match
+# `object$strata`'s already-clean level labels (e.g. `cut_exposure_quantile()`'s
+# `"Q1"`/`"Q2"`/... or a categorical column's own levels).
 #' @noRd
 .tidy_survfit <- function(fit) {
-  tibble::tibble(
+  tbl <- tibble::tibble(
     time     = fit$time,
     n_risk   = fit$n.risk,
     n_event  = fit$n.event,
@@ -297,6 +384,35 @@ er_tte_build <- function(object) {
     lower    = fit$lower,
     upper    = fit$upper
   )
+  if (!is.null(fit$strata)) {
+    tbl$strata <- sub("^[^=]+=", "", rep(names(fit$strata), times = fit$strata))
+  }
+  tbl
+}
+
+# Per-stratum (or, unstratified, single-row) summary of a
+# `survival::survfit()` fit: subject count, event count, and median
+# survival time. Reused by `print.er_tte()` and (once implemented) the
+# log-rank annotation layer, so it's computed once here rather than
+# re-derived from `summary(fit)$table` at every call site.
+#' @noRd
+.km_summary <- function(fit) {
+  tbl <- summary(fit)$table
+  if (is.null(dim(tbl))) {
+    tibble::tibble(
+      stratum = NA_character_,
+      n       = unname(fit$n),
+      n_event = unname(tbl["events"]),
+      median  = unname(tbl["median"])
+    )
+  } else {
+    tibble::tibble(
+      stratum = sub("^[^=]+=", "", rownames(tbl)),
+      n       = unname(fit$n),
+      n_event = unname(tbl[, "events"]),
+      median  = unname(tbl[, "median"])
+    )
+  }
 }
 
 # Blank axes-only survival panel: time on x (from `object$time$limits`,
