@@ -5,6 +5,7 @@
 \alias{er_predict}
 \alias{er_simulate}
 \alias{er_summary}
+\alias{er_predict_survival}
 \title{Model interface for exposure-response plots}
 \usage{
 er_predict(model, newdata, conf_level = 0.95, ...)
@@ -12,11 +13,16 @@ er_predict(model, newdata, conf_level = 0.95, ...)
 er_simulate(model, newdata, nsim = 100, seed = NULL, ...)
 
 er_summary(model, ...)
+
+er_predict_survival(model, newdata, time_grid, conf_level = 0.95, ...)
 }
 \arguments{
 \item{model}{A fitted exposure-response model object.}
 
-\item{newdata}{A data frame of covariate values at which to predict.}
+\item{newdata}{A data frame of covariate values at which to predict.
+For \code{er_predict_survival()}, one row per covariate profile (e.g. one
+per stratum level) -- it does \emph{not} include a time column; times
+come from \code{time_grid} instead (see "Details").}
 
 \item{conf_level}{Confidence level for the prediction interval.}
 
@@ -25,6 +31,8 @@ er_summary(model, ...)
 \item{nsim}{Number of simulation replicates.}
 
 \item{seed}{Optional RNG seed.}
+
+\item{time_grid}{Numeric vector of times at which to predict \code{S(t)}.}
 }
 \value{
 \itemize{
@@ -87,10 +95,22 @@ currently consumes it. \code{NULL} if not available.
 
 This is purely additive: a method that only ever returns
 \code{list(p_value = ...)} (as above) continues to work unchanged.
+\item \code{er_predict_survival()} returns \code{newdata}, cross-joined with
+\code{time_grid} (one row per \code{newdata} row x \code{time_grid} value), with
+three additional columns: \code{time}, \code{fit_survival} (the point estimate
+of \verb{S(time | newdata row)}), \code{ci_lower}, and \code{ci_upper}. Unlike
+\code{er_predict()}, \code{newdata} here never includes a time/exposure
+column itself -- \code{time_grid} is a separate argument, so a method can
+build the full time grid in one call per covariate profile rather
+than being handed a pre-crossed data frame. There is no default
+method that returns \code{NULL}; a model with no survival-curve support
+should simply not implement this generic, and \code{\link[=er_tte_add_model]{er_tte_add_model()}}
+errors informatively (via the default method above) if called with
+one.
 }
 }
 \description{
-\code{erplots} draws exposure-response plots from fitted models that implement this small interface, rather than assuming a particular model class. Implement \code{er_predict()} for basic plotting support; implement \code{er_simulate()} for simulation-based visualisations; implement \code{er_summary()} for summary annotations.
+\code{erplots} draws exposure-response plots from fitted models that implement this small interface, rather than assuming a particular model class. Implement \code{er_predict()} for basic plotting support; implement \code{er_simulate()} for simulation-based visualisations; implement \code{er_summary()} for summary annotations; implement \code{er_predict_survival()} for a parametric survival-curve overlay in the \code{er_tte()} grammar (\code{\link[=er_tte_add_model]{er_tte_add_model()}}).
 }
 \details{
 \code{er_plot_add_model()} does not verify that \code{model} was fit on the same exposure/response variables as the plot; that compatibility is the caller's responsibility. When \code{er_plot_add_model()} builds \code{newdata}, it always includes the exposure and, if stratified, strata variables, plus reference values for any other covariates in the model's original fitting data.
@@ -98,4 +118,13 @@ This is purely additive: a method that only ever returns
 A method may rely on caller-supplied extra arguments being forwarded through \code{...}: \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args}, \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}'s \code{summary_args}, and \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}'s \code{simulate_args} are each spliced into the corresponding generic call (\code{er_predict()}/\code{er_summary()}/\code{er_simulate()} respectively), so a model-specific argument beyond the fixed contract below (e.g. a landmark time for a time-to-event model) has a documented path to reach the method. These are deliberately kept separate from each \verb{er_plot_add_*()}/\verb{er_vpc_add_*()} function's own \code{...}, which is reserved for the \code{style} builder instead (see \code{\link[=er_style]{er_style()}}'s "Passing extra arguments to a builder" section) -- a method should not assume it receives anything passed via that \code{...}.
 
 \code{er_predict()} should return \code{newdata} with \code{fit_resp}, \code{ci_lower}, and \code{ci_upper}. \code{er_simulate()} should return \code{newdata} replicates with \code{sim_id} and \code{fit_resp}; it may additionally return \code{sim_resp} for response-level simulations. \code{er_summary()} should return \code{NULL} or a named list with optional keys such as \code{p_value}, \code{coefficients}, and \code{glance}.
+
+Strata membership for \code{er_predict_survival()} is carried on \code{newdata}
+as an ordinary column (named after the \code{er_tte()} object's own
+\code{stratify_by} variable), the same way \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s
+\code{newdata} carries strata -- it is never implicit in \code{model} itself.
+\code{\link[=er_tte_add_model]{er_tte_add_model()}} builds one \code{newdata} row per stratum level (or a
+single row, unstratified), filling any other covariate the model
+references with a reference value exactly as \code{\link[=er_plot_add_model]{er_plot_add_model()}}
+already does (see its "Details").
 }
