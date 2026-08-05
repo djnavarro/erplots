@@ -66,19 +66,37 @@ data |>
   plot()
 ```
 
+**Done**: real `ertte` integration. `ertte` now implements
+`er_predict_survival.ertte_model()` (wrapping its own `ertte_predict()`),
+alongside its existing `er_predict()`/`er_simulate()`/`er_summary()`
+methods for the scalar landmark/RMST reductions used by
+`er_plot()`/`er_vpc()`. `ertte` has been added to `Suggests`/`Remotes` in
+`DESCRIPTION` (GitHub-only, like `erglm`/`emaxnls`), and
+`tests/testthat/test-tte-model-sync.R` is a dedicated integration test
+file gated with `skip_if_not_installed("ertte")`, comparing
+`er_predict_survival()` output against the test-only
+`er_test_toy_tte_model()` (`survival::survreg()`-based, in
+`tests/testthat/helper-toy-model.R`) across distributions/covariates, and
+exercising `er_tte_add_model()` end to end with real `ertte_aft()`/
+`ertte_coxph()` fits -- mirroring `test-toy-model-sync.R`'s `erglm`
+pattern.
+
 **Remaining, not yet scheduled for a specific release**:
 
-- Real `ertte` integration: `ertte` doesn't yet implement
-  `er_predict_survival()` (as of this writing it only registers
-  `er_predict()`/`er_simulate()`/`er_summary()` methods for the scalar
-  landmark/RMST reductions used by `er_plot()`/`er_vpc()`, a separate,
-  already-working integration). Once `ertte` adds an
-  `er_predict_survival.ertte_model()` method (wrapping its own
-  `ertte_predict()`), add a dedicated integration test file gated with
-  `skip_if_not_installed("ertte")`, matching how `erglm`-specific tests
-  are already gated -- the test-only `er_test_toy_tte_model()`
-  (`survival::survreg()`-based, in `tests/testthat/helper-toy-model.R`)
-  covers the generic contract in the meantime.
+- `er_tte_add_model()`'s documented approximation -- when
+  `object$strata$type == "continuous"`, the strata variable rides on
+  `newdata` as its quantile-bin label (e.g. `"Q1"`), not the raw numeric
+  covariate. This is fine as long as the fitted model's own covariates
+  don't include that same raw numeric variable, but if they do (e.g.
+  `stratify_by = age` with a model fitted on `age` directly, rather than
+  on a different exposure column), the resulting `newdata$age` column
+  is a factor of bin labels and the underlying `predict()` call fails
+  with a low-level, uninformative error (e.g. survreg's
+  `"non-conformable arguments"`) rather than something actionable.
+  Consider either an informative upfront check (does any term in
+  `model`'s formula match `object$strata$var` when
+  `object$strata$type == "continuous"`?) or resolving it properly by
+  carrying both the bin label and a representative numeric value.
 
 **Explicitly deferred beyond even this release**: a survival-curve VPC
 (simulate event times from an `ertte` model, compare simulated vs.

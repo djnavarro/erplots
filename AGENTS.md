@@ -20,16 +20,20 @@ component needs something from the model, add or extend a generic in
 
 Companion packages implementing the model interface: `erglm` (GLM-based
 exposure-response models; `Suggests`-only, `Remotes: djnavarro/erglm`
-since it's GitHub-only) and `emaxnls` (Emax/sigmoidal dose-response
-models via nonlinear least squares; `Suggests: emaxnls (>= 0.1.1.9000)`
--- this version floor is load-bearing, see "Gotchas" below -- plus
-`Remotes: djnavarro/emaxnls`). A third sister package, `ertte`
-(time-to-event exposure-response modelling), exists but isn't yet on
-CRAN or added to `Suggests` here -- it currently implements
+since it's GitHub-only), `emaxnls` (Emax/sigmoidal dose-response models
+via nonlinear least squares; `Suggests: emaxnls (>= 0.1.1.9000)` -- this
+version floor is load-bearing, see "Gotchas" below -- plus `Remotes:
+djnavarro/emaxnls`), and `ertte` (time-to-event exposure-response
+modelling; `Suggests`/`Remotes: djnavarro/ertte`, GitHub-only like the
+other two). `ertte` implements the full contract:
 `er_predict()`/`er_simulate()`/`er_summary()` methods for scalar
 landmark-binary/RMST reductions (plugging into `er_plot()`/`er_vpc()`),
-but not yet `er_predict_survival()` for `er_tte_add_model()`; see
-`.agents/PLAN.md`.
+plus `er_predict_survival.ertte_model()` (wrapping its own
+`ertte_predict()`) for the full `S(t)` curve overlay `er_tte_add_model()`
+needs -- see `tests/testthat/test-tte-model-sync.R` for the dedicated,
+`skip_if_not_installed("ertte")`-gated integration tests, and
+`.agents/PLAN.md` for a documented rough edge in the
+continuous-`stratify_by` approximation `er_tte_add_model()` makes.
 
 ## Architecture reference (current state)
 
