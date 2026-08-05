@@ -21,6 +21,7 @@ Imports:
     rlang,
     scales,
     stats,
+    survival,
     tibble,
     tidyselect
 Suggests: 
@@ -59,6 +60,7 @@ Collate:
     'er-plot-style-quantile.R'
     'er-plot-style-summary.R'
     'er-plot-theme.R'
+    'er-tte-api.R'
     'er-vpc-add.R'
     'er-vpc-api.R'
     'er-vpc-build.R'
