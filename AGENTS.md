@@ -5,11 +5,14 @@
 erplots provides a fluent mini-language for building exposure-response
 plots: model curves/ribbons, a summary annotation, quantile-binned
 response-rate/mean summaries, a raw-data layer, and grouped distribution
-panels. It is model-agnostic: erplots never fits a model itself. Any
-model implementing `er_predict()` can be visualised; implementing
+panels. It also provides a separate time-to-event mini-grammar
+(`er_tte()`) for Kaplan-Meier/survival-over-time figures. It is
+model-agnostic: erplots never fits a model itself. Any model
+implementing `er_predict()` can be visualised; implementing
 `er_simulate()` and `er_summary()` additionally enables uncertainty
-spaghetti plots/VPCs and model-derived summary annotations. See
-`?er_model_interface`.
+spaghetti plots/VPCs and model-derived summary annotations; implementing
+`er_predict_survival()` enables a parametric `S(t)` overlay on an
+`er_tte()` plot (`er_tte_add_model()`). See `?er_model_interface`.
 
 **Never call a model-fitting function from this package.** If a plot
 component needs something from the model, add or extend a generic in
@@ -20,7 +23,13 @@ exposure-response models; `Suggests`-only, `Remotes: djnavarro/erglm`
 since it's GitHub-only) and `emaxnls` (Emax/sigmoidal dose-response
 models via nonlinear least squares; `Suggests: emaxnls (>= 0.1.1.9000)`
 -- this version floor is load-bearing, see "Gotchas" below -- plus
-`Remotes: djnavarro/emaxnls`).
+`Remotes: djnavarro/emaxnls`). A third sister package, `ertte`
+(time-to-event exposure-response modelling), exists but isn't yet on
+CRAN or added to `Suggests` here -- it currently implements
+`er_predict()`/`er_simulate()`/`er_summary()` methods for scalar
+landmark-binary/RMST reductions (plugging into `er_plot()`/`er_vpc()`),
+but not yet `er_predict_survival()` for `er_tte_add_model()`; see
+`.agents/PLAN.md`.
 
 ## Architecture reference (current state)
 
@@ -73,10 +82,13 @@ color/fill encodes strata wherever there's room for it (model
 line/ribbon, data overlay's `color`), and facets are used only where
 color is already spoken for by something else.
 
-### The model interface (`er_predict()`/`er_simulate()`/`er_summary()`)
+### The model interface (`er_predict()`/`er_simulate()`/`er_summary()`/`er_predict_survival()`)
 
-Three generics, defined in `R/er-generics.R`. Full contract in
-`?er_model_interface`.
+Four generics, defined in `R/er-generics.R`. Full contract in
+`?er_model_interface`. The first three power `er_plot()`/`er_vpc()`;
+`er_predict_survival()` powers `er_tte()`'s model layer
+(`er_tte_add_model()`) instead -- see "The `er_tte()` mini-grammar"
+below.
 
 A method may rely on caller-supplied extra arguments being forwarded:
 `er_plot_add_model()`'s `predict_args`, `er_plot_add_summary()`'s
@@ -329,6 +341,95 @@ wires up `draw_key` -- `+ ggplot2::scale_colour_manual(...)`/`+
 theme()` on the built/returned ggplot2 object remains the escape hatch
 for both.
 
+### The `er_tte()` mini-grammar
+
+`er_tte(data, time, event, stratify_by = NULL, n_strata = 4, conf_level
+= 0.95)` is a third, separate mini-grammar (distinct from `er_plot()`/
+`er_vpc()`'s exposure-vs-response coordinate system): a time x-axis,
+survival-probability y-axis, built for Kaplan-Meier/survival-over-time
+figures. Unlike `exposure`/`response` elsewhere in the package,
+`time`/`event` accept arbitrary tidy-eval expressions (e.g. `status ==
+2`), not just bare column names; `stratify_by` stays a bare column name,
+matching every other stratification argument. `er_tte()` computes a
+`survival::survfit()` Kaplan-Meier fit once (single-arm, or `~ strata`
+when `stratify_by` is set -- a numeric `stratify_by` is quantile-binned
+via `cut_exposure_quantile()`, same as `er_vpc()`'s own), storing the raw
+fit and a tidy per-event-time table (`time`, `n_risk`, `n_event`,
+`n_censor`, `surv`, `lower`, `upper`, plus `strata` when stratified) on
+`object$km` for every layer to read from, rather than recomputing it.
+`object$strata` (`var`/`label`/`type`/`n_strata`) mirrors `er_vpc()`'s
+own `object$strata`.
+
+Five `er_tte_add_*()` layers, all singleton (a second call replaces the
+first), each drawn via a builder matching the shared `function(data,
+config, stratify, time, strata, theme, ...)` signature (the TTE-grammar
+analogue of `er_style()`'s interface):
+
+- **`er_tte_add_curve()`** -- the KM step curve + confidence band
+  (`er_style_tte_curve_km()`, the default). A step-shaped ribbon has no
+  built-in ggplot2 geom, so it's built from one `geom_rect()` per
+  inter-event interval.
+- **`er_tte_add_censor()`** -- censoring tick marks
+  (`er_style_tte_censor_ticks()`), read straight off the KM table's
+  `n_censor > 0` rows (a censoring-only row's `surv` value is already
+  the curve's current step height).
+- **`er_tte_add_risktable()`** -- a number-at-risk panel
+  (`er_style_tte_risktable_text()`), stacked below the curve via
+  `patchwork::wrap_plots(..., axes = "collect_x")` -- the one layer that
+  changes `er_tte_build()`'s output from a plain ggplot2 object to a
+  patchwork. Its own time breaks double as the curve panel's x-axis
+  ticks so the two panels' shared x-axis lines up exactly.
+- **`er_tte_add_pvalue()`** -- a corner-placed log-rank test annotation
+  (`er_style_tte_pvalue_logrank()`, `survival::survdiff()`). Requires a
+  stratified object.
+- **`er_tte_add_model()`** -- a fitted parametric `S(t)` curve/ribbon
+  overlay (`er_style_tte_model_line()`, the default), via the
+  [er_predict_survival()] generic (see "The model interface" above) --
+  the one TTE layer that calls out to a caller-supplied model, mirroring
+  `er_plot_add_model()`'s `keep_strata`/`predict_args` design. `model`
+  may reference covariates beyond the strata variable; erplots fills any
+  other covariate from the plot data with a reference value, reusing
+  `R/er-plot-layer.R`'s own `.fill_reference_covariates()`/
+  `.reference_value()` helpers. Strata membership is carried on
+  `newdata` (a column named after `object$strata$var`), never implicit
+  in `model` -- when `object$strata$type == "continuous"`, the values
+  used are the already quantile-binned levels (e.g. `"Q1"`), not the raw
+  numeric covariate, a documented approximation.
+
+`er_tte_build()` assembles a blank axes-only survival panel (time on x
+from `object$time$limits`, survival probability on y from
+`object$theme$ylim`, defaulting to `[0, 1]`) plus every present layer's
+geoms, then `.polish_tte_labels()` retitles a stratified colour/fill
+legend with `strata$label` (every builder's own colour/fill mapping uses
+the stratum *level* label, not the original variable name, so this step
+is what actually names the legend).
+
+### `er_tte_theme()`
+
+Mirrors `er_plot_theme()`/`er_vpc_theme()`'s "every argument defaults to
+`NULL`, leave unchanged" accumulation design, scoped to what `er_tte()`
+actually renders: `xlab`/`ylab`/`strata_lab`, `title`/`subtitle`/
+`caption` (applied via a single `ggplot2::labs()` call on the curve
+panel -- always the top-most panel even when the risktable panel is
+stacked below it via `patchwork::wrap_plots()`, so no
+`patchwork::plot_annotation()` indirection is needed the way
+`er_plot_theme()` requires), `theme_base`/`theme_extra`,
+`format_p`/`format_percent`, `draw_key`, and `height_curve`/
+`height_risktable` (merged via `utils::modifyList()`, mirroring
+`er_plot_theme()`'s `height_*` arguments).
+
+`xlim` is the one argument that isn't purely cosmetic: it overwrites
+`object$time$limits` directly (mirroring `er_plot_theme()`'s own `xlim`,
+not `er_vpc_theme()`'s display-only version), since that field also
+drives `er_tte_add_model()`'s default `time_grid` and
+`er_tte_add_risktable()`'s default `times` -- both computed at
+add-layer time, not lazily at build time, so `er_tte_theme(xlim = ...)`
+must be called *before* those layers to affect their defaults. `ylim`,
+by contrast, is purely cosmetic (a survival probability is always
+modelled on `[0, 1]`; this only changes the display), stored on
+`object$theme$ylim` (defaulting to `c(0, 1)`, set in `er_tte()`) rather
+than touching any structural field.
+
 ### `er_plot_theme()`
 
 Styles the plot without remapping which variable drives which aesthetic
@@ -440,7 +541,8 @@ edit if forgotten:
 ## Structure
 
 - `R/er-generics.R` -- the model interface: `er_predict()`,
-  `er_simulate()`, `er_summary()` generics and their default methods.
+  `er_simulate()`, `er_summary()`, `er_predict_survival()` generics and
+  their default methods.
 - `R/er-plot-api.R` -- the `er_plot` object's core lifecycle only:
   `er_plot()`, `er_plot_build()`, and `print`/`plot` methods for the
   `er_plot` S3 class.
@@ -465,6 +567,11 @@ edit if forgotten:
   `R/er-vpc-build.R`, `R/er-vpc-style-observed.R`,
   `R/er-vpc-style-simulated.R`, `R/er-vpc-theme.R` -- the VPC
   mini-grammar, mirroring `er_plot()`'s own file split.
+- `R/er-tte-api.R`, `R/er-tte-add.R`, `R/er-tte-layer.R`,
+  `R/er-tte-style-{curve,censor,risktable,pvalue,model}.R` -- the
+  `er_tte()` mini-grammar (see "The `er_tte()` mini-grammar" above). No
+  `er_tte_theme()`/`-theme.R`/`-build.R` split yet -- `er_tte_build()`
+  still lives in `er-tte-api.R`.
 - `R/utils-helpers.R` -- small internal helpers (including the
   binary-response-only `ci_clopper_pearson()`, `ci_t()`, `ci_poisson()`,
   `cut_quantile()`, `cut_exposure_quantile()`, the response-type
