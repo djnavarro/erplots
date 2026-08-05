@@ -371,6 +371,8 @@ er_tte_build <- function(object) {
     object$output <- object$output + geoms
   }
 
+  object$output <- .polish_tte_labels(object, object$output)
+
   return(object)
 }
 
@@ -427,6 +429,30 @@ er_tte_build <- function(object) {
       median  = unname(tbl[, "median"])
     )
   }
+}
+
+# Retitles a stratified layer's colour/fill legend with
+# `object$strata$label` (e.g. `"sex"`) instead of the literal `"strata"`
+# a builder like `er_style_tte_curve_km()` maps colour/fill to --
+# `config$table`'s own `strata` column holds the already-cleaned
+# stratum *level* labels (e.g. `"Male"`/`"Q1"`), not the original
+# `stratify_by` variable's name, so a builder has no way to supply the
+# right legend title itself. The TTE-grammar analogue of `er_plot()`'s
+# `.polish_labels()` -- much narrower in scope, since `er_tte_build()`
+# only ever produces one panel (no data/group panels to reconcile) and
+# there's no `fill_role`-tagged builder (e.g. a hex-density overlay)
+# whose `fill` means something other than strata to guard against here.
+# Called unconditionally at the end of every `er_tte_build()` so it
+# keeps working as more layers (censor/model) gain their own
+# colour/fill-by-strata mappings; a no-op when unstratified.
+#' @noRd
+.polish_tte_labels <- function(object, plot) {
+  if (is.null(object$strata)) return(plot)
+
+  ll <- names(ggplot2::get_labs(plot))
+  if ("colour" %in% ll) plot <- plot + ggplot2::labs(color = object$strata$label)
+  if ("fill" %in% ll)   plot <- plot + ggplot2::labs(fill = object$strata$label)
+  return(plot)
 }
 
 # Blank axes-only survival panel: time on x (from `object$time$limits`,

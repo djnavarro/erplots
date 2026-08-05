@@ -41,10 +41,11 @@
 #' Stratified colour/fill both map to `config$table`'s own `strata`
 #' column (the already-cleaned stratum label, e.g. `"Q1"` or a
 #' categorical level) rather than the original `stratify_by` column on
-#' `data`, since that's what `config$table` actually carries -- there is
-#' no polishing step yet (analogous to `er_plot()`'s `.polish_labels()`)
-#' to retitle the resulting legend with `strata$label` instead of the
-#' literal `"strata"`.
+#' `data`, since that's what `config$table` actually carries.
+#' `er_tte_build()`'s `.polish_tte_labels()` (the TTE-grammar analogue
+#' of `er_plot()`'s `.polish_labels()`) retitles the resulting legend
+#' with `strata$label` (e.g. `"sex"`) afterwards, so a builder itself
+#' never needs to know the original variable's name.
 #'
 #' `er_style_tte_curve_km()` is tagged `er_style_tag(fn, layer =
 #' "curve")`, so [er_tte_add_curve()] errors informatively if handed a

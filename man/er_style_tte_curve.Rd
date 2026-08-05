@@ -71,10 +71,11 @@ needing a bespoke stat.
 Stratified colour/fill both map to \code{config$table}'s own \code{strata}
 column (the already-cleaned stratum label, e.g. \code{"Q1"} or a
 categorical level) rather than the original \code{stratify_by} column on
-\code{data}, since that's what \code{config$table} actually carries -- there is
-no polishing step yet (analogous to \code{er_plot()}'s \code{.polish_labels()})
-to retitle the resulting legend with \code{strata$label} instead of the
-literal \code{"strata"}.
+\code{data}, since that's what \code{config$table} actually carries.
+\code{er_tte_build()}'s \code{.polish_tte_labels()} (the TTE-grammar analogue
+of \code{er_plot()}'s \code{.polish_labels()}) retitles the resulting legend
+with \code{strata$label} (e.g. \code{"sex"}) afterwards, so a builder itself
+never needs to know the original variable's name.
 
 \code{er_style_tte_curve_km()} is tagged \code{er_style_tag(fn, layer = "curve")}, so \code{\link[=er_tte_add_curve]{er_tte_add_curve()}} errors informatively if handed a
 builder tagged for a different layer.

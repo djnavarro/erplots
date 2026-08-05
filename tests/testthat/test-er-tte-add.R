@@ -41,3 +41,22 @@ test_that("er_tte_build assembles the curve layer onto the base panel", {
   # ribbon + step line, since show_ci defaults to TRUE
   expect_length(built$output$layers, 2)
 })
+
+test_that("er_tte_build retitles a stratified legend with the real variable label", {
+  df <- survival::lung
+  df$sex <- factor(df$sex, labels = c("Male", "Female"))
+  obj <- df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_curve()
+  built <- er_tte_build(obj)
+
+  labs <- ggplot2::get_labs(built$output)
+  expect_equal(labs$colour, "sex")
+  expect_equal(labs$fill, "sex")
+})
+
+test_that("er_tte_build leaves an unstratified plot's labels untouched", {
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_curve()
+  built <- er_tte_build(obj)
+  labs <- ggplot2::get_labs(built$output)
+  expect_null(labs$colour)
+  expect_null(labs$fill)
+})
