@@ -41,65 +41,47 @@ scheduled -- no concrete need has surfaced yet.
   supports this).
 - Prediction-correction (pcVPC).
 
-## Later release (proposed 0.2.0): TTE plotting grammar (`er_tte`)
+## Later release (proposed 0.2.0): TTE plotting grammar (`er_tte`) -- remaining work
 
 Tracked upstream in [ertte#1](https://github.com/djnavarro/ertte/issues/1)
 (Workstream C -- "TTE plotting grammar in `erplots`"), co-designed with the
-new `ertte` (time-to-event exposure-response modelling) package. Full
-design writeup and phased build order live in the implementation plan
-produced for this work; this entry just records scope and sequencing so
-the decision isn't lost.
+new `ertte` (time-to-event exposure-response modelling) package.
 
-**Not scheduled for 0.1.** erplots 0.1 is otherwise ready to submit
-(blocked only on the CRAN submission-ordering items above); the TTE
-grammar is a large, net-new mini-grammar -- its own time-x-axis/
-survival-y-axis coordinate system, step curves, censoring marks, a
-number-at-risk table, and a log-rank annotation, none of which reuse the
-existing `er_predict()`-vs-exposure machinery `er_plot()`/`er_vpc()`
-share. `ertte` itself doesn't exist yet and has open design questions
+**Done** (see `HISTORY.md`'s "The `er_tte` grammar" entry for the design
+writeup): the `er_tte()` object/Kaplan-Meier fit, and four of its five
+layers -- `er_tte_add_curve()`, `er_tte_add_censor()`,
+`er_tte_add_risktable()`, `er_tte_add_pvalue()`.
+
+**Remaining**, and still not scheduled for a specific release -- blocked
+on `ertte` itself, which doesn't exist yet and has open design questions
 (AFT vs. PH parameterisation, delta-method vs. profile CIs); building
 `er_tte_add_model()`'s prediction contract now risks rework once
-`ertte`'s model object stabilizes. Large enough in scope to justify its
-own minor release (proposed 0.2.0) rather than sharing "0.2" with the two
-smaller deferred items above.
-
-**Proposed shape**, mirroring `er_plot()`/`er_vpc()`'s object/layer/
-builder architecture:
+`ertte`'s model object stabilizes:
 
 ```r
 data |>
   er_tte(time, event, stratify_by = NULL, n_strata = 4, conf_level = 0.95) |>
-  er_tte_add_curve() |>       # KM step curve + CI ribbon, singleton
-  er_tte_add_censor() |>      # censoring tick marks, singleton
-  er_tte_add_risktable() |>   # number-at-risk table, patchwork panel, singleton
-  er_tte_add_pvalue() |>      # log-rank annotation, singleton
-  er_tte_add_model(fit) |>    # parametric S(t) overlay from an ertte model, singleton
-  er_tte_theme(...) |>
+  er_tte_add_curve() |>
+  er_tte_add_censor() |>
+  er_tte_add_risktable() |>
+  er_tte_add_pvalue() |>
+  er_tte_add_model(fit) |>    # parametric S(t) overlay from an ertte model, singleton -- not yet built
+  er_tte_theme(...) |>        # not yet built; `object$theme$title`/`subtitle`/`caption` already exist on
+                               # `er_tte()`'s object but nothing sets them yet
   plot()
 ```
 
-Key decisions carried by this plan:
-
-- The empirical KM curve, censoring marks, risk table, and log-rank test
-  are computed directly from raw `(time, event)` data (no model
-  involved), the same way `er_vpc_add_observed()` bins raw data without
-  one. This requires a real Kaplan-Meier estimator and log-rank test
-  inside erplots, not just a place to draw someone else's tidy table --
-  **confirmed**: `survival` added to `DESCRIPTION`'s `Imports` (a
-  "Recommended" package bundled with base R, so effectively free). The
-  KM fit (`survival::survfit()`) and, when `stratify_by` has more than
-  one level, the log-rank test (`survival::survdiff()`) are computed
-  once in `er_tte()` and shared across layers rather than recomputed per
-  add-verb.
 - `er_tte_add_model()` needs a prediction contract distinct from
   `er_predict()` (a time grid in, `S(t)` + CI per stratum out) --
   proposed as a new generic, `er_predict_survival(model, newdata,
   time_grid, conf_level, ...)`, added to `R/er-generics.R` alongside the
   existing three rather than overloading `er_predict()` with a `type=`
   argument.
-- File layout mirrors the `er-plot-*`/`er-vpc-*` split (`R/er-tte-api.R`,
-  `-add.R`, `-layer.R`, `-build.R`, `-style-{curve,censor,risktable,
-  pvalue,model}.R`, `-theme.R`), plus a test-only toy TTE model
+- File layout mirrors the `er-plot-*`/`er-vpc-*` split; `R/er-tte-api.R`,
+  `-add.R`, `-layer.R`, and `-style-{curve,censor,risktable,pvalue}.R`
+  already exist, so this only needs a new `-style-model.R` (plus
+  whatever `-build.R`/`-theme.R` split proves warranted once
+  `er_tte_theme()` exists), and a test-only toy TTE model
   (`survival::survreg()`-based) so model-layer tests don't depend on
   `ertte` existing yet -- real `ertte` integration tests get added later,
   gated with `skip_if_not_installed("ertte")`, matching how `erglm`-
@@ -111,10 +93,6 @@ observed KM). The upstream issue phases this after the core `er_tte`
 grammar exists and after `ertte`'s `er_simulate`-equivalent contract is
 defined.
 
-**Open questions** (to resolve before starting Phase 2): confirm
-`er_predict_survival()`'s exact signature, in particular whether strata
-membership is carried on `newdata` or is implicit in `model`; confirm
-whether `er_tte_add_pvalue()` reuses `er_style_summary_pvalue()`'s
-`format_p` formatter plumbing.
-
-`survival` `Imports` dependency: **confirmed**, see above.
+**Open questions** (to resolve before starting on `er_tte_add_model()`):
+confirm `er_predict_survival()`'s exact signature, in particular whether
+strata membership is carried on `newdata` or is implicit in `model`.

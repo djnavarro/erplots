@@ -545,5 +545,7 @@ utils::globalVariables(c(
   "upper",
   "xmax",
   "strata",
+  "n_censor",
+  "n_risk",
   ":="
 ))

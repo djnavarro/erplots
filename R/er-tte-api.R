@@ -14,10 +14,10 @@
 #' `survival::survfit()`, and stores the fit plus a tidy per-event-time
 #' table (`time`, `n_risk`, `n_event`, `n_censor`, `surv`, `lower`,
 #' `upper`) on `object$km`. Layers added afterwards -- the curve
-#' ([er_tte_add_curve()]) and log-rank annotation ([er_tte_add_pvalue()])
-#' so far; censoring marks, a number-at-risk table, and a model overlay
-#' are not yet implemented -- read from this shared fit rather than
-#' recomputing it.
+#' ([er_tte_add_curve()]), censoring marks ([er_tte_add_censor()]), a
+#' number-at-risk panel ([er_tte_add_risktable()]), and log-rank
+#' annotation ([er_tte_add_pvalue()]) so far; a model overlay is not yet
+#' implemented -- read from this shared fit rather than recomputing it.
 #'
 #' Unlike [er_plot()]/[er_vpc()], `time`/`event` accept arbitrary
 #' tidy-eval expressions, not just bare column names -- time-to-event
@@ -333,31 +333,58 @@ plot.er_tte <- function(x, y = NULL, ...) {
 
 #' Build and render an `er_tte` object
 #'
-#' Assembles the layers into a single ggplot2 object: a blank axes-only
+#' Assembles the layers into a ggplot2 object: a blank axes-only
 #' survival panel (time x-axis, survival probability y-axis), plus the
-#' curve and pvalue layers' geoms, when present ([er_tte_add_curve()],
-#' [er_tte_add_pvalue()]). Censoring marks, a number-at-risk table, and
-#' a model overlay will be added the same way in future changes.
+#' curve, censor, and pvalue layers' geoms, when present
+#' ([er_tte_add_curve()], [er_tte_add_censor()], [er_tte_add_pvalue()]).
+#' When a risktable layer is also present ([er_tte_add_risktable()]),
+#' the result is instead a [patchwork::wrap_plots()] composition of two
+#' panels -- the curve panel described above, stacked above a
+#' number-at-risk panel -- with a shared, [patchwork::wrap_plots()]-
+#' collected x-axis. A model overlay will be added the same way in
+#' future changes.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #'
-#' @returns The input `object`, with `object$output` (the composed
-#'   ggplot2 plot) populated.
+#' @returns The input `object`, with `object$output` (the composed plot
+#'   -- a single ggplot2 object, or a patchwork object when the
+#'   risktable layer is present) populated.
 #'
 #' @details
 #' The user does not typically invoke this function directly. Instead, it
 #' is called automatically when `plot()` is called.
 #'
-#' @seealso [er_tte()], [er_tte_add_curve()], [er_tte_add_pvalue()]
+#' @seealso [er_tte()], [er_tte_add_curve()], [er_tte_add_censor()],
+#'   [er_tte_add_risktable()], [er_tte_add_pvalue()]
 #'
 #' @export
 er_tte_build <- function(object) {
   if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
 
-  object$output <- .build_blank_tte_plot(object)
+  # the risktable layer's own time breaks (when present) double as the
+  # curve panel's x-axis ticks, so the two panels' shared x-axis lines
+  # up exactly once patchwork collects it below
+  risktable_breaks <- object$layer$risktable$config$breaks
+
+  object$output <- .build_blank_tte_plot(object, breaks = risktable_breaks)
 
   if (!is.null(object$layer$curve)) {
     layer <- object$layer$curve
+    geoms <- rlang::exec(
+      layer$style,
+      data = object$data,
+      config = layer$config,
+      stratify = !is.null(object$strata),
+      time = object$time,
+      strata = object$strata,
+      theme = object$theme,
+      !!!layer$dots
+    )
+    object$output <- object$output + geoms
+  }
+
+  if (!is.null(object$layer$censor)) {
+    layer <- object$layer$censor
     geoms <- rlang::exec(
       layer$style,
       data = object$data,
@@ -387,6 +414,15 @@ er_tte_build <- function(object) {
   }
 
   object$output <- .polish_tte_labels(object, object$output)
+
+  if (!is.null(object$layer$risktable)) {
+    object$output <- patchwork::wrap_plots(
+      list(object$output, .build_tte_risktable_plot(object)),
+      ncol = 1,
+      heights = c(object$theme$height$curve, object$theme$height$risktable),
+      axes = "collect_x"
+    )
+  }
 
   return(object)
 }
@@ -473,14 +509,48 @@ er_tte_build <- function(object) {
 # Blank axes-only survival panel: time on x (from `object$time$limits`,
 # always starting at 0), survival probability on y (fixed to [0, 1] --
 # unlike the response axis in `er_plot()`, a survival probability is
-# always on this scale). Placeholder until `er_tte_add_curve()`/
-# `er_style_tte_curve_km()` exist.
+# always on this scale). `breaks` is `NULL` unless the risktable layer
+# is present, in which case it's that layer's own time breaks -- passed
+# through here (rather than added as a second, later `scale_x_*()` call)
+# so the curve panel ends up with exactly one x scale, ticked at the
+# same points the risktable panel reports risk counts at.
 #' @noRd
-.build_blank_tte_plot <- function(object) {
+.build_blank_tte_plot <- function(object, breaks = NULL) {
   ggplot2::ggplot() +
-    ggplot2::xlim(object$time$limits) +
+    ggplot2::scale_x_continuous(limits = object$time$limits, breaks = breaks %||% ggplot2::waiver()) +
     ggplot2::ylim(0, 1) +
     ggplot2::labs(x = object$theme$xlab, y = object$theme$ylab) +
     object$theme$theme_base +
     object$theme$theme_extra
+}
+
+# The risktable panel: one row of risk-count text per stratum (or a
+# single "All" row, unstratified), on the same time x-axis/limits as the
+# curve panel above it -- `config$breaks` (shared with that panel's own
+# x-axis ticks, see `.build_blank_tte_plot()`) guarantees the two line
+# up under `patchwork::wrap_plots(axes = "collect_x")`. No gridlines
+# (a risk-count table reads as a table, not a data panel) and no legend
+# (rows are already labelled by stratum on the y-axis, so a colour
+# legend would be redundant even if a builder chose to add one).
+#' @noRd
+.build_tte_risktable_plot <- function(object) {
+  layer <- object$layer$risktable
+  geoms <- rlang::exec(
+    layer$style,
+    data = object$data,
+    config = layer$config,
+    stratify = !is.null(object$strata),
+    time = object$time,
+    strata = object$strata,
+    theme = object$theme,
+    !!!layer$dots
+  )
+
+  ggplot2::ggplot() +
+    geoms +
+    ggplot2::scale_x_continuous(limits = object$time$limits, breaks = layer$config$breaks) +
+    ggplot2::labs(x = object$theme$xlab, y = "Number at risk") +
+    object$theme$theme_base +
+    object$theme$theme_extra +
+    ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "none")
 }

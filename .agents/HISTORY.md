@@ -1140,6 +1140,85 @@ needed"` instead of a clear error. `.check_theme_limits()`'s validation
 was `!(x[2] > x[1])`, which evaluates to `NA` (not `TRUE`/`FALSE`) when
 either endpoint is `NA`, crashing the enclosing `if()`.
 
+## The `er_tte` grammar: curve, censor, risktable, and pvalue layers
+
+Built out the core of the TTE (time-to-event) plotting mini-grammar
+proposed in `PLAN.md`, mirroring `er_plot()`/`er_vpc()`'s object/layer/
+builder architecture but with its own time-x-axis/survival-y-axis
+coordinate system: `er_tte(data, time, event, stratify_by, n_strata,
+conf_level)` computes a `survival::survfit()` Kaplan-Meier fit once
+(plus, when stratified, nothing yet -- the log-rank test is computed
+lazily by the pvalue layer, not here), storing both the raw fit and a
+tidied per-event-time table on `object$km` for every layer to share.
+Four of the five proposed layers are now implemented:
+`er_tte_add_curve()` (KM step curve + confidence band),
+`er_tte_add_censor()` (censoring tick marks), `er_tte_add_risktable()`
+(number-at-risk panel), and `er_tte_add_pvalue()` (log-rank annotation).
+Only `er_tte_add_model()` (a parametric $S(t)$ overlay) and
+`er_tte_theme()` remain, deferred for the reasons `PLAN.md` still
+records (`ertte`'s model interface hasn't stabilized).
+
+**`time`/`event` as tidy-eval expressions, not bare column names.**
+Unlike `exposure`/`response` elsewhere in the package, `er_tte()`
+accepts arbitrary expressions for both (e.g. `status == 2`), since
+survival data very commonly needs an inline transform to get a binary
+event indicator and requiring a separate `dplyr::mutate()` first would
+just be boilerplate. `stratify_by` stayed a bare column name, matching
+every other stratification argument in the package, since it drives
+quantile-binning/faceting decisions rather than being evaluated as an
+expression.
+
+**The step-shaped confidence ribbon.** ggplot2 has no built-in "step
+ribbon" geom (unlike `geom_step()` for the line itself).
+`er_style_tte_curve_km()` works around this with one `geom_rect()` per
+inter-event interval (`xmin`/`xmax` the interval's start/end time,
+`ymin`/`ymax` the constant `lower`/`upper` bound for that interval) --
+visually identical to a step ribbon without a bespoke stat. The KM
+table gets a `(0, 1)` origin row prepended (one per stratum, when
+stratified) so the curve starts at the conventional Kaplan-Meier
+origin rather than at the first observed event/censoring time.
+
+**Censoring marks land on the curve for free.** A censoring-only row of
+the KM table (`n_censor > 0`, `n_event == 0`) already carries the
+survival value the curve had going into that time -- KM survival only
+drops at an *event* time, never at censoring -- so
+`er_style_tte_censor_ticks()` just filters the existing KM table to
+`n_censor > 0` and plots a point at `(time, surv)`, no extra lookup
+needed. The marks never contribute their own legend entry
+(`show.legend = FALSE`), since the curve's own legend already
+identifies each stratum by colour.
+
+**The risktable layer needed a genuinely different composition path.**
+Every other TTE layer draws geoms directly onto the curve's own ggplot
+object; a number-at-risk table has to be a second, stacked panel
+instead. `er_tte_build()` now conditionally wraps the output in
+`patchwork::wrap_plots(..., axes = "collect_x")` only when a risktable
+layer is present, so `object$output` stays a plain ggplot2 object (not
+a patchwork) in every other case -- preserving prior behaviour and
+every existing test that asserted on `built$output$layers` directly.
+The risktable layer's own time breaks (`er_tte_add_risktable(times =
+..., n_times = 6)`, defaulting to a `pretty()`-based grid clipped to the
+time range) are threaded back into the *curve* panel's own
+`scale_x_continuous(breaks = ...)` call (added as a `breaks` parameter
+on `.build_blank_tte_plot()`, rather than a second, later
+`scale_x_*()` call that would trigger ggplot2's "already present, will
+replace" behaviour) -- so the two panels' x-axes align exactly once
+patchwork collects them, rather than relying on both independently
+picking the same default breaks. `summary.survfit(..., extend = TRUE)`
+computes the number at risk at each break for every stratum, including
+past a stratum's own last observed time, where it would otherwise be
+silently dropped.
+
+**`er_tte_add_pvalue()` reused the corner-distance placement idiom, applied
+to curve coordinates.** `er_plot_add_summary()`'s corner-placed
+annotation avoids a plot's raw data points via
+`.compute_corner_distance()`; there's no raw per-subject scatter in the
+TTE grammar for an annotation to avoid, but the survival curve(s)
+themselves are exactly what it risks overlapping, so
+`.layer_tte_pvalue()` calls the same shared helper on the curve's own
+`(time, surv)` coordinates (rescaled onto `time$limits`/`c(0, 1)`)
+instead of raw data.
+
 Decided against actually *supporting* `NA` the way
 `coord_cartesian()` does: unlike a pure display-only axis limit,
 `object$exposure$limits`/`object$response$limits` also drive non-cosmetic

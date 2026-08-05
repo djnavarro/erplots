@@ -43,6 +43,70 @@
   list(config = config, style = style, dots = dots)
 }
 
+# censor ------------------------------------------------------------------
+
+# Assembles the `censor` layer's config: the subset of the KM table's
+# rows where a censoring event actually occurred (`n_censor > 0`), read
+# directly off `object$km$table` -- unlike `.layer_tte_curve()`, no
+# `(0, 1)` origin row is needed here, since censoring at time 0 isn't a
+# thing a tick mark needs to represent. A censoring-only row's `surv`
+# value is already the survival curve's current step height (KM
+# survival only changes at an *event* time, not a censoring time), so
+# plotting a tick at `(time, surv)` lands it exactly on the curve.
+#' @noRd
+.layer_tte_censor <- function(object, style, dots) {
+  config <- list()
+  config$table <- object$km$table |> dplyr::filter(n_censor > 0)
+  list(config = config, style = style, dots = dots)
+}
+
+# risktable -----------------------------------------------------------------
+
+# Default time breaks for the risktable layer, when the caller doesn't
+# supply `times` explicitly: `pretty()`'s usual axis-break algorithm,
+# clipped to `time$limits` (`pretty()` commonly proposes a point just
+# past the requested range's upper end, which `survival::summary.survfit()`
+# would then have to extrapolate beyond the fit -- harmless with
+# `extend = TRUE`, but a break with no visual meaning past the curve's
+# own x-axis limit). Falls back to the two range endpoints themselves if
+# clipping happens to leave fewer than 2 points (a degenerate/very
+# narrow time range).
+#' @noRd
+.default_risktable_times <- function(time_limits, n_times) {
+  breaks <- pretty(time_limits, n = n_times)
+  breaks <- breaks[breaks >= time_limits[1] & breaks <= time_limits[2]]
+  if (length(breaks) < 2) breaks <- time_limits
+  breaks
+}
+
+# Assembles the `risktable` layer's config: a `time`/`n_risk` table (one
+# row per stratum per requested time break, when stratified) read from
+# `summary.survfit(object$km$fit, times = breaks, extend = TRUE)` --
+# `extend = TRUE` guarantees a row at every requested break for every
+# stratum, even past that stratum's own last observed time (where it
+# would otherwise be silently dropped), so every panel row has the same
+# set of x-positions to plot at.
+#' @noRd
+.layer_tte_risktable <- function(object, style, dots, times, n_times) {
+  breaks <- times %||% .default_risktable_times(object$time$limits, n_times)
+  breaks <- sort(unique(breaks))
+
+  fit_summary <- summary(object$km$fit, times = breaks, extend = TRUE)
+
+  if (is.null(object$strata)) {
+    table <- tibble::tibble(time = fit_summary$time, n_risk = fit_summary$n.risk, strata = "All")
+  } else {
+    table <- tibble::tibble(
+      time    = fit_summary$time,
+      n_risk  = fit_summary$n.risk,
+      strata  = sub("^[^=]+=", "", as.character(fit_summary$strata))
+    )
+  }
+
+  config <- list(table = table, breaks = breaks)
+  list(config = config, style = style, dots = dots)
+}
+
 # pvalue ------------------------------------------------------------------
 
 # Assembles the `pvalue` layer's config: a log-rank test comparing all
