@@ -588,12 +588,20 @@ edit if forgotten:
 ## Vignette structure
 
 `vignettes/articles/` (pkgdown-only, not shipped -- see `.Rbuildignore`)
-holds seven articles:
+holds nine articles:
 
 - `plot-binary.Rmd`, `plot-continuous.Rmd`, `plot-count.Rmd` -- worked
   examples of each layer, one per response type. Binary is the most
   detailed; the other two link back to it for response-type-agnostic
   content (model/summary/group layers).
+- `plot-vpc.Rmd` -- the `er_vpc()` mini-grammar: observed/simulated
+  layers, `plot_by`/`stratify_by`, the three visual idioms, theming, and
+  troubleshooting plot legibility.
+- `plot-tte.Rmd` -- the `er_tte()` mini-grammar: curve/censor/risktable
+  layers, stratified curves (categorical and quantile-binned numeric),
+  the log-rank p-value annotation, the `er_tte_add_model()` overlay
+  (using `ertte`), and `er_tte_theme()` (including the `xlim`
+  call-order caveat).
 - `design.Rmd` -- "The plotting grammar": singleton/additive layer
   distinction, the stratification color/facet precedence rule, the
   response-type dispatch table. Short pointer sections into `theming.Rmd`

@@ -81,6 +81,7 @@ articles:
       - articles/plot-continuous
       - articles/plot-count
       - articles/plot-vpc
+      - articles/plot-tte
       - articles/design
       - articles/theming
       - articles/extending
