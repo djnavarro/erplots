@@ -15,9 +15,11 @@
 #' table (`time`, `n_risk`, `n_event`, `n_censor`, `surv`, `lower`,
 #' `upper`) on `object$km`. Layers added afterwards -- the curve
 #' ([er_tte_add_curve()]), censoring marks ([er_tte_add_censor()]), a
-#' number-at-risk panel ([er_tte_add_risktable()]), and log-rank
-#' annotation ([er_tte_add_pvalue()]) so far; a model overlay is not yet
-#' implemented -- read from this shared fit rather than recomputing it.
+#' number-at-risk panel ([er_tte_add_risktable()]), log-rank annotation
+#' ([er_tte_add_pvalue()]), and a parametric model overlay
+#' ([er_tte_add_model()]) -- read from this shared fit rather than
+#' recomputing it (the model layer alone reads from the caller-supplied
+#' `model` instead, via [er_predict_survival()]).
 #'
 #' Unlike [er_plot()]/[er_vpc()], `time`/`event` accept arbitrary
 #' tidy-eval expressions, not just bare column names -- time-to-event
@@ -255,6 +257,7 @@ er_tte <- function(data, time, event, stratify_by = NULL, n_strata = 4, conf_lev
   object$theme$title <- NULL
   object$theme$subtitle <- NULL
   object$theme$caption <- NULL
+  object$theme$ylim <- c(0, 1)
   object$theme$format_percent <- scales::label_percent(accuracy = 1)
   object$theme$format_p <- scales::label_pvalue(accuracy = .001, add_p = TRUE)
   object$theme$theme_base <- ggplot2::theme_bw()
@@ -335,14 +338,13 @@ plot.er_tte <- function(x, y = NULL, ...) {
 #'
 #' Assembles the layers into a ggplot2 object: a blank axes-only
 #' survival panel (time x-axis, survival probability y-axis), plus the
-#' curve, censor, and pvalue layers' geoms, when present
-#' ([er_tte_add_curve()], [er_tte_add_censor()], [er_tte_add_pvalue()]).
-#' When a risktable layer is also present ([er_tte_add_risktable()]),
-#' the result is instead a [patchwork::wrap_plots()] composition of two
-#' panels -- the curve panel described above, stacked above a
-#' number-at-risk panel -- with a shared, [patchwork::wrap_plots()]-
-#' collected x-axis. A model overlay will be added the same way in
-#' future changes.
+#' curve, censor, pvalue, and model layers' geoms, when present
+#' ([er_tte_add_curve()], [er_tte_add_censor()], [er_tte_add_pvalue()],
+#' [er_tte_add_model()]). When a risktable layer is also present
+#' ([er_tte_add_risktable()]), the result is instead a
+#' [patchwork::wrap_plots()] composition of two panels -- the curve
+#' panel described above, stacked above a number-at-risk panel -- with a
+#' shared, [patchwork::wrap_plots()]-collected x-axis.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #'
@@ -400,6 +402,21 @@ er_tte_build <- function(object) {
 
   if (!is.null(object$layer$pvalue)) {
     layer <- object$layer$pvalue
+    geoms <- rlang::exec(
+      layer$style,
+      data = object$data,
+      config = layer$config,
+      stratify = !is.null(object$strata),
+      time = object$time,
+      strata = object$strata,
+      theme = object$theme,
+      !!!layer$dots
+    )
+    object$output <- object$output + geoms
+  }
+
+  if (!is.null(object$layer$model)) {
+    layer <- object$layer$model
     geoms <- rlang::exec(
       layer$style,
       data = object$data,
@@ -518,8 +535,11 @@ er_tte_build <- function(object) {
 .build_blank_tte_plot <- function(object, breaks = NULL) {
   ggplot2::ggplot() +
     ggplot2::scale_x_continuous(limits = object$time$limits, breaks = breaks %||% ggplot2::waiver()) +
-    ggplot2::ylim(0, 1) +
-    ggplot2::labs(x = object$theme$xlab, y = object$theme$ylab) +
+    ggplot2::scale_y_continuous(limits = object$theme$ylim) +
+    ggplot2::labs(
+      x = object$theme$xlab, y = object$theme$ylab,
+      title = object$theme$title, subtitle = object$theme$subtitle, caption = object$theme$caption
+    ) +
     object$theme$theme_base +
     object$theme$theme_extra
 }

@@ -505,6 +505,7 @@ utils::globalVariables(c(
   "ci_lower",
   "ci_upper",
   "fit_resp",
+  "fit_survival",
   "n1",
   "n0",
   "n_units",

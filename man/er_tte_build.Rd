@@ -17,14 +17,13 @@ risktable layer is present) populated.
 \description{
 Assembles the layers into a ggplot2 object: a blank axes-only
 survival panel (time x-axis, survival probability y-axis), plus the
-curve, censor, and pvalue layers' geoms, when present
-(\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}, \code{\link[=er_tte_add_censor]{er_tte_add_censor()}}, \code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}}).
-When a risktable layer is also present (\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}),
-the result is instead a \code{\link[patchwork:wrap_plots]{patchwork::wrap_plots()}} composition of two
-panels -- the curve panel described above, stacked above a
-number-at-risk panel -- with a shared, \code{\link[patchwork:wrap_plots]{patchwork::wrap_plots()}}-
-collected x-axis. A model overlay will be added the same way in
-future changes.
+curve, censor, pvalue, and model layers' geoms, when present
+(\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}, \code{\link[=er_tte_add_censor]{er_tte_add_censor()}}, \code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}},
+\code{\link[=er_tte_add_model]{er_tte_add_model()}}). When a risktable layer is also present
+(\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}), the result is instead a
+\code{\link[patchwork:wrap_plots]{patchwork::wrap_plots()}} composition of two panels -- the curve
+panel described above, stacked above a number-at-risk panel -- with a
+shared, \code{\link[patchwork:wrap_plots]{patchwork::wrap_plots()}}-collected x-axis.
 }
 \details{
 The user does not typically invoke this function directly. Instead, it

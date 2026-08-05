@@ -224,3 +224,99 @@ test_that("er_tte_build assembles both the curve and pvalue layers together", {
   layer_geoms <- vapply(built$output$layers, function(l) class(l$geom)[1], character(1))
   expect_setequal(layer_geoms, c("GeomRect", "GeomStep", "GeomLabel"))
 })
+
+# model ---------------------------------------------------------------------
+
+test_that("er_tte_add_model adds a model layer with the default style", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod)
+  expect_false(is.null(obj$layer$model))
+  expect_identical(obj$layer$model$style, er_style_tte_model_line)
+})
+
+test_that("er_tte_add_model is a singleton -- a second call replaces the first", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  obj <- survival::lung |>
+    er_tte(time, status == 2) |>
+    er_tte_add_model(mod, show_ci = TRUE) |>
+    er_tte_add_model(mod, show_ci = FALSE)
+  expect_identical(obj$layer$model$dots, list(show_ci = FALSE))
+})
+
+test_that("er_tte_add_model errors on a non-er_tte object", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  expect_error(er_tte_add_model(list(), mod), "er_tte object")
+})
+
+test_that("er_tte_add_model errors when style is not a function", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  expect_error(
+    survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod, style = 1),
+    "must be a function"
+  )
+})
+
+test_that("er_tte_add_model errors when a builder tagged for a different layer is passed", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  expect_error(
+    survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod, style = er_style_tte_curve_km),
+    "model"
+  )
+})
+
+test_that("er_tte_add_model errors on unnamed extra arguments", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  expect_error(
+    survival::lung |> er_tte(time, status == 2) |>
+      er_tte_add_model(
+        mod, keep_strata = NULL, style = NULL, conf_level = 0.95,
+        time_grid = NULL, predict_args = list(), 0.3
+      ),
+    "named"
+  )
+})
+
+test_that("er_tte_add_model validates time_grid", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  expect_error(
+    survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod, time_grid = -1),
+    "time_grid"
+  )
+})
+
+test_that("er_tte_add_model defaults to a 100-point time grid spanning object$time$limits", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod)
+  expect_length(obj$layer$model$config$time_grid, 100)
+  expect_equal(range(obj$layer$model$config$time_grid), obj$time$limits)
+})
+
+test_that("er_tte_add_model respects a custom time_grid", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod, time_grid = c(0, 100, 200))
+  expect_equal(obj$layer$model$config$time_grid, c(0, 100, 200))
+  expect_equal(nrow(obj$layer$model$config$predictions), 3)
+})
+
+test_that("er_tte_add_model fills reference covariates for a model with extra terms", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ age, survival::lung)
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod)
+  expect_true("age" %in% names(obj$layer$model$config$predictions))
+  expect_equal(unique(obj$layer$model$config$predictions$age), mean(survival::lung$age, na.rm = TRUE))
+})
+
+test_that("er_tte_build assembles the model layer onto the base panel", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod)
+  built <- er_tte_build(obj)
+  expect_s3_class(built$output, "ggplot")
+  layer_geoms <- vapply(built$output$layers, function(l) class(l$geom)[1], character(1))
+  expect_setequal(layer_geoms, c("GeomRibbon", "GeomLine"))
+})
+
+test_that("er_tte_add_model without ertte errors informatively for a model with no method", {
+  expect_error(
+    survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(structure(list(), class = "not_a_tte_model")),
+    "er_predict_survival"
+  )
+})

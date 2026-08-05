@@ -129,3 +129,54 @@ er_summary.er_test_toy_model <- function(model, conf_level = 0.95, ...) {
 registerS3method("er_predict", "er_test_toy_model", er_predict.er_test_toy_model)
 registerS3method("er_simulate", "er_test_toy_model", er_simulate.er_test_toy_model)
 registerS3method("er_summary", "er_test_toy_model", er_summary.er_test_toy_model)
+
+# ---------------------------------------------------------------------------
+# er_test_toy_tte_model(): an internal, test-only AFT time-to-event model
+# wrapper, implemented via survival::survreg(). Exists to exercise
+# er_tte_add_model()/er_predict_survival() without depending on the (not
+# yet CRAN-released) ertte package -- see PLAN.md's "er_tte_add_model()"
+# entry. CI construction deliberately mirrors ertte's own documented
+# approximation for its AFT engine (Wald interval on the linear
+# predictor `mu`, back-transformed through the base distribution's CDF;
+# `scale` uncertainty is ignored) -- not a claim of optimality, just
+# enough for this package's own tests to exercise the generic contract.
+# ---------------------------------------------------------------------------
+
+er_test_toy_tte_model <- function(formula, data, dist = "weibull") {
+  fit <- survival::survreg(formula, data = data, dist = dist)
+  structure(list(fit = fit, data = data), class = "er_test_toy_tte_model")
+}
+
+er_predict_survival.er_test_toy_tte_model <- function(model, newdata, time_grid, conf_level = 0.95, ...) {
+  fit <- model$fit
+  scale <- fit$scale
+  dist <- fit$dist
+
+  pbase <- switch(dist,
+    weibull = ,
+    exponential = function(z) 1 - exp(-exp(z)),
+    lognormal = stats::pnorm,
+    loglogistic = stats::plogis,
+    rlang::abort(paste0("er_test_toy_tte_model() doesn't support dist = \"", dist, "\"."))
+  )
+
+  z_scale <- -stats::qnorm((1 - conf_level) / 2)
+  lp <- stats::predict(fit, newdata = newdata, type = "linear", se.fit = TRUE)
+
+  n_profile <- nrow(newdata)
+  n_time <- length(time_grid)
+  out <- newdata[rep(seq_len(n_profile), each = n_time), , drop = FALSE]
+  out$time <- rep(time_grid, times = n_profile)
+  rownames(out) <- NULL
+
+  mu    <- rep(lp$fit, each = n_time)
+  se_mu <- rep(lp$se.fit, each = n_time)
+  log_t <- log(out$time)
+
+  out$fit_survival <- 1 - pbase((log_t - mu) / scale)
+  out$ci_lower <- 1 - pbase((log_t - (mu - z_scale * se_mu)) / scale)
+  out$ci_upper <- 1 - pbase((log_t - (mu + z_scale * se_mu)) / scale)
+
+  out
+}
+registerS3method("er_predict_survival", "er_test_toy_tte_model", er_predict_survival.er_test_toy_tte_model)

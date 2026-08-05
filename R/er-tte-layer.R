@@ -3,7 +3,10 @@
 # plot's raw Kaplan-Meier fit (already computed once, in `er_tte()`
 # itself, and stored on `object$km`) gets turned into the `config` a
 # style builder receives. No `er_predict()`/`er_simulate()`/`er_summary()`
-# calls happen here -- nothing in this grammar (yet) is a model layer.
+# calls happen here -- the curve/censor/risktable/pvalue layers all read
+# from the shared KM fit. `.layer_tte_model()` (below) is the one
+# exception: it calls `er_predict_survival()` on the caller-supplied
+# `model`, mirroring `R/er-plot-layer.R`'s own `.layer_model()`.
 
 # Prepends a `time = 0, surv = 1` origin row -- one per stratum, when
 # stratified -- to a tidy KM table (`.tidy_survfit()`'s output), so a
@@ -106,6 +109,54 @@
   config <- list(table = table, breaks = breaks)
   list(config = config, style = style, dots = dots)
 }
+
+# model ---------------------------------------------------------------------
+
+# Assembles the `model` layer's config: a `newdata` prediction grid (one
+# row per stratum level, or a single row unstratified, crossed with a
+# `time_grid` spanning `object$time$limits` inside `er_predict_survival()`
+# itself -- unlike `.get_model_predictions()`'s `er_plot()` analogue,
+# `time_grid` is a separate generic argument, not a `newdata` column, so
+# no cross-join happens here), the model's survival predictions (via
+# `er_predict_survival()`), and `conf_level`.
+#
+# Strata membership is carried on `newdata` as a column named after
+# `object$strata$var` (never implicit in `model`) -- see
+# `?er_model_interface`'s "Details". When `object$strata$type ==
+# "continuous"`, the values used are the already quantile-binned levels
+# stored on `.er_tte_strata` (the same levels the curve/censor/pvalue
+# layers show), not the raw numeric variable -- a documented
+# approximation, the TTE-grammar analogue of `er_vpc()`'s own numeric
+# `stratify_by` binning.
+#' @noRd
+.layer_tte_model <- function(object, model, stratify, conf_level, time_grid, predict_args, style, dots) {
+  config <- list()
+
+  time_grid <- time_grid %||% seq(object$time$limits[1], object$time$limits[2], length.out = 100L)
+
+  if (!stratify) {
+    newdata <- data.frame(matrix(nrow = 1, ncol = 0))
+  } else {
+    strata_levels <- levels(factor(object$data[[".er_tte_strata"]]))
+    newdata <- data.frame(strata_levels) |> .set_names(object$strata$var)
+  }
+
+  # a fitted model's formula may reference covariates beyond the strata
+  # variable -- fill every other column of the original fitting data
+  # with a single reference value, exactly like `er_plot_add_model()`'s
+  # `.get_model_predictions()` does (see its comment for the rationale)
+  newdata <- .fill_reference_covariates(newdata, object$data)
+
+  config$time_grid <- time_grid
+  config$conf_level <- conf_level
+  config$predictions <- rlang::exec(
+    er_predict_survival, model = model, newdata = newdata,
+    time_grid = time_grid, conf_level = conf_level, !!!predict_args
+  )
+
+  list(config = config, style = style, dots = dots)
+}
+
 
 # pvalue ------------------------------------------------------------------
 

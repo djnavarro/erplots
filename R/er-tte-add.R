@@ -158,6 +158,83 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 }
 
 
+# model ---------------------------------------------------------------------
+
+#' Add a parametric survival-curve overlay layer
+#'
+#' Adds the model layer: a fitted parametric `S(t)` curve (with an
+#' uncertainty band) from a time-to-event model, overlaid on the
+#' Kaplan-Meier curve already stored on `object$km` (see [er_tte()]).
+#' Singleton (a second call replaces the previous one).
+#'
+#' @param object Partially constructed plot (has S3 class `er_tte`).
+#' @param model A fitted time-to-event model. Must implement
+#'   [er_predict_survival()] (see [er_model_interface]).
+#' @param keep_strata Logical; whether this layer should draw one curve
+#'   per stratum level. Defaults to `!is.null(object$strata)`.
+#' @param style Function drawing the model curve/ribbon. Defaults to
+#'   [er_style_tte_model_line()].
+#' @param conf_level Confidence level for the prediction band.
+#' @param time_grid Numeric vector of times at which to predict `S(t)`,
+#'   or `NULL` (the default) to use 100 points evenly spaced across
+#'   `object$time$limits`.
+#' @param predict_args A named list of additional arguments forwarded to
+#'   [er_predict_survival()] (e.g. a model-specific argument its method
+#'   requires beyond `model`/`newdata`/`time_grid`/`conf_level`).
+#'   Distinct from `...`: `predict_args` reaches [er_predict_survival()],
+#'   `...` reaches `style` -- mirroring [er_plot_add_model()]'s
+#'   `predict_args`.
+#' @param ... Additional named arguments forwarded unchanged to `style`
+#'   at build time.
+#'
+#' @details
+#' `model` may reference covariates beyond the strata variable; erplots
+#' fills any additional covariate from the plot data with a reference
+#' value (first factor level or numeric mean), exactly as
+#' [er_plot_add_model()] does -- see its "Details". Strata membership is
+#' carried on the `newdata` passed to [er_predict_survival()], never
+#' implicit in `model` itself -- see [er_model_interface]'s "Details".
+#'
+#' erplots does not check that `model` was fit on the same time/event
+#' variables as the plot; the caller must ensure compatibility.
+#'
+#' @returns The input `object`, with the model layer added.
+#'
+#' @seealso [er_tte()], [er_style_tte_model_line()], [er_model_interface]
+#'
+#' @export
+er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
+                              conf_level = 0.95, time_grid = NULL,
+                              predict_args = list(), ...) {
+
+  dots <- rlang::list2(...)
+  .check_dots_named(dots)
+  .check_dots_named(predict_args, arg = "predict_args")
+  if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
+  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(time_grid) && (!is.numeric(time_grid) || length(time_grid) < 1L || any(!is.finite(time_grid)) || any(time_grid < 0))) {
+    rlang::abort("`time_grid` must be a numeric vector of non-negative values, or NULL.")
+  }
+  if (is.null(keep_strata)) keep_strata <- !is.null(object$strata)
+
+  style <- style %||% er_style_tte_model_line
+  .check_style_layer(style, "model", arg = "style")
+
+  object$layer$model <- .layer_tte_model(
+    object = object,
+    model = model,
+    stratify = keep_strata,
+    conf_level = conf_level,
+    time_grid = time_grid,
+    predict_args = predict_args,
+    style = style,
+    dots = dots
+  )
+
+  return(object)
+}
+
+
 # pvalue ------------------------------------------------------------------
 
 #' Add a log-rank test annotation layer
