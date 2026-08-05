@@ -14,16 +14,17 @@ The input \code{object}, with \code{object$output} (the composed
 ggplot2 plot) populated.
 }
 \description{
-Assembles the layers into a single ggplot2 object. At this stage of
-development no \verb{er_tte_add_*()} layer verbs exist yet, so this always
-renders a blank axes-only survival panel (time x-axis, survival
-probability y-axis) -- the same "no layers yet" fallback
-\code{\link[=er_plot_build]{er_plot_build()}} uses.
+Assembles the layers into a single ggplot2 object: a blank axes-only
+survival panel (time x-axis, survival probability y-axis), plus the
+curve layer's geoms, when present (\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}). Only the
+curve layer exists so far; censoring marks, a number-at-risk table,
+a log-rank annotation, and a model overlay will be added the same way
+in future changes.
 }
 \details{
 The user does not typically invoke this function directly. Instead, it
 is called automatically when \code{plot()} is called.
 }
 \seealso{
-\code{\link[=er_tte]{er_tte()}}
+\code{\link[=er_tte]{er_tte()}}, \code{\link[=er_tte_add_curve]{er_tte_add_curve()}}
 }

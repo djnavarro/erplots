@@ -539,5 +539,11 @@ utils::globalVariables(c(
   ".vpc_bin",
   ".vpc_stratum",
   "prob",
+  "time",
+  "surv",
+  "lower",
+  "upper",
+  "xmax",
+  "strata",
   ":="
 ))

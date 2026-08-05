@@ -265,6 +265,7 @@ er_tte <- function(data, time, event, stratify_by = NULL, n_strata = 4, conf_lev
     ),
     legend.position = "bottom"
   )
+  object$theme$draw_key <- ggplot2::draw_key_rect
   object$theme$height <- list(curve = 6, risktable = 2)
 
   return(object)
@@ -331,11 +332,12 @@ plot.er_tte <- function(x, y = NULL, ...) {
 
 #' Build and render an `er_tte` object
 #'
-#' Assembles the layers into a single ggplot2 object. At this stage of
-#' development no `er_tte_add_*()` layer verbs exist yet, so this always
-#' renders a blank axes-only survival panel (time x-axis, survival
-#' probability y-axis) -- the same "no layers yet" fallback
-#' [er_plot_build()] uses.
+#' Assembles the layers into a single ggplot2 object: a blank axes-only
+#' survival panel (time x-axis, survival probability y-axis), plus the
+#' curve layer's geoms, when present ([er_tte_add_curve()]). Only the
+#' curve layer exists so far; censoring marks, a number-at-risk table,
+#' a log-rank annotation, and a model overlay will be added the same way
+#' in future changes.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #'
@@ -346,16 +348,28 @@ plot.er_tte <- function(x, y = NULL, ...) {
 #' The user does not typically invoke this function directly. Instead, it
 #' is called automatically when `plot()` is called.
 #'
-#' @seealso [er_tte()]
+#' @seealso [er_tte()], [er_tte_add_curve()]
 #'
 #' @export
 er_tte_build <- function(object) {
   if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
 
-  # no `er_tte_add_*()` verbs exist yet -- every build is currently the
-  # "blank canvas" fallback; this will grow layer-by-layer the same way
-  # `er_plot_build()`/`er_vpc_build()` do
   object$output <- .build_blank_tte_plot(object)
+
+  if (!is.null(object$layer$curve)) {
+    layer <- object$layer$curve
+    geoms <- rlang::exec(
+      layer$style,
+      data = object$data,
+      config = layer$config,
+      stratify = !is.null(object$strata),
+      time = object$time,
+      strata = object$strata,
+      theme = object$theme,
+      !!!layer$dots
+    )
+    object$output <- object$output + geoms
+  }
 
   return(object)
 }
