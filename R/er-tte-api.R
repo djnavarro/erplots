@@ -13,10 +13,11 @@
 #' `er_tte()` computes the (single-arm) Kaplan-Meier estimate once, via
 #' `survival::survfit()`, and stores the fit plus a tidy per-event-time
 #' table (`time`, `n_risk`, `n_event`, `n_censor`, `surv`, `lower`,
-#' `upper`) on `object$km`. Layers added afterwards (curve, censoring
-#' marks, number-at-risk table, log-rank annotation, model overlay --
-#' none of which exist yet at this stage of development) will read from
-#' this shared fit rather than recomputing it.
+#' `upper`) on `object$km`. Layers added afterwards -- the curve
+#' ([er_tte_add_curve()]) and log-rank annotation ([er_tte_add_pvalue()])
+#' so far; censoring marks, a number-at-risk table, and a model overlay
+#' are not yet implemented -- read from this shared fit rather than
+#' recomputing it.
 #'
 #' Unlike [er_plot()]/[er_vpc()], `time`/`event` accept arbitrary
 #' tidy-eval expressions, not just bare column names -- time-to-event
@@ -309,7 +310,7 @@ print.er_tte <- function(x, ...) {
     if (layer_set["curve"])     cat("    - curve:      layer built\n", sep = "")
     if (layer_set["censor"])    cat("    - censor:     layer built\n", sep = "")
     if (layer_set["risktable"]) cat("    - risktable:  layer built\n", sep = "")
-    if (layer_set["pvalue"])    cat("    - pvalue:     layer built\n", sep = "")
+    if (layer_set["pvalue"])    cat("    - pvalue:     log-rank ", x$theme$format_p(x$layer$pvalue$config$p_value), "\n", sep = "")
     if (layer_set["model"])     cat("    - model:      layer built\n", sep = "")
   } else {
     cat("  plot layers: <none>\n")
@@ -334,10 +335,9 @@ plot.er_tte <- function(x, y = NULL, ...) {
 #'
 #' Assembles the layers into a single ggplot2 object: a blank axes-only
 #' survival panel (time x-axis, survival probability y-axis), plus the
-#' curve layer's geoms, when present ([er_tte_add_curve()]). Only the
-#' curve layer exists so far; censoring marks, a number-at-risk table,
-#' a log-rank annotation, and a model overlay will be added the same way
-#' in future changes.
+#' curve and pvalue layers' geoms, when present ([er_tte_add_curve()],
+#' [er_tte_add_pvalue()]). Censoring marks, a number-at-risk table, and
+#' a model overlay will be added the same way in future changes.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #'
@@ -348,7 +348,7 @@ plot.er_tte <- function(x, y = NULL, ...) {
 #' The user does not typically invoke this function directly. Instead, it
 #' is called automatically when `plot()` is called.
 #'
-#' @seealso [er_tte()], [er_tte_add_curve()]
+#' @seealso [er_tte()], [er_tte_add_curve()], [er_tte_add_pvalue()]
 #'
 #' @export
 er_tte_build <- function(object) {
@@ -358,6 +358,21 @@ er_tte_build <- function(object) {
 
   if (!is.null(object$layer$curve)) {
     layer <- object$layer$curve
+    geoms <- rlang::exec(
+      layer$style,
+      data = object$data,
+      config = layer$config,
+      stratify = !is.null(object$strata),
+      time = object$time,
+      strata = object$strata,
+      theme = object$theme,
+      !!!layer$dots
+    )
+    object$output <- object$output + geoms
+  }
+
+  if (!is.null(object$layer$pvalue)) {
+    layer <- object$layer$pvalue
     geoms <- rlang::exec(
       layer$style,
       data = object$data,

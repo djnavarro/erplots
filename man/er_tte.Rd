@@ -43,10 +43,11 @@ the natural coordinate system for a Kaplan-Meier curve, not something
 \code{er_tte()} computes the (single-arm) Kaplan-Meier estimate once, via
 \code{survival::survfit()}, and stores the fit plus a tidy per-event-time
 table (\code{time}, \code{n_risk}, \code{n_event}, \code{n_censor}, \code{surv}, \code{lower},
-\code{upper}) on \code{object$km}. Layers added afterwards (curve, censoring
-marks, number-at-risk table, log-rank annotation, model overlay --
-none of which exist yet at this stage of development) will read from
-this shared fit rather than recomputing it.
+\code{upper}) on \code{object$km}. Layers added afterwards -- the curve
+(\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}) and log-rank annotation (\code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}})
+so far; censoring marks, a number-at-risk table, and a model overlay
+are not yet implemented -- read from this shared fit rather than
+recomputing it.
 
 Unlike \code{\link[=er_plot]{er_plot()}}/\code{\link[=er_vpc]{er_vpc()}}, \code{time}/\code{event} accept arbitrary
 tidy-eval expressions, not just bare column names -- time-to-event

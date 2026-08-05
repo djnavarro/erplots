@@ -16,15 +16,14 @@ ggplot2 plot) populated.
 \description{
 Assembles the layers into a single ggplot2 object: a blank axes-only
 survival panel (time x-axis, survival probability y-axis), plus the
-curve layer's geoms, when present (\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}). Only the
-curve layer exists so far; censoring marks, a number-at-risk table,
-a log-rank annotation, and a model overlay will be added the same way
-in future changes.
+curve and pvalue layers' geoms, when present (\code{\link[=er_tte_add_curve]{er_tte_add_curve()}},
+\code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}}). Censoring marks, a number-at-risk table, and
+a model overlay will be added the same way in future changes.
 }
 \details{
 The user does not typically invoke this function directly. Instead, it
 is called automatically when \code{plot()} is called.
 }
 \seealso{
-\code{\link[=er_tte]{er_tte()}}, \code{\link[=er_tte_add_curve]{er_tte_add_curve()}}
+\code{\link[=er_tte]{er_tte()}}, \code{\link[=er_tte_add_curve]{er_tte_add_curve()}}, \code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}}
 }

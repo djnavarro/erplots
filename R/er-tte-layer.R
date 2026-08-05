@@ -42,3 +42,36 @@
   config$conf_level <- object$km$conf_level
   list(config = config, style = style, dots = dots)
 }
+
+# pvalue ------------------------------------------------------------------
+
+# Assembles the `pvalue` layer's config: a log-rank test comparing all
+# strata (`survival::survdiff()`, the standard chi-squared log-rank
+# statistic on `length(strata) - 1` degrees of freedom), plus the same
+# per-corner "how uncrowded is this corner" metric
+# `.layer_summary()`/`.layer_quantile()` use in the `er_plot()` grammar,
+# computed here from the survival curve's own `(time, surv)` coordinates
+# (rescaled via `time$limits`/`c(0, 1)`) rather than raw exposure/response
+# data -- there is no raw per-subject scatter to avoid in this grammar,
+# but the curve itself is exactly what a corner-placed annotation risks
+# overlapping.
+#' @noRd
+.layer_tte_pvalue <- function(object, style, dots) {
+  config <- list()
+
+  lr_formula <- stats::reformulate(
+    termlabels = ".er_tte_strata",
+    response = "survival::Surv(.er_tte_time, .er_tte_event)"
+  )
+  lr <- survival::survdiff(lr_formula, data = object$data)
+  lr_df <- length(lr$n) - 1
+  config$p_value <- stats::pchisq(lr$chisq, df = lr_df, lower.tail = FALSE)
+
+  config$corner_distance <- .compute_corner_distance(
+    data = object$km$table,
+    exposure = list(name = "time", limits = object$time$limits),
+    response = list(name = "surv", limits = c(0, 1))
+  )
+
+  list(config = config, style = style, dots = dots)
+}

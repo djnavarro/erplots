@@ -64,6 +64,7 @@ Collate:
     'er-tte-api.R'
     'er-tte-layer.R'
     'er-tte-style-curve.R'
+    'er-tte-style-pvalue.R'
     'er-vpc-add.R'
     'er-vpc-api.R'
     'er-vpc-build.R'
