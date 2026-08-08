@@ -49,7 +49,7 @@
 #' | Response | Exposure | Scenario |
 #' | --- | --- | --- |
 #' | `biomarker_change` | `auc_ss` | Emax (continuous) |
-#' | `responder` | `cmax_ss` | Emax (binary), e.g. `emaxnls::emax_logistic()` |
+#' | `responder` | `cmax_ss` | Emax (binary) |
 #' | `adverse_event` | `auc_ss` | logistic regression |
 #' | `symptom_score` | `cmin_ss` | linear regression |
 #' | `n_events` | `auc_ss` | Poisson regression |
@@ -72,34 +72,6 @@
 #'
 #' @examples
 #' erplots_data
-#'
-#' # Emax (continuous): biomarker_change ~ auc_ss
-#' if (requireNamespace("emaxnls", quietly = TRUE)) {
-#'   mod <- emaxnls::emax_nls(
-#'     structural_model = biomarker_change ~ auc_ss,
-#'     covariate_model = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
-#'     data = erplots_data
-#'   )
-#'   erplots_data |>
-#'     er_plot(auc_ss, biomarker_change) |>
-#'     er_plot_add_model(mod) |>
-#'     er_plot_add_data() |>
-#'     plot()
-#' }
-#'
-#' # Emax (binary): responder ~ cmax_ss
-#' if (requireNamespace("emaxnls", quietly = TRUE)) {
-#'   mod <- emaxnls::emax_logistic(
-#'     structural_model = responder ~ cmax_ss,
-#'     covariate_model = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
-#'     data = erplots_data
-#'   )
-#'   erplots_data |>
-#'     er_plot(cmax_ss, responder) |>
-#'     er_plot_add_model(mod) |>
-#'     er_plot_add_quantiles() |>
-#'     plot()
-#' }
 #'
 #' # Logistic regression: adverse_event ~ auc_ss
 #' if (requireNamespace("erglm", quietly = TRUE)) {
