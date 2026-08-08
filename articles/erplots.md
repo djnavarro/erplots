@@ -301,8 +301,9 @@ erglm_data |>
 
 ![](erplots_files/figure-html/theme-1.png)
 
-See [Theming erplots](https://erplots.djnavarro.net/articles/theming.md)
-for every argument
+See [Theming
+erplots](https://erplots.djnavarro.net/articles/theming.html) for every
+argument
 [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
 supports.
 
@@ -313,32 +314,33 @@ also has one or more alternative styles you can switch to – spaghetti
 plots instead of a ribbon, violin plots instead of boxplots, a
 density-style overlay for the raw data when you have a lot of points,
 and so on – and you can write your own if none of the built-in options
-fit. From here:
+fit. The following articles, part of the package website at
+<https://erplots.djnavarro.net/>, cover this in more depth:
 
 - [Plotting binary
-  responses](https://erplots.djnavarro.net/articles/plot-binary.md),
+  responses](https://erplots.djnavarro.net/articles/plot-binary.html),
   [plotting continuous
-  responses](https://erplots.djnavarro.net/articles/plot-continuous.md),
+  responses](https://erplots.djnavarro.net/articles/plot-continuous.html),
   and [plotting count
-  responses](https://erplots.djnavarro.net/articles/plot-count.md) walk
-  through every layer and every built-in style in detail, for each
+  responses](https://erplots.djnavarro.net/articles/plot-count.html)
+  walk through every layer and every built-in style in detail, for each
   response type.
 - [The plotting
-  grammar](https://erplots.djnavarro.net/articles/design.md) explains
+  grammar](https://erplots.djnavarro.net/articles/design.html) explains
   the design rules behind the mini-language – which layers can appear
   more than once, how stratification interacts with each layer, and so
   on.
-- [Theming erplots](https://erplots.djnavarro.net/articles/theming.md)
+- [Theming erplots](https://erplots.djnavarro.net/articles/theming.html)
   covers every
   [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
   argument in detail – labels, limits, the visual theme, the
   stratification palette, formatters, and panel heights.
 - [Extending
-  erplots](https://erplots.djnavarro.net/articles/extending.md) shows
+  erplots](https://erplots.djnavarro.net/articles/extending.html) shows
   how to write your own layer style, and what erplots expects from a
   model object if you want to plug in one that isn’t erglm.
 - [Model
-  interface](https://erplots.djnavarro.net/articles/model-interface.md)
+  interface](https://erplots.djnavarro.net/articles/model-interface.html)
   describes the technicalities. It outlines what erplots needs from
   other packages in order to be able to use its models when drawing
   exposure-response plots.

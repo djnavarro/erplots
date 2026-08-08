@@ -13,7 +13,7 @@ model-fitting package for the data itself."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">erplots</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -145,7 +145,7 @@ variability) rather than a literal pharmacokinetic model – good enough to
 produce a plausible, correlated exposure triple, not a validated PK
 simulator.</p>
 <p>Each response column is paired with the exposure column and mechanism
-that makes it a natural fit for one modelling scenario:</p><table class="table table"><tr><td>Response</td><td>Exposure</td><td>Scenario</td></tr><tr><td><code>biomarker_change</code></td><td><code>auc_ss</code></td><td>Emax (continuous)</td></tr><tr><td><code>responder</code></td><td><code>cmax_ss</code></td><td>Emax (binary), e.g. <code><a href="https://emaxnls.djnavarro.net/reference/emax_logistic.html" class="external-link">emaxnls::emax_logistic()</a></code></td></tr><tr><td><code>adverse_event</code></td><td><code>auc_ss</code></td><td>logistic regression</td></tr><tr><td><code>symptom_score</code></td><td><code>cmin_ss</code></td><td>linear regression</td></tr><tr><td><code>n_events</code></td><td><code>auc_ss</code></td><td>Poisson regression</td></tr></table><p>At 4,000 rows, a raw-point data-layer overlay
+that makes it a natural fit for one modelling scenario:</p><table class="table table"><tr><td>Response</td><td>Exposure</td><td>Scenario</td></tr><tr><td><code>biomarker_change</code></td><td><code>auc_ss</code></td><td>Emax (continuous)</td></tr><tr><td><code>responder</code></td><td><code>cmax_ss</code></td><td>Emax (binary)</td></tr><tr><td><code>adverse_event</code></td><td><code>auc_ss</code></td><td>logistic regression</td></tr><tr><td><code>symptom_score</code></td><td><code>cmin_ss</code></td><td>linear regression</td></tr><tr><td><code>n_events</code></td><td><code>auc_ss</code></td><td>Poisson regression</td></tr></table><p>At 4,000 rows, a raw-point data-layer overlay
 (<code><a href="er_style_data.html">er_style_data_overlay()</a></code>) visibly overplots – see the relevant example
 below, which uses <code><a href="er_style_data.html">er_style_data_hex()</a></code> instead.</p>
 <p><code>study_id</code> (<code>"Study 1"</code>-<code>"Study 4"</code>, unevenly sized: 400/800/1200/1600
@@ -178,36 +178,6 @@ whether <code><a href="er_style_data.html">er_style_data_hex()</a></code>'s bins
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   cmin_ss &lt;dbl&gt;, biomarker_change &lt;dbl&gt;, responder &lt;int&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   adverse_event &lt;int&gt;, symptom_score &lt;dbl&gt;, n_events &lt;int&gt;</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Emax (continuous): biomarker_change ~ auc_ss</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"emaxnls"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">emaxnls</span><span class="fu">::</span><span class="fu"><a href="https://emaxnls.djnavarro.net/reference/emax_nls.html" class="external-link">emax_nls</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    structural_model <span class="op">=</span> <span class="va">biomarker_change</span> <span class="op">~</span> <span class="va">auc_ss</span>,</span></span>
-<span class="r-in"><span>    covariate_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">E0</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">Emax</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">logEC50</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    data <span class="op">=</span> <span class="va">erplots_data</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">erplots_data</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">auc_ss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-plt img"><img src="erplots_data-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Emax (binary): responder ~ cmax_ss</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"emaxnls"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">emaxnls</span><span class="fu">::</span><span class="fu"><a href="https://emaxnls.djnavarro.net/reference/emax_logistic.html" class="external-link">emax_logistic</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    structural_model <span class="op">=</span> <span class="va">responder</span> <span class="op">~</span> <span class="va">cmax_ss</span>,</span></span>
-<span class="r-in"><span>    covariate_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">E0</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">Emax</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">logEC50</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    data <span class="op">=</span> <span class="va">erplots_data</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">erplots_data</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">cmax_ss</span>, <span class="va">responder</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-plt img"><img src="erplots_data-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Logistic regression: adverse_event ~ auc_ss</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"erglm"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">erglm</span><span class="fu">::</span><span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">adverse_event</span> <span class="op">~</span> <span class="va">auc_ss</span>, data <span class="op">=</span> <span class="va">erplots_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -217,7 +187,7 @@ whether <code><a href="er_style_data.html">er_style_data_hex()</a></code>'s bins
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-plt img"><img src="erplots_data-3.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="erplots_data-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Linear regression: symptom_score ~ cmin_ss</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"erglm"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
@@ -227,7 +197,7 @@ whether <code><a href="er_style_data.html">er_style_data_hex()</a></code>'s bins
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-plt img"><img src="erplots_data-4.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="erplots_data-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Linear regression: symptom_score ~ cmin_ss, with a hex-binned data layer</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"erglm"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"hexbin"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
@@ -238,7 +208,7 @@ whether <code><a href="er_style_data.html">er_style_data_hex()</a></code>'s bins
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_data_hex</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-plt img"><img src="erplots_data-5.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="erplots_data-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Filtering to one study (n = 400) for a smaller-sample illustration: a</span></span></span>
 <span class="r-in"><span><span class="co"># Poisson regression n_events ~ auc_ss with scatter plot data layer</span></span></span>
@@ -251,7 +221,7 @@ whether <code><a href="er_style_data.html">er_style_data_hex()</a></code>'s bins
 <span class="r-in"><span>    <span class="fu"><a href="er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-plt img"><img src="erplots_data-6.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="erplots_data-4.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

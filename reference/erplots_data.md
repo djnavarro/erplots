@@ -101,14 +101,14 @@ validated PK simulator.
 Each response column is paired with the exposure column and mechanism
 that makes it a natural fit for one modelling scenario:
 
-|  |  |  |
-|----|----|----|
-| Response | Exposure | Scenario |
-| `biomarker_change` | `auc_ss` | Emax (continuous) |
-| `responder` | `cmax_ss` | Emax (binary), e.g. [`emaxnls::emax_logistic()`](https://emaxnls.djnavarro.net/reference/emax_logistic.html) |
-| `adverse_event` | `auc_ss` | logistic regression |
-| `symptom_score` | `cmin_ss` | linear regression |
-| `n_events` | `auc_ss` | Poisson regression |
+|                    |           |                     |
+|--------------------|-----------|---------------------|
+| Response           | Exposure  | Scenario            |
+| `biomarker_change` | `auc_ss`  | Emax (continuous)   |
+| `responder`        | `cmax_ss` | Emax (binary)       |
+| `adverse_event`    | `auc_ss`  | logistic regression |
+| `symptom_score`    | `cmin_ss` | linear regression   |
+| `n_events`         | `auc_ss`  | Poisson regression  |
 
 At 4,000 rows, a raw-point data-layer overlay
 ([`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md))
@@ -148,36 +148,6 @@ erplots_data
 #> # ℹ 9 more variables: renal_function <fct>, auc_ss <dbl>, cmax_ss <dbl>,
 #> #   cmin_ss <dbl>, biomarker_change <dbl>, responder <int>,
 #> #   adverse_event <int>, symptom_score <dbl>, n_events <int>
-
-# Emax (continuous): biomarker_change ~ auc_ss
-if (requireNamespace("emaxnls", quietly = TRUE)) {
-  mod <- emaxnls::emax_nls(
-    structural_model = biomarker_change ~ auc_ss,
-    covariate_model = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
-    data = erplots_data
-  )
-  erplots_data |>
-    er_plot(auc_ss, biomarker_change) |>
-    er_plot_add_model(mod) |>
-    er_plot_add_data() |>
-    plot()
-}
-
-
-# Emax (binary): responder ~ cmax_ss
-if (requireNamespace("emaxnls", quietly = TRUE)) {
-  mod <- emaxnls::emax_logistic(
-    structural_model = responder ~ cmax_ss,
-    covariate_model = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
-    data = erplots_data
-  )
-  erplots_data |>
-    er_plot(cmax_ss, responder) |>
-    er_plot_add_model(mod) |>
-    er_plot_add_quantiles() |>
-    plot()
-}
-
 
 # Logistic regression: adverse_event ~ auc_ss
 if (requireNamespace("erglm", quietly = TRUE)) {
