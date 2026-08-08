@@ -1,3 +1,5 @@
 .Rproj.user
 docs
 tests/testthat/Rplots.pdf
+/doc/
+/Meta/

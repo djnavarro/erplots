@@ -10,3 +10,6 @@
 ^AGENTS\.md$
 ^\.agents$
 ^data-raw$
+^cran-comments\.md$
+^doc$
+^Meta$

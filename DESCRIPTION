@@ -34,8 +34,6 @@ Suggests:
     withr
 URL: https://github.com/djnavarro/erplots, https://erplots.djnavarro.net/
 BugReports: https://github.com/djnavarro/erplots/issues
-Remotes: 
-    djnavarro/erglm
 Depends: 
     R (>= 4.1.0)
 LazyData: true

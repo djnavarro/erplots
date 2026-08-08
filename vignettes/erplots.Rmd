@@ -8,11 +8,21 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+has_erglm <- requireNamespace("erglm", quietly = TRUE)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 7,
-  fig.height = 5
+  fig.height = 5,
+  eval = has_erglm
+)
+```
+
+```{r, echo = FALSE, results = "asis", eval = !has_erglm}
+cat(
+  "**Note:** the erglm package is not installed, so the code in this",
+  "vignette was not evaluated. Install erglm to see the output for",
+  "yourself: `install.packages(\"erglm\")`."
 )
 ```
 
@@ -263,8 +273,8 @@ erglm_data |>
   plot()
 ```
 
-See [Theming erplots](theming.html) for every argument
-`er_plot_theme()` supports.
+See [Theming erplots](https://erplots.djnavarro.net/articles/theming.html)
+for every argument `er_plot_theme()` supports.
 
 ## Where to next
 
@@ -273,21 +283,23 @@ also has one or more alternative styles you can switch to -- spaghetti
 plots instead of a ribbon, violin plots instead of boxplots, a
 density-style overlay for the raw data when you have a lot of points,
 and so on -- and you can write your own if none of the built-in options
-fit. From here:
+fit. The following articles, part of the package website at
+<https://erplots.djnavarro.net/>, cover this in more depth:
 
-* [Plotting binary responses](plot-binary.html),
-  [plotting continuous responses](plot-continuous.html), and
-  [plotting count responses](plot-count.html) walk through every layer
-  and every built-in style in detail, for each response type.
-* [The plotting grammar](design.html) explains the design rules behind
-  the mini-language -- which layers can appear more than once, how
-  stratification interacts with each layer, and so on.
-* [Theming erplots](theming.html) covers every `er_plot_theme()`
-  argument in detail -- labels, limits, the visual theme, the
-  stratification palette, formatters, and panel heights.
-* [Extending erplots](extending.html) shows how to write your own layer
-  style, and what erplots expects from a model object if you want to
-  plug in one that isn't erglm.
-* [Model interface](model-interface.html) describes the technicalities.
-  It outlines what erplots needs from other packages in order to be
-  able to use its models when drawing exposure-response plots.
+* [Plotting binary responses](https://erplots.djnavarro.net/articles/plot-binary.html),
+  [plotting continuous responses](https://erplots.djnavarro.net/articles/plot-continuous.html), and
+  [plotting count responses](https://erplots.djnavarro.net/articles/plot-count.html) walk through
+  every layer and every built-in style in detail, for each response type.
+* [The plotting grammar](https://erplots.djnavarro.net/articles/design.html) explains the design
+  rules behind the mini-language -- which layers can appear more than
+  once, how stratification interacts with each layer, and so on.
+* [Theming erplots](https://erplots.djnavarro.net/articles/theming.html) covers every
+  `er_plot_theme()` argument in detail -- labels, limits, the visual
+  theme, the stratification palette, formatters, and panel heights.
+* [Extending erplots](https://erplots.djnavarro.net/articles/extending.html) shows how to write
+  your own layer style, and what erplots expects from a model object if
+  you want to plug in one that isn't erglm.
+* [Model interface](https://erplots.djnavarro.net/articles/model-interface.html) describes the
+  technicalities. It outlines what erplots needs from other packages in
+  order to be able to use its models when drawing exposure-response
+  plots.
