@@ -1130,6 +1130,31 @@ as the original one-plot case), and the loop iterates `has_legend[-1]`
 directly instead of a coincidental positional range. Regression test in
 `tests/testthat/test-er-plot-api.R`.
 
+## Resolved: `emaxnls` on CRAN not registering the model interface
+
+`PLAN.md`'s "CRAN release strategy" item had flagged an open question
+for the 0.1 submission: `emaxnls` was already on CRAN, but that release
+doesn't register the `er_predict()`/`er_simulate()`/`er_summary()`
+methods erplots relies on (only `Remotes: djnavarro/emaxnls`'s GitHub
+version does, per the `>= 0.1.1.9000` version floor r-universe needed --
+see "r-universe: `Suggests: emaxnls (>= 0.1.1.9000)`" above). The open
+question was what erplots 0.1 should say/do about this gap -- wait for a
+CRAN `emaxnls` release that registers the methods, document the gap
+prominently, or otherwise avoid implying CRAN's `emaxnls` works with
+erplots out of the box.
+
+Resolved by sidestepping the gap entirely rather than picking one of
+those three: `emaxnls` was dropped from `DESCRIPTION`'s `Suggests`
+altogether. Every place it's still used --
+`vignettes/articles/plot-continuous.Rmd`, `plot-vpc.Rmd`,
+`model-interface.Rmd` -- lives in `vignettes/articles/`, which is
+pkgdown-site-only and excluded from the built package via
+`.Rbuildignore`, so none of it is part of what CRAN receives or checks.
+`erglm` remains the one companion package actually listed in
+`Suggests`, and it has no equivalent problem (see "r-universe" entry
+above: "No equivalent fix was needed for erglm, which has no CRAN
+release to be confused with").
+
 ## Pre-0.1 stress test: `.check_theme_limits()` crash on `NA` in `xlim`/`ylim`
 
 The same stress-testing pass found a second crash: `er_plot_theme(xlim =

@@ -16,15 +16,6 @@ Plan out submission order/dependency handling before submitting:
   accepted to CRAN before `erplots` 0.1 is submitted -- confirm that
   ordering holds, or fall back to gating erglm-dependent tests/examples
   more defensively if it slips.
-- `emaxnls` is trickier: it's already on CRAN, but the CRAN release
-  doesn't register the `er_predict()`/`er_simulate()`/`er_summary()`
-  methods erplots relies on (only `Remotes: djnavarro/emaxnls`'s
-  GitHub version does, per the `>= 0.1.1.9000` floor in
-  `DESCRIPTION`). Need a plan for what erplots 0.1 says/does about
-  `emaxnls` on CRAN -- e.g. whether to wait for a new `emaxnls` CRAN
-  release that registers the methods, document the gap prominently,
-  or otherwise avoid implying CRAN's `emaxnls` works with erplots
-  out of the box.
 
 ## 0.2 release
 
