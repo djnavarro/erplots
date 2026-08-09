@@ -33,6 +33,11 @@ a small S3 interface (`er_predict()`, optionally `er_simulate()` and
     is separately guarded with `requireNamespace()`/
     `skip_if_not_installed()`, which is what this platform is actually
     checking).
+* win-builder (submitted 2026-08-09 via `devtools::check_win_devel()`/
+  `check_win_release()`/`check_win_oldrelease()`): R-devel, R-release,
+  and R-oldrelease all queued; results pending by email to
+  djnavarro@protonmail.com -- **update this section with the actual
+  results before submitting**.
 
 ## R CMD check results
 
