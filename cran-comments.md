@@ -54,10 +54,10 @@ a small S3 interface (`er_predict()`, optionally `er_simulate()` and
   the one expected, non-package `nosuggests`/vignette-rebuild
   exception on R-hub.
 
-## Downstream companion packages and `Suggests`
+## Downstream companion package and `Suggests`
 
 `erplots` is designed to be used alongside separate model-fitting
-packages that implement its S3 interface; none of these are required to
+packages that implement its S3 interface, none of which are required to
 install or use `erplots` itself (every example and test that touches one
 is guarded with `requireNamespace(..., quietly = TRUE)` or
 `testthat::skip_if_not_installed()`).
@@ -70,21 +70,6 @@ is guarded with `requireNamespace(..., quietly = TRUE)` or
   other. `erplots`'s own `Suggests: erglm` carries no version floor, and
   no `Remotes:` entry is needed, since the CRAN release already provides
   everything `erplots`'s examples/tests use.
-
-* **`emaxnls`** (Emax/sigmoidal dose-response models via nonlinear least
-  squares) is *not* listed as a dependency in this submission, even
-  though it is a long-standing companion package and is itself already
-  on CRAN (version 0.1.1, published 2026-06-30). That CRAN release
-  predates the `erplots` integration: it registers no
-  `er_predict()`/`er_simulate()`/`er_summary()` methods, so pairing it
-  with `erplots` today would silently do nothing. The integration exists
-  only in `emaxnls`'s unreleased development version. Rather than add a
-  `Suggests` entry with a `Remotes:`-only version floor pointing at an
-  unreleased dependency, we have deferred this pairing entirely: no code
-  path, example, or test in this submission references `emaxnls`. We
-  plan a small 0.1.1 follow-up release re-adding `emaxnls` to `Suggests`
-  once a CRAN release of `emaxnls` itself includes the registered
-  methods.
 
 ## Other notes
 
