@@ -3,4 +3,7 @@ docs
 tests/testthat/Rplots.pdf
 /doc/
 /Meta/
-revdep
+revdep/checks
+revdep/library
+revdep/data.sqlite
+revdep/*.html
