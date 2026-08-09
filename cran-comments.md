@@ -2,7 +2,8 @@
 
 ## Summary
 
-This is a new package, first submission to CRAN.
+This is a new package, first submission to CRAN. Summary of the package as
+per DESCRIPTION:
 
 `erplots` provides a fluent mini-language for building exposure-response
 plots (model curves/ribbons, quantile-binned summaries, raw-data layers,
@@ -11,6 +12,16 @@ observed data and a fitted exposure-response model. It is deliberately
 model-agnostic: it never fits a model itself, and any model implementing
 a small S3 interface (`er_predict()`, optionally `er_simulate()` and
 `er_summary()`) can be visualised with it.
+
+Local tests, CI checks, Rhub checks, and win-builder checks are all reported
+below, with no issues. There is also a brief discussion of the relationship
+between `erplots` and the companion package `erglm` now on CRAN (as the first
+package that implements the interface).  
+
+Thank you for your consideration.
+
+Kind regards,
+Danielle Navarro
 
 ## Test environments
 
@@ -27,12 +38,9 @@ a small S3 interface (`er_predict()`, optionally `er_simulate()` and
     failures (1032 passed, 52 skipped) and 0 example failures, but
     `R CMD check` still reports `1 error` because re-building the
     package's `knitr`/`rmarkdown` vignette requires those packages to
-    be installed regardless of the "no suggests" condition -- this is
-    expected for any package with a `VignetteBuilder` and is not a
-    package bug (every code path that touches an optional dependency
-    is separately guarded with `requireNamespace()`/
-    `skip_if_not_installed()`, which is what this platform is actually
-    checking).
+    be installed regardless of the "no suggests" condition --
+    expected for any package with a `VignetteBuilder` and not a
+    package bug.
 * win-builder (submitted 2026-08-09 via `devtools::check_win_devel()`/
   `check_win_release()`/`check_win_oldrelease()`): R-devel (r90381),
   R-release (4.6.1), and R-oldrelease (4.5.3) all `Status: 1 NOTE` --
