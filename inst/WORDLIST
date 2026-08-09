@@ -15,6 +15,7 @@ VPC
 VPC's
 VPCs
 binwise
+boxjitter
 boxplot's
 colourbar
 coord
@@ -30,6 +31,7 @@ generic's
 geom's
 geoms
 ggplot
+hexbin
 level's
 linetype
 linewidth
@@ -48,6 +50,7 @@ standalone
 tibble
 tidyselection
 unstyled
+violinjitter
 vline
 vlines
 whatever's
