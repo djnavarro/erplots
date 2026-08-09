@@ -51,6 +51,11 @@ er_predict.er_test_toy_model <- function(model, newdata, conf_level = 0.95, ...)
 }
 
 er_simulate.er_test_toy_model <- function(model, newdata, nsim = 100, seed = NULL, ...) {
+  # mvtnorm is Suggests-only; skip cleanly (rather than erroring) for any
+  # test that transitively reaches this method when it isn't installed,
+  # e.g. under R-hub's `nosuggests` container.
+  testthat::skip_if_not_installed("mvtnorm")
+
   fit <- model$fit
   family_name <- stats::family(fit)$family
   dispersion <- summary(fit)$dispersion
