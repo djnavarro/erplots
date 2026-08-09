@@ -15,11 +15,31 @@ a small S3 interface (`er_predict()`, optionally `er_simulate()` and
 ## Test environments
 
 * Local: Ubuntu 24.04, R 4.6.1 (`R CMD check --as-cran`)
-* [add win-builder / R-hub / GitHub Actions results here once run]
+* GitHub Actions (`R-CMD-check.yaml`): ubuntu-latest (R-devel, R-release,
+  R-oldrel-1), windows-latest (R-release), macos-latest/arm64 (R-release)
+* R-hub (`R-hub` workflow, run on 2026-08-09,
+  <https://github.com/djnavarro/erplots/actions/runs/31286358791>):
+  * `windows` (R-devel), `macos-arm64` (R-devel), `ubuntu-clang`
+    (R-devel, Ubuntu 22.04 + clang), `ubuntu-next` (R-patched/R-next,
+    Ubuntu 24.04), `donttest` (Ubuntu 22.04, `\donttest{}` examples
+    run): all clean.
+  * `nosuggests` (Fedora 42, none of `Suggests` installed): 0 test
+    failures (1032 passed, 52 skipped) and 0 example failures, but
+    `R CMD check` still reports `1 error` because re-building the
+    package's `knitr`/`rmarkdown` vignette requires those packages to
+    be installed regardless of the "no suggests" condition -- this is
+    expected for any package with a `VignetteBuilder` and is not a
+    package bug (every code path that touches an optional dependency
+    is separately guarded with `requireNamespace()`/
+    `skip_if_not_installed()`, which is what this platform is actually
+    checking).
 
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
+
+(See "Test environments" above for the one expected, non-package
+`nosuggests`/vignette-rebuild exception on R-hub.)
 
 ## Downstream companion packages and `Suggests`
 
