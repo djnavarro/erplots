@@ -6,17 +6,6 @@ not a changelog: once an item here is completed, its write-up should
 move to [.agents/HISTORY.md](HISTORY.md) and be removed from this file
 rather than marked "done" in place. Items are grouped by target release.
 
-## 0.1 release (initial CRAN submission)
-
-### CRAN release strategy
-
-Plan out submission order/dependency handling before submitting:
-
-- `erglm` as a `Suggests` dependency is fine *if* `erglm` 0.1.1 is
-  accepted to CRAN before `erplots` 0.1 is submitted -- confirm that
-  ordering holds, or fall back to gating erglm-dependent tests/examples
-  more defensively if it slips.
-
 ## 0.2 release
 
 ### Deferred: an additive `model` layer

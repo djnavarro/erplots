@@ -1130,6 +1130,19 @@ as the original one-plot case), and the loop iterates `has_legend[-1]`
 directly instead of a coincidental positional range. Regression test in
 `tests/testthat/test-er-plot-api.R`.
 
+## Resolved: `erglm`/`erplots` CRAN submission ordering
+
+`PLAN.md`'s "CRAN release strategy" item had also flagged that
+`erglm` as a `Suggests` dependency was only safe *if* `erglm` 0.1.1
+reached CRAN before `erplots` 0.1 was submitted, with a fallback of
+gating erglm-dependent tests/examples more defensively if that
+ordering slipped.
+
+Resolved: `erglm` 0.1.1 was accepted to CRAN on 2026-08-08, one day
+ahead of this `erplots` submission (see `cran-comments.md`'s
+"Downstream companion package and `Suggests`" section), so the ordering
+held without needing the defensive fallback.
+
 ## Resolved: `emaxnls` on CRAN not registering the model interface
 
 `PLAN.md`'s "CRAN release strategy" item had flagged an open question
