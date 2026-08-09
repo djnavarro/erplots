@@ -34,17 +34,25 @@ a small S3 interface (`er_predict()`, optionally `er_simulate()` and
     `skip_if_not_installed()`, which is what this platform is actually
     checking).
 * win-builder (submitted 2026-08-09 via `devtools::check_win_devel()`/
-  `check_win_release()`/`check_win_oldrelease()`): R-devel, R-release,
-  and R-oldrelease all queued; results pending by email to
-  djnavarro@protonmail.com -- **update this section with the actual
-  results before submitting**.
+  `check_win_release()`/`check_win_oldrelease()`): R-devel (r90381),
+  R-release (4.6.1), and R-oldrelease (4.5.3) all `Status: 1 NOTE` --
+  only the standard "New submission" NOTE, nothing else. R-devel and
+  R-oldrelease also print an `INFO` line ("Package suggested but not
+  available for checking: 'erglm'"), which is a win-builder mirror
+  limitation, not a package issue -- `erglm` is on CRAN and every
+  example/test that uses it is guarded with
+  `requireNamespace(..., quietly = TRUE)`/`skip_if_not_installed()`.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note
 
-(See "Test environments" above for the one expected, non-package
-`nosuggests`/vignette-rebuild exception on R-hub.)
+* The one NOTE is the standard `New submission` NOTE win-builder and
+  CRAN's own incoming checks raise for every first submission.
+* Local, GitHub Actions, and R-hub checks (`nosuggests` aside) show
+  0 errors | 0 warnings | 0 notes -- see "Test environments" above for
+  the one expected, non-package `nosuggests`/vignette-rebuild
+  exception on R-hub.
 
 ## Downstream companion packages and `Suggests`
 
