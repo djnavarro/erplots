@@ -358,7 +358,7 @@ er_style_group_linerange <- er_style_tag(er_style_group_linerange, layer = "grou
 #' @param jitter_height Amount of additional uniform vertical jitter (as in [ggplot2::geom_jitter()]'s `height`).
 #'
 #' @details Mirrors `.dodge_quantile_strata()`'s offset formula (symmetric
-#' offsets around the center, sized by the number of strata), applied to
+#' offsets around the centre, sized by the number of strata), applied to
 #' the y-axis (`lvl`'s integer position) instead of x -- since neither
 #' `er_style_group_boxplot()` nor `er_style_group_violin()` sets an
 #' explicit dodge width (both rely on ggplot2's automatic `dodge2()`/

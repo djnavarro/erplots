@@ -34,7 +34,7 @@ added to a plot that already has a coord that sets the axis limits
 plot object does not yet have a coord. The expectation, however, is that the builder will
 supply an x-axis limit that is consistent with the base plot. That
 is, since all layer plots use the exposure variable for the
-x-axis, they should use the values stored in \code{exposure$limits} tp
+x-axis, they should use the values stored in \code{exposure$limits} to
 set the x-axis limits.
 }
 \description{
@@ -126,13 +126,13 @@ replacing the previous one. See \code{\link[=er_plot]{er_plot()}}'s "Layers are 
 singleton or additive" section for the full discussion.
 
 The \code{data} slot's default, \code{er_style_data_overlay()}, needs no
-\code{color_role} tag: its color aesthetic (when stratified) is always
+\code{color_role} tag: its colour aesthetic (when stratified) is always
 strata, since the response is already shown via y-position, so it
 shares the base plot's own strata legend directly. \code{config$color_role}
 matters for the "panel"-layout family instead, where it's \code{"strata"}
 for a binary response (as used by the built-in
-\code{er_style_data_boxjitter()}, whose color aesthetic still means strata)
-or \code{"response"} for a continuous/count response, where the color
+\code{er_style_data_boxjitter()}, whose colour aesthetic still means strata)
+or \code{"response"} for a continuous/count response, where the colour
 channel is already spoken for by the response value itself -- there's
 no built-in "panel"-layout builder for that case today, but a custom
 builder tagged \code{er_style_tag(builder, layout = "panel")} can still opt
@@ -168,7 +168,7 @@ A builder that doesn't need any extra arguments simply declares \code{...}
 and ignores it -- every built-in builder does exactly this except
 \code{er_style_model_spaghetti()}. A custom builder can read whichever named
 arguments it recognizes out of its own \code{...} (e.g. via
-\code{rlang::list2(...)}) and ignore the rest; unrecognized extra arguments
+\code{rlang::list2(...)}) and ignore the rest; unrecognised extra arguments
 are never an error at the builder itself, only at the \verb{er_plot_add_*()}
 call site if they weren't named.
 }

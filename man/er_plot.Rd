@@ -13,7 +13,7 @@ er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
 
 \item{response}{Response variable (one variable, unquoted).}
 
-\item{stratify_by}{Stratification variable used for color and fill (one variable, unquoted).}
+\item{stratify_by}{Stratification variable used for colour and fill (one variable, unquoted).}
 
 \item{response_type}{One of \code{"auto"}, \code{"binary"}, \code{"continuous"}, or \code{"count"}.}
 }
@@ -26,7 +26,7 @@ Create an \code{er_plot} specification for exposure-response visualization. Buil
 \details{
 Layers are either singleton or additive: model, summary, quantile, and data layers are singleton (a second call replaces the previous); groups are additive (each call adds a panel).
 
-\code{stratify_by} declares a discrete variable used for color/fill across layers; each layer's \code{keep_strata} controls whether it uses stratification. Rows with \code{NA} in the stratification variable are kept as their own level.
+\code{stratify_by} declares a discrete variable used for colour/fill across layers; each layer's \code{keep_strata} controls whether it uses stratification. Rows with \code{NA} in the stratification variable are kept as their own level.
 
 \code{response_type} governs response-scale defaults and which interval method the quantile and VPC layers use; see \code{response_type} below and \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} for details.
 }

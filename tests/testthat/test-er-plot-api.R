@@ -392,7 +392,7 @@ test_that("er_plot_add_groups is additive across repeated calls", {
   expect_identical(plt2$layer$group$config[[".aucss_quantile"]]$style, er_style_group_violin)
 })
 
-test_that("er_plot_add_groups honors per-call keep_strata when mixed", {
+test_that("er_plot_add_groups honours per-call keep_strata when mixed", {
   # regression test: `stratify` used to be stored once for the whole
   # `layer$group` and shared by every panel at build time, so mixing
   # `keep_strata = TRUE`/`FALSE` across calls applied the wrong flag to

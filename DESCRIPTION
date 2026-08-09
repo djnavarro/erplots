@@ -30,6 +30,7 @@ Suggests:
     MASS,
     mvtnorm,
     rmarkdown,
+    spelling,
     testthat (>= 3.0.0),
     withr
 URL: https://github.com/djnavarro/erplots, https://erplots.djnavarro.net/
@@ -63,3 +64,4 @@ Collate:
     'er-vpc-style-simulated.R'
     'er-vpc-theme.R'
     'utils-helpers.R'
+Language: en-GB

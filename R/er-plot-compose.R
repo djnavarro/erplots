@@ -79,7 +79,7 @@
   # the data layer's `colour` aesthetic means strata everywhere except
   # when `config$color_role == "response"` (continuous/count response;
   # there, `colour` is the response value itself, so its label is the 
-  # response's, not the strata's. When that response-colored layer is also 
+  # response's, not the strata's. When that response-coloured layer is also 
   # faceted by stratum (more than one panel), each panel is tagged with its 
   # stratum level via a plot title -- not the y-axis label, which patchwork's
   # `axes = "collect"` merges across all stacked panels (see
@@ -149,7 +149,7 @@
   # genuinely mapped to strata (discrete); `color_continuous`/
   # `fill_continuous` are the symmetric counterpart, only ever overriding
   # where it's mapped to something else continuous instead (density,
-  # or -- for a future custom builder -- a response-colored data layer)
+  # or -- for a future custom builder -- a response-coloured data layer)
   if (!is.null(p$base)) {
     overlay_style <- object$layer$overlay$config$style
     fill_is_density <- identical(.style_fill_role(overlay_style), "density")
@@ -276,10 +276,10 @@
   has_strata <- purrr::map_lgl(object$layer, \(x) x$stratify %||% FALSE)
 
   # the data layer's `stratify` flag drives per-stratum faceting (not a
-  # shared color legend) whenever its color channel is already spoken
+  # shared colour legend) whenever its colour channel is already spoken
   # for by the response value (`color_role == "response"`, continuous/
   # count response). Exclude it from strata-legend deduplication
-  # in that case so each stratum panel keeps its own response colorbar.
+  # in that case so each stratum panel keeps its own response colourbar.
   if (!is.null(object$layer$data) && identical(object$layer$data$config$color_role, "response")) {
     has_strata["data"] <- FALSE
   }

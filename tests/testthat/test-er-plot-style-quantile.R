@@ -553,7 +553,7 @@ test_that("vline_label_size/vline_label_colour/vline_label_fill override default
   expect_equal(label_layer$aes_params$fill, "yellow")
 })
 
-test_that("interior vline_labels are centered on their vline (vjust = 0.5) with hjust picking top/bottom", {
+test_that("interior vline_labels are centred on their vline (vjust = 0.5) with hjust picking top/bottom", {
   p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
   args <- list(
     data     = p1$data,
@@ -570,7 +570,7 @@ test_that("interior vline_labels are centered on their vline (vjust = 0.5) with 
   out_bottom <- do.call(er_style_quantile_errorbar_vlines,
                          c(args, list(vline_labels = TRUE, vline_label_position = "bottom")))
 
-  # interior breaks (everything but the first/last) stay centered
+  # interior breaks (everything but the first/last) stay centred
   n_breaks <- length(p1$layer$quantile$config$breaks)
   interior_idx <- seq(2, n_breaks - 1)
   expect_equal(out_top[[5]]$aes_params$vjust[interior_idx], rep(0.5, length(interior_idx)))

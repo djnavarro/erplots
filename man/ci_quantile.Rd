@@ -9,7 +9,7 @@ ci_quantile(x, prob = 0.5, conf_level = 0.95)
 \arguments{
 \item{x}{Numeric vector of observations}
 
-\item{prob}{Quantile probability (e.g. \code{0.1} for the 10th percentile)}
+\item{prob}{Quantile probability (e.g. \code{0.1} for the tenth percentile)}
 
 \item{conf_level}{Confidence level}
 }

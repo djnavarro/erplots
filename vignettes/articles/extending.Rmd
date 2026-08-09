@@ -120,7 +120,7 @@ erglm_data |>
 Looking at this object we see that it is a tibble with one row per exposure quantile (as always, noting that the placebo group will be its own distinct group). Each column contains a summary statistic or indicator variable that you might want to use in your builder function:
 
 - `x_mid` and `y_mid` capture mean exposure and mean response associated with the exposure bin. Our new builder will need to use these.
-- `ci_lower` and `ci_upper` are the confidence interval bounds. Our bulder will need these too.
+- `ci_lower` and `ci_upper` are the confidence interval bounds. Our builder will need these too.
 - `y_mid_lbl`, `y_lwr_lbl`, `y_upr_lbl`, and `y_lbl` support the built-in label geom that `er_style_quantile_errorbar()` draws alongside its error
 bar. If we we wanted to use labels in our plot we would need these columns, but since we plan to skip that we can ignore them.
 

@@ -209,11 +209,11 @@ NULL
 #' the two outer boundaries at the minimum non-placebo and maximum
 #' exposure, not just the interior boundaries shared between two bins.
 #' The two outer labels are justified to hang inward (toward the panel's
-#' interior) rather than centered on their vline like every interior
+#' interior) rather than centred on their vline like every interior
 #' label, since an outer boundary can sit right at (or very close to)
 #' the exposure axis's own limits -- most commonly when there's no
 #' placebo arm, so `config$breaks`' own min/max coincide exactly with
-#' `exposure$limits` -- and a label centered there would have roughly
+#' `exposure$limits` -- and a label centred there would have roughly
 #' half its width hanging off the edge of the panel.
 #'
 #' @returns A single [ggplot2::geom_label()], or `NULL` if there are no
@@ -243,11 +243,11 @@ NULL
   )
 
   # `vjust` controls the perpendicular (thickness) offset for text
-  # rotated 90 degrees -- 0.5 centers a label on its vline, `0`/`1` hang
+  # rotated 90 degrees -- 0.5 centres a label on its vline, `0`/`1` hang
   # it to one side. The leftmost/rightmost boundary each hang inward
-  # (toward the panel's interior) rather than centering, so they don't
+  # (toward the panel's interior) rather than centring, so they don't
   # risk overflowing past the exposure axis's own limits; every interior
-  # boundary still centers, since it's never at risk of running off the
+  # boundary still centres, since it's never at risk of running off the
   # panel edge.
   n_breaks <- length(breaks)
   label_vjust <- rep(0.5, n_breaks)

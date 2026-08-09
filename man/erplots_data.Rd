@@ -50,7 +50,7 @@ model-fitting package for the data itself.
 }
 \details{
 The three exposure columns (\code{auc_ss}, \code{cmax_ss}, \code{cmin_ss}) come from a
-simplified, internally-consistent PK-flavored simulation (individual
+simplified, internally-consistent PK-flavoured simulation (individual
 clearance driven by \code{bodyweight_kg}/\code{renal_function}, with between-subject
 variability) rather than a literal pharmacokinetic model -- good enough to
 produce a plausible, correlated exposure triple, not a validated PK

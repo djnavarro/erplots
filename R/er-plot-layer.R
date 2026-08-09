@@ -249,7 +249,7 @@
   # helpers (R/er-plot-compose.R) use instead of hardcoding "upper"/"lower".
   # `color_role` tags what the layer's `colour` aesthetic means --
   # "strata" (the usual case, dispatched to via the shared strata legend)
-  # or "response" (the continuous/count variant's color-encoded response
+  # or "response" (the continuous/count variant's colour-encoded response
   # value, which needs its own label/legend and isn't deduplicated across
   # stratum panels) -- consumed by `.polish_labels()`/`.polish_legends()`
   # in R/er-plot-compose.R.
@@ -263,11 +263,11 @@
     config$panel_position <- c(upper = "above", lower = "below")[panels]
 
   } else {
-    # continuous/count response: a single panel, points colored
+    # continuous/count response: a single panel, points coloured
     # continuously by the response value, in place of the binary
     # upper/lower partition -- `er_plot_add_data()` guards `panel` to
     # "both" for this response type, since there's no upper/lower
-    # partition to select from. When stratified, the color channel is
+    # partition to select from. When stratified, the colour channel is
     # already spoken for by the response, so stratification becomes one
     # panel per stratum level instead (all placed "below" the base plot).
     config$color_role <- "response"

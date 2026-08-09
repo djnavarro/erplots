@@ -218,7 +218,7 @@ true `(exposure, response)` coordinates, shown in the
 [continuous](plot-continuous.html#data-layer) and
 [count](plot-count.html#data-layer) articles) covers that case
 there, and a custom `"panel"`-layout builder (e.g. a single
-color-encoded panel) remains possible via `er_style_tag()` if a project
+colour-encoded panel) remains possible via `er_style_tag()` if a project
 needs one -- see the [Extending erplots](extending.html) article. Each
 builder declares which of the two structural families it belongs to
 via `er_style_tag()`, which is what `er_plot_add_data()` uses to decide
@@ -245,9 +245,9 @@ p_boxjitter <- erglm_data |>
 p_overlay$output | p_boxjitter$output
 ```
 
-Stratification looks the same for both: color/fill always means strata
+Stratification looks the same for both: colour/fill always means strata
 for `er_style_data_boxjitter()`, sharing the model curve's own legend, the
-same way `er_style_data_overlay()`'s color aesthetic does for any response
+same way `er_style_data_overlay()`'s colour aesthetic does for any response
 type:
 
 ```{r data-compare-stratified, fig.width = 10}

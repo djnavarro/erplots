@@ -365,10 +365,10 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' builder is never checked (only `layout` is a hard requirement).
 #'
 #' `keep_strata`'s effect also depends on a builder's structural family:
-#' for an "overlay"-layout builder it always means a shared color
+#' for an "overlay"-layout builder it always means a shared colour
 #' aesthetic, for any response type; for a "panel"-layout builder on a
 #' continuous/count response it instead produces one panel per stratum
-#' level rather than a shared color aesthetic. `panel` must be `"both"`
+#' level rather than a shared colour aesthetic. `panel` must be `"both"`
 #' for an "overlay"-layout builder (there's no upper/lower partition to
 #' select from) and for a continuous/count response under a
 #' "panel"-layout builder (same reason).
@@ -447,7 +447,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
     rlang::abort(c(
       paste0("`panel` must be \"both\" for a ", object$response$type, " response."),
       "i" = "The \"upper\"/\"lower\" two-panel design is specific to binary responses.",
-      "i" = "A continuous/count response uses a single color-encoded panel instead."
+      "i" = "A continuous/count response uses a single colour-encoded panel instead."
     ))
   }
 

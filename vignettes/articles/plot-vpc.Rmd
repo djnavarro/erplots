@@ -15,7 +15,7 @@ library(emaxnls)
 library(erglm)
 ```
 
-Alongside the `er_plot()` mini-grammar covered in the [binary](plot-binary.html), [continuous](plot-continuous.html), and [count](plot-count.html) articles, erplots supplies a second, smaller mini-grammar built around `er_vpc()` for constructing visual predictive checks (VPCs). A VPC compares what a model predicts against what was actually observed, binned by exposure (or some other variable of interest), so that any systematic mismatch between model and data is easy to spot. The grammar is deliberately narrower than `er_plot()`'s in one respect: there's no color/facet precedence rule to reconcile across builders, since an optional `stratify_by` splits the plot into facet panels only (see `?er_vpc`), never color. But the same model-agnostic philosophy still applies -- any model implementing `er_predict()`/`er_simulate()` (see [Implementing the model interface](model-interface.html)) can be visualised this way, and this article uses the same erglm and emaxnls models as the other articles to demonstrate it. As with `er_plot()`, `er_vpc()` itself only sets up the plot's variables and bins; nothing is drawn until `er_vpc_add_observed()` and `er_vpc_add_simulated()` are added and the pipeline is plotted.
+Alongside the `er_plot()` mini-grammar covered in the [binary](plot-binary.html), [continuous](plot-continuous.html), and [count](plot-count.html) articles, erplots supplies a second, smaller mini-grammar built around `er_vpc()` for constructing visual predictive checks (VPCs). A VPC compares what a model predicts against what was actually observed, binned by exposure (or some other variable of interest), so that any systematic mismatch between model and data is easy to spot. The grammar is deliberately narrower than `er_plot()`'s in one respect: there's no colour/facet precedence rule to reconcile across builders, since an optional `stratify_by` splits the plot into facet panels only (see `?er_vpc`), never colour. But the same model-agnostic philosophy still applies -- any model implementing `er_predict()`/`er_simulate()` (see [Implementing the model interface](model-interface.html)) can be visualised this way, and this article uses the same erglm and emaxnls models as the other articles to demonstrate it. As with `er_plot()`, `er_vpc()` itself only sets up the plot's variables and bins; nothing is drawn until `er_vpc_add_observed()` and `er_vpc_add_simulated()` are added and the pipeline is plotted.
 
 ## Binary response 
 
@@ -108,7 +108,7 @@ mod <- emax_nls(
 )
 ```
 
-We'll start by showing the limitations of the default "mean plus confidence interval" visual style. This is set as the default style for VPCs because it has the virtue of working regardless of whether the `plot_by` variable is continuous or discrete, and regardless of whether the `response` variable is binary, continous or counts. But as you can see from the plot below, it's not the best choice for a continuous response variable:
+We'll start by showing the limitations of the default "mean plus confidence interval" visual style. This is set as the default style for VPCs because it has the virtue of working regardless of whether the `plot_by` variable is continuous or discrete, and regardless of whether the `response` variable is binary, continuous or counts. But as you can see from the plot below, it's not the best choice for a continuous response variable:
 
 ```{r}
 emax_df |> 

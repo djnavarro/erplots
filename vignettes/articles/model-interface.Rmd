@@ -362,7 +362,7 @@ erglm's own `er_simulate.erglm_model()` additionally auto-picks and
 *reports* a seed when the caller doesn't supply one (via
 `rlang::inform()`), so a plot is reproducible even when nobody thought to
 pass `seed = ` -- worth considering for your own implementation if
-reproducibility of un-seeded calls matters to your users.
+reproducibility of unseeded calls matters to your users.
 
 Like `er_predict()`, `er_simulate()` may need an argument beyond
 `model`/`newdata`/`nsim`/`seed` -- a `toy_landmark`-style
@@ -384,7 +384,7 @@ er_summary(model, ...)
 Return `NULL` (again, the default -- don't implement this generic if
 there's nothing sensible to report) or a named list with any of three
 independently-optional keys: `p_value`, `coefficients`, `glance`.
-Unrecognized keys are permitted and ignored by the built-in summary
+Unrecognised keys are permitted and ignored by the built-in summary
 builders, which gives your own package room to stash extra fields for a
 custom builder to read, without erplots ever needing to know about them.
 `er_plot_add_summary()` always forwards `conf_level` to `er_summary()`

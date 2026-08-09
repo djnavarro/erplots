@@ -181,7 +181,7 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
   # added to the *base* plot (see `.build_overlay_geoms()` in
   # R/er-plot-build.R), not a standalone above/below panel -- so there's
   # no response-type dispatch on which points to filter (no binary
-  # upper/lower split) and no `color_role` juggling: color, when mapped at
+  # upper/lower split) and no `color_role` juggling: colour, when mapped at
   # all, always means strata, since the response is already shown via
   # y-position.
   if (stratify == TRUE) {
@@ -242,7 +242,7 @@ er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, res
   # `fill = strata`, discrete) -- ggplot2 errors ("Continuous value
   # supplied to a discrete scale") if both are combined. Pair a
   # stratified plot using `er_style_data_hex()` with a model builder that
-  # doesn't map `fill`, e.g. `er_style_model_line()` (color only). The
+  # doesn't map `fill`, e.g. `er_style_model_line()` (colour only). The
   # `fill_role = "density"` tag below tells `.polish_labels()` to title
   # the (sole) `fill` legend "Count" rather than the strata label it uses
   # by default.

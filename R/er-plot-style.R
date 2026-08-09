@@ -40,8 +40,8 @@
 #' plot object does not yet have a coord. The expectation, however, is that the builder will
 #' supply an x-axis limit that is consistent with the base plot. That
 #' is, since all layer plots use the exposure variable for the
-#' x-axis, they should use the values stored in `exposure$limits` tp
-#' set the x-axis limits.   
+#' x-axis, they should use the values stored in `exposure$limits` to
+#' set the x-axis limits.
 #'
 #' @section Writing your own builder:
 #'
@@ -113,13 +113,13 @@
 #' singleton or additive" section for the full discussion.
 #'
 #' The `data` slot's default, `er_style_data_overlay()`, needs no
-#' `color_role` tag: its color aesthetic (when stratified) is always
+#' `color_role` tag: its colour aesthetic (when stratified) is always
 #' strata, since the response is already shown via y-position, so it
 #' shares the base plot's own strata legend directly. `config$color_role`
 #' matters for the "panel"-layout family instead, where it's `"strata"`
 #' for a binary response (as used by the built-in
-#' `er_style_data_boxjitter()`, whose color aesthetic still means strata)
-#' or `"response"` for a continuous/count response, where the color
+#' `er_style_data_boxjitter()`, whose colour aesthetic still means strata)
+#' or `"response"` for a continuous/count response, where the colour
 #' channel is already spoken for by the response value itself -- there's
 #' no built-in "panel"-layout builder for that case today, but a custom
 #' builder tagged `er_style_tag(builder, layout = "panel")` can still opt
@@ -154,7 +154,7 @@
 #' and ignores it -- every built-in builder does exactly this except
 #' `er_style_model_spaghetti()`. A custom builder can read whichever named
 #' arguments it recognizes out of its own `...` (e.g. via
-#' `rlang::list2(...)`) and ignore the rest; unrecognized extra arguments
+#' `rlang::list2(...)`) and ignore the rest; unrecognised extra arguments
 #' are never an error at the builder itself, only at the `er_plot_add_*()`
 #' call site if they weren't named.
 #'

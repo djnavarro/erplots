@@ -66,10 +66,10 @@ builder the same way. If \code{style} is tagged with a \code{layer} other than
 builder is never checked (only \code{layout} is a hard requirement).
 
 \code{keep_strata}'s effect also depends on a builder's structural family:
-for an "overlay"-layout builder it always means a shared color
+for an "overlay"-layout builder it always means a shared colour
 aesthetic, for any response type; for a "panel"-layout builder on a
 continuous/count response it instead produces one panel per stratum
-level rather than a shared color aesthetic. \code{panel} must be \code{"both"}
+level rather than a shared colour aesthetic. \code{panel} must be \code{"both"}
 for an "overlay"-layout builder (there's no upper/lower partition to
 select from) and for a continuous/count response under a
 "panel"-layout builder (same reason).

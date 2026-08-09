@@ -7,14 +7,14 @@
 #' @details
 #' Layers are either singleton or additive: model, summary, quantile, and data layers are singleton (a second call replaces the previous); groups are additive (each call adds a panel).
 #'
-#' `stratify_by` declares a discrete variable used for color/fill across layers; each layer's `keep_strata` controls whether it uses stratification. Rows with `NA` in the stratification variable are kept as their own level.
+#' `stratify_by` declares a discrete variable used for colour/fill across layers; each layer's `keep_strata` controls whether it uses stratification. Rows with `NA` in the stratification variable are kept as their own level.
 #'
 #' `response_type` governs response-scale defaults and which interval method the quantile and VPC layers use; see `response_type` below and [er_plot_add_quantiles()] for details.
 #'
 #' @param data Data frame or tibble containing the observed data.
 #' @param exposure Exposure variable (one variable, unquoted).
 #' @param response Response variable (one variable, unquoted).
-#' @param stratify_by Stratification variable used for color and fill (one variable, unquoted).
+#' @param stratify_by Stratification variable used for colour and fill (one variable, unquoted).
 #' @param response_type One of `"auto"`, `"binary"`, `"continuous"`, or `"count"`.
 #'
 #' @returns An (empty) plot object of class `er_plot`.

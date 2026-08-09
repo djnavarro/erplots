@@ -221,7 +221,7 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #' about the shape of `x`'s distribution.
 #'
 #' @param x Numeric vector of observations
-#' @param prob Quantile probability (e.g. `0.1` for the 10th percentile)
+#' @param prob Quantile probability (e.g. `0.1` for the tenth percentile)
 #' @param conf_level Confidence level
 #'
 #' @returns Named numeric vector (`lower`, `upper`), with confidence level
