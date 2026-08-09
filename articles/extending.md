@@ -194,7 +194,7 @@ indicator variable that you might want to use in your builder function:
 - `x_mid` and `y_mid` capture mean exposure and mean response associated
   with the exposure bin. Our new builder will need to use these.
 - `ci_lower` and `ci_upper` are the confidence interval bounds. Our
-  bulder will need these too.
+  builder will need these too.
 - `y_mid_lbl`, `y_lwr_lbl`, `y_upr_lbl`, and `y_lbl` support the
   built-in label geom that
   [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)

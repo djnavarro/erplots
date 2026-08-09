@@ -78,7 +78,7 @@ er_summary(model, ...)
 
 - `er_summary()` returns `NULL` (nothing available – the default
   method's behaviour), or a named list with any of the following
-  independently optional keys. Unrecognized keys are permitted and
+  independently optional keys. Unrecognised keys are permitted and
   ignored by built-in builders, giving a model package room to stash
   extra fields for its own custom builders.
 

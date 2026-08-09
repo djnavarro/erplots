@@ -20,7 +20,7 @@ ci_quantile(x, prob = 0.5, conf_level = 0.95)
 
 - prob:
 
-  Quantile probability (e.g. `0.1` for the 10th percentile)
+  Quantile probability (e.g. `0.1` for the tenth percentile)
 
 - conf_level:
 

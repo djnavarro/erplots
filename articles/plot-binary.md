@@ -282,7 +282,7 @@ the
 and
 [count](https://erplots.djnavarro.net/articles/plot-count.html#data-layer)
 articles) covers that case there, and a custom `"panel"`-layout builder
-(e.g. a single color-encoded panel) remains possible via
+(e.g. a single colour-encoded panel) remains possible via
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
 if a project needs one – see the [Extending
 erplots](https://erplots.djnavarro.net/articles/extending.md) article.
@@ -318,12 +318,12 @@ p_overlay$output | p_boxjitter$output
 
 ![](plot-binary_files/figure-html/data-compare-binary-1.png)
 
-Stratification looks the same for both: color/fill always means strata
+Stratification looks the same for both: colour/fill always means strata
 for
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md),
 sharing the model curve’s own legend, the same way
 [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)’s
-color aesthetic does for any response type:
+colour aesthetic does for any response type:
 
 ``` r
 

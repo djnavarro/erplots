@@ -163,7 +163,7 @@ That’s a plausible future addition, but not something currently planned.
 
 `stratify_by`, set once in
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-declares a single discrete variable used to split layers by color/fill,
+declares a single discrete variable used to split layers by colour/fill,
 with one shared, deduplicated legend across the whole composed plot:
 
 ``` r
@@ -184,9 +184,9 @@ Each layer’s own `keep_strata` argument controls whether *that* layer
 uses the stratification (default `TRUE` whenever `stratify_by` was set).
 The general rule, in the order a layer actually applies it: **a layer’s
 own encoding takes precedence; stratification adapts to whatever channel
-is left**, defaulting to color/fill.
+is left**, defaulting to colour/fill.
 
-For most layers, color/fill is always free for strata, so this rule is
+For most layers, colour/fill is always free for strata, so this rule is
 invisible in practice. The data layer is the one exception, and its
 behaviour now depends on which builder is in play, and which
 *structural* family (declared via
@@ -194,16 +194,16 @@ behaviour now depends on which builder is in play, and which
 that builder belongs to:
 
 - [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-  (the default, `"overlay"`-layout): color, when mapped at all, always
+  (the default, `"overlay"`-layout): colour, when mapped at all, always
   means strata – the response is already shown via y-position, so
-  color/fill is free for stratification like every other layer, and the
+  colour/fill is free for stratification like every other layer, and the
   overlay shares the base plot’s own strata legend with the
   model/quantile layers.
 - [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
   (the panel-based design, `"panel"`-layout, binary-response only):
-  behaves the same way as overlay – color/fill means strata, shared
+  behaves the same way as overlay – colour/fill means strata, shared
   legend. There is no built-in `"panel"`-layout builder for a
-  continuous/count response today; if one is written, its color
+  continuous/count response today; if one is written, its colour
   aesthetic would typically already be spoken for by the response value
   itself, in which case stratification should fall back to one panel per
   stratum level instead of a shared legend – the concrete instance of “a
@@ -213,7 +213,7 @@ that builder belongs to:
 A `config$color_role` tag (`"strata"` or `"response"`) records which
 meaning applies for a given data-layer build, so erplots knows whether
 to treat a builder’s legend as the shared strata legend or a standalone
-response colorbar.
+response colourbar.
 
 ## Response type changes what a layer summarises
 
@@ -264,7 +264,7 @@ Everything above is about the **grammar**: which layers exist, whether a
 second call to a layer function replaces or adds to the first, and how
 stratification/`response_type` change what a layer draws. None of it
 touches *how the composed plot looks* – labels, axis limits, the overall
-ggplot2 theme, the discrete color/fill palette, formatters, and so on.
+ggplot2 theme, the discrete colour/fill palette, formatters, and so on.
 That’s a deliberately separate, orthogonal knob,
 [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md),
 covered in its own article: [Theming

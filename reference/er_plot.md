@@ -29,7 +29,7 @@ er_plot(data, exposure, response, stratify_by = NULL, response_type = "auto")
 
 - stratify_by:
 
-  Stratification variable used for color and fill (one variable,
+  Stratification variable used for colour and fill (one variable,
   unquoted).
 
 - response_type:
@@ -46,7 +46,7 @@ Layers are either singleton or additive: model, summary, quantile, and
 data layers are singleton (a second call replaces the previous); groups
 are additive (each call adds a panel).
 
-`stratify_by` declares a discrete variable used for color/fill across
+`stratify_by` declares a discrete variable used for colour/fill across
 layers; each layer's `keep_strata` controls whether it uses
 stratification. Rows with `NA` in the stratification variable are kept
 as their own level.

@@ -165,7 +165,7 @@ There’s no built-in panel-based alternative for a continuous response –
 (the panel-based responders/non-responders design covered in the [binary
 responses](https://erplots.djnavarro.net/articles/plot-binary.html#er_style_data_overlay-vs--er_style_data_boxjitter)
 article) is binary-only. If you need a panel-based builder here (e.g. a
-single color-encoded panel), you can write a custom one and tag it with
+single colour-encoded panel), you can write a custom one and tag it with
 `er_style_tag(fn, layout = "panel")` – see the [Extending
 erplots](https://erplots.djnavarro.net/articles/extending.md) article.
 

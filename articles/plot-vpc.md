@@ -21,11 +21,11 @@ model predicts against what was actually observed, binned by exposure
 between model and data is easy to spot. The grammar is deliberately
 narrower than
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s in
-one respect: there’s no color/facet precedence rule to reconcile across
+one respect: there’s no colour/facet precedence rule to reconcile across
 builders, since an optional `stratify_by` splits the plot into facet
 panels only (see
 [`?er_vpc`](https://erplots.djnavarro.net/reference/er_vpc.md)), never
-color. But the same model-agnostic philosophy still applies – any model
+colour. But the same model-agnostic philosophy still applies – any model
 implementing
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 (see [Implementing the model
@@ -196,7 +196,7 @@ We’ll start by showing the limitations of the default “mean plus
 confidence interval” visual style. This is set as the default style for
 VPCs because it has the virtue of working regardless of whether the
 `plot_by` variable is continuous or discrete, and regardless of whether
-the `response` variable is binary, continous or counts. But as you can
+the `response` variable is binary, continuous or counts. But as you can
 see from the plot below, it’s not the best choice for a continuous
 response variable:
 

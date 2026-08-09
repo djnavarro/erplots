@@ -132,13 +132,13 @@ erglm_data |>
 
 ![](theming_files/figure-html/theme-1.png)
 
-## Discrete color/fill palette
+## Discrete colour/fill palette
 
 `color_discrete`/`fill_discrete` take a discrete ggplot2 scale object
 (e.g. from
-[`ggplot2::scale_color_brewer()`](https://ggplot2.tidyverse.org/reference/scale_brewer.html)
+[`ggplot2::scale_colour_brewer()`](https://ggplot2.tidyverse.org/reference/scale_brewer.html)
 or
-[`ggplot2::scale_color_viridis_d()`](https://ggplot2.tidyverse.org/reference/scale_viridis.html))
+[`ggplot2::scale_colour_viridis_d()`](https://ggplot2.tidyverse.org/reference/scale_viridis.html))
 and apply it wherever `colour`/`fill` is genuinely mapped to the
 stratification variable:
 
@@ -150,7 +150,7 @@ erglm_data |>
   er_plot_add_quantiles() |>
   er_plot_add_data() |>
   er_plot_theme(
-    color_discrete = ggplot2::scale_color_brewer(palette = "Dark2"),
+    color_discrete = ggplot2::scale_colour_brewer(palette = "Dark2"),
     fill_discrete = ggplot2::scale_fill_brewer(palette = "Dark2")
   ) |>
   plot()
@@ -182,14 +182,14 @@ erglm_data |>
 
 ![](theming_files/figure-html/dodge-width-1.png)
 
-## Continuous color/fill palette
+## Continuous colour/fill palette
 
 `color_continuous`/`fill_continuous` are the symmetric counterpart,
 scoped to aesthetics mapped to something continuous *other* than the
 stratification variable.
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)’s
 bin-density `fill` is the one built-in example (a continuous/count
-response’s response-colored data layer is the other, but there’s
+response’s response-coloured data layer is the other, but there’s
 currently no built-in “panel”-layout builder for it – see
 `vignettes/articles/extending.Rmd` for writing a custom one).
 

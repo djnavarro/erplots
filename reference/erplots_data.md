@@ -92,7 +92,7 @@ Simulated; see `data-raw/erplots_data.R` for the full generating code.
 ## Details
 
 The three exposure columns (`auc_ss`, `cmax_ss`, `cmin_ss`) come from a
-simplified, internally-consistent PK-flavored simulation (individual
+simplified, internally-consistent PK-flavoured simulation (individual
 clearance driven by `bodyweight_kg`/`renal_function`, with
 between-subject variability) rather than a literal pharmacokinetic model
 – good enough to produce a plausible, correlated exposure triple, not a

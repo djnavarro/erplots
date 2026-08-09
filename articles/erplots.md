@@ -281,7 +281,7 @@ Everything above changes *what’s drawn*.
 [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
 changes *how it looks*, without remapping any aesthetic: axis/legend
 labels, a plot title, axis limits, the overall ggplot2 theme, a discrete
-color/fill palette for stratification, and more.
+colour/fill palette for stratification, and more.
 
 ``` r
 
@@ -293,7 +293,7 @@ erglm_data |>
   er_plot_theme(
     xlab = "Steady-state AUC",
     theme_base = ggplot2::theme_minimal(),
-    color_discrete = ggplot2::scale_color_brewer(palette = "Dark2"),
+    color_discrete = ggplot2::scale_colour_brewer(palette = "Dark2"),
     fill_discrete = ggplot2::scale_fill_brewer(palette = "Dark2")
   ) |>
   plot()
