@@ -1,6 +1,6 @@
 Package: erplots
 Title: Model-Agnostic Exposure-Response Plots
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: 
     person("Danielle", "Navarro", , "djnavarro@protonmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7648-6578"))
 Description: Provides a fluent mini-language for building exposure-response
@@ -24,6 +24,7 @@ Imports:
     tibble,
     tidyselect
 Suggests: 
+    emaxnls (>= 0.1.1.9000),
     erglm,
     hexbin,
     knitr,
@@ -35,12 +36,15 @@ Suggests:
     withr
 URL: https://github.com/djnavarro/erplots, https://erplots.djnavarro.net/
 BugReports: https://github.com/djnavarro/erplots/issues
+Remotes: 
+    djnavarro/emaxnls,
+    djnavarro/erglm
 Depends: 
     R (>= 4.1.0)
 LazyData: true
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0
-Config/Needs/website: djnavarro/emaxnls, djnavarro/waeponwifestre, rmarkdown
+Config/Needs/website: djnavarro/waeponwifestre, rmarkdown
 Collate: 
     'data.R'
     'er-generics.R'
