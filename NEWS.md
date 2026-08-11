@@ -1,3 +1,5 @@
+# erplots 0.2.0
+
 # erplots 0.1.0
 
 Initial CRAN release.
