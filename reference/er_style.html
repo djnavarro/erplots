@@ -61,44 +61,6 @@ including how to write a custom one.</p>
 
 
     <div class="section level2">
-    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-
-
-<dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>The original data frame</p></dd>
-
-
-<dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
-<dd><p>Configuration for the specific plot</p></dd>
-
-
-<dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
-<dd><p>Logical indicating whether to stratify</p></dd>
-
-
-<dt id="arg-exposure">exposure<a class="anchor" aria-label="anchor" href="#arg-exposure"></a></dt>
-<dd><p>Exposure variable</p></dd>
-
-
-<dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
-<dd><p>Response variable</p></dd>
-
-
-<dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
-<dd><p>Stratification variable</p></dd>
-
-
-<dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
-<dd><p>Theme components</p></dd>
-
-
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from the corresponding
-<code>er_plot_add_*()</code> call's own <code>...</code>; see "Passing extra arguments to a
-builder" below.</p></dd>
-
-</dl></div>
-    <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A geom, or a list of geoms. More precisely, a list of
 objects that can be added to a ggplot2 plot. The expectation is
@@ -127,12 +89,27 @@ their own family-specific pages, one per layer:</p><ul><li><p><code><a href="er_
 as needed</p>
     </div>
     <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+
+
+<p>Every <code>er_style_*()</code> builder receives:</p><ul><li><p><code>data</code> – The original data frame</p></li>
+<li><p><code>config</code> – Configuration for the specific plot</p></li>
+<li><p><code>stratify</code> – Logical indicating whether to stratify</p></li>
+<li><p><code>exposure</code> – Exposure variable</p></li>
+<li><p><code>response</code> – Response variable</p></li>
+<li><p><code>strata</code> – Stratification variable</p></li>
+<li><p><code>theme</code> – Theme components</p></li>
+<li><p><code>...</code> – Additional named arguments forwarded from the corresponding
+<code>er_plot_add_*()</code> call's own <code>...</code>; see "Passing extra arguments to a
+builder" below.</p></li>
+</ul></div>
+    <div class="section level2">
     <h2 id="writing-your-own-builder">Writing your own builder<a class="anchor" aria-label="anchor" href="#writing-your-own-builder"></a></h2>
 
 
 
 <p>Every <code>er_style_*()</code> function above shares the signature documented in
-<code>@param</code>s, and that signature is a public part of the API, not an
+the "Arguments" section above, and that signature is a public part of the API, not an
 implementation detail: any function <code>function(data, config, stratify, exposure, response, strata, theme, ...)</code> that returns a geom or list of
 geoms can stand in for a built-in builder. This is the officially
 supported way to draw a layer differently from any of the built-in
