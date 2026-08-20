@@ -3,25 +3,6 @@
 \name{er_style}
 \alias{er_style}
 \title{Builder functions for exposure-response plots}
-\arguments{
-\item{data}{The original data frame}
-
-\item{config}{Configuration for the specific plot}
-
-\item{stratify}{Logical indicating whether to stratify}
-
-\item{exposure}{Exposure variable}
-
-\item{response}{Response variable}
-
-\item{strata}{Stratification variable}
-
-\item{theme}{Theme components}
-
-\item{...}{Additional named arguments forwarded from the corresponding
-\verb{er_plot_add_*()} call's own \code{...}; see "Passing extra arguments to a
-builder" below.}
-}
 \value{
 A geom, or a list of geoms. More precisely, a list of
 objects that can be added to a ggplot2 plot. The expectation is
@@ -56,11 +37,28 @@ their own family-specific pages, one per layer:
 Arguments are standardised to allow users to write their own
 as needed
 }
+\section{Arguments}{
+
+Every \verb{er_style_*()} builder receives:
+\itemize{
+\item \code{data} -- The original data frame
+\item \code{config} -- Configuration for the specific plot
+\item \code{stratify} -- Logical indicating whether to stratify
+\item \code{exposure} -- Exposure variable
+\item \code{response} -- Response variable
+\item \code{strata} -- Stratification variable
+\item \code{theme} -- Theme components
+\item \code{...} -- Additional named arguments forwarded from the corresponding
+\verb{er_plot_add_*()} call's own \code{...}; see "Passing extra arguments to a
+builder" below.
+}
+}
+
 \section{Writing your own builder}{
 
 
 Every \verb{er_style_*()} function above shares the signature documented in
-\verb{@param}s, and that signature is a public part of the API, not an
+the "Arguments" section above, and that signature is a public part of the API, not an
 implementation detail: any function \verb{function(data, config, stratify, exposure, response, strata, theme, ...)} that returns a geom or list of
 geoms can stand in for a built-in builder. This is the officially
 supported way to draw a layer differently from any of the built-in

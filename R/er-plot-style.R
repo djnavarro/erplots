@@ -5,14 +5,17 @@
 #' strata, theme, ...)` signature every `er_style_*()` builder implements,
 #' including how to write a custom one.
 #'
-#' @param data The original data frame
-#' @param config Configuration for the specific plot
-#' @param stratify Logical indicating whether to stratify
-#' @param exposure Exposure variable
-#' @param response Response variable
-#' @param strata Stratification variable
-#' @param theme Theme components
-#' @param ... Additional named arguments forwarded from the corresponding
+#' @section Arguments:
+#' Every `er_style_*()` builder receives:
+#'
+#' - `data` -- The original data frame
+#' - `config` -- Configuration for the specific plot
+#' - `stratify` -- Logical indicating whether to stratify
+#' - `exposure` -- Exposure variable
+#' - `response` -- Response variable
+#' - `strata` -- Stratification variable
+#' - `theme` -- Theme components
+#' - `...` -- Additional named arguments forwarded from the corresponding
 #'   `er_plot_add_*()` call's own `...`; see "Passing extra arguments to a
 #'   builder" below.
 #'
@@ -46,7 +49,7 @@
 #' @section Writing your own builder:
 #'
 #' Every `er_style_*()` function above shares the signature documented in
-#' `@param`s, and that signature is a public part of the API, not an
+#' the "Arguments" section above, and that signature is a public part of the API, not an
 #' implementation detail: any function `function(data, config, stratify,
 #' exposure, response, strata, theme, ...)` that returns a geom or list of
 #' geoms can stand in for a built-in builder. This is the officially
