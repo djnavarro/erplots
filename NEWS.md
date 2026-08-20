@@ -1,3 +1,11 @@
+# erplots 0.1.1
+
+* No user-facing changes. Fixes a documentation issue flagged by CRAN's
+  Debian pretest check: `?er_style` used `@param` on a page with no
+  attached function, producing an Rd file with `\arguments` but no
+  `\usage` (NOTEd by a stricter R-devel Rd check). The argument
+  descriptions now live in a plain `@section Arguments:` instead.
+
 # erplots 0.1.0
 
 Initial CRAN release.

@@ -1,5 +1,24 @@
 # CRAN submission comments
 
+## Resubmission
+
+This is a resubmission. In this version I have:
+
+* Fixed an Rd NOTE flagged by the Debian pretest (not seen on the Windows
+  pretest): `checking Rd contents ... NOTE`, `Rd files without \usage:
+  'er_style.Rd'`, `\arguments should not be documented without \usage.`
+  `?er_style` documents the shared `er_style_*()` builder signature as a
+  standalone conceptual topic with no function attached, and used
+  roxygen2's `@param` (which always emits a formal `\arguments` section)
+  without a corresponding `\usage` -- newly flagged by a stricter
+  R-devel Rd check that the Debian pretest machine had and the Windows
+  one, at a slightly older R-devel snapshot, did not yet have. Fixed by
+  moving the argument descriptions from `@param` into a plain
+  `@section Arguments:` instead.
+
+Re-checked locally (`R CMD check --as-cran`) after the fix: 0 errors |
+0 warnings | 1 note (the standard "New submission" note only).
+
 ## Summary
 
 This is a new package, first submission to CRAN. Summary of the package as
@@ -22,30 +41,6 @@ Thank you for your consideration.
 
 Kind regards,
 Danielle Navarro
-
-## Resubmission note
-
-This is a resubmission. The initial submission (2026-08-20) was flagged
-by CRAN's automated incoming checks with a second NOTE on the Debian
-pretest only (not Windows):
-
-```
-* checking Rd contents ... NOTE
-Rd files without \usage:
-  ‘er_style.Rd’
-\arguments should not be documented without \usage.
-```
-
-`?er_style` documents the shared `er_style_*()` builder signature as a
-standalone conceptual topic with no function attached, and used
-roxygen2's `@param` (which always emits a formal `\arguments` section)
-without a corresponding `\usage` -- newly flagged by a stricter R-devel
-Rd check that the Debian pretest machine had and the Windows one, at a
-slightly older R-devel snapshot, did not yet have. Fixed by moving the
-argument descriptions from `@param` into a plain `@section Arguments:`
-instead. Re-checked locally (`R CMD check --as-cran`) after the fix:
-0 errors | 0 warnings | 1 note (the standard "New submission" note
-only).
 
 ## Test environments
 

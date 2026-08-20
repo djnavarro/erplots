@@ -1,6 +1,6 @@
 Package: erplots
 Title: Model-Agnostic Exposure-Response Plots
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person("Danielle", "Navarro", , "djnavarro@protonmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7648-6578"))
 Description: Provides a fluent mini-language for building exposure-response
