@@ -86,8 +86,8 @@ is guarded with `requireNamespace(..., quietly = TRUE)` or
   `vignettes/articles/` for the pkgdown site only and is excluded from
   the build via `.Rbuildignore`, so it is not part of this submission.
 * This is a first submission of `erplots` itself, but one CRAN reverse
-  dependency already exists: `erglm` (accepted to CRAN one day ahead of
-  this submission, see above) lists `erplots` in `Suggests`. Checked
+  dependency already exists: `erglm` (accepted to CRAN on 2026-08-08, 
+  see above) lists `erplots` in `Suggests`. Checked
   with `revdepcheck::revdep_check()` against this submission's source;
   no problems found (see `revdep/cran.md`). Two further companion
   packages, `emaxnls` and `ertte`, were also checked as a courtesy but
