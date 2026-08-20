@@ -417,6 +417,21 @@ edit if forgotten:
   (`R/er-plot-style-group.R`) rather than using it. Converting a `lvl`
   column to a factor before `as.numeric()` matters here -- calling
   `as.numeric()` on a plain character column coerces label text to `NA`.
+- **A roxygen `@name`-only doc page (a conceptual topic with no function
+  attached, e.g. `?er_style`) must not use `@param`.** `@param` makes
+  roxygen2 emit a formal `\arguments` section; R-devel now NOTEs any Rd
+  file that has `\arguments` without a matching `\usage` (caught on
+  CRAN's Debian pretest, 2026-08-20, one submission after the version
+  that passed win-builder/R-hub cleanly -- a newer R-devel build than
+  either had checked against). Every other `@name`-only page in the
+  package (`er_style_group`, `er_style_summary`, `er_style_data`,
+  `er_style_quantile`, `er_style_model`, `er_style_vpc_observed`,
+  `er_style_vpc_simulated`, `er_vpc`, `er_plot`, `er_model_interface`,
+  `cut_quantile`) is fine because a real function immediately follows
+  with `@rdname` pointing back at it, so roxygen2 generates a genuine
+  `\usage` from that function's formals. `?er_style` alone documents a
+  shared signature with no such function, so its argument list lives in
+  a plain `@section Arguments:` (a markdown bullet list) instead.
 - **A new `R/er-plot-style-*.R` file that calls `er_style_tag()` at its
   own top level needs `#' @include er-plot-style.R`.** `er_style_tag()`
   lives in `R/er-plot-style.R`; without the `@include` tag,
