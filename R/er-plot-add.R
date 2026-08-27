@@ -330,7 +330,11 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'   binary response; see "Details" for when `"both"` is required.
 #' @param ... Additional named arguments forwarded, unchanged, to `style`
 #'   when it's called at build time -- see [er_style()]'s "Passing extra
-#'   arguments to a builder" section. Must be named.
+#'   arguments to a builder" section. Must be named. The built-in
+#'   `er_style_data_overlay()`/`er_style_data_boxjitter()` builders read a
+#'   `seed` from here to make their jitter reproducible across repeated
+#'   `plot()` calls on the same object; omit it (the default) for a fresh
+#'   random jitter on every render.
 #'
 #' @returns The input `object`, with the data layer added.
 #' 

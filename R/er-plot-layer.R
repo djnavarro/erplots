@@ -234,7 +234,23 @@
   config <- list()
   config$layout <- "panel"
   config$panel <- panel
-  config$seed  <- 1234L
+  # A user-supplied `seed` (via `er_plot_add_data()`'s own `...`) takes
+  # priority; otherwise a fresh seed is drawn here -- once per
+  # `er_plot_add_data()` call, not once per `er_plot_build()`/`plot()`
+  # call -- so that repeated builds of the *same* object still show
+  # identical jitter (this is what `position_jitter()` itself would do
+  # internally with `seed = NULL`, but only if a new position object
+  # were created on every render, which isn't the guarantee we want
+  # here). CRAN policy forbids hard-coding a *specific* seed literal
+  # (e.g. the `1234L` this used to be) without letting the user pick
+  # their own -- drawing one at random each call, while still letting a
+  # caller override it, satisfies that. Assigning via `[<-`/`list()`
+  # (rather than `$<-`) keeps the `seed` name present in `config` even
+  # when the value is `NULL`; `$<-` would silently drop the element
+  # instead of storing `NULL`. (Not actually reachable here since the
+  # random fallback is never `NULL`, but kept for consistency with
+  # `.layer_overlay()` below and any future caller that wants "no seed".)
+  config["seed"] <- list(dots$seed %||% sample.int(.Machine$integer.max, 1L))
   # `er_plot_add_data()` has already resolved `style` (and confirmed
   # its layout is "panel") before calling here -- see `?er_style` for
   # the `style`/`er_style_tag()` escape hatch
@@ -295,7 +311,10 @@
   layer_overlay <- list()
 
   config <- list()
-  config$seed <- 1234L
+  # see the matching comment in `.layer_data()` above: a user-supplied
+  # `seed` wins, otherwise a fresh one is drawn here (once per
+  # `er_plot_add_data()` call) rather than hard-coded.
+  config["seed"] <- list(dots$seed %||% sample.int(.Machine$integer.max, 1L))
 
   # unlike `.layer_data()`, there's a single builder regardless of
   # response type -- `er_style_data_overlay()` only needs to know the

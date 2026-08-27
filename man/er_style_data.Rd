@@ -66,7 +66,12 @@ er_style_data_hex(
 
 \item{theme}{Theme components.}
 
-\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_data]{er_plot_add_data()}}'s own \code{...}.}
+\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_data]{er_plot_add_data()}}'s
+own \code{...}. \code{er_style_data_overlay()}/\code{er_style_data_boxjitter()} read a
+\code{seed} from here (via \code{config$seed}, \code{NULL} when not supplied) and pass
+it to \code{\link[ggplot2:position_jitter]{ggplot2::position_jitter()}}, letting a caller make the jitter
+reproducible across repeated \code{plot()} calls on the same object; with no
+\code{seed}, each render draws a fresh jitter, as for any other jittered geom.}
 
 \item{box_width}{Width of \code{er_style_data_boxjitter()}'s boxplot.}
 

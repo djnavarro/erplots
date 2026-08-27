@@ -1,3 +1,19 @@
+# erplots 0.1.2
+
+Addresses CRAN human review feedback on the 0.1.1 submission:
+
+* DESCRIPTION's `Description` field no longer wraps function names
+  (`er_predict()`, `er_simulate()`, `er_summary()`) in single quotes --
+  CRAN reserves quoting for package/software/API names.
+* `er_plot_add_data()`'s two jittered builders (`er_style_data_overlay()`,
+  `er_style_data_boxjitter()`) no longer hard-code a specific RNG seed
+  (previously a literal `1234L` in `R/er-plot-layer.R`, used so that
+  repeated `plot()` calls on the same object show identical jitter).
+  A fresh seed is now drawn at `er_plot_add_data()` time instead (so
+  that reproducibility guarantee still holds), and a caller can
+  override it by passing `seed = <value>` through `er_plot_add_data()`'s
+  own `...`.
+
 # erplots 0.1.1
 
 * No user-facing changes. Fixes a documentation issue flagged by CRAN's

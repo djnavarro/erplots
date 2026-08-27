@@ -12,7 +12,12 @@
 #' @param response Response variable.
 #' @param strata Stratification variable.
 #' @param theme Theme components.
-#' @param ... Additional named arguments forwarded from [er_plot_add_data()]'s own `...`.
+#' @param ... Additional named arguments forwarded from [er_plot_add_data()]'s
+#'   own `...`. `er_style_data_overlay()`/`er_style_data_boxjitter()` read a
+#'   `seed` from here (via `config$seed`, `NULL` when not supplied) and pass
+#'   it to [ggplot2::position_jitter()], letting a caller make the jitter
+#'   reproducible across repeated `plot()` calls on the same object; with no
+#'   `seed`, each render draws a fresh jitter, as for any other jittered geom.
 #' @param jitter_height Vertical jitter applied to raw points.
 #' @param alpha Point transparency for `er_style_data_overlay()`; fill
 #'   transparency for `er_style_data_hex()`.

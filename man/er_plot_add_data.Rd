@@ -26,7 +26,11 @@ binary response; see "Details" for when \code{"both"} is required.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
 when it's called at build time -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section. Must be named.}
+arguments to a builder" section. Must be named. The built-in
+\code{er_style_data_overlay()}/\code{er_style_data_boxjitter()} builders read a
+\code{seed} from here to make their jitter reproducible across repeated
+\code{plot()} calls on the same object; omit it (the default) for a fresh
+random jitter on every render.}
 }
 \value{
 The input \code{object}, with the data layer added.

@@ -22,26 +22,41 @@ Thank you for your consideration.
 Kind regards,
 Danielle Navarro
 
-## Resubmission note
+## Resubmission
 
-This is strictly a resubmission, after the original led to a pretest 
-failure. In this version I have:
+This is a resubmission, responding to human review feedback on the 0.1.1
+submission. In this version I have:
 
-* Fixed an Rd NOTE flagged by the Debian pretest (not seen on the Windows
-  pretest): `checking Rd contents ... NOTE`, `Rd files without \usage:
-  'er_style.Rd'`, `\arguments should not be documented without \usage.`
-  `?er_style` documents the shared `er_style_*()` builder signature as a
-  standalone conceptual topic with no function attached, and used
-  roxygen2's `@param` (which always emits a formal `\arguments` section)
-  without a corresponding `\usage` -- newly flagged by a stricter
-  R-devel Rd check that the Debian pretest machine had and the Windows
-  one, at a slightly older R-devel snapshot, did not yet have. Fixed by
-  moving the argument descriptions from `@param` into a plain
-  `@section Arguments:` instead.
+* Removed the single quotes around function names (`er_predict()`,
+  `er_simulate()`, `er_summary()`) in the `Description` field of
+  DESCRIPTION -- quoting is now reserved for package/software/API names
+  only, per the reviewer's note.
+* Checked for references describing the package's methods to add to
+  `Description` in `authors (year) <doi:...>` form. `erplots` is a
+  plotting grammar with no associated methods paper, so no reference has
+  been added.
+* Investigated the reported `Warning: Examples in comments in:
+  er_model_interface.Rd`. `R/er-generics.R` (the source for this Rd page)
+  has no `@examples` block, the built `.Rd` has no `\examples` section,
+  and no other part of its content resembles commented-out example code
+  -- we could not reproduce this warning locally (`R CMD check --as-cran`,
+  `tools::checkRd()`) and believe it may be spurious, but have
+  re-`roxygenize()`d the package regardless, as suggested. Every other
+  exported topic already carries a `@returns`/`\value` tag; the sole
+  exception, `erplots_data.Rd`, is a `\docType{data}` page, which per
+  <https://contributor.r-project.org/cran-cookbook/docs_issues.html#missing-value-tags-in-.rd-files>
+  does not require one.
+* Removed a hard-coded RNG seed (a literal `1234L` in `R/er-plot-layer.R`,
+  used so that `er_style_data_overlay()`/`er_style_data_boxjitter()`'s
+  jittered points render identically across repeated `plot()` calls on
+  the same object). A fresh seed is now drawn once per
+  `er_plot_add_data()` call instead (preserving that reproducibility
+  guarantee without a fixed literal), and a caller can override it by
+  passing `seed = <value>` through `er_plot_add_data()`'s own `...`.
 
-Re-checked locally (`R CMD check --as-cran`) after the fix: 0 errors |
-0 warnings | 1 note (the standard "New submission" note only).
-
+Re-checked locally (`R CMD check --as-cran`) after these fixes: 0 errors |
+0 warnings | 1 note (the standard "New submission" note only). Full test
+suite (1180 tests) also passes.
 
 ## Test environments
 
