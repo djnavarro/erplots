@@ -404,6 +404,36 @@ edit if forgotten:
   way `config$breaks` already is) for anything that needs `plot_by`'s
   own numeric range, e.g. sizing a continuous-x error bar.
 
+- **Any builder that draws its own randomness (e.g. jitter) must seed
+  opt-in only, never automatically.** CRAN policy forbids a package
+  managing the RNG seed without the user's consent -- no hard-coded
+  literal (`set.seed(1234)`) and no auto-generated fallback either (an
+  earlier fix for this drew a fresh `sample.int()` seed whenever the
+  user didn't supply one, which was itself a form of always-on seed
+  management nobody asked for; this was simplified away). The
+  established pattern, used identically by
+  `er_style_data_overlay()`/`er_style_data_boxjitter()`
+  (`R/er-plot-style-data.R`), `er_style_group_boxjitter()`/
+  `er_style_group_violinjitter()` (`R/er-plot-style-group.R`), and
+  `er_style_model_spaghetti()` (`R/er-plot-style-model.R`): read a
+  `seed` out of the builder's own `...` (`dots <- rlang::list2(...);
+  seed <- dots$seed`, falling back to `config$seed` where a `.layer_*()`
+  function also has an opinion, which today only happens for the
+  data layer's overlay/panel jitter), default `NULL`, and only manage
+  the seed when it's non-`NULL`. *How* to apply it splits into two
+  cases: for a **lazily-evaluated** draw (e.g. `ggplot2::geom_jitter()`'s
+  actual jitter happens at `ggplot_build()` time, not when the geom
+  object is constructed), pass `seed` straight through to
+  `ggplot2::position_jitter()`'s own `seed` argument -- wrapping the
+  *construction* call in `withr::with_seed()` has no effect, since the
+  random draw it would be scoping hasn't happened yet. For an
+  **eagerly-evaluated** draw (e.g. `stats::runif()` called directly
+  inside the builder body, as `.dodge_group_jitter()`/
+  `er_style_group_boxjitter()`/`er_style_group_violinjitter()` do),
+  `withr::with_seed(seed, ...)` around the draw itself works correctly,
+  since the random values are produced immediately, not deferred.
+  `withr` is a runtime `Imports` dependency (not `Suggests`) because of
+  this second case.
 - **Rotated-label `vjust`/`hjust` are swapped.** For `geom_label(angle =
   90)` text, `vjust` controls the *horizontal* offset relative to the
   anchor (0 = left, 1 = right) and `hjust` controls the offset *along*

@@ -633,6 +633,53 @@ test_that("er_style_group_boxjitter()/er_style_group_violinjitter() jitter stays
   expect_true(all(abs(jitter_data$y_jitter - lvl_num) <= 0.375 + 0.1 + 1e-8))
 })
 
+test_that("er_style_group_boxjitter()/er_style_group_violinjitter() jitter is opt-in seedable via ...", {
+  # mirrors the data layer's equivalent test in
+  # test-er-plot-style-data.R: no seed -> differs across calls; a
+  # supplied seed -> reproducible.
+  p1 <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_groups(treatment, style = er_style_group_boxjitter)
+  p2 <- er_plot(er_test_data, aucss, ae1, sex) |>
+    er_plot_add_groups(treatment, style = er_style_group_violinjitter)
+
+  args1 <- list(
+    data = p1$data,
+    config = p1$layer$group$config[[1]],
+    stratify = p1$layer$group$stratify,
+    exposure = p1$exposure,
+    response = p1$response,
+    strata = p1$strata,
+    theme = p1$theme
+  )
+  args2 <- list(
+    data = p2$data,
+    config = p2$layer$group$config[[1]],
+    stratify = p2$layer$group$stratify,
+    exposure = p2$exposure,
+    response = p2$response,
+    strata = p2$strata,
+    theme = p2$theme
+  )
+
+  # unstratified: no seed differs across calls, a seed is reproducible
+  y_a <- do.call(er_style_group_boxjitter, args1)[[3]]$data$y_jitter
+  y_b <- do.call(er_style_group_boxjitter, args1)[[3]]$data$y_jitter
+  expect_false(identical(y_a, y_b))
+
+  y_c <- do.call(er_style_group_boxjitter, c(args1, list(seed = 7402L)))[[3]]$data$y_jitter
+  y_d <- do.call(er_style_group_boxjitter, c(args1, list(seed = 7402L)))[[3]]$data$y_jitter
+  y_e <- do.call(er_style_group_boxjitter, c(args1, list(seed = 8103L)))[[3]]$data$y_jitter
+  expect_identical(y_c, y_d)
+  expect_false(identical(y_c, y_e))
+
+  # stratified: same behaviour, via .dodge_group_jitter()
+  y_f <- do.call(er_style_group_violinjitter, c(args2, list(seed = 7402L)))[[3]]$data$y_jitter
+  y_g <- do.call(er_style_group_violinjitter, c(args2, list(seed = 7402L)))[[3]]$data$y_jitter
+  y_h <- do.call(er_style_group_violinjitter, args2)[[3]]$data$y_jitter
+  expect_identical(y_f, y_g)
+  expect_false(identical(y_f, y_h))
+})
+
 test_that("er_plot_add_groups() builds and renders with style = er_style_group_boxjitter/violinjitter", {
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>

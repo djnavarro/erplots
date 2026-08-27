@@ -20,7 +20,15 @@
 #' @param inner_range,outer_range Quantile probabilities (length 2) for `er_style_group_linerange()`'s thick and thin lines.
 #' @param alpha_dot,alpha_inner,alpha_outer Per-part transparency for `er_style_group_linerange()`'s dot, inner line, and outer line.
 #' @param jitter_height,jitter_size,jitter_alpha Vertical jitter, point size, and transparency for `er_style_group_boxjitter()`/`er_style_group_violinjitter()`'s overlaid points.
-#' @param ... Additional named arguments forwarded from [er_plot_add_groups()]'s own `...`.
+#' @param ... Additional named arguments forwarded from [er_plot_add_groups()]'s
+#'   own `...`. `er_style_group_boxjitter()`/`er_style_group_violinjitter()` read
+#'   a `seed` from here (`NULL` when not supplied) and use it to scope
+#'   (via [withr::with_seed()]) the vertical jitter draw, letting a caller
+#'   make the jitter reproducible across repeated `plot()` calls on the
+#'   same object -- the same opt-in-only mechanism
+#'   `er_style_data_overlay()`/`er_style_data_boxjitter()` use for the
+#'   data layer (see [er_style_data()]); with no `seed`, each render
+#'   draws a fresh jitter.
 #'
 #' @details Builders for the `group` layer ([er_plot_add_groups()]) draw exposure distributions for grouping variables. `er_style_group_boxplot()` and `er_style_group_violin()` put group levels on the y-axis; `er_style_group_histogram()` puts them on facet strips and frees the y-axis for counts; `er_style_group_linerange()` also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. `er_style_group_boxjitter()`/`er_style_group_violinjitter()` are thin wrappers around `er_style_group_boxplot()`/`er_style_group_violin()` that additionally overlay jittered raw exposure values (vertical jitter only -- exposure position on the x-axis is never perturbed), the same idea `er_style_data_boxjitter()` applies to the data layer. All built-in group builders are tagged `layer = "group"`, so [er_plot_add_groups()] errors if given one tagged for another layer.
 #'
@@ -356,6 +364,9 @@ er_style_group_linerange <- er_style_tag(er_style_group_linerange, layer = "grou
 #' @param strata_col Name of the strata column in `dat`.
 #' @param dodge_width Total width the strata are spread across within one `lvl` row.
 #' @param jitter_height Amount of additional uniform vertical jitter (as in [ggplot2::geom_jitter()]'s `height`).
+#' @param seed Optional RNG seed for the jitter draw, or `NULL` (the
+#'   default -- no seed management, draws from the ambient RNG stream).
+#'   See `er_style_group_boxjitter()`'s own `...` documentation.
 #'
 #' @details Mirrors `.dodge_quantile_strata()`'s offset formula (symmetric
 #' offsets around the centre, sized by the number of strata), applied to
@@ -367,7 +378,7 @@ er_style_group_linerange <- er_style_tag(er_style_group_linerange, layer = "grou
 #'
 #' @returns `dat` with an added numeric `y_jitter` column.
 #' @noRd
-.dodge_group_jitter <- function(dat, strata_col, dodge_width, jitter_height) {
+.dodge_group_jitter <- function(dat, strata_col, dodge_width, jitter_height, seed = NULL) {
 
   strata_vals <- dat[[strata_col]]
   strata_levels <- if (is.factor(strata_vals)) levels(strata_vals) else sort(unique(strata_vals))
@@ -378,9 +389,20 @@ er_style_group_linerange <- er_style_tag(er_style_group_linerange, layer = "grou
     strata_levels
   )
 
+  # unlike the data layer's jitter (drawn lazily by ggplot2's own
+  # `position_jitter()` at render time, so a `seed` is simply passed
+  # through to it), this jitter is drawn eagerly, right here, so scoping
+  # it with `withr::with_seed()` when a `seed` is supplied works
+  # directly -- no `NULL`-seed branch is needed inside `with_seed()`
+  # itself, but we still only call it when `seed` is non-`NULL`, since
+  # CRAN policy is about not managing the seed *without user consent*,
+  # not about avoiding `withr::with_seed()` specifically.
+  draw_jitter <- function() stats::runif(nrow(dat), -jitter_height, jitter_height)
+  jitter_draw <- if (is.null(seed)) draw_jitter() else withr::with_seed(seed, draw_jitter())
+
   dat$y_jitter <- as.numeric(factor(dat$lvl)) +
     offsets[as.character(strata_vals)] +
-    stats::runif(nrow(dat), -jitter_height, jitter_height)
+    jitter_draw
 
   dat
 }
@@ -390,6 +412,12 @@ er_style_group_linerange <- er_style_tag(er_style_group_linerange, layer = "grou
 #' @export
 er_style_group_boxjitter <- function(data, config, stratify, exposure, response, strata, theme,
                                       alpha = 0.5, jitter_height = 0.15, jitter_size = 1, jitter_alpha = 0.6, ...) {
+
+  # a user-supplied `seed` (via `er_plot_add_groups()`'s own `...`) is
+  # opt-in only -- see this function's `...` documentation and the
+  # matching design for the data layer's jitter (`er_style_data()`).
+  dots <- rlang::list2(...)
+  seed <- dots$seed
 
   # raw points are already shown via the jitter layer below, so the
   # wrapped boxplot's own outlier points are suppressed -- otherwise a
@@ -402,8 +430,9 @@ er_style_group_boxjitter <- function(data, config, stratify, exposure, response,
 
   if (stratify == FALSE) {
     jitter_data <- config$data
+    draw_jitter <- function() stats::runif(nrow(jitter_data), -jitter_height, jitter_height)
     jitter_data$y_jitter <- as.numeric(factor(jitter_data$lvl)) +
-      stats::runif(nrow(jitter_data), -jitter_height, jitter_height)
+      (if (is.null(seed)) draw_jitter() else withr::with_seed(seed, draw_jitter()))
     jitter_map <- ggplot2::aes(x = .data[[exposure$name]], y = y_jitter)
   }
   if (stratify == TRUE) {
@@ -411,7 +440,7 @@ er_style_group_boxjitter <- function(data, config, stratify, exposure, response,
     # `.dodge_group_jitter()`'s `@details` for why this is an
     # approximation, not a guaranteed exact match, to the boxplot's own
     # (ggplot2-automatic) dodge positions.
-    jitter_data <- .dodge_group_jitter(config$data, strata$name, dodge_width = 0.75, jitter_height = jitter_height)
+    jitter_data <- .dodge_group_jitter(config$data, strata$name, dodge_width = 0.75, jitter_height = jitter_height, seed = seed)
     jitter_map <- ggplot2::aes(x = .data[[exposure$name]], y = y_jitter, color = .data[[strata$name]])
   }
 
@@ -434,6 +463,11 @@ er_style_group_violinjitter <- function(data, config, stratify, exposure, respon
                                          alpha = 0.5, quantiles = NULL, quantile_linetype = "solid",
                                          jitter_height = 0.15, jitter_size = 1, jitter_alpha = 0.6, ...) {
 
+  # see `er_style_group_boxjitter()`'s matching comment: `seed` is
+  # opt-in only, read from the caller's own `...`.
+  dots <- rlang::list2(...)
+  seed <- dots$seed
+
   geoms <- er_style_group_violin(
     data, config, stratify, exposure, response, strata, theme,
     alpha = alpha, quantiles = quantiles, quantile_linetype = quantile_linetype, ...
@@ -441,8 +475,9 @@ er_style_group_violinjitter <- function(data, config, stratify, exposure, respon
 
   if (stratify == FALSE) {
     jitter_data <- config$data
+    draw_jitter <- function() stats::runif(nrow(jitter_data), -jitter_height, jitter_height)
     jitter_data$y_jitter <- as.numeric(factor(jitter_data$lvl)) +
-      stats::runif(nrow(jitter_data), -jitter_height, jitter_height)
+      (if (is.null(seed)) draw_jitter() else withr::with_seed(seed, draw_jitter()))
     jitter_map <- ggplot2::aes(x = .data[[exposure$name]], y = y_jitter)
   }
   if (stratify == TRUE) {
@@ -450,7 +485,7 @@ er_style_group_violinjitter <- function(data, config, stratify, exposure, respon
     # `.dodge_group_jitter()`'s `@details` for why this is an
     # approximation, not a guaranteed exact match, to the violin's own
     # (ggplot2-automatic) dodge positions.
-    jitter_data <- .dodge_group_jitter(config$data, strata$name, dodge_width = 0.9, jitter_height = jitter_height)
+    jitter_data <- .dodge_group_jitter(config$data, strata$name, dodge_width = 0.9, jitter_height = jitter_height, seed = seed)
     jitter_map <- ggplot2::aes(x = .data[[exposure$name]], y = y_jitter, color = .data[[strata$name]])
   }
 

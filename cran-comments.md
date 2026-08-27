@@ -54,10 +54,21 @@ submission. In this version I have:
   reproducible jitter; with no `seed` supplied (the default), no seed
   management happens at all, and jitter differs from one build to the
   next, like any other jittered geom.
+* Swept the rest of the package for other RNG seed usage while fixing
+  the above, and found one further inconsistency: `er_plot_add_groups()`'s
+  jittered builders (`er_style_group_boxjitter()`, `er_style_group_violinjitter()`)
+  drew their jitter with no seed control at all (not hard-coded, just
+  unseedable). Brought these in line with the same opt-in-only pattern
+  for consistency, which required moving `withr` from `Suggests` to
+  `Imports` (previously only used in tests). Every other seed-adjacent
+  code path already followed this pattern:
+  `er_style_model_spaghetti()`'s simulated draws, and the `seed`
+  parameters `er_simulate()`/`er_vpc_add_simulated()` forward to a
+  model's own method, all default to `NULL` with no fallback.
 
 Re-checked locally (`R CMD check --as-cran`) after these fixes: 0 errors |
 0 warnings | 1 note (the standard "New submission" note only). Full test
-suite (1181 tests) also passes.
+suite (1186 tests) also passes.
 
 ## Test environments
 

@@ -118,7 +118,15 @@ er_style_group_violinjitter(
 
 \item{show_outliers}{Logical: whether \code{er_style_group_boxplot()} draws the boxplot's own outlier points. Defaults to \code{TRUE}; \code{er_style_group_boxjitter()} sets this to \code{FALSE} when it wraps this builder, since its own jittered points already show every raw value, outliers included.}
 
-\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}'s own \code{...}.}
+\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}'s
+own \code{...}. \code{er_style_group_boxjitter()}/\code{er_style_group_violinjitter()} read
+a \code{seed} from here (\code{NULL} when not supplied) and use it to scope
+(via \code{\link[withr:with_seed]{withr::with_seed()}}) the vertical jitter draw, letting a caller
+make the jitter reproducible across repeated \code{plot()} calls on the
+same object -- the same opt-in-only mechanism
+\code{er_style_data_overlay()}/\code{er_style_data_boxjitter()} use for the
+data layer (see \code{\link[=er_style_data]{er_style_data()}}); with no \code{seed}, each render
+draws a fresh jitter.}
 
 \item{bins}{Number of histogram bins for \code{er_style_group_histogram()}.}
 
