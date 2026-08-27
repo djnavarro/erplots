@@ -10,7 +10,7 @@
 |collate  |en_US.UTF-8                     |
 |ctype    |en_US.UTF-8                     |
 |tz       |Australia/Sydney                |
-|date     |2026-08-09                      |
+|date     |2026-08-27                      |
 |pandoc   |3.1.3 @ /usr/bin/pandoc         |
 |quarto   |1.5.52 @ /opt/quarto/bin/quarto |
 
@@ -18,34 +18,34 @@
 
 |package      |old    |new    |Δ  |
 |:------------|:------|:------|:--|
-|erplots      |0.1.0  |0.1.0  |NA |
-|cli          |3.6.6  |3.6.6  |NA |
-|cpp11        |0.5.5  |0.5.5  |NA |
-|dplyr        |1.2.1  |1.2.1  |NA |
-|farver       |2.1.2  |2.1.2  |NA |
-|generics     |0.1.4  |0.1.4  |NA |
-|ggplot2      |4.0.3  |4.0.3  |NA |
-|glue         |1.8.1  |1.8.1  |NA |
-|gtable       |0.3.6  |0.3.6  |NA |
-|isoband      |0.3.0  |0.3.0  |NA |
-|labeling     |0.4.3  |0.4.3  |NA |
-|lifecycle    |1.0.5  |1.0.5  |NA |
-|magrittr     |2.0.5  |2.0.5  |NA |
-|patchwork    |1.3.2  |1.3.2  |NA |
-|pillar       |1.11.1 |1.11.1 |NA |
-|pkgconfig    |2.0.3  |2.0.3  |NA |
-|purrr        |1.2.2  |1.2.2  |NA |
-|R6           |2.6.1  |2.6.1  |NA |
-|RColorBrewer |1.1-3  |1.1-3  |NA |
-|rlang        |1.3.0  |1.3.0  |NA |
-|S7           |0.2.2  |0.2.2  |NA |
-|scales       |1.4.0  |1.4.0  |NA |
-|tibble       |3.3.1  |3.3.1  |NA |
-|tidyselect   |1.2.1  |1.2.1  |NA |
-|utf8         |1.2.6  |1.2.6  |NA |
-|vctrs        |0.7.3  |0.7.3  |NA |
-|viridisLite  |0.4.3  |0.4.3  |NA |
-|withr        |3.0.3  |3.0.3  |NA |
+|erplots      |0.1.1  |0.1.2  |*  |
+|cli          |3.6.6  |3.6.6  |   |
+|cpp11        |0.5.5  |0.5.5  |   |
+|dplyr        |1.2.1  |1.2.1  |   |
+|farver       |2.1.2  |2.1.2  |   |
+|generics     |0.1.4  |0.1.4  |   |
+|ggplot2      |4.0.3  |4.0.3  |   |
+|glue         |1.8.1  |1.8.1  |   |
+|gtable       |0.3.6  |0.3.6  |   |
+|isoband      |0.3.0  |0.3.0  |   |
+|labeling     |0.4.3  |0.4.3  |   |
+|lifecycle    |1.0.5  |1.0.5  |   |
+|magrittr     |2.0.5  |2.0.5  |   |
+|patchwork    |1.3.2  |1.3.2  |   |
+|pillar       |1.11.1 |1.11.1 |   |
+|pkgconfig    |2.0.3  |2.0.3  |   |
+|purrr        |1.2.2  |1.2.2  |   |
+|R6           |2.6.1  |2.6.1  |   |
+|RColorBrewer |1.1-3  |1.1-3  |   |
+|rlang        |1.3.0  |1.3.0  |   |
+|S7           |0.2.2  |0.2.2  |   |
+|scales       |1.4.0  |1.4.0  |   |
+|tibble       |3.3.1  |3.3.1  |   |
+|tidyselect   |1.2.1  |1.2.1  |   |
+|utf8         |1.2.6  |1.2.6  |   |
+|vctrs        |0.7.3  |0.7.3  |   |
+|viridisLite  |0.4.3  |0.4.3  |   |
+|withr        |3.0.3  |3.0.3  |   |
 
 # Revdeps
 
