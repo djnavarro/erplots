@@ -17,12 +17,12 @@ Addresses CRAN human review feedback on the 0.1.1 submission:
   no longer hard-code a specific RNG seed (previously a literal `1234L`
   in `R/er-plot-layer.R`, used so that repeated
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) calls on the
-  same object show identical jitter). A fresh seed is now drawn at
-  [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-  time instead (so that reproducibility guarantee still holds), and a
-  caller can override it by passing `seed = <value>` through
+  same object always showed identical jitter). Seeding is now opt-in
+  only: pass `seed = <value>` through
   [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)’s
-  own `...`.
+  own `...` for reproducible jitter across rebuilds of the same object;
+  with no `seed` (the default), jitter draws from the ambient RNG stream
+  and differs from one build to the next, like any other jittered geom.
 
 ## erplots 0.1.1
 

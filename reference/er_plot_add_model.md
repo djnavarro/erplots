@@ -137,7 +137,7 @@ erglm_data |>
   plot()
 }
 
-#> Using seed = 3867. Pass `seed = 3867` to reproduce this result.
+#> Using seed = 3953. Pass `seed = 3953` to reproduce this result.
 
 
 
