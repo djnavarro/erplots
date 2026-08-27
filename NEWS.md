@@ -1,10 +1,7 @@
 # erplots 0.1.2
 
-Addresses CRAN human review feedback on the 0.1.1 submission:
+Addresses CRAN reviewer feedback on the 0.1.1 submission. User-facing changes:
 
-* DESCRIPTION's `Description` field no longer wraps function names
-  (`er_predict()`, `er_simulate()`, `er_summary()`) in single quotes --
-  CRAN reserves quoting for package/software/API names.
 * `er_plot_add_data()`'s two jittered builders (`er_style_data_overlay()`,
   `er_style_data_boxjitter()`) no longer hard-code a specific RNG seed
   (previously a literal `1234L` in `R/er-plot-layer.R`, used so that
@@ -22,14 +19,11 @@ Addresses CRAN human review feedback on the 0.1.1 submission:
 # erplots 0.1.1
 
 * No user-facing changes. Fixes a documentation issue flagged by CRAN's
-  Debian pretest check: `?er_style` used `@param` on a page with no
-  attached function, producing an Rd file with `\arguments` but no
-  `\usage` (NOTEd by a stricter R-devel Rd check). The argument
-  descriptions now live in a plain `@section Arguments:` instead.
+  Debian pretest check.
 
 # erplots 0.1.0
 
-Initial CRAN release.
+Initial CRAN submission.
 
 ## `er_plot()`: the plotting mini-language
 
