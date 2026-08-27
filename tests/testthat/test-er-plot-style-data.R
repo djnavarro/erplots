@@ -384,11 +384,32 @@ test_that("er_style_data_boxjitter()'s jitter is seeded via position_jitter(), n
 })
 
 
-test_that("er_plot_build() produces reproducible jitter across repeated builds of the same er_plot", {
+test_that("er_plot_build() jitter differs across repeated builds of the same er_plot when no seed is supplied", {
+  # seeding is opt-in only (see `.layer_overlay()` in R/er-plot-layer.R) --
+  # CRAN policy forbids a package hard-coding a seed without the user's
+  # consent, so with no `seed` supplied the jitter draws from the ambient
+  # RNG stream and differs from one build to the next, like any other
+  # jittered geom.
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
     er_plot_add_data(style = er_style_data_overlay)
+
+  built_a <- er_plot_build(plt)
+  built_b <- er_plot_build(plt)
+
+  y_a <- ggplot2::ggplot_build(built_a$plot$base)$data[[length(built_a$plot$base$layers)]]$y
+  y_b <- ggplot2::ggplot_build(built_b$plot$base)$data[[length(built_b$plot$base$layers)]]$y
+
+  expect_false(identical(y_a, y_b))
+})
+
+
+test_that("er_plot_build() produces reproducible jitter across repeated builds when a seed is supplied", {
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_data(style = er_style_data_overlay, seed = 6417L)
 
   built_a <- er_plot_build(plt)
   built_b <- er_plot_build(plt)

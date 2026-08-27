@@ -8,11 +8,12 @@ Addresses CRAN human review feedback on the 0.1.1 submission:
 * `er_plot_add_data()`'s two jittered builders (`er_style_data_overlay()`,
   `er_style_data_boxjitter()`) no longer hard-code a specific RNG seed
   (previously a literal `1234L` in `R/er-plot-layer.R`, used so that
-  repeated `plot()` calls on the same object show identical jitter).
-  A fresh seed is now drawn at `er_plot_add_data()` time instead (so
-  that reproducibility guarantee still holds), and a caller can
-  override it by passing `seed = <value>` through `er_plot_add_data()`'s
-  own `...`.
+  repeated `plot()` calls on the same object always showed identical
+  jitter). Seeding is now opt-in only: pass `seed = <value>` through
+  `er_plot_add_data()`'s own `...` for reproducible jitter across
+  rebuilds of the same object; with no `seed` (the default), jitter
+  draws from the ambient RNG stream and differs from one build to the
+  next, like any other jittered geom.
 
 # erplots 0.1.1
 

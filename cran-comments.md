@@ -48,15 +48,16 @@ submission. In this version I have:
   does not require one.
 * Removed a hard-coded RNG seed (a literal `1234L` in `R/er-plot-layer.R`,
   used so that `er_style_data_overlay()`/`er_style_data_boxjitter()`'s
-  jittered points render identically across repeated `plot()` calls on
-  the same object). A fresh seed is now drawn once per
-  `er_plot_add_data()` call instead (preserving that reproducibility
-  guarantee without a fixed literal), and a caller can override it by
-  passing `seed = <value>` through `er_plot_add_data()`'s own `...`.
+  jittered points rendered identically across repeated `plot()` calls on
+  the same object). Seeding is now opt-in only: a caller can pass
+  `seed = <value>` through `er_plot_add_data()`'s own `...` for
+  reproducible jitter; with no `seed` supplied (the default), no seed
+  management happens at all, and jitter differs from one build to the
+  next, like any other jittered geom.
 
 Re-checked locally (`R CMD check --as-cran`) after these fixes: 0 errors |
 0 warnings | 1 note (the standard "New submission" note only). Full test
-suite (1180 tests) also passes.
+suite (1181 tests) also passes.
 
 ## Test environments
 
