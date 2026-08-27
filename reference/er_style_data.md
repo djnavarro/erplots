@@ -87,7 +87,14 @@ er_style_data_hex(
 
   Additional named arguments forwarded from
   [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)'s
-  own `...`.
+  own `...`. `er_style_data_overlay()`/`er_style_data_boxjitter()` read
+  a `seed` from here (via `config$seed`, `NULL` when not supplied) and
+  pass it to
+  [`ggplot2::position_jitter()`](https://ggplot2.tidyverse.org/reference/position_jitter.html),
+  letting a caller make the jitter reproducible across repeated
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) calls on the
+  same object; with no `seed`, each render draws a fresh jitter, as for
+  any other jittered geom.
 
 - box_width:
 

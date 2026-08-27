@@ -1,5 +1,29 @@
 # Changelog
 
+## erplots 0.1.2
+
+Addresses CRAN human review feedback on the 0.1.1 submission:
+
+- DESCRIPTION’s `Description` field no longer wraps function names
+  ([`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
+  in single quotes – CRAN reserves quoting for package/software/API
+  names.
+- [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)’s
+  two jittered builders
+  ([`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),
+  [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md))
+  no longer hard-code a specific RNG seed (previously a literal `1234L`
+  in `R/er-plot-layer.R`, used so that repeated
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) calls on the
+  same object show identical jitter). A fresh seed is now drawn at
+  [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
+  time instead (so that reproducibility guarantee still holds), and a
+  caller can override it by passing `seed = <value>` through
+  [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)’s
+  own `...`.
+
 ## erplots 0.1.1
 
 - No user-facing changes. Fixes a documentation issue flagged by CRAN’s

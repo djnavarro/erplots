@@ -11,7 +11,7 @@ the plot, but other possibilities are available."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">erplots</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,7 +99,11 @@ binary response; see "Details" for when <code>"both"</code> is required.</p></dd
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional named arguments forwarded, unchanged, to <code>style</code>
 when it's called at build time – see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra
-arguments to a builder" section. Must be named.</p></dd>
+arguments to a builder" section. Must be named. The built-in
+<code><a href="er_style_data.html">er_style_data_overlay()</a></code>/<code><a href="er_style_data.html">er_style_data_boxjitter()</a></code> builders read a
+<code>seed</code> from here to make their jitter reproducible across repeated
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> calls on the same object; omit it (the default) for a fresh
+random jitter on every render.</p></dd>
 
 </dl></div>
     <div class="section level2">

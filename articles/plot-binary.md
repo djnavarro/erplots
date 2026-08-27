@@ -129,7 +129,7 @@ erglm_data |>
   er_plot_add_model(mod, style = er_style_model_spaghetti) |> 
   er_plot_add_quantiles() |> 
   plot()
-#> Using seed = 6292. Pass `seed = 6292` to reproduce this result.
+#> Using seed = 3606. Pass `seed = 3606` to reproduce this result.
 ```
 
 ![](plot-binary_files/figure-html/model-1-1.png)

@@ -11,7 +11,7 @@ boxplot/jitter panels."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">erplots</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -142,7 +142,12 @@ boxplot/jitter panels.</p>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>'s own <code>...</code>.</p></dd>
+<dd><p>Additional named arguments forwarded from <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>'s
+own <code>...</code>. <code>er_style_data_overlay()</code>/<code>er_style_data_boxjitter()</code> read a
+<code>seed</code> from here (via <code>config$seed</code>, <code>NULL</code> when not supplied) and pass
+it to <code><a href="https://ggplot2.tidyverse.org/reference/position_jitter.html" class="external-link">ggplot2::position_jitter()</a></code>, letting a caller make the jitter
+reproducible across repeated <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> calls on the same object; with no
+<code>seed</code>, each render draws a fresh jitter, as for any other jittered geom.</p></dd>
 
 
 <dt id="arg-box-width">box_width<a class="anchor" aria-label="anchor" href="#arg-box-width"></a></dt>

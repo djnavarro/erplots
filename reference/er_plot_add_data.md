@@ -48,7 +48,14 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
   Additional named arguments forwarded, unchanged, to `style` when it's
   called at build time – see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-  "Passing extra arguments to a builder" section. Must be named.
+  "Passing extra arguments to a builder" section. Must be named. The
+  built-in
+  [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)/[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+  builders read a `seed` from here to make their jitter reproducible
+  across repeated
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) calls on the
+  same object; omit it (the default) for a fresh random jitter on every
+  render.
 
 ## Value
 
