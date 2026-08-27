@@ -53,20 +53,19 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.2" id="erplots-012">erplots 0.1.2<a class="anchor" aria-label="anchor" href="#erplots-012"></a></h2>
-<p>Addresses CRAN human review feedback on the 0.1.1 submission:</p>
-<ul><li>DESCRIPTION’s <code>Description</code> field no longer wraps function names (<code><a href="../reference/er_model_interface.html">er_predict()</a></code>, <code><a href="../reference/er_model_interface.html">er_simulate()</a></code>, <code><a href="../reference/er_model_interface.html">er_summary()</a></code>) in single quotes – CRAN reserves quoting for package/software/API names.</li>
-<li>
+<p>Addresses CRAN reviewer feedback on the 0.1.1 submission. User-facing changes:</p>
+<ul><li>
 <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code>’s two jittered builders (<code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>, <code><a href="../reference/er_style_data.html">er_style_data_boxjitter()</a></code>) no longer hard-code a specific RNG seed (previously a literal <code>1234L</code> in <code>R/er-plot-layer.R</code>, used so that repeated <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> calls on the same object always showed identical jitter). Seeding is now opt-in only: pass <code>seed = &lt;value&gt;</code> through <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code>’s own <code>...</code> for reproducible jitter across rebuilds of the same object; with no <code>seed</code> (the default), jitter draws from the ambient RNG stream and differs from one build to the next, like any other jittered geom.</li>
 <li>
 <code><a href="../reference/er_plot_add_groups.html">er_plot_add_groups()</a></code>’s jittered builders (<code><a href="../reference/er_style_group.html">er_style_group_boxjitter()</a></code>, <code><a href="../reference/er_style_group.html">er_style_group_violinjitter()</a></code>) gain the same opt-in <code>seed</code> support, for consistency – their jitter previously had no seed control at all. <code>withr</code> moves from <code>Suggests</code> to <code>Imports</code> to support this.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.1" id="erplots-011">erplots 0.1.1<a class="anchor" aria-label="anchor" href="#erplots-011"></a></h2>
-<ul><li>No user-facing changes. Fixes a documentation issue flagged by CRAN’s Debian pretest check: <code><a href="../reference/er_style.html">?er_style</a></code> used <code>@param</code> on a page with no attached function, producing an Rd file with <code>\arguments</code> but no <code>\usage</code> (NOTEd by a stricter R-devel Rd check). The argument descriptions now live in a plain <code>@section Arguments:</code> instead.</li>
+<ul><li>No user-facing changes. Fixes a documentation issue flagged by CRAN’s Debian pretest check.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="erplots-010">erplots 0.1.0<a class="anchor" aria-label="anchor" href="#erplots-010"></a></h2>
-<p>Initial CRAN release.</p>
+<p>Initial CRAN submission.</p>
 <div class="section level3">
 <h3 id="er_plot-the-plotting-mini-language-0-1-0">
 <code>er_plot()</code>: the plotting mini-language<a class="anchor" aria-label="anchor" href="#er_plot-the-plotting-mini-language-0-1-0"></a></h3>

@@ -2,14 +2,9 @@
 
 ## erplots 0.1.2
 
-Addresses CRAN human review feedback on the 0.1.1 submission:
+Addresses CRAN reviewer feedback on the 0.1.1 submission. User-facing
+changes:
 
-- DESCRIPTION’s `Description` field no longer wraps function names
-  ([`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
-  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
-  in single quotes – CRAN reserves quoting for package/software/API
-  names.
 - [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)’s
   two jittered builders
   ([`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),
@@ -34,16 +29,11 @@ Addresses CRAN human review feedback on the 0.1.1 submission:
 ## erplots 0.1.1
 
 - No user-facing changes. Fixes a documentation issue flagged by CRAN’s
-  Debian pretest check:
-  [`?er_style`](https://erplots.djnavarro.net/reference/er_style.md)
-  used `@param` on a page with no attached function, producing an Rd
-  file with `\arguments` but no `\usage` (NOTEd by a stricter R-devel Rd
-  check). The argument descriptions now live in a plain
-  `@section Arguments:` instead.
+  Debian pretest check.
 
 ## erplots 0.1.0
 
-Initial CRAN release.
+Initial CRAN submission.
 
 ### `er_plot()`: the plotting mini-language
 
