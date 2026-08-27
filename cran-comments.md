@@ -1,6 +1,6 @@
 # CRAN submission comments
 
-## Summary
+## New package summary
 
 This is a new package. Summary of the package as per DESCRIPTION:
 
@@ -22,51 +22,56 @@ Thank you for your consideration.
 Kind regards,
 Danielle Navarro
 
-## Resubmission
+## Resubmission summary
 
-This is a resubmission, responding to human review feedback on the 0.1.1
-submission. In this version I have:
+This is a resubmission, responding to the reviewer feedback on the 0.1.1
+submission. The comments below summarise each of the issues raised in the
+review process, and the steps taken to address them:
 
-* Removed the single quotes around function names (`er_predict()`,
-  `er_simulate()`, `er_summary()`) in the `Description` field of
-  DESCRIPTION -- quoting is now reserved for package/software/API names
+* The review flagged that the `Description` field in DESCRIPTION had
+  incorrectly placed single quotes around function names. This has now
+  been corrected: quoting is now reserved for package/software/API names
   only, per the reviewer's note.
-* Checked for references describing the package's methods to add to
-  `Description` in `authors (year) <doi:...>` form. `erplots` is a
-  plotting grammar with no associated methods paper, so no reference has
-  been added.
-* Investigated the reported `Warning: Examples in comments in:
-  er_model_interface.Rd`. `R/er-generics.R` (the source for this Rd page)
-  has no `@examples` block and the built `.Rd` has no `\examples` section,
-  and we were unable to reproduce the warning locally (`R CMD check
-  --as-cran`, `tools::checkRd()`), including by re-checking out and
-  re-`roxygenize()`-ing the exact commit submitted as 0.1.1, which
-  produced no changes. We have nevertheless re-`roxygenize()`d this
-  submission as suggested, and confirmed every exported topic carries a
-  `@returns`/`\value` tag; the sole exception, `erplots_data.Rd`, is a
-  `\docType{data}` page, which per
-  <https://contributor.r-project.org/cran-cookbook/docs_issues.html#missing-value-tags-in-.rd-files>
-  does not require one. Happy to investigate further with any additional
-  detail on how the warning was produced.
-* Removed a hard-coded RNG seed (a literal `1234L` in `R/er-plot-layer.R`,
-  used so that `er_style_data_overlay()`/`er_style_data_boxjitter()`'s
-  jittered points rendered identically across repeated `plot()` calls on
-  the same object). Seeding is now opt-in only: a caller can pass
-  `seed = <value>` through `er_plot_add_data()`'s own `...` for
-  reproducible jitter; with no `seed` supplied (the default), no seed
-  management happens at all, and jitter differs from one build to the
+
+* The second query raised in the review was whether the package should
+  include a DOI or other link to a methodological paper that outlines
+  the theory underpinning the package. At this stage there is no published
+  write up of the mini-grammar used in this package apart from its own
+  documentation and pkgdown site (already linked in the DESCRIPTION file),
+  so there is no link that can be added here.
+
+* I have investigated the reported `Warning: Examples in comments in:
+  er_model_interface.Rd` warning that appeared during CRAN review. The 
+  `R/er-generics.R` file is the source for this Rd page: it has no 
+  `@examples` block and the built `.Rd` has no `\examples` section, and 
+  I was unable to reproduce the warning locally via `R CMD check --as-cran`. 
+  I also revisited the exact commit submitted as 0.1.1 and confirmed that 
+  rebuilding the documentation against it produced no changes, so the 
+  documentation itself was not out of date for that commit. I can't fully 
+  rule out, though, that the tarball I actually uploaded was built before 
+  running `roxygenize()` on a still-in-progress version of the 
+  documentation -- if that's what happened, apologies for the oversight. 
+  In any case, I've rerun `roxygenize()` on this submission as 
+  suggested in the CRAN review, and confirmed every exported topic carries 
+  a `@returns`/`\value` tag. The only exception to this is `erplots_data.Rd`, 
+  which is a data page and, as I understand it from reading the CRAN 
+  cookbook, does not require one. My hope is that this addresses the issue.
+  Naturally, I am happy to investigate further if the issue reoccurs.
+
+* I have removed a hard-coded RNG seed (a literal `1234L` that was 
+  accidentally retained in `R/er-plot-layer.R`). The use of RNG seeds is 
+  now opt-in only: a caller can pass `seed = <value>` through the dots 
+  in `er_plot_add_data()`; with no `seed` supplied (the default), no seed
+  management happens at all, and jitter differs from one call to the
   next, like any other jittered geom.
-* Swept the rest of the package for other RNG seed usage while fixing
-  the above, and found one further inconsistency: `er_plot_add_groups()`'s
-  jittered builders (`er_style_group_boxjitter()`, `er_style_group_violinjitter()`)
+
+* Related to the point above, I've also swept the rest of the package for 
+  other RNG seed usage while fixing the above, and found an additional 
+  inconsistency: the jittered builders for `er_plot_add_groups()` previously
   drew their jitter with no seed control at all (not hard-coded, just
-  unseedable). Brought these in line with the same opt-in-only pattern
-  for consistency, which required moving `withr` from `Suggests` to
-  `Imports` (previously only used in tests). Every other seed-adjacent
-  code path already followed this pattern:
-  `er_style_model_spaghetti()`'s simulated draws, and the `seed`
-  parameters `er_simulate()`/`er_vpc_add_simulated()` forward to a
-  model's own method, all default to `NULL` with no fallback.
+  unseedable). This has also been corrected: the same opt-in-only pattern
+  is used for consistency. As consequence `withr` has now moved from 
+  `Suggests` to `Imports` (previously only used in tests). 
 
 Re-checked locally (`R CMD check --as-cran`) after these fixes: 0 errors |
 0 warnings | 1 note (the standard "New submission" note only). Full test
