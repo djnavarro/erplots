@@ -195,7 +195,15 @@ histogram panel.</p>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>'s own <code>...</code>.</p></dd>
+<dd><p>Additional named arguments forwarded from <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>'s
+own <code>...</code>. <code>er_style_group_boxjitter()</code>/<code>er_style_group_violinjitter()</code> read
+a <code>seed</code> from here (<code>NULL</code> when not supplied) and use it to scope
+(via <code><a href="https://withr.r-lib.org/reference/with_seed.html" class="external-link">withr::with_seed()</a></code>) the vertical jitter draw, letting a caller
+make the jitter reproducible across repeated <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> calls on the
+same object – the same opt-in-only mechanism
+<code><a href="er_style_data.html">er_style_data_overlay()</a></code>/<code><a href="er_style_data.html">er_style_data_boxjitter()</a></code> use for the
+data layer (see <code><a href="er_style_data.html">er_style_data()</a></code>); with no <code>seed</code>, each render
+draws a fresh jitter.</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>

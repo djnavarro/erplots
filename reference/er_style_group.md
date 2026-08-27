@@ -144,6 +144,17 @@ er_style_group_violinjitter(
   Additional named arguments forwarded from
   [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)'s
   own `...`.
+  `er_style_group_boxjitter()`/`er_style_group_violinjitter()` read a
+  `seed` from here (`NULL` when not supplied) and use it to scope (via
+  [`withr::with_seed()`](https://withr.r-lib.org/reference/with_seed.html))
+  the vertical jitter draw, letting a caller make the jitter
+  reproducible across repeated
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) calls on the
+  same object – the same opt-in-only mechanism
+  [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)/[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+  use for the data layer (see
+  [`er_style_data()`](https://erplots.djnavarro.net/reference/er_style_data.md));
+  with no `seed`, each render draws a fresh jitter.
 
 - bins:
 

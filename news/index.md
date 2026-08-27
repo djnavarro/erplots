@@ -23,6 +23,13 @@ Addresses CRAN human review feedback on the 0.1.1 submission:
   own `...` for reproducible jitter across rebuilds of the same object;
   with no `seed` (the default), jitter draws from the ambient RNG stream
   and differs from one build to the next, like any other jittered geom.
+- [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)’s
+  jittered builders
+  ([`er_style_group_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md),
+  [`er_style_group_violinjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md))
+  gain the same opt-in `seed` support, for consistency – their jitter
+  previously had no seed control at all. `withr` moves from `Suggests`
+  to `Imports` to support this.
 
 ## erplots 0.1.1
 
