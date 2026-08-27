@@ -37,15 +37,17 @@ submission. In this version I have:
   been added.
 * Investigated the reported `Warning: Examples in comments in:
   er_model_interface.Rd`. `R/er-generics.R` (the source for this Rd page)
-  has no `@examples` block, the built `.Rd` has no `\examples` section,
-  and no other part of its content resembles commented-out example code
-  -- we could not reproduce this warning locally (`R CMD check --as-cran`,
-  `tools::checkRd()`) and believe it may be spurious, but have
-  re-`roxygenize()`d the package regardless, as suggested. Every other
-  exported topic already carries a `@returns`/`\value` tag; the sole
-  exception, `erplots_data.Rd`, is a `\docType{data}` page, which per
+  has no `@examples` block and the built `.Rd` has no `\examples` section,
+  and we were unable to reproduce the warning locally (`R CMD check
+  --as-cran`, `tools::checkRd()`), including by re-checking out and
+  re-`roxygenize()`-ing the exact commit submitted as 0.1.1, which
+  produced no changes. We have nevertheless re-`roxygenize()`d this
+  submission as suggested, and confirmed every exported topic carries a
+  `@returns`/`\value` tag; the sole exception, `erplots_data.Rd`, is a
+  `\docType{data}` page, which per
   <https://contributor.r-project.org/cran-cookbook/docs_issues.html#missing-value-tags-in-.rd-files>
-  does not require one.
+  does not require one. Happy to investigate further with any additional
+  detail on how the warning was produced.
 * Removed a hard-coded RNG seed (a literal `1234L` in `R/er-plot-layer.R`,
   used so that `er_style_data_overlay()`/`er_style_data_boxjitter()`'s
   jittered points rendered identically across repeated `plot()` calls on
