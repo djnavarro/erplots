@@ -1,6 +1,6 @@
 Package: erplots
 Title: Model-Agnostic Exposure-Response Plots
-Version: 0.1.2
+Version: 0.1.2.9000
 Authors@R: 
     person("Danielle", "Navarro", , "djnavarro@protonmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7648-6578"))
 Description: Provides a fluent mini-language for building exposure-response
@@ -21,11 +21,14 @@ Imports:
     rlang,
     scales,
     stats,
+    survival,
     tibble,
     tidyselect,
     withr
 Suggests: 
+    emaxnls (>= 0.1.1.9000),
     erglm,
+    ertte,
     hexbin,
     knitr,
     MASS,
@@ -35,12 +38,16 @@ Suggests:
     testthat (>= 3.0.0)
 URL: https://github.com/djnavarro/erplots, https://erplots.djnavarro.net/
 BugReports: https://github.com/djnavarro/erplots/issues
+Remotes: 
+    djnavarro/emaxnls,
+    djnavarro/erglm,
+    djnavarro/ertte
 Depends: 
     R (>= 4.1.0)
 LazyData: true
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0
-Config/Needs/website: djnavarro/emaxnls, djnavarro/waeponwifestre, rmarkdown
+Config/Needs/website: djnavarro/waeponwifestre, rmarkdown
 Collate: 
     'data.R'
     'er-generics.R'
@@ -56,6 +63,15 @@ Collate:
     'er-plot-style-quantile.R'
     'er-plot-style-summary.R'
     'er-plot-theme.R'
+    'er-tte-add.R'
+    'er-tte-api.R'
+    'er-tte-layer.R'
+    'er-tte-style-censor.R'
+    'er-tte-style-curve.R'
+    'er-tte-style-model.R'
+    'er-tte-style-pvalue.R'
+    'er-tte-style-risktable.R'
+    'er-tte-theme.R'
     'er-vpc-add.R'
     'er-vpc-api.R'
     'er-vpc-build.R'

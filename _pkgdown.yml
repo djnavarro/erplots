@@ -24,6 +24,25 @@ reference:
   - er_style_quantile
   - er_style_data
   - er_style_group
+- title: Time-to-event plots
+  desc: Build Kaplan-Meier/survival-over-time plots
+- contents:
+  - er_tte
+  - er_tte_add_curve
+  - er_tte_add_censor
+  - er_tte_add_risktable
+  - er_tte_add_pvalue
+  - er_tte_add_model
+  - er_tte_theme
+  - er_tte_build
+- title: Time-to-event plot builder functions
+  desc: Low level functions to draw specific components of a time-to-event plot
+- contents:
+  - er_style_tte_curve
+  - er_style_tte_censor
+  - er_style_tte_risktable
+  - er_style_tte_pvalue
+  - er_style_tte_model
 - title: VPC plots
   desc: Functions to build visual predictive check plots
 - contents:
@@ -62,6 +81,7 @@ articles:
       - articles/plot-continuous
       - articles/plot-count
       - articles/plot-vpc
+      - articles/plot-tte
       - articles/design
       - articles/theming
       - articles/extending
