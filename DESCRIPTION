@@ -21,11 +21,13 @@ Imports:
     rlang,
     scales,
     stats,
+    survival,
     tibble,
     tidyselect,
     withr
 Suggests: 
     erglm,
+    ertte,
     hexbin,
     knitr,
     MASS,
@@ -35,6 +37,10 @@ Suggests:
     testthat (>= 3.0.0)
 URL: https://github.com/djnavarro/erplots, https://erplots.djnavarro.net/
 BugReports: https://github.com/djnavarro/erplots/issues
+Remotes: 
+    djnavarro/emaxnls,
+    djnavarro/erglm,
+    djnavarro/ertte
 Depends: 
     R (>= 4.1.0)
 LazyData: true
@@ -56,6 +62,15 @@ Collate:
     'er-plot-style-quantile.R'
     'er-plot-style-summary.R'
     'er-plot-theme.R'
+    'er-tte-add.R'
+    'er-tte-api.R'
+    'er-tte-layer.R'
+    'er-tte-style-censor.R'
+    'er-tte-style-curve.R'
+    'er-tte-style-model.R'
+    'er-tte-style-pvalue.R'
+    'er-tte-style-risktable.R'
+    'er-tte-theme.R'
     'er-vpc-add.R'
     'er-vpc-api.R'
     'er-vpc-build.R'

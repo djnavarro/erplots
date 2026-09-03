@@ -1,10 +1,13 @@
 
 #' Model interface for exposure-response plots
 #'
-#' `erplots` draws exposure-response plots from fitted models that implement this small interface, rather than assuming a particular model class. Implement `er_predict()` for basic plotting support; implement `er_simulate()` for simulation-based visualisations; implement `er_summary()` for summary annotations.
+#' `erplots` draws exposure-response plots from fitted models that implement this small interface, rather than assuming a particular model class. Implement `er_predict()` for basic plotting support; implement `er_simulate()` for simulation-based visualisations; implement `er_summary()` for summary annotations; implement `er_predict_survival()` for a parametric survival-curve overlay in the `er_tte()` grammar ([er_tte_add_model()]).
 #'
 #' @param model A fitted exposure-response model object.
 #' @param newdata A data frame of covariate values at which to predict.
+#'   For `er_predict_survival()`, one row per covariate profile (e.g. one
+#'   per stratum level) -- it does *not* include a time column; times
+#'   come from `time_grid` instead (see "Details").
 #' @param conf_level Confidence level for the prediction interval.
 #' @param nsim Number of simulation replicates.
 #' @param seed Optional RNG seed.
@@ -75,6 +78,28 @@
 #'
 #'   This is purely additive: a method that only ever returns
 #'   `list(p_value = ...)` (as above) continues to work unchanged.
+#' - `er_predict_survival()` returns `newdata`, cross-joined with
+#'   `time_grid` (one row per `newdata` row x `time_grid` value), with
+#'   three additional columns: `time`, `fit_survival` (the point estimate
+#'   of `S(time | newdata row)`), `ci_lower`, and `ci_upper`. Unlike
+#'   `er_predict()`, `newdata` here never includes a time/exposure
+#'   column itself -- `time_grid` is a separate argument, so a method can
+#'   build the full time grid in one call per covariate profile rather
+#'   than being handed a pre-crossed data frame. There is no default
+#'   method that returns `NULL`; a model with no survival-curve support
+#'   should simply not implement this generic, and [er_tte_add_model()]
+#'   errors informatively (via the default method above) if called with
+#'   one.
+#'
+#' @details
+#' Strata membership for `er_predict_survival()` is carried on `newdata`
+#' as an ordinary column (named after the `er_tte()` object's own
+#' `stratify_by` variable), the same way [er_plot_add_model()]'s
+#' `newdata` carries strata -- it is never implicit in `model` itself.
+#' [er_tte_add_model()] builds one `newdata` row per stratum level (or a
+#' single row, unstratified), filling any other covariate the model
+#' references with a reference value exactly as [er_plot_add_model()]
+#' already does (see its "Details").
 #'
 #' @name er_model_interface
 NULL
@@ -113,4 +138,19 @@ er_summary <- function(model, ...) {
 #' @export
 er_summary.default <- function(model, ...) {
   NULL
+}
+
+#' @rdname er_model_interface
+#' @param time_grid Numeric vector of times at which to predict `S(t)`.
+#' @export
+er_predict_survival <- function(model, newdata, time_grid, conf_level = 0.95, ...) {
+  UseMethod("er_predict_survival")
+}
+
+#' @export
+er_predict_survival.default <- function(model, newdata, time_grid, conf_level = 0.95, ...) {
+  rlang::abort(c(
+    paste0("No `er_predict_survival()` method is available for objects of class <", paste(class(model), collapse = "/"), ">."),
+    "i" = "Implement `er_predict_survival.<class>()` so erplots knows how to generate a survival-curve prediction for `er_tte_add_model()`."
+  ))
 }

@@ -505,6 +505,7 @@ utils::globalVariables(c(
   "ci_lower",
   "ci_upper",
   "fit_resp",
+  "fit_survival",
   "n1",
   "n0",
   "n_units",
@@ -539,5 +540,13 @@ utils::globalVariables(c(
   ".vpc_bin",
   ".vpc_stratum",
   "prob",
+  "time",
+  "surv",
+  "lower",
+  "upper",
+  "xmax",
+  "strata",
+  "n_censor",
+  "n_risk",
   ":="
 ))
