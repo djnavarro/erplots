@@ -1,4 +1,5 @@
 CMD
+CRAN's
 Clopper
 Cmax
 Codecov
@@ -11,6 +12,7 @@ Gotchas
 Lifecycle
 Poisson
 R's
+TTE
 VPC
 VPC's
 VPCs
@@ -43,12 +45,17 @@ overplots
 pharmacometric
 pharmacometricians
 pointrange
+pvalue
+recomputation
 replicate's
+risktable
 rollout
 sigmoidal
 standalone
+stat
 tibble
 tidyselection
+uncrowded
 unstyled
 violinjitter
 vline
