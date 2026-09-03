@@ -1,3 +1,5 @@
+# erplots 0.2.0
+
 # erplots 0.1.2
 
 Addresses CRAN reviewer feedback on the 0.1.1 submission. User-facing changes:
