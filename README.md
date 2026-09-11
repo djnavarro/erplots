@@ -10,6 +10,8 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 [![R-CMD-check](https://github.com/djnavarro/erplots/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/djnavarro/erplots/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/djnavarro/erplots/graph/badge.svg)](https://app.codecov.io/gh/djnavarro/erplots)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/erplots)](https://CRAN.R-project.org/package=erplots)
 <!-- badges: end -->
 
 The erplots package provides a mini-language for building
