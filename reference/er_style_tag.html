@@ -9,7 +9,7 @@ function can carry."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">erplots</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,6 +25,7 @@ function can carry."></head><body>
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-vpc.html">Visual predictive checks</a></li>
+    <li><a class="dropdown-item" href="../articles/plot-tte.html">Time-to-event plots</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
     <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
@@ -105,10 +106,11 @@ or <code>NULL</code> (the default) to leave this tag unset.</p></dd>
 
 <dt id="arg-layer">layer<a class="anchor" aria-label="anchor" href="#arg-layer"></a></dt>
 <dd><p>One of <code>"model"</code>, <code>"summary"</code>, <code>"quantile"</code>, <code>"data"</code>,
-<code>"group"</code>, <code>"observed"</code>, or <code>"simulated"</code>, naming which
-<code>er_plot_add_*()</code>/<code>er_vpc_add_*()</code> layer the builder is meant to be
-used with, or <code>NULL</code> (the default) to leave this tag unset. See
-"Details".</p></dd>
+<code>"group"</code>, <code>"observed"</code>, <code>"simulated"</code>, <code>"curve"</code>, <code>"censor"</code>,
+<code>"risktable"</code>, or <code>"pvalue"</code>, naming which
+<code>er_plot_add_*()</code>/<code>er_vpc_add_*()</code>/<code>er_tte_add_*()</code> layer the
+builder is meant to be used with, or <code>NULL</code> (the default) to leave
+this tag unset. See "Details".</p></dd>
 
 
 <dt id="arg-zorder">zorder<a class="anchor" aria-label="anchor" href="#arg-zorder"></a></dt>

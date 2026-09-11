@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">erplots</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,6 +23,7 @@
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-vpc.html">Visual predictive checks</a></li>
+    <li><a class="dropdown-item" href="../articles/plot-tte.html">Time-to-event plots</a></li>
     <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
     <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
@@ -174,6 +175,115 @@
         </dt>
         <dd>Group panel builders for exposure-response plots</dd>
       </dl></div><div class="section level2">
+      <h2 id="time-to-event-plots">Time-to-event plots<a class="anchor" aria-label="anchor" href="#time-to-event-plots"></a></h2>
+
+      <div class="section-desc"><p>Build Kaplan-Meier/survival-over-time plots</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="er_tte.html">er_tte()</a></code>
+
+        </dt>
+        <dd>The time-to-event plotting mini-language</dd>
+
+        <dt>
+
+          <code><a href="er_tte_add_curve.html">er_tte_add_curve()</a></code>
+
+        </dt>
+        <dd>Add a Kaplan-Meier curve layer</dd>
+
+        <dt>
+
+          <code><a href="er_tte_add_censor.html">er_tte_add_censor()</a></code>
+
+        </dt>
+        <dd>Add a censoring-marks layer</dd>
+
+        <dt>
+
+          <code><a href="er_tte_add_risktable.html">er_tte_add_risktable()</a></code>
+
+        </dt>
+        <dd>Add a number-at-risk panel</dd>
+
+        <dt>
+
+          <code><a href="er_tte_add_pvalue.html">er_tte_add_pvalue()</a></code>
+
+        </dt>
+        <dd>Add a log-rank test annotation layer</dd>
+
+        <dt>
+
+          <code><a href="er_tte_add_model.html">er_tte_add_model()</a></code>
+
+        </dt>
+        <dd>Add a parametric survival-curve overlay layer</dd>
+
+        <dt>
+
+          <code><a href="er_tte_theme.html">er_tte_theme()</a></code>
+
+        </dt>
+        <dd>Adjust theme/labels for an <code>er_tte</code> object</dd>
+
+        <dt>
+
+          <code><a href="er_tte_build.html">er_tte_build()</a></code>
+
+        </dt>
+        <dd>Build and render an <code>er_tte</code> object</dd>
+      </dl></div><div class="section level2">
+      <h2 id="time-to-event-plot-builder-functions">Time-to-event plot builder functions<a class="anchor" aria-label="anchor" href="#time-to-event-plot-builder-functions"></a></h2>
+
+      <div class="section-desc"><p>Low level functions to draw specific components of a time-to-event plot</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="er_style_tte_curve.html">er_style_tte_curve_km()</a></code>
+
+        </dt>
+        <dd>Kaplan-Meier curve builders for the TTE grammar</dd>
+
+        <dt>
+
+          <code><a href="er_style_tte_censor.html">er_style_tte_censor_ticks()</a></code>
+
+        </dt>
+        <dd>Censoring-mark builders for the TTE grammar</dd>
+
+        <dt>
+
+          <code><a href="er_style_tte_risktable.html">er_style_tte_risktable_text()</a></code>
+
+        </dt>
+        <dd>Number-at-risk builders for the TTE grammar</dd>
+
+        <dt>
+
+          <code><a href="er_style_tte_pvalue.html">er_style_tte_pvalue_logrank()</a></code>
+
+        </dt>
+        <dd>Log-rank test annotation builders for the TTE grammar</dd>
+
+        <dt>
+
+          <code><a href="er_style_tte_model.html">er_style_tte_model_line()</a></code>
+
+        </dt>
+        <dd>Model-curve builders for the TTE grammar</dd>
+      </dl></div><div class="section level2">
       <h2 id="vpc-plots">VPC plots<a class="anchor" aria-label="anchor" href="#vpc-plots"></a></h2>
 
       <div class="section-desc"><p>Functions to build visual predictive check plots</p></div>
@@ -289,7 +399,7 @@
 
       <dl><dt>
 
-          <code><a href="er_model_interface.html">er_predict()</a></code> <code><a href="er_model_interface.html">er_simulate()</a></code> <code><a href="er_model_interface.html">er_summary()</a></code>
+          <code><a href="er_model_interface.html">er_predict()</a></code> <code><a href="er_model_interface.html">er_simulate()</a></code> <code><a href="er_model_interface.html">er_summary()</a></code> <code><a href="er_model_interface.html">er_predict_survival()</a></code>
 
         </dt>
         <dd>Model interface for exposure-response plots</dd>

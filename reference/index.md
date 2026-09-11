@@ -68,6 +68,53 @@ plot
   [`er_style_group_violinjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md)
   : Group panel builders for exposure-response plots
 
+## Time-to-event plots
+
+Build Kaplan-Meier/survival-over-time plots
+
+- [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) : The
+  time-to-event plotting mini-language
+
+- [`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md)
+  : Add a Kaplan-Meier curve layer
+
+- [`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)
+  : Add a censoring-marks layer
+
+- [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)
+  : Add a number-at-risk panel
+
+- [`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md)
+  : Add a log-rank test annotation layer
+
+- [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
+  : Add a parametric survival-curve overlay layer
+
+- [`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)
+  :
+
+  Adjust theme/labels for an `er_tte` object
+
+- [`er_tte_build()`](https://erplots.djnavarro.net/reference/er_tte_build.md)
+  :
+
+  Build and render an `er_tte` object
+
+## Time-to-event plot builder functions
+
+Low level functions to draw specific components of a time-to-event plot
+
+- [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)
+  : Kaplan-Meier curve builders for the TTE grammar
+- [`er_style_tte_censor_ticks()`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md)
+  : Censoring-mark builders for the TTE grammar
+- [`er_style_tte_risktable_text()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)
+  : Number-at-risk builders for the TTE grammar
+- [`er_style_tte_pvalue_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_pvalue.md)
+  : Log-rank test annotation builders for the TTE grammar
+- [`er_style_tte_model_line()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md)
+  : Model-curve builders for the TTE grammar
+
 ## VPC plots
 
 Functions to build visual predictive check plots
@@ -128,6 +175,7 @@ The generics a model must (or may) implement to work with erplots
 - [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
   [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  [`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
   : Model interface for exposure-response plots
 
 ## Other

@@ -4,7 +4,10 @@
 implement this small interface, rather than assuming a particular model
 class. Implement `er_predict()` for basic plotting support; implement
 `er_simulate()` for simulation-based visualisations; implement
-`er_summary()` for summary annotations.
+`er_summary()` for summary annotations; implement
+`er_predict_survival()` for a parametric survival-curve overlay in the
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) grammar
+([`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)).
 
 ## Usage
 
@@ -14,6 +17,8 @@ er_predict(model, newdata, conf_level = 0.95, ...)
 er_simulate(model, newdata, nsim = 100, seed = NULL, ...)
 
 er_summary(model, ...)
+
+er_predict_survival(model, newdata, time_grid, conf_level = 0.95, ...)
 ```
 
 ## Arguments
@@ -24,7 +29,10 @@ er_summary(model, ...)
 
 - newdata:
 
-  A data frame of covariate values at which to predict.
+  A data frame of covariate values at which to predict. For
+  `er_predict_survival()`, one row per covariate profile (e.g. one per
+  stratum level) – it does *not* include a time column; times come from
+  `time_grid` instead (see "Details").
 
 - conf_level:
 
@@ -41,6 +49,10 @@ er_summary(model, ...)
 - seed:
 
   Optional RNG seed.
+
+- time_grid:
+
+  Numeric vector of times at which to predict `S(t)`.
 
 ## Value
 
@@ -111,6 +123,20 @@ er_summary(model, ...)
   This is purely additive: a method that only ever returns
   `list(p_value = ...)` (as above) continues to work unchanged.
 
+- `er_predict_survival()` returns `newdata`, cross-joined with
+  `time_grid` (one row per `newdata` row x `time_grid` value), with
+  three additional columns: `time`, `fit_survival` (the point estimate
+  of `S(time | newdata row)`), `ci_lower`, and `ci_upper`. Unlike
+  `er_predict()`, `newdata` here never includes a time/exposure column
+  itself – `time_grid` is a separate argument, so a method can build the
+  full time grid in one call per covariate profile rather than being
+  handed a pre-crossed data frame. There is no default method that
+  returns `NULL`; a model with no survival-curve support should simply
+  not implement this generic, and
+  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
+  errors informatively (via the default method above) if called with
+  one.
+
 ## Details
 
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
@@ -146,3 +172,16 @@ assume it receives anything passed via that `...`.
 response-level simulations. `er_summary()` should return `NULL` or a
 named list with optional keys such as `p_value`, `coefficients`, and
 `glance`.
+
+Strata membership for `er_predict_survival()` is carried on `newdata` as
+an ordinary column (named after the
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) object's
+own `stratify_by` variable), the same way
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+`newdata` carries strata – it is never implicit in `model` itself.
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
+builds one `newdata` row per stratum level (or a single row,
+unstratified), filling any other covariate the model references with a
+reference value exactly as
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+already does (see its "Details").
