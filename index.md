@@ -3,15 +3,29 @@
 The erplots package provides a mini-language for building
 exposure-response plots: model curves/ribbons, quantile-binned
 response-rate summaries, data strips, and grouped distribution panels.
-It is model-agnostic: erplots never fits a model itself. Instead, you
-fit a model with whatever package suits your workflow
-(e.g. [erglm](https://github.com/djnavarro/erglm) for logistic
-regression), and pass the fitted object to
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md).
+It supports time-to-event plots and visual predictive check plots as
+well as the core exposure-response plots, and it is model agnostic: it
+can display model predictions and summaries for a particular model type
+as long an appropriate model interface (consisting of a few key S3
+methods) is available. Examples of packages that support the interface
+are [erglm](https://erglm.djnavarro.net) (e.g., logistic regression,
+linear regression, Poisson regression, etc),
+[ertte](https://ertte.djnavarro.net) (parametric survival models, Cox
+proportional hazard models), and
+[emaxnls](https://emaxnls.djnavarro.net) (hyperbolic and sigmoidal Emax
+regression models for binary and continuous outcomes).
 
 ## Installation
 
-You can install the development version of erplots like so:
+You can install the lates CRAN release like so:
+
+``` r
+
+install.packages("erplots")
+```
+
+Alternatively, you can install the development version of erplots with
+this:
 
 ``` r
 
