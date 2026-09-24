@@ -184,7 +184,8 @@ data and the simulated data.
 ## Builder functions for exposure-response plots
 
 Low level functions to draw specific components of an exposure-response
-plot.
+plot. Each function supports one option for the `style` argument to the
+corresponding layer in the exposure-response plot.
 
 - [`er_style`](https://erplots.djnavarro.net/reference/er_style.md) :
   Builder functions for exposure-response plots
@@ -218,7 +219,9 @@ plot.
 
 ## Builder functions for time-to-event plots
 
-Low level functions to draw specific components of a time-to-event plot
+Low level functions to draw specific components of a time-to-event plot.
+Each function supports one option for the `style` argument to the
+corresponding layer in the time-to-event plot.
 
 - [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)
   : Kaplan-Meier curve builders for the TTE grammar
@@ -233,7 +236,9 @@ Low level functions to draw specific components of a time-to-event plot
 
 ## Builder functions for visual predictive check plots
 
-Low level functions to draw specific components of a VPC plot
+Low level functions to draw specific components of a VPC plot. Each
+function supports one option for the `style` argument to the
+corresponding layer in the VPC plot.
 
 - [`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
   [`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
