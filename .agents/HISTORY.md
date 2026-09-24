@@ -1456,3 +1456,62 @@ the quantile layer's `_vlines` bin-boundary lines (drawn from
 -- a boundary line landing outside a narrowed `xlim` is a much smaller
 concern than a whole summary marker vanishing, and is left as a known,
 minor, out-of-scope gap).
+
+## VPC observed/simulated markers clipped to (and warn about) narrowed `xlim`/`ylim` (issue #17)
+
+Follow-up investigation, after #14/#15/#16, into whether `er_vpc()`/
+`er_tte()` had an analogous silent-data-loss risk. `er_vpc_theme(xlim =
+)`/`ylim = )` is (and remains) purely cosmetic -- it only feeds
+`ggplot2::coord_cartesian()` in `.build_vpc_plot()`, never touching the
+bin/percentile computations in `.layer_vpc_observed()`/
+`.layer_vpc_simulated()` -- so there's no staleness bug the way #14's
+model-layer grid had. The bug is that same `coord_cartesian(..., clip =
+"off")` call: when a narrowed `xlim`/`ylim` puts an observed/simulated
+summary point, errorbar, or percentile line/ribbon outside the requested
+window, ggplot2 drew it anyway, bleeding past the panel border with no
+warning -- confirmed directly (`er_vpc_theme(ylim = c(-1, 1))` on data
+whose CI band reaches roughly -2.2 to 3.3 drew the overshoot with zero
+warnings).
+
+Fixed the same way as the previous entry: `.clip_vpc_config_to_limits()`
+(`R/er-vpc-build.R`) filters (and `rlang::warn()`s about) `config$summary`/
+`config$percentiles` before `.build_vpc_plot()` hands them to `config$style`,
+called separately for the observed and simulated layer so each source is
+named in its own warning. Like `.clip_quantile_summary_to_limits()`, only
+the *marker* position is checked (`y_mid`/`y`, plus `x_mid`/`x_median` when
+`plot_by` is numeric), not the whole errorbar/ribbon's CI bounds -- the
+bin's own statistic is never touched, only whether its marker gets drawn.
+A categorical `plot_by`'s discrete `.vpc_bin` position is never filtered
+against `xlim`, since a numeric window has no meaningful bearing on it.
+
+One wrinkle `.clip_to_limits()`/`.clip_quantile_summary_to_limits()` didn't
+have to deal with: a VPC observed/simulated builder reads from exactly one
+of two config tables (`config$summary` for the adaptive mean/errorbar
+idiom; `config$percentiles` for the two quantile-based idioms), chosen by
+which builder was passed to `er_vpc_add_observed()`/`_simulated()` --
+neither existing tag (`layout`, checked/opt-in for a *different* purpose)
+disambiguates the two "adaptive" idioms (`mean_errorbar` vs.
+`quantile_errorbar`), which are both untagged for `layout`. Clipping (and
+warning about) both tables unconditionally produced a spurious warning
+about markers that were never going to be drawn regardless of `xlim`/
+`ylim`, just because the *other* idiom's table happened to have
+out-of-range rows too. Fixed by adding a new, optional `er_style_tag()`
+attribute, `marker_source` (`"summary"` or `"percentiles"`), read via
+`.style_vpc_marker_source()`; all six built-in observed/simulated builders
+are now tagged with the one table they actually draw from. An untagged
+custom builder still has both tables checked (always safe, the same
+opt-in-degradation every other `er_style_tag()` attribute gets), so it
+just risks the same spurious-warning behaviour a built-in builder used to
+have before this fix.
+
+Also fixed along the way: the percentile column-name mismatch between
+`.layer_vpc_observed()` (`y`) and `.layer_vpc_simulated()` (`y_mid`) --
+the clip helper picks whichever name the given `config$percentiles`
+actually has, rather than assuming one.
+
+Checked whether `er_tte()` had the same shape of bug; it doesn't (see
+issue #18 for the different, staleness-shaped bug it does have,
+deferred in `PLAN.md`) -- `er_tte_build()` uses hard
+`ggplot2::scale_x_continuous(limits = ...)`, not `coord_cartesian(clip =
+"off")`, so ggplot2's own scale mechanism already crops and warns about
+a narrowed axis there.

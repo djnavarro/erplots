@@ -36,6 +36,24 @@ it. Not scheduled.
   supports this).
 - Prediction-correction (pcVPC).
 
+### Deferred: `er_tte()`'s model/risktable layers go stale when `xlim` is widened after them (issue #18)
+
+Follow-on to #14/#15/#16/#17 (see `HISTORY.md`): `er_tte_add_model()`'s
+default `time_grid` and `er_tte_add_risktable()`'s default `times`/
+`breaks` are computed once at add-layer time from `object$time$limits`,
+and `er_tte_theme(xlim = ...)` afterward is documented as not refreshing
+them. Narrowing turns out to be self-correcting (`er_tte_build()` uses
+hard `ggplot2::scale_x_continuous(limits = ...)`, not `coord_cartesian(clip
+= "off")`, so ggplot2 itself drops/crops the overflow and warns), but
+widening is genuinely silent: the model curve/ribbon and the
+risktable's reported time points simply stop at the old, narrower
+boundary, leaving the rest of the widened panel blank with no warning at
+all. The natural fix mirrors #15's `.refresh_model_predictions()`
+pattern -- recompute `config$time_grid`/`config$breaks` from the
+*current* `object$time$limits` at the top of `er_tte_build()`, when the
+caller didn't supply an explicit `time_grid`/`times`. Not yet
+implemented.
+
 ## Later release (proposed 0.2.0): TTE plotting grammar (`er_tte`) -- remaining work
 
 Tracked upstream in [ertte#1](https://github.com/djnavarro/ertte/issues/1)
