@@ -363,6 +363,15 @@ plot.er_tte <- function(x, y = NULL, ...) {
 er_tte_build <- function(object) {
   if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
 
+  # recompute every time-dependent default against the *current*
+  # `object$time$limits`, rather than whatever was cached when each
+  # layer was added -- see issue #18 (the TTE-grammar analogue of
+  # `er_plot_build()`'s own `.refresh_model_predictions()`/issue #14).
+  # Each is a no-op when its layer isn't present.
+  object <- .refresh_tte_time_upper(object)
+  object <- .refresh_tte_model_predictions(object)
+  object <- .refresh_tte_risktable_breaks(object)
+
   # the risktable layer's own time breaks (when present) double as the
   # curve panel's x-axis ticks, so the two panels' shared x-axis lines
   # up exactly once patchwork collects it below

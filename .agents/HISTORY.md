@@ -1515,3 +1515,60 @@ deferred in `PLAN.md`) -- `er_tte_build()` uses hard
 `ggplot2::scale_x_continuous(limits = ...)`, not `coord_cartesian(clip =
 "off")`, so ggplot2's own scale mechanism already crops and warns about
 a narrowed axis there.
+
+## `er_tte()`'s curve/model/risktable time defaults recomputed at build time, not add time (issue #18)
+
+Follow-on to #14/#15/#16/#17, applying #14/#15's exact fix shape to
+`er_tte()`. Unlike `er_vpc_theme()`'s purely cosmetic `xlim`/`ylim`,
+`er_tte_theme(xlim = ...)` structurally overwrites `object$time$limits`
+-- and three layers cached a value derived from it at *add* time: the
+curve layer's `config$time_upper` (where the confidence ribbon's last
+interval stops), the model layer's default `time_grid`, and the
+risktable layer's default `times`/`breaks` (which also become the curve
+panel's shared x-axis ticks). None of the three used to be revisited if
+`er_tte_theme(xlim = ...)` was called *after* the layer that read them.
+
+Narrowing turned out to be self-correcting and not actually a bug in
+practice: `er_tte_build()` uses hard `ggplot2::scale_x_continuous(limits
+= ...)` (not `coord_cartesian(clip = "off")`, unlike `er_plot()`/
+`er_vpc()`), so an out-of-range row gets NA'd and dropped by ggplot2
+itself, which raises its own "Removed N rows..." warning. Widening,
+however, was genuinely silent: reproduced with a curve/model fit on data
+truncated to `time <= 300`, then `er_tte_theme(xlim = c(0, 1022))`
+afterward -- the model curve/ribbon (and the curve's own confidence
+ribbon, via the stale `time_upper`) simply stopped at 300, leaving
+two-thirds of the widened panel blank, with no warning of any kind.
+
+Fixed the same way as #14/#15: each layer's add-time computation stays
+eager (a bad `model`/`predict_args` combination still fails immediately
+at `er_tte_add_model()`'s own call site), but `er_tte_build()` now
+unconditionally recomputes all three from the object's *current*
+`object$time$limits` before assembling any geoms:
+
+- `.refresh_tte_time_upper()` -- just re-reads `object$time$limits[2]`.
+- `.refresh_tte_model_predictions()` -- re-derives the default
+  `time_grid` (`seq()` over `time$limits`) and re-runs
+  `er_predict_survival()` against it. An explicit, caller-supplied
+  `time_grid` (`er_tte_add_model()`'s own argument, distinct from the
+  `NULL` default) is never regenerated -- unlike `er_plot_add_model()`,
+  which has no equivalent override to preserve, `er_tte_add_model()`
+  lets a caller pin an exact grid, and that has to keep meaning "exactly
+  this," not "unless the axis later changes."
+- `.refresh_tte_risktable_breaks()` -- same explicit-override carve-out
+  for `times`, re-deriving `.default_risktable_times()`'s `pretty()`-based
+  breaks otherwise.
+
+All three add-time computations were refactored to share their
+build-time counterparts' actual logic (`.compute_tte_model_config()`,
+`.compute_tte_risktable_config()`) rather than duplicating it, so add
+time and build time can never drift apart. `model`/`stratify`/
+`predict_args`/`time_grid` (the caller's own, possibly-`NULL`, argument)
+are now stashed on the model layer's `config`; `times`/`n_times`
+likewise on the risktable layer's -- mirroring `.layer_model()`'s own
+`config$predict_args` stash from #14/#15.
+
+`er_predict_survival()`/`summary.survfit()` are both cheap to re-run (a
+prediction against an already-fitted model / a KM-fit lookup, neither a
+refit), so this keeps `er_tte_theme(xlim = ...)`'s effect on every
+time-dependent default order-independent, the same guarantee #15 gave
+`er_plot()`'s model layer.
