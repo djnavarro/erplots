@@ -37,6 +37,11 @@
 # confidence ribbon's final interval needs to extend to (there's no
 # "next event time" for the last interval to stop at, unlike every
 # earlier interval).
+#
+# `config$time_upper` is recomputed at build time by
+# `.refresh_tte_time_upper()` (see issue #18), so this add-time value is
+# only ever a snapshot for what would otherwise be an unpopulated field
+# between `er_tte_add_curve()` and the first `er_tte_build()` call.
 #' @noRd
 .layer_tte_curve <- function(object, style, dots) {
   config <- list()
@@ -89,8 +94,28 @@
 # stratum, even past that stratum's own last observed time (where it
 # would otherwise be silently dropped), so every panel row has the same
 # set of x-positions to plot at.
+#
+# `times`/`n_times` (the caller's own, possibly-`NULL`, arguments) are
+# stashed on `config` so `.refresh_tte_risktable_breaks()` (called from
+# `er_tte_build()`, see issue #18) can recompute `breaks`/`table` against
+# whatever `object$time$limits` looks like at build time, rather than
+# being stuck with the snapshot taken here. An explicit `times` is never
+# regenerated -- only the `NULL` (default-breaks) case depends on
+# `time$limits` at all.
 #' @noRd
 .layer_tte_risktable <- function(object, style, dots, times, n_times) {
+  config <- .compute_tte_risktable_config(object, times, n_times)
+  config$times_arg <- times
+  config$n_times <- n_times
+  list(config = config, style = style, dots = dots)
+}
+
+# Shared by `.layer_tte_risktable()` (add-time) and
+# `.refresh_tte_risktable_breaks()` (build-time, see issue #18) -- the
+# actual `breaks`/`table` computation, factored out so both call sites
+# stay in sync.
+#' @noRd
+.compute_tte_risktable_config <- function(object, times, n_times) {
   breaks <- times %||% .default_risktable_times(object$time$limits, n_times)
   breaks <- sort(unique(breaks))
 
@@ -106,8 +131,7 @@
     )
   }
 
-  config <- list(table = table, breaks = breaks)
-  list(config = config, style = style, dots = dots)
+  list(table = table, breaks = breaks)
 }
 
 # model ---------------------------------------------------------------------
@@ -128,13 +152,48 @@
 # layers show), not the raw numeric variable -- a documented
 # approximation, the TTE-grammar analogue of `er_vpc()`'s own numeric
 # `stratify_by` binning.
+#
+# `model`/`stratify`/`predict_args`/`time_grid` (the caller's own,
+# possibly-`NULL`, `time_grid` argument) are all stashed on `config` so
+# `.refresh_tte_model_predictions()` (called from `er_tte_build()`, see
+# issue #18 -- the TTE-grammar analogue of `er_plot()`'s own
+# `.refresh_model_predictions()`/issue #14) can recompute
+# `config$predictions` against whatever `object$time$limits` looks like
+# at build time, rather than being stuck with the snapshot taken here.
+# An explicit `time_grid` is never regenerated -- only the `NULL`
+# (default-grid) case depends on `time$limits` at all. This is still an
+# eager, add-time computation purely so a bad `model`/`predict_args`
+# combination fails immediately at the `er_tte_add_model()` call site
+# rather than silently, much later, inside `plot()`/`print()`; the value
+# computed here is unconditionally replaced by
+# `.refresh_tte_model_predictions()` at build time, so it never actually
+# reaches a builder.
 #' @noRd
 .layer_tte_model <- function(object, model, stratify, conf_level, time_grid, predict_args, style, dots) {
   config <- list()
 
-  time_grid <- time_grid %||% seq(object$time$limits[1], object$time$limits[2], length.out = 100L)
+  config$model <- model
+  config$stratify <- stratify
+  config$conf_level <- conf_level
+  config$predict_args <- predict_args
+  config$time_grid_arg <- time_grid
 
-  if (!stratify) {
+  config <- .compute_tte_model_config(object, config)
+
+  list(config = config, style = style, dots = dots)
+}
+
+# Shared by `.layer_tte_model()` (add-time) and
+# `.refresh_tte_model_predictions()` (build-time, see issue #18) -- the
+# actual `newdata`/prediction computation, factored out so both call
+# sites stay in sync. `config` must already carry `model`/`stratify`/
+# `conf_level`/`predict_args`/`time_grid_arg`; this fills in (or
+# recomputes) `config$time_grid`/`config$predictions`.
+#' @noRd
+.compute_tte_model_config <- function(object, config) {
+  time_grid <- config$time_grid_arg %||% seq(object$time$limits[1], object$time$limits[2], length.out = 100L)
+
+  if (!config$stratify) {
     newdata <- data.frame(matrix(nrow = 1, ncol = 0))
   } else {
     strata_levels <- levels(factor(object$data[[".er_tte_strata"]]))
@@ -148,13 +207,12 @@
   newdata <- .fill_reference_covariates(newdata, object$data)
 
   config$time_grid <- time_grid
-  config$conf_level <- conf_level
   config$predictions <- rlang::exec(
-    er_predict_survival, model = model, newdata = newdata,
-    time_grid = time_grid, conf_level = conf_level, !!!predict_args
+    er_predict_survival, model = config$model, newdata = newdata,
+    time_grid = time_grid, conf_level = config$conf_level, !!!config$predict_args
   )
 
-  list(config = config, style = style, dots = dots)
+  config
 }
 
 
@@ -189,4 +247,62 @@
   )
 
   list(config = config, style = style, dots = dots)
+}
+
+
+# build-time refreshes (issue #18) -----------------------------------------
+
+# `object$time$limits` is structural: `er_tte_theme(xlim = ...)`
+# overwrites it directly (unlike `er_plot()`'s `exposure$limits`/
+# `er_vpc()`'s purely cosmetic `theme$xlim`). Three layers cache a value
+# derived from it at *add* time -- the curve layer's `time_upper`, the
+# model layer's default `time_grid`, and the risktable layer's default
+# `breaks` (which also become the curve panel's shared x-axis ticks, see
+# `er_tte_build()`) -- and none of them used to be revisited if
+# `er_tte_theme(xlim = ...)` was called afterward. Narrowing turned out
+# to be self-correcting (`er_tte_build()` uses hard
+# `ggplot2::scale_x_continuous(limits = ...)`, not
+# `coord_cartesian(clip = "off")`, so ggplot2's own scale mechanism drops
+# and warns about the overflow), but *widening* was genuinely silent: the
+# curve's confidence ribbon, the model curve/ribbon, and the risktable's
+# reported time points all simply stopped at the old, narrower boundary,
+# leaving the rest of the widened panel blank with no warning at all.
+#
+# These three functions are called unconditionally from the top of
+# `er_tte_build()`, mirroring `er_plot_build()`'s own
+# `.refresh_model_predictions()` (issue #14) -- each is a no-op when its
+# layer isn't present, and recomputing is cheap (no model refit; at most
+# a fresh `er_predict_survival()` prediction call or a `summary.survfit()`
+# call against the already-computed KM fit), so this keeps
+# `er_tte_theme(xlim = ...)`'s effect on every time-dependent default
+# order-independent regardless of whether it's called before or after
+# the layer that reads it.
+
+#' @noRd
+.refresh_tte_time_upper <- function(object) {
+  if (is.null(object$layer$curve)) return(object)
+  object$layer$curve$config$time_upper <- object$time$limits[2]
+  object
+}
+
+#' @noRd
+.refresh_tte_model_predictions <- function(object) {
+  layer <- object$layer$model
+  if (is.null(layer)) return(object)
+
+  layer$config <- .compute_tte_model_config(object, layer$config)
+  object$layer$model <- layer
+  object
+}
+
+#' @noRd
+.refresh_tte_risktable_breaks <- function(object) {
+  layer <- object$layer$risktable
+  if (is.null(layer)) return(object)
+
+  refreshed <- .compute_tte_risktable_config(object, layer$config$times_arg, layer$config$n_times)
+  layer$config$table  <- refreshed$table
+  layer$config$breaks <- refreshed$breaks
+  object$layer$risktable <- layer
+  object
 }

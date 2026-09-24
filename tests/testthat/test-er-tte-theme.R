@@ -133,3 +133,89 @@ test_that("er_tte_theme() calls accumulate, leaving unsupplied fields unchanged"
   expect_equal(obj$theme$xlab, "X")
   expect_equal(obj$theme$ylab, "Y")
 })
+
+test_that("er_tte_theme(xlim = ...) after er_tte_add_model()/er_tte_add_risktable() still widens their defaults (#18)", {
+  # regression test for issue #18: the model layer's default `time_grid`
+  # and the risktable layer's default `breaks` used to be snapshotted
+  # once, at add-layer time, over whatever `object$time$limits` happened
+  # to be *then* -- a later `er_tte_theme(xlim = ...)` never revisited
+  # either. Narrowing turned out to be self-correcting (`er_tte_build()`
+  # uses hard `scale_x_continuous(limits = ...)`, which ggplot2 itself
+  # crops/warns about), but *widening* left the model curve/ribbon and
+  # the risktable's reported time points stuck at the old, narrower
+  # range, with no warning at all. Contrast with "er_tte_theme()'s xlim
+  # affects er_tte_add_model()'s default time_grid when set first" above
+  # -- this is the previously-broken *other* call order.
+  lung_early <- subset(survival::lung, time <= 300)
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, lung_early)
+
+  tte_after <- lung_early |>
+    er_tte(time, status == 2) |>
+    er_tte_add_curve() |>
+    er_tte_add_model(mod) |>
+    er_tte_add_risktable() |>
+    er_tte_theme(xlim = c(0, 1022))
+
+  built_after <- er_tte_build(tte_after)
+  expect_equal(range(built_after$layer$model$config$time_grid), c(0, 1022))
+  expect_equal(built_after$layer$curve$config$time_upper, 1022)
+  # `.default_risktable_times()` snaps to `pretty()` breaks within the
+  # limit, so this won't hit 1022 exactly -- just confirm it's no longer
+  # stuck at (or near) the old, narrower 0-300 range
+  expect_true(max(built_after$layer$risktable$config$breaks) > 300)
+  expect_true(max(built_after$layer$risktable$config$table$time) > 300)
+
+  # same result regardless of call order
+  tte_before <- lung_early |>
+    er_tte(time, status == 2) |>
+    er_tte_theme(xlim = c(0, 1022)) |>
+    er_tte_add_curve() |>
+    er_tte_add_model(mod) |>
+    er_tte_add_risktable()
+
+  built_before <- er_tte_build(tte_before)
+  expect_equal(built_after$layer$model$config$time_grid, built_before$layer$model$config$time_grid)
+  expect_equal(built_after$layer$curve$config$time_upper, built_before$layer$curve$config$time_upper)
+  expect_equal(built_after$layer$risktable$config$breaks, built_before$layer$risktable$config$breaks)
+})
+
+test_that("er_tte_theme(xlim = ...) after er_tte_add_model()/er_tte_add_risktable() still narrows their defaults", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+
+  tte_narrowed <- survival::lung |>
+    er_tte(time, status == 2) |>
+    er_tte_add_curve() |>
+    er_tte_add_model(mod) |>
+    er_tte_add_risktable() |>
+    er_tte_theme(xlim = c(0, 200))
+
+  built <- er_tte_build(tte_narrowed)
+  expect_equal(range(built$layer$model$config$time_grid), c(0, 200))
+  expect_equal(built$layer$curve$config$time_upper, 200)
+  expect_true(max(built$layer$risktable$config$breaks) <= 200)
+})
+
+test_that("er_tte_add_model(time_grid = ...)/er_tte_add_risktable(times = ...) explicit overrides are never regenerated from time$limits", {
+  lung_early <- subset(survival::lung, time <= 300)
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, lung_early)
+
+  tte <- lung_early |>
+    er_tte(time, status == 2) |>
+    er_tte_add_curve() |>
+    er_tte_add_model(mod, time_grid = seq(0, 250, length.out = 10)) |>
+    er_tte_add_risktable(times = c(0, 100, 200)) |>
+    er_tte_theme(xlim = c(0, 1022))
+
+  built <- er_tte_build(tte)
+  expect_equal(built$layer$model$config$time_grid, seq(0, 250, length.out = 10))
+  expect_equal(built$layer$risktable$config$breaks, c(0, 100, 200))
+})
+
+test_that("er_tte_build() refreshes are no-ops when the model/risktable layers aren't present", {
+  tte <- survival::lung |>
+    er_tte(time, status == 2) |>
+    er_tte_add_curve() |>
+    er_tte_theme(xlim = c(0, 200))
+
+  expect_no_error(er_tte_build(tte))
+})
