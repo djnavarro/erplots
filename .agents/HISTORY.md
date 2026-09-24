@@ -1335,3 +1335,44 @@ ignoring `scale` uncertainty -- not a claim of optimality, just enough
 to exercise the generic contract. Real `ertte` integration tests are
 deferred until `ertte` actually implements
 `er_predict_survival.ertte_model()` (see `PLAN.md`).
+
+## Model layer prediction grid recomputed at build time, not add time (issue #14)
+
+`er_plot_add_model()`'s `.layer_model()` computed its prediction grid
+(`.get_model_predictions()`, a `seq()` over `exposure$limits`) eagerly, at
+add-layer time. `er_plot_theme(xlim = ...)` mutates `object$exposure$limits`
+for the coordinate system, but never revisited an already-added model
+layer's cached grid -- so `er_plot_add_model(mod) |> er_plot_theme(xlim =
+c(0, 2000))` left the model curve/ribbon spanning the pre-`xlim` (typically
+wider, data-derived) range while the panel narrowed around it. Combined
+with `.build_base_plot()`'s `coord_cartesian(..., clip = "off")` (kept
+deliberately so a point sitting exactly on a supplied limit isn't clipped
+at the panel edge), that stale excess wasn't cropped at the new panel
+border either -- it drew straight through it.
+
+Fixed by keeping the add-time computation (so a bad model/`predict_args`
+combination still fails immediately at the `er_plot_add_model()` call site)
+but adding an unconditional recompute at build time:
+`.refresh_model_predictions()` (`R/er-plot-layer.R`), called from the top of
+`er_plot_build()` before `.build_base_plot()`. It re-runs
+`.get_model_predictions()` against `object`'s *current*
+`exposure`/`strata`/`stratify`/`data`, using `model`/`conf_level`/
+`predict_args` stashed on `config` at add time. Re-running `er_predict()`
+is cheap (a prediction against an already-fitted model, not a refit), so
+this is safe and keeps `er_plot_theme(xlim = ...)`'s effect on the model
+layer order-independent -- it also transparently handles *widening* `xlim`
+after `er_plot_add_model()`, stretching the grid rather than leaving a
+short line that stops short of the new, wider panel.
+
+Only the model layer needed this: quantile/data/group/overlay layers all
+plot the observed data's own exposure values (or bins derived from them),
+which don't depend on `exposure$limits` at all -- the model layer is the
+only one that synthesizes a grid explicitly bounded by it.
+`er_style_model_spaghetti()` needed no separate fix, since its `newdata`
+is derived from `config$predictions` and so picks up the refresh
+automatically.
+
+The broader question -- whether *any* layer whose own data exceeds a
+narrowed `xlim`/`ylim` can still bleed past the panel border via the same
+`clip = "off"` mechanism -- is tracked as a deferred follow-up in
+`PLAN.md`, not addressed here.

@@ -14,12 +14,27 @@
   # confidence level
   config$conf_level <- conf_level
 
+  # stashed so `.refresh_model_predictions()` (called from
+  # `er_plot_build()`) can recompute `config$predictions` against
+  # whatever `object$exposure$limits`/`object$strata` look like at build
+  # time, rather than being stuck with the snapshot taken here -- see
+  # that function's own comment for why this matters (issue #14: a later
+  # `er_plot_theme(xlim = ...)` call must still be reflected in the
+  # model curve/ribbon, not just the coordinate system)
+  config$predict_args <- predict_args
+
   # model predictions, via the `er_predict()` generic. `predict_args`
   # (from `er_plot_add_model()`'s own argument of the same name, kept
   # separate from `dots`/`config$dots` below) is spliced into the
   # `er_predict()` call itself, for model-specific arguments beyond the
   # fixed `model`/`newdata`/`conf_level` contract -- see
-  # `?er_model_interface` and `?er_plot_add_model`'s "Details".
+  # `?er_model_interface` and `?er_plot_add_model`'s "Details". This is
+  # an eager, add-time computation purely so a bad model/`predict_args`
+  # combination fails immediately at the `er_plot_add_model()` call site
+  # rather than silently, much later, inside `plot()`/`print()`; the
+  # value computed here is unconditionally replaced by
+  # `.refresh_model_predictions()` at build time (`er_plot_build()`), so
+  # it never actually reaches a builder.
   config$predictions <- .get_model_predictions(
     config$model, 
     config$conf_level, 
@@ -447,6 +462,51 @@
 .get_strata_values <- function(data, name) {
   if (is.null(name)) return(NA)
   data[[name]]
+}
+
+# Recomputes the model layer's `config$predictions` from scratch, using
+# `object`'s *current* `exposure`/`strata` rather than whatever they were
+# when `er_plot_add_model()` was first called. Called unconditionally from
+# `er_plot_build()` (before `.build_base_plot()`) whenever a model layer is
+# present.
+#
+# Why this exists (issue #14): `.layer_model()` computes `config$predictions`
+# eagerly, at add-layer time, over a `seq()` grid spanning
+# `object$exposure$limits` as it stood *then*. A later
+# `er_plot_theme(xlim = ...)` call mutates `object$exposure$limits` for the
+# coordinate system, but never revisits an already-added model layer's
+# cached predictions -- so the model curve/ribbon kept spanning the old
+# (typically wider, data-derived) range while the panel's `coord_cartesian()`
+# window narrowed to the new `xlim`. Because `.build_base_plot()` uses
+# `clip = "off"` (needed so a point sitting exactly on a supplied limit
+# isn't clipped at the panel edge -- see `AGENTS.md`), that stale excess
+# wasn't cropped at the panel border either: it was drawn straight through
+# it. Recomputing at build time -- right before the geoms are actually
+# built -- makes the model layer's grid track `exposure$limits`/`strata`
+# however they end up, regardless of what order `er_plot_add_model()` and
+# `er_plot_theme(xlim = ...)` were called in (and, symmetrically, stretches
+# to fill a *widened* `xlim` rather than leaving a short line that stops
+# short of the new panel edge).
+#
+# `er_predict()` is a prediction call against an already-fitted model, not
+# a refit -- re-running it here is cheap and doesn't touch model internals,
+# consistent with "erplots never calls a model-fitting function".
+.refresh_model_predictions <- function(object) {
+  layer_model <- object$layer$model
+  if (is.null(layer_model)) return(object)
+
+  layer_model$config$predictions <- .get_model_predictions(
+    layer_model$config$model,
+    layer_model$config$conf_level,
+    object$exposure,
+    object$strata,
+    layer_model$stratify,
+    object$data,
+    predict_args = layer_model$config$predict_args
+  )
+
+  object$layer$model <- layer_model
+  object
 }
 
 .get_model_predictions <- function(model, conf_level, exposure, strata, stratify, data,
