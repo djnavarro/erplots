@@ -34,7 +34,7 @@ reference:
   - er_vpc_theme
   - er_vpc_build
 - title: Builder functions for exposure-response plots
-  desc: Low level functions to draw specific components of an exposure-response plot.
+  desc: Low level functions to draw specific components of an exposure-response plot. Each function supports one option for the `style` argument to the corresponding layer in the exposure-response plot.
 - contents: 
   - er_style
   - er_style_tag
@@ -44,7 +44,7 @@ reference:
   - er_style_data
   - er_style_group
 - title: Builder functions for time-to-event plots
-  desc: Low level functions to draw specific components of a time-to-event plot
+  desc: Low level functions to draw specific components of a time-to-event plot. Each function supports one option for the `style` argument to the corresponding layer in the time-to-event plot.
 - contents:
   - er_style_tte_curve
   - er_style_tte_censor
@@ -52,7 +52,7 @@ reference:
   - er_style_tte_pvalue
   - er_style_tte_model
 - title: Builder functions for visual predictive check plots
-  desc: Low level functions to draw specific components of a VPC plot
+  desc: Low level functions to draw specific components of a VPC plot. Each function supports one option for the `style` argument to the corresponding layer in the VPC plot.
 - contents:
   - er_style_vpc_observed
   - er_style_vpc_simulated
