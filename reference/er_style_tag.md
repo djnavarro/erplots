@@ -14,7 +14,8 @@ er_style_tag(
   layer = NULL,
   zorder = NULL,
   response_types = NULL,
-  plot_by_types = NULL
+  plot_by_types = NULL,
+  marker_source = NULL
 )
 ```
 
@@ -81,12 +82,20 @@ er_style_tag(
   [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)'s
   `plot_by` argument) the builder supports; see "Details".
 
+- marker_source:
+
+  One of `"summary"` or `"percentiles"`, naming which of a VPC
+  observed/simulated builder's two config tables (`config$summary` or
+  `config$percentiles`) it actually draws its marker(s) from, or `NULL`
+  (the default) to leave this tag unset. See "Details".
+
 ## Value
 
 `style`, with whichever of the `"er_style_layout"`/
 `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`/
 `"er_style_zorder"`/`"er_style_response_types"`/
-`"er_style_plot_by_types"` attributes were requested attached.
+`"er_style_plot_by_types"`/`"er_style_vpc_marker_source"` attributes
+were requested attached.
 
 ## Details
 
@@ -200,6 +209,21 @@ checked against either, so a custom builder that doesn't declare them
 keeps working unchanged (though it's then responsible for guarding
 against its own incompatible inputs, the way every built-in VPC builder
 still does internally as a fallback).
+
+`marker_source` is also optional and VPC-specific, read by
+`.clip_vpc_config_to_limits()` (see
+[`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)'s
+`xlim`/`ylim`) to decide which of a VPC observed/simulated builder's two
+config tables to crop-and-warn against when a marker falls outside the
+plotted axis limits. A builder that plots `config$summary` (e.g.
+[`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md))
+should tag `marker_source = "summary"`; one that plots
+`config$percentiles` (e.g.
+[`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md),
+[`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md))
+should tag `marker_source = "percentiles"`. An untagged builder has both
+tables checked, which is always safe but can produce a spurious warning
+about a table the builder never actually draws from.
 
 ## See also
 
