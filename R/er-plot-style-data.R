@@ -18,16 +18,27 @@
 #'   it to [ggplot2::position_jitter()], letting a caller make the jitter
 #'   reproducible across repeated `plot()` calls on the same object; with no
 #'   `seed`, each render draws a fresh jitter, as for any other jittered geom.
-#' @param jitter_height Vertical jitter applied to raw points.
-#' @param alpha Point transparency for `er_style_data_overlay()`; fill
-#'   transparency for `er_style_data_hex()`.
-#' @param size Point size for `er_style_data_overlay()`.
+#' @param jitter_height Vertical jitter applied to raw points. Defaults to
+#'   `NULL`: `er_style_data_boxjitter()` resolves this to `0.3` when
+#'   stratified or `0.15` otherwise; `er_style_data_overlay()` resolves it
+#'   to `0.015` for a binary response (whose y-values would otherwise
+#'   overplot into two solid lines) or `0` otherwise.
+#' @param alpha Point transparency for `er_style_data_overlay()` (defaults
+#'   to `0.4`); fill transparency for `er_style_data_hex()` (defaults to
+#'   `0.85`).
+#' @param size Point size for `er_style_data_overlay()`. Defaults to `1`.
 #' @param box_width Width of `er_style_data_boxjitter()`'s boxplot.
-#' @param box_alpha Transparency of `er_style_data_boxjitter()`'s boxplot fill.
-#' @param show_outliers Logical: whether `er_style_data_boxjitter()` draws outlier points.
-#' @param jitter_size Point size for `er_style_data_boxjitter()`'s jittered points.
-#' @param jitter_alpha Transparency of `er_style_data_boxjitter()`'s jittered points.
-#' @param bins Number of hex bins for `er_style_data_hex()`.
+#'   Defaults to `0.6`.
+#' @param box_alpha Transparency of `er_style_data_boxjitter()`'s boxplot
+#'   fill. Defaults to `0.4`.
+#' @param show_outliers Logical: whether `er_style_data_boxjitter()` draws
+#'   outlier points. Defaults to `FALSE`, since its raw points are already
+#'   shown via the jitter layer.
+#' @param jitter_size Point size for `er_style_data_boxjitter()`'s
+#'   jittered points. Defaults to `1`.
+#' @param jitter_alpha Transparency of `er_style_data_boxjitter()`'s
+#'   jittered points. Defaults to `0.6`.
+#' @param bins Number of hex bins for `er_style_data_hex()`. Defaults to `30`.
 #'
 #' @details Builders for the `data` layer ([er_plot_add_data()]) are tagged with the structural family they belong to via [er_style_tag()]. `er_style_data_overlay()` and `er_style_data_hex()` use the overlay layout, drawing in the main panel; `er_style_data_boxjitter()` uses the panel layout and is binary-response only. All built-in data builders are also tagged `layer = "data"`, so [er_plot_add_data()] errors if given a builder tagged for another layer.
 #'

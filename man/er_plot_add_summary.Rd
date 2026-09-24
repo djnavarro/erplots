@@ -19,7 +19,7 @@ er_plot_add_summary(
 
 \item{model}{A fitted exposure-response model, or \code{NULL} (the default).
 Only needed for builder styles (e.g.
-\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}) that produced model-based summaries; a
+\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}) that produce model-based summaries; a
 purely descriptive builder (e.g. \code{\link[=er_style_summary_n]{er_style_summary_n()}}) ignores it.}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
@@ -31,7 +31,8 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (used,
 e.g., for the \code{conf_low}/\code{conf_high} columns of its \code{coefficients}
-result -- see \code{?er_model_interface}). Ignored when \code{model} is \code{NULL}.}
+result -- see \code{?er_model_interface}). Defaults to \code{0.95}. Ignored
+when \code{model} is \code{NULL}.}
 
 \item{summary_args}{A named list of additional arguments forwarded to
 \code{\link[=er_summary]{er_summary()}}, distinct from \code{...} the same way

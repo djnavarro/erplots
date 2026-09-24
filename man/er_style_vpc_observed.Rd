@@ -53,7 +53,10 @@ er_style_vpc_observed_mean_errorbar(
 
 \item{theme}{Theme components.}
 
-\item{point_size}{Point size for all three point/interval builders.}
+\item{point_size}{Point size for all three point/interval builders.
+Defaults to \code{1.5} for \code{er_style_vpc_observed_quantile_line()}/
+\code{er_style_vpc_observed_quantile_errorbar()}, or \code{2} for
+\code{er_style_vpc_observed_mean_errorbar()}.}
 
 \item{...}{Additional named arguments forwarded from
 \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}'s own \code{...}.}
@@ -158,6 +161,32 @@ are both opt-in, manual escape hatches for this -- see their own
 argument docs above. Neither is automatic, because which collision is
 actually occurring (source-vs-source, \code{probs}-vs-\code{probs}, or both)
 depends on the data at hand.
+}
+\examples{
+if (requireNamespace("erglm", quietly = TRUE)) {
+  library(erglm)
+  mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+
+  # er_style_vpc_observed_mean_errorbar(): the default, adaptive to
+  # plot_by's type
+  erglm_data |>
+    er_vpc(aucss, ae2, plot_by = aucss) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_mean_errorbar) |>
+    er_vpc_add_simulated(model = mod, seed = 6203, style = er_style_vpc_simulated_mean_errorbar) |>
+    plot()
+
+  # er_style_vpc_observed_quantile_line(): continuous-x percentile
+  # lines, paired with the matching simulated ribbon builder
+  mod2 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+  erglm_data |>
+    er_vpc(aucss, biomarker_change, plot_by = aucss) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_line) |>
+    er_vpc_add_simulated(
+      model = mod2, seed = 8417, style = er_style_vpc_simulated_quantile_ribbon
+    ) |>
+    plot()
+}
+
 }
 \seealso{
 \code{\link[=er_style]{er_style()}}, \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}

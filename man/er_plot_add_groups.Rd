@@ -42,7 +42,7 @@ The input \code{object}, with a group panel added.
 \description{
 Adds a group layer: a boxplot/violin panel showing the \emph{exposure}
 distribution, split by one or more grouping variables (continuous
-grouping variables are binned into quantiles first.
+grouping variables are binned into quantiles first).
 }
 \details{
 Unlike the other four layers, the groups layer is \strong{additive}: each call

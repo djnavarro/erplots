@@ -27,7 +27,8 @@ per stratum level. Defaults to \code{!is.null(object$strata)}.}
 \item{style}{Function drawing the model curve/ribbon. Defaults to
 \code{\link[=er_style_tte_model_line]{er_style_tte_model_line()}}.}
 
-\item{conf_level}{Confidence level for the prediction band.}
+\item{conf_level}{Confidence level for the prediction band. Defaults
+to \code{0.95}.}
 
 \item{time_grid}{Numeric vector of times at which to predict \code{S(t)},
 or \code{NULL} (the default) to use 100 points evenly spaced across

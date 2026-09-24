@@ -18,7 +18,7 @@ spaced breaks spanning \code{object$time$limits}.}
 
 \item{n_times}{Number of evenly spaced breaks to use when \code{times} is
 \code{NULL}. Must be a single whole number of at least 2. Ignored when
-\code{times} is supplied.}
+\code{times} is supplied. Defaults to \code{6}.}
 
 \item{...}{Additional named arguments forwarded unchanged to \code{style}
 at build time (e.g. \code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}}'s \code{text_size}).}

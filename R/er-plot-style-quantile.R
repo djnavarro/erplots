@@ -12,21 +12,29 @@
 #' @param response Response variable.
 #' @param strata Stratification variable.
 #' @param theme Theme components.
-#' @param point_size Point size for `er_style_quantile_errorbar()`.
-#' @param errorbar_width Width of `er_style_quantile_errorbar()`'s error bars.
-#' @param label_size Text size for the per-bin value label.
-#' @param pointrange_size,pointrange_linewidth Size and linewidth for `ggplot2::geom_pointrange()`.
-#' @param vline_colour,vline_linetype Colour and linetype of quantile-bin boundary lines.
-#' @param vline_labels Logical: whether the `_vlines` builders also label each bin boundary with its exposure value.
-#' @param vline_label_position One of `"auto"`, `"top"`, `"bottom"` -- vertical placement of `vline_labels`.
-#' @param vline_label_size,vline_label_colour,vline_label_fill Size, text colour, and background fill for `vline_labels`.
-#' @param vline_label_inset Fraction of the response range `vline_labels` are inset from the panel edge.
-#' @param vline_label_digits Number of decimal places `vline_labels` are rounded to.
+#' @param point_size Point size for `er_style_quantile_errorbar()`. Defaults to `2`.
+#' @param errorbar_width Width of `er_style_quantile_errorbar()`'s error bars. Defaults to `0.025`.
+#' @param label_size Text size for the per-bin value label. Defaults to `3`.
+#' @param pointrange_size,pointrange_linewidth Size and linewidth for
+#'   [ggplot2::geom_pointrange()]. Default to `NULL`, which leaves
+#'   `geom_pointrange()`'s own built-in size/linewidth defaults in effect.
+#' @param vline_colour,vline_linetype Colour and linetype of quantile-bin
+#'   boundary lines. Default to `"grey50"` and `"dotted"` respectively.
+#' @param vline_labels Logical: whether the `_vlines` builders also label
+#'   each bin boundary with its exposure value. Defaults to `FALSE`.
+#' @param vline_label_position One of `"auto"` (the default), `"top"`, or
+#'   `"bottom"` -- vertical placement of `vline_labels`.
+#' @param vline_label_size,vline_label_colour,vline_label_fill Size, text
+#'   colour, and background fill for `vline_labels`. `vline_label_size`
+#'   defaults to `3`; `vline_label_colour`/`vline_label_fill` default to
+#'   `NULL` (`ggplot2::geom_label()`'s own defaults).
+#' @param vline_label_inset Fraction of the response range `vline_labels`
+#'   are inset from the panel edge. Defaults to `0.05`.
+#' @param vline_label_digits Number of decimal places `vline_labels` are
+#'   rounded to. Defaults to `0`.
 #' @param ... Additional named arguments forwarded from [er_plot_add_quantiles()]'s own `...`.
 #'
-#' @details Builders for the `quantile` layer ([er_plot_add_quantiles()])
-#' bin exposure into quantile groups and plot a response summary with an
-#' uncertainty interval. `er_style_quantile_errorbar()` and
+#' @details `er_style_quantile_errorbar()` and
 #' `er_style_quantile_pointrange()` are the base builders; their
 #' `_vlines` variants add a line at every quantile-bin boundary --
 #' including the two outer boundaries at the minimum non-placebo
@@ -131,6 +139,14 @@
 #'     er_plot_add_model(mod) |>
 #'     er_plot_add_summary(mod) |>
 #'     er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines, vline_labels = TRUE) |>
+#'     plot()
+#'
+#'   # er_style_quantile_pointrange_vlines(): the pointrange equivalent of
+#'   # er_style_quantile_errorbar_vlines()
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_add_quantiles(style = er_style_quantile_pointrange_vlines) |>
 #'     plot()
 #' }
 #'

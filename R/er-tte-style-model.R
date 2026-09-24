@@ -8,8 +8,8 @@
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame (`object$data`).
-#' @param config Configuration for the model layer (see
-#'   `.layer_tte_model()`): `config$predictions` (the prediction tibble
+#' @param config Configuration for the model layer (populated by
+#'   [er_tte_add_model()]): `config$predictions` (the prediction tibble
 #'   from [er_predict_survival()], with `time`/`fit_survival`/
 #'   `ci_lower`/`ci_upper` columns), `config$time_grid`, `config$conf_level`.
 #' @param stratify Logical: whether the fit is stratified
@@ -35,8 +35,8 @@
 #' Stratified colour/fill both map to `config$predictions`'s own strata
 #' column (named after `strata$var`) rather than a fixed name -- unlike
 #' [er_style_tte_curve_km()], which always reads a column literally
-#' named `strata` (`.tidy_survfit()`'s own naming). `er_tte_build()`'s
-#' `.polish_tte_labels()` still retitles the resulting legend with
+#' named `strata` (the tidied Kaplan-Meier table's own naming).
+#' [er_tte_build()] still retitles the resulting legend with
 #' `strata$label` afterwards.
 #'
 #' `er_style_tte_model_line()` is tagged `er_style_tag(fn, layer =
@@ -44,6 +44,19 @@
 #' builder tagged for a different layer.
 #'
 #' @returns A geom, or a list of geoms.
+#'
+#' @examples
+#' if (requireNamespace("ertte", quietly = TRUE)) {
+#'   library(survival)
+#'   library(ertte)
+#'   mod <- ertte_aft(Surv(time, status == 2) ~ age, lung)
+#'
+#'   lung |>
+#'     er_tte(time, status == 2) |>
+#'     er_tte_add_curve() |>
+#'     er_tte_add_model(mod, style = er_style_tte_model_line, ribbon_alpha = 0.3) |>
+#'     plot()
+#' }
 #'
 #' @seealso [er_tte_add_model()], [er_style_tte_curve_km()]
 #'

@@ -73,24 +73,35 @@ it to \code{\link[ggplot2:position_jitter]{ggplot2::position_jitter()}}, letting
 reproducible across repeated \code{plot()} calls on the same object; with no
 \code{seed}, each render draws a fresh jitter, as for any other jittered geom.}
 
-\item{box_width}{Width of \code{er_style_data_boxjitter()}'s boxplot.}
+\item{box_width}{Width of \code{er_style_data_boxjitter()}'s boxplot.
+Defaults to \code{0.6}.}
 
-\item{box_alpha}{Transparency of \code{er_style_data_boxjitter()}'s boxplot fill.}
+\item{box_alpha}{Transparency of \code{er_style_data_boxjitter()}'s boxplot
+fill. Defaults to \code{0.4}.}
 
-\item{show_outliers}{Logical: whether \code{er_style_data_boxjitter()} draws outlier points.}
+\item{show_outliers}{Logical: whether \code{er_style_data_boxjitter()} draws
+outlier points. Defaults to \code{FALSE}, since its raw points are already
+shown via the jitter layer.}
 
-\item{jitter_height}{Vertical jitter applied to raw points.}
+\item{jitter_height}{Vertical jitter applied to raw points. Defaults to
+\code{NULL}: \code{er_style_data_boxjitter()} resolves this to \code{0.3} when
+stratified or \code{0.15} otherwise; \code{er_style_data_overlay()} resolves it
+to \code{0.015} for a binary response (whose y-values would otherwise
+overplot into two solid lines) or \code{0} otherwise.}
 
-\item{jitter_size}{Point size for \code{er_style_data_boxjitter()}'s jittered points.}
+\item{jitter_size}{Point size for \code{er_style_data_boxjitter()}'s
+jittered points. Defaults to \code{1}.}
 
-\item{jitter_alpha}{Transparency of \code{er_style_data_boxjitter()}'s jittered points.}
+\item{jitter_alpha}{Transparency of \code{er_style_data_boxjitter()}'s
+jittered points. Defaults to \code{0.6}.}
 
-\item{alpha}{Point transparency for \code{er_style_data_overlay()}; fill
-transparency for \code{er_style_data_hex()}.}
+\item{alpha}{Point transparency for \code{er_style_data_overlay()} (defaults
+to \code{0.4}); fill transparency for \code{er_style_data_hex()} (defaults to
+\code{0.85}).}
 
-\item{size}{Point size for \code{er_style_data_overlay()}.}
+\item{size}{Point size for \code{er_style_data_overlay()}. Defaults to \code{1}.}
 
-\item{bins}{Number of hex bins for \code{er_style_data_hex()}.}
+\item{bins}{Number of hex bins for \code{er_style_data_hex()}. Defaults to \code{30}.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.

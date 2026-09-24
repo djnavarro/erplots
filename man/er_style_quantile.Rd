@@ -97,27 +97,37 @@ er_style_quantile_pointrange_vlines(
 
 \item{theme}{Theme components.}
 
-\item{point_size}{Point size for \code{er_style_quantile_errorbar()}.}
+\item{point_size}{Point size for \code{er_style_quantile_errorbar()}. Defaults to \code{2}.}
 
-\item{errorbar_width}{Width of \code{er_style_quantile_errorbar()}'s error bars.}
+\item{errorbar_width}{Width of \code{er_style_quantile_errorbar()}'s error bars. Defaults to \code{0.025}.}
 
-\item{label_size}{Text size for the per-bin value label.}
+\item{label_size}{Text size for the per-bin value label. Defaults to \code{3}.}
 
 \item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}'s own \code{...}.}
 
-\item{vline_colour, vline_linetype}{Colour and linetype of quantile-bin boundary lines.}
+\item{vline_colour, vline_linetype}{Colour and linetype of quantile-bin
+boundary lines. Default to \code{"grey50"} and \code{"dotted"} respectively.}
 
-\item{vline_labels}{Logical: whether the \verb{_vlines} builders also label each bin boundary with its exposure value.}
+\item{vline_labels}{Logical: whether the \verb{_vlines} builders also label
+each bin boundary with its exposure value. Defaults to \code{FALSE}.}
 
-\item{vline_label_position}{One of \code{"auto"}, \code{"top"}, \code{"bottom"} -- vertical placement of \code{vline_labels}.}
+\item{vline_label_position}{One of \code{"auto"} (the default), \code{"top"}, or
+\code{"bottom"} -- vertical placement of \code{vline_labels}.}
 
-\item{vline_label_size, vline_label_colour, vline_label_fill}{Size, text colour, and background fill for \code{vline_labels}.}
+\item{vline_label_size, vline_label_colour, vline_label_fill}{Size, text
+colour, and background fill for \code{vline_labels}. \code{vline_label_size}
+defaults to \code{3}; \code{vline_label_colour}/\code{vline_label_fill} default to
+\code{NULL} (\code{ggplot2::geom_label()}'s own defaults).}
 
-\item{vline_label_inset}{Fraction of the response range \code{vline_labels} are inset from the panel edge.}
+\item{vline_label_inset}{Fraction of the response range \code{vline_labels}
+are inset from the panel edge. Defaults to \code{0.05}.}
 
-\item{vline_label_digits}{Number of decimal places \code{vline_labels} are rounded to.}
+\item{vline_label_digits}{Number of decimal places \code{vline_labels} are
+rounded to. Defaults to \code{0}.}
 
-\item{pointrange_size, pointrange_linewidth}{Size and linewidth for \code{ggplot2::geom_pointrange()}.}
+\item{pointrange_size, pointrange_linewidth}{Size and linewidth for
+\code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}}. Default to \code{NULL}, which leaves
+\code{geom_pointrange()}'s own built-in size/linewidth defaults in effect.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -128,9 +138,7 @@ drawing a point/interval summary per exposure quantile bin as an error bar
 or a pointrange, optionally with bin-boundary vlines.
 }
 \details{
-Builders for the \code{quantile} layer (\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}})
-bin exposure into quantile groups and plot a response summary with an
-uncertainty interval. \code{er_style_quantile_errorbar()} and
+\code{er_style_quantile_errorbar()} and
 \code{er_style_quantile_pointrange()} are the base builders; their
 \verb{_vlines} variants add a line at every quantile-bin boundary --
 including the two outer boundaries at the minimum non-placebo
@@ -232,6 +240,14 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_add_model(mod) |>
     er_plot_add_summary(mod) |>
     er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines, vline_labels = TRUE) |>
+    plot()
+
+  # er_style_quantile_pointrange_vlines(): the pointrange equivalent of
+  # er_style_quantile_errorbar_vlines()
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_quantiles(style = er_style_quantile_pointrange_vlines) |>
     plot()
 }
 

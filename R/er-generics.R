@@ -1,7 +1,14 @@
 
 #' Model interface for exposure-response plots
 #'
-#' `erplots` draws exposure-response plots from fitted models that implement this small interface, rather than assuming a particular model class. Implement `er_predict()` for basic plotting support; implement `er_simulate()` for simulation-based visualisations; implement `er_summary()` for summary annotations; implement `er_predict_survival()` for a parametric survival-curve overlay in the `er_tte()` grammar ([er_tte_add_model()]).
+#' @description
+#' `erplots` draws exposure-response plots from fitted models that implement this small interface, rather than assuming a particular model class:
+#'
+#' * Implement `er_predict()` for basic plotting support.
+#' * Implement `er_simulate()` for simulation-based visualisations.
+#' * Implement `er_summary()` for summary annotations.
+#' * Implement `er_predict_survival()` for a parametric survival-curve
+#'   overlay in the `er_tte()` grammar ([er_tte_add_model()]).
 #'
 #' @param model A fitted exposure-response model object.
 #' @param newdata A data frame of covariate values at which to predict.
@@ -16,9 +23,9 @@
 #' @details
 #' `er_plot_add_model()` does not verify that `model` was fit on the same exposure/response variables as the plot; that compatibility is the caller's responsibility. When `er_plot_add_model()` builds `newdata`, it always includes the exposure and, if stratified, strata variables, plus reference values for any other covariates in the model's original fitting data.
 #'
-#' A method may rely on caller-supplied extra arguments being forwarded through `...`: [er_plot_add_model()]'s `predict_args`, [er_plot_add_summary()]'s `summary_args`, and [er_vpc_add_simulated()]'s `simulate_args` are each spliced into the corresponding generic call (`er_predict()`/`er_summary()`/`er_simulate()` respectively), so a model-specific argument beyond the fixed contract below (e.g. a landmark time for a time-to-event model) has a documented path to reach the method. These are deliberately kept separate from each `er_plot_add_*()`/`er_vpc_add_*()` function's own `...`, which is reserved for the `style` builder instead (see [er_style()]'s "Passing extra arguments to a builder" section) -- a method should not assume it receives anything passed via that `...`.
+#' Strata membership for `er_predict_survival()` is carried on `newdata` the same way: as an ordinary column (named after the `er_tte()` object's own `stratify_by` variable), never implicit in `model` itself. [er_tte_add_model()] builds one `newdata` row per stratum level (or a single row, unstratified), filling any other covariate the model references with a reference value exactly as [er_plot_add_model()] already does (see its "Details").
 #'
-#' `er_predict()` should return `newdata` with `fit_resp`, `ci_lower`, and `ci_upper`. `er_simulate()` should return `newdata` replicates with `sim_id` and `fit_resp`; it may additionally return `sim_resp` for response-level simulations. `er_summary()` should return `NULL` or a named list with optional keys such as `p_value`, `coefficients`, and `glance`.
+#' A method may rely on caller-supplied extra arguments being forwarded through `...`: [er_plot_add_model()]'s `predict_args`, [er_plot_add_summary()]'s `summary_args`, and [er_vpc_add_simulated()]'s `simulate_args` are each spliced into the corresponding generic call (`er_predict()`/`er_summary()`/`er_simulate()` respectively), so a model-specific argument beyond the fixed contract below (e.g. a landmark time for a time-to-event model) has a documented path to reach the method. These are deliberately kept separate from each `er_plot_add_*()`/`er_vpc_add_*()` function's own `...`, which is reserved for the `style` builder instead (see [er_style()]'s "Passing extra arguments to a builder" section) -- a method should not assume it receives anything passed via that `...`.
 #'
 #' @returns
 #' - `er_predict()` returns `newdata` with three additional columns:
@@ -91,15 +98,21 @@
 #'   errors informatively (via the default method above) if called with
 #'   one.
 #'
-#' @details
-#' Strata membership for `er_predict_survival()` is carried on `newdata`
-#' as an ordinary column (named after the `er_tte()` object's own
-#' `stratify_by` variable), the same way [er_plot_add_model()]'s
-#' `newdata` carries strata -- it is never implicit in `model` itself.
-#' [er_tte_add_model()] builds one `newdata` row per stratum level (or a
-#' single row, unstratified), filling any other covariate the model
-#' references with a reference value exactly as [er_plot_add_model()]
-#' already does (see its "Details").
+#' @examples
+#' # a bare-bones er_predict() method for a plain `lm` fit
+#' toy_fit <- lm(biomarker_change ~ auc_ss, data = erplots_data)
+#' class(toy_fit) <- c("toy_lm", class(toy_fit))
+#'
+#' er_predict.toy_lm <- function(model, newdata, conf_level = 0.95, ...) {
+#'   z <- -qnorm((1 - conf_level) / 2)
+#'   pred <- predict(model, newdata = newdata, se.fit = TRUE)
+#'   newdata$fit_resp <- pred$fit
+#'   newdata$ci_lower <- pred$fit - z * pred$se.fit
+#'   newdata$ci_upper <- pred$fit + z * pred$se.fit
+#'   newdata
+#' }
+#'
+#' er_predict(toy_fit, newdata = data.frame(auc_ss = c(100, 500, 900)))
 #'
 #' @name er_model_interface
 NULL

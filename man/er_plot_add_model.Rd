@@ -23,7 +23,8 @@ er_plot_add_model(
 
 \item{style}{Function drawing the model curve/ribbon. Defaults to \code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}}.}
 
-\item{conf_level}{Confidence level for the prediction ribbon.}
+\item{conf_level}{Confidence level for the prediction ribbon. Defaults
+to \code{0.95}.}
 
 \item{predict_args}{A named list of additional arguments forwarded to
 \code{\link[=er_predict]{er_predict()}} (e.g. a model-specific argument its \code{er_predict()}

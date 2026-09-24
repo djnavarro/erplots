@@ -39,12 +39,9 @@
 #' @param nsim Number of simulated draws for `er_style_model_spaghetti()`,
 #'   passed to [er_simulate()]. Default `100L`.
 #'
-#' @details Builders for the `model` layer ([er_plot_add_model()]), which
-#' draws the fitted curve (and, where applicable, its uncertainty) over
-#' the exposure range: `er_style_model_ribbonline()` (ribbon plus line, the
-#' default), `er_style_model_line()` (line only, no ribbon), and
-#' `er_style_model_spaghetti()` (a spaghetti plot of simulated draws, for
-#' models that implement [er_simulate()]). All three are tagged
+#' @details `er_style_model_ribbonline()` is the default; `er_style_model_line()`
+#' omits the ribbon; `er_style_model_spaghetti()` draws simulated draws
+#' instead of a ribbon, for models that implement [er_simulate()]. All three are tagged
 #' `er_style_tag(fn, layer = "model")`, so [er_plot_add_model()]
 #' errors informatively if handed one of these tagged for a different
 #' layer entirely (e.g. `"summary"`, meant for [er_plot_add_summary()]).

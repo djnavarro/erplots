@@ -40,7 +40,8 @@ Adds the data layer: individual observations. By default, points are drawn
 as an overlay showing the exposure and response values in the main panel of
 the plot, but other possibilities are available.
 }
-\details{
+\section{Default builders}{
+
 The default builder for the data layer is \code{er_style_data_overlay()},
 which creates a plain scatter plot for
 continuous/count responses, or a scatter with a small vertical jitter
@@ -55,6 +56,9 @@ just raw points. There is no built-in "panel"-layout builder for a
 continuous/count response; \code{panel} must be \code{"both"} (the default) for these
 response types regardless of builder, since there's no upper/lower
 partition to select from.
+}
+
+\section{Structural families}{
 
 Every data-layer builder declares which of these two \emph{structural}
 families it belongs to via \code{\link[=er_style_tag]{er_style_tag()}} -- \code{"overlay"} (a single call
@@ -68,6 +72,9 @@ panel. See \code{\link[=er_style_tag]{er_style_tag()}} and \code{\link[=er_style
 builder the same way. If \code{style} is tagged with a \code{layer} other than
 \code{"data"}, \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors informatively; an untagged
 builder is never checked (only \code{layout} is a hard requirement).
+}
+
+\section{Effect of \code{keep_strata}}{
 
 \code{keep_strata}'s effect also depends on a builder's structural family:
 for an "overlay"-layout builder it always means a shared colour
@@ -78,6 +85,7 @@ for an "overlay"-layout builder (there's no upper/lower partition to
 select from) and for a continuous/count response under a
 "panel"-layout builder (same reason).
 }
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)

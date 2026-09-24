@@ -24,7 +24,8 @@ er_vpc(
 
 \item{response}{Response variable (one variable, unquoted).}
 
-\item{response_type}{One of \code{"auto"}, \code{"binary"}, \code{"continuous"}, or \code{"count"}.}
+\item{response_type}{One of \code{"auto"} (the default), \code{"binary"},
+\code{"continuous"}, or \code{"count"}.}
 
 \item{plot_by}{Variable (unquoted) plotted on the x-axis and used to
 bin/group the observed vs. simulated comparison. Defaults to
@@ -33,7 +34,8 @@ bin/group the observed vs. simulated comparison. Defaults to
 exposure variable itself); a categorical variable is used as-is,
 with no binning.}
 
-\item{n_bins}{Number of quantile bins, when \code{plot_by} is numeric.}
+\item{n_bins}{Number of quantile bins, when \code{plot_by} is numeric.
+Defaults to \code{4}.}
 
 \item{stratify_by}{Optional variable (unquoted) splitting the VPC into
 one facet panel per level, via \code{ggplot2::facet_wrap()}. A
@@ -45,16 +47,18 @@ to a different variable than \code{plot_by}. Defaults to \code{NULL} (no
 faceting, a single panel, matching prior behaviour).}
 
 \item{n_strata}{Number of quantile bins, when \code{stratify_by} is
-numeric. Ignored when \code{stratify_by} is \code{NULL} or categorical.}
+numeric. Ignored when \code{stratify_by} is \code{NULL} or categorical.
+Defaults to \code{4}.}
 
 \item{conf_level}{Confidence level for both the observed- and
-simulated-side intervals. Must be strictly between 0 and 1.}
+simulated-side intervals. Must be strictly between 0 and 1.
+Defaults to \code{0.95}.}
 
 \item{probs}{Percentiles to compute for a percentile-based builder
 (e.g. \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}}/\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}/
 \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}/\code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}};
 ignored by the default adaptive mean/errorbar pair). Only computed
-for a continuous/count response.}
+for a continuous/count response. Defaults to \code{c(0.1, 0.5, 0.9)}.}
 }
 \value{
 An (empty) plot object of class \code{er_vpc}.
@@ -71,10 +75,12 @@ since it reuses the observed layer's own binning decision so both
 sides share identical bin boundaries. Both layers are singletons (a
 second call replaces the previous one).
 
-Unlike \code{\link[=er_plot]{er_plot()}}, \code{er_vpc()} has no stratification concept and
-always renders a single panel -- see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}} for
-\code{plot_by}, the (orthogonal) variable plotted on the x-axis and used
-to bin/group the comparison. Whether \code{plot_by} is \code{"continuous"}
+\code{er_vpc()}'s own stratification (\code{stratify_by}) is real, but simpler
+than \code{\link[=er_plot]{er_plot()}}'s: a facet-only split via \code{ggplot2::facet_wrap()},
+with no colour/facet precedence rule to reconcile (see \code{stratify_by}
+below). It's orthogonal to \code{plot_by} -- see \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}
+for \code{plot_by}, the variable plotted on the x-axis and used to
+bin/group the comparison. Whether \code{plot_by} is \code{"continuous"}
 (numeric, quantile-binned) or \code{"discrete"} (used as-is) is
 auto-detected from the column's type and stored on
 \code{object$group$type}, mirroring how \code{object$response$type} records

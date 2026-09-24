@@ -10,7 +10,8 @@
 #' @param model A fitted exposure-response model. Must implement [er_predict()].
 #' @param keep_strata Logical; whether this layer should use stratification.
 #' @param style Function drawing the model curve/ribbon. Defaults to [er_style_model_ribbonline()].
-#' @param conf_level Confidence level for the prediction ribbon.
+#' @param conf_level Confidence level for the prediction ribbon. Defaults
+#'   to `0.95`.
 #' @param predict_args A named list of additional arguments forwarded to
 #'   [er_predict()] (e.g. a model-specific argument its `er_predict()`
 #'   method requires beyond `model`/`newdata`/`conf_level`). Distinct
@@ -115,7 +116,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param model A fitted exposure-response model, or `NULL` (the default).
 #'   Only needed for builder styles (e.g.
-#'   [er_style_summary_pvalue()]) that produced model-based summaries; a
+#'   [er_style_summary_pvalue()]) that produce model-based summaries; a
 #'   purely descriptive builder (e.g. [er_style_summary_n()]) ignores it.
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
@@ -124,7 +125,8 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   [er_style_summary_pvalue()].
 #' @param conf_level Confidence level forwarded to [er_summary()] (used,
 #'   e.g., for the `conf_low`/`conf_high` columns of its `coefficients`
-#'   result -- see `?er_model_interface`). Ignored when `model` is `NULL`.
+#'   result -- see `?er_model_interface`). Defaults to `0.95`. Ignored
+#'   when `model` is `NULL`.
 #' @param summary_args A named list of additional arguments forwarded to
 #'   [er_summary()], distinct from `...` the same way
 #'   [er_plot_add_model()]'s `predict_args` is distinct from its own
@@ -197,8 +199,9 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
 #' @param style Function drawing the quantile summary; defaults to
 #'   [er_style_quantile_errorbar()] (point + error bar).
-#' @param bins Number of exposure bins (not counting placebo).
-#' @param conf_level Confidence level for the interval.
+#' @param bins Number of exposure bins (not counting placebo). Defaults
+#'   to `4`.
+#' @param conf_level Confidence level for the interval. Defaults to `0.95`.
 #' @param ... Additional named arguments forwarded, unchanged, to `style`
 #'   when it's called at build time. Arguments must be named.
 #'
@@ -338,7 +341,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'
 #' @returns The input `object`, with the data layer added.
 #' 
-#' @details
+#' @section Default builders:
 #' The default builder for the data layer is `er_style_data_overlay()`, 
 #' which creates a plain scatter plot for
 #' continuous/count responses, or a scatter with a small vertical jitter
@@ -355,6 +358,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' response types regardless of builder, since there's no upper/lower
 #' partition to select from.
 #'
+#' @section Structural families:
 #' Every data-layer builder declares which of these two *structural*
 #' families it belongs to via [er_style_tag()] -- `"overlay"` (a single call
 #' merged into the main panel) or `"panel"` (one-or-more panels stacked
@@ -368,6 +372,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' `"data"`, [er_plot_add_data()] errors informatively; an untagged
 #' builder is never checked (only `layout` is a hard requirement).
 #'
+#' @section Effect of `keep_strata`:
 #' `keep_strata`'s effect also depends on a builder's structural family:
 #' for an "overlay"-layout builder it always means a shared colour
 #' aesthetic, for any response type; for a "panel"-layout builder on a
@@ -484,7 +489,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'
 #' Adds a group layer: a boxplot/violin panel showing the *exposure*
 #' distribution, split by one or more grouping variables (continuous
-#' grouping variables are binned into quantiles first.
+#' grouping variables are binned into quantiles first).
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param group_by Grouping variables to define groups for distribution

@@ -60,7 +60,8 @@ er_style_vpc_simulated_mean_errorbar(
 
 \item{theme}{Theme components.}
 
-\item{ribbon_alpha}{Fill transparency for \code{er_style_vpc_simulated_quantile_ribbon()}'s bands.}
+\item{ribbon_alpha}{Fill transparency for
+\code{er_style_vpc_simulated_quantile_ribbon()}'s bands. Defaults to \code{0.3}.}
 
 \item{ribbon_edges}{Whether \code{er_style_vpc_simulated_quantile_ribbon()}
 additionally draws a line along each band's own \code{ci_lower}/\code{ci_upper}
@@ -84,7 +85,9 @@ each band's \code{y_mid}. Defaults match the previous fixed styling
 \item{...}{Additional named arguments forwarded from
 \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}'s own \code{...}.}
 
-\item{point_size}{Point size for both point/interval builders.}
+\item{point_size}{Point size for both point/interval builders.
+Defaults to \code{1.5} for \code{er_style_vpc_simulated_quantile_errorbar()},
+or \code{2} for \code{er_style_vpc_simulated_mean_errorbar()}.}
 
 \item{errorbar_width}{Width of \code{er_style_vpc_simulated_mean_errorbar()}'s
 and \code{er_style_vpc_simulated_quantile_errorbar()}'s error bars.
@@ -174,6 +177,32 @@ fails wherever two of them cross. \code{ribbon_edges = TRUE} mitigates this
 by drawing each band's own \code{ci_lower}/\code{ci_upper} bounds as a line (see
 \code{edge_linetype}/\code{edge_linewidth}/\code{edge_colour}), which stays legible
 even where the fills themselves are illegible.
+}
+\examples{
+if (requireNamespace("erglm", quietly = TRUE)) {
+  library(erglm)
+  mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+
+  # er_style_vpc_simulated_mean_errorbar(): the default, adaptive to
+  # plot_by's type
+  erglm_data |>
+    er_vpc(aucss, ae2, plot_by = aucss) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_mean_errorbar) |>
+    er_vpc_add_simulated(model = mod, seed = 6203, style = er_style_vpc_simulated_mean_errorbar) |>
+    plot()
+
+  # er_style_vpc_simulated_quantile_errorbar(): a point + interval per
+  # requested percentile, paired with the matching observed builder
+  mod2 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+  erglm_data |>
+    er_vpc(aucss, biomarker_change, plot_by = aucss) |>
+    er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |>
+    er_vpc_add_simulated(
+      model = mod2, seed = 8417, style = er_style_vpc_simulated_quantile_errorbar
+    ) |>
+    plot()
+}
+
 }
 \seealso{
 \code{\link[=er_style]{er_style()}}, \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}

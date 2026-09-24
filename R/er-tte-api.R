@@ -60,8 +60,9 @@
 #'   (a single, unstratified curve).
 #' @param n_strata Number of quantile bins, when `stratify_by` is
 #'   numeric. Ignored when `stratify_by` is `NULL` or categorical.
+#'   Defaults to `4`.
 #' @param conf_level Confidence level for the Kaplan-Meier confidence
-#'   band. Must be strictly between 0 and 1.
+#'   band. Must be strictly between 0 and 1. Defaults to `0.95`.
 #'
 #' @returns An (empty of layers) plot object of class `er_tte`, with the
 #'   Kaplan-Meier fit already computed on `object$km`.

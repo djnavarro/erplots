@@ -21,8 +21,8 @@ er_style_tte_censor_ticks(
 \arguments{
 \item{data}{The original data frame (\code{object$data}).}
 
-\item{config}{Configuration for the censor layer (see
-\code{.layer_tte_censor()}): \code{config$table} (the subset of the tidy KM
+\item{config}{Configuration for the censor layer (populated by
+\code{\link[=er_tte_add_censor]{er_tte_add_censor()}}): \code{config$table} (the subset of the tidy KM
 table where \code{n_censor > 0}, with a \code{strata} column when
 stratified).}
 

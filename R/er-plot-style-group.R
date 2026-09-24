@@ -12,14 +12,28 @@
 #' @param response Response variable.
 #' @param strata Stratification variable.
 #' @param theme Theme components.
-#' @param alpha Transparency of the geom.
+#' @param alpha Transparency of the geom. Defaults to `0.5` for
+#'   `er_style_group_boxplot()`/`er_style_group_violin()`/
+#'   `er_style_group_boxjitter()`/`er_style_group_violinjitter()`;
+#'   `er_style_group_histogram()` defaults to `NULL`, which resolves to
+#'   `0.5` when stratified or `0.8` otherwise.
 #' @param show_outliers Logical: whether `er_style_group_boxplot()` draws the boxplot's own outlier points. Defaults to `TRUE`; `er_style_group_boxjitter()` sets this to `FALSE` when it wraps this builder, since its own jittered points already show every raw value, outliers included.
-#' @param bins Number of histogram bins for `er_style_group_histogram()`.
-#' @param quantiles,quantile_linetype Violin quantile positions and linetype for `er_style_group_violin()`.
-#' @param size Overall size multiplier for `er_style_group_linerange()`'s dot and lines.
-#' @param inner_range,outer_range Quantile probabilities (length 2) for `er_style_group_linerange()`'s thick and thin lines.
-#' @param alpha_dot,alpha_inner,alpha_outer Per-part transparency for `er_style_group_linerange()`'s dot, inner line, and outer line.
-#' @param jitter_height,jitter_size,jitter_alpha Vertical jitter, point size, and transparency for `er_style_group_boxjitter()`/`er_style_group_violinjitter()`'s overlaid points.
+#' @param bins Number of histogram bins for `er_style_group_histogram()`. Defaults to `30`.
+#' @param quantiles,quantile_linetype Violin quantile positions and
+#'   linetype for `er_style_group_violin()`. Default to `NULL` (no
+#'   quantile lines drawn) and `"solid"` respectively.
+#' @param size Overall size multiplier for `er_style_group_linerange()`'s
+#'   dot and lines. Defaults to `1`.
+#' @param inner_range,outer_range Quantile probabilities (length 2) for
+#'   `er_style_group_linerange()`'s thick and thin lines. Default to
+#'   `c(0.25, 0.75)` and `c(0.05, 0.95)` respectively.
+#' @param alpha_dot,alpha_inner,alpha_outer Per-part transparency for
+#'   `er_style_group_linerange()`'s dot, inner line, and outer line.
+#'   Default to `1`, `0.8`, and `0.4` respectively.
+#' @param jitter_height,jitter_size,jitter_alpha Vertical jitter, point
+#'   size, and transparency for
+#'   `er_style_group_boxjitter()`/`er_style_group_violinjitter()`'s
+#'   overlaid points. Default to `0.15`, `1`, and `0.6` respectively.
 #' @param ... Additional named arguments forwarded from [er_plot_add_groups()]'s
 #'   own `...`. `er_style_group_boxjitter()`/`er_style_group_violinjitter()` read
 #'   a `seed` from here (`NULL` when not supplied) and use it to scope
@@ -30,7 +44,7 @@
 #'   data layer (see [er_style_data()]); with no `seed`, each render
 #'   draws a fresh jitter.
 #'
-#' @details Builders for the `group` layer ([er_plot_add_groups()]) draw exposure distributions for grouping variables. `er_style_group_boxplot()` and `er_style_group_violin()` put group levels on the y-axis; `er_style_group_histogram()` puts them on facet strips and frees the y-axis for counts; `er_style_group_linerange()` also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. `er_style_group_boxjitter()`/`er_style_group_violinjitter()` are thin wrappers around `er_style_group_boxplot()`/`er_style_group_violin()` that additionally overlay jittered raw exposure values (vertical jitter only -- exposure position on the x-axis is never perturbed), the same idea `er_style_data_boxjitter()` applies to the data layer. All built-in group builders are tagged `layer = "group"`, so [er_plot_add_groups()] errors if given one tagged for another layer.
+#' @details `er_style_group_boxplot()` and `er_style_group_violin()` put group levels on the y-axis; `er_style_group_histogram()` puts them on facet strips and frees the y-axis for counts; `er_style_group_linerange()` also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. `er_style_group_boxjitter()`/`er_style_group_violinjitter()` are thin wrappers around `er_style_group_boxplot()`/`er_style_group_violin()` that additionally overlay jittered raw exposure values (vertical jitter only -- exposure position on the x-axis is never perturbed), the same idea `er_style_data_boxjitter()` applies to the data layer. All built-in group builders are tagged `layer = "group"`, so [er_plot_add_groups()] errors if given one tagged for another layer.
 #'
 #' See [er_style()] for the shared builder interface these functions implement.
 #'

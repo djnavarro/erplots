@@ -23,9 +23,10 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \item{style}{Function drawing the quantile summary; defaults to
 \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar).}
 
-\item{bins}{Number of exposure bins (not counting placebo).}
+\item{bins}{Number of exposure bins (not counting placebo). Defaults
+to \code{4}.}
 
-\item{conf_level}{Confidence level for the interval.}
+\item{conf_level}{Confidence level for the interval. Defaults to \code{0.95}.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
 when it's called at build time. Arguments must be named.}

@@ -13,14 +13,18 @@
 #' @param strata Stratification variable.
 #' @param theme Theme components.
 #' @param inset Distance from the panel edge for the annotation label.
-#' @param label_size Label text size.
-#' @param label_colour Label text colour.
-#' @param label_fill Label background fill.
-#' @param fields Fields from `glance` to include for `er_style_summary_gof()`.
+#'   Defaults to `0.05`.
+#' @param label_size Label text size. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
+#' @param label_colour Label text colour. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
+#' @param label_fill Label background fill. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
+#' @param fields Fields from `glance` to include for `er_style_summary_gof()`,
+#'   and the order they're shown in: one or more of `"n"` (labelled "N"),
+#'   `"aic"` ("AIC"), `"bic"` ("BIC"), or `"r_squared"` (`"R\u00b2"`). Defaults
+#'   to all four, in that order. A field is shown only when both present
+#'   and non-`NA` in the model's `glance` result.
 #' @param ... Additional named arguments forwarded from [er_plot_add_model()]'s own `...`.
 #'
-#' @details Builders for [er_plot_add_summary()] annotate the base panel
-#' with a summary statistic or descriptive label. `er_style_summary_pvalue()`
+#' @details `er_style_summary_pvalue()`
 #' draws a formatted p-value from the model's [er_summary()] result;
 #' `er_style_summary_n()` draws observation counts and doesn't have to
 #' originate from a fitted model at all.

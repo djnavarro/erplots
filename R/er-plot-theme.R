@@ -63,17 +63,58 @@
 #'   "Details".
 #' @param format_p,format_percent,format_number Formatter functions
 #'   (typically from `scales::label_*()`). Used by the summary/quantile layers to
-#'   format p-values/rates/means for display.
+#'   format p-values/rates/means for display. Default to
+#'   `scales::label_pvalue(accuracy = .001, add_p = TRUE)`,
+#'   `scales::label_percent(accuracy = 1)`, and
+#'   `scales::label_number(accuracy = 0.01)` respectively.
 #' @param draw_key A key-glyph function (e.g. [ggplot2::draw_key_point()]),
-#'   passed as every geom's `key_glyph` argument.
+#'   passed as every geom's `key_glyph` argument. Defaults to
+#'   [ggplot2::draw_key_rect()].
 #' @param dodge_width Spacing between adjacent strata's horizontal offset
 #'   in the quantile layer, as a fraction of the exposure range. A single
 #'   positive number; see "Details".
 #' @param height_base,height_data,height_group Relative panel heights
-#'   (single positive numbers).
+#'   (single positive numbers), for the base plot, data-layer panel(s),
+#'   and group-layer panel(s) respectively. Default to `6`, `2`, and `3`.
 #'   Supplying only one leaves the other two unchanged.
 #'
 #' @returns The input `object`, with the requested theme fields updated.
+#'
+#' @examples
+#' if (requireNamespace("erglm", quietly = TRUE)) {
+#'   library(erglm)
+#'   mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+#'
+#'   # axis labels, a title, and a swapped-in theme
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_theme(
+#'       xlab = "AUC at steady state",
+#'       ylab = "P(adverse event)",
+#'       title = "Exposure-response for adverse events",
+#'       theme_base = ggplot2::theme_minimal()
+#'     ) |>
+#'     plot()
+#'
+#'   # repeated calls accumulate: this only touches xlim/ylim, leaving
+#'   # the labels/title/theme set above unchanged
+#'   erglm_data |>
+#'     er_plot(aucss, ae1) |>
+#'     er_plot_add_model(mod) |>
+#'     er_plot_theme(xlab = "AUC at steady state") |>
+#'     er_plot_theme(xlim = c(0, 3000)) |>
+#'     plot()
+#'
+#'   # widening the stratum-dodge spacing in a stratified quantile layer
+#'   mod2 <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
+#'   erglm_data |>
+#'     er_plot(aucss, ae1, stratify_by = sex) |>
+#'     er_plot_add_model(mod2) |>
+#'     er_plot_add_quantiles() |>
+#'     er_plot_theme(dodge_width = 0.15, strata_lab = "Sex") |>
+#'     plot()
+#' }
 #'
 #' @seealso [er_plot()], [er_style()]
 #'

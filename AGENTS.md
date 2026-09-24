@@ -703,6 +703,20 @@ it.
   `tests/testthat/test-er-plot-style-{model,summary,quantile,data,group}.R`.
 - Vignettes/articles live in `vignettes/articles/` and are built for the
   pkgdown site, not shipped with the package (see `.Rbuildignore`).
+- Two skills in `.agents/skills/` (also excluded from the built package
+  via `.Rbuildignore`) carry detailed, checklist-driven guidance for
+  specific recurring tasks -- load the matching one before doing that
+  task rather than relying on the summary here:
+  - **`.agents/skills/write-roxygen-docs/`** -- what goes in a title vs.
+    description vs. `@details`, how to calibrate documentation density,
+    and how to keep roxygen comments user-facing (no agent/contributor
+    material, no internal `.`-prefixed helpers, square-bracket
+    cross-references). Use before adding a new exported function or
+    editing an existing `@param`/`@returns`/`@details`/`@examples` block.
+  - **`.agents/skills/write-news-entries/`** -- how to size and place a
+    `NEWS.md` bullet, and the same-development-cycle carve-out for
+    `## Bug fixes` entries. Use whenever adding or reviewing a `NEWS.md`
+    entry.
 
 ## Keeping this documentation current
 
@@ -722,3 +736,8 @@ via `.Rbuildignore`) carry the parts that don't belong here:
   deferred/open items. When you finish something listed there, move its
   write-up into `HISTORY.md` and remove it from `PLAN.md` rather than
   marking it "done" in place.
+
+`.agents/skills/` (see "Development workflow" above) holds task-specific
+guidance rather than package-state facts, and doesn't need updating just
+because the package's architecture changes -- only when the *task itself*
+(how to write a NEWS entry, how to structure a roxygen block) changes.

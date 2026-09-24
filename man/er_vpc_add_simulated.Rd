@@ -25,12 +25,14 @@ must already have an observed layer (see \code{\link[=er_vpc_add_observed]{er_vp
 \item{sim}{Simulated data with matching exposure/response/\code{plot_by}
 columns and \code{sim_id}. Mutually exclusive with \code{model}.}
 
-\item{nsim}{Number of simulation replicates, only used with \code{model}.}
+\item{nsim}{Number of simulation replicates, only used with \code{model}.
+Defaults to \code{100}.}
 
 \item{seed}{Optional RNG seed, only used with \code{model}.}
 
-\item{style}{A function determining how the simulated layer is drawn;
-see \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}.}
+\item{style}{A function determining how the simulated layer is drawn.
+Defaults to \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}; see
+\code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}} for the other built-in options.}
 
 \item{simulate_args}{A named list of additional arguments forwarded to
 \code{\link[=er_simulate]{er_simulate()}}, only used with \code{model}. Distinct from \code{...} the

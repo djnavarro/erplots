@@ -105,12 +105,9 @@ the fitted exposure-response curve as a ribbon-and-line, a line alone, or a
 spaghetti plot of simulated draws.
 }
 \details{
-Builders for the \code{model} layer (\code{\link[=er_plot_add_model]{er_plot_add_model()}}), which
-draws the fitted curve (and, where applicable, its uncertainty) over
-the exposure range: \code{er_style_model_ribbonline()} (ribbon plus line, the
-default), \code{er_style_model_line()} (line only, no ribbon), and
-\code{er_style_model_spaghetti()} (a spaghetti plot of simulated draws, for
-models that implement \code{\link[=er_simulate]{er_simulate()}}). All three are tagged
+\code{er_style_model_ribbonline()} is the default; \code{er_style_model_line()}
+omits the ribbon; \code{er_style_model_spaghetti()} draws simulated draws
+instead of a ribbon, for models that implement \code{\link[=er_simulate]{er_simulate()}}. All three are tagged
 \code{er_style_tag(fn, layer = "model")}, so \code{\link[=er_plot_add_model]{er_plot_add_model()}}
 errors informatively if handed one of these tagged for a different
 layer entirely (e.g. \code{"summary"}, meant for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}).

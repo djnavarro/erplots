@@ -9,8 +9,9 @@ er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
 \arguments{
 \item{object}{Partially constructed VPC (has S3 class \code{er_vpc}).}
 
-\item{style}{A function determining how the observed layer is drawn;
-see \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}.}
+\item{style}{A function determining how the observed layer is drawn.
+Defaults to \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}; see
+\code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}} for the other built-in options.}
 
 \item{...}{Additional named arguments forwarded to \code{style}.}
 }

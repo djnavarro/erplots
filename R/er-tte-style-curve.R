@@ -10,8 +10,8 @@
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame (`object$data`).
-#' @param config Configuration for the curve layer (see
-#'   `.layer_tte_curve()`): `config$table` (the tidy KM table, with a
+#' @param config Configuration for the curve layer (populated by
+#'   [er_tte_add_curve()]): `config$table` (the tidy KM table, with a
 #'   `(0, 1)` origin row prepended per stratum), `config$time_upper`
 #'   (the time-axis upper limit, needed so the last confidence-band
 #'   interval has somewhere to end), `config$conf_level`.
@@ -42,10 +42,9 @@
 #' column (the already-cleaned stratum label, e.g. `"Q1"` or a
 #' categorical level) rather than the original `stratify_by` column on
 #' `data`, since that's what `config$table` actually carries.
-#' `er_tte_build()`'s `.polish_tte_labels()` (the TTE-grammar analogue
-#' of `er_plot()`'s `.polish_labels()`) retitles the resulting legend
-#' with `strata$label` (e.g. `"sex"`) afterwards, so a builder itself
-#' never needs to know the original variable's name.
+#' [er_tte_build()] retitles the resulting legend with `strata$label`
+#' (e.g. `"sex"`) afterwards, so a builder itself never needs to know
+#' the original variable's name.
 #'
 #' `er_style_tte_curve_km()` is tagged `er_style_tag(fn, layer =
 #' "curve")`, so [er_tte_add_curve()] errors informatively if handed a

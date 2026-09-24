@@ -110,21 +110,36 @@ one.
 }
 }
 \description{
-\code{erplots} draws exposure-response plots from fitted models that implement this small interface, rather than assuming a particular model class. Implement \code{er_predict()} for basic plotting support; implement \code{er_simulate()} for simulation-based visualisations; implement \code{er_summary()} for summary annotations; implement \code{er_predict_survival()} for a parametric survival-curve overlay in the \code{er_tte()} grammar (\code{\link[=er_tte_add_model]{er_tte_add_model()}}).
+\code{erplots} draws exposure-response plots from fitted models that implement this small interface, rather than assuming a particular model class:
+\itemize{
+\item Implement \code{er_predict()} for basic plotting support.
+\item Implement \code{er_simulate()} for simulation-based visualisations.
+\item Implement \code{er_summary()} for summary annotations.
+\item Implement \code{er_predict_survival()} for a parametric survival-curve
+overlay in the \code{er_tte()} grammar (\code{\link[=er_tte_add_model]{er_tte_add_model()}}).
+}
 }
 \details{
 \code{er_plot_add_model()} does not verify that \code{model} was fit on the same exposure/response variables as the plot; that compatibility is the caller's responsibility. When \code{er_plot_add_model()} builds \code{newdata}, it always includes the exposure and, if stratified, strata variables, plus reference values for any other covariates in the model's original fitting data.
 
+Strata membership for \code{er_predict_survival()} is carried on \code{newdata} the same way: as an ordinary column (named after the \code{er_tte()} object's own \code{stratify_by} variable), never implicit in \code{model} itself. \code{\link[=er_tte_add_model]{er_tte_add_model()}} builds one \code{newdata} row per stratum level (or a single row, unstratified), filling any other covariate the model references with a reference value exactly as \code{\link[=er_plot_add_model]{er_plot_add_model()}} already does (see its "Details").
+
 A method may rely on caller-supplied extra arguments being forwarded through \code{...}: \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args}, \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}'s \code{summary_args}, and \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}'s \code{simulate_args} are each spliced into the corresponding generic call (\code{er_predict()}/\code{er_summary()}/\code{er_simulate()} respectively), so a model-specific argument beyond the fixed contract below (e.g. a landmark time for a time-to-event model) has a documented path to reach the method. These are deliberately kept separate from each \verb{er_plot_add_*()}/\verb{er_vpc_add_*()} function's own \code{...}, which is reserved for the \code{style} builder instead (see \code{\link[=er_style]{er_style()}}'s "Passing extra arguments to a builder" section) -- a method should not assume it receives anything passed via that \code{...}.
+}
+\examples{
+# a bare-bones er_predict() method for a plain `lm` fit
+toy_fit <- lm(biomarker_change ~ auc_ss, data = erplots_data)
+class(toy_fit) <- c("toy_lm", class(toy_fit))
 
-\code{er_predict()} should return \code{newdata} with \code{fit_resp}, \code{ci_lower}, and \code{ci_upper}. \code{er_simulate()} should return \code{newdata} replicates with \code{sim_id} and \code{fit_resp}; it may additionally return \code{sim_resp} for response-level simulations. \code{er_summary()} should return \code{NULL} or a named list with optional keys such as \code{p_value}, \code{coefficients}, and \code{glance}.
+er_predict.toy_lm <- function(model, newdata, conf_level = 0.95, ...) {
+  z <- -qnorm((1 - conf_level) / 2)
+  pred <- predict(model, newdata = newdata, se.fit = TRUE)
+  newdata$fit_resp <- pred$fit
+  newdata$ci_lower <- pred$fit - z * pred$se.fit
+  newdata$ci_upper <- pred$fit + z * pred$se.fit
+  newdata
+}
 
-Strata membership for \code{er_predict_survival()} is carried on \code{newdata}
-as an ordinary column (named after the \code{er_tte()} object's own
-\code{stratify_by} variable), the same way \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s
-\code{newdata} carries strata -- it is never implicit in \code{model} itself.
-\code{\link[=er_tte_add_model]{er_tte_add_model()}} builds one \code{newdata} row per stratum level (or a
-single row, unstratified), filling any other covariate the model
-references with a reference value exactly as \code{\link[=er_plot_add_model]{er_plot_add_model()}}
-already does (see its "Details").
+er_predict(toy_fit, newdata = data.frame(auc_ss = c(100, 500, 900)))
+
 }

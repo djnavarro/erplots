@@ -19,11 +19,11 @@ er_style_tte_risktable_text(
 \arguments{
 \item{data}{The original data frame (\code{object$data}).}
 
-\item{config}{Configuration for the risktable layer (see
-\code{.layer_tte_risktable()}): \code{config$table} (\code{time}/\code{n_risk}/\code{strata},
+\item{config}{Configuration for the risktable layer (populated by
+\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}): \code{config$table} (\code{time}/\code{n_risk}/\code{strata},
 one row per requested time break per stratum) and \code{config$breaks}
 (the time breaks themselves, also used as the curve panel's x-axis
-ticks -- see \code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}).}
+ticks).}
 
 \item{stratify}{Logical: whether the fit is stratified
 (\code{!is.null(object$strata)}).}

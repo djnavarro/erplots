@@ -112,7 +112,7 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #'   spaced breaks spanning `object$time$limits`.
 #' @param n_times Number of evenly spaced breaks to use when `times` is
 #'   `NULL`. Must be a single whole number of at least 2. Ignored when
-#'   `times` is supplied.
+#'   `times` is supplied. Defaults to `6`.
 #' @param ... Additional named arguments forwarded unchanged to `style`
 #'   at build time (e.g. [er_style_tte_risktable_text()]'s `text_size`).
 #'
@@ -174,7 +174,8 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #'   per stratum level. Defaults to `!is.null(object$strata)`.
 #' @param style Function drawing the model curve/ribbon. Defaults to
 #'   [er_style_tte_model_line()].
-#' @param conf_level Confidence level for the prediction band.
+#' @param conf_level Confidence level for the prediction band. Defaults
+#'   to `0.95`.
 #' @param time_grid Numeric vector of times at which to predict `S(t)`,
 #'   or `NULL` (the default) to use 100 points evenly spaced across
 #'   `object$time$limits`.

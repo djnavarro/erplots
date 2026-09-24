@@ -8,11 +8,11 @@
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame (`object$data`).
-#' @param config Configuration for the risktable layer (see
-#'   `.layer_tte_risktable()`): `config$table` (`time`/`n_risk`/`strata`,
+#' @param config Configuration for the risktable layer (populated by
+#'   [er_tte_add_risktable()]): `config$table` (`time`/`n_risk`/`strata`,
 #'   one row per requested time break per stratum) and `config$breaks`
 #'   (the time breaks themselves, also used as the curve panel's x-axis
-#'   ticks -- see [er_tte_add_risktable()]).
+#'   ticks).
 #' @param stratify Logical: whether the fit is stratified
 #'   (`!is.null(object$strata)`).
 #' @param time `object$time` (`name`/`label`/`limits`).

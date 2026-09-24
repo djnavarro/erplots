@@ -84,17 +84,22 @@ er_style_summary_gof(
 
 \item{theme}{Theme components.}
 
-\item{inset}{Distance from the panel edge for the annotation label.}
+\item{inset}{Distance from the panel edge for the annotation label.
+Defaults to \code{0.05}.}
 
-\item{label_size}{Label text size.}
+\item{label_size}{Label text size. Defaults to \code{NULL} (\code{\link[ggplot2:geom_label]{ggplot2::geom_label()}}'s own default).}
 
-\item{label_colour}{Label text colour.}
+\item{label_colour}{Label text colour. Defaults to \code{NULL} (\code{\link[ggplot2:geom_label]{ggplot2::geom_label()}}'s own default).}
 
-\item{label_fill}{Label background fill.}
+\item{label_fill}{Label background fill. Defaults to \code{NULL} (\code{\link[ggplot2:geom_label]{ggplot2::geom_label()}}'s own default).}
 
 \item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...}.}
 
-\item{fields}{Fields from \code{glance} to include for \code{er_style_summary_gof()}.}
+\item{fields}{Fields from \code{glance} to include for \code{er_style_summary_gof()},
+and the order they're shown in: one or more of \code{"n"} (labelled "N"),
+\code{"aic"} ("AIC"), \code{"bic"} ("BIC"), or \code{"r_squared"} (\code{"R\\u00b2"}). Defaults
+to all four, in that order. A field is shown only when both present
+and non-\code{NA} in the model's \code{glance} result.}
 }
 \value{
 A geom, or a list of geoms; see \code{\link[=er_style]{er_style()}}.
@@ -105,8 +110,7 @@ drawing a text/label annotation from a model's p-value, coefficients,
 goodness-of-fit statistics, or observation counts.
 }
 \details{
-Builders for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} annotate the base panel
-with a summary statistic or descriptive label. \code{er_style_summary_pvalue()}
+\code{er_style_summary_pvalue()}
 draws a formatted p-value from the model's \code{\link[=er_summary]{er_summary()}} result;
 \code{er_style_summary_n()} draws observation counts and doesn't have to
 originate from a fitted model at all.

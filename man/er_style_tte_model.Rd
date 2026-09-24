@@ -21,8 +21,8 @@ er_style_tte_model_line(
 \arguments{
 \item{data}{The original data frame (\code{object$data}).}
 
-\item{config}{Configuration for the model layer (see
-\code{.layer_tte_model()}): \code{config$predictions} (the prediction tibble
+\item{config}{Configuration for the model layer (populated by
+\code{\link[=er_tte_add_model]{er_tte_add_model()}}): \code{config$predictions} (the prediction tibble
 from \code{\link[=er_predict_survival]{er_predict_survival()}}, with \code{time}/\code{fit_survival}/
 \code{ci_lower}/\code{ci_upper} columns), \code{config$time_grid}, \code{config$conf_level}.}
 
@@ -65,12 +65,26 @@ rather than a step function.
 Stratified colour/fill both map to \code{config$predictions}'s own strata
 column (named after \code{strata$var}) rather than a fixed name -- unlike
 \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}, which always reads a column literally
-named \code{strata} (\code{.tidy_survfit()}'s own naming). \code{er_tte_build()}'s
-\code{.polish_tte_labels()} still retitles the resulting legend with
+named \code{strata} (the tidied Kaplan-Meier table's own naming).
+\code{\link[=er_tte_build]{er_tte_build()}} still retitles the resulting legend with
 \code{strata$label} afterwards.
 
 \code{er_style_tte_model_line()} is tagged \code{er_style_tag(fn, layer = "model")}, so \code{\link[=er_tte_add_model]{er_tte_add_model()}} errors informatively if handed a
 builder tagged for a different layer.
+}
+\examples{
+if (requireNamespace("ertte", quietly = TRUE)) {
+  library(survival)
+  library(ertte)
+  mod <- ertte_aft(Surv(time, status == 2) ~ age, lung)
+
+  lung |>
+    er_tte(time, status == 2) |>
+    er_tte_add_curve() |>
+    er_tte_add_model(mod, style = er_style_tte_model_line, ribbon_alpha = 0.3) |>
+    plot()
+}
+
 }
 \seealso{
 \code{\link[=er_tte_add_model]{er_tte_add_model()}}, \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}

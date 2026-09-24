@@ -22,8 +22,8 @@ er_style_tte_pvalue_logrank(
 \arguments{
 \item{data}{The original data frame (\code{object$data}).}
 
-\item{config}{Configuration for the pvalue layer (see
-\code{.layer_tte_pvalue()}): \code{config$p_value} (the log-rank test's
+\item{config}{Configuration for the pvalue layer (populated by
+\code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}}): \code{config$p_value} (the log-rank test's
 p-value) and \code{config$corner_distance} (how uncrowded each panel
 corner is, relative to the plotted survival curve(s) -- see
 \code{\link[=er_style]{er_style()}}'s \code{?er_plot_add_summary()}-analogous corner-placement
@@ -44,11 +44,11 @@ idiom).}
 \item{inset}{Distance from the panel edge for the annotation label,
 as a fraction of the panel's width/height. Default \code{0.05}.}
 
-\item{label_size}{Label text size.}
+\item{label_size}{Label text size. Defaults to \code{NULL} (\code{\link[ggplot2:geom_label]{ggplot2::geom_label()}}'s own default).}
 
-\item{label_colour}{Label text colour.}
+\item{label_colour}{Label text colour. Defaults to \code{NULL} (\code{\link[ggplot2:geom_label]{ggplot2::geom_label()}}'s own default).}
 
-\item{label_fill}{Label background fill.}
+\item{label_fill}{Label background fill. Defaults to \code{NULL} (\code{\link[ggplot2:geom_label]{ggplot2::geom_label()}}'s own default).}
 }
 \value{
 A geom, or a list of geoms.

@@ -49,7 +49,9 @@ with additional theme tweaks layered on top of \code{theme_base}. See
 \item{format_percent, format_number}{Formatter functions (typically
 from \verb{scales::label_*()}), used to format the rate/mean displayed
 in the observed/simulated summaries for a binary response
-(\code{format_percent}) or a continuous/count response (\code{format_number}).}
+(\code{format_percent}) or a continuous/count response (\code{format_number}).
+Default to \code{scales::label_percent(accuracy = 1)} and
+\code{scales::label_number(accuracy = 0.01)} respectively.}
 }
 \value{
 The input \code{object}, with the requested theme fields updated.
@@ -76,9 +78,10 @@ settings too if you want to keep them alongside your own additions.
 
 Unlike \code{\link[=er_plot_theme]{er_plot_theme()}}, there is no \code{color_discrete}/\code{fill_discrete}
 argument here: the observed-vs-simulated colour/fill distinction uses
-a fixed, shared scale (see the "Gotchas" section of \code{AGENTS.md}) to
-keep the two aligned across builders that mix colour and fill for the
-same idea, and swapping it out is not yet supported. Adding \code{+ ggplot2::scale_colour_manual(...)}/\code{+ ggplot2::scale_fill_manual(...)}
+a fixed, shared scale (with \code{"Observed"}/\code{"Simulated"} always mapped
+to the same two hues) to keep the two aligned across builders that mix
+colour and fill for the same idea, and swapping it out is not yet
+supported. Adding \code{+ ggplot2::scale_colour_manual(...)}/\code{+ ggplot2::scale_fill_manual(...)}
 to the built/returned ggplot2 object remains the escape hatch for
 this, and for any other tweak not covered by this function's
 arguments (e.g. \code{draw_key}, which isn't wired up for any built-in VPC

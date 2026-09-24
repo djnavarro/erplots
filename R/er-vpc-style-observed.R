@@ -13,6 +13,9 @@
 #' @param response Response variable.
 #' @param theme Theme components.
 #' @param point_size Point size for all three point/interval builders.
+#'   Defaults to `1.5` for `er_style_vpc_observed_quantile_line()`/
+#'   `er_style_vpc_observed_quantile_errorbar()`, or `2` for
+#'   `er_style_vpc_observed_mean_errorbar()`.
 #' @param errorbar_width Width of `er_style_vpc_observed_mean_errorbar()`'s
 #'   and `er_style_vpc_observed_quantile_errorbar()`'s error bars.
 #'   Interpreted differently depending on `plot_by`'s type: for a
@@ -104,6 +107,31 @@
 #' depends on the data at hand.
 #'
 #' @returns A list of geoms; see [er_style()].
+#'
+#' @examples
+#' if (requireNamespace("erglm", quietly = TRUE)) {
+#'   library(erglm)
+#'   mod <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())
+#'
+#'   # er_style_vpc_observed_mean_errorbar(): the default, adaptive to
+#'   # plot_by's type
+#'   erglm_data |>
+#'     er_vpc(aucss, ae2, plot_by = aucss) |>
+#'     er_vpc_add_observed(style = er_style_vpc_observed_mean_errorbar) |>
+#'     er_vpc_add_simulated(model = mod, seed = 6203, style = er_style_vpc_simulated_mean_errorbar) |>
+#'     plot()
+#'
+#'   # er_style_vpc_observed_quantile_line(): continuous-x percentile
+#'   # lines, paired with the matching simulated ribbon builder
+#'   mod2 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+#'   erglm_data |>
+#'     er_vpc(aucss, biomarker_change, plot_by = aucss) |>
+#'     er_vpc_add_observed(style = er_style_vpc_observed_quantile_line) |>
+#'     er_vpc_add_simulated(
+#'       model = mod2, seed = 8417, style = er_style_vpc_simulated_quantile_ribbon
+#'     ) |>
+#'     plot()
+#' }
 #'
 #' @name er_style_vpc_observed
 #' @seealso [er_style()], [er_style_vpc_simulated()]

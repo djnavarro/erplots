@@ -21,8 +21,8 @@ er_style_tte_curve_km(
 \arguments{
 \item{data}{The original data frame (\code{object$data}).}
 
-\item{config}{Configuration for the curve layer (see
-\code{.layer_tte_curve()}): \code{config$table} (the tidy KM table, with a
+\item{config}{Configuration for the curve layer (populated by
+\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}): \code{config$table} (the tidy KM table, with a
 \verb{(0, 1)} origin row prepended per stratum), \code{config$time_upper}
 (the time-axis upper limit, needed so the last confidence-band
 interval has somewhere to end), \code{config$conf_level}.}
@@ -72,10 +72,9 @@ Stratified colour/fill both map to \code{config$table}'s own \code{strata}
 column (the already-cleaned stratum label, e.g. \code{"Q1"} or a
 categorical level) rather than the original \code{stratify_by} column on
 \code{data}, since that's what \code{config$table} actually carries.
-\code{er_tte_build()}'s \code{.polish_tte_labels()} (the TTE-grammar analogue
-of \code{er_plot()}'s \code{.polish_labels()}) retitles the resulting legend
-with \code{strata$label} (e.g. \code{"sex"}) afterwards, so a builder itself
-never needs to know the original variable's name.
+\code{\link[=er_tte_build]{er_tte_build()}} retitles the resulting legend with \code{strata$label}
+(e.g. \code{"sex"}) afterwards, so a builder itself never needs to know
+the original variable's name.
 
 \code{er_style_tte_curve_km()} is tagged \code{er_style_tag(fn, layer = "curve")}, so \code{\link[=er_tte_add_curve]{er_tte_add_curve()}} errors informatively if handed a
 builder tagged for a different layer.

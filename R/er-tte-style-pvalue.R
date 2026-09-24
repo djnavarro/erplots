@@ -6,8 +6,8 @@
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame (`object$data`).
-#' @param config Configuration for the pvalue layer (see
-#'   `.layer_tte_pvalue()`): `config$p_value` (the log-rank test's
+#' @param config Configuration for the pvalue layer (populated by
+#'   [er_tte_add_pvalue()]): `config$p_value` (the log-rank test's
 #'   p-value) and `config$corner_distance` (how uncrowded each panel
 #'   corner is, relative to the plotted survival curve(s) -- see
 #'   [er_style()]'s `?er_plot_add_summary()`-analogous corner-placement
@@ -21,9 +21,9 @@
 #'   [er_tte_add_pvalue()]'s own `...`.
 #' @param inset Distance from the panel edge for the annotation label,
 #'   as a fraction of the panel's width/height. Default `0.05`.
-#' @param label_size Label text size.
-#' @param label_colour Label text colour.
-#' @param label_fill Label background fill.
+#' @param label_size Label text size. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
+#' @param label_colour Label text colour. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
+#' @param label_fill Label background fill. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
 #'
 #' @details
 #' `er_style_tte_pvalue_logrank()` places its annotation in whichever of

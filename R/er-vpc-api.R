@@ -12,10 +12,12 @@
 #' sides share identical bin boundaries. Both layers are singletons (a
 #' second call replaces the previous one).
 #'
-#' Unlike [er_plot()], `er_vpc()` has no stratification concept and
-#' always renders a single panel -- see [er_vpc_add_observed()] for
-#' `plot_by`, the (orthogonal) variable plotted on the x-axis and used
-#' to bin/group the comparison. Whether `plot_by` is `"continuous"`
+#' `er_vpc()`'s own stratification (`stratify_by`) is real, but simpler
+#' than [er_plot()]'s: a facet-only split via `ggplot2::facet_wrap()`,
+#' with no colour/facet precedence rule to reconcile (see `stratify_by`
+#' below). It's orthogonal to `plot_by` -- see [er_vpc_add_observed()]
+#' for `plot_by`, the variable plotted on the x-axis and used to
+#' bin/group the comparison. Whether `plot_by` is `"continuous"`
 #' (numeric, quantile-binned) or `"discrete"` (used as-is) is
 #' auto-detected from the column's type and stored on
 #' `object$group$type`, mirroring how `object$response$type` records
@@ -24,7 +26,8 @@
 #' @param data Data frame or tibble containing the observed data.
 #' @param exposure Exposure variable (one variable, unquoted).
 #' @param response Response variable (one variable, unquoted).
-#' @param response_type One of `"auto"`, `"binary"`, `"continuous"`, or `"count"`.
+#' @param response_type One of `"auto"` (the default), `"binary"`,
+#'   `"continuous"`, or `"count"`.
 #' @param plot_by Variable (unquoted) plotted on the x-axis and used to
 #'   bin/group the observed vs. simulated comparison. Defaults to
 #'   `exposure`. A numeric variable is split into `n_bins` quantile bins
@@ -32,6 +35,7 @@
 #'   exposure variable itself); a categorical variable is used as-is,
 #'   with no binning.
 #' @param n_bins Number of quantile bins, when `plot_by` is numeric.
+#'   Defaults to `4`.
 #' @param stratify_by Optional variable (unquoted) splitting the VPC into
 #'   one facet panel per level, via `ggplot2::facet_wrap()`. A
 #'   categorical variable is used as-is; a numeric variable is
@@ -42,13 +46,15 @@
 #'   faceting, a single panel, matching prior behaviour).
 #' @param n_strata Number of quantile bins, when `stratify_by` is
 #'   numeric. Ignored when `stratify_by` is `NULL` or categorical.
+#'   Defaults to `4`.
 #' @param conf_level Confidence level for both the observed- and
 #'   simulated-side intervals. Must be strictly between 0 and 1.
+#'   Defaults to `0.95`.
 #' @param probs Percentiles to compute for a percentile-based builder
 #'   (e.g. [er_style_vpc_observed_quantile_line()]/[er_style_vpc_simulated_quantile_ribbon()]/
 #'   [er_style_vpc_observed_quantile_errorbar()]/[er_style_vpc_simulated_quantile_errorbar()];
 #'   ignored by the default adaptive mean/errorbar pair). Only computed
-#'   for a continuous/count response.
+#'   for a continuous/count response. Defaults to `c(0.1, 0.5, 0.9)`.
 #'
 #' @returns An (empty) plot object of class `er_vpc`.
 #'

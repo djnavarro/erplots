@@ -7,8 +7,8 @@
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame (`object$data`).
-#' @param config Configuration for the censor layer (see
-#'   `.layer_tte_censor()`): `config$table` (the subset of the tidy KM
+#' @param config Configuration for the censor layer (populated by
+#'   [er_tte_add_censor()]): `config$table` (the subset of the tidy KM
 #'   table where `n_censor > 0`, with a `strata` column when
 #'   stratified).
 #' @param stratify Logical: whether the fit is stratified

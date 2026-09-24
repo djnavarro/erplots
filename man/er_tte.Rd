@@ -21,10 +21,11 @@ variable is split into \code{n_strata} quantile bins. Defaults to \code{NULL}
 (a single, unstratified curve).}
 
 \item{n_strata}{Number of quantile bins, when \code{stratify_by} is
-numeric. Ignored when \code{stratify_by} is \code{NULL} or categorical.}
+numeric. Ignored when \code{stratify_by} is \code{NULL} or categorical.
+Defaults to \code{4}.}
 
 \item{conf_level}{Confidence level for the Kaplan-Meier confidence
-band. Must be strictly between 0 and 1.}
+band. Must be strictly between 0 and 1. Defaults to \code{0.95}.}
 }
 \value{
 An (empty of layers) plot object of class \code{er_tte}, with the
