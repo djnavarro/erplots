@@ -160,19 +160,20 @@ goodness-of-fit statistics, or observation counts.</p>
 
 
 <dt id="arg-inset">inset<a class="anchor" aria-label="anchor" href="#arg-inset"></a></dt>
-<dd><p>Distance from the panel edge for the annotation label.</p></dd>
+<dd><p>Distance from the panel edge for the annotation label.
+Defaults to <code>0.05</code>.</p></dd>
 
 
 <dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
-<dd><p>Label text size.</p></dd>
+<dd><p>Label text size. Defaults to <code>NULL</code> (<code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code>'s own default).</p></dd>
 
 
 <dt id="arg-label-colour">label_colour<a class="anchor" aria-label="anchor" href="#arg-label-colour"></a></dt>
-<dd><p>Label text colour.</p></dd>
+<dd><p>Label text colour. Defaults to <code>NULL</code> (<code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code>'s own default).</p></dd>
 
 
 <dt id="arg-label-fill">label_fill<a class="anchor" aria-label="anchor" href="#arg-label-fill"></a></dt>
-<dd><p>Label background fill.</p></dd>
+<dd><p>Label background fill. Defaults to <code>NULL</code> (<code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code>'s own default).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -180,7 +181,11 @@ goodness-of-fit statistics, or observation counts.</p>
 
 
 <dt id="arg-fields">fields<a class="anchor" aria-label="anchor" href="#arg-fields"></a></dt>
-<dd><p>Fields from <code>glance</code> to include for <code>er_style_summary_gof()</code>.</p></dd>
+<dd><p>Fields from <code>glance</code> to include for <code>er_style_summary_gof()</code>,
+and the order they're shown in: one or more of <code>"n"</code> (labelled "N"),
+<code>"aic"</code> ("AIC"), <code>"bic"</code> ("BIC"), or <code>"r_squared"</code> (<code>"R\u00b2"</code>). Defaults
+to all four, in that order. A field is shown only when both present
+and non-<code>NA</code> in the model's <code>glance</code> result.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -189,8 +194,7 @@ goodness-of-fit statistics, or observation counts.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code> annotate the base panel
-with a summary statistic or descriptive label. <code>er_style_summary_pvalue()</code>
+    <p><code>er_style_summary_pvalue()</code>
 draws a formatted p-value from the model's <code><a href="er_model_interface.html">er_summary()</a></code> result;
 <code>er_style_summary_n()</code> draws observation counts and doesn't have to
 originate from a fitted model at all.

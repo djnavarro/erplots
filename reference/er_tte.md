@@ -43,12 +43,12 @@ er_tte(data, time, event, stratify_by = NULL, n_strata = 4, conf_level = 0.95)
 - n_strata:
 
   Number of quantile bins, when `stratify_by` is numeric. Ignored when
-  `stratify_by` is `NULL` or categorical.
+  `stratify_by` is `NULL` or categorical. Defaults to `4`.
 
 - conf_level:
 
   Confidence level for the Kaplan-Meier confidence band. Must be
-  strictly between 0 and 1.
+  strictly between 0 and 1. Defaults to `0.95`.
 
 ## Value
 

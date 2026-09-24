@@ -115,15 +115,16 @@ er_style_quantile_pointrange_vlines(
 
 - point_size:
 
-  Point size for `er_style_quantile_errorbar()`.
+  Point size for `er_style_quantile_errorbar()`. Defaults to `2`.
 
 - errorbar_width:
 
-  Width of `er_style_quantile_errorbar()`'s error bars.
+  Width of `er_style_quantile_errorbar()`'s error bars. Defaults to
+  `0.025`.
 
 - label_size:
 
-  Text size for the per-bin value label.
+  Text size for the per-bin value label. Defaults to `3`.
 
 - ...:
 
@@ -133,35 +134,43 @@ er_style_quantile_pointrange_vlines(
 
 - vline_colour, vline_linetype:
 
-  Colour and linetype of quantile-bin boundary lines.
+  Colour and linetype of quantile-bin boundary lines. Default to
+  `"grey50"` and `"dotted"` respectively.
 
 - vline_labels:
 
   Logical: whether the `_vlines` builders also label each bin boundary
-  with its exposure value.
+  with its exposure value. Defaults to `FALSE`.
 
 - vline_label_position:
 
-  One of `"auto"`, `"top"`, `"bottom"` – vertical placement of
-  `vline_labels`.
+  One of `"auto"` (the default), `"top"`, or `"bottom"` – vertical
+  placement of `vline_labels`.
 
 - vline_label_size, vline_label_colour, vline_label_fill:
 
   Size, text colour, and background fill for `vline_labels`.
+  `vline_label_size` defaults to `3`;
+  `vline_label_colour`/`vline_label_fill` default to `NULL`
+  ([`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)'s
+  own defaults).
 
 - vline_label_inset:
 
   Fraction of the response range `vline_labels` are inset from the panel
-  edge.
+  edge. Defaults to `0.05`.
 
 - vline_label_digits:
 
-  Number of decimal places `vline_labels` are rounded to.
+  Number of decimal places `vline_labels` are rounded to. Defaults to
+  `0`.
 
 - pointrange_size, pointrange_linewidth:
 
   Size and linewidth for
   [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html).
+  Default to `NULL`, which leaves `geom_pointrange()`'s own built-in
+  size/linewidth defaults in effect.
 
 ## Value
 
@@ -170,17 +179,13 @@ A geom, or a list of geoms; see
 
 ## Details
 
-Builders for the `quantile` layer
-([`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md))
-bin exposure into quantile groups and plot a response summary with an
-uncertainty interval. `er_style_quantile_errorbar()` and
-`er_style_quantile_pointrange()` are the base builders; their `_vlines`
-variants add a line at every quantile-bin boundary – including the two
-outer boundaries at the minimum non-placebo exposure and the overall
-maximum exposure, not just the boundaries shared between two adjacent
-bins – so a reader can see every bin edge from the plot alone. All
-built-in quantile builders are tagged
-`er_style_tag(fn, layer = "quantile")`, so
+`er_style_quantile_errorbar()` and `er_style_quantile_pointrange()` are
+the base builders; their `_vlines` variants add a line at every
+quantile-bin boundary – including the two outer boundaries at the
+minimum non-placebo exposure and the overall maximum exposure, not just
+the boundaries shared between two adjacent bins – so a reader can see
+every bin edge from the plot alone. All built-in quantile builders are
+tagged `er_style_tag(fn, layer = "quantile")`, so
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 errors informatively if handed a builder tagged for a different layer.
 
@@ -287,7 +292,16 @@ if (requireNamespace("erglm", quietly = TRUE)) {
     er_plot_add_summary(mod) |>
     er_plot_add_quantiles(style = er_style_quantile_errorbar_vlines, vline_labels = TRUE) |>
     plot()
+
+  # er_style_quantile_pointrange_vlines(): the pointrange equivalent of
+  # er_style_quantile_errorbar_vlines()
+  erglm_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(mod) |>
+    er_plot_add_quantiles(style = er_style_quantile_pointrange_vlines) |>
+    plot()
 }
+
 
 
 

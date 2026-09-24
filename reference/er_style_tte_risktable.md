@@ -31,11 +31,11 @@ er_style_tte_risktable_text(
 
 - config:
 
-  Configuration for the risktable layer (see `.layer_tte_risktable()`):
+  Configuration for the risktable layer (populated by
+  [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)):
   `config$table` (`time`/`n_risk`/`strata`, one row per requested time
   break per stratum) and `config$breaks` (the time breaks themselves,
-  also used as the curve panel's x-axis ticks – see
-  [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)).
+  also used as the curve panel's x-axis ticks).
 
 - stratify:
 

@@ -2,12 +2,19 @@
 
 `erplots` draws exposure-response plots from fitted models that
 implement this small interface, rather than assuming a particular model
-class. Implement `er_predict()` for basic plotting support; implement
-`er_simulate()` for simulation-based visualisations; implement
-`er_summary()` for summary annotations; implement
-`er_predict_survival()` for a parametric survival-curve overlay in the
-[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) grammar
-([`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)).
+class:
+
+- Implement `er_predict()` for basic plotting support.
+
+- Implement `er_simulate()` for simulation-based visualisations.
+
+- Implement `er_summary()` for summary annotations.
+
+- Implement `er_predict_survival()` for a parametric survival-curve
+  overlay in the
+  [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+  grammar
+  ([`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)).
 
 ## Usage
 
@@ -148,6 +155,17 @@ builds `newdata`, it always includes the exposure and, if stratified,
 strata variables, plus reference values for any other covariates in the
 model's original fitting data.
 
+Strata membership for `er_predict_survival()` is carried on `newdata`
+the same way: as an ordinary column (named after the
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) object's
+own `stratify_by` variable), never implicit in `model` itself.
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
+builds one `newdata` row per stratum level (or a single row,
+unstratified), filling any other covariate the model references with a
+reference value exactly as
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
+already does (see its "Details").
+
 A method may rely on caller-supplied extra arguments being forwarded
 through `...`:
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
@@ -166,22 +184,25 @@ reserved for the `style` builder instead (see
 "Passing extra arguments to a builder" section) – a method should not
 assume it receives anything passed via that `...`.
 
-`er_predict()` should return `newdata` with `fit_resp`, `ci_lower`, and
-`ci_upper`. `er_simulate()` should return `newdata` replicates with
-`sim_id` and `fit_resp`; it may additionally return `sim_resp` for
-response-level simulations. `er_summary()` should return `NULL` or a
-named list with optional keys such as `p_value`, `coefficients`, and
-`glance`.
+## Examples
 
-Strata membership for `er_predict_survival()` is carried on `newdata` as
-an ordinary column (named after the
-[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) object's
-own `stratify_by` variable), the same way
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
-`newdata` carries strata – it is never implicit in `model` itself.
-[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
-builds one `newdata` row per stratum level (or a single row,
-unstratified), filling any other covariate the model references with a
-reference value exactly as
-[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-already does (see its "Details").
+``` r
+# a bare-bones er_predict() method for a plain `lm` fit
+toy_fit <- lm(biomarker_change ~ auc_ss, data = erplots_data)
+class(toy_fit) <- c("toy_lm", class(toy_fit))
+
+er_predict.toy_lm <- function(model, newdata, conf_level = 0.95, ...) {
+  z <- -qnorm((1 - conf_level) / 2)
+  pred <- predict(model, newdata = newdata, se.fit = TRUE)
+  newdata$fit_resp <- pred$fit
+  newdata$ci_lower <- pred$fit - z * pred$se.fit
+  newdata$ci_upper <- pred$fit + z * pred$se.fit
+  newdata
+}
+
+er_predict(toy_fit, newdata = data.frame(auc_ss = c(100, 500, 900)))
+#>   auc_ss   fit_resp   ci_lower   ci_upper
+#> 1    100  -19.44029  -19.87311  -19.00747
+#> 2    500  -87.09426  -89.55216  -84.63637
+#> 3    900 -154.74824 -159.25187 -150.24461
+```

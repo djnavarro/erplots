@@ -102,19 +102,26 @@ er_style_summary_gof(
 
 - inset:
 
-  Distance from the panel edge for the annotation label.
+  Distance from the panel edge for the annotation label. Defaults to
+  `0.05`.
 
 - label_size:
 
-  Label text size.
+  Label text size. Defaults to `NULL`
+  ([`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)'s
+  own default).
 
 - label_colour:
 
-  Label text colour.
+  Label text colour. Defaults to `NULL`
+  ([`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)'s
+  own default).
 
 - label_fill:
 
-  Label background fill.
+  Label background fill. Defaults to `NULL`
+  ([`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)'s
+  own default).
 
 - ...:
 
@@ -124,7 +131,11 @@ er_style_summary_gof(
 
 - fields:
 
-  Fields from `glance` to include for `er_style_summary_gof()`.
+  Fields from `glance` to include for `er_style_summary_gof()`, and the
+  order they're shown in: one or more of `"n"` (labelled "N"), `"aic"`
+  ("AIC"), `"bic"` ("BIC"), or `"r_squared"` (`"R\u00b2"`). Defaults to
+  all four, in that order. A field is shown only when both present and
+  non-`NA` in the model's `glance` result.
 
 ## Value
 
@@ -133,9 +144,6 @@ A geom, or a list of geoms; see
 
 ## Details
 
-Builders for
-[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
-annotate the base panel with a summary statistic or descriptive label.
 `er_style_summary_pvalue()` draws a formatted p-value from the model's
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 result; `er_style_summary_n()` draws observation counts and doesn't have

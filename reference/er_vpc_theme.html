@@ -134,7 +134,9 @@ with additional theme tweaks layered on top of <code>theme_base</code>. See
 <dd><p>Formatter functions (typically
 from <code>scales::label_*()</code>), used to format the rate/mean displayed
 in the observed/simulated summaries for a binary response
-(<code>format_percent</code>) or a continuous/count response (<code>format_number</code>).</p></dd>
+(<code>format_percent</code>) or a continuous/count response (<code>format_number</code>).
+Default to <code>scales::label_percent(accuracy = 1)</code> and
+<code>scales::label_number(accuracy = 0.01)</code> respectively.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -155,9 +157,10 @@ than merging with it, so re-include the border/legend-position
 settings too if you want to keep them alongside your own additions.</p>
 <p>Unlike <code><a href="er_plot_theme.html">er_plot_theme()</a></code>, there is no <code>color_discrete</code>/<code>fill_discrete</code>
 argument here: the observed-vs-simulated colour/fill distinction uses
-a fixed, shared scale (see the "Gotchas" section of <code>AGENTS.md</code>) to
-keep the two aligned across builders that mix colour and fill for the
-same idea, and swapping it out is not yet supported. Adding <code>+ ggplot2::scale_colour_manual(...)</code>/<code>+ ggplot2::scale_fill_manual(...)</code>
+a fixed, shared scale (with <code>"Observed"</code>/<code>"Simulated"</code> always mapped
+to the same two hues) to keep the two aligned across builders that mix
+colour and fill for the same idea, and swapping it out is not yet
+supported. Adding <code>+ ggplot2::scale_colour_manual(...)</code>/<code>+ ggplot2::scale_fill_manual(...)</code>
 to the built/returned ggplot2 object remains the escape hatch for
 this, and for any other tweak not covered by this function's
 arguments (e.g. <code>draw_key</code>, which isn't wired up for any built-in VPC

@@ -35,6 +35,7 @@ er_tte_add_risktable(object, style = NULL, times = NULL, n_times = 6, ...)
 
   Number of evenly spaced breaks to use when `times` is `NULL`. Must be
   a single whole number of at least 2. Ignored when `times` is supplied.
+  Defaults to `6`.
 
 - ...:
 

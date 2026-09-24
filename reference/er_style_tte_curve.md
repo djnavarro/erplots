@@ -37,7 +37,8 @@ er_style_tte_curve_km(
 
 - config:
 
-  Configuration for the curve layer (see `.layer_tte_curve()`):
+  Configuration for the curve layer (populated by
+  [`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md)):
   `config$table` (the tidy KM table, with a `(0, 1)` origin row
   prepended per stratum), `config$time_upper` (the time-axis upper
   limit, needed so the last confidence-band interval has somewhere to
@@ -98,12 +99,10 @@ Stratified colour/fill both map to `config$table`'s own `strata` column
 (the already-cleaned stratum label, e.g. `"Q1"` or a categorical level)
 rather than the original `stratify_by` column on `data`, since that's
 what `config$table` actually carries.
-[`er_tte_build()`](https://erplots.djnavarro.net/reference/er_tte_build.md)'s
-`.polish_tte_labels()` (the TTE-grammar analogue of
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s
-`.polish_labels()`) retitles the resulting legend with `strata$label`
-(e.g. `"sex"`) afterwards, so a builder itself never needs to know the
-original variable's name.
+[`er_tte_build()`](https://erplots.djnavarro.net/reference/er_tte_build.md)
+retitles the resulting legend with `strata$label` (e.g. `"sex"`)
+afterwards, so a builder itself never needs to know the original
+variable's name.
 
 `er_style_tte_curve_km()` is tagged `er_style_tag(fn, layer = "curve")`,
 so

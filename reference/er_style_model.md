@@ -139,14 +139,10 @@ A geom, or a list of geoms; see
 
 ## Details
 
-Builders for the `model` layer
-([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)),
-which draws the fitted curve (and, where applicable, its uncertainty)
-over the exposure range: `er_style_model_ribbonline()` (ribbon plus
-line, the default), `er_style_model_line()` (line only, no ribbon), and
-`er_style_model_spaghetti()` (a spaghetti plot of simulated draws, for
-models that implement
-[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+`er_style_model_ribbonline()` is the default; `er_style_model_line()`
+omits the ribbon; `er_style_model_spaghetti()` draws simulated draws
+instead of a ribbon, for models that implement
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
 All three are tagged `er_style_tag(fn, layer = "model")`, so
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 errors informatively if handed one of these tagged for a different layer

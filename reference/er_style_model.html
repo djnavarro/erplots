@@ -192,12 +192,9 @@ passed to <code><a href="er_model_interface.html">er_simulate()</a></code>. Defa
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for the <code>model</code> layer (<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>), which
-draws the fitted curve (and, where applicable, its uncertainty) over
-the exposure range: <code>er_style_model_ribbonline()</code> (ribbon plus line, the
-default), <code>er_style_model_line()</code> (line only, no ribbon), and
-<code>er_style_model_spaghetti()</code> (a spaghetti plot of simulated draws, for
-models that implement <code><a href="er_model_interface.html">er_simulate()</a></code>). All three are tagged
+    <p><code>er_style_model_ribbonline()</code> is the default; <code>er_style_model_line()</code>
+omits the ribbon; <code>er_style_model_spaghetti()</code> draws simulated draws
+instead of a ribbon, for models that implement <code><a href="er_model_interface.html">er_simulate()</a></code>. All three are tagged
 <code>er_style_tag(fn, layer = "model")</code>, so <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>
 errors informatively if handed one of these tagged for a different
 layer entirely (e.g. <code>"summary"</code>, meant for <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>).</p>

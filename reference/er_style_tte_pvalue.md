@@ -31,7 +31,8 @@ er_style_tte_pvalue_logrank(
 
 - config:
 
-  Configuration for the pvalue layer (see `.layer_tte_pvalue()`):
+  Configuration for the pvalue layer (populated by
+  [`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md)):
   `config$p_value` (the log-rank test's p-value) and
   `config$corner_distance` (how uncrowded each panel corner is, relative
   to the plotted survival curve(s) – see
@@ -69,15 +70,21 @@ er_style_tte_pvalue_logrank(
 
 - label_size:
 
-  Label text size.
+  Label text size. Defaults to `NULL`
+  ([`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)'s
+  own default).
 
 - label_colour:
 
-  Label text colour.
+  Label text colour. Defaults to `NULL`
+  ([`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)'s
+  own default).
 
 - label_fill:
 
-  Label background fill.
+  Label background fill. Defaults to `NULL`
+  ([`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)'s
+  own default).
 
 ## Value
 

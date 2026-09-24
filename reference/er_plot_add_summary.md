@@ -29,8 +29,7 @@ er_plot_add_summary(
   A fitted exposure-response model, or `NULL` (the default). Only needed
   for builder styles (e.g.
   [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md))
-  that produced model-based summaries; a purely descriptive builder
-  (e.g.
+  that produce model-based summaries; a purely descriptive builder (e.g.
   [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md))
   ignores it.
 
@@ -53,7 +52,7 @@ er_plot_add_summary(
   (used, e.g., for the `conf_low`/`conf_high` columns of its
   `coefficients` result – see
   [`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)).
-  Ignored when `model` is `NULL`.
+  Defaults to `0.95`. Ignored when `model` is `NULL`.
 
 - summary_args:
 

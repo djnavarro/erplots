@@ -130,7 +130,11 @@ er_style_group_violinjitter(
 
 - alpha:
 
-  Transparency of the geom.
+  Transparency of the geom. Defaults to `0.5` for
+  `er_style_group_boxplot()`/`er_style_group_violin()`/
+  `er_style_group_boxjitter()`/`er_style_group_violinjitter()`;
+  `er_style_group_histogram()` defaults to `NULL`, which resolves to
+  `0.5` when stratified or `0.8` otherwise.
 
 - show_outliers:
 
@@ -158,32 +162,36 @@ er_style_group_violinjitter(
 
 - bins:
 
-  Number of histogram bins for `er_style_group_histogram()`.
+  Number of histogram bins for `er_style_group_histogram()`. Defaults to
+  `30`.
 
 - quantiles, quantile_linetype:
 
   Violin quantile positions and linetype for `er_style_group_violin()`.
+  Default to `NULL` (no quantile lines drawn) and `"solid"`
+  respectively.
 
 - size:
 
   Overall size multiplier for `er_style_group_linerange()`'s dot and
-  lines.
+  lines. Defaults to `1`.
 
 - inner_range, outer_range:
 
   Quantile probabilities (length 2) for `er_style_group_linerange()`'s
-  thick and thin lines.
+  thick and thin lines. Default to `c(0.25, 0.75)` and `c(0.05, 0.95)`
+  respectively.
 
 - alpha_dot, alpha_inner, alpha_outer:
 
   Per-part transparency for `er_style_group_linerange()`'s dot, inner
-  line, and outer line.
+  line, and outer line. Default to `1`, `0.8`, and `0.4` respectively.
 
 - jitter_height, jitter_size, jitter_alpha:
 
   Vertical jitter, point size, and transparency for
   `er_style_group_boxjitter()`/`er_style_group_violinjitter()`'s
-  overlaid points.
+  overlaid points. Default to `0.15`, `1`, and `0.6` respectively.
 
 ## Value
 
@@ -192,9 +200,6 @@ A geom, or a list of geoms; see
 
 ## Details
 
-Builders for the `group` layer
-([`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md))
-draw exposure distributions for grouping variables.
 `er_style_group_boxplot()` and `er_style_group_violin()` put group
 levels on the y-axis; `er_style_group_histogram()` puts them on facet
 strips and frees the y-axis for counts; `er_style_group_linerange()`

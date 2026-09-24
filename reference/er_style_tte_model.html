@@ -91,8 +91,8 @@ band. Shares the same <code>function(data, config, stratify, time, strata, theme
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
-<dd><p>Configuration for the model layer (see
-<code>.layer_tte_model()</code>): <code>config$predictions</code> (the prediction tibble
+<dd><p>Configuration for the model layer (populated by
+<code><a href="er_tte_add_model.html">er_tte_add_model()</a></code>): <code>config$predictions</code> (the prediction tibble
 from <code><a href="er_model_interface.html">er_predict_survival()</a></code>, with <code>time</code>/<code>fit_survival</code>/
 <code>ci_lower</code>/<code>ci_upper</code> columns), <code>config$time_grid</code>, <code>config$conf_level</code>.</p></dd>
 
@@ -147,8 +147,8 @@ rather than a step function.</p>
 <p>Stratified colour/fill both map to <code>config$predictions</code>'s own strata
 column (named after <code>strata$var</code>) rather than a fixed name – unlike
 <code><a href="er_style_tte_curve.html">er_style_tte_curve_km()</a></code>, which always reads a column literally
-named <code>strata</code> (<code>.tidy_survfit()</code>'s own naming). <code><a href="er_tte_build.html">er_tte_build()</a></code>'s
-<code>.polish_tte_labels()</code> still retitles the resulting legend with
+named <code>strata</code> (the tidied Kaplan-Meier table's own naming).
+<code><a href="er_tte_build.html">er_tte_build()</a></code> still retitles the resulting legend with
 <code>strata$label</code> afterwards.</p>
 <p><code>er_style_tte_model_line()</code> is tagged <code>er_style_tag(fn, layer = "model")</code>, so <code><a href="er_tte_add_model.html">er_tte_add_model()</a></code> errors informatively if handed a
 builder tagged for a different layer.</p>
@@ -158,6 +158,23 @@ builder tagged for a different layer.</p>
     <div class="dont-index"><p><code><a href="er_tte_add_model.html">er_tte_add_model()</a></code>, <code><a href="er_style_tte_curve.html">er_style_tte_curve_km()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ertte"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/ertte" class="external-link">ertte</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ertte.djnavarro.net/reference/ertte_aft.html" class="external-link">ertte_aft</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span>, <span class="va">lung</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">lung</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="er_tte_add_model.html">er_tte_add_model</a></span><span class="op">(</span><span class="va">mod</span>, style <span class="op">=</span> <span class="va">er_style_tte_model_line</span>, ribbon_alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-plt img"><img src="er_style_tte_model-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -21,8 +21,11 @@ er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
 
 - style:
 
-  A function determining how the observed layer is drawn; see
-  [`er_style_vpc_observed()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md).
+  A function determining how the observed layer is drawn. Defaults to
+  [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md);
+  see
+  [`er_style_vpc_observed()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+  for the other built-in options.
 
 - ...:
 

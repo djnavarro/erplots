@@ -40,7 +40,8 @@ er_vpc(
 
 - response_type:
 
-  One of `"auto"`, `"binary"`, `"continuous"`, or `"count"`.
+  One of `"auto"` (the default), `"binary"`, `"continuous"`, or
+  `"count"`.
 
 - plot_by:
 
@@ -52,7 +53,7 @@ er_vpc(
 
 - n_bins:
 
-  Number of quantile bins, when `plot_by` is numeric.
+  Number of quantile bins, when `plot_by` is numeric. Defaults to `4`.
 
 - stratify_by:
 
@@ -69,12 +70,12 @@ er_vpc(
 - n_strata:
 
   Number of quantile bins, when `stratify_by` is numeric. Ignored when
-  `stratify_by` is `NULL` or categorical.
+  `stratify_by` is `NULL` or categorical. Defaults to `4`.
 
 - conf_level:
 
   Confidence level for both the observed- and simulated-side intervals.
-  Must be strictly between 0 and 1.
+  Must be strictly between 0 and 1. Defaults to `0.95`.
 
 - probs:
 
@@ -82,7 +83,7 @@ er_vpc(
   [`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/[`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)/
   [`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/[`er_style_vpc_simulated_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md);
   ignored by the default adaptive mean/errorbar pair). Only computed for
-  a continuous/count response.
+  a continuous/count response. Defaults to `c(0.1, 0.5, 0.9)`.
 
 ## Value
 
@@ -97,15 +98,18 @@ must be added afterwards, since it reuses the observed layer's own
 binning decision so both sides share identical bin boundaries. Both
 layers are singletons (a second call replaces the previous one).
 
-Unlike
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-`er_vpc()` has no stratification concept and always renders a single
-panel – see
+`er_vpc()`'s own stratification (`stratify_by`) is real, but simpler
+than
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)'s: a
+facet-only split via
+[`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html),
+with no colour/facet precedence rule to reconcile (see `stratify_by`
+below). It's orthogonal to `plot_by` – see
 [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)
-for `plot_by`, the (orthogonal) variable plotted on the x-axis and used
-to bin/group the comparison. Whether `plot_by` is `"continuous"`
-(numeric, quantile-binned) or `"discrete"` (used as-is) is auto-detected
-from the column's type and stored on `object$group$type`, mirroring how
+for `plot_by`, the variable plotted on the x-axis and used to bin/group
+the comparison. Whether `plot_by` is `"continuous"` (numeric,
+quantile-binned) or `"discrete"` (used as-is) is auto-detected from the
+column's type and stored on `object$group$type`, mirroring how
 `object$response$type` records the response's type.
 
 ## See also

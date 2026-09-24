@@ -61,7 +61,7 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 
 The input `object`, with the data layer added.
 
-## Details
+## Default builders
 
 The default builder for the data layer is
 [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),
@@ -79,6 +79,8 @@ response, not just raw points. There is no built-in "panel"-layout
 builder for a continuous/count response; `panel` must be `"both"` (the
 default) for these response types regardless of builder, since there's
 no upper/lower partition to select from.
+
+## Structural families
 
 Every data-layer builder declares which of these two *structural*
 families it belongs to via
@@ -98,6 +100,8 @@ for how to tag a custom builder the same way. If `style` is tagged with
 a `layer` other than `"data"`, `er_plot_add_data()` errors
 informatively; an untagged builder is never checked (only `layout` is a
 hard requirement).
+
+## Effect of `keep_strata`
 
 `keep_strata`'s effect also depends on a builder's structural family:
 for an "overlay"-layout builder it always means a shared colour

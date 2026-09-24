@@ -34,7 +34,8 @@ er_style_tte_model_line(
 
 - config:
 
-  Configuration for the model layer (see `.layer_tte_model()`):
+  Configuration for the model layer (populated by
+  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)):
   `config$predictions` (the prediction tibble from
   [`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
   with `time`/`fit_survival`/ `ci_lower`/`ci_upper` columns),
@@ -92,11 +93,10 @@ pair rather than a step function.
 Stratified colour/fill both map to `config$predictions`'s own strata
 column (named after `strata$var`) rather than a fixed name – unlike
 [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md),
-which always reads a column literally named `strata`
-(`.tidy_survfit()`'s own naming).
-[`er_tte_build()`](https://erplots.djnavarro.net/reference/er_tte_build.md)'s
-`.polish_tte_labels()` still retitles the resulting legend with
-`strata$label` afterwards.
+which always reads a column literally named `strata` (the tidied
+Kaplan-Meier table's own naming).
+[`er_tte_build()`](https://erplots.djnavarro.net/reference/er_tte_build.md)
+still retitles the resulting legend with `strata$label` afterwards.
 
 `er_style_tte_model_line()` is tagged
 `er_style_tag(fn, layer = "model")`, so
@@ -107,3 +107,20 @@ errors informatively if handed a builder tagged for a different layer.
 
 [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md),
 [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)
+
+## Examples
+
+``` r
+if (requireNamespace("ertte", quietly = TRUE)) {
+  library(survival)
+  library(ertte)
+  mod <- ertte_aft(Surv(time, status == 2) ~ age, lung)
+
+  lung |>
+    er_tte(time, status == 2) |>
+    er_tte_add_curve() |>
+    er_tte_add_model(mod, style = er_style_tte_model_line, ribbon_alpha = 0.3) |>
+    plot()
+}
+
+```

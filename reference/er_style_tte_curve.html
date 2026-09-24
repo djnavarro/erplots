@@ -97,8 +97,8 @@ survival-probability y-axis instead of exposure/response.</p>
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
-<dd><p>Configuration for the curve layer (see
-<code>.layer_tte_curve()</code>): <code>config$table</code> (the tidy KM table, with a
+<dd><p>Configuration for the curve layer (populated by
+<code><a href="er_tte_add_curve.html">er_tte_add_curve()</a></code>): <code>config$table</code> (the tidy KM table, with a
 <code>(0, 1)</code> origin row prepended per stratum), <code>config$time_upper</code>
 (the time-axis upper limit, needed so the last confidence-band
 interval has somewhere to end), <code>config$conf_level</code>.</p></dd>
@@ -158,10 +158,9 @@ needing a bespoke stat.</p>
 column (the already-cleaned stratum label, e.g. <code>"Q1"</code> or a
 categorical level) rather than the original <code>stratify_by</code> column on
 <code>data</code>, since that's what <code>config$table</code> actually carries.
-<code><a href="er_tte_build.html">er_tte_build()</a></code>'s <code>.polish_tte_labels()</code> (the TTE-grammar analogue
-of <code><a href="er_plot.html">er_plot()</a></code>'s <code>.polish_labels()</code>) retitles the resulting legend
-with <code>strata$label</code> (e.g. <code>"sex"</code>) afterwards, so a builder itself
-never needs to know the original variable's name.</p>
+<code><a href="er_tte_build.html">er_tte_build()</a></code> retitles the resulting legend with <code>strata$label</code>
+(e.g. <code>"sex"</code>) afterwards, so a builder itself never needs to know
+the original variable's name.</p>
 <p><code>er_style_tte_curve_km()</code> is tagged <code>er_style_tag(fn, layer = "curve")</code>, so <code><a href="er_tte_add_curve.html">er_tte_add_curve()</a></code> errors informatively if handed a
 builder tagged for a different layer.</p>
     </div>

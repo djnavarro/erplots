@@ -112,8 +112,10 @@ random jitter on every render.</p></dd>
     <p>The input <code>object</code>, with the data layer added.</p>
     </div>
     <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The default builder for the data layer is <code><a href="er_style_data.html">er_style_data_overlay()</a></code>,
+    <h2 id="default-builders">Default builders<a class="anchor" aria-label="anchor" href="#default-builders"></a></h2>
+
+
+<p>The default builder for the data layer is <code><a href="er_style_data.html">er_style_data_overlay()</a></code>,
 which creates a plain scatter plot for
 continuous/count responses, or a scatter with a small vertical jitter
 for a binary response (whose y-values are exactly 0/1 and would
@@ -127,6 +129,11 @@ just raw points. There is no built-in "panel"-layout builder for a
 continuous/count response; <code>panel</code> must be <code>"both"</code> (the default) for these
 response types regardless of builder, since there's no upper/lower
 partition to select from.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="structural-families">Structural families<a class="anchor" aria-label="anchor" href="#structural-families"></a></h2>
+
+
 <p>Every data-layer builder declares which of these two <em>structural</em>
 families it belongs to via <code><a href="er_style_tag.html">er_style_tag()</a></code> – <code>"overlay"</code> (a single call
 merged into the main panel) or <code>"panel"</code> (one-or-more panels stacked
@@ -139,6 +146,11 @@ panel. See <code><a href="er_style_tag.html">er_style_tag()</a></code> and <code
 builder the same way. If <code>style</code> is tagged with a <code>layer</code> other than
 <code>"data"</code>, <code>er_plot_add_data()</code> errors informatively; an untagged
 builder is never checked (only <code>layout</code> is a hard requirement).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="effect-of-keep-strata">Effect of <code>keep_strata</code><a class="anchor" aria-label="anchor" href="#effect-of-keep-strata"></a></h2>
+
+
 <p><code>keep_strata</code>'s effect also depends on a builder's structural family:
 for an "overlay"-layout builder it always means a shared colour
 aesthetic, for any response type; for a "panel"-layout builder on a

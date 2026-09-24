@@ -46,7 +46,7 @@ er_tte_add_model(
 
 - conf_level:
 
-  Confidence level for the prediction band.
+  Confidence level for the prediction band. Defaults to `0.95`.
 
 - time_grid:
 

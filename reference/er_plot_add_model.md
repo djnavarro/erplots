@@ -39,7 +39,7 @@ er_plot_add_model(
 
 - conf_level:
 
-  Confidence level for the prediction ribbon.
+  Confidence level for the prediction ribbon. Defaults to `0.95`.
 
 - predict_args:
 

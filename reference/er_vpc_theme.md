@@ -75,7 +75,8 @@ er_vpc_theme(
   Formatter functions (typically from `scales::label_*()`), used to
   format the rate/mean displayed in the observed/simulated summaries for
   a binary response (`format_percent`) or a continuous/count response
-  (`format_number`).
+  (`format_number`). Default to `scales::label_percent(accuracy = 1)`
+  and `scales::label_number(accuracy = 0.01)` respectively.
 
 ## Value
 
@@ -105,9 +106,9 @@ Unlike
 [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md),
 there is no `color_discrete`/`fill_discrete` argument here: the
 observed-vs-simulated colour/fill distinction uses a fixed, shared scale
-(see the "Gotchas" section of `AGENTS.md`) to keep the two aligned
-across builders that mix colour and fill for the same idea, and swapping
-it out is not yet supported. Adding
+(with `"Observed"`/`"Simulated"` always mapped to the same two hues) to
+keep the two aligned across builders that mix colour and fill for the
+same idea, and swapping it out is not yet supported. Adding
 `+ ggplot2::scale_colour_manual(...)`/`+ ggplot2::scale_fill_manual(...)`
 to the built/returned ggplot2 object remains the escape hatch for this,
 and for any other tweak not covered by this function's arguments (e.g.

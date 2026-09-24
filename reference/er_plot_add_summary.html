@@ -87,7 +87,7 @@ from the raw <code>(exposure, response)</code> coordinates of the data.</p>
 <dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
 <dd><p>A fitted exposure-response model, or <code>NULL</code> (the default).
 Only needed for builder styles (e.g.
-<code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code>) that produced model-based summaries; a
+<code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code>) that produce model-based summaries; a
 purely descriptive builder (e.g. <code><a href="er_style_summary.html">er_style_summary_n()</a></code>) ignores it.</p></dd>
 
 
@@ -105,7 +105,8 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
 <dd><p>Confidence level forwarded to <code><a href="er_model_interface.html">er_summary()</a></code> (used,
 e.g., for the <code>conf_low</code>/<code>conf_high</code> columns of its <code>coefficients</code>
-result – see <code><a href="er_model_interface.html">?er_model_interface</a></code>). Ignored when <code>model</code> is <code>NULL</code>.</p></dd>
+result – see <code><a href="er_model_interface.html">?er_model_interface</a></code>). Defaults to <code>0.95</code>. Ignored
+when <code>model</code> is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-summary-args">summary_args<a class="anchor" aria-label="anchor" href="#arg-summary-args"></a></dt>

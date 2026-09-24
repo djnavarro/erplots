@@ -31,7 +31,8 @@ er_style_tte_censor_ticks(
 
 - config:
 
-  Configuration for the censor layer (see `.layer_tte_censor()`):
+  Configuration for the censor layer (populated by
+  [`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)):
   `config$table` (the subset of the tidy KM table where `n_censor > 0`,
   with a `strata` column when stratified).
 

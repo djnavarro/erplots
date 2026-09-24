@@ -152,40 +152,51 @@ reproducible across repeated <code><a href="https://rdrr.io/r/graphics/plot.defa
 
 
 <dt id="arg-box-width">box_width<a class="anchor" aria-label="anchor" href="#arg-box-width"></a></dt>
-<dd><p>Width of <code>er_style_data_boxjitter()</code>'s boxplot.</p></dd>
+<dd><p>Width of <code>er_style_data_boxjitter()</code>'s boxplot.
+Defaults to <code>0.6</code>.</p></dd>
 
 
 <dt id="arg-box-alpha">box_alpha<a class="anchor" aria-label="anchor" href="#arg-box-alpha"></a></dt>
-<dd><p>Transparency of <code>er_style_data_boxjitter()</code>'s boxplot fill.</p></dd>
+<dd><p>Transparency of <code>er_style_data_boxjitter()</code>'s boxplot
+fill. Defaults to <code>0.4</code>.</p></dd>
 
 
 <dt id="arg-show-outliers">show_outliers<a class="anchor" aria-label="anchor" href="#arg-show-outliers"></a></dt>
-<dd><p>Logical: whether <code>er_style_data_boxjitter()</code> draws outlier points.</p></dd>
+<dd><p>Logical: whether <code>er_style_data_boxjitter()</code> draws
+outlier points. Defaults to <code>FALSE</code>, since its raw points are already
+shown via the jitter layer.</p></dd>
 
 
 <dt id="arg-jitter-height">jitter_height<a class="anchor" aria-label="anchor" href="#arg-jitter-height"></a></dt>
-<dd><p>Vertical jitter applied to raw points.</p></dd>
+<dd><p>Vertical jitter applied to raw points. Defaults to
+<code>NULL</code>: <code>er_style_data_boxjitter()</code> resolves this to <code>0.3</code> when
+stratified or <code>0.15</code> otherwise; <code>er_style_data_overlay()</code> resolves it
+to <code>0.015</code> for a binary response (whose y-values would otherwise
+overplot into two solid lines) or <code>0</code> otherwise.</p></dd>
 
 
 <dt id="arg-jitter-size">jitter_size<a class="anchor" aria-label="anchor" href="#arg-jitter-size"></a></dt>
-<dd><p>Point size for <code>er_style_data_boxjitter()</code>'s jittered points.</p></dd>
+<dd><p>Point size for <code>er_style_data_boxjitter()</code>'s
+jittered points. Defaults to <code>1</code>.</p></dd>
 
 
 <dt id="arg-jitter-alpha">jitter_alpha<a class="anchor" aria-label="anchor" href="#arg-jitter-alpha"></a></dt>
-<dd><p>Transparency of <code>er_style_data_boxjitter()</code>'s jittered points.</p></dd>
+<dd><p>Transparency of <code>er_style_data_boxjitter()</code>'s
+jittered points. Defaults to <code>0.6</code>.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Point transparency for <code>er_style_data_overlay()</code>; fill
-transparency for <code>er_style_data_hex()</code>.</p></dd>
+<dd><p>Point transparency for <code>er_style_data_overlay()</code> (defaults
+to <code>0.4</code>); fill transparency for <code>er_style_data_hex()</code> (defaults to
+<code>0.85</code>).</p></dd>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>Point size for <code>er_style_data_overlay()</code>.</p></dd>
+<dd><p>Point size for <code>er_style_data_overlay()</code>. Defaults to <code>1</code>.</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
-<dd><p>Number of hex bins for <code>er_style_data_hex()</code>.</p></dd>
+<dd><p>Number of hex bins for <code>er_style_data_hex()</code>. Defaults to <code>30</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

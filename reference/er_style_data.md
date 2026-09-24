@@ -98,40 +98,49 @@ er_style_data_hex(
 
 - box_width:
 
-  Width of `er_style_data_boxjitter()`'s boxplot.
+  Width of `er_style_data_boxjitter()`'s boxplot. Defaults to `0.6`.
 
 - box_alpha:
 
-  Transparency of `er_style_data_boxjitter()`'s boxplot fill.
+  Transparency of `er_style_data_boxjitter()`'s boxplot fill. Defaults
+  to `0.4`.
 
 - show_outliers:
 
   Logical: whether `er_style_data_boxjitter()` draws outlier points.
+  Defaults to `FALSE`, since its raw points are already shown via the
+  jitter layer.
 
 - jitter_height:
 
-  Vertical jitter applied to raw points.
+  Vertical jitter applied to raw points. Defaults to `NULL`:
+  `er_style_data_boxjitter()` resolves this to `0.3` when stratified or
+  `0.15` otherwise; `er_style_data_overlay()` resolves it to `0.015` for
+  a binary response (whose y-values would otherwise overplot into two
+  solid lines) or `0` otherwise.
 
 - jitter_size:
 
-  Point size for `er_style_data_boxjitter()`'s jittered points.
+  Point size for `er_style_data_boxjitter()`'s jittered points. Defaults
+  to `1`.
 
 - jitter_alpha:
 
   Transparency of `er_style_data_boxjitter()`'s jittered points.
+  Defaults to `0.6`.
 
 - alpha:
 
-  Point transparency for `er_style_data_overlay()`; fill transparency
-  for `er_style_data_hex()`.
+  Point transparency for `er_style_data_overlay()` (defaults to `0.4`);
+  fill transparency for `er_style_data_hex()` (defaults to `0.85`).
 
 - size:
 
-  Point size for `er_style_data_overlay()`.
+  Point size for `er_style_data_overlay()`. Defaults to `1`.
 
 - bins:
 
-  Number of hex bins for `er_style_data_hex()`.
+  Number of hex bins for `er_style_data_hex()`. Defaults to `30`.
 
 ## Value
 

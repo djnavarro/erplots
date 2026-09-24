@@ -39,11 +39,11 @@ er_plot_add_quantiles(
 
 - bins:
 
-  Number of exposure bins (not counting placebo).
+  Number of exposure bins (not counting placebo). Defaults to `4`.
 
 - conf_level:
 
-  Confidence level for the interval.
+  Confidence level for the interval. Defaults to `0.95`.
 
 - ...:
 

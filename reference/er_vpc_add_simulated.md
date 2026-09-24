@@ -42,7 +42,8 @@ er_vpc_add_simulated(
 
 - nsim:
 
-  Number of simulation replicates, only used with `model`.
+  Number of simulation replicates, only used with `model`. Defaults to
+  `100`.
 
 - seed:
 
@@ -50,8 +51,11 @@ er_vpc_add_simulated(
 
 - style:
 
-  A function determining how the simulated layer is drawn; see
-  [`er_style_vpc_simulated()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md).
+  A function determining how the simulated layer is drawn. Defaults to
+  [`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md);
+  see
+  [`er_style_vpc_simulated()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+  for the other built-in options.
 
 - simulate_args:
 

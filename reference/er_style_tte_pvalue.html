@@ -89,8 +89,8 @@ comparing survival across <code>stratify_by</code>'s levels.</p>
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
-<dd><p>Configuration for the pvalue layer (see
-<code>.layer_tte_pvalue()</code>): <code>config$p_value</code> (the log-rank test's
+<dd><p>Configuration for the pvalue layer (populated by
+<code><a href="er_tte_add_pvalue.html">er_tte_add_pvalue()</a></code>): <code>config$p_value</code> (the log-rank test's
 p-value) and <code>config$corner_distance</code> (how uncrowded each panel
 corner is, relative to the plotted survival curve(s) – see
 <code><a href="er_style.html">er_style()</a></code>'s <code>?er_plot_add_summary()</code>-analogous corner-placement
@@ -125,15 +125,15 @@ as a fraction of the panel's width/height. Default <code>0.05</code>.</p></dd>
 
 
 <dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
-<dd><p>Label text size.</p></dd>
+<dd><p>Label text size. Defaults to <code>NULL</code> (<code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code>'s own default).</p></dd>
 
 
 <dt id="arg-label-colour">label_colour<a class="anchor" aria-label="anchor" href="#arg-label-colour"></a></dt>
-<dd><p>Label text colour.</p></dd>
+<dd><p>Label text colour. Defaults to <code>NULL</code> (<code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code>'s own default).</p></dd>
 
 
 <dt id="arg-label-fill">label_fill<a class="anchor" aria-label="anchor" href="#arg-label-fill"></a></dt>
-<dd><p>Label background fill.</p></dd>
+<dd><p>Label background fill. Defaults to <code>NULL</code> (<code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code>'s own default).</p></dd>
 
 </dl></div>
     <div class="section level2">
