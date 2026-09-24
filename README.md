@@ -21,9 +21,9 @@ It supports time-to-event plots and visual predictive check plots as
 well as the core exposure-response plots, and it is model agnostic: it
 can display model predictions and summaries for a particular model type
 as long an appropriate model interface (consisting of a few key S3
-methods) is available. Examples of packages that support the interface
-are [erglm](https://erglm.djnavarro.net) (e.g., logistic regression,
-linear regression, Poisson regression, etc),
+methods) is available. Packages that support the interface include
+[erglm](https://erglm.djnavarro.net) (e.g., logistic regression, linear
+regression, Poisson regression, etc),
 [ertte](https://ertte.djnavarro.net) (parametric survival models, Cox
 proportional hazard models), and
 [emaxnls](https://emaxnls.djnavarro.net) (hyperbolic and sigmoidal Emax
@@ -31,7 +31,7 @@ regression models for binary and continuous outcomes).
 
 ## Installation
 
-You can install the lates CRAN release like so:
+You can install the latest CRAN release like so:
 
 ``` r
 install.packages("erplots")
