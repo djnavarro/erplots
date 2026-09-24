@@ -1376,3 +1376,83 @@ The broader question -- whether *any* layer whose own data exceeds a
 narrowed `xlim`/`ylim` can still bleed past the panel border via the same
 `clip = "off"` mechanism -- is tracked as a deferred follow-up in
 `PLAN.md`, not addressed here.
+## Data/quantile/group layers clipped to (and warn about) narrowed `xlim`/`ylim`
+
+Related, but structurally different, follow-on to the previous entry:
+unlike the model layer's synthetic prediction
+grid (regenerated exactly within limits at build time), the
+data-overlay/panel, group, and quantile layers all plot or summarise the
+*observed data* in full, with no reference to `object$exposure$limits`/
+`object$response$limits` at all. Narrowing either via `er_plot_theme()`
+only zoomed `coord_cartesian()`'s view -- the underlying data was never
+filtered or even checked against it.
+
+Reproduced and quantified: with `er_test_data |> er_plot_add_data() |>
+er_plot_theme(xlim = c(0, 100))`, 200 of 300 rows (67%) sit outside the
+window and are still handed to `geom_jitter()` -- but rather than
+spilling visibly into the margin (as the model-layer bug did), they're
+far enough outside the panel to fall off the finite output device
+entirely. No warning, no visual cue. Confirmed the same for the quantile
+layer (bin markers positioned by their mean exposure, computed from all
+data) and the group layer (box/violin/histogram panels, same full-data
+summaries).
+
+Fixed by actually dropping out-of-range data for display, paired with an
+informative `rlang::warn()` (chosen over `rlang::inform()` so it's
+visible by default and catchable with `expect_warning()`, matching how
+`er_tte()`'s own missing-`time`/`event` warning already works) -- a
+deliberate departure from `clip = "off"`'s "don't touch the data, just
+don't clip the drawing" philosophy for the *model* layer, since here the
+alternative is either an inconsistent, overshoot-dependent visual
+(sometimes spills into the margin, sometimes vanishes off the page with
+no cue at all) or reintroducing `coord_cartesian`'s point-at-boundary
+clipping problem by switching to real scale limits.
+
+Two new helpers in `R/utils-helpers.R`:
+
+- `.clip_to_limits(data, exposure_name, exposure_limits, response_name =
+  NULL, response_limits = NULL, layer_label)` -- generic row filter +
+  warn, used for raw observations. `response_name`/`response_limits` are
+  optional since the group layer's panels never map `response` to an
+  axis. Existing `NA`s in either column are left alone (kept), so a
+  pre-existing missingness concern isn't conflated with this one.
+- `.clip_quantile_summary_to_limits(summary, exposure_limits,
+  response_limits, bin_col = "exposure_bins")` -- a deliberately
+  different operation for the quantile layer: `config$summary`'s
+  mean/rate + CI per bin is computed once from *all* of `object$data` in
+  `.layer_quantile()` (add-time) and stays that way -- narrowing `xlim`
+  shouldn't silently change which observations feed a bin's statistic.
+  What's filtered is only whether a bin's *marker* (`x_mid`/`y_mid`) gets
+  drawn; the warning names which bin(s) by their `exposure_bins` label
+  (e.g. `"Q2, Q3"`) rather than a bare count, since a whole summary point
+  disappearing is a bigger deal than one hidden raw dot.
+
+Wired in centrally, at build time, in `R/er-plot-build.R`:
+
+- `.build_data_plot()` (panel-layout data builders, e.g.
+  `er_style_data_boxjitter()`) filters `data` by `exposure$limits` only
+  -- these builders never map `response` to an axis.
+- `.build_overlay_geoms()` (overlay-layout data builders, e.g.
+  `er_style_data_overlay()`/`_hex()`) filters `data` by both
+  `exposure$limits` and `response$limits`.
+- `.build_group_plot()` filters each group's own precomputed
+  `config[[g]]$data` (the frame every group style builder actually reads
+  via `geom_boxplot(data = config$data, ...)`, distinct from the `data`
+  argument passed positionally to the builder) by `exposure$limits`.
+- `.build_quantile_geoms()` filters a local copy of `config$summary`
+  before the style builder call, leaving `object$layer$quantile$config`
+  itself untouched (mirroring how every other layer's `config` isn't
+  mutated back onto `object` either).
+
+Because every one of these runs inside `er_plot_build()` (called fresh
+on every `plot()`/`print()`), it's automatically keyed to whatever
+`exposure$limits`/`response$limits` currently are -- no ordering
+sensitivity the way #14's stale model-grid bug had.
+
+Not touched: the summary annotation layer (positioned in `[0,1]` NPC
+coordinates, never reads `exposure$limits`/`response$limits` at all) and
+the quantile layer's `_vlines` bin-boundary lines (drawn from
+`config$breaks`, a fixed set of cutpoints independent of `config$summary`
+-- a boundary line landing outside a narrowed `xlim` is a much smaller
+concern than a whole summary marker vanishing, and is left as a known,
+minor, out-of-scope gap).

@@ -29,6 +29,86 @@
 .set_label <- function(x, lbl) {attr(x, "label") <- lbl; x}
 .set_names <- function(x, nm) {names(x) <- nm; x}
 
+# Filters `data` to rows whose `exposure_name`/`response_name` columns lie
+# within the given limits, warning (`rlang::warn()`, mirroring ggplot2's
+# own "Removed N rows containing missing values" convention for
+# out-of-bound data) whenever doing so drops at least one row.
+# `response_name`/`response_limits` are optional -- pass `NULL` for a
+# layer that never maps `response` (e.g. the group layer's exposure-only
+# panels).
+#
+# Existing `NA`s in either column are left alone (kept) rather than
+# counted as "outside the limits" -- that's a separate, pre-existing
+# missingness concern this helper isn't meant to speak to.
+#
+# Used by every layer that plots genuine observations in full regardless
+# of `exposure$limits`/`response$limits` -- the data layer's
+# overlay/panel builders and the group layer's panels. Unlike the model
+# layer, whose synthetic prediction grid is instead *regenerated* exactly
+# within limits at build time (see issue #14/PR #15), there's no stale
+# cache to refresh here: the data genuinely extends beyond whatever
+# window `er_plot_theme(xlim = ...)`/`ylim = ...)` chose, so out-of-range
+# rows are dropped for display (rather than left to spill inconsistently
+# past the panel border, or -- for a large enough overshoot -- vanish off
+# the finite output device with no visual cue at all) and their count
+# reported instead.
+#' @noRd
+.clip_to_limits <- function(data, exposure_name, exposure_limits,
+                             response_name = NULL, response_limits = NULL,
+                             layer_label = "observations") {
+  in_range <- function(x, limits) is.na(x) | (x >= limits[1] & x <= limits[2])
+
+  keep <- in_range(data[[exposure_name]], exposure_limits)
+  if (!is.null(response_name) && !is.null(response_limits)) {
+    keep <- keep & in_range(data[[response_name]], response_limits)
+  }
+
+  n_dropped <- sum(!keep)
+  if (n_dropped > 0) {
+    rlang::warn(sprintf(
+      "%d of %d %s (%s) fall outside the plotted axis limits and %s not shown.",
+      n_dropped, nrow(data), layer_label,
+      scales::percent(n_dropped / nrow(data), accuracy = 1),
+      if (n_dropped == 1) "is" else "are"
+    ))
+  }
+
+  data[keep, , drop = FALSE]
+}
+
+# The quantile layer's own variant of `.clip_to_limits()`: unlike raw
+# observations, a quantile bin's mean/rate + CI (`config$summary`, built
+# once from *all* of `object$data` in `.layer_quantile()`) is deliberately
+# left untouched by `exposure$limits`/`response$limits` -- narrowing the
+# axis shouldn't silently change which observations feed a bin's
+# statistic. What this filters is only the *marker* -- whether a given
+# bin's `x_mid`/`y_mid` is drawn at all -- so a whole summary point
+# disappearing is called out by name (which bin) rather than folded into
+# a generic dropped-observations count.
+#' @noRd
+.clip_quantile_summary_to_limits <- function(summary, exposure_limits, response_limits,
+                                              bin_col = "exposure_bins") {
+  in_range <- function(x, limits) is.na(x) | (x >= limits[1] & x <= limits[2])
+
+  keep <- in_range(summary$x_mid, exposure_limits) & in_range(summary$y_mid, response_limits)
+  n_dropped <- sum(!keep)
+  if (n_dropped > 0) {
+    hidden_bins <- as.character(summary[[bin_col]][!keep])
+    rlang::warn(c(
+      sprintf(
+        "%d of %d quantile bin marker%s fall%s outside the plotted axis limits and %s not shown: %s.",
+        n_dropped, nrow(summary), if (n_dropped == 1) "" else "s",
+        if (n_dropped == 1) "s" else "", if (n_dropped == 1) "is" else "are",
+        paste(hidden_bins, collapse = ", ")
+      ),
+      "i" = "The bin's own mean/rate and CI are still computed from every observation in it -- only its marker's position falls outside the current `xlim`/`ylim`.",
+      "i" = "Widen `xlim`/`ylim` (via `er_plot_theme()`) to show it, or reduce `bins` if the quantile boundaries themselves are the problem."
+    ))
+  }
+
+  summary[keep, , drop = FALSE]
+}
+
 # Shared response-value validation, used by both `er_plot()` and
 # `er_vpc()`: a declared `response_type = "binary"` response with values
 # outside {0, 1} silently shrinks the rate calculation's denominator
