@@ -206,11 +206,17 @@ NULL
 #'   tag unset. For a VPC observed/simulated builder, declares which of
 #'   `object$group$type` values (see [er_vpc()]'s `plot_by` argument)
 #'   the builder supports; see "Details".
+#' @param marker_source One of `"summary"` or `"percentiles"`, naming
+#'   which of a VPC observed/simulated builder's two config tables
+#'   (`config$summary` or `config$percentiles`) it actually draws its
+#'   marker(s) from, or `NULL` (the default) to leave this tag unset. See
+#'   "Details".
 #'
 #' @returns `style`, with whichever of the `"er_style_layout"`/
 #'   `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`/
 #'   `"er_style_zorder"`/`"er_style_response_types"`/
-#'   `"er_style_plot_by_types"` attributes were requested attached.
+#'   `"er_style_plot_by_types"`/`"er_style_vpc_marker_source"` attributes
+#'   were requested attached.
 #'
 
 #' @details
@@ -309,6 +315,19 @@ NULL
 #' incompatible inputs, the way every built-in VPC builder still does
 #' internally as a fallback).
 #'
+#' `marker_source` is also optional and VPC-specific, read by
+#' `.clip_vpc_config_to_limits()` (see [er_vpc_theme()]'s `xlim`/`ylim`)
+#' to decide which of a VPC observed/simulated builder's two config
+#' tables to crop-and-warn against when a marker falls outside the
+#' plotted axis limits. A builder that plots `config$summary` (e.g.
+#' [er_style_vpc_observed_mean_errorbar()]) should tag
+#' `marker_source = "summary"`; one that plots `config$percentiles`
+#' (e.g. [er_style_vpc_observed_quantile_line()],
+#' [er_style_vpc_observed_quantile_errorbar()]) should tag
+#' `marker_source = "percentiles"`. An untagged builder has both tables
+#' checked, which is always safe but can produce a spurious warning about
+#' a table the builder never actually draws from.
+#'
 #' @seealso [er_plot_add_data()], [er_style()]
 #'
 #' @examples
@@ -325,7 +344,7 @@ NULL
 #'
 #' @export
 er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL,
-                          response_types = NULL, plot_by_types = NULL) {
+                          response_types = NULL, plot_by_types = NULL, marker_source = NULL) {
   if (!is.function(style)) rlang::abort("`style` must be a function")
 
   if (!is.null(layout)) {
@@ -356,6 +375,10 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   if (!is.null(plot_by_types)) {
     plot_by_types <- match.arg(plot_by_types, c("continuous", "discrete"), several.ok = TRUE)
     attr(style, "er_style_plot_by_types") <- plot_by_types
+  }
+  if (!is.null(marker_source)) {
+    marker_source <- match.arg(marker_source, c("summary", "percentiles"))
+    attr(style, "er_style_vpc_marker_source") <- marker_source
   }
 
   style
@@ -408,6 +431,11 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 #' @noRd
 .style_plot_by_types <- function(style) {
   attr(style, "er_style_plot_by_types")
+}
+
+#' @noRd
+.style_vpc_marker_source <- function(style) {
+  attr(style, "er_style_vpc_marker_source")
 }
 
 #' @noRd

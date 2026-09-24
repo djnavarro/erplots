@@ -48,7 +48,12 @@ test_that("er_vpc_theme() writes xlim/ylim, consumed lazily at build time", {
 
   expect_equal(vpc$theme$xlim, c(0, 100))
   expect_equal(vpc$theme$ylim, c(-0.1, 1.1))
-  expect_no_error(er_vpc_build(vpc))
+  # `xlim = c(0, 100)` narrows past `aucss`'s own range, so some bins'
+  # markers now fall outside the window and get cropped-and-warned about
+  # -- see `.clip_vpc_config_to_limits()`/issue #17. That's the expected,
+  # intentional behaviour here; just confirm the build itself still
+  # succeeds (no error) despite it.
+  expect_warning(er_vpc_build(vpc), "VPC marker")
 })
 
 test_that("er_vpc_theme() validates xlab/ylab/strata_lab/title/subtitle/caption", {

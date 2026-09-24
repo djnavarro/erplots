@@ -192,7 +192,8 @@ er_style_vpc_simulated_quantile_ribbon <- er_style_tag(
   er_style_vpc_simulated_quantile_ribbon,
   layer = "simulated", layout = "continuous",
   response_types = c("continuous", "count"),
-  plot_by_types = "continuous"
+  plot_by_types = "continuous",
+  marker_source = "percentiles"
 )
 
 
@@ -262,7 +263,8 @@ er_style_vpc_simulated_quantile_errorbar <- er_style_tag(
   er_style_vpc_simulated_quantile_errorbar,
   layer = "simulated",
   response_types = c("continuous", "count"),
-  plot_by_types = c("continuous", "discrete")
+  plot_by_types = c("continuous", "discrete"),
+  marker_source = "percentiles"
 )
 
 
@@ -323,5 +325,6 @@ er_style_vpc_simulated_mean_errorbar <- er_style_tag(
   er_style_vpc_simulated_mean_errorbar,
   layer = "simulated",
   response_types = c("binary", "continuous", "count"),
-  plot_by_types = c("continuous", "discrete")
+  plot_by_types = c("continuous", "discrete"),
+  marker_source = "summary"
 )

@@ -138,7 +138,8 @@ er_style_vpc_observed_quantile_line <- er_style_tag(
   er_style_vpc_observed_quantile_line,
   layer = "observed", layout = "continuous",
   response_types = c("continuous", "count"),
-  plot_by_types = "continuous"
+  plot_by_types = "continuous",
+  marker_source = "percentiles"
 )
 
 
@@ -208,7 +209,8 @@ er_style_vpc_observed_quantile_errorbar <- er_style_tag(
   er_style_vpc_observed_quantile_errorbar,
   layer = "observed",
   response_types = c("continuous", "count"),
-  plot_by_types = c("continuous", "discrete")
+  plot_by_types = c("continuous", "discrete"),
+  marker_source = "percentiles"
 )
 
 
@@ -269,5 +271,6 @@ er_style_vpc_observed_mean_errorbar <- er_style_tag(
   er_style_vpc_observed_mean_errorbar,
   layer = "observed",
   response_types = c("binary", "continuous", "count"),
-  plot_by_types = c("continuous", "discrete")
+  plot_by_types = c("continuous", "discrete"),
+  marker_source = "summary"
 )

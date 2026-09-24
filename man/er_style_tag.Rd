@@ -12,7 +12,8 @@ er_style_tag(
   layer = NULL,
   zorder = NULL,
   response_types = NULL,
-  plot_by_types = NULL
+  plot_by_types = NULL,
+  marker_source = NULL
 )
 }
 \arguments{
@@ -56,12 +57,19 @@ observed/simulated builder, declares which of \code{er_vpc()}'s
 tag unset. For a VPC observed/simulated builder, declares which of
 \code{object$group$type} values (see \code{\link[=er_vpc]{er_vpc()}}'s \code{plot_by} argument)
 the builder supports; see "Details".}
+
+\item{marker_source}{One of \code{"summary"} or \code{"percentiles"}, naming
+which of a VPC observed/simulated builder's two config tables
+(\code{config$summary} or \code{config$percentiles}) it actually draws its
+marker(s) from, or \code{NULL} (the default) to leave this tag unset. See
+"Details".}
 }
 \value{
 \code{style}, with whichever of the \code{"er_style_layout"}/
 \code{"er_style_fill_role"}/\code{"er_style_y_role"}/\code{"er_style_layer"}/
 \code{"er_style_zorder"}/\code{"er_style_response_types"}/
-\code{"er_style_plot_by_types"} attributes were requested attached.
+\code{"er_style_plot_by_types"}/\code{"er_style_vpc_marker_source"} attributes
+were requested attached.
 }
 \description{
 Attaches the self-declared metadata a custom \verb{er_style_*()}-style
@@ -161,6 +169,19 @@ either, so a custom builder that doesn't declare them keeps working
 unchanged (though it's then responsible for guarding against its own
 incompatible inputs, the way every built-in VPC builder still does
 internally as a fallback).
+
+\code{marker_source} is also optional and VPC-specific, read by
+\code{.clip_vpc_config_to_limits()} (see \code{\link[=er_vpc_theme]{er_vpc_theme()}}'s \code{xlim}/\code{ylim})
+to decide which of a VPC observed/simulated builder's two config
+tables to crop-and-warn against when a marker falls outside the
+plotted axis limits. A builder that plots \code{config$summary} (e.g.
+\code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}) should tag
+\code{marker_source = "summary"}; one that plots \code{config$percentiles}
+(e.g. \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}},
+\code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}) should tag
+\code{marker_source = "percentiles"}. An untagged builder has both tables
+checked, which is always safe but can produce a spurious warning about
+a table the builder never actually draws from.
 }
 \examples{
 build_data_density <- er_style_tag(
