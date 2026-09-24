@@ -54,7 +54,7 @@
     <div class="section level2">
       <h2 id="exposure-response-plots">Exposure-response plots<a class="anchor" aria-label="anchor" href="#exposure-response-plots"></a></h2>
 
-      <div class="section-desc"><p>Build exposure-response plots from any model that implements <code><a href="../reference/er_model_interface.html">er_predict()</a></code></p></div>
+      <div class="section-desc"><p>The compositional mini-grammar for designing exposure-response plots, dividing plot structure into distinct layers for the data, the model, the quantile summaries, textual summaries, and the exposure group plots.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -117,67 +117,9 @@
         </dt>
         <dd>Build and render an <code>er_plot</code> object</dd>
       </dl></div><div class="section level2">
-      <h2 id="plot-builder-functions">Plot builder functions<a class="anchor" aria-label="anchor" href="#plot-builder-functions"></a></h2>
-
-      <div class="section-desc"><p>Low level functions to draw specific components of an exposure-response plot</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="er_style.html">er_style</a></code>
-
-        </dt>
-        <dd>Builder functions for exposure-response plots</dd>
-
-        <dt>
-
-          <code><a href="er_style_tag.html">er_style_tag()</a></code>
-
-        </dt>
-        <dd>Tag a builder with structural/aesthetic metadata</dd>
-
-        <dt>
-
-          <code><a href="er_style_model.html">er_style_model_ribbonline()</a></code> <code><a href="er_style_model.html">er_style_model_line()</a></code> <code><a href="er_style_model.html">er_style_model_spaghetti()</a></code>
-
-        </dt>
-        <dd>Model curve builders for exposure-response plots</dd>
-
-        <dt>
-
-          <code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code> <code><a href="er_style_summary.html">er_style_summary_n()</a></code> <code><a href="er_style_summary.html">er_style_summary_coefficients()</a></code> <code><a href="er_style_summary.html">er_style_summary_gof()</a></code>
-
-        </dt>
-        <dd>Summary annotation builders for exposure-response plots</dd>
-
-        <dt>
-
-          <code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code> <code><a href="er_style_quantile.html">er_style_quantile_errorbar_vlines()</a></code> <code><a href="er_style_quantile.html">er_style_quantile_pointrange()</a></code> <code><a href="er_style_quantile.html">er_style_quantile_pointrange_vlines()</a></code>
-
-        </dt>
-        <dd>Quantile summary builders for exposure-response plots</dd>
-
-        <dt>
-
-          <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code> <code><a href="er_style_data.html">er_style_data_overlay()</a></code> <code><a href="er_style_data.html">er_style_data_hex()</a></code>
-
-        </dt>
-        <dd>Data layer builders for exposure-response plots</dd>
-
-        <dt>
-
-          <code><a href="er_style_group.html">er_style_group_boxplot()</a></code> <code><a href="er_style_group.html">er_style_group_histogram()</a></code> <code><a href="er_style_group.html">er_style_group_violin()</a></code> <code><a href="er_style_group.html">er_style_group_linerange()</a></code> <code><a href="er_style_group.html">er_style_group_boxjitter()</a></code> <code><a href="er_style_group.html">er_style_group_violinjitter()</a></code>
-
-        </dt>
-        <dd>Group panel builders for exposure-response plots</dd>
-      </dl></div><div class="section level2">
       <h2 id="time-to-event-plots">Time-to-event plots<a class="anchor" aria-label="anchor" href="#time-to-event-plots"></a></h2>
 
-      <div class="section-desc"><p>Build Kaplan-Meier/survival-over-time plots</p></div>
+      <div class="section-desc"><p>The compositional mini-grammar for designing Kaplan-Meier/survival-over-time plots, dividing plot structure distinct layers for survival curves, censoring markers, risk tables, p-value summaries, and the survival model.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -240,7 +182,109 @@
         </dt>
         <dd>Build and render an <code>er_tte</code> object</dd>
       </dl></div><div class="section level2">
-      <h2 id="time-to-event-plot-builder-functions">Time-to-event plot builder functions<a class="anchor" aria-label="anchor" href="#time-to-event-plot-builder-functions"></a></h2>
+      <h2 id="visual-predictive-check-plots">Visual predictive check plots<a class="anchor" aria-label="anchor" href="#visual-predictive-check-plots"></a></h2>
+
+      <div class="section-desc"><p>The compositional mini-grammar for desigining visual predictive check plots, dividing plot structure into distinct layers for the observed data and the simulated data.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="er_vpc.html">er_vpc()</a></code>
+
+        </dt>
+        <dd>The exposure-response VPC mini-language</dd>
+
+        <dt>
+
+          <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>
+
+        </dt>
+        <dd>Add the observed-data layer to an <code>er_vpc</code> VPC</dd>
+
+        <dt>
+
+          <code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>
+
+        </dt>
+        <dd>Add the simulated-data layer to an <code>er_vpc</code> VPC</dd>
+
+        <dt>
+
+          <code><a href="er_vpc_theme.html">er_vpc_theme()</a></code>
+
+        </dt>
+        <dd>Adjust theme/labels for an <code>er_vpc</code> object</dd>
+
+        <dt>
+
+          <code><a href="er_vpc_build.html">er_vpc_build()</a></code>
+
+        </dt>
+        <dd>Build and render an <code>er_vpc</code> object</dd>
+      </dl></div><div class="section level2">
+      <h2 id="builder-functions-for-exposure-response-plots">Builder functions for exposure-response plots<a class="anchor" aria-label="anchor" href="#builder-functions-for-exposure-response-plots"></a></h2>
+
+      <div class="section-desc"><p>Low level functions to draw specific components of an exposure-response plot.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="er_style.html">er_style</a></code>
+
+        </dt>
+        <dd>Builder functions for exposure-response plots</dd>
+
+        <dt>
+
+          <code><a href="er_style_tag.html">er_style_tag()</a></code>
+
+        </dt>
+        <dd>Tag a builder with structural/aesthetic metadata</dd>
+
+        <dt>
+
+          <code><a href="er_style_model.html">er_style_model_ribbonline()</a></code> <code><a href="er_style_model.html">er_style_model_line()</a></code> <code><a href="er_style_model.html">er_style_model_spaghetti()</a></code>
+
+        </dt>
+        <dd>Model curve builders for exposure-response plots</dd>
+
+        <dt>
+
+          <code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code> <code><a href="er_style_summary.html">er_style_summary_n()</a></code> <code><a href="er_style_summary.html">er_style_summary_coefficients()</a></code> <code><a href="er_style_summary.html">er_style_summary_gof()</a></code>
+
+        </dt>
+        <dd>Summary annotation builders for exposure-response plots</dd>
+
+        <dt>
+
+          <code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code> <code><a href="er_style_quantile.html">er_style_quantile_errorbar_vlines()</a></code> <code><a href="er_style_quantile.html">er_style_quantile_pointrange()</a></code> <code><a href="er_style_quantile.html">er_style_quantile_pointrange_vlines()</a></code>
+
+        </dt>
+        <dd>Quantile summary builders for exposure-response plots</dd>
+
+        <dt>
+
+          <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code> <code><a href="er_style_data.html">er_style_data_overlay()</a></code> <code><a href="er_style_data.html">er_style_data_hex()</a></code>
+
+        </dt>
+        <dd>Data layer builders for exposure-response plots</dd>
+
+        <dt>
+
+          <code><a href="er_style_group.html">er_style_group_boxplot()</a></code> <code><a href="er_style_group.html">er_style_group_histogram()</a></code> <code><a href="er_style_group.html">er_style_group_violin()</a></code> <code><a href="er_style_group.html">er_style_group_linerange()</a></code> <code><a href="er_style_group.html">er_style_group_boxjitter()</a></code> <code><a href="er_style_group.html">er_style_group_violinjitter()</a></code>
+
+        </dt>
+        <dd>Group panel builders for exposure-response plots</dd>
+      </dl></div><div class="section level2">
+      <h2 id="builder-functions-for-time-to-event-plots">Builder functions for time-to-event plots<a class="anchor" aria-label="anchor" href="#builder-functions-for-time-to-event-plots"></a></h2>
 
       <div class="section-desc"><p>Low level functions to draw specific components of a time-to-event plot</p></div>
 
@@ -284,51 +328,7 @@
         </dt>
         <dd>Model-curve builders for the TTE grammar</dd>
       </dl></div><div class="section level2">
-      <h2 id="vpc-plots">VPC plots<a class="anchor" aria-label="anchor" href="#vpc-plots"></a></h2>
-
-      <div class="section-desc"><p>Functions to build visual predictive check plots</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="er_vpc.html">er_vpc()</a></code>
-
-        </dt>
-        <dd>The exposure-response VPC mini-language</dd>
-
-        <dt>
-
-          <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>
-
-        </dt>
-        <dd>Add the observed-data layer to an <code>er_vpc</code> VPC</dd>
-
-        <dt>
-
-          <code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>
-
-        </dt>
-        <dd>Add the simulated-data layer to an <code>er_vpc</code> VPC</dd>
-
-        <dt>
-
-          <code><a href="er_vpc_theme.html">er_vpc_theme()</a></code>
-
-        </dt>
-        <dd>Adjust theme/labels for an <code>er_vpc</code> object</dd>
-
-        <dt>
-
-          <code><a href="er_vpc_build.html">er_vpc_build()</a></code>
-
-        </dt>
-        <dd>Build and render an <code>er_vpc</code> object</dd>
-      </dl></div><div class="section level2">
-      <h2 id="vpc-plot-builder-functions">VPC plot builder functions<a class="anchor" aria-label="anchor" href="#vpc-plot-builder-functions"></a></h2>
+      <h2 id="builder-functions-for-visual-predictive-check-plots">Builder functions for visual predictive check plots<a class="anchor" aria-label="anchor" href="#builder-functions-for-visual-predictive-check-plots"></a></h2>
 
       <div class="section-desc"><p>Low level functions to draw specific components of a VPC plot</p></div>
 
@@ -390,7 +390,7 @@
       </dl></div><div class="section level2">
       <h2 id="model-interface">Model interface<a class="anchor" aria-label="anchor" href="#model-interface"></a></h2>
 
-      <div class="section-desc"><p>The generics a model must (or may) implement to work with erplots</p></div>
+      <div class="section-desc"><p>Generic functions that define the interface between models and plots</p></div>
 
       <dl></dl></div><div class="section level2">
 
