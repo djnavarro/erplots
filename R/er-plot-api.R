@@ -259,7 +259,14 @@ plot.er_plot <- function(x, y = NULL, ...) {
 #' @export
 er_plot_build <- function(object) {
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  
+
+  # a model layer's prediction grid is add-time-eager (see
+  # `.layer_model()`) but must still reflect whatever `exposure$limits`/
+  # `strata` look like *now* -- e.g. a later `er_plot_theme(xlim = ...)`
+  # call -- so it's unconditionally refreshed here, right before building
+  # any geoms. See `.refresh_model_predictions()`'s own comment (issue #14).
+  object <- .refresh_model_predictions(object)
+
   # build
   has_base_layer <- !is.null(object$layer$model) || !is.null(object$layer$summary) ||
     !is.null(object$layer$quantile) || !is.null(object$layer$overlay)

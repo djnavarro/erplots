@@ -48,7 +48,7 @@ test_that(".layer_model constructs the correct data structure", {
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
 
-  cfg_names <- c("model", "conf_level", "predictions", "style", "dots")
+  cfg_names <- c("model", "conf_level", "predict_args", "predictions", "style", "dots")
   expect_length(cfg1, length(cfg_names))
   expect_length(cfg2, length(cfg_names))
   expect_named(cfg1, cfg_names)

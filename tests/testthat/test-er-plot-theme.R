@@ -42,6 +42,48 @@ test_that("er_plot_theme() writes xlim/ylim, consumed lazily at build time", {
   expect_no_error(er_plot_build(plt))
 })
 
+test_that("er_plot_theme(xlim = ...) after er_plot_add_model() still narrows the model layer (#14)", {
+  # regression test for issue #14: `er_plot_add_model()`'s prediction grid
+  # used to be snapshotted once, at add-layer time, over whatever
+  # `exposure$limits` happened to be *then* -- a later
+  # `er_plot_theme(xlim = ...)` narrowed the coordinate system's window but
+  # never revisited that stale grid, so (combined with the base panel's
+  # `clip = "off"`) the model ribbon/line kept spanning the old, wider
+  # range and bled straight through the narrowed panel border instead of
+  # being cropped at it.
+  plt_after <- er_test_data |>
+    er_plot(aucss, biomarker_change) |>
+    er_plot_add_model(er_test_mod_gaussian) |>
+    er_plot_theme(xlim = c(0, 100))
+
+  built_after <- er_plot_build(plt_after)
+  expect_equal(range(built_after$layer$model$config$predictions$aucss), c(0, 100))
+
+  # same result regardless of call order
+  plt_before <- er_test_data |>
+    er_plot(aucss, biomarker_change) |>
+    er_plot_theme(xlim = c(0, 100)) |>
+    er_plot_add_model(er_test_mod_gaussian)
+
+  built_before <- er_plot_build(plt_before)
+  expect_equal(range(built_before$layer$model$config$predictions$aucss), c(0, 100))
+  expect_equal(
+    built_after$layer$model$config$predictions,
+    built_before$layer$model$config$predictions
+  )
+
+  # widening `xlim` after `er_plot_add_model()` stretches the grid to
+  # match too, rather than leaving a short line that stops short of the
+  # new, wider panel
+  plt_widened <- er_test_data |>
+    er_plot(aucss, biomarker_change) |>
+    er_plot_add_model(er_test_mod_gaussian) |>
+    er_plot_theme(xlim = c(0, 10000))
+
+  built_widened <- er_plot_build(plt_widened)
+  expect_equal(range(built_widened$layer$model$config$predictions$aucss), c(0, 10000))
+})
+
 test_that("er_plot_theme() validates xlab/ylab/strata_lab/title/subtitle/caption", {
   plt <- er_test_data |> er_plot(aucss, ae1)
   expect_error(er_plot_theme(plt, xlab = c("a", "b")), "single string")
