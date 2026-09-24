@@ -15,28 +15,20 @@ the first). Overlaying two fitted curves on the same panel (e.g.
 comparing two models) isn't supported without a custom builder. Not
 scheduled -- no concrete need has surfaced yet.
 
-### Deferred: `clip = "off"` can still let non-model layers bleed past a narrowed axis
+### Deferred: quantile layer's `_vlines` bin-boundary lines can still land outside a narrowed axis
 
-Fixed for the model layer specifically (issue #14, see `HISTORY.md`): the
-model curve/ribbon's prediction grid is now recomputed at build time
-(`.refresh_model_predictions()`, called from `er_plot_build()`) so it
-always tracks the final `exposure$limits`/`strata`, regardless of whether
-`er_plot_theme(xlim = ...)` was called before or after
-`er_plot_add_model()`.
-
-That fix only addresses a *stale grid* -- it doesn't change
-`.build_base_plot()`'s `coord_cartesian(..., clip = "off")` itself (kept
-deliberately, so a point sitting exactly on a supplied limit isn't
-clipped at the panel edge). Any *other* layer whose own data genuinely
-exceeds a narrowed `xlim`/`ylim` -- e.g. `er_plot_add_data()`'s raw
-observations when `exposure$limits` is set narrower than the data's own
-range, or a response ribbon exceeding a narrowed `ylim` -- will still
-bleed past the panel border rather than being cropped, since there's no
-"stale cache" to refresh in those cases (the data really does extend that
-far). Not scheduled -- no report of this yet, and fixing it would mean
-either reconsidering `clip = "off"` (reintroducing the point-at-boundary
-clipping it was added to avoid) or explicitly filtering every layer's
-geom data to the current limits at build time.
+The model layer's stale-grid bug (#14) and the data/quantile/group
+layers' full-data-regardless-of-limits bug (both now fixed -- see
+`HISTORY.md`) covered every layer that draws a *point/marker* positioned
+by data. Not covered: the quantile layer's `_vlines` builders
+(`er_style_quantile_errorbar_vlines()`/`_pointrange_vlines()`) draw a
+labelled `geom_vline()` at every element of `config$breaks` -- a fixed
+set of cutpoints from `cut_exposure_quantile()`, independent of
+`config$summary` and never filtered against `exposure$limits`. A
+boundary line/label landing outside a narrowed `xlim` is a smaller
+concern than a whole summary marker silently vanishing (the case that
+motivated the fix), but is a known, minor gap if a future report surfaces
+it. Not scheduled.
 
 ### Deferred: VPC mini-grammar follow-ons (advanced)
 

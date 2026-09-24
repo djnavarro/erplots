@@ -47,6 +47,16 @@
   strata   <- object$strata
   theme    <- object$theme
 
+  # "panel"-layout data builders (e.g. `er_style_data_boxjitter()`) only
+  # ever map exposure to an axis (the panel's own y is a discrete
+  # strata/dummy row, not `response`) -- see `.clip_to_limits()`'s own
+  # comment for why this drops rows rather than leaving them to spill
+  # past the panel border
+  data <- .clip_to_limits(
+    data, exposure$name, exposure$limits,
+    layer_label = "data-panel observations"
+  )
+
   data_plots <- list()
 
   for (panel_name in config$panels) {
@@ -73,6 +83,16 @@
   strata   <- object$strata
   theme    <- object$theme
 
+  # overlay-layout data builders (`er_style_data_overlay()`/`_hex()`) map
+  # both exposure and response to an axis -- see `.clip_to_limits()`'s own
+  # comment for why this drops rows rather than leaving them to spill
+  # past the panel border
+  data <- .clip_to_limits(
+    data, exposure$name, exposure$limits,
+    response$name, response$limits,
+    layer_label = "data-overlay observations"
+  )
+
   overlay_geoms <- do.call(config$style, c(
     list(data, config, stratify, exposure, response, strata, theme),
     config$dots
@@ -94,11 +114,25 @@
     # each group's own `stratify` (set when it was added via
     # `er_plot_add_groups()`) rather than a single shared value, since
     # different calls may have used different `keep_strata` settings
+    group_config <- config[[g]]
+
+    # a group panel only ever maps exposure to an axis (group levels sit
+    # on the other one) -- see `.clip_to_limits()`'s own comment for why
+    # this drops rows rather than leaving them to spill past the panel
+    # border. Filters `group_config$data` (the panel's own pre-joined
+    # data, read by every group style builder -- e.g.
+    # `er_style_group_boxplot()`'s `geom_boxplot(data = config$data, ...)`),
+    # not the `data` argument passed positionally below.
+    group_config$data <- .clip_to_limits(
+      group_config$data, exposure$name, exposure$limits,
+      layer_label = sprintf("group panel (\"%s\") observations", g)
+    )
+
     group_plots[[g]] <- ggplot2::ggplot() + 
       theme$theme_base +
-      do.call(config[[g]]$style, c(
-        list(data, config[[g]], config[[g]]$stratify, exposure, response, strata, theme),
-        config[[g]]$dots
+      do.call(group_config$style, c(
+        list(data, group_config, group_config$stratify, exposure, response, strata, theme),
+        group_config$dots
       ))
   }
   
@@ -149,6 +183,15 @@
   response <- object$response
   strata   <- object$strata
   theme    <- object$theme
+
+  # `config$summary`'s bin statistics are computed once from *all* of
+  # `object$data` in `.layer_quantile()` and deliberately left
+  # untouched here -- see `.clip_quantile_summary_to_limits()`'s own
+  # comment for why only the marker (whether a bin's `x_mid`/`y_mid` is
+  # drawn) is filtered, not the underlying mean/rate/CI
+  config$summary <- .clip_quantile_summary_to_limits(
+    config$summary, exposure$limits, response$limits
+  )
 
   quantile_geoms <- do.call(config$style, c(
     list(data, config, stratify, exposure, response, strata, theme),
