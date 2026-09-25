@@ -12,6 +12,12 @@
   argument for computing the quantile break points. Defaults to `7`
   (unchanged prior behaviour) and is recorded as a `"quantile_type"`
   attribute on the returned factor.
+* `cut_quantile()`/`cut_exposure_quantile()` gain a `labeller` argument
+  for customising quantile-bin labels: a function called as
+  `labeller(n, breaks)`, or a character vector used directly. Defaults
+  to `NULL` (unchanged `"Q1"`/`"Q2"`/... labelling);
+  `cut_exposure_quantile()`'s separate `"Placebo"` level is untouched by
+  `labeller`.
 
 # erplots 0.1.2
 

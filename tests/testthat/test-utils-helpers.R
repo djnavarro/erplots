@@ -226,6 +226,60 @@ test_that("cut_exposure_quantile's quantile_type controls the breaks attribute a
   expect_equal(attr(result, "quantile_type"), 1)
 })
 
+test_that("cut_quantile defaults to Q1..Qn labels when labeller is NULL", {
+  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = NULL)
+  expect_equal(levels(result), paste0("Q", 1:4))
+})
+
+test_that("cut_quantile accepts a function labeller, called with (n, breaks)", {
+  x <- c(1, 2, 3, 4, 5, 6, 7, 8)
+  captured <- list()
+  labeller <- function(n, breaks) {
+    captured$n <<- n
+    captured$breaks <<- breaks
+    paste0("Group ", seq_len(n))
+  }
+
+  result <- cut_quantile(x, n = 4, labeller = labeller)
+
+  expect_equal(levels(result), paste0("Group ", 1:4))
+  expect_equal(captured$n, 4)
+  expect_equal(unname(captured$breaks), unname(stats::quantile(x, probs = (0:4) / 4)))
+})
+
+test_that("cut_quantile accepts a character vector labeller", {
+  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = c("Low", "Mid-low", "Mid-high", "High"))
+  expect_equal(levels(result), c("Low", "Mid-low", "Mid-high", "High"))
+})
+
+test_that("cut_quantile errors informatively when labeller's length doesn't match the actual bin count", {
+  expect_error(
+    cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = c("a", "b")),
+    "must produce 4 labels"
+  )
+  expect_error(
+    cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = function(n, breaks) "only one"),
+    "must produce 4 labels"
+  )
+
+  # the actual bin count (after resolution-driven fallback) is what's
+  # checked against, not the originally requested n
+  x <- c(rep(1, 18), 2)
+  expect_warning(
+    expect_error(
+      cut_quantile(x, n = 4, labeller = c("a", "b", "c", "d")),
+      "must produce 1 label"
+    ),
+    "only 1 are distinguishable"
+  )
+})
+
+test_that("cut_exposure_quantile's labeller only relabels the non-placebo bins", {
+  x <- c(0, 0, 1, 2, 3, 4, 5, 6, 7, 8)
+  result <- cut_exposure_quantile(x, n = 4, labeller = c("Low", "Mid-low", "Mid-high", "High"))
+  expect_equal(levels(result), c("Placebo", "Low", "Mid-low", "Mid-high", "High"))
+})
+
 test_that("cut_exposure_quantile's ties argument only affects the non-placebo bins", {
   x <- c(rep(0, 5), 1:9, rep(10, 5), 11:15)
 

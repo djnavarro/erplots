@@ -11,7 +11,8 @@ cut_exposure_quantile(
   is_placebo = NULL,
   ties = c("upward", "downward", "split-even"),
   seed = NULL,
-  quantile_type = 7
+  quantile_type = 7,
+  labeller = NULL
 )
 
 cut_quantile(
@@ -19,7 +20,8 @@ cut_quantile(
   n = 4,
   ties = c("upward", "downward", "split-even"),
   seed = NULL,
-  quantile_type = 7
+  quantile_type = 7,
+  labeller = NULL
 )
 }
 \arguments{
@@ -46,6 +48,15 @@ seed for reproducible bin assignment.}
 as \code{\link[stats:quantile]{stats::quantile()}}'s own \code{type} argument to compute the
 quantile break points. Defaults to \code{7}, matching
 \code{\link[stats:quantile]{stats::quantile()}}'s own default.}
+
+\item{labeller}{Controls the labels used for the \code{n} quantile bins
+(\code{cut_exposure_quantile()}'s separate \code{"Placebo"} level is always
+used as-is, regardless of \code{labeller}). \code{NULL} (the default) labels
+bins \code{"Q1"}, \code{"Q2"}, etc. A function is called as \code{labeller(n, breaks)} (the actual bin count and the \code{n + 1} quantile cutpoints,
+after any resolution-driven fallback -- see \verb{@details} below) and
+must return a character vector of length \code{n}; this is the hook for,
+e.g., range-style labels built from \code{breaks}. A character vector is
+used directly as the \code{n} labels.}
 }
 \value{
 A factor with \code{"ties"} and \code{"quantile_type"} attributes
@@ -68,7 +79,10 @@ supports, rather than erroring or silently showing fewer bins with
 no explanation. \code{cut_exposure_quantile()}'s \code{"breaks"} attribute is
 read back out by quantile-layer builders that draw bin-boundary
 separators (e.g. \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}}) via
-\code{attr(exposure_bins, "breaks")}.
+\code{attr(exposure_bins, "breaks")}. Because that fallback can lower \code{n}
+below what was originally requested, a character-vector \code{labeller}
+is length-checked against the \emph{actual} bin count, not the requested
+one, and errors informatively on a mismatch.
 }
 \examples{
 x <- rnorm(100)
@@ -76,5 +90,7 @@ cut_quantile(x)
 cut_exposure_quantile(abs(x))
 cut_quantile(x, ties = "split-even", seed = 8213)
 cut_quantile(x, quantile_type = 1)
+cut_quantile(x, labeller = function(n, breaks) paste0("Group ", 1:n))
+cut_quantile(x, labeller = c("Low", "Mid-low", "Mid-high", "High"))
 
 }
