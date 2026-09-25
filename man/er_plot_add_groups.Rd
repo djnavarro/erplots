@@ -10,6 +10,9 @@ er_plot_add_groups(
   style = NULL,
   bins = NULL,
   keep_strata = NULL,
+  ties = "upward",
+  quantile_type = 7,
+  labeller = NULL,
   ...
 )
 }
@@ -24,12 +27,19 @@ plots (a tidyselection of variables).}
 by this call; see \code{\link[=er_style]{er_style()}} and "Details".}
 
 \item{bins}{Number of quantile bins used for continuous grouping
-variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).}
+variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).
+Applied identically to every grouping variable added by this call.}
 
 \item{keep_strata}{Logical, indicating whether this layer should be
 split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. See
 "Details" for an error case.}
+
+\item{ties, quantile_type, labeller}{Passed straight through to
+\code{\link[=cut_quantile]{cut_quantile()}}/\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} to control how a
+continuous grouping variable is split into bins -- see their
+documentation for what each controls. Applied identically to every
+grouping variable added by this call.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
 when it's called at build time (identically for every grouping
@@ -60,6 +70,15 @@ informatively; an untagged builder is never checked.
 stratification variable, since that would mean grouping and
 stratifying by the same column at once; pass \code{keep_strata = FALSE}
 for that grouping variable instead.
+
+\code{bins}/\code{ties}/\code{quantile_type}/\code{labeller} are local to this call --
+different grouping variables (including across separate
+\code{er_plot_add_groups()} calls) aren't required to agree, and generally
+shouldn't: they're usually different variables with no reason to share
+a binning scheme. The one exception is grouping by the plot's own
+exposure variable, which risks silently disagreeing with
+\code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}'s own exposure-binning; \code{\link[=er_plot_build]{er_plot_build()}}
+warns (doesn't error) if the two disagree in that specific case.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

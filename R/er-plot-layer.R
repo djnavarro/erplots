@@ -134,7 +134,8 @@
 
 # layer_quantile ---------------------------------------------------------------
 
-.layer_quantile <- function(object, stratify, bins, conf_level, style, dots = list()) {
+.layer_quantile <- function(object, stratify, bins, conf_level, style, dots = list(),
+                             ties = "upward", quantile_type = 7, labeller = NULL) {
 
   layer_quantile <- list()
   config <- list()
@@ -147,7 +148,10 @@
       response = .data[[object$response$name]],
       exposure_bins = cut_exposure_quantile(
         x = .data[[object$exposure$name]], 
-        n = config$n_quantiles
+        n = config$n_quantiles,
+        ties = ties,
+        quantile_type = quantile_type,
+        labeller = labeller
       ),
       strata = .get_strata_values(.data, object$strata$name)   
     )
@@ -156,6 +160,13 @@
   # bin-boundary separators (e.g. `er_style_quantile_errorbar_vlines()`)
   # -- see `cut_exposure_quantile()`'s `"breaks"` attribute
   config$breaks <- attr(binned$exposure_bins, "breaks")
+  # tie-break rule actually used, read back off the binned column's own
+  # attribute (rather than re-storing the `ties` argument directly) so
+  # `.check_exposure_binning_consistency()` compares what was actually
+  # applied -- these two are always identical today, but keeping the
+  # source-of-truth on the computed column avoids the two ever silently
+  # drifting apart if that changes
+  config$ties <- attr(binned$exposure_bins, "ties")
 
   # visual distance from corners, identical to `.layer_summary()`'s own
   # computation -- lets `er_style_quantile_errorbar_vlines()`/
@@ -350,7 +361,8 @@
 
 # layer_group ------------------------------------------------------------------
 
-.layer_group <- function(object, group_cols, stratify, bins, style, dots = list()) {
+.layer_group <- function(object, group_cols, stratify, bins, style, dots = list(),
+                          ties = "upward", quantile_type = 7, labeller = NULL) {
 
   # grouping by the plot's own stratification variable while also
   # keeping strata (`stratify == TRUE`) bakes the same column name into
@@ -396,7 +408,7 @@
         dat <- dat |> 
           dplyr::mutate(
             {{new_g_sym}} := .data[[g]] |> 
-              cut_exposure_quantile() |> 
+              cut_exposure_quantile(n = bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |> 
               .set_label(.get_label(dat[[g]]) %||% g)
           )
         
@@ -404,10 +416,17 @@
         dat <- dat |> 
           dplyr::mutate(
             {{new_g_sym}} := .data[[g]] |> 
-              cut_quantile() |> 
+              cut_quantile(n = bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |> 
               .set_label(.get_label(dat[[g]]) %||% g)
           )
       }
+      # tie-break rule actually used and quantile cutpoints (exposure
+      # variable only -- `cut_quantile()` has no `"breaks"` attribute),
+      # read back off the binned column's own attributes for
+      # `.check_exposure_binning_consistency()` to compare against the
+      # quantile layer's own `config$breaks`/`config$ties`
+      config$ties <- attr(dat[[new_g]], "ties")
+      config$breaks <- attr(dat[[new_g]], "breaks")
       g <- new_g
     }
 
@@ -450,6 +469,50 @@
   }
 
   return(layer_group)
+}
+
+# Warns (at `er_plot_build()` time, so it catches either add-order) when
+# `er_plot_add_quantiles()` and an `er_plot_add_groups()` call that groups
+# by *the exposure variable itself* end up binning it differently.
+# Deliberately narrow: two `er_plot_add_groups()` calls for two different
+# (non-exposure) covariates are never compared against each other -- there's
+# no reason they'd need to agree, so nothing there is checked. Compares
+# `breaks`/`ties` (read back off each layer's own binned column, stored on
+# `config$breaks`/`config$ties` by `.layer_quantile()`/`.layer_group()`
+# above) rather than the raw `bins`/`ties`/`quantile_type` arguments, so a
+# `quantile_type` difference that happens to produce identical breaks
+# doesn't spuriously warn.
+#' @noRd
+.check_exposure_binning_consistency <- function(object) {
+  quantile_config <- object$layer$quantile$config
+  if (is.null(quantile_config)) return(invisible(NULL))
+
+  exposure_key <- paste0(".", object$exposure$name, "_quantile")
+  group_config <- object$layer$group$config[[exposure_key]]
+  if (is.null(group_config)) return(invisible(NULL))
+
+  breaks_differ <- !isTRUE(all.equal(
+    unname(quantile_config$breaks), unname(group_config$breaks)
+  ))
+  ties_differ <- !identical(quantile_config$ties, group_config$ties)
+
+  if (breaks_differ || ties_differ) {
+    rlang::warn(c(
+      sprintf(
+        "`er_plot_add_quantiles()` and `er_plot_add_groups()` bin `%s` differently.",
+        object$exposure$name
+      ),
+      "i" = sprintf(
+        "Quantile layer: %d bin%s, ties = \"%s\". Group layer: %d bin%s, ties = \"%s\".",
+        length(quantile_config$breaks) - 1, if (length(quantile_config$breaks) == 2) "" else "s",
+        quantile_config$ties,
+        length(group_config$breaks) - 1, if (length(group_config$breaks) == 2) "" else "s",
+        group_config$ties
+      ),
+      "i" = "Pass matching `bins`/`ties`/`quantile_type` to both calls if you want the two panels' bins to line up, or ignore this warning if the difference is intentional."
+    ))
+  }
+  invisible(NULL)
 }
 
 

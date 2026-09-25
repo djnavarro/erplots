@@ -260,6 +260,13 @@ plot.er_plot <- function(x, y = NULL, ...) {
 er_plot_build <- function(object) {
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
 
+  # warns if the quantile layer and a group layer that happens to group
+  # by the exposure variable itself disagree on how it's binned -- see
+  # `.check_exposure_binning_consistency()`'s own comment for why this is
+  # the one case that's checked, and why it lives at build time (so it
+  # catches either `er_plot_add_*()` call order)
+  .check_exposure_binning_consistency(object)
+
   # a model layer's prediction grid is add-time-eager (see
   # `.layer_model()`) but must still reflect whatever `exposure$limits`/
   # `strata` look like *now* -- e.g. a later `er_plot_theme(xlim = ...)`

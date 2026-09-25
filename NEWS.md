@@ -18,6 +18,23 @@
   to `NULL` (unchanged `"Q1"`/`"Q2"`/... labelling);
   `cut_exposure_quantile()`'s separate `"Placebo"` level is untouched by
   `labeller`.
+* `er_plot_add_quantiles()`/`er_plot_add_groups()` gain `ties`/
+  `quantile_type`/`labeller` arguments, forwarded to
+  [cut_exposure_quantile()]/[cut_quantile()]. These are local to each
+  call -- they aren't required to agree across different
+  `er_plot_add_groups()` calls, or with `er_plot_add_quantiles()` -- except
+  in one case: `er_plot_build()` now warns if `er_plot_add_groups()` bins
+  *the exposure variable itself* differently than `er_plot_add_quantiles()`
+  does, since the two panels would then show inconsistent quantile bins
+  for the same variable.
+
+## Bug fixes
+
+* `er_plot_add_groups()`'s `bins` argument now actually controls the
+  number of quantile bins used for a continuous grouping variable.
+  Previously documented but silently ignored -- every continuous grouping
+  variable was always split into `cut_quantile()`/`cut_exposure_quantile()`'s
+  own default of 4 bins, regardless of what `bins` was set to.
 
 # erplots 0.1.2
 

@@ -202,6 +202,9 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' @param bins Number of exposure bins (not counting placebo). Defaults
 #'   to `4`.
 #' @param conf_level Confidence level for the interval. Defaults to `0.95`.
+#' @param ties,quantile_type,labeller Passed straight through to
+#'   [cut_exposure_quantile()] to control how the exposure variable is
+#'   split into bins -- see its documentation for what each controls.
 #' @param ... Additional named arguments forwarded, unchanged, to `style`
 #'   when it's called at build time. Arguments must be named.
 #'
@@ -218,6 +221,13 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' default to `"continuous"` and are summarised the same way as any other
 #' continuous response unless `response_type = "count"` is declared
 #' explicitly in [er_plot()].
+#'
+#' `bins`/`ties`/`quantile_type`/`labeller` are local to this layer --
+#' they aren't shared with [er_plot_add_groups()], even when that layer
+#' groups by the same exposure variable. [er_plot_build()] warns (doesn't
+#' error) if the two disagree in that specific case; pass matching values
+#' to both calls to avoid the warning, or ignore it if the difference is
+#' intentional.
 #'
 #'
 #' @examples
@@ -286,7 +296,9 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #'
 #' @export
 er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
-                                    bins = 4, conf_level = 0.95, ...) {
+                                    bins = 4, conf_level = 0.95,
+                                    ties = "upward", quantile_type = 7,
+                                    labeller = NULL, ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
@@ -303,7 +315,10 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
     bins = bins,
     conf_level = conf_level,
     style = style,
-    dots = dots
+    dots = dots,
+    ties = ties,
+    quantile_type = quantile_type,
+    labeller = labeller
   )
   
   return(object)
@@ -499,10 +514,16 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   by this call; see [er_style()] and "Details".
 #' @param bins Number of quantile bins used for continuous grouping
 #'   variables (`NULL`, the default, uses [cut_quantile()]'s own default).
+#'   Applied identically to every grouping variable added by this call.
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. See
 #'   "Details" for an error case.
+#' @param ties,quantile_type,labeller Passed straight through to
+#'   [cut_quantile()]/[cut_exposure_quantile()] to control how a
+#'   continuous grouping variable is split into bins -- see their
+#'   documentation for what each controls. Applied identically to every
+#'   grouping variable added by this call.
 #' @param ... Additional named arguments forwarded, unchanged, to `style`
 #'   when it's called at build time (identically for every grouping
 #'   variable added by this call) -- see [er_style()]'s "Passing extra
@@ -527,6 +548,15 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' stratifying by the same column at once; pass `keep_strata = FALSE`
 #' for that grouping variable instead.
 #'
+#' `bins`/`ties`/`quantile_type`/`labeller` are local to this call --
+#' different grouping variables (including across separate
+#' `er_plot_add_groups()` calls) aren't required to agree, and generally
+#' shouldn't: they're usually different variables with no reason to share
+#' a binning scheme. The one exception is grouping by the plot's own
+#' exposure variable, which risks silently disagreeing with
+#' [er_plot_add_quantiles()]'s own exposure-binning; [er_plot_build()]
+#' warns (doesn't error) if the two disagree in that specific case.
+#'
 #' @examples
 #' if (requireNamespace("erglm", quietly = TRUE)) {
 #' library(erglm)
@@ -550,7 +580,8 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   [er_plot_add_quantiles()], [er_plot_add_data()], [er_style()]
 #'
 #' @export
-er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep_strata = NULL, ...) {
+er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep_strata = NULL,
+                                 ties = "upward", quantile_type = 7, labeller = NULL, ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
@@ -567,6 +598,9 @@ er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep
     object = object,
     group_cols = group_cols, 
     stratify = keep_strata, 
+    ties = ties,
+    quantile_type = quantile_type,
+    labeller = labeller,
     bins = bins,
     style = style,
     dots = dots

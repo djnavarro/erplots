@@ -64,7 +64,10 @@ never affects the built plot**:
 - **`er_plot_add_quantiles()`** -- quantile-binned response-rate/mean
   summary with CI. Singleton. Generalised across all three response
   types (rate + Clopper-Pearson for `"binary"`; mean + t-interval for
-  `"continuous"`; mean + exact Poisson interval for `"count"`).
+  `"continuous"`; mean + exact Poisson interval for `"count"`). Bins the
+  exposure variable via `cut_exposure_quantile()`; `bins`/`ties`/
+  `quantile_type`/`labeller` control that call and are local to this
+  layer (see `er_plot_add_groups()`'s own note below).
 - **`er_plot_add_data()`** -- raw-data layer. Singleton. Two mutually
   exclusive structural families selected by which builder is passed as
   `style` (see "Builder system" below): `"overlay"` (raw points/hexbins
@@ -74,7 +77,22 @@ never affects the built plot**:
   other slot.
 - **`er_plot_add_groups()`** -- one or more stacked panels showing the
   exposure distribution per group variable. The one layer that's
-  additive rather than singleton (each call adds another panel).
+  additive rather than singleton (each call adds another panel). A
+  continuous grouping variable is quantile-binned via
+  `cut_exposure_quantile()` (when the variable is the plot's own
+  exposure) or `cut_quantile()` (otherwise); this call's own
+  `bins`/`ties`/`quantile_type`/`labeller` control that, applied
+  identically to every grouping variable added by the call. These are
+  deliberately *not* shared with `er_plot_add_quantiles()`, or across
+  separate `er_plot_add_groups()` calls for different covariates --
+  there's usually no reason for two different variables' binning to
+  agree. The one exception: `er_plot_build()` warns (`.check_exposure_binning_consistency()`
+  in `R/er-plot-layer.R`) if a group variable that resolves to the
+  exposure variable itself ends up binned differently (`breaks`/`ties`)
+  than `er_plot_add_quantiles()`'s own exposure-binning, since that's the
+  one case where the two layers are describing the same variable and a
+  silent mismatch would be confusing. This check runs at build time
+  (rather than at either add-call) so it catches either add order.
 
 `er_plot_build()` triggers a base panel when at least one of
 model/summary/quantile/overlay is present, *or* when no layer at all has

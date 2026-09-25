@@ -123,10 +123,10 @@ test_that(".layer_quantile constructs the correct data structure", {
   expect_type(cfg1, "list")
   expect_type(cfg2, "list")
 
-  expect_length(cfg1, 7)
-  expect_length(cfg2, 7)
+  expect_length(cfg1, 8)
+  expect_length(cfg2, 8)
 
-  cfg_names <- c("n_quantiles", "conf_level", "breaks", "corner_distance", "summary", "style", "dots")
+  cfg_names <- c("n_quantiles", "conf_level", "breaks", "ties", "corner_distance", "summary", "style", "dots")
   expect_named(cfg1, cfg_names)
   expect_named(cfg2, cfg_names)
 
@@ -147,6 +147,27 @@ test_that(".layer_quantile constructs the correct data structure", {
 
   expect_equal(unique(smm1$strata), NA)
   expect_equal(as.character(unique(smm2$strata)), c("Male", "Female"))
+})
+
+test_that("er_plot_add_quantiles() forwards ties/quantile_type/labeller to cut_exposure_quantile()", {
+  plt_default <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  plt_custom <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_quantiles(bins = 4, ties = "downward", quantile_type = 1,
+                           labeller = c("Low", "Mid-low", "Mid-high", "High"))
+
+  cfg_default <- plt_default$layer$quantile$config
+  cfg_custom <- plt_custom$layer$quantile$config
+
+  expect_equal(cfg_default$ties, "upward")
+  expect_equal(cfg_custom$ties, "downward")
+  # quantile_type = 1 uses a different interpolation rule, so the breaks
+  # should generally differ from the type = 7 default on real data
+  expect_false(isTRUE(all.equal(unname(cfg_default$breaks), unname(cfg_custom$breaks))))
+  expect_equal(
+    as.character(unique(cfg_custom$summary$exposure_bins)) |> sort(),
+    c("High", "Low", "Mid-high", "Mid-low", "Placebo") |> sort()
+  )
 })
 
 
@@ -388,6 +409,48 @@ test_that(".layer_group constructs the correct data structure", {
   expect_equal(attr(fct1w, "label"), attr(er_test_data$weight, "label"))
   expect_equal(attr(fct2w, "label"), attr(er_test_data$weight, "label"))
   expect_equal(attr(fct1s, "label"), attr(er_test_data$sex, "label"))
+})
+
+test_that("er_plot_add_groups()'s bins argument actually controls the bin count", {
+  # previously dead code -- cut_exposure_quantile()/cut_quantile() were
+  # always called with no `n =`, silently ignoring `bins`
+  plt_exposure <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_groups(aucss, bins = 6)
+  plt_covariate <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_groups(weight, bins = 6)
+
+  fct_exposure <- plt_exposure$layer$group$config[[".aucss_quantile"]]$data[[1]]
+  fct_covariate <- plt_covariate$layer$group$config[[".weight_quantile"]]$data[[1]]
+
+  expect_equal(nlevels(fct_exposure), 7) # 6 quantile bins + Placebo
+  expect_equal(nlevels(fct_covariate), 6)
+})
+
+test_that("er_plot_add_groups() forwards ties/quantile_type/labeller to cut_exposure_quantile()/cut_quantile()", {
+  plt_exposure <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_groups(aucss, bins = 4, ties = "downward", quantile_type = 1,
+                        labeller = c("Low", "Mid-low", "Mid-high", "High"))
+  plt_covariate <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_groups(weight, bins = 4, ties = "downward", quantile_type = 1,
+                        labeller = c("Low", "Mid-low", "Mid-high", "High"))
+
+  fct_exposure <- plt_exposure$layer$group$config[[".aucss_quantile"]]$data[[1]]
+  fct_covariate <- plt_covariate$layer$group$config[[".weight_quantile"]]$data[[1]]
+
+  expect_equal(attr(fct_exposure, "ties"), "downward")
+  expect_equal(levels(fct_exposure), c("Placebo", "Low", "Mid-low", "Mid-high", "High"))
+  expect_equal(attr(fct_covariate, "ties"), "downward")
+  expect_equal(levels(fct_covariate), c("Low", "Mid-low", "Mid-high", "High"))
+
+  # config$ties/config$breaks are captured for the exposure variable only
+  # (used by `.check_exposure_binning_consistency()`); `cut_quantile()`
+  # never carries a `"breaks"` attribute, so the covariate case has none
+  cfg_exposure <- plt_exposure$layer$group$config[[".aucss_quantile"]]
+  cfg_covariate <- plt_covariate$layer$group$config[[".weight_quantile"]]
+  expect_equal(cfg_exposure$ties, "downward")
+  expect_equal(length(cfg_exposure$breaks), 5)
+  expect_equal(cfg_covariate$ties, "downward")
+  expect_null(cfg_covariate$breaks)
 })
 
 
