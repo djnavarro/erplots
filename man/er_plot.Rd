@@ -26,7 +26,7 @@ Create an \code{er_plot} specification for exposure-response visualization. Buil
 \details{
 Layers are either singleton or additive: model, summary, quantile, and data layers are singleton (a second call replaces the previous); groups are additive (each call adds a panel).
 
-\code{stratify_by} declares a discrete variable used for colour/fill across layers; each layer's \code{keep_strata} controls whether it uses stratification. Rows with \code{NA} in the stratification variable are kept as their own level.
+\code{stratify_by} declares a discrete variable used for colour/fill across layers; each layer's \code{keep_strata} controls whether it uses stratification. Rows with \code{NA} in the stratification variable are kept as their own level. A numeric \code{stratify_by} errors -- bin it yourself first with \code{\link[=cut_quantile]{cut_quantile()}}/\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} and pass the resulting factor.
 
 \code{response_type} governs response-scale defaults and which interval method the quantile and VPC layers use; see \code{response_type} below and \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} for details.
 }

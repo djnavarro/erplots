@@ -23,7 +23,7 @@ test_that("er_vpc() defaults plot_by to the exposure variable and stores n_bins/
   expect_equal(vpc2$group$probs, c(0.2, 0.8))
 })
 
-test_that("er_vpc() defaults and stores ties/quantile_type/labeller (and their strata_* analogues)", {
+test_that("er_vpc() defaults and stores ties/quantile_type/labeller (for plot_by) and seed", {
   vpc <- er_vpc(er_test_data, aucss, ae1)
   expect_equal(vpc$group$ties, "upward")
   expect_equal(vpc$group$quantile_type, 7)
@@ -31,25 +31,24 @@ test_that("er_vpc() defaults and stores ties/quantile_type/labeller (and their s
   expect_null(vpc$group$seed)
 
   vpc2 <- er_vpc(
-    er_test_data, aucss, ae1, stratify_by = age, n_strata = 3,
+    er_test_data, aucss, ae1,
     ties = "downward", quantile_type = 1, labeller = c("Low", "Mid", "High", "Highest"),
-    strata_ties = "split-even", strata_quantile_type = 2, strata_labeller = c("A", "B", "C"),
     seed = 5012
   )
   expect_equal(vpc2$group$ties, "downward")
   expect_equal(vpc2$group$quantile_type, 1)
   expect_equal(vpc2$group$labeller, c("Low", "Mid", "High", "Highest"))
   expect_equal(vpc2$group$seed, 5012)
-  expect_equal(vpc2$strata$ties, "split-even")
-  expect_equal(vpc2$strata$quantile_type, 2)
-  expect_equal(vpc2$strata$labeller, c("A", "B", "C"))
 })
 
-test_that("er_vpc() validates ties/strata_ties against the same three-value enum as cut_quantile()", {
+test_that("er_vpc() validates ties against the same three-value enum as cut_quantile()", {
   expect_error(er_vpc(er_test_data, aucss, ae1, ties = "sideways"), "should be one of")
+})
+
+test_that("er_vpc() errors clearly on a numeric stratify_by, rather than auto-binning it", {
   expect_error(
-    er_vpc(er_test_data, aucss, ae1, stratify_by = age, strata_ties = "sideways"),
-    "should be one of"
+    er_vpc(er_test_data, aucss, ae1, stratify_by = age),
+    "must be discrete"
   )
 })
 
@@ -129,15 +128,6 @@ test_that("er_vpc() stores stratify_by metadata, defaulting to no stratification
 
   vpc_discrete <- er_vpc(er_test_data, aucss, ae1, stratify_by = sex)
   expect_equal(vpc_discrete$strata$var, "sex")
-  expect_equal(vpc_discrete$strata$type, "discrete")
-
-  expect_message(
-    vpc_continuous <- er_vpc(er_test_data, aucss, ae1, stratify_by = weight, n_strata = 3),
-    "quantile bins for faceting"
-  )
-  expect_equal(vpc_continuous$strata$var, "weight")
-  expect_equal(vpc_continuous$strata$type, "continuous")
-  expect_equal(vpc_continuous$strata$n_strata, 3)
 })
 
 test_that("er_vpc() validates stratify_by", {
@@ -147,8 +137,8 @@ test_that("er_vpc() validates stratify_by", {
     "same variable as `plot_by`"
   )
   expect_error(
-    er_vpc(er_test_data, aucss, ae1, stratify_by = weight, n_strata = 0),
-    "n_strata"
+    er_vpc(er_test_data, aucss, ae1, stratify_by = weight),
+    "must be discrete"
   )
 })
 
@@ -166,20 +156,6 @@ test_that("er_vpc_build() facets by stratify_by when supplied, and doesn't other
     er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 8802)
   built_strat <- er_vpc_build(vpc_strat)
   expect_true(inherits(built_strat$output$facet, "FacetWrap"))
-})
-
-test_that("er_vpc_add_simulated() reuses the observed layer's stratum breaks for a numeric stratify_by", {
-  vpc <- er_test_data |>
-    er_vpc(aucss, ae1, stratify_by = weight, n_strata = 3) |>
-    er_vpc_add_observed() |>
-    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 8803)
-
-  obs_breaks <- vpc$layer$observed$config$strata_breaks
-  expect_length(obs_breaks, 4) # 3 bins -> 4 cutpoints
-  expect_equal(
-    levels(droplevels(vpc$layer$simulated$config$summary$.vpc_stratum)) |> length() <= 3,
-    TRUE
-  )
 })
 
 test_that("print.er_vpc() reports stratify_by", {

@@ -30,8 +30,8 @@ Defaults to \code{100}.}
 
 \item{seed}{Optional RNG seed. Used for \code{model}'s own simulation draws,
 and also (regardless of whether \code{sim}/\code{model} was supplied) to seed
-this layer's random tie-break when \code{\link[=er_vpc]{er_vpc()}}'s \code{ties}/\code{strata_ties}
-is \code{"split-even"} -- see \code{\link[=er_vpc]{er_vpc()}}'s own \code{seed} argument for the
+this layer's random tie-break when \code{\link[=er_vpc]{er_vpc()}}'s \code{ties} is
+\code{"split-even"} -- see \code{\link[=er_vpc]{er_vpc()}}'s own \code{seed} argument for the
 observed layer's independent tie-break seed.}
 
 \item{style}{A function determining how the simulated layer is drawn.

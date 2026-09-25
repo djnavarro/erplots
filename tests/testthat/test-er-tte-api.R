@@ -94,45 +94,20 @@ test_that("er_tte stratifies by a categorical variable, matching a direct survfi
 
   expect_s3_class(obj, "er_tte")
   expect_equal(obj$strata$var, "sex")
-  expect_equal(obj$strata$type, "discrete")
   expect_setequal(unique(obj$km$table$strata), c("Male", "Female"))
   expect_equal(sort(unname(obj$km$fit$surv)), sort(unname(fit_direct$surv)))
   expect_equal(sort(unname(obj$km$fit$n)), sort(unname(fit_direct$n)))
 })
 
-test_that("er_tte stratifies by a numeric variable via quantile bins, matching a direct survfit() call", {
-  obj <- survival::lung |> er_tte(time, status == 2, stratify_by = age, n_strata = 3)
-
-  expect_equal(obj$strata$type, "continuous")
-  expect_equal(obj$strata$n_strata, 3)
-  expect_setequal(unique(obj$km$table$strata), c("Q1", "Q2", "Q3"))
-
-  fit_direct <- survival::survfit(
-    survival::Surv(time, status == 2) ~ obj$data$.er_tte_strata,
-    data = survival::lung
-  )
-  expect_equal(sort(unname(obj$km$fit$surv)), sort(unname(fit_direct$surv)))
-})
-
-test_that("er_tte's numeric stratify_by never carves out a placebo bin", {
-  # unlike `er_vpc()`'s `stratify_by`, `er_tte()` has no exposure argument
-  # to compare against, so a numeric `stratify_by` is always split into
-  # plain quantile bins with no separate placebo/zero bin
-  obj <- survival::lung |> er_tte(time, status == 2, stratify_by = age, n_strata = 3)
-  expect_false("Placebo" %in% unique(obj$km$table$strata))
-})
-
-test_that("er_tte informs when stratify_by is numeric", {
-  expect_message(
+test_that("er_tte() errors clearly on a numeric stratify_by, rather than auto-binning it", {
+  expect_error(
     survival::lung |> er_tte(time, status == 2, stratify_by = age),
-    "quantile bins"
+    "must be discrete"
   )
 })
 
-test_that("er_tte errors clearly on a bad stratify_by/n_strata", {
+test_that("er_tte errors clearly on a bad stratify_by", {
   expect_error(survival::lung |> er_tte(time, status == 2, stratify_by = not_a_col), "not_a_col")
-  expect_error(survival::lung |> er_tte(time, status == 2, stratify_by = age, n_strata = 0), "n_strata")
-  expect_error(survival::lung |> er_tte(time, status == 2, stratify_by = age, n_strata = 1.5), "n_strata")
 })
 
 test_that("print/plot/build work when stratified", {

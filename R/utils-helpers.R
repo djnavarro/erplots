@@ -145,6 +145,31 @@
   invisible(NULL)
 }
 
+# Shared by `er_plot()`/`er_tte()`/`er_vpc()`: `stratify_by` must name a
+# discrete/categorical variable in all three -- erplots deliberately
+# doesn't auto-bin a numeric one on the caller's behalf (unlike
+# `exposure`/`plot_by`, where binning is intrinsic to what the plot even
+# is). Deciding how to carve a continuous covariate into groups is a
+# substantive statistical choice, not a plotting one; the fix is one
+# `dplyr::mutate(x_grp = cut_quantile(x, ...))` call before plotting,
+# which also gives full control over bin count/tie-breaking/labels via
+# `cut_quantile()`/`cut_exposure_quantile()`'s own arguments, rather than
+# each mini-grammar's own `stratify_by` needing to redundantly expose
+# that same control. `strata_name` may be `NULL` (no `stratify_by`
+# supplied), in which case this is a no-op.
+#' @noRd
+.check_stratify_by_discrete <- function(data, strata_name) {
+  if (is.null(strata_name)) return(invisible(NULL))
+  if (is.numeric(data[[strata_name]])) {
+    rlang::abort(c(
+      sprintf("`stratify_by` (`%s`) must be discrete, not numeric.", strata_name),
+      "i" = "Bin it yourself first (e.g. `dplyr::mutate(data, grp = cut_quantile(x, n = 4))`), then pass the resulting factor to `stratify_by`.",
+      "i" = "See `?cut_quantile`/`?cut_exposure_quantile` for control over bin count, tie-breaking, and labels."
+    ))
+  }
+  invisible(NULL)
+}
+
 # Validates `nsim` up front for `er_vpc_add_simulated(model = ...)` --
 # without this, `nsim = 0`/negative/fractional values ran to completion
 # but failed deep inside whatever matrix/vector machinery a model's

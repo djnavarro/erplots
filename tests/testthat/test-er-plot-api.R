@@ -13,6 +13,14 @@ test_that("er_plot errors clearly when exposure/response/stratify_by name nonexi
   expect_error(er_plot(er_test_data, not_a_col1, not_a_col2), "not_a_col1.*not_a_col2")
 })
 
+test_that("er_plot errors clearly when stratify_by is numeric, rather than silently mismapping it", {
+  # previously silent: a numeric stratify_by mapped straight to a
+  # continuous colour scale (`color = .data[[strata$name]]`), breaking
+  # every stratified builder's discrete-groups assumption, with no error
+  # and no `object$strata$type` field even existing to detect it
+  expect_error(er_plot(er_test_data, aucss, ae1, stratify_by = weight), "must be discrete")
+})
+
 test_that("er_plot errors clearly when exposure is not numeric", {
   df_factor <- er_test_data
   df_factor$aucss <- factor(round(df_factor$aucss / 50))

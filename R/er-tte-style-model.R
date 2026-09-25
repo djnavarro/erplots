@@ -15,7 +15,7 @@
 #' @param stratify Logical: whether the fit is stratified
 #'   (`!is.null(object$strata)`).
 #' @param time `object$time` (`name`/`label`/`limits`).
-#' @param strata `object$strata` (`var`/`label`/`type`/`n_strata`), or
+#' @param strata `object$strata` (`var`/`label`), or
 #'   `NULL` when unstratified.
 #' @param theme `object$theme`.
 #' @param ... Additional named arguments forwarded from

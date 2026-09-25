@@ -47,23 +47,12 @@
 #'   binned column) rather than re-resolving them, so both sides always
 #'   stay in sync.
 #' @param stratify_by Optional variable (unquoted) splitting the VPC into
-#'   one facet panel per level, via `ggplot2::facet_wrap()`. A
-#'   categorical variable is used as-is; a numeric variable is
-#'   automatically split into `n_strata` quantile bins (placebo, i.e.
-#'   `0`, kept in its own bin when `stratify_by` is the exposure variable
-#'   itself), with a message reporting that this happened. Must resolve
-#'   to a different variable than `plot_by`. Defaults to `NULL` (no
-#'   faceting, a single panel, matching prior behaviour).
-#' @param n_strata Number of quantile bins, when `stratify_by` is
-#'   numeric. Ignored when `stratify_by` is `NULL` or categorical.
-#'   Defaults to `4`.
-#' @param strata_ties,strata_quantile_type,strata_labeller The
-#'   `stratify_by` analogues of `ties`/`quantile_type`/`labeller` above,
-#'   for the same reason: kept separate since `plot_by`/`stratify_by` are
-#'   usually different variables with no reason to share a binning
-#'   scheme (mirroring `n_bins`/`n_strata` already being separate
-#'   arguments), while still guaranteeing the observed and simulated
-#'   layers agree on `stratify_by`'s own binning.
+#'   one facet panel per level, via `ggplot2::facet_wrap()`, used as-is.
+#'   Must be discrete -- a numeric column errors; bin it yourself first
+#'   with [cut_quantile()]/[cut_exposure_quantile()] and pass the
+#'   resulting factor, for full control over bin count/tie-breaking/labels.
+#'   Must resolve to a different variable than `plot_by`. Defaults to
+#'   `NULL` (no faceting, a single panel, matching prior behaviour).
 #' @param conf_level Confidence level for both the observed- and
 #'   simulated-side intervals. Must be strictly between 0 and 1.
 #'   Defaults to `0.95`.
@@ -73,10 +62,10 @@
 #'   ignored by the default adaptive mean/errorbar pair). Only computed
 #'   for a continuous/count response. Defaults to `c(0.1, 0.5, 0.9)`.
 #' @param seed Optional single number seeding the observed layer's random
-#'   tie-break when `ties`/`strata_ties` is `"split-even"` (ignored
-#'   otherwise). `NULL` (the default) draws from the ambient RNG stream.
-#'   The simulated layer's own `"split-even"` tie-break is instead seeded
-#'   by [er_vpc_add_simulated()]'s own `seed` argument -- the two are
+#'   tie-break when `ties` is `"split-even"` (ignored otherwise). `NULL`
+#'   (the default) draws from the ambient RNG stream. The simulated
+#'   layer's own `"split-even"` tie-break is instead seeded by
+#'   [er_vpc_add_simulated()]'s own `seed` argument -- the two are
 #'   independent random draws over different data (the observed rows vs.
 #'   the, typically larger, simulated replicate pool), so each is seeded
 #'   by the call that actually performs it.
@@ -106,8 +95,7 @@ NULL
 er_vpc <- function(data, exposure, response, response_type = "auto",
                     plot_by = NULL, n_bins = 4,
                     ties = "upward", quantile_type = 7, labeller = NULL,
-                    stratify_by = NULL, n_strata = 4,
-                    strata_ties = "upward", strata_quantile_type = 7, strata_labeller = NULL,
+                    stratify_by = NULL,
                     conf_level = 0.95, probs = c(0.1, 0.5, 0.9), seed = NULL) {
 
   # see `er_plot()`'s identical `dplyr::ungroup()` call for the rationale
@@ -165,11 +153,8 @@ er_vpc <- function(data, exposure, response, response_type = "auto",
         "i" = "Faceting by the same variable already used for x-axis binning would give each panel a single bin."
       ))
     }
-    if (!is.numeric(n_strata) || length(n_strata) != 1L || !is.finite(n_strata) || n_strata < 1 || n_strata != round(n_strata)) {
-      rlang::abort("`n_strata` must be a single positive whole number.")
-    }
-    strata_ties <- match.arg(strata_ties, c("upward", "downward", "split-even"))
   }
+  .check_stratify_by_discrete(data, strata_var)
 
   if (!is.numeric(conf_level) || length(conf_level) != 1L || !is.finite(conf_level) || conf_level <= 0 || conf_level >= 1) {
     rlang::abort("`conf_level` must be a single number strictly between 0 and 1.")
@@ -228,19 +213,6 @@ er_vpc <- function(data, exposure, response, response_type = "auto",
     object$strata <- list()
     object$strata$var <- strata_var
     object$strata$label <- .get_label(object$data[[strata_var]]) %||% strata_var
-    object$strata$type <- if (is.numeric(object$data[[strata_var]])) "continuous" else "discrete"
-    object$strata$n_strata <- n_strata
-    object$strata$ties <- strata_ties
-    object$strata$quantile_type <- strata_quantile_type
-    object$strata$labeller <- strata_labeller
-
-    if (object$strata$type == "continuous") {
-      rlang::inform(paste0(
-        "`stratify_by` (`", strata_var, "`) is numeric; splitting into ", n_strata,
-        " quantile bins for faceting. Pass a categorical variable to `stratify_by`, ",
-        "or set `n_strata` to change the bin count."
-      ))
-    }
   }
 
   object$theme$format_percent <- scales::label_percent(accuracy = 1)
@@ -268,9 +240,7 @@ print.er_vpc <- function(x, ...) {
   cat("    - plot_by:   ", x$group$var %||% "<none>", " (", x$group$type %||% "<none>", "), ",
     x$group$n_bins %||% "<none>", " bins\n", sep = "")
   if (!is.null(x$strata)) {
-    cat("    - stratify_by: ", x$strata$var, " (", x$strata$type, ")",
-      if (x$strata$type == "continuous") paste0(", ", x$strata$n_strata, " bins") else "",
-      "\n", sep = "")
+    cat("    - stratify_by: ", x$strata$var, "\n", sep = "")
   }
 
   if (any(layer_set)) {

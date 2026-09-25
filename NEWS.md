@@ -28,18 +28,33 @@
   does, since the two panels would then show inconsistent quantile bins
   for the same variable.
 
-* [er_vpc()] gains `ties`/`quantile_type`/`labeller` (for `plot_by`) and
-  `strata_ties`/`strata_quantile_type`/`strata_labeller` (for
-  `stratify_by`), plus a `seed` argument for reproducing a `"split-even"`
-  tie-break. Unlike the `er_plot_add_quantiles()`/`er_plot_add_groups()`
-  arguments above, these live on `er_vpc()` itself rather than on
-  [er_vpc_add_observed()]/[er_vpc_add_simulated()], since the observed and
-  simulated layers must always bin `plot_by`/`stratify_by` identically --
+* [er_vpc()] gains `ties`/`quantile_type`/`labeller` for `plot_by`, plus
+  a `seed` argument for reproducing a `"split-even"` tie-break. Unlike
+  the `er_plot_add_quantiles()`/`er_plot_add_groups()` arguments above,
+  these live on `er_vpc()` itself rather than on
+  [er_vpc_add_observed()]/[er_vpc_add_simulated()], since the observed
+  and simulated layers must always bin `plot_by` identically --
   [er_vpc_add_simulated()]'s own `seed` argument now also seeds its
   independent `"split-even"` tie-break.
 
+## Breaking changes
+
+* `stratify_by` must now name a discrete/categorical variable in
+  [er_vpc()] (and in the not-yet-released [er_tte()]); a numeric column
+  errors instead of being automatically split into quantile bins. The
+  `n_strata` argument is removed from both. Bin a continuous covariate
+  yourself first with [cut_quantile()]/[cut_exposure_quantile()], which
+  also gives full control over bin count, tie-breaking, and labels --
+  see `?er_vpc`/`?er_tte`.
+
 ## Bug fixes
 
+* [er_plot()] now errors clearly when `stratify_by` names a numeric
+  column, instead of silently mapping it to a continuous colour scale
+  (which broke every stratified builder's discrete-groups assumption --
+  ribbons, per-stratum lines, dodging -- with no warning). `stratify_by`
+  has always been documented as requiring a discrete variable; this was
+  simply never validated.
 * `er_plot_add_groups()`'s `bins` argument now actually controls the
   number of quantile bins used for a continuous grouping variable.
   Previously documented but silently ignored -- every continuous grouping

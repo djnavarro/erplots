@@ -146,12 +146,11 @@
 #
 # Strata membership is carried on `newdata` as a column named after
 # `object$strata$var` (never implicit in `model`) -- see
-# `?er_model_interface`'s "Details". When `object$strata$type ==
-# "continuous"`, the values used are the already quantile-binned levels
-# stored on `.er_tte_strata` (the same levels the curve/censor/pvalue
-# layers show), not the raw numeric variable -- a documented
-# approximation, the TTE-grammar analogue of `er_vpc()`'s own numeric
-# `stratify_by` binning.
+# `?er_model_interface`'s "Details". The values used are `.er_tte_strata`'s
+# own levels (the same levels the curve/censor/pvalue layers show), i.e.
+# `stratify_by`'s own discrete levels -- `stratify_by` is required to be
+# discrete (see `?er_tte`), so there's no numeric-variable case to
+# approximate here.
 #
 # `model`/`stratify`/`predict_args`/`time_grid` (the caller's own,
 # possibly-`NULL`, `time_grid` argument) are all stashed on `config` so

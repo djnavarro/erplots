@@ -110,34 +110,13 @@
   # unset, so every `.by = ` grouping below can unconditionally include
   # it rather than branching on whether stratification is in use --
   # `.build_vpc_plot()` only facets when `object$strata` is non-`NULL`,
-  # so the dummy single-level column is otherwise inert.
+  # so the dummy single-level column is otherwise inert. `stratify_by`
+  # is required to be discrete (validated in `er_vpc()`), so -- unlike
+  # `plot_by` just above -- there's no quantile-binning branch here.
   strata_var <- object$strata$var
   config$strata_var <- strata_var
   config$strata_label <- object$strata$label
-  config$strata_type <- object$strata$type
-  if (is.null(strata_var)) {
-    config$strata_breaks <- NULL
-    config$strata_ties <- NULL
-    config$strata_labels <- NULL
-    dat$.vpc_stratum <- 1L
-  } else if (config$strata_type == "continuous") {
-    is_placebo_strata <- if (strata_var == exp_var) dat[[exp_var]] == 0 else rep(FALSE, nrow(dat))
-    strata_bins <- cut_exposure_quantile(
-      dat[[strata_var]], n = object$strata$n_strata, is_placebo = is_placebo_strata,
-      ties = object$strata$ties, quantile_type = object$strata$quantile_type,
-      labeller = object$strata$labeller, seed = object$group$seed
-    )
-    config$strata_breaks <- attr(strata_bins, "breaks")
-    # mirrors `config$ties`/`config$labels` above, for the same reason
-    config$strata_ties <- attr(strata_bins, "ties")
-    config$strata_labels <- levels(strata_bins)[-1] # drop "Placebo"
-    dat$.vpc_stratum <- strata_bins
-  } else {
-    config$strata_breaks <- NULL
-    config$strata_ties <- NULL
-    config$strata_labels <- NULL
-    dat$.vpc_stratum <- dat[[strata_var]]
-  }
+  dat$.vpc_stratum <- if (is.null(strata_var)) 1L else dat[[strata_var]]
 
   # response-type-dispatched observed summary (rate/mean + CI) -- mirrors
   # `.layer_quantile()`'s own binary/continuous/count dispatch
@@ -266,26 +245,15 @@
     sim$.vpc_bin <- sim[[group_var]]
   }
 
-  # `.vpc_stratum`, mirroring `.vpc_bin` immediately above: binned
-  # against the observed layer's own cutpoints (`obs_config$strata_breaks`)
-  # when `stratify_by` is numeric, so both sides share identical facet
-  # boundaries; a constant `1L` when `stratify_by` is unset, so every
-  # `.by = ` grouping below can unconditionally include it (see
+  # `.vpc_stratum`, mirroring `.vpc_bin` immediately above, but with no
+  # quantile-binning branch -- `stratify_by` is required to be discrete
+  # (validated in `er_vpc()`), so simulated rows use its levels directly.
+  # A constant `1L` when `stratify_by` is unset, so every `.by = `
+  # grouping below can unconditionally include it (see
   # `.layer_vpc_observed()`'s identical comment)
   config$strata_var <- obs_config$strata_var
   config$strata_label <- obs_config$strata_label
-  config$strata_type <- obs_config$strata_type
-  if (is.null(obs_config$strata_var)) {
-    sim$.vpc_stratum <- 1L
-  } else if (obs_config$strata_type == "continuous") {
-    is_placebo_strata <- if (obs_config$strata_var == exp_var) sim[[exp_var]] == 0 else rep(FALSE, nrow(sim))
-    sim$.vpc_stratum <- .apply_exposure_breaks(
-      sim[[obs_config$strata_var]], obs_config$strata_breaks, is_placebo_strata,
-      ties = obs_config$strata_ties, labels = obs_config$strata_labels, seed = seed
-    )
-  } else {
-    sim$.vpc_stratum <- sim[[obs_config$strata_var]]
-  }
+  sim$.vpc_stratum <- if (is.null(obs_config$strata_var)) 1L else sim[[obs_config$strata_var]]
 
   alpha <- (1 - conf_level) / 2
   format_y_mid <- if (response_type == "binary") object$theme$format_percent else object$theme$format_number

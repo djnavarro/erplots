@@ -53,7 +53,7 @@ object/Kaplan-Meier fit, all five layers -- `er_tte_add_curve()`,
 
 ```r
 data |>
-  er_tte(time, event, stratify_by = NULL, n_strata = 4, conf_level = 0.95) |>
+  er_tte(time, event, stratify_by = NULL, conf_level = 0.95) |>
   er_tte_add_curve() |>
   er_tte_add_censor() |>
   er_tte_add_risktable() |>
@@ -78,22 +78,12 @@ exercising `er_tte_add_model()` end to end with real `ertte_aft()`/
 `ertte_coxph()` fits -- mirroring `test-toy-model-sync.R`'s `erglm`
 pattern.
 
-**Remaining, not yet scheduled for a specific release**:
-
-- `er_tte_add_model()`'s documented approximation -- when
-  `object$strata$type == "continuous"`, the strata variable rides on
-  `newdata` as its quantile-bin label (e.g. `"Q1"`), not the raw numeric
-  covariate. This is fine as long as the fitted model's own covariates
-  don't include that same raw numeric variable, but if they do (e.g.
-  `stratify_by = age` with a model fitted on `age` directly, rather than
-  on a different exposure column), the resulting `newdata$age` column
-  is a factor of bin labels and the underlying `predict()` call fails
-  with a low-level, uninformative error (e.g. survreg's
-  `"non-conformable arguments"`) rather than something actionable.
-  Consider either an informative upfront check (does any term in
-  `model`'s formula match `object$strata$var` when
-  `object$strata$type == "continuous"`?) or resolving it properly by
-  carrying both the bin label and a representative numeric value.
+**Remaining, not yet scheduled for a specific release**: none currently
+-- the one item previously tracked here (`er_tte_add_model()`'s
+continuous-`stratify_by` approximation) is now moot: `stratify_by` is
+required to be discrete across all three mini-grammars (`er_plot()`/
+`er_tte()`/`er_vpc()`), so there's no numeric-variable case left to
+approximate. See `HISTORY.md` for the writeup.
 
 **Explicitly deferred beyond even this release**: a survival-curve VPC
 (simulate event times from an `ertte` model, compare simulated vs.
