@@ -7,6 +7,11 @@
   candidate bins), plus an opt-in `seed` argument for reproducing
   `"split-even"`'s random tie-break. The resolved rule is recorded as a
   `"ties"` attribute on the returned factor.
+* `cut_quantile()`/`cut_exposure_quantile()` gain a `quantile_type`
+  argument, passed straight through to [stats::quantile()]'s own `type`
+  argument for computing the quantile break points. Defaults to `7`
+  (unchanged prior behaviour) and is recorded as a `"quantile_type"`
+  attribute on the returned factor.
 
 # erplots 0.1.2
 

@@ -193,6 +193,39 @@ test_that("cut_quantile's ties = \"split-even\" balances bin sizes and is reprod
   )
 })
 
+test_that("cut_quantile defaults to quantile_type = 7 and records it as an attribute", {
+  x <- c(1:9, rep(10, 5), 11:15)
+  default_result <- cut_quantile(x, n = 4)
+  type7_result <- cut_quantile(x, n = 4, quantile_type = 7)
+
+  expect_equal(default_result, type7_result)
+  expect_equal(attr(default_result, "quantile_type"), 7)
+})
+
+test_that("cut_quantile's quantile_type argument is forwarded to stats::quantile()", {
+  x <- c(1:9, rep(10, 5), 11:15)
+  result_type1 <- cut_quantile(x, n = 4, quantile_type = 1)
+  result_type7 <- cut_quantile(x, n = 4, quantile_type = 7)
+
+  # the two types disagree on this skewed vector, so the resulting bin
+  # membership should differ
+  expect_false(identical(result_type1, result_type7))
+  expect_equal(attr(result_type1, "quantile_type"), 1)
+})
+
+test_that("cut_exposure_quantile's quantile_type controls the breaks attribute and is recorded", {
+  x <- c(rep(0, 5), 1:9, rep(10, 5), 11:15)
+  non_placebo_x <- x[x != 0]
+
+  result <- cut_exposure_quantile(x, n = 4, quantile_type = 1)
+
+  expect_equal(
+    unname(attr(result, "breaks")),
+    unname(stats::quantile(non_placebo_x, probs = (0:4) / 4, type = 1))
+  )
+  expect_equal(attr(result, "quantile_type"), 1)
+})
+
 test_that("cut_exposure_quantile's ties argument only affects the non-placebo bins", {
   x <- c(rep(0, 5), 1:9, rep(10, 5), 11:15)
 

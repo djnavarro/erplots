@@ -384,11 +384,15 @@ ci_quantile <- function(x, prob = 0.5, conf_level = 0.95) {
 #'   which involve no randomness). `NULL` (the default) draws from the
 #'   ambient RNG stream and so is not reproducible across calls; pass a
 #'   seed for reproducible bin assignment.
+#' @param quantile_type Integer between 1 and 9, passed straight through
+#'   as [stats::quantile()]'s own `type` argument to compute the
+#'   quantile break points. Defaults to `7`, matching
+#'   [stats::quantile()]'s own default.
 #'
-#' @returns A factor with a `"ties"` attribute recording the `ties` rule
-#'   used. `cut_exposure_quantile()`'s result additionally carries a
-#'   `"breaks"` attribute holding the `n + 1` quantile cutpoints used to
-#'   form the bins.
+#' @returns A factor with `"ties"` and `"quantile_type"` attributes
+#'   recording those two arguments. `cut_exposure_quantile()`'s result
+#'   additionally carries a `"breaks"` attribute holding the `n + 1`
+#'   quantile cutpoints used to form the bins.
 #'
 #' @details Both functions error if `x` has fewer than 2 distinct
 #'   non-missing values, since quantile bins aren't well-defined in that
@@ -407,6 +411,7 @@ ci_quantile <- function(x, prob = 0.5, conf_level = 0.95) {
 #' cut_quantile(x)
 #' cut_exposure_quantile(abs(x))
 #' cut_quantile(x, ties = "split-even", seed = 8213)
+#' cut_quantile(x, quantile_type = 1)
 #' 
 NULL
 
@@ -468,7 +473,7 @@ NULL
 #' @rdname cut_quantile
 cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL,
                                    ties = c("upward", "downward", "split-even"),
-                                   seed = NULL) {
+                                   seed = NULL, quantile_type = 7) {
   ties <- match.arg(ties)
   if (is.null(is_placebo)) is_placebo <- x == 0
   non_placebo_x <- x[!is_placebo]
@@ -483,7 +488,7 @@ cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL,
     ))
   }
   breaks <- non_placebo_x |>
-    stats::quantile(probs = (0:n)/n, na.rm = TRUE)
+    stats::quantile(probs = (0:n)/n, na.rm = TRUE, type = quantile_type)
 
   # if the exposure column doesn't have enough resolution to distinguish
   # all `n` requested quantile bins (e.g. many repeated values clustered
@@ -518,6 +523,7 @@ cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL,
     factor(levels = 0:n, labels = c("Placebo", paste0("Q", 1:n)))  
   attr(exp_quantile, "breaks") <- breaks
   attr(exp_quantile, "ties") <- ties
+  attr(exp_quantile, "quantile_type") <- quantile_type
   return(exp_quantile)
 }
 
@@ -525,7 +531,7 @@ cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL,
 #' @rdname cut_quantile
 cut_quantile <- function(x, n = 4,
                           ties = c("upward", "downward", "split-even"),
-                          seed = NULL) {
+                          seed = NULL, quantile_type = 7) {
   ties <- match.arg(ties)
   n_distinct <- length(unique(x[!is.na(x)]))
   if (n_distinct < 2) {
@@ -537,7 +543,7 @@ cut_quantile <- function(x, n = 4,
       "i" = "At least 2 distinct values are required to form quantile bins -- check for a constant, all-`NA`, or too-small variable."
     ))
   }
-  breaks <- stats::quantile(x, probs = (0:n)/n, na.rm = TRUE)
+  breaks <- stats::quantile(x, probs = (0:n)/n, na.rm = TRUE, type = quantile_type)
 
   # see `cut_exposure_quantile()`'s equivalent step for the rationale --
   # a variable without enough resolution to distinguish all `n` requested
@@ -560,6 +566,7 @@ cut_quantile <- function(x, n = 4,
   bin_num <- .cut_quantile_bin_num(x, breaks, n, ties, seed = seed)
   bin_fct <- factor(bin_num, levels = 1:n, labels = paste0("Q", 1:n)) 
   attr(bin_fct, "ties") <- ties
+  attr(bin_fct, "quantile_type") <- quantile_type
   return(bin_fct)
 }
 

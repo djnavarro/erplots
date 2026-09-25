@@ -10,14 +10,16 @@ cut_exposure_quantile(
   n = 4,
   is_placebo = NULL,
   ties = c("upward", "downward", "split-even"),
-  seed = NULL
+  seed = NULL,
+  quantile_type = 7
 )
 
 cut_quantile(
   x,
   n = 4,
   ties = c("upward", "downward", "split-even"),
-  seed = NULL
+  seed = NULL,
+  quantile_type = 7
 )
 }
 \arguments{
@@ -39,12 +41,17 @@ used by \code{ties = "split-even"} (ignored for \code{"upward"}/\code{"downward"
 which involve no randomness). \code{NULL} (the default) draws from the
 ambient RNG stream and so is not reproducible across calls; pass a
 seed for reproducible bin assignment.}
+
+\item{quantile_type}{Integer between 1 and 9, passed straight through
+as \code{\link[stats:quantile]{stats::quantile()}}'s own \code{type} argument to compute the
+quantile break points. Defaults to \code{7}, matching
+\code{\link[stats:quantile]{stats::quantile()}}'s own default.}
 }
 \value{
-A factor with a \code{"ties"} attribute recording the \code{ties} rule
-used. \code{cut_exposure_quantile()}'s result additionally carries a
-\code{"breaks"} attribute holding the \code{n + 1} quantile cutpoints used to
-form the bins.
+A factor with \code{"ties"} and \code{"quantile_type"} attributes
+recording those two arguments. \code{cut_exposure_quantile()}'s result
+additionally carries a \code{"breaks"} attribute holding the \code{n + 1}
+quantile cutpoints used to form the bins.
 }
 \description{
 \code{cut_quantile()} bins a numeric vector into \code{n} quantile groups.
@@ -68,5 +75,6 @@ x <- rnorm(100)
 cut_quantile(x)
 cut_exposure_quantile(abs(x))
 cut_quantile(x, ties = "split-even", seed = 8213)
+cut_quantile(x, quantile_type = 1)
 
 }
