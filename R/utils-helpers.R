@@ -372,10 +372,23 @@ ci_quantile <- function(x, prob = 0.5, conf_level = 0.95) {
 #' @param x Numeric vector
 #' @param n Number of bins
 #' @param is_placebo Logical vector indicating placebo samples
+#' @param ties Rule for assigning a value that sits exactly on an interior
+#'   break point, where the bin membership would otherwise be ambiguous.
+#'   `"upward"` (the default, matching prior behaviour) is equivalent to
+#'   [cut()] with `right = TRUE`; `"downward"` is equivalent to `right =
+#'   FALSE`; `"split-even"` randomly divides each tied group between its
+#'   two candidate bins so that final bin sizes are as equal as possible,
+#'   rather than sending every tied value the same direction.
+#' @param seed Optional single number used to seed the random tie-break
+#'   used by `ties = "split-even"` (ignored for `"upward"`/`"downward"`,
+#'   which involve no randomness). `NULL` (the default) draws from the
+#'   ambient RNG stream and so is not reproducible across calls; pass a
+#'   seed for reproducible bin assignment.
 #'
-#' @returns A factor. `cut_exposure_quantile()`'s result additionally
-#'   carries a `"breaks"` attribute holding the `n + 1` quantile
-#'   cutpoints used to form the bins.
+#' @returns A factor with a `"ties"` attribute recording the `ties` rule
+#'   used. `cut_exposure_quantile()`'s result additionally carries a
+#'   `"breaks"` attribute holding the `n + 1` quantile cutpoints used to
+#'   form the bins.
 #'
 #' @details Both functions error if `x` has fewer than 2 distinct
 #'   non-missing values, since quantile bins aren't well-defined in that
@@ -393,12 +406,70 @@ ci_quantile <- function(x, prob = 0.5, conf_level = 0.95) {
 #' x <- rnorm(100)
 #' cut_quantile(x)
 #' cut_exposure_quantile(abs(x))
+#' cut_quantile(x, ties = "split-even", seed = 8213)
 #' 
 NULL
 
+# Shared by both `cut_quantile()`/`cut_exposure_quantile()`: assigns each
+# element of `x` to an integer bin (`1:n`, `NA` where `x` is missing or
+# outside `range(breaks)`) according to the `ties` rule. `"upward"`/
+# `"downward"` are direct `cut()` calls; `"split-even"` is handled by
+# `.resolve_quantile_ties()` below.
+#' @noRd
+.cut_quantile_bin_num <- function(x, breaks, n, ties, seed = NULL) {
+  switch(
+    ties,
+    upward = as.numeric(cut(x, breaks, labels = 1:n, include.lowest = TRUE)),
+    downward = as.numeric(cut(x, breaks, labels = 1:n, right = FALSE, include.lowest = TRUE)),
+    `split-even` = .resolve_quantile_ties(x, breaks, n, seed = seed)
+  )
+}
+
+# `ties = "split-even"`'s implementation. Starts from the `"upward"`
+# baseline (every tied value assigned to the lower of its two candidate
+# bins), then, for each interior break in turn, randomly moves just
+# enough of that break's tied group up into the higher bin to bring the
+# cumulative count assigned so far as close as possible to an even split
+# (`target_cum`, a largest-remainder-style allocation of `n_obs` into `n`
+# roughly equal pieces) -- mirroring the equal-group-size goal of
+# `dplyr::ntile()`, but breaking ties randomly rather than by row order.
+# Only ties at a break point are ever moved; non-tied values keep the
+# bin `cut()` already gave them. See AGENTS.md's "no automatic seed
+# management" convention for why `seed` is opt-in only.
+#' @noRd
+.resolve_quantile_ties <- function(x, breaks, n, seed = NULL) {
+  baseline <- as.numeric(cut(x, breaks, labels = 1:n, include.lowest = TRUE))
+  if (n < 2) return(baseline)
+
+  valid <- which(!is.na(baseline))
+  n_obs <- length(valid)
+  target_cum <- round((1:n) * n_obs / n)
+
+  resolve <- function() {
+    bin_num <- baseline
+    for (j in 2:n) {
+      brk <- breaks[j]
+      tied <- valid[x[valid] == brk]
+      if (length(tied) == 0) next
+      count_below <- sum(x[valid] < brk)
+      k_lower <- max(0, min(length(tied), target_cum[j - 1] - count_below))
+      if (k_lower < length(tied)) {
+        move_up <- sample(tied, size = length(tied) - k_lower)
+        bin_num[move_up] <- j
+      }
+    }
+    bin_num
+  }
+
+  if (!is.null(seed)) withr::with_seed(seed, resolve()) else resolve()
+}
+
 #' @export
 #' @rdname cut_quantile
-cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL) {
+cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL,
+                                   ties = c("upward", "downward", "split-even"),
+                                   seed = NULL) {
+  ties <- match.arg(ties)
   if (is.null(is_placebo)) is_placebo <- x == 0
   non_placebo_x <- x[!is_placebo]
   n_distinct <- length(unique(non_placebo_x[!is.na(non_placebo_x)]))
@@ -437,20 +508,25 @@ cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL) {
     n <- n_actual
   }
 
-  exp_bin <- as.numeric(dplyr::case_when(
-    is_placebo ~ "0",
-    is.na(x) ~ NA_character_,
-    TRUE ~ cut(x, breaks, labels = 1:n, include.lowest = TRUE)
-  ))
+  bin_num <- .cut_quantile_bin_num(x, breaks, n, ties, seed = seed)
+  exp_bin <- dplyr::case_when(
+    is_placebo ~ 0,
+    is.na(x) ~ NA_real_,
+    TRUE ~ bin_num
+  )
   exp_quantile <- exp_bin |>
     factor(levels = 0:n, labels = c("Placebo", paste0("Q", 1:n)))  
   attr(exp_quantile, "breaks") <- breaks
+  attr(exp_quantile, "ties") <- ties
   return(exp_quantile)
 }
 
 #' @export
 #' @rdname cut_quantile
-cut_quantile <- function(x, n = 4) {
+cut_quantile <- function(x, n = 4,
+                          ties = c("upward", "downward", "split-even"),
+                          seed = NULL) {
+  ties <- match.arg(ties)
   n_distinct <- length(unique(x[!is.na(x)]))
   if (n_distinct < 2) {
     rlang::abort(c(
@@ -481,8 +557,9 @@ cut_quantile <- function(x, n = 4) {
     n <- n_actual
   }
 
-  bin_num <- as.numeric(cut(x, breaks, labels = 1:n, include.lowest = TRUE))
+  bin_num <- .cut_quantile_bin_num(x, breaks, n, ties, seed = seed)
   bin_fct <- factor(bin_num, levels = 1:n, labels = paste0("Q", 1:n)) 
+  attr(bin_fct, "ties") <- ties
   return(bin_fct)
 }
 

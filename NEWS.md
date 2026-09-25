@@ -1,5 +1,13 @@
 # erplots 0.2.0
 
+* `cut_quantile()`/`cut_exposure_quantile()` gain a `ties` argument
+  controlling how a value that sits exactly on an interior quantile break
+  is assigned (`"upward"`, the default and prior behaviour; `"downward"`;
+  or `"split-even"`, which randomly balances tied values between the two
+  candidate bins), plus an opt-in `seed` argument for reproducing
+  `"split-even"`'s random tie-break. The resolved rule is recorded as a
+  `"ties"` attribute on the returned factor.
+
 # erplots 0.1.2
 
 Addresses CRAN reviewer feedback on the 0.1.1 submission. User-facing changes:

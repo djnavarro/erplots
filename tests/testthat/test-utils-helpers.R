@@ -151,6 +151,60 @@ test_that("cut_quantile works normally with at least 2 distinct values", {
   expect_equal(levels(result), paste0("Q", 1:4))
 })
 
+test_that("cut_quantile defaults to ties = \"upward\" and records it as an attribute", {
+  x <- c(1:9, rep(10, 5), 11:15)
+  default_result <- cut_quantile(x, n = 4)
+  upward_result <- cut_quantile(x, n = 4, ties = "upward")
+
+  expect_equal(default_result, upward_result)
+  expect_equal(attr(default_result, "ties"), "upward")
+})
+
+test_that("cut_quantile's ties argument controls how a tied break value is assigned", {
+  # a run of `10`s straddles the 50%/75% quantile breaks (10 and 10.5)
+  x <- c(1:9, rep(10, 5), 11:15)
+
+  upward <- cut_quantile(x, n = 4, ties = "upward")
+  downward <- cut_quantile(x, n = 4, ties = "downward")
+
+  # "upward" (right = TRUE): ties at a break go to the lower bin
+  expect_equal(as.integer(table(upward)), c(5, 9, 0, 5))
+  # "downward" (right = FALSE): ties at a break go to the higher bin
+  expect_equal(as.integer(table(downward)), c(5, 4, 5, 5))
+
+  expect_equal(attr(upward, "ties"), "upward")
+  expect_equal(attr(downward, "ties"), "downward")
+})
+
+test_that("cut_quantile's ties = \"split-even\" balances bin sizes and is reproducible with a seed", {
+  x <- c(1:9, rep(10, 5), 11:15)
+
+  split_even <- cut_quantile(x, n = 4, ties = "split-even", seed = 7148)
+  counts <- as.integer(table(split_even))
+
+  # as close to equal as 19 observations across 4 bins can get
+  expect_equal(sort(counts), c(4, 5, 5, 5))
+  expect_equal(attr(split_even, "ties"), "split-even")
+
+  # same seed -> identical result
+  expect_identical(
+    cut_quantile(x, n = 4, ties = "split-even", seed = 7148),
+    split_even
+  )
+})
+
+test_that("cut_exposure_quantile's ties argument only affects the non-placebo bins", {
+  x <- c(rep(0, 5), 1:9, rep(10, 5), 11:15)
+
+  upward <- cut_exposure_quantile(x, n = 4, ties = "upward")
+  split_even <- cut_exposure_quantile(x, n = 4, ties = "split-even", seed = 314)
+
+  expect_equal(as.integer(table(upward)), c(5, 5, 9, 0, 5))
+  expect_equal(sort(as.integer(table(split_even))[-1]), c(4, 5, 5, 5))
+  expect_equal(unname(table(split_even)["Placebo"]), 5L)
+  expect_equal(attr(split_even, "ties"), "split-even")
+})
+
 test_that(".dodge_quantile_strata adds a symmetric, scale-appropriate offset per stratum", {
   summary <- data.frame(
     x_mid = c(10, 10, 50, 50),

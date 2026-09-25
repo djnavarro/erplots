@@ -5,9 +5,20 @@
 \alias{cut_exposure_quantile}
 \title{Cut a continuous variable into quantiles}
 \usage{
-cut_exposure_quantile(x, n = 4, is_placebo = NULL)
+cut_exposure_quantile(
+  x,
+  n = 4,
+  is_placebo = NULL,
+  ties = c("upward", "downward", "split-even"),
+  seed = NULL
+)
 
-cut_quantile(x, n = 4)
+cut_quantile(
+  x,
+  n = 4,
+  ties = c("upward", "downward", "split-even"),
+  seed = NULL
+)
 }
 \arguments{
 \item{x}{Numeric vector}
@@ -15,11 +26,25 @@ cut_quantile(x, n = 4)
 \item{n}{Number of bins}
 
 \item{is_placebo}{Logical vector indicating placebo samples}
+
+\item{ties}{Rule for assigning a value that sits exactly on an interior
+break point, where the bin membership would otherwise be ambiguous.
+\code{"upward"} (the default, matching prior behaviour) is equivalent to
+\code{\link[=cut]{cut()}} with \code{right = TRUE}; \code{"downward"} is equivalent to \code{right = FALSE}; \code{"split-even"} randomly divides each tied group between its
+two candidate bins so that final bin sizes are as equal as possible,
+rather than sending every tied value the same direction.}
+
+\item{seed}{Optional single number used to seed the random tie-break
+used by \code{ties = "split-even"} (ignored for \code{"upward"}/\code{"downward"},
+which involve no randomness). \code{NULL} (the default) draws from the
+ambient RNG stream and so is not reproducible across calls; pass a
+seed for reproducible bin assignment.}
 }
 \value{
-A factor. \code{cut_exposure_quantile()}'s result additionally
-carries a \code{"breaks"} attribute holding the \code{n + 1} quantile
-cutpoints used to form the bins.
+A factor with a \code{"ties"} attribute recording the \code{ties} rule
+used. \code{cut_exposure_quantile()}'s result additionally carries a
+\code{"breaks"} attribute holding the \code{n + 1} quantile cutpoints used to
+form the bins.
 }
 \description{
 \code{cut_quantile()} bins a numeric vector into \code{n} quantile groups.
@@ -42,5 +67,6 @@ separators (e.g. \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quanti
 x <- rnorm(100)
 cut_quantile(x)
 cut_exposure_quantile(abs(x))
+cut_quantile(x, ties = "split-even", seed = 8213)
 
 }
