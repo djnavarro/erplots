@@ -40,6 +40,57 @@ test_that(".layer_vpc_simulated() bins simulated rows against the observed layer
   expect_setequal(sim_bins, obs_bins)
 })
 
+test_that(".layer_vpc_observed() forwards ties/quantile_type/labeller to cut_exposure_quantile()", {
+  vpc_default <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
+  vpc_custom <- er_vpc(
+    er_test_data, aucss, ae1, ties = "downward", quantile_type = 1,
+    labeller = c("Low", "Mid-low", "Mid-high", "High")
+  ) |> er_vpc_add_observed()
+
+  expect_equal(vpc_default$layer$observed$config$ties, "upward")
+  expect_equal(vpc_custom$layer$observed$config$ties, "downward")
+  expect_equal(vpc_custom$layer$observed$config$labels, c("Low", "Mid-low", "Mid-high", "High"))
+  expect_setequal(
+    levels(vpc_custom$layer$observed$config$summary$.vpc_bin),
+    c("Placebo", "Low", "Mid-low", "Mid-high", "High")
+  )
+})
+
+test_that("the observed and simulated layers assign a tied exposure value to the same bin, honoring a custom ties rule", {
+  # a run of `10`s straddles the 25%/50% quantile breaks
+  exposure <- c(1:9, rep(10, 5), 11:15, 16:34)
+  dat <- data.frame(exposure = exposure, resp = rep(c(0, 1), length.out = length(exposure)))
+  sim <- do.call(rbind, lapply(1:3, function(i) {
+    data.frame(exposure = exposure, resp = rep(c(0, 1), length.out = length(exposure)), sim_id = i)
+  }))
+
+  for (rule in c("upward", "downward")) {
+    vpc <- dat |>
+      er_vpc(exposure, resp, plot_by = exposure, n_bins = 4, ties = rule) |>
+      er_vpc_add_observed() |>
+      er_vpc_add_simulated(sim = sim)
+
+    # rebuild the actual per-row bin assignment used by each layer, since
+    # config$summary is already aggregated to one row per bin
+    obs_bins <- cut_exposure_quantile(exposure, n = 4, ties = rule)
+    sim_bins <- .apply_exposure_breaks(
+      sim$exposure, attr(obs_bins, "breaks"),
+      ties = vpc$layer$observed$config$ties, labels = vpc$layer$observed$config$labels
+    )
+
+    # the tied run of `10`s should land in the same bin regardless of
+    # which row (observed or simulated) it came from
+    expect_equal(unique(as.character(obs_bins[exposure == 10])), unique(as.character(sim_bins[sim$exposure == 10])))
+    # and "upward" vs "downward" should actually produce different bins
+    # for the tied value (sanity check that the test setup is meaningful)
+    expect_equal(length(unique(as.character(obs_bins[exposure == 10]))), 1)
+  }
+
+  obs_bins_up <- cut_exposure_quantile(exposure, n = 4, ties = "upward")
+  obs_bins_down <- cut_exposure_quantile(exposure, n = 4, ties = "downward")
+  expect_false(identical(as.character(obs_bins_up[exposure == 10]), as.character(obs_bins_down[exposure == 10])))
+})
+
 test_that(".layer_vpc_simulated() computes percentile bands matching config$percentiles' shape", {
   vpc <- er_vpc(er_test_data, aucss, biomarker_change, probs = c(0.1, 0.5, 0.9)) |>
     er_vpc_add_observed() |>

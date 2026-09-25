@@ -82,11 +82,25 @@
 
   if (config$is_numeric_group) {
     is_placebo <- if (group_var == exp_var) dat[[exp_var]] == 0 else rep(FALSE, nrow(dat))
-    exposure_bins <- cut_exposure_quantile(dat[[group_var]], n = n_bins, is_placebo = is_placebo)
+    exposure_bins <- cut_exposure_quantile(
+      dat[[group_var]], n = n_bins, is_placebo = is_placebo,
+      ties = object$group$ties, quantile_type = object$group$quantile_type,
+      labeller = object$group$labeller, seed = object$group$seed
+    )
     config$breaks <- attr(exposure_bins, "breaks")
+    # `ties`/resolved labels, read back off the binned column's own
+    # attributes, for `.layer_vpc_simulated()`'s `.apply_exposure_breaks()`
+    # calls to reuse verbatim -- guarantees the simulated side's tie-break
+    # rule and bin labels always match the observed side's, exactly the
+    # same pattern `config$breaks` already establishes for the numeric
+    # cutpoints themselves
+    config$ties <- attr(exposure_bins, "ties")
+    config$labels <- levels(exposure_bins)[-1] # drop "Placebo"
     dat$.vpc_bin <- exposure_bins
   } else {
     config$breaks <- NULL
+    config$ties <- NULL
+    config$labels <- NULL
     dat$.vpc_bin <- dat[[group_var]]
   }
 
@@ -103,14 +117,25 @@
   config$strata_type <- object$strata$type
   if (is.null(strata_var)) {
     config$strata_breaks <- NULL
+    config$strata_ties <- NULL
+    config$strata_labels <- NULL
     dat$.vpc_stratum <- 1L
   } else if (config$strata_type == "continuous") {
     is_placebo_strata <- if (strata_var == exp_var) dat[[exp_var]] == 0 else rep(FALSE, nrow(dat))
-    strata_bins <- cut_exposure_quantile(dat[[strata_var]], n = object$strata$n_strata, is_placebo = is_placebo_strata)
+    strata_bins <- cut_exposure_quantile(
+      dat[[strata_var]], n = object$strata$n_strata, is_placebo = is_placebo_strata,
+      ties = object$strata$ties, quantile_type = object$strata$quantile_type,
+      labeller = object$strata$labeller, seed = object$group$seed
+    )
     config$strata_breaks <- attr(strata_bins, "breaks")
+    # mirrors `config$ties`/`config$labels` above, for the same reason
+    config$strata_ties <- attr(strata_bins, "ties")
+    config$strata_labels <- levels(strata_bins)[-1] # drop "Placebo"
     dat$.vpc_stratum <- strata_bins
   } else {
     config$strata_breaks <- NULL
+    config$strata_ties <- NULL
+    config$strata_labels <- NULL
     dat$.vpc_stratum <- dat[[strata_var]]
   }
 
@@ -209,7 +234,7 @@
 
 # layer_vpc_simulated ------------------------------------------------------------
 
-.layer_vpc_simulated <- function(object, sim, style, dots = list()) {
+.layer_vpc_simulated <- function(object, sim, style, dots = list(), seed = NULL) {
 
   layer <- list()
   config <- list()
@@ -233,7 +258,10 @@
   # see `.apply_exposure_breaks()` for why this matters
   if (obs_config$is_numeric_group) {
     is_placebo <- if (group_var == exp_var) sim[[exp_var]] == 0 else rep(FALSE, nrow(sim))
-    sim$.vpc_bin <- .apply_exposure_breaks(sim[[group_var]], obs_config$breaks, is_placebo)
+    sim$.vpc_bin <- .apply_exposure_breaks(
+      sim[[group_var]], obs_config$breaks, is_placebo,
+      ties = obs_config$ties, labels = obs_config$labels, seed = seed
+    )
   } else {
     sim$.vpc_bin <- sim[[group_var]]
   }
@@ -251,7 +279,10 @@
     sim$.vpc_stratum <- 1L
   } else if (obs_config$strata_type == "continuous") {
     is_placebo_strata <- if (obs_config$strata_var == exp_var) sim[[exp_var]] == 0 else rep(FALSE, nrow(sim))
-    sim$.vpc_stratum <- .apply_exposure_breaks(sim[[obs_config$strata_var]], obs_config$strata_breaks, is_placebo_strata)
+    sim$.vpc_stratum <- .apply_exposure_breaks(
+      sim[[obs_config$strata_var]], obs_config$strata_breaks, is_placebo_strata,
+      ties = obs_config$strata_ties, labels = obs_config$strata_labels, seed = seed
+    )
   } else {
     sim$.vpc_stratum <- sim[[obs_config$strata_var]]
   }

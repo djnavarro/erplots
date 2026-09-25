@@ -58,7 +58,11 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #'   columns and `sim_id`. Mutually exclusive with `model`.
 #' @param nsim Number of simulation replicates, only used with `model`.
 #'   Defaults to `100`.
-#' @param seed Optional RNG seed, only used with `model`.
+#' @param seed Optional RNG seed. Used for `model`'s own simulation draws,
+#'   and also (regardless of whether `sim`/`model` was supplied) to seed
+#'   this layer's random tie-break when [er_vpc()]'s `ties`/`strata_ties`
+#'   is `"split-even"` -- see [er_vpc()]'s own `seed` argument for the
+#'   observed layer's independent tie-break seed.
 #' @param style A function determining how the simulated layer is drawn.
 #'   Defaults to [er_style_vpc_simulated_mean_errorbar()]; see
 #'   [er_style_vpc_simulated()] for the other built-in options.
@@ -144,7 +148,8 @@ er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, s
     object = object,
     sim = sim,
     style = style,
-    dots = dots
+    dots = dots,
+    seed = seed
   )
 
   return(object)

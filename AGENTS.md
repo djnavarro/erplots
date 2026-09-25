@@ -220,63 +220,92 @@ Built-in builders, by layer:
 ### The VPC mini-grammar
 
 `er_vpc(data, exposure, response, response_type, plot_by = NULL, n_bins
-= 4, stratify_by = NULL, n_strata = 4, conf_level = 0.95, probs = c(0.1,
-0.5, 0.9))` |> `er_vpc_add_observed()` |> `er_vpc_add_simulated()` |>
+= 4, ties = "upward", quantile_type = 7, labeller = NULL, stratify_by =
+NULL, n_strata = 4, strata_ties = "upward", strata_quantile_type = 7,
+strata_labeller = NULL, conf_level = 0.95, probs = c(0.1, 0.5, 0.9), seed
+= NULL)` |> `er_vpc_add_observed()` |> `er_vpc_add_simulated()` |>
 `plot()` mirrors `er_plot()`'s object/layer/builder architecture, scoped
 deliberately narrower in one respect that remains true even after
 `stratify_by` (below): always a single `plot_by` axis/binning scheme, no
 per-builder color/facet precedence rule to thread through (see
 "Stratification via `stratify_by`" below for why). `plot_by`/`n_bins`/
-`conf_level`/`probs` all live on `er_vpc()` itself (stored on
-`object$group`), not on either add-verb, since the observed and
-simulated layers must always agree on them -- `plot_by` defaults to the
-plot's exposure variable; numeric `plot_by` is quantile-binned
-(`cut_exposure_quantile()`, placebo separated when `plot_by` is the
-exposure variable itself), categorical is used as-is. Whether `plot_by`
-is numeric or categorical is auto-detected once in `er_vpc()` and
-stored as `object$group$type` (`"continuous"`/`"discrete"`), mirroring
-`object$response$type`; both `.layer_vpc_*()` functions copy it onto
-their `config$group_type` (with `config$is_numeric_group` kept as a
-convenience boolean derived from it) for builders to read. When
-`plot_by` is numeric, both `.layer_vpc_*()` functions also compute
-`x_median` alongside `x_mid` on `config$summary` (the per-bin median,
-vs. mean, of `plot_by`'s values) -- `x_mid` remains what the
-percentile-band idiom plots at, while `x_median` is what the default
-`_mean_errorbar()` pair plots at instead.
+`ties`/`quantile_type`/`labeller`/`conf_level`/`probs`/`seed` all live on
+`er_vpc()` itself (stored on `object$group`), not on either add-verb,
+since the observed and simulated layers must always agree on them --
+unlike `er_plot_add_quantiles()`/`er_plot_add_groups()`'s own
+`ties`/`quantile_type`/`labeller` (deliberately kept independent per
+layer, since those two layers aren't required to bin the same variable
+identically), `er_vpc()`'s observed/simulated layers *are* required to,
+since `er_vpc_add_simulated()` reuses the observed layer's own cutpoints
+rather than deriving fresh ones (see below) -- a mismatched `ties`
+between the two would silently misrepresent the comparison the VPC exists
+to make. `plot_by` defaults to the plot's exposure variable; numeric
+`plot_by` is quantile-binned (`cut_exposure_quantile()`, placebo
+separated when `plot_by` is the exposure variable itself), categorical is
+used as-is. Whether `plot_by` is numeric or categorical is auto-detected
+once in `er_vpc()` and stored as `object$group$type`
+(`"continuous"`/`"discrete"`), mirroring `object$response$type`; both
+`.layer_vpc_*()` functions copy it onto their `config$group_type` (with
+`config$is_numeric_group` kept as a convenience boolean derived from it)
+for builders to read. When `plot_by` is numeric, both `.layer_vpc_*()`
+functions also compute `x_median` alongside `x_mid` on `config$summary`
+(the per-bin median, vs. mean, of `plot_by`'s values) -- `x_mid` remains
+what the percentile-band idiom plots at, while `x_median` is what the
+default `_mean_errorbar()` pair plots at instead. `seed` seeds only the
+observed layer's own `ties = "split-even"` tie-break (an eager draw, via
+`.resolve_quantile_ties()`); `er_vpc_add_simulated()`'s own `seed`
+argument independently seeds the simulated layer's `"split-even"`
+tie-break over its own (typically larger, replicated) data.
 
 **Stratification via `stratify_by`.** Optional, defaults to `NULL` (no
 faceting, a single panel -- prior behaviour unchanged). When supplied,
 `er_vpc()` splits the VPC into one `ggplot2::facet_wrap()` panel per
-level, stored as `object$strata` (`var`/`label`/`type`/`n_strata`,
-mirroring `object$group`). A categorical `stratify_by` is used as-is; a
-numeric one is quantile-binned into `n_strata` bins (`cut_exposure_quantile()`,
-placebo separated only when `stratify_by` is the exposure variable
-itself, exactly like `plot_by`), with `rlang::inform()` reporting that
-this happened. `er_vpc()` errors if `stratify_by` resolves to the same
-variable as `plot_by` -- faceting by the exact variable already driving
-the x-axis binning would give each panel a single bin. Unlike
-`er_plot()`'s stratification, this is facet-only (no color precedence
-rule to reconcile), and no `er_style_vpc_*()` builder needs to know it
-exists: `.layer_vpc_observed()` computes a `.vpc_stratum` column
-alongside `.vpc_bin` (a constant `1L` when `stratify_by` is unset, so
-every `.by = ` grouping can unconditionally include it rather than
-branching), `.layer_vpc_simulated()` bins simulated rows against the
-observed layer's own stored `config$strata_breaks` the same way it
-already does for `config$breaks`, and `.build_vpc_plot()` adds a single
+level, stored as `object$strata` (`var`/`label`/`type`/`n_strata`/
+`ties`/`quantile_type`/`labeller`, mirroring `object$group`). A
+categorical `stratify_by` is used as-is; a numeric one is quantile-binned
+into `n_strata` bins (`cut_exposure_quantile()`, placebo separated only
+when `stratify_by` is the exposure variable itself, exactly like
+`plot_by`), with `rlang::inform()` reporting that this happened.
+`strata_ties`/`strata_quantile_type`/`strata_labeller` are `er_vpc()`'s
+own arguments for this binning -- kept as a separate trio from
+`ties`/`quantile_type`/`labeller` (mirroring `n_strata` already being
+separate from `n_bins`) since `plot_by`/`stratify_by` are usually
+different variables with no reason to share a binning scheme, while each
+individually still needs observed/simulated agreement for the reason
+above. `er_vpc()` errors if `stratify_by` resolves to the same variable
+as `plot_by` -- faceting by the exact variable already driving the x-axis
+binning would give each panel a single bin. Unlike `er_plot()`'s
+stratification, this is facet-only (no color precedence rule to
+reconcile), and no `er_style_vpc_*()` builder needs to know it exists:
+`.layer_vpc_observed()` computes a `.vpc_stratum` column alongside
+`.vpc_bin` (a constant `1L` when `stratify_by` is unset, so every `.by =
+` grouping can unconditionally include it rather than branching),
+`.layer_vpc_simulated()` bins simulated rows against the observed layer's
+own stored `config$strata_breaks`/`config$strata_ties`/
+`config$strata_labels` the same way it already does for `config$breaks`/
+`config$ties`/`config$labels`, and `.build_vpc_plot()` adds a single
 `facet_wrap(vars(.vpc_stratum))` when `object$strata` is non-`NULL` --
 every builder's `config$summary`/`config$percentiles` already carries
 the `.vpc_stratum` column needed for that facet to work.
 
 - **`er_vpc_add_observed(object, style = ...)`** -- bins the observed
-  data (using `object$group`) and computes its response summary.
+  data (using `object$group`/`object$strata`) and computes its response
+  summary. Beyond the numeric `breaks`/`strata_breaks` cutpoints, also
+  captures the resolved `ties`/`strata_ties` rule and final bin `labels`/
+  `strata_labels` (read back off `cut_exposure_quantile()`'s own
+  attributes/levels) onto `config`, for `er_vpc_add_simulated()` to reuse
+  verbatim.
 - **`er_vpc_add_simulated(object, model = NULL, sim = NULL, nsim = 100,
   seed = NULL, style = ...)`** -- must be called after
   `er_vpc_add_observed()`; bins simulated rows against the *observed*
-  layer's own stored cutpoints (`obs_config$breaks`, via
-  `.apply_exposure_breaks()`), guaranteeing both sides share identical
-  bin boundaries. `model`/`sim` are mutually exclusive; exactly one is
-  required. When `model` is supplied, calls `er_simulate()` internally
-  and requires a `sim_resp` column.
+  layer's own stored cutpoints/ties/labels (`obs_config$breaks`/`ties`/
+  `labels`, via `.apply_exposure_breaks()`), guaranteeing both sides
+  share identical bin boundaries, tie-break rule, and display labels.
+  `model`/`sim` are mutually exclusive; exactly one is required. When
+  `model` is supplied, calls `er_simulate()` internally and requires a
+  `sim_resp` column. `seed` seeds both `er_simulate()`'s own draws (when
+  `model` is used) and this layer's `ties = "split-even"` tie-break
+  (regardless of whether `sim`/`model` was used).
 
 Three visual idioms, chosen by `style`:
 

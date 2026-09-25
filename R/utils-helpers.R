@@ -169,17 +169,23 @@
 # does) -- used by `.layer_vpc_simulated()` to bin simulated exposure
 # values against the *same* cutpoints the observed layer already
 # computed, so the two sides are guaranteed to share bin boundaries.
-# Mirrors `cut_exposure_quantile()`'s own placebo-handling/labelling.
+# Mirrors `cut_exposure_quantile()`'s own placebo-handling/labelling,
+# including its `ties`/label/seed handling (via `.cut_quantile_bin_num()`,
+# defined further down this file) -- `ties = "upward"`/`labels = NULL` (the
+# defaults) reproduce this function's own prior, hardcoded behaviour
+# exactly, so this is a pure superset for any existing caller.
 #' @noRd
-.apply_exposure_breaks <- function(x, breaks, is_placebo = NULL) {
+.apply_exposure_breaks <- function(x, breaks, is_placebo = NULL,
+                                    ties = "upward", labels = NULL, seed = NULL) {
   if (is.null(is_placebo)) is_placebo <- rep(FALSE, length(x))
   n <- length(breaks) - 1
-  exp_bin <- as.numeric(dplyr::case_when(
-    is_placebo ~ "0",
-    is.na(x) ~ NA_character_,
-    TRUE ~ cut(x, breaks, labels = 1:n, include.lowest = TRUE)
-  ))
-  factor(exp_bin, levels = 0:n, labels = c("Placebo", paste0("Q", 1:n)))
+  bin_num <- .cut_quantile_bin_num(x, breaks, n, ties, seed = seed)
+  exp_bin <- dplyr::case_when(
+    is_placebo ~ 0,
+    is.na(x) ~ NA_real_,
+    TRUE ~ bin_num
+  )
+  factor(exp_bin, levels = 0:n, labels = c("Placebo", labels %||% paste0("Q", 1:n)))
 }
 
 # simple helpers ----------------------------------------------------------

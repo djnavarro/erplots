@@ -98,6 +98,35 @@ test_that("ci_poisson returns a named lower/upper vector", {
   expect_true(ci["lower"] < ci["upper"])
 })
 
+test_that(".apply_exposure_breaks() defaults reproduce its prior, hardcoded behaviour", {
+  x <- c(0, 0, 1:9, rep(10, 5), 11:15)
+  breaks <- attr(cut_exposure_quantile(x, n = 4), "breaks")
+
+  result <- .apply_exposure_breaks(x, breaks, is_placebo = x == 0)
+  expect_equal(levels(result), c("Placebo", "Q1", "Q2", "Q3", "Q4"))
+  # matches a direct `cut(..., right = TRUE, include.lowest = TRUE)` call
+  expect_equal(
+    as.character(result[x != 0]),
+    as.character(cut(x[x != 0], breaks, labels = paste0("Q", 1:4), include.lowest = TRUE))
+  )
+})
+
+test_that(".apply_exposure_breaks() honours ties/labels/seed", {
+  x <- c(1:9, rep(10, 5), 11:15)
+  breaks <- attr(cut_exposure_quantile(x, n = 4), "breaks")
+
+  up <- .apply_exposure_breaks(x, breaks, ties = "upward")
+  down <- .apply_exposure_breaks(x, breaks, ties = "downward")
+  expect_false(identical(as.character(up), as.character(down)))
+
+  labelled <- .apply_exposure_breaks(x, breaks, labels = c("Low", "Mid-low", "Mid-high", "High"))
+  expect_equal(levels(labelled), c("Placebo", "Low", "Mid-low", "Mid-high", "High"))
+
+  split1 <- .apply_exposure_breaks(x, breaks, ties = "split-even", seed = 823)
+  split2 <- .apply_exposure_breaks(x, breaks, ties = "split-even", seed = 823)
+  expect_identical(split1, split2)
+})
+
 test_that("cut_exposure_quantile errors clearly on constant, all-NA, or too-few-value exposure", {
   expect_error(cut_exposure_quantile(rep(5, 10)), "found only 1 distinct")
   expect_error(cut_exposure_quantile(rep(NA_real_, 10)), "found only 0 distinct")

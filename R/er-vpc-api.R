@@ -36,6 +36,16 @@
 #'   with no binning.
 #' @param n_bins Number of quantile bins, when `plot_by` is numeric.
 #'   Defaults to `4`.
+#' @param ties,quantile_type,labeller Control how a numeric `plot_by` is
+#'   split into quantile bins -- passed straight through to
+#'   [cut_exposure_quantile()], see its documentation for what each
+#'   controls. Set here, on `er_vpc()` itself, rather than on
+#'   [er_vpc_add_observed()]/[er_vpc_add_simulated()], because the two
+#'   layers must always agree on how `plot_by` is binned --
+#'   `er_vpc_add_simulated()` reuses these exact settings (via
+#'   [cut_exposure_quantile()]'s attributes on the observed layer's own
+#'   binned column) rather than re-resolving them, so both sides always
+#'   stay in sync.
 #' @param stratify_by Optional variable (unquoted) splitting the VPC into
 #'   one facet panel per level, via `ggplot2::facet_wrap()`. A
 #'   categorical variable is used as-is; a numeric variable is
@@ -47,6 +57,13 @@
 #' @param n_strata Number of quantile bins, when `stratify_by` is
 #'   numeric. Ignored when `stratify_by` is `NULL` or categorical.
 #'   Defaults to `4`.
+#' @param strata_ties,strata_quantile_type,strata_labeller The
+#'   `stratify_by` analogues of `ties`/`quantile_type`/`labeller` above,
+#'   for the same reason: kept separate since `plot_by`/`stratify_by` are
+#'   usually different variables with no reason to share a binning
+#'   scheme (mirroring `n_bins`/`n_strata` already being separate
+#'   arguments), while still guaranteeing the observed and simulated
+#'   layers agree on `stratify_by`'s own binning.
 #' @param conf_level Confidence level for both the observed- and
 #'   simulated-side intervals. Must be strictly between 0 and 1.
 #'   Defaults to `0.95`.
@@ -55,6 +72,14 @@
 #'   [er_style_vpc_observed_quantile_errorbar()]/[er_style_vpc_simulated_quantile_errorbar()];
 #'   ignored by the default adaptive mean/errorbar pair). Only computed
 #'   for a continuous/count response. Defaults to `c(0.1, 0.5, 0.9)`.
+#' @param seed Optional single number seeding the observed layer's random
+#'   tie-break when `ties`/`strata_ties` is `"split-even"` (ignored
+#'   otherwise). `NULL` (the default) draws from the ambient RNG stream.
+#'   The simulated layer's own `"split-even"` tie-break is instead seeded
+#'   by [er_vpc_add_simulated()]'s own `seed` argument -- the two are
+#'   independent random draws over different data (the observed rows vs.
+#'   the, typically larger, simulated replicate pool), so each is seeded
+#'   by the call that actually performs it.
 #'
 #' @returns An (empty) plot object of class `er_vpc`.
 #'
@@ -80,8 +105,10 @@ NULL
 #' @export
 er_vpc <- function(data, exposure, response, response_type = "auto",
                     plot_by = NULL, n_bins = 4,
+                    ties = "upward", quantile_type = 7, labeller = NULL,
                     stratify_by = NULL, n_strata = 4,
-                    conf_level = 0.95, probs = c(0.1, 0.5, 0.9)) {
+                    strata_ties = "upward", strata_quantile_type = 7, strata_labeller = NULL,
+                    conf_level = 0.95, probs = c(0.1, 0.5, 0.9), seed = NULL) {
 
   # see `er_plot()`'s identical `dplyr::ungroup()` call for the rationale
   data <- dplyr::ungroup(data)
@@ -123,6 +150,7 @@ er_vpc <- function(data, exposure, response, response_type = "auto",
   if (!is.numeric(n_bins) || length(n_bins) != 1L || !is.finite(n_bins) || n_bins < 1 || n_bins != round(n_bins)) {
     rlang::abort("`n_bins` must be a single positive whole number.")
   }
+  ties <- match.arg(ties, c("upward", "downward", "split-even"))
 
   strata_quo <- rlang::enquo(stratify_by)
   strata_var <- if (rlang::quo_is_null(strata_quo)) NULL else rlang::as_name(strata_quo)
@@ -140,6 +168,7 @@ er_vpc <- function(data, exposure, response, response_type = "auto",
     if (!is.numeric(n_strata) || length(n_strata) != 1L || !is.finite(n_strata) || n_strata < 1 || n_strata != round(n_strata)) {
       rlang::abort("`n_strata` must be a single positive whole number.")
     }
+    strata_ties <- match.arg(strata_ties, c("upward", "downward", "split-even"))
   }
 
   if (!is.numeric(conf_level) || length(conf_level) != 1L || !is.finite(conf_level) || conf_level <= 0 || conf_level >= 1) {
@@ -184,8 +213,16 @@ er_vpc <- function(data, exposure, response, response_type = "auto",
   object$group$label <- .get_label(object$data[[group_var]]) %||% group_var
   object$group$type <- if (is.numeric(object$data[[group_var]])) "continuous" else "discrete"
   object$group$n_bins <- n_bins
+  object$group$ties <- ties
+  object$group$quantile_type <- quantile_type
+  object$group$labeller <- labeller
   object$group$conf_level <- conf_level
   object$group$probs <- probs
+  # this call's own randomness (the observed side's `ties = "split-even"`
+  # tie-break only -- see `er_vpc_add_simulated()`'s own `seed` for the
+  # simulated side's) -- lives on `object$group` alongside the rest of
+  # this binning config rather than a new top-level field
+  object$group$seed <- seed
 
   if (!is.null(strata_var)) {
     object$strata <- list()
@@ -193,6 +230,9 @@ er_vpc <- function(data, exposure, response, response_type = "auto",
     object$strata$label <- .get_label(object$data[[strata_var]]) %||% strata_var
     object$strata$type <- if (is.numeric(object$data[[strata_var]])) "continuous" else "discrete"
     object$strata$n_strata <- n_strata
+    object$strata$ties <- strata_ties
+    object$strata$quantile_type <- strata_quantile_type
+    object$strata$labeller <- strata_labeller
 
     if (object$strata$type == "continuous") {
       rlang::inform(paste0(
