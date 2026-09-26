@@ -33,7 +33,10 @@ layers can't disagree about how the comparison is binned or
 summarized.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"mean_errorbar"} \tab \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}} \tab Mean/rate + CI per bin, x-position adaptive to \code{plot_by}'s type (the default). \cr
    \code{"quantile_line"} \tab \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}} \tab One line per requested percentile against a continuous \code{plot_by} axis. \cr

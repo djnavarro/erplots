@@ -27,7 +27,10 @@ censored, read from the fit already stored on \code{object$km} (see
 call replaces the previous one).
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"ticks"} \tab \code{\link[=er_style_tte_censor_ticks]{er_style_tte_censor_ticks()}} \tab Tick marks at each censoring time, on the curve's current step height (the only built-in, and the default). \cr
 }

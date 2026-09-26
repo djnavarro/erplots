@@ -69,7 +69,10 @@ to both calls to avoid the warning, or ignore it if the difference is
 intentional.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"errorbar"} \tab \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} \tab Point + error bar per bin (the default). \cr
    \code{"errorbar_vlines"} \tab \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}} \tab \code{"errorbar"} plus a labelled vline at every bin boundary. \cr

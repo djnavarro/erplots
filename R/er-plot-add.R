@@ -36,6 +36,10 @@
 #' an argument name for unrelated purposes.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"ribbonline"` | [er_style_model_ribbonline()] | Fitted curve with an uncertainty ribbon (the default). |
@@ -156,6 +160,10 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   arguments to a builder" section. Must be named.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"pvalue"` | [er_style_summary_pvalue()] | A formatted p-value from the model's [er_summary()] result (the default). |
@@ -262,6 +270,10 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' intentional.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"errorbar"` | [er_style_quantile_errorbar()] | Point + error bar per bin (the default). |
@@ -401,6 +413,10 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' @returns The input `object`, with the data layer added.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"overlay"` | [er_style_data_overlay()] | Raw points (jittered for a binary response) drawn on the main panel (the default). |
@@ -613,6 +629,10 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' warns (doesn't error) if the two disagree in that specific case.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"boxplot"` | [er_style_group_boxplot()] | Boxplot per group level, group levels on the y-axis (the default). |

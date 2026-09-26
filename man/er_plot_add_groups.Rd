@@ -82,7 +82,10 @@ exposure variable, which risks silently disagreeing with
 warns (doesn't error) if the two disagree in that specific case.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"boxplot"} \tab \code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}} \tab Boxplot per group level, group levels on the y-axis (the default). \cr
    \code{"violin"} \tab \code{\link[=er_style_group_violin]{er_style_group_violin()}} \tab Violin per group level, group levels on the y-axis. \cr

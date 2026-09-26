@@ -67,7 +67,10 @@ only mean predictions -- this function errors informatively if
 here), so the observed and simulated layers always agree on them.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"mean_errorbar"} \tab \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}} \tab Mean/rate + CI per bin, x-position adaptive to \code{plot_by}'s type (the default). \cr
    \code{"quantile_ribbon"} \tab \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}} \tab One ribbon per requested percentile against a continuous \code{plot_by} axis. \cr

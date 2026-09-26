@@ -65,7 +65,7 @@ the data provided to the TTE plot.
 }
 \section{Styles}{
 
-The following pre-defined styles are available for this model layer. Please
+The following pre-defined styles are available for this layer. Please
 see the documentation for the corresponding builder function to see what
 customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr

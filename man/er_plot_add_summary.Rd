@@ -53,7 +53,10 @@ corner of the base panel is furthest from the observed data, computed
 from the raw \verb{(exposure, response)} coordinates of the data.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"pvalue"} \tab \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}} \tab A formatted p-value from the model's \code{\link[=er_summary]{er_summary()}} result (the default). \cr
    \code{"n"} \tab \code{\link[=er_style_summary_n]{er_style_summary_n()}} \tab Observation counts; model-agnostic, works with \code{model = NULL}. \cr

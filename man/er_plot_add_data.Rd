@@ -42,7 +42,10 @@ as an overlay showing the exposure and response values in the main panel of
 the plot, but other possibilities are available.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"overlay"} \tab \code{\link[=er_style_data_overlay]{er_style_data_overlay()}} \tab Raw points (jittered for a binary response) drawn on the main panel (the default). \cr
    \code{"hex"} \tab \code{\link[=er_style_data_hex]{er_style_data_hex()}} \tab 2D hexbin density of the raw points on the main panel. \cr

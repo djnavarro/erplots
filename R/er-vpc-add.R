@@ -22,6 +22,10 @@
 #' summarized.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"mean_errorbar"` | [er_style_vpc_observed_mean_errorbar()] | Mean/rate + CI per bin, x-position adaptive to `plot_by`'s type (the default). |
@@ -99,6 +103,10 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #' here), so the observed and simulated layers always agree on them.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"mean_errorbar"` | [er_style_vpc_simulated_mean_errorbar()] | Mean/rate + CI per bin, x-position adaptive to `plot_by`'s type (the default). |

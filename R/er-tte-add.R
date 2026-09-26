@@ -18,6 +18,10 @@
 #' @returns The input `object`, with the curve layer added.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"km"` | [er_style_tte_curve_km()] | Kaplan-Meier step curve with a confidence band (the only built-in, and the default). |
@@ -77,6 +81,10 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 #' @returns The input `object`, with the censor layer added.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"ticks"` | [er_style_tte_censor_ticks()] | Tick marks at each censoring time, on the curve's current step height (the only built-in, and the default). |
@@ -144,6 +152,10 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #' see [er_tte_build()].
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"text"` | [er_style_tte_risktable_text()] | Number-at-risk counts as a text grid, one row per stratum (the only built-in, and the default). |
@@ -325,6 +337,10 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #' stratification.
 #'
 #' @section Styles:
+#' The following pre-defined styles are available for this layer. Please
+#' see the documentation for the corresponding builder function to see what 
+#' customisation options are available:
+#' 
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"logrank"` | [er_style_tte_summary_logrank()] | Log-rank test p-value comparing survival across `stratify_by`'s levels (the default). |

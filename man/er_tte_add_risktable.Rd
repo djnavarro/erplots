@@ -42,7 +42,10 @@ the curve panel's x-axis tick marks, so the two panels'
 see \code{\link[=er_tte_build]{er_tte_build()}}.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"text"} \tab \code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}} \tab Number-at-risk counts as a text grid, one row per stratum (the only built-in, and the default). \cr
 }

@@ -70,7 +70,10 @@ builders (e.g. \code{\link[=er_style_tte_summary_n]{er_style_tte_summary_n()}}) 
 stratification.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"logrank"} \tab \code{\link[=er_style_tte_summary_logrank]{er_style_tte_summary_logrank()}} \tab Log-rank test p-value comparing survival across \code{stratify_by}'s levels (the default). \cr
    \code{"n"} \tab \code{\link[=er_style_tte_summary_n]{er_style_tte_summary_n()}} \tab Subject/event counts; model- and stratification-agnostic. \cr
