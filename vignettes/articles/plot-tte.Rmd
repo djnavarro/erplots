@@ -53,7 +53,7 @@ lung |>
 
 ## Stratified curves
 
-Passing `stratify_by` to `er_tte()` splits the Kaplan-Meier estimate into one curve per level (`survival::survfit(... ~ strata)`), and every layer added afterwards follows suit. `lung$sex` is coded numerically (1/2), so we convert it to a factor first -- otherwise a numeric `stratify_by` is automatically quantile-binned rather than used as-is (useful for a genuinely continuous covariate, not what we want here):
+Passing `stratify_by` to `er_tte()` splits the Kaplan-Meier estimate into one curve per level (`survival::survfit(... ~ strata)`), and every layer added afterwards follows suit. `stratify_by` must name a discrete/categorical variable -- `lung$sex` is coded numerically (1/2), so we convert it to a factor first:
 
 ```{r}
 lung_sex <- lung |> transform(sex = factor(sex, labels = c("Male", "Female")))
@@ -66,11 +66,12 @@ lung_sex |>
   plot()
 ```
 
-A numeric `stratify_by` is split into `n_strata` quantile bins instead, with a message reporting that this happened:
+A genuinely continuous covariate, like `age`, needs binning into groups first -- `cut_quantile()` gives full control over bin count, tie-breaking, and labels:
 
 ```{r}
 lung |>
-  er_tte(time, status == 2, stratify_by = age, n_strata = 3) |>
+  transform(age_grp = cut_quantile(age, n = 3)) |>
+  er_tte(time, status == 2, stratify_by = age_grp) |>
   er_tte_add_curve() |>
   plot()
 ```

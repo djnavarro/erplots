@@ -15,7 +15,7 @@
 #' @param stratify Logical: always `TRUE` here, since
 #'   [er_tte_add_pvalue()] requires a stratified `er_tte` object.
 #' @param time `object$time` (`name`/`label`/`limits`).
-#' @param strata `object$strata` (`var`/`label`/`type`/`n_strata`).
+#' @param strata `object$strata` (`var`/`label`).
 #' @param theme `object$theme` -- `theme$format_p` formats the p-value.
 #' @param ... Additional named arguments forwarded from
 #'   [er_tte_add_pvalue()]'s own `...`.

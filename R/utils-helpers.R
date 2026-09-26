@@ -145,6 +145,31 @@
   invisible(NULL)
 }
 
+# Shared by `er_plot()`/`er_tte()`/`er_vpc()`: `stratify_by` must name a
+# discrete/categorical variable in all three -- erplots deliberately
+# doesn't auto-bin a numeric one on the caller's behalf (unlike
+# `exposure`/`plot_by`, where binning is intrinsic to what the plot even
+# is). Deciding how to carve a continuous covariate into groups is a
+# substantive statistical choice, not a plotting one; the fix is one
+# `dplyr::mutate(x_grp = cut_quantile(x, ...))` call before plotting,
+# which also gives full control over bin count/tie-breaking/labels via
+# `cut_quantile()`/`cut_exposure_quantile()`'s own arguments, rather than
+# each mini-grammar's own `stratify_by` needing to redundantly expose
+# that same control. `strata_name` may be `NULL` (no `stratify_by`
+# supplied), in which case this is a no-op.
+#' @noRd
+.check_stratify_by_discrete <- function(data, strata_name) {
+  if (is.null(strata_name)) return(invisible(NULL))
+  if (is.numeric(data[[strata_name]])) {
+    rlang::abort(c(
+      sprintf("`stratify_by` (`%s`) must be discrete, not numeric.", strata_name),
+      "i" = "Bin it yourself first (e.g. `dplyr::mutate(data, grp = cut_quantile(x, n = 4))`), then pass the resulting factor to `stratify_by`.",
+      "i" = "See `?cut_quantile`/`?cut_exposure_quantile` for control over bin count, tie-breaking, and labels."
+    ))
+  }
+  invisible(NULL)
+}
+
 # Validates `nsim` up front for `er_vpc_add_simulated(model = ...)` --
 # without this, `nsim = 0`/negative/fractional values ran to completion
 # but failed deep inside whatever matrix/vector machinery a model's
@@ -169,17 +194,23 @@
 # does) -- used by `.layer_vpc_simulated()` to bin simulated exposure
 # values against the *same* cutpoints the observed layer already
 # computed, so the two sides are guaranteed to share bin boundaries.
-# Mirrors `cut_exposure_quantile()`'s own placebo-handling/labelling.
+# Mirrors `cut_exposure_quantile()`'s own placebo-handling/labelling,
+# including its `ties`/label/seed handling (via `.cut_quantile_bin_num()`,
+# defined further down this file) -- `ties = "upward"`/`labels = NULL` (the
+# defaults) reproduce this function's own prior, hardcoded behaviour
+# exactly, so this is a pure superset for any existing caller.
 #' @noRd
-.apply_exposure_breaks <- function(x, breaks, is_placebo = NULL) {
+.apply_exposure_breaks <- function(x, breaks, is_placebo = NULL,
+                                    ties = "upward", labels = NULL, seed = NULL) {
   if (is.null(is_placebo)) is_placebo <- rep(FALSE, length(x))
   n <- length(breaks) - 1
-  exp_bin <- as.numeric(dplyr::case_when(
-    is_placebo ~ "0",
-    is.na(x) ~ NA_character_,
-    TRUE ~ cut(x, breaks, labels = 1:n, include.lowest = TRUE)
-  ))
-  factor(exp_bin, levels = 0:n, labels = c("Placebo", paste0("Q", 1:n)))
+  bin_num <- .cut_quantile_bin_num(x, breaks, n, ties, seed = seed)
+  exp_bin <- dplyr::case_when(
+    is_placebo ~ 0,
+    is.na(x) ~ NA_real_,
+    TRUE ~ bin_num
+  )
+  factor(exp_bin, levels = 0:n, labels = c("Placebo", labels %||% paste0("Q", 1:n)))
 }
 
 # simple helpers ----------------------------------------------------------
@@ -372,10 +403,36 @@ ci_quantile <- function(x, prob = 0.5, conf_level = 0.95) {
 #' @param x Numeric vector
 #' @param n Number of bins
 #' @param is_placebo Logical vector indicating placebo samples
+#' @param ties Rule for assigning a value that sits exactly on an interior
+#'   break point, where the bin membership would otherwise be ambiguous.
+#'   `"upward"` (the default, matching prior behaviour) is equivalent to
+#'   [cut()] with `right = TRUE`; `"downward"` is equivalent to `right =
+#'   FALSE`; `"split-even"` randomly divides each tied group between its
+#'   two candidate bins so that final bin sizes are as equal as possible,
+#'   rather than sending every tied value the same direction.
+#' @param seed Optional single number used to seed the random tie-break
+#'   used by `ties = "split-even"` (ignored for `"upward"`/`"downward"`,
+#'   which involve no randomness). `NULL` (the default) draws from the
+#'   ambient RNG stream and so is not reproducible across calls; pass a
+#'   seed for reproducible bin assignment.
+#' @param quantile_type Integer between 1 and 9, passed straight through
+#'   as [stats::quantile()]'s own `type` argument to compute the
+#'   quantile break points. Defaults to `7`, matching
+#'   [stats::quantile()]'s own default.
+#' @param labeller Controls the labels used for the `n` quantile bins
+#'   (`cut_exposure_quantile()`'s separate `"Placebo"` level is always
+#'   used as-is, regardless of `labeller`). `NULL` (the default) labels
+#'   bins `"Q1"`, `"Q2"`, etc. A function is called as `labeller(n,
+#'   breaks)` (the actual bin count and the `n + 1` quantile cutpoints,
+#'   after any resolution-driven fallback -- see `@details` below) and
+#'   must return a character vector of length `n`; this is the hook for,
+#'   e.g., range-style labels built from `breaks`. A character vector is
+#'   used directly as the `n` labels.
 #'
-#' @returns A factor. `cut_exposure_quantile()`'s result additionally
-#'   carries a `"breaks"` attribute holding the `n + 1` quantile
-#'   cutpoints used to form the bins.
+#' @returns A factor with `"ties"` and `"quantile_type"` attributes
+#'   recording those two arguments. `cut_exposure_quantile()`'s result
+#'   additionally carries a `"breaks"` attribute holding the `n + 1`
+#'   quantile cutpoints used to form the bins.
 #'
 #' @details Both functions error if `x` has fewer than 2 distinct
 #'   non-missing values, since quantile bins aren't well-defined in that
@@ -386,19 +443,108 @@ ci_quantile <- function(x, prob = 0.5, conf_level = 0.95) {
 #'   no explanation. `cut_exposure_quantile()`'s `"breaks"` attribute is
 #'   read back out by quantile-layer builders that draw bin-boundary
 #'   separators (e.g. [er_style_quantile_errorbar_vlines()]) via
-#'   `attr(exposure_bins, "breaks")`.
+#'   `attr(exposure_bins, "breaks")`. Because that fallback can lower `n`
+#'   below what was originally requested, a character-vector `labeller`
+#'   is length-checked against the *actual* bin count, not the requested
+#'   one, and errors informatively on a mismatch.
 #'
 #' @name cut_quantile
 #' @examples
 #' x <- rnorm(100)
 #' cut_quantile(x)
 #' cut_exposure_quantile(abs(x))
+#' cut_quantile(x, ties = "split-even", seed = 8213)
+#' cut_quantile(x, quantile_type = 1)
+#' cut_quantile(x, labeller = function(n, breaks) paste0("Group ", 1:n))
+#' cut_quantile(x, labeller = c("Low", "Mid-low", "Mid-high", "High"))
 #' 
 NULL
 
+# Shared by both `cut_quantile()`/`cut_exposure_quantile()`: assigns each
+# element of `x` to an integer bin (`1:n`, `NA` where `x` is missing or
+# outside `range(breaks)`) according to the `ties` rule. `"upward"`/
+# `"downward"` are direct `cut()` calls; `"split-even"` is handled by
+# `.resolve_quantile_ties()` below.
+#' @noRd
+.cut_quantile_bin_num <- function(x, breaks, n, ties, seed = NULL) {
+  switch(
+    ties,
+    upward = as.numeric(cut(x, breaks, labels = 1:n, include.lowest = TRUE)),
+    downward = as.numeric(cut(x, breaks, labels = 1:n, right = FALSE, include.lowest = TRUE)),
+    `split-even` = .resolve_quantile_ties(x, breaks, n, seed = seed)
+  )
+}
+
+# `ties = "split-even"`'s implementation. Starts from the `"upward"`
+# baseline (every tied value assigned to the lower of its two candidate
+# bins), then, for each interior break in turn, randomly moves just
+# enough of that break's tied group up into the higher bin to bring the
+# cumulative count assigned so far as close as possible to an even split
+# (`target_cum`, a largest-remainder-style allocation of `n_obs` into `n`
+# roughly equal pieces) -- mirroring the equal-group-size goal of
+# `dplyr::ntile()`, but breaking ties randomly rather than by row order.
+# Only ties at a break point are ever moved; non-tied values keep the
+# bin `cut()` already gave them. See AGENTS.md's "no automatic seed
+# management" convention for why `seed` is opt-in only.
+#' @noRd
+.resolve_quantile_ties <- function(x, breaks, n, seed = NULL) {
+  baseline <- as.numeric(cut(x, breaks, labels = 1:n, include.lowest = TRUE))
+  if (n < 2) return(baseline)
+
+  valid <- which(!is.na(baseline))
+  n_obs <- length(valid)
+  target_cum <- round((1:n) * n_obs / n)
+
+  resolve <- function() {
+    bin_num <- baseline
+    for (j in 2:n) {
+      brk <- breaks[j]
+      tied <- valid[x[valid] == brk]
+      if (length(tied) == 0) next
+      count_below <- sum(x[valid] < brk)
+      k_lower <- max(0, min(length(tied), target_cum[j - 1] - count_below))
+      if (k_lower < length(tied)) {
+        move_up <- sample(tied, size = length(tied) - k_lower)
+        bin_num[move_up] <- j
+      }
+    }
+    bin_num
+  }
+
+  if (!is.null(seed)) withr::with_seed(seed, resolve()) else resolve()
+}
+
+# Resolves `labeller` (`NULL`/function/character vector) into the
+# character vector of `n` quantile-bin labels used by both
+# `cut_quantile()`/`cut_exposure_quantile()`. `n`/`breaks` here are
+# already post-fallback (i.e. the actual bin count/cutpoints used, not
+# necessarily what the caller originally requested) -- see `?cut_quantile`'s
+# `@details` for why a character-vector `labeller` is checked against
+# this `n`, not the requested one.
+#' @noRd
+.resolve_quantile_labels <- function(labeller, n, breaks) {
+  if (is.null(labeller)) return(paste0("Q", 1:n))
+
+  labels <- if (is.function(labeller)) labeller(n, breaks) else labeller
+
+  if (!is.character(labels) || length(labels) != n) {
+    rlang::abort(c(
+      sprintf(
+        "`labeller` must produce %d label%s (the number of quantile bins actually used), not %d.",
+        n, if (n == 1) "" else "s", length(labels)
+      ),
+      "i" = "If `x` doesn't have enough resolution for the originally requested number of bins, the actual bin count used can be lower than requested."
+    ))
+  }
+  labels
+}
+
 #' @export
 #' @rdname cut_quantile
-cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL) {
+cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL,
+                                   ties = c("upward", "downward", "split-even"),
+                                   seed = NULL, quantile_type = 7, labeller = NULL) {
+  ties <- match.arg(ties)
   if (is.null(is_placebo)) is_placebo <- x == 0
   non_placebo_x <- x[!is_placebo]
   n_distinct <- length(unique(non_placebo_x[!is.na(non_placebo_x)]))
@@ -412,7 +558,7 @@ cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL) {
     ))
   }
   breaks <- non_placebo_x |>
-    stats::quantile(probs = (0:n)/n, na.rm = TRUE)
+    stats::quantile(probs = (0:n)/n, na.rm = TRUE, type = quantile_type)
 
   # if the exposure column doesn't have enough resolution to distinguish
   # all `n` requested quantile bins (e.g. many repeated values clustered
@@ -437,20 +583,27 @@ cut_exposure_quantile <- function(x, n = 4, is_placebo = NULL) {
     n <- n_actual
   }
 
-  exp_bin <- as.numeric(dplyr::case_when(
-    is_placebo ~ "0",
-    is.na(x) ~ NA_character_,
-    TRUE ~ cut(x, breaks, labels = 1:n, include.lowest = TRUE)
-  ))
+  bin_num <- .cut_quantile_bin_num(x, breaks, n, ties, seed = seed)
+  exp_bin <- dplyr::case_when(
+    is_placebo ~ 0,
+    is.na(x) ~ NA_real_,
+    TRUE ~ bin_num
+  )
+  labels <- .resolve_quantile_labels(labeller, n, breaks)
   exp_quantile <- exp_bin |>
-    factor(levels = 0:n, labels = c("Placebo", paste0("Q", 1:n)))  
+    factor(levels = 0:n, labels = c("Placebo", labels))
   attr(exp_quantile, "breaks") <- breaks
+  attr(exp_quantile, "ties") <- ties
+  attr(exp_quantile, "quantile_type") <- quantile_type
   return(exp_quantile)
 }
 
 #' @export
 #' @rdname cut_quantile
-cut_quantile <- function(x, n = 4) {
+cut_quantile <- function(x, n = 4,
+                          ties = c("upward", "downward", "split-even"),
+                          seed = NULL, quantile_type = 7, labeller = NULL) {
+  ties <- match.arg(ties)
   n_distinct <- length(unique(x[!is.na(x)]))
   if (n_distinct < 2) {
     rlang::abort(c(
@@ -461,7 +614,7 @@ cut_quantile <- function(x, n = 4) {
       "i" = "At least 2 distinct values are required to form quantile bins -- check for a constant, all-`NA`, or too-small variable."
     ))
   }
-  breaks <- stats::quantile(x, probs = (0:n)/n, na.rm = TRUE)
+  breaks <- stats::quantile(x, probs = (0:n)/n, na.rm = TRUE, type = quantile_type)
 
   # see `cut_exposure_quantile()`'s equivalent step for the rationale --
   # a variable without enough resolution to distinguish all `n` requested
@@ -481,8 +634,11 @@ cut_quantile <- function(x, n = 4) {
     n <- n_actual
   }
 
-  bin_num <- as.numeric(cut(x, breaks, labels = 1:n, include.lowest = TRUE))
-  bin_fct <- factor(bin_num, levels = 1:n, labels = paste0("Q", 1:n)) 
+  bin_num <- .cut_quantile_bin_num(x, breaks, n, ties, seed = seed)
+  labels <- .resolve_quantile_labels(labeller, n, breaks)
+  bin_fct <- factor(bin_num, levels = 1:n, labels = labels)
+  attr(bin_fct, "ties") <- ties
+  attr(bin_fct, "quantile_type") <- quantile_type
   return(bin_fct)
 }
 

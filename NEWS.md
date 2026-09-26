@@ -1,5 +1,66 @@
 # erplots 0.2.0
 
+* `cut_quantile()`/`cut_exposure_quantile()` gain a `ties` argument
+  controlling how a value that sits exactly on an interior quantile break
+  is assigned (`"upward"`, the default and prior behaviour; `"downward"`;
+  or `"split-even"`, which randomly balances tied values between the two
+  candidate bins), plus an opt-in `seed` argument for reproducing
+  `"split-even"`'s random tie-break. The resolved rule is recorded as a
+  `"ties"` attribute on the returned factor.
+* `cut_quantile()`/`cut_exposure_quantile()` gain a `quantile_type`
+  argument, passed straight through to [stats::quantile()]'s own `type`
+  argument for computing the quantile break points. Defaults to `7`
+  (unchanged prior behaviour) and is recorded as a `"quantile_type"`
+  attribute on the returned factor.
+* `cut_quantile()`/`cut_exposure_quantile()` gain a `labeller` argument
+  for customising quantile-bin labels: a function called as
+  `labeller(n, breaks)`, or a character vector used directly. Defaults
+  to `NULL` (unchanged `"Q1"`/`"Q2"`/... labelling);
+  `cut_exposure_quantile()`'s separate `"Placebo"` level is untouched by
+  `labeller`.
+* `er_plot_add_quantiles()`/`er_plot_add_groups()` gain `ties`/
+  `quantile_type`/`labeller` arguments, forwarded to
+  `cut_exposure_quantile()`/`cut_quantile()`. These are local to each
+  call -- they aren't required to agree across different
+  `er_plot_add_groups()` calls, or with `er_plot_add_quantiles()` -- except
+  in one case: `er_plot_build()` now warns if `er_plot_add_groups()` bins
+  *the exposure variable itself* differently than `er_plot_add_quantiles()`
+  does, since the two panels would then show inconsistent quantile bins
+  for the same variable.
+
+* `er_vpc()` gains `ties`/`quantile_type`/`labeller` for `plot_by`, plus
+  a `seed` argument for reproducing a `"split-even"` tie-break. Unlike
+  the `er_plot_add_quantiles()`/`er_plot_add_groups()` arguments above,
+  these live on `er_vpc()` itself rather than on
+  `er_vpc_add_observed()`/`er_vpc_add_simulated()`, since the observed
+  and simulated layers must always bin `plot_by` identically --
+  `er_vpc_add_simulated()`'s own `seed` argument now also seeds its
+  independent `"split-even"` tie-break.
+
+## Breaking changes
+
+* `stratify_by` must now name a discrete/categorical variable in
+  `er_vpc()` (and in the not-yet-released `er_tte()`); a numeric column
+  errors instead of being automatically split into quantile bins. The
+  `n_strata` argument is removed from both. Bin a continuous covariate
+  yourself first with `cut_quantile()`/`cut_exposure_quantile()`, which
+  also gives full control over bin count, tie-breaking, and labels --
+  see `?er_vpc`/`?er_tte`.
+
+## Bug fixes
+
+* `er_plot()` now errors clearly when `stratify_by` names a numeric
+  column, instead of silently mapping it to a continuous colour scale
+  (which broke every stratified builder's discrete-groups assumption --
+  ribbons, per-stratum lines, dodging -- with no warning). `stratify_by`
+  has always been documented as requiring a discrete variable; this was
+  simply never validated.
+* `er_plot_add_groups()`'s `bins` argument now actually controls the
+  number of quantile bins used for a continuous grouping variable.
+  Previously documented but silently ignored -- every continuous grouping
+  variable was always split into `cut_quantile()`/`cut_exposure_quantile()`'s
+  own default of 4 bins, regardless of what `bins` was set to.
+
 # erplots 0.1.2
 
 Addresses CRAN reviewer feedback on the 0.1.1 submission. User-facing changes:

@@ -7,7 +7,7 @@
 #' @details
 #' Layers are either singleton or additive: model, summary, quantile, and data layers are singleton (a second call replaces the previous); groups are additive (each call adds a panel).
 #'
-#' `stratify_by` declares a discrete variable used for colour/fill across layers; each layer's `keep_strata` controls whether it uses stratification. Rows with `NA` in the stratification variable are kept as their own level.
+#' `stratify_by` declares a discrete variable used for colour/fill across layers; each layer's `keep_strata` controls whether it uses stratification. Rows with `NA` in the stratification variable are kept as their own level. A numeric `stratify_by` errors -- bin it yourself first with [cut_quantile()]/[cut_exposure_quantile()] and pass the resulting factor.
 #'
 #' `response_type` governs response-scale defaults and which interval method the quantile and VPC layers use; see `response_type` below and [er_plot_add_quantiles()] for details.
 #'
@@ -94,6 +94,10 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
       "i" = "erplots' quantile-binning and model-prediction grid assume a numeric exposure axis."
     ))
   }
+  # `stratify_by` must be discrete -- see `.check_stratify_by_discrete()`'s
+  # own comment for why erplots doesn't auto-bin a numeric one on the
+  # caller's behalf, the way it does for `exposure`
+  .check_stratify_by_discrete(data, strata_name)
 
   # empty plot object
   object <- structure(
@@ -259,6 +263,13 @@ plot.er_plot <- function(x, y = NULL, ...) {
 #' @export
 er_plot_build <- function(object) {
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
+
+  # warns if the quantile layer and a group layer that happens to group
+  # by the exposure variable itself disagree on how it's binned -- see
+  # `.check_exposure_binning_consistency()`'s own comment for why this is
+  # the one case that's checked, and why it lives at build time (so it
+  # catches either `er_plot_add_*()` call order)
+  .check_exposure_binning_consistency(object)
 
   # a model layer's prediction grid is add-time-eager (see
   # `.layer_model()`) but must still reflect whatever `exposure$limits`/

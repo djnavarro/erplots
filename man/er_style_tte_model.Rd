@@ -31,7 +31,7 @@ from \code{\link[=er_predict_survival]{er_predict_survival()}}, with \code{time}
 
 \item{time}{\code{object$time} (\code{name}/\code{label}/\code{limits}).}
 
-\item{strata}{\code{object$strata} (\code{var}/\code{label}/\code{type}/\code{n_strata}), or
+\item{strata}{\code{object$strata} (\code{var}/\code{label}), or
 \code{NULL} when unstratified.}
 
 \item{theme}{\code{object$theme}.}

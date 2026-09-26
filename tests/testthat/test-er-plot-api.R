@@ -13,6 +13,14 @@ test_that("er_plot errors clearly when exposure/response/stratify_by name nonexi
   expect_error(er_plot(er_test_data, not_a_col1, not_a_col2), "not_a_col1.*not_a_col2")
 })
 
+test_that("er_plot errors clearly when stratify_by is numeric, rather than silently mismapping it", {
+  # previously silent: a numeric stratify_by mapped straight to a
+  # continuous colour scale (`color = .data[[strata$name]]`), breaking
+  # every stratified builder's discrete-groups assumption, with no error
+  # and no `object$strata$type` field even existing to detect it
+  expect_error(er_plot(er_test_data, aucss, ae1, stratify_by = weight), "must be discrete")
+})
+
 test_that("er_plot errors clearly when exposure is not numeric", {
   df_factor <- er_test_data
   df_factor$aucss <- factor(round(df_factor$aucss / 50))
@@ -454,6 +462,47 @@ test_that("er_plot_build does not error", {
   expect_no_error(er_plot_build(plt1))
   expect_no_error(er_plot_build(plt2))
   expect_no_error(er_plot_build(plt3))
+})
+
+test_that("er_plot_build warns when the quantile and group layers bin the exposure variable differently", {
+  mismatched_bins <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_quantiles(bins = 4) |>
+    er_plot_add_groups(aucss, bins = 6)
+  expect_warning(er_plot_build(mismatched_bins), "bin `aucss` differently")
+
+  mismatched_ties <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_quantiles(bins = 4, ties = "upward") |>
+    er_plot_add_groups(aucss, bins = 4, ties = "downward")
+  expect_warning(er_plot_build(mismatched_ties), "bin `aucss` differently")
+
+  # order shouldn't matter
+  mismatched_bins_reordered <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_groups(aucss, bins = 6) |>
+    er_plot_add_quantiles(bins = 4)
+  expect_warning(er_plot_build(mismatched_bins_reordered), "bin `aucss` differently")
+})
+
+test_that("er_plot_build doesn't warn when exposure binning agrees, or when the group layer bins something else", {
+  matching <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_quantiles(bins = 4, ties = "upward") |>
+    er_plot_add_groups(aucss, bins = 4, ties = "upward")
+  expect_no_warning(er_plot_build(matching))
+
+  non_exposure_group <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_quantiles(bins = 4) |>
+    er_plot_add_groups(weight, bins = 8)
+  expect_no_warning(er_plot_build(non_exposure_group))
+
+  quantile_only <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  expect_no_warning(er_plot_build(quantile_only))
+
+  group_only <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_groups(aucss, bins = 6)
+  expect_no_warning(er_plot_build(group_only))
 })
 
 test_that("er_plot_build constructs ggplot2 objects", {

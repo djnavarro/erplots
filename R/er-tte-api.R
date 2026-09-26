@@ -38,16 +38,16 @@
 #' `response_type = "binary"` response.
 #'
 #' Optional `stratify_by` splits the Kaplan-Meier estimate into one curve
-#' per level, via `survival::survfit()`'s `~ strata` formula side --
-#' mirroring [er_vpc()]'s `stratify_by`: a categorical variable is used
-#' as-is; a numeric variable is automatically split into `n_strata`
-#' quantile bins (via [cut_exposure_quantile()], so `0`/placebo is kept
-#' in its own bin), with a message reporting that this happened. Unlike
-#' `time`/`event`, `stratify_by` must be a bare column name (not an
-#' arbitrary expression), matching `exposure`/`response`/`stratify_by`
+#' per level, via `survival::survfit()`'s `~ strata` formula side. It
+#' must name a discrete/categorical variable -- mirroring [er_plot()]/
+#' [er_vpc()]'s own `stratify_by`, a numeric one errors; bin it yourself
+#' first with [cut_quantile()]/[cut_exposure_quantile()] and pass the
+#' resulting factor, for full control over bin count/tie-breaking/labels.
+#' Unlike `time`/`event`, `stratify_by` must be a bare column name (not
+#' an arbitrary expression), matching `exposure`/`response`/`stratify_by`
 #' elsewhere in the package. `object$km$table` gains a `strata` column
-#' when stratified; `object$strata` (`var`/`label`/`type`/`n_strata`)
-#' mirrors `er_vpc()`'s own `object$strata`.
+#' when stratified; `object$strata` (`var`/`label`) mirrors `er_vpc()`'s
+#' own `object$strata`.
 #'
 #' @param data Data frame or tibble containing the observed data.
 #' @param time Event/censoring time (unquoted expression, evaluated in
@@ -55,12 +55,8 @@
 #' @param event Event indicator (unquoted expression, evaluated in
 #'   `data`): `TRUE`/`1` for an event, `FALSE`/`0` for censoring.
 #' @param stratify_by Optional stratification variable (unquoted, bare
-#'   column name). A categorical variable is used as-is; a numeric
-#'   variable is split into `n_strata` quantile bins. Defaults to `NULL`
-#'   (a single, unstratified curve).
-#' @param n_strata Number of quantile bins, when `stratify_by` is
-#'   numeric. Ignored when `stratify_by` is `NULL` or categorical.
-#'   Defaults to `4`.
+#'   column name), used as-is. Must be discrete -- a numeric column
+#'   errors. Defaults to `NULL` (a single, unstratified curve).
 #' @param conf_level Confidence level for the Kaplan-Meier confidence
 #'   band. Must be strictly between 0 and 1. Defaults to `0.95`.
 #'
@@ -72,8 +68,8 @@
 #' lung |>
 #'   er_tte(time, status == 2)
 #'
-#' # `lung$sex` is coded numerically (1/2); convert to a factor first, or
-#' # a numeric `stratify_by` is quantile-binned instead of used as-is
+#' # `lung$sex` is coded numerically (1/2); `stratify_by` requires a
+#' # discrete variable, so convert it to a factor first
 #' lung |>
 #'   transform(sex = factor(sex, labels = c("Male", "Female"))) |>
 #'   er_tte(time, status == 2, stratify_by = sex)
@@ -87,7 +83,7 @@ NULL
 
 #' @rdname er_tte
 #' @export
-er_tte <- function(data, time, event, stratify_by = NULL, n_strata = 4, conf_level = 0.95) {
+er_tte <- function(data, time, event, stratify_by = NULL, conf_level = 0.95) {
 
   # see `er_plot()`'s identical `dplyr::ungroup()` call for the rationale
   data <- dplyr::ungroup(data)
@@ -167,10 +163,8 @@ er_tte <- function(data, time, event, stratify_by = NULL, n_strata = 4, conf_lev
     if (!(strata_var %in% names(data))) {
       rlang::abort(sprintf("Column `%s` not found in `data`.", strata_var))
     }
-    if (!is.numeric(n_strata) || length(n_strata) != 1L || !is.finite(n_strata) || n_strata < 1 || n_strata != round(n_strata)) {
-      rlang::abort("`n_strata` must be a single positive whole number.")
-    }
   }
+  .check_stratify_by_discrete(data, strata_var)
 
   n_missing <- sum(is.na(time_vals) | is.na(event_vals))
   if (n_missing > 0) {
@@ -193,26 +187,7 @@ er_tte <- function(data, time, event, stratify_by = NULL, n_strata = 4, conf_lev
     strata_info <- list()
     strata_info$var <- strata_var
     strata_info$label <- .get_label(data[[strata_var]]) %||% strata_var
-    strata_info$type <- if (is.numeric(data[[strata_var]])) "continuous" else "discrete"
-    strata_info$n_strata <- n_strata
-
-    if (strata_info$type == "continuous") {
-      # unlike `er_vpc()`'s `stratify_by` (which special-cases placebo,
-      # i.e. `0`, only when `stratify_by` happens to be the exposure
-      # variable itself), `er_tte()` has no dedicated exposure argument
-      # to compare against -- so `stratify_by` never gets a separate
-      # placebo bin here, regardless of its values
-      data[[".er_tte_strata"]] <- cut_exposure_quantile(
-        data[[strata_var]], n = n_strata, is_placebo = rep(FALSE, nrow(data))
-      )
-      rlang::inform(paste0(
-        "`stratify_by` (`", strata_var, "`) is numeric; splitting into ", n_strata,
-        " quantile bins. Pass a categorical variable to `stratify_by`, ",
-        "or set `n_strata` to change the bin count."
-      ))
-    } else {
-      data[[".er_tte_strata"]] <- factor(data[[strata_var]])
-    }
+    data[[".er_tte_strata"]] <- factor(data[[strata_var]])
   }
 
   # Kaplan-Meier fit -- computed once, here, and shared by every layer
@@ -289,9 +264,7 @@ print.er_tte <- function(x, ...) {
   cat("    - time:   ", x$time$label  %||% "<none>", "\n", sep = "")
   cat("    - event:  ", x$event$label %||% "<none>", "\n", sep = "")
   if (!is.null(x$strata)) {
-    cat("    - stratify_by: ", x$strata$var, " (", x$strata$type, ")",
-      if (x$strata$type == "continuous") paste0(", ", x$strata$n_strata, " bins") else "",
-      "\n", sep = "")
+    cat("    - stratify_by: ", x$strata$var, "\n", sep = "")
   }
 
   if (is.null(x$strata)) {

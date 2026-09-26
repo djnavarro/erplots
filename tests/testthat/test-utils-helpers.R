@@ -98,6 +98,35 @@ test_that("ci_poisson returns a named lower/upper vector", {
   expect_true(ci["lower"] < ci["upper"])
 })
 
+test_that(".apply_exposure_breaks() defaults reproduce its prior, hardcoded behaviour", {
+  x <- c(0, 0, 1:9, rep(10, 5), 11:15)
+  breaks <- attr(cut_exposure_quantile(x, n = 4), "breaks")
+
+  result <- .apply_exposure_breaks(x, breaks, is_placebo = x == 0)
+  expect_equal(levels(result), c("Placebo", "Q1", "Q2", "Q3", "Q4"))
+  # matches a direct `cut(..., right = TRUE, include.lowest = TRUE)` call
+  expect_equal(
+    as.character(result[x != 0]),
+    as.character(cut(x[x != 0], breaks, labels = paste0("Q", 1:4), include.lowest = TRUE))
+  )
+})
+
+test_that(".apply_exposure_breaks() honours ties/labels/seed", {
+  x <- c(1:9, rep(10, 5), 11:15)
+  breaks <- attr(cut_exposure_quantile(x, n = 4), "breaks")
+
+  up <- .apply_exposure_breaks(x, breaks, ties = "upward")
+  down <- .apply_exposure_breaks(x, breaks, ties = "downward")
+  expect_false(identical(as.character(up), as.character(down)))
+
+  labelled <- .apply_exposure_breaks(x, breaks, labels = c("Low", "Mid-low", "Mid-high", "High"))
+  expect_equal(levels(labelled), c("Placebo", "Low", "Mid-low", "Mid-high", "High"))
+
+  split1 <- .apply_exposure_breaks(x, breaks, ties = "split-even", seed = 823)
+  split2 <- .apply_exposure_breaks(x, breaks, ties = "split-even", seed = 823)
+  expect_identical(split1, split2)
+})
+
 test_that("cut_exposure_quantile errors clearly on constant, all-NA, or too-few-value exposure", {
   expect_error(cut_exposure_quantile(rep(5, 10)), "found only 1 distinct")
   expect_error(cut_exposure_quantile(rep(NA_real_, 10)), "found only 0 distinct")
@@ -149,6 +178,147 @@ test_that("cut_quantile works normally with at least 2 distinct values", {
   result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4)
   expect_s3_class(result, "factor")
   expect_equal(levels(result), paste0("Q", 1:4))
+})
+
+test_that("cut_quantile defaults to ties = \"upward\" and records it as an attribute", {
+  x <- c(1:9, rep(10, 5), 11:15)
+  default_result <- cut_quantile(x, n = 4)
+  upward_result <- cut_quantile(x, n = 4, ties = "upward")
+
+  expect_equal(default_result, upward_result)
+  expect_equal(attr(default_result, "ties"), "upward")
+})
+
+test_that("cut_quantile's ties argument controls how a tied break value is assigned", {
+  # a run of `10`s straddles the 50%/75% quantile breaks (10 and 10.5)
+  x <- c(1:9, rep(10, 5), 11:15)
+
+  upward <- cut_quantile(x, n = 4, ties = "upward")
+  downward <- cut_quantile(x, n = 4, ties = "downward")
+
+  # "upward" (right = TRUE): ties at a break go to the lower bin
+  expect_equal(as.integer(table(upward)), c(5, 9, 0, 5))
+  # "downward" (right = FALSE): ties at a break go to the higher bin
+  expect_equal(as.integer(table(downward)), c(5, 4, 5, 5))
+
+  expect_equal(attr(upward, "ties"), "upward")
+  expect_equal(attr(downward, "ties"), "downward")
+})
+
+test_that("cut_quantile's ties = \"split-even\" balances bin sizes and is reproducible with a seed", {
+  x <- c(1:9, rep(10, 5), 11:15)
+
+  split_even <- cut_quantile(x, n = 4, ties = "split-even", seed = 7148)
+  counts <- as.integer(table(split_even))
+
+  # as close to equal as 19 observations across 4 bins can get
+  expect_equal(sort(counts), c(4, 5, 5, 5))
+  expect_equal(attr(split_even, "ties"), "split-even")
+
+  # same seed -> identical result
+  expect_identical(
+    cut_quantile(x, n = 4, ties = "split-even", seed = 7148),
+    split_even
+  )
+})
+
+test_that("cut_quantile defaults to quantile_type = 7 and records it as an attribute", {
+  x <- c(1:9, rep(10, 5), 11:15)
+  default_result <- cut_quantile(x, n = 4)
+  type7_result <- cut_quantile(x, n = 4, quantile_type = 7)
+
+  expect_equal(default_result, type7_result)
+  expect_equal(attr(default_result, "quantile_type"), 7)
+})
+
+test_that("cut_quantile's quantile_type argument is forwarded to stats::quantile()", {
+  x <- c(1:9, rep(10, 5), 11:15)
+  result_type1 <- cut_quantile(x, n = 4, quantile_type = 1)
+  result_type7 <- cut_quantile(x, n = 4, quantile_type = 7)
+
+  # the two types disagree on this skewed vector, so the resulting bin
+  # membership should differ
+  expect_false(identical(result_type1, result_type7))
+  expect_equal(attr(result_type1, "quantile_type"), 1)
+})
+
+test_that("cut_exposure_quantile's quantile_type controls the breaks attribute and is recorded", {
+  x <- c(rep(0, 5), 1:9, rep(10, 5), 11:15)
+  non_placebo_x <- x[x != 0]
+
+  result <- cut_exposure_quantile(x, n = 4, quantile_type = 1)
+
+  expect_equal(
+    unname(attr(result, "breaks")),
+    unname(stats::quantile(non_placebo_x, probs = (0:4) / 4, type = 1))
+  )
+  expect_equal(attr(result, "quantile_type"), 1)
+})
+
+test_that("cut_quantile defaults to Q1..Qn labels when labeller is NULL", {
+  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = NULL)
+  expect_equal(levels(result), paste0("Q", 1:4))
+})
+
+test_that("cut_quantile accepts a function labeller, called with (n, breaks)", {
+  x <- c(1, 2, 3, 4, 5, 6, 7, 8)
+  captured <- list()
+  labeller <- function(n, breaks) {
+    captured$n <<- n
+    captured$breaks <<- breaks
+    paste0("Group ", seq_len(n))
+  }
+
+  result <- cut_quantile(x, n = 4, labeller = labeller)
+
+  expect_equal(levels(result), paste0("Group ", 1:4))
+  expect_equal(captured$n, 4)
+  expect_equal(unname(captured$breaks), unname(stats::quantile(x, probs = (0:4) / 4)))
+})
+
+test_that("cut_quantile accepts a character vector labeller", {
+  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = c("Low", "Mid-low", "Mid-high", "High"))
+  expect_equal(levels(result), c("Low", "Mid-low", "Mid-high", "High"))
+})
+
+test_that("cut_quantile errors informatively when labeller's length doesn't match the actual bin count", {
+  expect_error(
+    cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = c("a", "b")),
+    "must produce 4 labels"
+  )
+  expect_error(
+    cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = function(n, breaks) "only one"),
+    "must produce 4 labels"
+  )
+
+  # the actual bin count (after resolution-driven fallback) is what's
+  # checked against, not the originally requested n
+  x <- c(rep(1, 18), 2)
+  expect_warning(
+    expect_error(
+      cut_quantile(x, n = 4, labeller = c("a", "b", "c", "d")),
+      "must produce 1 label"
+    ),
+    "only 1 are distinguishable"
+  )
+})
+
+test_that("cut_exposure_quantile's labeller only relabels the non-placebo bins", {
+  x <- c(0, 0, 1, 2, 3, 4, 5, 6, 7, 8)
+  result <- cut_exposure_quantile(x, n = 4, labeller = c("Low", "Mid-low", "Mid-high", "High"))
+  expect_equal(levels(result), c("Placebo", "Low", "Mid-low", "Mid-high", "High"))
+})
+
+test_that("cut_exposure_quantile's ties argument only affects the non-placebo bins", {
+  x <- c(rep(0, 5), 1:9, rep(10, 5), 11:15)
+
+  upward <- cut_exposure_quantile(x, n = 4, ties = "upward")
+  split_even <- cut_exposure_quantile(x, n = 4, ties = "split-even", seed = 314)
+
+  expect_equal(as.integer(table(upward)), c(5, 5, 9, 0, 5))
+  expect_equal(sort(as.integer(table(split_even))[-1]), c(4, 5, 5, 5))
+  expect_equal(unname(table(split_even)["Placebo"]), 5L)
+  expect_equal(attr(split_even, "ties"), "split-even")
 })
 
 test_that(".dodge_quantile_strata adds a symmetric, scale-appropriate offset per stratum", {

@@ -10,6 +10,9 @@ er_plot_add_quantiles(
   style = NULL,
   bins = 4,
   conf_level = 0.95,
+  ties = "upward",
+  quantile_type = 7,
+  labeller = NULL,
   ...
 )
 }
@@ -27,6 +30,10 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 to \code{4}.}
 
 \item{conf_level}{Confidence level for the interval. Defaults to \code{0.95}.}
+
+\item{ties, quantile_type, labeller}{Passed straight through to
+\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} to control how the exposure variable is
+split into bins -- see its documentation for what each controls.}
 
 \item{...}{Additional named arguments forwarded, unchanged, to \code{style}
 when it's called at build time. Arguments must be named.}
@@ -52,6 +59,13 @@ Note that count responses are not automatically detected as such: they
 default to \code{"continuous"} and are summarised the same way as any other
 continuous response unless \code{response_type = "count"} is declared
 explicitly in \code{\link[=er_plot]{er_plot()}}.
+
+\code{bins}/\code{ties}/\code{quantile_type}/\code{labeller} are local to this layer --
+they aren't shared with \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, even when that layer
+groups by the same exposure variable. \code{\link[=er_plot_build]{er_plot_build()}} warns (doesn't
+error) if the two disagree in that specific case; pass matching values
+to both calls to avoid the warning, or ignore it if the difference is
+intentional.
 }
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {

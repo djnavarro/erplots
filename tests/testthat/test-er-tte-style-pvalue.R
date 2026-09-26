@@ -39,11 +39,14 @@ test_that("er_tte_add_pvalue's log-rank p-value matches a direct survival::survd
 })
 
 test_that("er_tte_add_pvalue matches survdiff() with more than 2 strata", {
-  obj <- survival::lung |> er_tte(time, status == 2, stratify_by = age, n_strata = 3) |> er_tte_add_pvalue()
+  # stratify_by must be discrete -- bin age into 3 quantile groups first
+  df <- survival::lung
+  df$age_grp <- cut_quantile(df$age, n = 3)
+  obj <- df |> er_tte(time, status == 2, stratify_by = age_grp) |> er_tte_add_pvalue()
 
   lr_direct <- survival::survdiff(
     survival::Surv(time, status == 2) ~ obj$data$.er_tte_strata,
-    data = survival::lung
+    data = df
   )
   p_direct <- stats::pchisq(lr_direct$chisq, length(lr_direct$n) - 1, lower.tail = FALSE)
 

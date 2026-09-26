@@ -28,7 +28,11 @@ columns and \code{sim_id}. Mutually exclusive with \code{model}.}
 \item{nsim}{Number of simulation replicates, only used with \code{model}.
 Defaults to \code{100}.}
 
-\item{seed}{Optional RNG seed, only used with \code{model}.}
+\item{seed}{Optional RNG seed. Used for \code{model}'s own simulation draws,
+and also (regardless of whether \code{sim}/\code{model} was supplied) to seed
+this layer's random tie-break when \code{\link[=er_vpc]{er_vpc()}}'s \code{ties} is
+\code{"split-even"} -- see \code{\link[=er_vpc]{er_vpc()}}'s own \code{seed} argument for the
+observed layer's independent tie-break seed.}
 
 \item{style}{A function determining how the simulated layer is drawn.
 Defaults to \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}; see

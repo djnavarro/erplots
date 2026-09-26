@@ -31,15 +31,35 @@ landmark-binary/RMST reductions (plugging into `er_plot()`/`er_vpc()`),
 plus `er_predict_survival.ertte_model()` (wrapping its own
 `ertte_predict()`) for the full `S(t)` curve overlay `er_tte_add_model()`
 needs -- see `tests/testthat/test-tte-model-sync.R` for the dedicated,
-`skip_if_not_installed("ertte")`-gated integration tests, and
-`.agents/PLAN.md` for a documented rough edge in the
-continuous-`stratify_by` approximation `er_tte_add_model()` makes.
+`skip_if_not_installed("ertte")`-gated integration tests.
 
 ## Architecture reference (current state)
 
 This section documents how the package works *today*. For the design
 rationale behind these choices, rejected alternatives, and a record of
 how the API got here, see [.agents/HISTORY.md](.agents/HISTORY.md).
+
+### `stratify_by` is discrete-only, everywhere
+
+`stratify_by` means the same thing in `er_plot()`/`er_tte()`/`er_vpc()`
+-- a discrete/categorical variable used to split layers by colour/fill
+(`er_plot()`) or facet panel (`er_tte()`/`er_vpc()`) -- and is validated
+identically across all three via a single shared helper,
+`.check_stratify_by_discrete()` (`R/utils-helpers.R`): a numeric column
+errors, with a message pointing at `cut_quantile()`/
+`cut_exposure_quantile()` as the fix (bin it yourself first, then pass
+the resulting factor). None of the three auto-bins a numeric
+`stratify_by` on the caller's behalf. This is a deliberate asymmetry
+with `exposure`/`plot_by` (and `er_plot()`'s own quantile/groups
+layers), which *do* get full quantile-binning support with `ties`/
+`quantile_type`/`labeller` controls: binning is intrinsic to what those
+layers are (you can't draw "rate per exposure bin" without deciding
+bins), whereas `stratify_by` is a comparison/faceting axis where
+deciding how to carve a continuous covariate into groups is a
+substantive statistical choice, not a plotting one. A caller who wants
+that convenience already has it, identically across all three grammars,
+via one `dplyr::mutate(grp = cut_quantile(x, ...))` call before
+plotting.
 
 ### The `er_plot` mini-language
 
@@ -64,7 +84,10 @@ never affects the built plot**:
 - **`er_plot_add_quantiles()`** -- quantile-binned response-rate/mean
   summary with CI. Singleton. Generalised across all three response
   types (rate + Clopper-Pearson for `"binary"`; mean + t-interval for
-  `"continuous"`; mean + exact Poisson interval for `"count"`).
+  `"continuous"`; mean + exact Poisson interval for `"count"`). Bins the
+  exposure variable via `cut_exposure_quantile()`; `bins`/`ties`/
+  `quantile_type`/`labeller` control that call and are local to this
+  layer (see `er_plot_add_groups()`'s own note below).
 - **`er_plot_add_data()`** -- raw-data layer. Singleton. Two mutually
   exclusive structural families selected by which builder is passed as
   `style` (see "Builder system" below): `"overlay"` (raw points/hexbins
@@ -74,7 +97,22 @@ never affects the built plot**:
   other slot.
 - **`er_plot_add_groups()`** -- one or more stacked panels showing the
   exposure distribution per group variable. The one layer that's
-  additive rather than singleton (each call adds another panel).
+  additive rather than singleton (each call adds another panel). A
+  continuous grouping variable is quantile-binned via
+  `cut_exposure_quantile()` (when the variable is the plot's own
+  exposure) or `cut_quantile()` (otherwise); this call's own
+  `bins`/`ties`/`quantile_type`/`labeller` control that, applied
+  identically to every grouping variable added by the call. These are
+  deliberately *not* shared with `er_plot_add_quantiles()`, or across
+  separate `er_plot_add_groups()` calls for different covariates --
+  there's usually no reason for two different variables' binning to
+  agree. The one exception: `er_plot_build()` warns (`.check_exposure_binning_consistency()`
+  in `R/er-plot-layer.R`) if a group variable that resolves to the
+  exposure variable itself ends up binned differently (`breaks`/`ties`)
+  than `er_plot_add_quantiles()`'s own exposure-binning, since that's the
+  one case where the two layers are describing the same variable and a
+  silent mismatch would be confusing. This check runs at build time
+  (rather than at either add-call) so it catches either add order.
 
 `er_plot_build()` triggers a base panel when at least one of
 model/summary/quantile/overlay is present, *or* when no layer at all has
@@ -84,7 +122,15 @@ been added (renders a blank axes-only panel rather than erroring).
 color/facet precedence rule documented in `vignettes/articles/design.Rmd`:
 color/fill encodes strata wherever there's room for it (model
 line/ribbon, data overlay's `color`), and facets are used only where
-color is already spoken for by something else.
+color is already spoken for by something else. `stratify_by` must name
+a discrete/categorical variable -- validated (`.check_stratify_by_discrete()`
+in `R/utils-helpers.R`, shared with `er_tte()`/`er_vpc()`), a numeric
+column errors rather than being silently treated as a continuous colour
+scale. A caller with a genuinely continuous covariate bins it themselves
+first, via `cut_quantile()`/`cut_exposure_quantile()`, for full control
+over bin count/tie-breaking/labels -- see "`stratify_by` is
+discrete-only, everywhere" below for the rationale, which applies
+identically to `er_tte()`/`er_vpc()`'s own `stratify_by`.
 
 ### The model interface (`er_predict()`/`er_simulate()`/`er_summary()`/`er_predict_survival()`)
 
@@ -202,63 +248,82 @@ Built-in builders, by layer:
 ### The VPC mini-grammar
 
 `er_vpc(data, exposure, response, response_type, plot_by = NULL, n_bins
-= 4, stratify_by = NULL, n_strata = 4, conf_level = 0.95, probs = c(0.1,
-0.5, 0.9))` |> `er_vpc_add_observed()` |> `er_vpc_add_simulated()` |>
+= 4, ties = "upward", quantile_type = 7, labeller = NULL, stratify_by =
+NULL, conf_level = 0.95, probs = c(0.1, 0.5, 0.9), seed = NULL)` |>
+`er_vpc_add_observed()` |> `er_vpc_add_simulated()` |>
 `plot()` mirrors `er_plot()`'s object/layer/builder architecture, scoped
 deliberately narrower in one respect that remains true even after
 `stratify_by` (below): always a single `plot_by` axis/binning scheme, no
 per-builder color/facet precedence rule to thread through (see
 "Stratification via `stratify_by`" below for why). `plot_by`/`n_bins`/
-`conf_level`/`probs` all live on `er_vpc()` itself (stored on
-`object$group`), not on either add-verb, since the observed and
-simulated layers must always agree on them -- `plot_by` defaults to the
-plot's exposure variable; numeric `plot_by` is quantile-binned
-(`cut_exposure_quantile()`, placebo separated when `plot_by` is the
-exposure variable itself), categorical is used as-is. Whether `plot_by`
-is numeric or categorical is auto-detected once in `er_vpc()` and
-stored as `object$group$type` (`"continuous"`/`"discrete"`), mirroring
-`object$response$type`; both `.layer_vpc_*()` functions copy it onto
-their `config$group_type` (with `config$is_numeric_group` kept as a
-convenience boolean derived from it) for builders to read. When
-`plot_by` is numeric, both `.layer_vpc_*()` functions also compute
-`x_median` alongside `x_mid` on `config$summary` (the per-bin median,
-vs. mean, of `plot_by`'s values) -- `x_mid` remains what the
-percentile-band idiom plots at, while `x_median` is what the default
-`_mean_errorbar()` pair plots at instead.
+`ties`/`quantile_type`/`labeller`/`conf_level`/`probs`/`seed` all live on
+`er_vpc()` itself (stored on `object$group`), not on either add-verb,
+since the observed and simulated layers must always agree on them --
+unlike `er_plot_add_quantiles()`/`er_plot_add_groups()`'s own
+`ties`/`quantile_type`/`labeller` (deliberately kept independent per
+layer, since those two layers aren't required to bin the same variable
+identically), `er_vpc()`'s observed/simulated layers *are* required to,
+since `er_vpc_add_simulated()` reuses the observed layer's own cutpoints
+rather than deriving fresh ones (see below) -- a mismatched `ties`
+between the two would silently misrepresent the comparison the VPC exists
+to make. `plot_by` defaults to the plot's exposure variable; numeric
+`plot_by` is quantile-binned (`cut_exposure_quantile()`, placebo
+separated when `plot_by` is the exposure variable itself), categorical is
+used as-is. Whether `plot_by` is numeric or categorical is auto-detected
+once in `er_vpc()` and stored as `object$group$type`
+(`"continuous"`/`"discrete"`), mirroring `object$response$type`; both
+`.layer_vpc_*()` functions copy it onto their `config$group_type` (with
+`config$is_numeric_group` kept as a convenience boolean derived from it)
+for builders to read. When `plot_by` is numeric, both `.layer_vpc_*()`
+functions also compute `x_median` alongside `x_mid` on `config$summary`
+(the per-bin median, vs. mean, of `plot_by`'s values) -- `x_mid` remains
+what the percentile-band idiom plots at, while `x_median` is what the
+default `_mean_errorbar()` pair plots at instead. `seed` seeds only the
+observed layer's own `ties = "split-even"` tie-break (an eager draw, via
+`.resolve_quantile_ties()`); `er_vpc_add_simulated()`'s own `seed`
+argument independently seeds the simulated layer's `"split-even"`
+tie-break over its own (typically larger, replicated) data.
 
 **Stratification via `stratify_by`.** Optional, defaults to `NULL` (no
 faceting, a single panel -- prior behaviour unchanged). When supplied,
 `er_vpc()` splits the VPC into one `ggplot2::facet_wrap()` panel per
-level, stored as `object$strata` (`var`/`label`/`type`/`n_strata`,
-mirroring `object$group`). A categorical `stratify_by` is used as-is; a
-numeric one is quantile-binned into `n_strata` bins (`cut_exposure_quantile()`,
-placebo separated only when `stratify_by` is the exposure variable
-itself, exactly like `plot_by`), with `rlang::inform()` reporting that
-this happened. `er_vpc()` errors if `stratify_by` resolves to the same
-variable as `plot_by` -- faceting by the exact variable already driving
-the x-axis binning would give each panel a single bin. Unlike
-`er_plot()`'s stratification, this is facet-only (no color precedence
-rule to reconcile), and no `er_style_vpc_*()` builder needs to know it
-exists: `.layer_vpc_observed()` computes a `.vpc_stratum` column
-alongside `.vpc_bin` (a constant `1L` when `stratify_by` is unset, so
-every `.by = ` grouping can unconditionally include it rather than
-branching), `.layer_vpc_simulated()` bins simulated rows against the
-observed layer's own stored `config$strata_breaks` the same way it
-already does for `config$breaks`, and `.build_vpc_plot()` adds a single
-`facet_wrap(vars(.vpc_stratum))` when `object$strata` is non-`NULL` --
-every builder's `config$summary`/`config$percentiles` already carries
-the `.vpc_stratum` column needed for that facet to work.
+level, stored as `object$strata` (`var`/`label`, mirroring
+`object$group`'s own `var`/`label`). Must be discrete -- a numeric
+`stratify_by` errors, same as `er_plot()`/`er_tte()`; see "`stratify_by`
+is discrete-only, everywhere" below for why this is scoped to
+`stratify_by` and not `plot_by`. `er_vpc()` errors if `stratify_by`
+resolves to the same variable as `plot_by` -- faceting by the exact
+variable already driving the x-axis binning would give each panel a
+single bin. Unlike `er_plot()`'s stratification, this is facet-only (no
+color precedence rule to reconcile), and no `er_style_vpc_*()` builder
+needs to know it exists: `.layer_vpc_observed()` computes a
+`.vpc_stratum` column (`dat[[strata_var]]` directly, or a constant `1L`
+when `stratify_by` is unset, so every `.by = ` grouping can
+unconditionally include it rather than branching), `.layer_vpc_simulated()`
+reuses the same `stratify_by` column directly (no binning to keep in
+sync, since it's already discrete), and `.build_vpc_plot()` adds a
+single `facet_wrap(vars(.vpc_stratum))` when `object$strata` is
+non-`NULL` -- every builder's `config$summary`/`config$percentiles`
+already carries the `.vpc_stratum` column needed for that facet to work.
 
 - **`er_vpc_add_observed(object, style = ...)`** -- bins the observed
-  data (using `object$group`) and computes its response summary.
+  data (using `object$group`/`object$strata`) and computes its response
+  summary. Beyond the numeric `breaks` cutpoints for `plot_by`, also
+  captures the resolved `ties` rule and final bin `labels` (read back off
+  `cut_exposure_quantile()`'s own attributes/levels) onto `config`, for
+  `er_vpc_add_simulated()` to reuse verbatim.
 - **`er_vpc_add_simulated(object, model = NULL, sim = NULL, nsim = 100,
   seed = NULL, style = ...)`** -- must be called after
   `er_vpc_add_observed()`; bins simulated rows against the *observed*
-  layer's own stored cutpoints (`obs_config$breaks`, via
-  `.apply_exposure_breaks()`), guaranteeing both sides share identical
-  bin boundaries. `model`/`sim` are mutually exclusive; exactly one is
-  required. When `model` is supplied, calls `er_simulate()` internally
-  and requires a `sim_resp` column.
+  layer's own stored cutpoints/ties/labels for `plot_by`
+  (`obs_config$breaks`/`ties`/`labels`, via `.apply_exposure_breaks()`),
+  guaranteeing both sides share identical `plot_by` bin boundaries,
+  tie-break rule, and display labels. `model`/`sim` are mutually
+  exclusive; exactly one is required. When `model` is supplied, calls
+  `er_simulate()` internally and requires a
+  `sim_resp` column. `seed` seeds both `er_simulate()`'s own draws (when
+  `model` is used) and this layer's `ties = "split-even"` tie-break
+  (regardless of whether `sim`/`model` was used).
 
 Three visual idioms, chosen by `style`:
 
@@ -347,22 +412,22 @@ for both.
 
 ### The `er_tte()` mini-grammar
 
-`er_tte(data, time, event, stratify_by = NULL, n_strata = 4, conf_level
-= 0.95)` is a third, separate mini-grammar (distinct from `er_plot()`/
-`er_vpc()`'s exposure-vs-response coordinate system): a time x-axis,
+`er_tte(data, time, event, stratify_by = NULL, conf_level = 0.95)` is a
+third, separate mini-grammar (distinct from `er_plot()`/`er_vpc()`'s
+exposure-vs-response coordinate system): a time x-axis,
 survival-probability y-axis, built for Kaplan-Meier/survival-over-time
 figures. Unlike `exposure`/`response` elsewhere in the package,
 `time`/`event` accept arbitrary tidy-eval expressions (e.g. `status ==
 2`), not just bare column names; `stratify_by` stays a bare column name,
-matching every other stratification argument. `er_tte()` computes a
+matching every other stratification argument, and must be discrete --
+same as `er_plot()`/`er_vpc()`'s own `stratify_by` (see "`stratify_by`
+is discrete-only, everywhere"). `er_tte()` computes a
 `survival::survfit()` Kaplan-Meier fit once (single-arm, or `~ strata`
-when `stratify_by` is set -- a numeric `stratify_by` is quantile-binned
-via `cut_exposure_quantile()`, same as `er_vpc()`'s own), storing the raw
-fit and a tidy per-event-time table (`time`, `n_risk`, `n_event`,
-`n_censor`, `surv`, `lower`, `upper`, plus `strata` when stratified) on
-`object$km` for every layer to read from, rather than recomputing it.
-`object$strata` (`var`/`label`/`type`/`n_strata`) mirrors `er_vpc()`'s
-own `object$strata`.
+when `stratify_by` is set), storing the raw fit and a tidy
+per-event-time table (`time`, `n_risk`, `n_event`, `n_censor`, `surv`,
+`lower`, `upper`, plus `strata` when stratified) on `object$km` for
+every layer to read from, rather than recomputing it. `object$strata`
+(`var`/`label`) mirrors `er_vpc()`'s own `object$strata`.
 
 Five `er_tte_add_*()` layers, all singleton (a second call replaces the
 first), each drawn via a builder matching the shared `function(data,
@@ -396,9 +461,9 @@ analogue of `er_style()`'s interface):
   `R/er-plot-layer.R`'s own `.fill_reference_covariates()`/
   `.reference_value()` helpers. Strata membership is carried on
   `newdata` (a column named after `object$strata$var`), never implicit
-  in `model` -- when `object$strata$type == "continuous"`, the values
-  used are the already quantile-binned levels (e.g. `"Q1"`), not the raw
-  numeric covariate, a documented approximation.
+  in `model` -- the values used are `stratify_by`'s own discrete levels
+  (`stratify_by` is required to be discrete; see "`stratify_by` is
+  discrete-only, everywhere" above).
 
 `er_tte_build()` assembles a blank axes-only survival panel (time on x
 from `object$time$limits`, survival probability on y from
@@ -643,10 +708,11 @@ holds nine articles:
   layers, `plot_by`/`stratify_by`, the three visual idioms, theming, and
   troubleshooting plot legibility.
 - `plot-tte.Rmd` -- the `er_tte()` mini-grammar: curve/censor/risktable
-  layers, stratified curves (categorical and quantile-binned numeric),
-  the log-rank p-value annotation, the `er_tte_add_model()` overlay
-  (using `ertte`), and `er_tte_theme()` (including the `xlim`
-  call-order caveat).
+  layers, stratified curves (a discrete `stratify_by`, and binning a
+  continuous covariate yourself via `cut_quantile()` first), the
+  log-rank p-value annotation, the `er_tte_add_model()` overlay (using
+  `ertte`), and `er_tte_theme()` (including the `xlim` call-order
+  caveat).
 - `design.Rmd` -- "The plotting grammar": singleton/additive layer
   distinction, the stratification color/facet precedence rule, the
   response-type dispatch table. Short pointer sections into `theming.Rmd`

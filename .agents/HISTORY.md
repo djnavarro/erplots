@@ -1572,3 +1572,56 @@ prediction against an already-fitted model / a KM-fit lookup, neither a
 refit), so this keeps `er_tte_theme(xlim = ...)`'s effect on every
 time-dependent default order-independent, the same guarantee #15 gave
 `er_plot()`'s model layer.
+
+## `stratify_by` now requires a discrete variable in all three mini-grammars
+
+Prior state was inconsistent across the three mini-grammars: `er_plot()`
+declared `stratify_by` discrete in its docs but never actually validated
+it -- a numeric column silently mapped to `color = .data[[strata$name]]`,
+which ggplot2 treats as a continuous gradient, breaking every stratified
+builder's discrete-groups assumption (ribbons, per-stratum lines,
+dodging) with no error and no `object$strata$type` field even existing
+to detect it. `er_tte()`/`er_vpc()`, by contrast, both auto-quantile-binned
+a numeric `stratify_by` via an `n_strata` argument -- a real, documented,
+vignette-demonstrated feature, not an oversight -- and `er_vpc()` had, in
+the immediately preceding commit on this same branch, just gained
+`strata_ties`/`strata_quantile_type`/`strata_labeller` to make that
+auto-binning fully customizable (mirroring `plot_by`'s own `ties`/
+`quantile_type`/`labeller`, added a few commits earlier still).
+
+Revisited once all three mini-grammars had customizable quantile-binning
+available for their own intrinsic x-axis/exposure variables (`er_plot`'s
+quantile/groups layers, `er_vpc`'s `plot_by`), which raised the question
+of whether `stratify_by` should get the same treatment for consistency.
+Decided against it: `plot_by` (and the quantile/groups layers' own
+binning) is intrinsic to what those layers *are* -- you can't draw "rate
+per exposure bin" without deciding bins. `stratify_by` is different: a
+facet/colour comparison axis, where deciding how to carve a continuous
+covariate into groups (quartiles? a clinical cutoff? tertiles?) is a
+substantive statistical choice erplots shouldn't make on the caller's
+behalf by default. A caller who wants that convenience already has it,
+identically across all three grammars, via one `dplyr::mutate(grp =
+cut_quantile(x, ...))` call before plotting -- reusing the exact same
+`cut_quantile()`/`cut_exposure_quantile()` arguments (`ties`/
+`quantile_type`/`labeller`) rather than each mini-grammar's own
+`stratify_by` needing to redundantly re-expose that same control (as
+`er_vpc()`'s now-reverted `strata_ties`/`strata_quantile_type`/
+`strata_labeller` trio would have required maintaining in parallel with
+`er_plot()`/`er_tte()` eventually gaining their own equivalents too).
+
+Landed as: a new shared `.check_stratify_by_discrete()` helper
+(`R/utils-helpers.R`), called from all three of `er_plot()`/`er_tte()`/
+`er_vpc()`, erroring on a numeric `stratify_by` with a message pointing
+at `cut_quantile()`/`cut_exposure_quantile()` as the fix. `er_tte()`
+lost its `n_strata` argument; `er_vpc()` lost `n_strata` and the
+just-added `strata_ties`/`strata_quantile_type`/`strata_labeller` trio
+(never released, so this is a same-cycle revert, not a deprecation).
+`object$strata` simplified to just `var`/`label` in both (the `type`/
+`n_strata` fields, and `er_vpc`'s `ties`/`quantile_type`/`labeller`,
+are gone -- always discrete now, so nothing left to record). This also
+retired `er_tte_add_model()`'s one documented approximation for a
+continuous `stratify_by` (previously tracked in `PLAN.md`): with no
+numeric-`stratify_by` case left, there's nothing left to approximate.
+`plot_by`'s own binning customization (`ties`/`quantile_type`/`labeller`/
+`n_bins`/`seed` on `er_vpc()`) is unaffected -- this decision is scoped
+to `stratify_by` specifically, per the distinction above.

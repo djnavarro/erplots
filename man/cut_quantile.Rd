@@ -5,9 +5,24 @@
 \alias{cut_exposure_quantile}
 \title{Cut a continuous variable into quantiles}
 \usage{
-cut_exposure_quantile(x, n = 4, is_placebo = NULL)
+cut_exposure_quantile(
+  x,
+  n = 4,
+  is_placebo = NULL,
+  ties = c("upward", "downward", "split-even"),
+  seed = NULL,
+  quantile_type = 7,
+  labeller = NULL
+)
 
-cut_quantile(x, n = 4)
+cut_quantile(
+  x,
+  n = 4,
+  ties = c("upward", "downward", "split-even"),
+  seed = NULL,
+  quantile_type = 7,
+  labeller = NULL
+)
 }
 \arguments{
 \item{x}{Numeric vector}
@@ -15,11 +30,39 @@ cut_quantile(x, n = 4)
 \item{n}{Number of bins}
 
 \item{is_placebo}{Logical vector indicating placebo samples}
+
+\item{ties}{Rule for assigning a value that sits exactly on an interior
+break point, where the bin membership would otherwise be ambiguous.
+\code{"upward"} (the default, matching prior behaviour) is equivalent to
+\code{\link[=cut]{cut()}} with \code{right = TRUE}; \code{"downward"} is equivalent to \code{right = FALSE}; \code{"split-even"} randomly divides each tied group between its
+two candidate bins so that final bin sizes are as equal as possible,
+rather than sending every tied value the same direction.}
+
+\item{seed}{Optional single number used to seed the random tie-break
+used by \code{ties = "split-even"} (ignored for \code{"upward"}/\code{"downward"},
+which involve no randomness). \code{NULL} (the default) draws from the
+ambient RNG stream and so is not reproducible across calls; pass a
+seed for reproducible bin assignment.}
+
+\item{quantile_type}{Integer between 1 and 9, passed straight through
+as \code{\link[stats:quantile]{stats::quantile()}}'s own \code{type} argument to compute the
+quantile break points. Defaults to \code{7}, matching
+\code{\link[stats:quantile]{stats::quantile()}}'s own default.}
+
+\item{labeller}{Controls the labels used for the \code{n} quantile bins
+(\code{cut_exposure_quantile()}'s separate \code{"Placebo"} level is always
+used as-is, regardless of \code{labeller}). \code{NULL} (the default) labels
+bins \code{"Q1"}, \code{"Q2"}, etc. A function is called as \code{labeller(n, breaks)} (the actual bin count and the \code{n + 1} quantile cutpoints,
+after any resolution-driven fallback -- see \verb{@details} below) and
+must return a character vector of length \code{n}; this is the hook for,
+e.g., range-style labels built from \code{breaks}. A character vector is
+used directly as the \code{n} labels.}
 }
 \value{
-A factor. \code{cut_exposure_quantile()}'s result additionally
-carries a \code{"breaks"} attribute holding the \code{n + 1} quantile
-cutpoints used to form the bins.
+A factor with \code{"ties"} and \code{"quantile_type"} attributes
+recording those two arguments. \code{cut_exposure_quantile()}'s result
+additionally carries a \code{"breaks"} attribute holding the \code{n + 1}
+quantile cutpoints used to form the bins.
 }
 \description{
 \code{cut_quantile()} bins a numeric vector into \code{n} quantile groups.
@@ -36,11 +79,18 @@ supports, rather than erroring or silently showing fewer bins with
 no explanation. \code{cut_exposure_quantile()}'s \code{"breaks"} attribute is
 read back out by quantile-layer builders that draw bin-boundary
 separators (e.g. \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}}) via
-\code{attr(exposure_bins, "breaks")}.
+\code{attr(exposure_bins, "breaks")}. Because that fallback can lower \code{n}
+below what was originally requested, a character-vector \code{labeller}
+is length-checked against the \emph{actual} bin count, not the requested
+one, and errors informatively on a mismatch.
 }
 \examples{
 x <- rnorm(100)
 cut_quantile(x)
 cut_exposure_quantile(abs(x))
+cut_quantile(x, ties = "split-even", seed = 8213)
+cut_quantile(x, quantile_type = 1)
+cut_quantile(x, labeller = function(n, breaks) paste0("Group ", 1:n))
+cut_quantile(x, labeller = c("Low", "Mid-low", "Mid-high", "High"))
 
 }

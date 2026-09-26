@@ -34,7 +34,7 @@ idiom).}
 
 \item{time}{\code{object$time} (\code{name}/\code{label}/\code{limits}).}
 
-\item{strata}{\code{object$strata} (\code{var}/\code{label}/\code{type}/\code{n_strata}).}
+\item{strata}{\code{object$strata} (\code{var}/\code{label}).}
 
 \item{theme}{\code{object$theme} -- \code{theme$format_p} formats the p-value.}
 

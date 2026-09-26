@@ -4,7 +4,7 @@
 \alias{er_tte}
 \title{The time-to-event plotting mini-language}
 \usage{
-er_tte(data, time, event, stratify_by = NULL, n_strata = 4, conf_level = 0.95)
+er_tte(data, time, event, stratify_by = NULL, conf_level = 0.95)
 }
 \arguments{
 \item{data}{Data frame or tibble containing the observed data.}
@@ -16,13 +16,8 @@ er_tte(data, time, event, stratify_by = NULL, n_strata = 4, conf_level = 0.95)
 \code{data}): \code{TRUE}/\code{1} for an event, \code{FALSE}/\code{0} for censoring.}
 
 \item{stratify_by}{Optional stratification variable (unquoted, bare
-column name). A categorical variable is used as-is; a numeric
-variable is split into \code{n_strata} quantile bins. Defaults to \code{NULL}
-(a single, unstratified curve).}
-
-\item{n_strata}{Number of quantile bins, when \code{stratify_by} is
-numeric. Ignored when \code{stratify_by} is \code{NULL} or categorical.
-Defaults to \code{4}.}
+column name), used as-is. Must be discrete -- a numeric column
+errors. Defaults to \code{NULL} (a single, unstratified curve).}
 
 \item{conf_level}{Confidence level for the Kaplan-Meier confidence
 band. Must be strictly between 0 and 1. Defaults to \code{0.95}.}
@@ -69,24 +64,24 @@ or a numeric vector taking only the values \code{0} (censored) and \code{1}
 \code{response_type = "binary"} response.
 
 Optional \code{stratify_by} splits the Kaplan-Meier estimate into one curve
-per level, via \code{survival::survfit()}'s \code{~ strata} formula side --
-mirroring \code{\link[=er_vpc]{er_vpc()}}'s \code{stratify_by}: a categorical variable is used
-as-is; a numeric variable is automatically split into \code{n_strata}
-quantile bins (via \code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}}, so \code{0}/placebo is kept
-in its own bin), with a message reporting that this happened. Unlike
-\code{time}/\code{event}, \code{stratify_by} must be a bare column name (not an
-arbitrary expression), matching \code{exposure}/\code{response}/\code{stratify_by}
+per level, via \code{survival::survfit()}'s \code{~ strata} formula side. It
+must name a discrete/categorical variable -- mirroring \code{\link[=er_plot]{er_plot()}}/
+\code{\link[=er_vpc]{er_vpc()}}'s own \code{stratify_by}, a numeric one errors; bin it yourself
+first with \code{\link[=cut_quantile]{cut_quantile()}}/\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} and pass the
+resulting factor, for full control over bin count/tie-breaking/labels.
+Unlike \code{time}/\code{event}, \code{stratify_by} must be a bare column name (not
+an arbitrary expression), matching \code{exposure}/\code{response}/\code{stratify_by}
 elsewhere in the package. \code{object$km$table} gains a \code{strata} column
-when stratified; \code{object$strata} (\code{var}/\code{label}/\code{type}/\code{n_strata})
-mirrors \code{er_vpc()}'s own \code{object$strata}.
+when stratified; \code{object$strata} (\code{var}/\code{label}) mirrors \code{er_vpc()}'s
+own \code{object$strata}.
 }
 \examples{
 library(survival)
 lung |>
   er_tte(time, status == 2)
 
-# `lung$sex` is coded numerically (1/2); convert to a factor first, or
-# a numeric `stratify_by` is quantile-binned instead of used as-is
+# `lung$sex` is coded numerically (1/2); `stratify_by` requires a
+# discrete variable, so convert it to a factor first
 lung |>
   transform(sex = factor(sex, labels = c("Male", "Female"))) |>
   er_tte(time, status == 2, stratify_by = sex)

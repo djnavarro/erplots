@@ -11,10 +11,13 @@ er_vpc(
   response_type = "auto",
   plot_by = NULL,
   n_bins = 4,
+  ties = "upward",
+  quantile_type = 7,
+  labeller = NULL,
   stratify_by = NULL,
-  n_strata = 4,
   conf_level = 0.95,
-  probs = c(0.1, 0.5, 0.9)
+  probs = c(0.1, 0.5, 0.9),
+  seed = NULL
 )
 }
 \arguments{
@@ -37,18 +40,24 @@ with no binning.}
 \item{n_bins}{Number of quantile bins, when \code{plot_by} is numeric.
 Defaults to \code{4}.}
 
-\item{stratify_by}{Optional variable (unquoted) splitting the VPC into
-one facet panel per level, via \code{ggplot2::facet_wrap()}. A
-categorical variable is used as-is; a numeric variable is
-automatically split into \code{n_strata} quantile bins (placebo, i.e.
-\code{0}, kept in its own bin when \code{stratify_by} is the exposure variable
-itself), with a message reporting that this happened. Must resolve
-to a different variable than \code{plot_by}. Defaults to \code{NULL} (no
-faceting, a single panel, matching prior behaviour).}
+\item{ties, quantile_type, labeller}{Control how a numeric \code{plot_by} is
+split into quantile bins -- passed straight through to
+\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}}, see its documentation for what each
+controls. Set here, on \code{er_vpc()} itself, rather than on
+\code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}/\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}, because the two
+layers must always agree on how \code{plot_by} is binned --
+\code{er_vpc_add_simulated()} reuses these exact settings (via
+\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}}'s attributes on the observed layer's own
+binned column) rather than re-resolving them, so both sides always
+stay in sync.}
 
-\item{n_strata}{Number of quantile bins, when \code{stratify_by} is
-numeric. Ignored when \code{stratify_by} is \code{NULL} or categorical.
-Defaults to \code{4}.}
+\item{stratify_by}{Optional variable (unquoted) splitting the VPC into
+one facet panel per level, via \code{ggplot2::facet_wrap()}, used as-is.
+Must be discrete -- a numeric column errors; bin it yourself first
+with \code{\link[=cut_quantile]{cut_quantile()}}/\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} and pass the
+resulting factor, for full control over bin count/tie-breaking/labels.
+Must resolve to a different variable than \code{plot_by}. Defaults to
+\code{NULL} (no faceting, a single panel, matching prior behaviour).}
 
 \item{conf_level}{Confidence level for both the observed- and
 simulated-side intervals. Must be strictly between 0 and 1.
@@ -59,6 +68,15 @@ Defaults to \code{0.95}.}
 \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}/\code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}};
 ignored by the default adaptive mean/errorbar pair). Only computed
 for a continuous/count response. Defaults to \code{c(0.1, 0.5, 0.9)}.}
+
+\item{seed}{Optional single number seeding the observed layer's random
+tie-break when \code{ties} is \code{"split-even"} (ignored otherwise). \code{NULL}
+(the default) draws from the ambient RNG stream. The simulated
+layer's own \code{"split-even"} tie-break is instead seeded by
+\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}'s own \code{seed} argument -- the two are
+independent random draws over different data (the observed rows vs.
+the, typically larger, simulated replicate pool), so each is seeded
+by the call that actually performs it.}
 }
 \value{
 An (empty) plot object of class \code{er_vpc}.
