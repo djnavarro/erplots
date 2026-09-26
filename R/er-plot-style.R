@@ -189,7 +189,7 @@ NULL
 #'   or `NULL` (the default) to leave this tag unset.
 #' @param layer One of `"model"`, `"summary"`, `"quantile"`, `"data"`,
 #'   `"group"`, `"observed"`, `"simulated"`, `"curve"`, `"censor"`,
-#'   `"risktable"`, or `"pvalue"`, naming which
+#'   `"risktable"`, `"tte_model"`, or `"tte_summary"`, naming which
 #'   `er_plot_add_*()`/`er_vpc_add_*()`/`er_tte_add_*()` layer the
 #'   builder is meant to be used with, or `NULL` (the default) to leave
 #'   this tag unset. See "Details".
@@ -360,7 +360,7 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   if (!is.null(layer)) {
     layer <- match.arg(layer, c(
       "model", "summary", "quantile", "data", "group", "observed", "simulated",
-      "curve", "censor", "risktable", "pvalue"
+      "curve", "censor", "risktable", "tte_model", "tte_summary"
     ))
     attr(style, "er_style_layer") <- layer
   }

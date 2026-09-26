@@ -672,9 +672,14 @@ lung_sex |>
 The `layer` tag works identically to `er_plot()`'s own -- the same
 `er_style_tag(fn, layer = ...)` mechanism, checked by every
 `er_tte_add_*()` function against the layer it was actually called from,
-just with five more valid values (`"curve"`, `"censor"`, `"risktable"`,
-`"pvalue"`, alongside `"model"` for `er_tte_add_model()`). A builder
-tagged for the wrong one errors immediately:
+just with five more valid values: `"curve"`, `"censor"`, `"risktable"`
+(unique to this grammar), plus `"tte_model"`/`"tte_summary"` for
+`er_tte_add_model()`/`er_tte_add_summary()` -- namespaced separately
+from `er_plot()`'s own `"model"`/`"summary"` tags, since a TTE builder
+and an `er_plot()` builder share neither a signature nor `config`
+contents, so a builder written for one grammar should never silently
+pass the tag check for the other. A builder tagged for the wrong one
+errors immediately:
 
 ```{r tte-layer-error, error = TRUE}
 lung_sex |>
@@ -689,7 +694,7 @@ time/event pair) and one x-axis variable (`time`, always continuous), so
 there's nothing for those tags to distinguish.
 
 See `?er_style_tte_curve`/`?er_style_tte_censor`/`?er_style_tte_risktable`/
-`?er_style_tte_pvalue`/`?er_style_tte_model` for each layer's own
+`?er_style_tte_summary`/`?er_style_tte_model` for each layer's own
 `config` contents in full, and
 [The exposure-response plotting grammar](design.html)/[Implementing the model
 interface](model-interface.html) for how `er_tte_add_model()`'s builder

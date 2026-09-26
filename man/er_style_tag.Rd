@@ -37,7 +37,7 @@ or \code{NULL} (the default) to leave this tag unset.}
 
 \item{layer}{One of \code{"model"}, \code{"summary"}, \code{"quantile"}, \code{"data"},
 \code{"group"}, \code{"observed"}, \code{"simulated"}, \code{"curve"}, \code{"censor"},
-\code{"risktable"}, or \code{"pvalue"}, naming which
+\code{"risktable"}, \code{"tte_model"}, or \code{"tte_summary"}, naming which
 \verb{er_plot_add_*()}/\verb{er_vpc_add_*()}/\verb{er_tte_add_*()} layer the
 builder is meant to be used with, or \code{NULL} (the default) to leave
 this tag unset. See "Details".}

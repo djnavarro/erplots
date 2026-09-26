@@ -15,8 +15,8 @@
 #' table (`time`, `n_risk`, `n_event`, `n_censor`, `surv`, `lower`,
 #' `upper`) on `object$km`. Layers added afterwards -- the curve
 #' ([er_tte_add_curve()]), censoring marks ([er_tte_add_censor()]), a
-#' number-at-risk panel ([er_tte_add_risktable()]), log-rank annotation
-#' ([er_tte_add_pvalue()]), and a parametric model overlay
+#' number-at-risk panel ([er_tte_add_risktable()]), summary annotation
+#' ([er_tte_add_summary()]), and a parametric model overlay
 #' ([er_tte_add_model()]) -- read from this shared fit rather than
 #' recomputing it (the model layer alone reads from the caller-supplied
 #' `model` instead, via [er_predict_survival()]).
@@ -216,7 +216,7 @@ er_tte <- function(data, time, event, stratify_by = NULL, conf_level = 0.95) {
         curve     = NULL,
         censor    = NULL,
         risktable = NULL,
-        pvalue    = NULL,
+        summary   = NULL,
         model     = NULL
       ),
       theme = list(),
@@ -236,6 +236,7 @@ er_tte <- function(data, time, event, stratify_by = NULL, conf_level = 0.95) {
   object$theme$ylim <- c(0, 1)
   object$theme$format_percent <- scales::label_percent(accuracy = 1)
   object$theme$format_p <- scales::label_pvalue(accuracy = .001, add_p = TRUE)
+  object$theme$format_number <- scales::label_number(accuracy = 0.01)
   object$theme$theme_base <- ggplot2::theme_bw()
   object$theme$theme_extra <- ggplot2::theme(
     panel.border = ggplot2::element_rect(
@@ -287,7 +288,17 @@ print.er_tte <- function(x, ...) {
     if (layer_set["curve"])     cat("    - curve:      layer built\n", sep = "")
     if (layer_set["censor"])    cat("    - censor:     layer built\n", sep = "")
     if (layer_set["risktable"]) cat("    - risktable:  layer built\n", sep = "")
-    if (layer_set["pvalue"])    cat("    - pvalue:     log-rank ", x$theme$format_p(x$layer$pvalue$config$p_value), "\n", sep = "")
+    if (layer_set["summary"]) {
+      lr <- x$layer$summary$config$logrank_p_value
+      detail <- if (!is.null(lr)) {
+        paste0("log-rank ", x$theme$format_p(lr))
+      } else if (is.null(x$layer$summary$config$model)) {
+        "descriptive"
+      } else {
+        "model-derived"
+      }
+      cat("    - summary:    ", detail, "\n", sep = "")
+    }
     if (layer_set["model"])     cat("    - model:      layer built\n", sep = "")
   } else {
     cat("  plot layers: <none>\n")
@@ -312,8 +323,8 @@ plot.er_tte <- function(x, y = NULL, ...) {
 #'
 #' Assembles the layers into a ggplot2 object: a blank axes-only
 #' survival panel (time x-axis, survival probability y-axis), plus the
-#' curve, censor, pvalue, and model layers' geoms, when present
-#' ([er_tte_add_curve()], [er_tte_add_censor()], [er_tte_add_pvalue()],
+#' curve, censor, summary, and model layers' geoms, when present
+#' ([er_tte_add_curve()], [er_tte_add_censor()], [er_tte_add_summary()],
 #' [er_tte_add_model()]). When a risktable layer is also present
 #' ([er_tte_add_risktable()]), the result is instead a
 #' [patchwork::wrap_plots()] composition of two panels -- the curve
@@ -331,7 +342,7 @@ plot.er_tte <- function(x, y = NULL, ...) {
 #' is called automatically when `plot()` is called.
 #'
 #' @seealso [er_tte()], [er_tte_add_curve()], [er_tte_add_censor()],
-#'   [er_tte_add_risktable()], [er_tte_add_pvalue()]
+#'   [er_tte_add_risktable()], [er_tte_add_summary()]
 #'
 #' @export
 er_tte_build <- function(object) {
@@ -383,13 +394,13 @@ er_tte_build <- function(object) {
     object$output <- object$output + geoms
   }
 
-  if (!is.null(object$layer$pvalue)) {
-    layer <- object$layer$pvalue
+  if (!is.null(object$layer$summary)) {
+    layer <- object$layer$summary
     geoms <- rlang::exec(
       layer$style,
       data = object$data,
       config = layer$config,
-      stratify = !is.null(object$strata),
+      stratify = layer$stratify,
       time = object$time,
       strata = object$strata,
       theme = object$theme,
@@ -459,9 +470,8 @@ er_tte_build <- function(object) {
 
 # Per-stratum (or, unstratified, single-row) summary of a
 # `survival::survfit()` fit: subject count, event count, and median
-# survival time. Reused by `print.er_tte()` and (once implemented) the
-# log-rank annotation layer, so it's computed once here rather than
-# re-derived from `summary(fit)$table` at every call site.
+# survival time. Reused by `print.er_tte()`, so it's computed once here
+# rather than re-derived from `summary(fit)$table` at every call site.
 #' @noRd
 .km_summary <- function(fit) {
   tbl <- summary(fit)$table

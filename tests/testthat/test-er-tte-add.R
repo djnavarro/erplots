@@ -175,51 +175,83 @@ test_that("er_tte_build's curve panel is ticked at the risktable layer's own tim
   expect_equal(curve_panel$scales$get_scales("x")$breaks, c(0, 200, 400))
 })
 
-# pvalue ---------------------------------------------------------------------
+# summary ---------------------------------------------------------------------
 
-test_that("er_tte_add_pvalue adds a pvalue layer with the default style", {
+test_that("er_tte_add_summary adds a summary layer with the default style", {
   df <- survival::lung
   df$sex <- factor(df$sex, labels = c("Male", "Female"))
-  obj <- df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_pvalue()
-  expect_false(is.null(obj$layer$pvalue))
-  expect_identical(obj$layer$pvalue$style, er_style_tte_pvalue_logrank)
+  obj <- df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_summary()
+  expect_false(is.null(obj$layer$summary))
+  expect_identical(obj$layer$summary$style, er_style_tte_summary_logrank)
 })
 
-test_that("er_tte_add_pvalue is a singleton -- a second call replaces the first", {
+test_that("er_tte_add_summary is a singleton -- a second call replaces the first", {
   df <- survival::lung
   df$sex <- factor(df$sex, labels = c("Male", "Female"))
   obj <- df |>
     er_tte(time, status == 2, stratify_by = sex) |>
-    er_tte_add_pvalue(inset = 0.1) |>
-    er_tte_add_pvalue(inset = 0.2)
-  expect_identical(obj$layer$pvalue$dots, list(inset = 0.2))
+    er_tte_add_summary(inset = 0.1) |>
+    er_tte_add_summary(inset = 0.2)
+  expect_identical(obj$layer$summary$dots, list(inset = 0.2))
 })
 
-test_that("er_tte_add_pvalue errors when style is not a function", {
+test_that("er_tte_add_summary errors when style is not a function", {
   df <- survival::lung
   df$sex <- factor(df$sex, labels = c("Male", "Female"))
   expect_error(
-    df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_pvalue(style = 1),
+    df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_summary(style = 1),
     "must be a function"
   )
 })
 
-test_that("er_tte_add_pvalue errors on unnamed extra arguments", {
+test_that("er_tte_add_summary errors on unnamed extra arguments", {
   df <- survival::lung
   df$sex <- factor(df$sex, labels = c("Male", "Female"))
   expect_error(
-    df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_pvalue(NULL, 0.3),
+    df |> er_tte(time, status == 2, stratify_by = sex) |>
+      er_tte_add_summary(model = NULL, keep_strata = NULL, style = NULL, conf_level = 0.95, summary_args = list(), 0.3),
     "named"
   )
 })
 
-test_that("er_tte_build assembles both the curve and pvalue layers together", {
+test_that("er_tte_add_summary errors on unnamed summary_args", {
+  df <- survival::lung
+  df$sex <- factor(df$sex, labels = c("Male", "Female"))
+  expect_error(
+    df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_summary(summary_args = list(1)),
+    "named"
+  )
+})
+
+test_that("er_tte_add_summary(model = ...) plumbs er_summary() through to a model-based builder", {
+  df <- survival::lung
+  mod <- er_test_toy_model(status == 2 ~ age, df, family = stats::binomial())
+  obj <- df |>
+    er_tte(time, status == 2) |>
+    er_tte_add_curve() |>
+    er_tte_add_summary(model = mod, style = er_style_tte_summary_gof)
+
+  expect_false(is.null(obj$layer$summary$config$summary$glance))
+  built <- er_tte_build(obj)
+  label_layer <- Filter(function(l) inherits(l$geom, "GeomLabel"), built$output$layers)
+  expect_length(label_layer, 1)
+})
+
+test_that("er_tte_add_model rejects an er_plot() model builder rather than silently no-oping", {
+  df <- survival::lung
+  expect_error(
+    df |> er_tte(time, status == 2) |> er_tte_add_model(model = list(), style = er_style_model_line),
+    "tte_model"
+  )
+})
+
+test_that("er_tte_build assembles both the curve and summary layers together", {
   df <- survival::lung
   df$sex <- factor(df$sex, labels = c("Male", "Female"))
   obj <- df |>
     er_tte(time, status == 2, stratify_by = sex) |>
     er_tte_add_curve() |>
-    er_tte_add_pvalue()
+    er_tte_add_summary()
   built <- er_tte_build(obj)
   layer_geoms <- vapply(built$output$layers, function(l) class(l$geom)[1], character(1))
   expect_setequal(layer_geoms, c("GeomRect", "GeomStep", "GeomLabel"))

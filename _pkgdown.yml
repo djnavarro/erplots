@@ -15,13 +15,13 @@ reference:
   - er_plot_theme
   - er_plot_build
 - title: Time-to-event plots
-  desc: The compositional mini-grammar for designing Kaplan-Meier/survival-over-time plots, dividing plot structure distinct layers for survival curves, censoring markers, risk tables, p-value summaries, and the survival model. 
+  desc: The compositional mini-grammar for designing Kaplan-Meier/survival-over-time plots, dividing plot structure distinct layers for survival curves, censoring markers, risk tables, textual summaries, and the survival model. 
 - contents:
   - er_tte
   - er_tte_add_curve
   - er_tte_add_censor
   - er_tte_add_risktable
-  - er_tte_add_pvalue
+  - er_tte_add_summary
   - er_tte_add_model
   - er_tte_theme
   - er_tte_build
@@ -49,7 +49,7 @@ reference:
   - er_style_tte_curve
   - er_style_tte_censor
   - er_style_tte_risktable
-  - er_style_tte_pvalue
+  - er_style_tte_summary
   - er_style_tte_model
 - title: Builder functions for visual predictive check plots
   desc: Low level functions to draw specific components of a VPC plot. Each function supports one option for the `style` argument to the corresponding layer in the VPC plot.

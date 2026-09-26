@@ -448,11 +448,27 @@ analogue of `er_style()`'s interface):
   changes `er_tte_build()`'s output from a plain ggplot2 object to a
   patchwork. Its own time breaks double as the curve panel's x-axis
   ticks so the two panels' shared x-axis lines up exactly.
-- **`er_tte_add_pvalue()`** -- a corner-placed log-rank test annotation
-  (`er_style_tte_pvalue_logrank()`, `survival::survdiff()`). Requires a
-  stratified object.
+- **`er_tte_add_summary()`** -- a corner-placed text/label annotation,
+  mirroring `er_plot_add_summary()`'s design (including an independent
+  `model`/`conf_level`/`summary_args`, unrelated to whatever model, if
+  any, was passed to `er_tte_add_model()`). Its default style,
+  `er_style_tte_summary_logrank()`, computes a log-rank test
+  (`survival::survdiff()`) comparing survival across `stratify_by`'s
+  levels; it draws nothing (rather than erroring) on an unstratified
+  object, or one with fewer than 2 strata levels present in the data.
+  Three further builders: `er_style_tte_summary_n()` (subject/event
+  counts, model- and stratification-agnostic),
+  `er_style_tte_summary_coefficients()`/`er_style_tte_summary_gof()`
+  (read from `model`'s own [er_summary()] result -- both draw nothing
+  when the layer is stratified, same restriction as their `er_plot()`
+  counterparts). All four are tagged `er_style_tag(fn, layer =
+  "tte_summary")` -- namespaced separately from `er_plot_add_summary()`'s
+  own `"summary"` tag, so a builder written for one grammar can't
+  silently pass the tag check for the other (see "Gotchas").
 - **`er_tte_add_model()`** -- a fitted parametric `S(t)` curve/ribbon
-  overlay (`er_style_tte_model_line()`, the default), via the
+  overlay (`er_style_tte_model_line()`, the default -- tagged
+  `er_style_tag(fn, layer = "tte_model")`, namespaced separately from
+  `er_plot_add_model()`'s own `"model"` tag; see "Gotchas"), via the
   [er_predict_survival()] generic (see "The model interface" above) --
   the one TTE layer that calls out to a caller-supplied model, mirroring
   `er_plot_add_model()`'s `keep_strata`/`predict_args` design. `model`
@@ -553,6 +569,25 @@ documented in `R/data.R`. Columns:
 A handful of non-obvious implementation details that would bite a future
 edit if forgotten:
 
+- **`er_style_tag()`'s `layer` value is a flat namespace, checked by
+  string equality only (`.check_style_layer()` in `R/er-plot-style.R`)
+  -- a `er_tte_add_*()`/`er_plot_add_*()`/`er_vpc_add_*()` function
+  never knows which grammar a tag "belongs to", only whether the string
+  matches.** `"curve"`/`"censor"`/`"risktable"` are unique to
+  `er_tte()`, and `"observed"`/`"simulated"` to `er_vpc()`, so no
+  collision is possible there. `er_tte_add_model()`/`er_tte_add_summary()`
+  deliberately use their own `"tte_model"`/`"tte_summary"` values rather
+  than reusing `er_plot_add_model()`/`er_plot_add_summary()`'s
+  `"model"`/`"summary"` -- an earlier version shared those two strings
+  across both grammars, which meant an `er_plot()` builder passed to
+  `er_tte_add_summary()` (or vice versa) silently passed the tag check;
+  for a builder whose body returns early before touching a formal
+  argument the other grammar doesn't supply (e.g.
+  `er_style_summary_pvalue()`'s `is.null(config$p_value)` guard), this
+  produced a silent no-op instead of an error. Any new grammar-specific
+  builder family should mint its own `layer` string rather than reusing
+  one from a different grammar, unless the two genuinely share a
+  signature and `config` shape.
 - **`.build_vpc_plot()` gives the colour and fill scales identical, fixed
   `limits` (`.vpc_source_levels <- c("Observed", "Simulated")`, defined
   in `R/er-vpc-layer.R`).** Without this, a builder pair that mixes
@@ -682,7 +717,7 @@ edit if forgotten:
   `R/er-vpc-style-simulated.R`, `R/er-vpc-theme.R` -- the VPC
   mini-grammar, mirroring `er_plot()`'s own file split.
 - `R/er-tte-api.R`, `R/er-tte-add.R`, `R/er-tte-layer.R`,
-  `R/er-tte-style-{curve,censor,risktable,pvalue,model}.R`,
+  `R/er-tte-style-{curve,censor,risktable,summary,model}.R`,
   `R/er-tte-theme.R` -- the `er_tte()` mini-grammar (see "The `er_tte()`
   mini-grammar" above). No `-build.R` split yet -- `er_tte_build()`
   still lives in `er-tte-api.R`.

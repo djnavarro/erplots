@@ -219,7 +219,7 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata)
 
   style <- style %||% er_style_tte_model_line
-  .check_style_layer(style, "model", arg = "style")
+  .check_style_layer(style, "tte_model", arg = "style")
 
   object$layer$model <- .layer_tte_model(
     object = object,
@@ -236,32 +236,54 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 }
 
 
-# pvalue ------------------------------------------------------------------
+# summary ------------------------------------------------------------------
 
-#' Add a log-rank test annotation layer
+#' Add a summary annotation layer
 #'
-#' Adds the pvalue layer: a corner-placed annotation of the log-rank
-#' test comparing survival across `stratify_by`'s levels
-#' (`survival::survdiff()`). Singleton (a second call replaces the
-#' previous one). Requires a stratified `er_tte` object -- a log-rank
-#' test compares two or more groups, so this errors if `stratify_by`
-#' wasn't set in [er_tte()].
+#' Adds the summary layer: a corner-placed text/label annotation, drawn
+#' from a log-rank test comparing survival across `stratify_by`'s levels
+#' (the default style, `survival::survdiff()`), a supplied model's
+#' [er_summary()] result, or purely descriptive observation/event counts
+#' -- depending on `style`. Singleton (a second call replaces the
+#' previous one).
 #'
-#' @param object Partially constructed plot (has S3 class `er_tte`,
-#'   with `stratify_by` set -- see [er_tte()]).
+#' @param object Partially constructed plot (has S3 class `er_tte`).
+#' @param model A fitted time-to-event model implementing [er_summary()],
+#'   or `NULL` (the default). Independent of whatever model, if any, was
+#'   passed to [er_tte_add_model()] -- only needed for builder styles
+#'   (e.g. [er_style_tte_summary_coefficients()]/
+#'   [er_style_tte_summary_gof()]) that produce model-based summaries;
+#'   the default log-rank builder and [er_style_tte_summary_n()] both
+#'   ignore it.
+#' @param keep_strata Logical, indicating whether this layer should be
+#'   split by the plot's stratification variable; defaults to `TRUE` if
+#'   `stratify_by` was set in [er_tte()], `FALSE` otherwise.
 #' @param style Function drawing the annotation. Defaults to
-#'   [er_style_tte_pvalue_logrank()].
+#'   [er_style_tte_summary_logrank()].
+#' @param conf_level Confidence level forwarded to [er_summary()] (see
+#'   `?er_model_interface`). Defaults to `0.95`. Ignored when `model` is
+#'   `NULL`.
+#' @param summary_args A named list of additional arguments forwarded to
+#'   [er_summary()], distinct from `...` the same way
+#'   [er_tte_add_model()]'s `predict_args` is distinct from its own
+#'   `...` -- see its "Details".
 #' @param ... Additional named arguments forwarded unchanged to `style`
-#'   at build time (e.g. [er_style_tte_pvalue_logrank()]'s `inset`/
+#'   at build time (e.g. [er_style_tte_summary_logrank()]'s `inset`/
 #'   `label_size`/`label_colour`/`label_fill`).
 #'
-#' @returns The input `object`, with the pvalue layer added.
+#' @returns The input `object`, with the summary layer added.
 #'
 #' @details
 #' The annotation is placed in whichever corner of the panel is
 #' currently furthest from the plotted survival curve(s), computed the
 #' same way [er_plot_add_summary()]'s corner-placed annotation avoids
-#' the raw data -- see [er_style_tte_pvalue_logrank()].
+#' the raw data -- see [er_style_tte_summary_logrank()].
+#'
+#' The default log-rank builder draws nothing on an unstratified object,
+#' or one with only 1 stratum level present in the data, rather than
+#' erroring -- a log-rank test needs at least 2 groups to compare. Other
+#' builders (e.g. [er_style_tte_summary_n()]) work regardless of
+#' stratification.
 #'
 #' @examples
 #' library(survival)
@@ -269,37 +291,41 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #'   transform(sex = factor(sex, labels = c("Male", "Female"))) |>
 #'   er_tte(time, status == 2, stratify_by = sex) |>
 #'   er_tte_add_curve() |>
-#'   er_tte_add_pvalue() |>
+#'   er_tte_add_summary() |>
 #'   plot()
 #'
-#' @seealso [er_tte()], [er_style_tte_pvalue_logrank()]
+#' # a purely descriptive annotation, with no model or log-rank test at all
+#' lung |>
+#'   er_tte(time, status == 2) |>
+#'   er_tte_add_curve() |>
+#'   er_tte_add_summary(style = er_style_tte_summary_n) |>
+#'   plot()
+#'
+#' @seealso [er_tte()], [er_style_tte_summary_logrank()]
 #'
 #' @export
-er_tte_add_pvalue <- function(object, style = NULL, ...) {
+er_tte_add_summary <- function(object, model = NULL, keep_strata = NULL, style = NULL,
+                                conf_level = 0.95, summary_args = list(), ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
+  .check_dots_named(summary_args, arg = "summary_args")
   if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
   if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (is.null(keep_strata)) keep_strata <- !is.null(object$strata)
 
-  if (is.null(object$strata)) {
-    rlang::abort(c(
-      "`er_tte_add_pvalue()` requires a stratified `er_tte` object.",
-      "i" = "Set `stratify_by` in `er_tte()` first -- a log-rank test compares two or more groups."
-    ))
-  }
-  n_strata_present <- length(unique(stats::na.omit(object$data[[".er_tte_strata"]])))
-  if (n_strata_present < 2) {
-    rlang::abort(c(
-      sprintf("`stratify_by` (`%s`) has only %d level present in the data.", object$strata$var, n_strata_present),
-      "i" = "A log-rank test needs at least 2 groups to compare."
-    ))
-  }
+  style <- style %||% er_style_tte_summary_logrank
+  .check_style_layer(style, "tte_summary", arg = "style")
 
-  style <- style %||% er_style_tte_pvalue_logrank
-  .check_style_layer(style, "pvalue", arg = "style")
-
-  object$layer$pvalue <- .layer_tte_pvalue(object = object, style = style, dots = dots)
+  object$layer$summary <- .layer_tte_summary(
+    object = object,
+    model = model,
+    stratify = keep_strata,
+    conf_level = conf_level,
+    summary_args = summary_args,
+    style = style,
+    dots = dots
+  )
 
   return(object)
 }

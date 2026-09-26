@@ -76,17 +76,29 @@ lung |>
   plot()
 ```
 
-### Log-rank test annotation
+### Summary annotation
 
-`er_tte_add_pvalue()` adds a corner-placed annotation of the log-rank test comparing survival across `stratify_by`'s levels (`survival::survdiff()`). It requires a stratified object -- calling it on an unstratified one errors, since a log-rank test needs at least two groups to compare:
+`er_tte_add_summary()` adds a corner-placed text/label annotation. Its default style, `er_style_tte_summary_logrank()`, compares survival across `stratify_by`'s levels (`survival::survdiff()`); on an unstratified object, or one with only 1 stratum level present in the data, it simply draws nothing (a log-rank test needs at least two groups to compare) rather than erroring:
 
 ```{r logrank-pvalue}
 lung_sex |>
   er_tte(time, status == 2, stratify_by = sex) |>
   er_tte_add_curve() |>
-  er_tte_add_pvalue() |>
+  er_tte_add_summary() |>
   plot()
 ```
+
+Other builders don't depend on `stratify_by` at all. `er_style_tte_summary_n()` draws subject/event counts (one line per stratum when stratified, a single overall line otherwise):
+
+```{r summary-n}
+lung |>
+  er_tte(time, status == 2) |>
+  er_tte_add_curve() |>
+  er_tte_add_summary(style = er_style_tte_summary_n) |>
+  plot()
+```
+
+`er_style_tte_summary_coefficients()`/`er_style_tte_summary_gof()` draw from a fitted model's own [er_summary()] result instead, passed via `er_tte_add_summary()`'s `model` argument -- independent of whatever model, if any, was passed to `er_tte_add_model()`. See [Implementing the model interface](model-interface.html) for what a model needs to implement to support this.
 
 ## Overlaying a parametric model
 
@@ -124,7 +136,7 @@ Since `age` isn't a stratification variable here, `er_tte_add_model()` predicts 
 lung_sex |>
   er_tte(time, status == 2, stratify_by = sex) |>
   er_tte_add_curve() |>
-  er_tte_add_pvalue() |>
+  er_tte_add_summary() |>
   er_tte_theme(
     xlab = "Days",
     ylab = "Overall survival",
@@ -166,7 +178,7 @@ lung |>
 lung_sex |>
   er_tte(time, status == 2, stratify_by = sex) |>
   er_tte_add_curve() |>
-  er_tte_add_pvalue() |>
+  er_tte_add_summary() |>
   er_tte_theme(format_p = scales::label_pvalue(accuracy = 0.0001, add_p = TRUE)) |>
   plot()
 ```

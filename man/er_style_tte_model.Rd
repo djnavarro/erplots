@@ -69,8 +69,11 @@ named \code{strata} (the tidied Kaplan-Meier table's own naming).
 \code{\link[=er_tte_build]{er_tte_build()}} still retitles the resulting legend with
 \code{strata$label} afterwards.
 
-\code{er_style_tte_model_line()} is tagged \code{er_style_tag(fn, layer = "model")}, so \code{\link[=er_tte_add_model]{er_tte_add_model()}} errors informatively if handed a
-builder tagged for a different layer.
+\code{er_style_tte_model_line()} is tagged \code{er_style_tag(fn, layer = "tte_model")} -- distinct from \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{"model"}
+tag, since the two grammars' model builders share no signature or
+\code{config} contents -- so \code{\link[=er_tte_add_model]{er_tte_add_model()}} errors informatively if
+handed a builder tagged for a different layer (including
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own builders).
 }
 \examples{
 if (requireNamespace("ertte", quietly = TRUE)) {

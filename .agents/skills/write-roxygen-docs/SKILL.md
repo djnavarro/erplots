@@ -153,7 +153,7 @@ skill):
 
   Note: several existing roxygen blocks in this package (e.g.
   `er_style_tte_curve()`, `er_style_tte_model()`, `er_style_tte_censor()`,
-  `er_style_tte_pvalue()`, `er_style_tte_risktable()`) currently *do* name
+  `er_style_tte_summary()`, `er_style_tte_risktable()`) currently *do* name
   internal helpers like `.layer_tte_curve()` or `.polish_tte_labels()` in
   `@details`. That predates this rule and is tracked as cleanup, not a
   pattern to extend — don't use existing docs as a precedent when writing

@@ -1625,3 +1625,110 @@ numeric-`stratify_by` case left, there's nothing left to approximate.
 `plot_by`'s own binning customization (`ties`/`quantile_type`/`labeller`/
 `n_bins`/`seed` on `er_vpc()`) is unaffected -- this decision is scoped
 to `stratify_by` specifically, per the distinction above.
+
+## Generalizing the TTE grammar's `pvalue` layer into `summary`
+
+Raised by comparing the summary-annotation layer across all three
+mini-grammars: `er_plot()` has a full `er_plot_add_summary()` layer with
+four builders (a model p-value, observation counts, model coefficients,
+model goodness-of-fit); `er_tte()` had only `er_tte_add_pvalue()`, a
+single-purpose log-rank annotation with no route to a model's own
+`er_summary()` result at all; `er_vpc()` has no summary-layer equivalent.
+Evaluated as two separate questions rather than one "make all three
+consistent" move.
+
+**`er_vpc()`: decided against adding a summary layer.** A VPC panel has
+no natural "one privileged statistic" the way a model curve has a
+p-value or a KM curve has a log-rank test -- it's a graphical adequacy
+check, not a hypothesis test with a canonical number, and nothing in the
+model interface computes a VPC-specific goodness-of-fit statistic to
+show. The two candidate contents (an N annotation; the underlying
+model's `glance`/`coefficients`) are each weaker than they look: N is
+redundant with what per-bin geoms already convey, and showing "the
+model's AIC" next to a plot whose point is "do this model's *simulated
+draws* look like the data" answers a different question than the panel
+asks. No change made.
+
+**`er_tte()`: renamed `er_tte_add_pvalue()` to `er_tte_add_summary()`
+(straight rename, no shim -- pre-CRAN convention), generalized to match
+`er_plot_add_summary()`'s shape.** Gained a `model`/`conf_level`/
+`summary_args` trio (independent of whatever model, if any, was passed
+to `er_tte_add_model()`, mirroring `er_plot_add_summary()`'s own
+independence from `er_plot_add_model()`) and a `keep_strata` argument,
+now actually read at build time (`er_tte_build()`'s summary block reads
+`object$layer$summary$stratify`, rather than the hardcoded
+`!is.null(object$strata)` every other TTE layer still uses -- matching
+how `er_plot_build()` already treats its own summary layer differently
+from `er_plot()`'s other layers).
+
+The log-rank test itself moved from an up-front, function-level
+`rlang::abort()` (`er_tte_add_pvalue()` required a stratified object with
+>= 2 levels present, or errored immediately) to a lazy, per-config
+computation: `.layer_tte_summary()` sets `config$logrank_p_value` to
+`NULL` when fewer than 2 strata levels are present, and the default
+builder (`er_style_tte_summary_logrank()`) treats `NULL` as "draw
+nothing" -- the same pattern `er_style_summary_pvalue()` already uses for
+a model with no single privileged p-value. This was necessary, not just
+nicer: a summary layer with a non-logrank builder (e.g. the new
+`er_style_tte_summary_n()`) has no reason to require stratification at
+all, so the requirement couldn't stay at the `er_tte_add_summary()`
+level. `config$logrank_p_value` is kept as its own field, separate from
+`config$summary` (the raw `er_summary()` result when `model` is
+supplied) -- a data-derived log-rank p-value and a model's own headline
+p-value are different things, and a caller could plausibly want both
+from the same layer.
+
+Three new builders, all tagged `er_style_tag(fn, layer = "summary")`:
+`er_style_tte_summary_n()` (subject/event counts -- TTE-specific content,
+unlike `er_style_summary_n()`'s plain N, since a censored subject and an
+event are visually indistinguishable on the curve alone), and
+`er_style_tte_summary_coefficients()`/`er_style_tte_summary_gof()`
+(near-verbatim ports of their `er_plot()` counterparts, reading
+`config$summary$coefficients`/`glance`, same "draws nothing when
+stratified" restriction). `er_tte()` gained a `format_number` theme
+field/`er_tte_theme()` argument (mirroring `er_plot_theme()`'s own) since
+`_coefficients()`/`_gof()` need it and no TTE builder had before.
+
+The `"summary"` layer tag is shared with `er_plot_add_summary()`'s own
+builders (checked only by string equality in `.check_style_layer()`, not
+scoped per grammar) -- the same sharing `"model"` already has between
+`er_plot_add_model()`/`er_tte_add_model()`. This means an `er_plot()`
+summary builder passed to `er_tte_add_summary()` (or vice versa) passes
+the tag check and, for a builder whose body returns early before
+touching a formal argument the other grammar doesn't supply (e.g.
+`er_style_summary_pvalue()`'s `is.null(config$p_value)` guard, checked
+before its unused `exposure`/`response` parameters would ever be forced),
+silently draws nothing instead of erroring. Noted as a known, minor gap
+(pre-existing for `"model"`) rather than fixed here -- scoped out of this
+change.
+
+## Namespacing the `"model"`/`"summary"` layer tags per grammar
+
+Follow-up to "Generalizing the TTE grammar's `pvalue` layer into
+`summary`" above, which had left `er_tte_add_model()`/
+`er_tte_add_summary()`'s builders sharing the literal `"model"`/
+`"summary"` `layer` tag values with `er_plot_add_model()`/
+`er_plot_add_summary()`'s own builders (`.check_style_layer()` checks by
+string equality only, with no grammar-scoping). Demonstrated concretely:
+passing `er_style_summary_pvalue()` (an `er_plot()` builder, tagged
+`"summary"`) into `er_tte_add_summary()` passed the tag check silently,
+then built without error -- `er_style_summary_pvalue()`'s
+`is.null(config$p_value)` guard returns early before its unused
+`exposure`/`response` formals (never supplied by TTE's own
+`rlang::exec()` call, which passes `time`/`strata` instead) would ever
+be forced, so the mismatch produced a silent no-op rather than a clear
+error. `"model"` had the same latent issue from when `er_tte_add_model()`
+was first added, just never demonstrated.
+
+Fixed by minting two new, TTE-specific `layer` values --
+`"tte_model"`/`"tte_summary"` -- used only by
+`er_style_tte_model_line()` and the four `er_style_tte_summary_*()`
+builders; `er_plot_add_model()`/`er_plot_add_summary()`'s own builders
+keep `"model"`/`"summary"` unchanged. `"curve"`/`"censor"`/`"risktable"`
+(TTE-only) and `"observed"`/`"simulated"` (VPC-only) were never at risk
+of this, since no other grammar defines builders for those roles, so
+they were left alone -- only the two tags that were genuinely doing
+double duty across grammars needed splitting. `er_style_tag()`'s valid
+`layer` list (`R/er-plot-style.R`) grew the two new values rather than
+becoming grammar-scoped in general, since a flat namespace is
+sufficient once the actual collisions are gone.

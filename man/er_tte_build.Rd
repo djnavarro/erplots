@@ -17,8 +17,8 @@ risktable layer is present) populated.
 \description{
 Assembles the layers into a ggplot2 object: a blank axes-only
 survival panel (time x-axis, survival probability y-axis), plus the
-curve, censor, pvalue, and model layers' geoms, when present
-(\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}, \code{\link[=er_tte_add_censor]{er_tte_add_censor()}}, \code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}},
+curve, censor, summary, and model layers' geoms, when present
+(\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}, \code{\link[=er_tte_add_censor]{er_tte_add_censor()}}, \code{\link[=er_tte_add_summary]{er_tte_add_summary()}},
 \code{\link[=er_tte_add_model]{er_tte_add_model()}}). When a risktable layer is also present
 (\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}), the result is instead a
 \code{\link[patchwork:wrap_plots]{patchwork::wrap_plots()}} composition of two panels -- the curve
@@ -31,5 +31,5 @@ is called automatically when \code{plot()} is called.
 }
 \seealso{
 \code{\link[=er_tte]{er_tte()}}, \code{\link[=er_tte_add_curve]{er_tte_add_curve()}}, \code{\link[=er_tte_add_censor]{er_tte_add_censor()}},
-\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}, \code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}}
+\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}, \code{\link[=er_tte_add_summary]{er_tte_add_summary()}}
 }

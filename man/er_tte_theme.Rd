@@ -18,6 +18,7 @@ er_tte_theme(
   theme_extra = NULL,
   format_p = NULL,
   format_percent = NULL,
+  format_number = NULL,
   draw_key = NULL,
   height_curve = NULL,
   height_risktable = NULL
@@ -55,11 +56,16 @@ with additional theme tweaks layered on top of \code{theme_base}. See
 "Details" for its default and replacement semantics.}
 
 \item{format_p}{Formatter function (typically from \code{scales::label_pvalue()}),
-used by \code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}}'s annotation.}
+used by \code{\link[=er_tte_add_summary]{er_tte_add_summary()}}'s log-rank annotation.}
 
 \item{format_percent}{Formatter function (typically from
 \code{scales::label_percent()}), reserved for a future TTE builder that
 formats a survival probability/risk-table count as a percentage.}
+
+\item{format_number}{Formatter function (typically from
+\code{scales::label_number()}), used by \code{\link[=er_tte_add_summary]{er_tte_add_summary()}}'s
+\code{er_style_tte_summary_coefficients()}/\code{er_style_tte_summary_gof()}
+builders to format coefficient/goodness-of-fit values.}
 
 \item{draw_key}{A key-glyph function (e.g. \code{\link[ggplot2:draw_key_point]{ggplot2::draw_key_point()}}),
 passed as the curve/model layers' \code{key_glyph} argument.}

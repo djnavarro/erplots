@@ -8,10 +8,12 @@
   Five singleton layers: `er_tte_add_curve()` (the KM step curve +
   confidence band), `er_tte_add_censor()` (censoring tick marks),
   `er_tte_add_risktable()` (a number-at-risk panel stacked below the
-  curve), `er_tte_add_pvalue()` (a log-rank test annotation, for a
-  stratified object), and `er_tte_add_model()` (a fitted parametric
-  `S(t)` curve/ribbon overlay). `er_tte_theme()` styles labels, titles,
-  axis limits, formatters, the legend key, and panel heights, mirroring
+  curve), `er_tte_add_summary()` (a corner-placed text/label annotation
+  -- a log-rank test by default, or subject/event counts or a fitted
+  model's coefficients/goodness-of-fit via `style`), and
+  `er_tte_add_model()` (a fitted parametric `S(t)` curve/ribbon
+  overlay). `er_tte_theme()` styles labels, titles, axis limits,
+  formatters, the legend key, and panel heights, mirroring
   `er_plot_theme()`/`er_vpc_theme()`. See the new `plot-tte` vignette.
 * Added `er_predict_survival()`, a fourth model-interface generic (see
   `?er_model_interface`) powering `er_tte_add_model()`'s `S(t)` overlay.

@@ -41,8 +41,8 @@ the natural coordinate system for a Kaplan-Meier curve, not something
 table (\code{time}, \code{n_risk}, \code{n_event}, \code{n_censor}, \code{surv}, \code{lower},
 \code{upper}) on \code{object$km}. Layers added afterwards -- the curve
 (\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}), censoring marks (\code{\link[=er_tte_add_censor]{er_tte_add_censor()}}), a
-number-at-risk panel (\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}), log-rank annotation
-(\code{\link[=er_tte_add_pvalue]{er_tte_add_pvalue()}}), and a parametric model overlay
+number-at-risk panel (\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}), summary annotation
+(\code{\link[=er_tte_add_summary]{er_tte_add_summary()}}), and a parametric model overlay
 (\code{\link[=er_tte_add_model]{er_tte_add_model()}}) -- read from this shared fit rather than
 recomputing it (the model layer alone reads from the caller-supplied
 \code{model} instead, via \code{\link[=er_predict_survival]{er_predict_survival()}}).

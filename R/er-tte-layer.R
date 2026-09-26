@@ -3,7 +3,7 @@
 # plot's raw Kaplan-Meier fit (already computed once, in `er_tte()`
 # itself, and stored on `object$km`) gets turned into the `config` a
 # style builder receives. No `er_predict()`/`er_simulate()`/`er_summary()`
-# calls happen here -- the curve/censor/risktable/pvalue layers all read
+# calls happen here -- the curve/censor/risktable/summary layers all read
 # from the shared KM fit. `.layer_tte_model()` (below) is the one
 # exception: it calls `er_predict_survival()` on the caller-supplied
 # `model`, mirroring `R/er-plot-layer.R`'s own `.layer_model()`.
@@ -147,7 +147,7 @@
 # Strata membership is carried on `newdata` as a column named after
 # `object$strata$var` (never implicit in `model`) -- see
 # `?er_model_interface`'s "Details". The values used are `.er_tte_strata`'s
-# own levels (the same levels the curve/censor/pvalue layers show), i.e.
+# own levels (the same levels the curve/censor/summary layers show), i.e.
 # `stratify_by`'s own discrete levels -- `stratify_by` is required to be
 # discrete (see `?er_tte`), so there's no numeric-variable case to
 # approximate here.
@@ -215,29 +215,57 @@
 }
 
 
-# pvalue ------------------------------------------------------------------
+# summary ------------------------------------------------------------------
 
-# Assembles the `pvalue` layer's config: a log-rank test comparing all
-# strata (`survival::survdiff()`, the standard chi-squared log-rank
-# statistic on `length(strata) - 1` degrees of freedom), plus the same
-# per-corner "how uncrowded is this corner" metric
-# `.layer_summary()`/`.layer_quantile()` use in the `er_plot()` grammar,
-# computed here from the survival curve's own `(time, surv)` coordinates
-# (rescaled via `time$limits`/`c(0, 1)`) rather than raw exposure/response
-# data -- there is no raw per-subject scatter to avoid in this grammar,
-# but the curve itself is exactly what a corner-placed annotation risks
-# overlapping.
+# Assembles the `summary` layer's config: an optional model-based summary
+# (`er_summary()`, mirroring `.layer_summary()`'s own `er_plot()`
+# version), a log-rank test comparing all strata (`survival::survdiff()`,
+# the standard chi-squared log-rank statistic on `length(strata) - 1`
+# degrees of freedom) when at least 2 strata levels are present in the
+# data -- `NULL` otherwise, so a builder that doesn't need it (e.g.
+# `er_style_tte_summary_n()`) works on an unstratified object rather than
+# requiring one up front -- and the same per-corner "how uncrowded is
+# this corner" metric `.layer_summary()`/`.layer_quantile()` use in the
+# `er_plot()` grammar, computed here from the survival curve's own
+# `(time, surv)` coordinates (rescaled via `time$limits`/`c(0, 1)`)
+# rather than raw exposure/response data -- there is no raw per-subject
+# scatter to avoid in this grammar, but the curve itself is exactly what
+# a corner-placed annotation risks overlapping.
 #' @noRd
-.layer_tte_pvalue <- function(object, style, dots) {
+.layer_tte_summary <- function(object, model, stratify, conf_level = 0.95,
+                                summary_args = list(), style, dots = list()) {
+
   config <- list()
 
-  lr_formula <- stats::reformulate(
-    termlabels = ".er_tte_strata",
-    response = "survival::Surv(.er_tte_time, .er_tte_event)"
-  )
-  lr <- survival::survdiff(lr_formula, data = object$data)
-  lr_df <- length(lr$n) - 1
-  config$p_value <- stats::pchisq(lr$chisq, df = lr_df, lower.tail = FALSE)
+  # the fitted model, supplied by the caller. Optional -- a summary
+  # builder doesn't have to be a *model* summary (e.g.
+  # `er_style_tte_summary_n()`/`er_style_tte_summary_logrank()` are both
+  # purely data-derived) -- so `model` may be `NULL` here. Use `[` (not
+  # `$`) so a `NULL` model is retained as a named element rather than
+  # dropped from `config`.
+  config["model"] <- list(model)
+  config["summary"] <- list(NULL)
+  if (!is.null(model)) {
+    config$summary <- rlang::exec(er_summary, model = model, conf_level = conf_level, !!!summary_args)
+  }
+
+  # log-rank p-value is data-derived, not model-based -- kept in its own
+  # field rather than overloading `config$summary$p_value` (a caller
+  # could plausibly supply both a `model` *and* want the log-rank test).
+  # `NULL` when fewer than 2 strata levels are present in the data
+  # (including an unstratified object), rather than an error.
+  config$logrank_p_value <- NULL
+  if (!is.null(object$strata)) {
+    n_strata_present <- length(unique(stats::na.omit(object$data[[".er_tte_strata"]])))
+    if (n_strata_present >= 2) {
+      lr_formula <- stats::reformulate(
+        termlabels = ".er_tte_strata",
+        response = "survival::Surv(.er_tte_time, .er_tte_event)"
+      )
+      lr <- survival::survdiff(lr_formula, data = object$data)
+      config$logrank_p_value <- stats::pchisq(lr$chisq, df = length(lr$n) - 1, lower.tail = FALSE)
+    }
+  }
 
   config$corner_distance <- .compute_corner_distance(
     data = object$km$table,
@@ -245,7 +273,7 @@
     response = list(name = "surv", limits = c(0, 1))
   )
 
-  list(config = config, style = style, dots = dots)
+  list(config = config, style = style, dots = dots, stratify = stratify)
 }
 
 

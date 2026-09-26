@@ -55,5 +55,5 @@ test_that("er_tte_build retitles a stratified model layer's legend with the real
 })
 
 test_that("er_style_tte_model_line is tagged for the model layer", {
-  expect_equal(attr(er_style_tte_model_line, "er_style_layer"), "model")
+  expect_equal(attr(er_style_tte_model_line, "er_style_layer"), "tte_model")
 })

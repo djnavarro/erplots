@@ -47,7 +47,7 @@ new `ertte` (time-to-event exposure-response modelling) package.
 **Done** (see `HISTORY.md`'s "The `er_tte` grammar", "`er_tte_add_model()`",
 and "`er_tte_theme()`" entries for the design writeups): the `er_tte()`
 object/Kaplan-Meier fit, all five layers -- `er_tte_add_curve()`,
-`er_tte_add_censor()`, `er_tte_add_risktable()`, `er_tte_add_pvalue()`,
+`er_tte_add_censor()`, `er_tte_add_risktable()`, `er_tte_add_summary()`,
 `er_tte_add_model()` -- and `er_tte_theme()`. The full pipeline from
 `PLAN.md`'s original sketch now works end to end:
 
@@ -57,7 +57,7 @@ data |>
   er_tte_add_curve() |>
   er_tte_add_censor() |>
   er_tte_add_risktable() |>
-  er_tte_add_pvalue() |>
+  er_tte_add_summary() |>
   er_tte_add_model(fit) |>
   er_tte_theme(...) |>
   plot()

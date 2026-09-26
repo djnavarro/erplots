@@ -61,10 +61,14 @@
 #'   with additional theme tweaks layered on top of `theme_base`. See
 #'   "Details" for its default and replacement semantics.
 #' @param format_p Formatter function (typically from `scales::label_pvalue()`),
-#'   used by [er_tte_add_pvalue()]'s annotation.
+#'   used by [er_tte_add_summary()]'s log-rank annotation.
 #' @param format_percent Formatter function (typically from
 #'   `scales::label_percent()`), reserved for a future TTE builder that
 #'   formats a survival probability/risk-table count as a percentage.
+#' @param format_number Formatter function (typically from
+#'   `scales::label_number()`), used by [er_tte_add_summary()]'s
+#'   `er_style_tte_summary_coefficients()`/`er_style_tte_summary_gof()`
+#'   builders to format coefficient/goodness-of-fit values.
 #' @param draw_key A key-glyph function (e.g. [ggplot2::draw_key_point()]),
 #'   passed as the curve/model layers' `key_glyph` argument.
 #' @param height_curve,height_risktable Relative panel heights (single
@@ -93,7 +97,7 @@ er_tte_theme <- function(object,
                           title = NULL, subtitle = NULL, caption = NULL,
                           xlim = NULL, ylim = NULL,
                           theme_base = NULL, theme_extra = NULL,
-                          format_p = NULL, format_percent = NULL,
+                          format_p = NULL, format_percent = NULL, format_number = NULL,
                           draw_key = NULL,
                           height_curve = NULL, height_risktable = NULL) {
 
@@ -111,6 +115,7 @@ er_tte_theme <- function(object,
   .check_theme_class(theme_extra, "theme_extra", "theme")
   .check_theme_function(format_p, "format_p")
   .check_theme_function(format_percent, "format_percent")
+  .check_theme_function(format_number, "format_number")
   .check_theme_function(draw_key, "draw_key")
   .check_theme_number(height_curve, "height_curve")
   .check_theme_number(height_risktable, "height_risktable")
@@ -142,6 +147,7 @@ er_tte_theme <- function(object,
 
   if (!is.null(format_p)) object$theme$format_p <- format_p
   if (!is.null(format_percent)) object$theme$format_percent <- format_percent
+  if (!is.null(format_number)) object$theme$format_number <- format_number
 
   if (!is.null(draw_key)) object$theme$draw_key <- draw_key
 
