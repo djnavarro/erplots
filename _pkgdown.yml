@@ -33,11 +33,14 @@ reference:
   - er_vpc_add_simulated
   - er_vpc_theme
   - er_vpc_build
+- title: Builder function metadata
+  desc: Tag a new builder function with the required metadata 
+  contents: 
+  - er_style_tag
 - title: Builder functions for exposure-response plots
   desc: Low level functions to draw specific components of an exposure-response plot. Each function supports one option for the `style` argument to the corresponding layer in the exposure-response plot.
 - contents: 
   - er_style
-  - er_style_tag
   - er_style_model
   - er_style_summary
   - er_style_quantile
