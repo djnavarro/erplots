@@ -71,7 +71,7 @@ summaries, and the survival model.
 
 ## Visual predictive check plots
 
-The compositional mini-grammar for desigining visual predictive check
+The compositional mini-grammar for designing visual predictive check
 plots, dividing plot structure into distinct layers for the observed
 data and the simulated data.
 
@@ -97,18 +97,6 @@ data and the simulated data.
   :
 
   Build and render an `er_vpc` object
-
-## Builder function metadata
-
-Tag a new builder function with the required metadata
-
-- [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
-  : Register a builder's structural/aesthetic metadata
-
-- [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)
-  :
-
-  List builders registered for string-based `style` dispatch
 
 ## Builder functions for exposure-response plots
 
@@ -183,9 +171,22 @@ corresponding layer in the VPC plot.
   [`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
   : Simulated-layer builders for VPC plots
 
+## Builder function metadata
+
+Functions used to tag a new builder function with the required metadata
+and report on that metadata.
+
+- [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+  : Register a builder's structural/aesthetic metadata
+
+- [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)
+  :
+
+  List builders registered for string-based `style` dispatch
+
 ## Confidence intervals
 
-Helper functions to compute confidence intervals
+Helper functions to compute confidence intervals.
 
 - [`ci_clopper_pearson()`](https://erplots.djnavarro.net/reference/ci_clopper_pearson.md)
   : Clopper-Pearson confidence interval for binary data
@@ -198,7 +199,7 @@ Helper functions to compute confidence intervals
 
 ## Model interface
 
-Generic functions that define the interface between models and plots
+Generic functions that define the interface between models and plots.
 
 - [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
@@ -208,7 +209,7 @@ Generic functions that define the interface between models and plots
 
 ## Other
 
-Other functions and objects
+Other functions and objects.
 
 - [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
