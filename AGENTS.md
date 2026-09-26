@@ -682,9 +682,9 @@ edit if forgotten:
   `R/er-vpc-style-simulated.R`, `R/er-vpc-theme.R` -- the VPC
   mini-grammar, mirroring `er_plot()`'s own file split.
 - `R/er-tte-api.R`, `R/er-tte-add.R`, `R/er-tte-layer.R`,
-  `R/er-tte-style-{curve,censor,risktable,pvalue,model}.R` -- the
-  `er_tte()` mini-grammar (see "The `er_tte()` mini-grammar" above). No
-  `er_tte_theme()`/`-theme.R`/`-build.R` split yet -- `er_tte_build()`
+  `R/er-tte-style-{curve,censor,risktable,pvalue,model}.R`,
+  `R/er-tte-theme.R` -- the `er_tte()` mini-grammar (see "The `er_tte()`
+  mini-grammar" above). No `-build.R` split yet -- `er_tte_build()`
   still lives in `er-tte-api.R`.
 - `R/utils-helpers.R` -- small internal helpers (including the
   binary-response-only `ci_clopper_pearson()`, `ci_t()`, `ci_poisson()`,
@@ -698,7 +698,7 @@ edit if forgotten:
 ## Vignette structure
 
 `vignettes/articles/` (pkgdown-only, not shipped -- see `.Rbuildignore`)
-holds nine articles:
+holds ten articles:
 
 - `plot-binary.Rmd`, `plot-continuous.Rmd`, `plot-count.Rmd` -- worked
   examples of each layer, one per response type. Binary is the most
@@ -713,21 +713,48 @@ holds nine articles:
   log-rank p-value annotation, the `er_tte_add_model()` overlay (using
   `ertte`), and `er_tte_theme()` (including the `xlim` call-order
   caveat).
-- `design.Rmd` -- "The plotting grammar": singleton/additive layer
-  distinction, the stratification color/facet precedence rule, the
-  response-type dispatch table. Short pointer sections into `theming.Rmd`
-  and `extending.Rmd`.
-- `theming.Rmd` -- "Theming erplots": one section per `er_plot_theme()`
-  argument group.
+- `design.Rmd` -- "The exposure-response plotting grammar": singleton/additive
+  layer distinction, the stratification color/facet precedence rule, the
+  response-type dispatch table, for the `er_plot()` grammar specifically
+  (the title change from "Understanding the erplots grammar" makes this
+  scope explicit -- `er_vpc()`/`er_tte()` have no equivalent conceptual
+  overview article, since their own grammars are simple enough to cover
+  in a couple of framing paragraphs at the top of `plot-vpc.Rmd`/
+  `plot-tte.Rmd` instead). Short pointer sections into `theming.Rmd` and
+  `extending.Rmd`.
+- `theming.Rmd` -- "Theming exposure-response plots": one section per
+  `er_plot_theme()` argument group. Scoped to `er_plot_theme()`
+  specifically, matching `design.Rmd`'s scope -- `er_vpc_theme()`/
+  `er_tte_theme()` are each covered by an inline "Theming" section
+  within `plot-vpc.Rmd`/`plot-tte.Rmd` instead, proportionate to their
+  smaller argument surface.
 - `extending.Rmd` -- "Extending erplots: writing your own builder": what
   each `.layer_*()` function's `config` contains, a worked custom
   quantile builder, and a walkthrough of all five `er_style_tag()`
-  arguments.
+  arguments for `er_plot()` builders, plus two further sections covering
+  `er_vpc()`/`er_tte()` builders specifically -- their own shared
+  signatures (`function(data, config, exposure, response, theme, ...)`
+  for VPC, notably missing `stratify`/`strata` since VPC stratification
+  is facet-only; `function(data, config, stratify, time, strata, theme,
+  ...)` for TTE), a worked custom builder for each (a diamond-marker VPC
+  observed builder; a TTE curve builder adding a median-survival
+  reference line), and the VPC-specific `er_style_tag()` arguments
+  (`response_types`, `plot_by_types`, VPC's own `layout` values
+  `"categorical"`/`"continuous"` -- distinct from the data layer's
+  `"overlay"`/`"panel"` pair -- and `marker_source`).
 - `model-interface.Rmd` -- "Implementing the model interface", aimed at
   maintainers of *other* modelling packages (distinct audience from
-  `extending.Rmd`): two self-contained toy model classes built from
+  `extending.Rmd`): three self-contained toy model classes built from
   scratch (`toy_model`: single-coefficient GLM; `toy_emax`: multi-
-  parameter `nls()` fit) demonstrating each generic.
+  parameter `nls()` fit; `toy_survival`: exponential `survival::survreg()`
+  fit, for `er_predict_survival()` and the `er_tte()` grammar's model
+  overlay specifically) demonstrating each generic.
+- `internals.Rmd` -- "The built plot object (internal structure)":
+  documents `object$plot`/`object$output`'s shape (unexported, no
+  stability guarantee) for the rare case where a hand patch on the built
+  ggplot2/patchwork object is the only way to reach something a custom
+  `style` builder can't. Opens with an explicit disclaimer that this is
+  an implementation detail, not a public interface.
 
 Keep `design.Rmd` and `extending.Rmd` in sync when the grammar changes
 in a way that affects builders (e.g. a new `er_style_tag()` argument, or

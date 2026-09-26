@@ -1,5 +1,5 @@
 ---
-title: "Theming erplots"
+title: "Theming exposure-response plots"
 ---
 
 ```{r, include = FALSE}
@@ -261,7 +261,7 @@ erglm_data |>
 
 ## Where to next
 
-* [The plotting grammar](design.html) explains the layer-composition
+* [The exposure-response plotting grammar](design.html) explains the layer-composition
   rules `er_plot_theme()` deliberately doesn't touch.
 * [Extending erplots](extending.html) shows how to write a custom
   `style` builder, if changing *what's drawn* -- rather than *how it

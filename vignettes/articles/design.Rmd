@@ -1,5 +1,5 @@
 ---
-title: "Understanding the erplots grammar"
+title: "The exposure-response plotting grammar"
 ---
 
 ```{r, include = FALSE}
@@ -27,7 +27,7 @@ library(erglm)
 
 ## Plots are constructed in layers
 
-The design of an exposure-response plot follows a very similar logic to how plots are built in the ggplot2 package. The first function you call is always `er_plot()`, which creates an empty object of class `er_plot`. When you do this, it stores the data set internally and keeps track of which columns correspond to the exposure, response, and stratification variables. You then pipe it through through one or more *layer* functions, each of which adds one visual layer, and then finish by calling `plot()` to generate the plot. A typical plot generation pipeline might look like this:
+The design of an exposure-response plot follows a very similar logic to how plots are built in the ggplot2 package. The first function you call is always `er_plot()`, which creates an empty object of class `er_plot`. When you do this, it stores the data set internally and keeps track of which columns correspond to the exposure, response, and stratification variables. You then pipe it through one or more *layer* functions, each of which adds one visual layer, and then finish by calling `plot()` to generate the plot. A typical plot generation pipeline might look like this:
 
 ```{r pipeline}
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
@@ -43,7 +43,7 @@ erglm_data |>
 There are a few features to notice here. 
 
 - First, the model object `mod` is not created by the erplots package itself. In this case, we fit the model using `erglm::erglm_model()`, and because the erglm package implements the erplots model interface functions, the erplots package knows how to extract everything it needs from the model.
-- Second, notice that at the end of the pipeline we call `plot()` explicitly.One difference between ggplot2 and erplots is that erplots makes a strong distinction between calling `print()` on the plot object (outputs a written description of the plot) and calling `plot()` on the plot object (renders the plot). 
+- Second, notice that at the end of the pipeline we call `plot()` explicitly. One difference between ggplot2 and erplots is that erplots makes a strong distinction between calling `print()` on the plot object (outputs a written description of the plot) and calling `plot()` on the plot object (renders the plot). 
 - Third, although erplots uses the "layers" language to talk about different parts of the plot, an erplot layer operates at a different level of abstraction to a ggplot2 geom. A single erplot layer might add several ggplot2 geoms rather than a single one; it might even create a separate ggplot2 object that gets merged with other ggplot2 objects using the patchwork package. 
 
 The diagram below illustrates the structure of the erplots plotting pipeline:
@@ -216,7 +216,7 @@ stratification/`response_type` change what a layer draws. None of it
 touches *how the composed plot looks* -- labels, axis limits, the overall
 ggplot2 theme, the discrete colour/fill palette, formatters, and so on.
 That's a deliberately separate, orthogonal knob, `er_plot_theme()`,
-covered in its own article: [Theming erplots](theming.html).
+covered in its own article: [Theming exposure-response plots](theming.html).
 
 ## Extending erplots
 

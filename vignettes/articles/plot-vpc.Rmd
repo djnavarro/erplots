@@ -23,13 +23,13 @@ For a binary response, `er_vpc_add_observed()` bins the data and computes the ob
 
 ### VPC by exposure
 
-```{r}
+```{r binary-fit}
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 ```
 
 The default approach for binary outcomes is to bin the exposure variable by quartiles, and then show the confidence interval for the response rate for both observed and simulated: 
 
-```{r}
+```{r binary-vpc-exposure}
 erglm_data |> 
   er_vpc(exposure = aucss, response = ae1) |>
   er_vpc_add_observed() |>
@@ -41,7 +41,7 @@ erglm_data |>
 
 The variable used to bin the data and position the x-axis, `plot_by`, defaults to the exposure variable, but it doesn't have to be. Setting it to a different continuous variable lets you check whether the model's predictions track the observed data as *that* variable changes, even when it isn't part of the fitted model itself. Here we bin by `weight` instead of `aucss`, using the same exposure-only model as above:
 
-```{r}
+```{r binary-vpc-weight}
 erglm_data |> 
   er_vpc(exposure = aucss, response = ae1, plot_by = weight) |>
   er_vpc_add_observed() |>
@@ -54,7 +54,7 @@ erglm_data |>
 
 The same idea applies to a categorical `plot_by`: there's no x-axis binning to do, since the categories already partition the data, and each level gets its own position. Here we bin by `sex`, using a model that actually includes `sex` as a covariate, so the simulated layer's predictions can differ between the two groups:
 
-```{r}
+```{r binary-vpc-sex}
 mod <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
 
 erglm_data |> 
@@ -70,7 +70,7 @@ erglm_data |>
 
 `stratify_by` must name a discrete/categorical variable, used as-is -- one panel per level. Here we reuse the `ae1 ~ aucss + sex` model from above, faceting by `sex` while keeping `aucss` on the x-axis:
 
-```{r}
+```{r stratified-sex}
 erglm_data |> 
   er_vpc(exposure = aucss, response = ae1, stratify_by = sex) |>
   er_vpc_add_observed() |>
@@ -80,7 +80,7 @@ erglm_data |>
 
 A genuinely continuous covariate, like `weight`, needs binning into groups first -- `cut_quantile()`/`cut_exposure_quantile()` give full control over bin count, tie-breaking, and labels:
 
-```{r}
+```{r stratified-weight-grp}
 erglm_data |> 
   transform(weight_grp = cut_quantile(weight, n = 3)) |>
   er_vpc(exposure = aucss, response = ae1, stratify_by = weight_grp) |>
@@ -97,7 +97,7 @@ A continuous response supports the same mean/errorbar comparison used above for 
 
 ### VPC by exposure
 
-```{r}
+```{r continuous-fit}
 mod <- emax_nls(
   structural_model = rsp_1 ~ exp_1,
   covariate_model = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
@@ -107,7 +107,7 @@ mod <- emax_nls(
 
 We'll start by showing the limitations of the default "mean plus confidence interval" visual style. This is set as the default style for VPCs because it has the virtue of working regardless of whether the `plot_by` variable is continuous or discrete, and regardless of whether the `response` variable is binary, continuous or counts. But as you can see from the plot below, it's not the best choice for a continuous response variable:
 
-```{r}
+```{r continuous-vpc-mean-errorbar}
 emax_df |> 
   er_vpc(exposure = exp_1, response = rsp_1) |> 
   er_vpc_add_observed() |> 
@@ -119,7 +119,7 @@ The plot renders correctly, but the only thing it shows is whether the model can
 
 As an alternative, we can switch to a genuinely distributional comparison: connected lines for several observed quantiles, and shaded ribbons showing the corresponding simulated quantiles. This style is the most commonly used approach when VPCs are applied for pharmacokinetic models, and works well for the exposure-response case with a continuous response variable:
 
-```{r}
+```{r continuous-vpc-quantile-line}
 emax_df |> 
   er_vpc(
     exposure = exp_1, 
@@ -137,7 +137,7 @@ emax_df |>
 
 This works well, and is usually the best choice, but one thing that is missing in this plot is an expression of uncertainty about the observed quantiles. Sometimes that is useful to have, in which case you can do something like this, where the `ci_quantile()` function is used under the hood to construct confidence intervals for observed quantiles:
 
-```{r}
+```{r continuous-vpc-quantile-errorbar}
 emax_df |> 
   er_vpc(
     exposure = exp_1, 
@@ -157,7 +157,7 @@ emax_df |>
 
 As with the binary case, a continuous `plot_by` doesn't have to be the exposure variable. Here the Emax model includes a covariate effect of `cnt_a` on the baseline parameter `E0`, so we bin on `cnt_a` directly to check the model's percentile predictions against it. Here is the VPC plotted in an errorbar style:
 
-```{r}
+```{r continuous-vpc-cnt-a-errorbar}
 mod <- emax_nls(
   structural_model = rsp_1 ~ exp_1,
   covariate_model = list(E0 ~ cnt_a, Emax ~ 1, logEC50 ~ 1),
@@ -182,7 +182,7 @@ emax_df |>
 
 For comparison, the plot below shows the same VPC in the ribbon style. The two show the same underlying comparison styled differently; which one to use is mostly a matter of taste (and, as covered below, legibility):
 
-```{r}
+```{r continuous-vpc-cnt-a-ribbon}
 emax_df |> 
   er_vpc(
     exposure = exp_1, 
@@ -203,7 +203,7 @@ emax_df |>
 
 As before, a categorical `plot_by` works with the default mean/errorbar pair too, this time using a model that includes `sex` as a covariate on the continuous response:
 
-```{r}
+```{r continuous-vpc-sex-errorbar}
 mod <- erglm_model(
   biomarker_change ~ aucss + sex, erglm_data, family = gaussian()
 )
@@ -219,7 +219,7 @@ erglm_data |>
 
 `er_vpc_theme()` adjusts labels, titles, axis limits, and the overall ggplot2 theme, without changing which variable drives which aesthetic. Every argument defaults to `NULL` ("leave unchanged"), so repeated calls only touch the fields they supply:
 
-```{r}
+```{r theming}
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
 
 erglm_data |> 
@@ -235,13 +235,45 @@ erglm_data |>
   plot()
 ```
 
-Note that `xlab` labels `plot_by` (the VPC's actual x-axis variable), not necessarily `exposure` -- the two only coincide when `plot_by` wasn't overridden. `er_vpc_theme()` doesn't cover everything: there's no argument for the observed/simulated colour scale, for instance, since it's fixed to keep the two aligned across builders that mix colour and fill for the same distinction. For anything not covered, `+ ggplot2::theme(...)`/`+ ggplot2::labs(...)` on the object returned by `plot()` remains the general-purpose escape hatch.
+Note that `xlab` labels `plot_by` (the VPC's actual x-axis variable), not necessarily `exposure` -- the two only coincide when `plot_by` wasn't overridden.
+
+`subtitle`/`caption` add further plot-level text, and `strata_lab` relabels the facet strip prefix for a stratified VPC (errors if `stratify_by` wasn't set in `er_vpc()`):
+
+```{r theming-labels}
+mod_strat <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
+
+erglm_data |>
+  er_vpc(exposure = aucss, response = ae1, stratify_by = sex) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod_strat, seed = 1234) |>
+  er_vpc_theme(
+    strata_lab = "Sex",
+    subtitle = "Binary response",
+    caption = "Source: erglm_data"
+  ) |>
+  plot()
+```
+
+`xlim`/`ylim` override the axis limits `er_vpc()` otherwise computes automatically from the data, applied via `ggplot2::coord_cartesian(clip = "off")`:
+
+```{r theming-limits}
+erglm_data |>
+  er_vpc(exposure = aucss, response = ae1) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  er_vpc_theme(xlim = c(-100, 3000), ylim = c(-0.05, 1.05)) |>
+  plot()
+```
+
+Narrowing the limits far enough to clip an actual marker produces a warning naming which bins were hidden, rather than silently dropping them -- the bin's own summary statistic is still computed from every observation in it either way, only its plotted position is affected.
+
+`er_vpc_theme()` doesn't cover everything. There's no argument for the observed/simulated colour scale, for instance, since it's fixed to keep the two aligned across builders that mix colour and fill for the same distinction. `format_percent`/`format_number` are accepted and stored, intended to format the rate/mean value attached to each bin's summary (`config$summary$y_mid_lbl`), but no built-in VPC style currently draws that label on the plot -- they're there for a custom `style` builder to read (see [Extending erplots](extending.html)), not for a visible effect on any of the built-in idioms shown in this article. For anything else not covered, `+ ggplot2::theme(...)`/`+ ggplot2::labs(...)` on the object returned by `plot()` remains the general-purpose escape hatch.
 
 ## Troubleshooting plot legibility
 
-A persistent problem when creating VPC plots is cleaning up an illegible plot. To an extent, this problem is unavoidable: VPC plots attempt to display a *lot* of information in a single image, and it has a tendency to make them difficult to read. Because the specific pattern of illegibility tends to vary from plot to plot, it is almost impossible to build in an automated fix to this problem. Instead of attempting an automated fix that will very likely not work, the `er_vpc()` mini-grammar exposes some customization tools that you can use to clean up a VPC plot that doesn't look very nice. In this section, we outline some of the options that you have. 
+A persistent problem when creating VPC plots is cleaning up an illegible plot. To an extent, this problem is unavoidable: VPC plots attempt to display a *lot* of information in a single image, and it has a tendency to make them difficult to read. Because the specific pattern of illegibility tends to vary from plot to plot, it is almost impossible to build in an automated fix to this problem. Instead of attempting an automated fix that will very likely not work, the `er_vpc()` mini-grammar exposes some customisation tools that you can use to clean up a VPC plot that doesn't look very nice. In this section, we outline some of the options that you have. 
 
-```{r}
+```{r troubleshooting-fit}
 mod <- emax_nls(
   structural_model = rsp_1 ~ exp_1,
   covariate_model = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
@@ -253,7 +285,7 @@ mod <- emax_nls(
 
 We'll start by creating a deliberately terrible VPC plot, using the Emax regression in the `mod` object. Suppose that, for one reason or another, you have been asked to show *five* quantiles for this model rather than the usual three. This is rarely a good idea because it leads to terrible crowding in the plot. Here's what happens if we do this, using errorbar styling for both the observed data and the model simulations: 
 
-```{r}
+```{r errorbar-collision}
 emax_df |>
   er_vpc(
     exposure = exp_1,
@@ -277,7 +309,7 @@ There's no simple fix for this: in this plot we have unpleasant collisions betwe
 - `prob_dodge_width` spreads a single builder's own `probs` apart, symmetrically around the bin's true position.
 - `errorbar_width` narrows or widens the error bars themselves, giving the eye more room to separate bars that remain close together after dodging
 
-```{r}
+```{r errorbar-dodge-fix}
 emax_df |>
   er_vpc(
     exposure = exp_1,
@@ -309,7 +341,7 @@ It takes a little bit of trial and error to find values that work in any specifi
 
 A different kind of legibility issue arises when ribbons are used to display confidence intervals. As before, we'll illustrate this using the extreme case when five quantiles are being displayed. A common visual style used for VPC plots is to use connected lines for the observed quantiles, and then ribbons to show model predictions and uncertainty at each quantile. In this case, however, the confidence bands are so closely packed together that they blend together visually and it is impossible to tell where the boundaries are:
 
-```{r}
+```{r ribbon-collision}
 emax_df |>
   er_vpc(
     exposure = exp_1,
@@ -329,7 +361,7 @@ emax_df |>
 
 Sometimes you can improve legibility in this case by placing more emphasis on the edges of the bands, and reducing the salience of the band shading. The code below illustrates this, and it helps somewhat, but the plot is still difficult to read:
 
-```{r}
+```{r ribbon-edges-fix}
 emax_df |>
   er_vpc(
     exposure = exp_1,
@@ -351,7 +383,7 @@ emax_df |>
 
 Ultimately, in this situation the most likely resolution is that you would have to revert from five quantile bands to the usual three:
 
-```{r}
+```{r ribbon-three-quantiles}
 emax_df |>
   er_vpc(
     exposure = exp_1,

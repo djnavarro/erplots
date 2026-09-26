@@ -23,7 +23,7 @@ This article uses the `lung` dataset from the survival package throughout, treat
 
 The minimal pipeline is `er_tte()` followed by `er_tte_add_curve()`, which draws the Kaplan-Meier step curve with a confidence band:
 
-```{r}
+```{r single-curve}
 lung |>
   er_tte(time, status == 2) |>
   er_tte_add_curve() |>
@@ -32,7 +32,7 @@ lung |>
 
 `er_tte_add_censor()` adds a tick mark at every censoring time, layered on top of the curve:
 
-```{r}
+```{r curve-censor}
 lung |>
   er_tte(time, status == 2) |>
   er_tte_add_curve() |>
@@ -42,7 +42,7 @@ lung |>
 
 `er_tte_add_risktable()` adds a number-at-risk panel, stacked below the curve via patchwork, with a shared x-axis:
 
-```{r}
+```{r curve-censor-risktable}
 lung |>
   er_tte(time, status == 2) |>
   er_tte_add_curve() |>
@@ -55,7 +55,7 @@ lung |>
 
 Passing `stratify_by` to `er_tte()` splits the Kaplan-Meier estimate into one curve per level (`survival::survfit(... ~ strata)`), and every layer added afterwards follows suit. `stratify_by` must name a discrete/categorical variable -- `lung$sex` is coded numerically (1/2), so we convert it to a factor first:
 
-```{r}
+```{r stratified-curve}
 lung_sex <- lung |> transform(sex = factor(sex, labels = c("Male", "Female")))
 
 lung_sex |>
@@ -68,7 +68,7 @@ lung_sex |>
 
 A genuinely continuous covariate, like `age`, needs binning into groups first -- `cut_quantile()` gives full control over bin count, tie-breaking, and labels:
 
-```{r}
+```{r stratified-continuous-covariate}
 lung |>
   transform(age_grp = cut_quantile(age, n = 3)) |>
   er_tte(time, status == 2, stratify_by = age_grp) |>
@@ -80,7 +80,7 @@ lung |>
 
 `er_tte_add_pvalue()` adds a corner-placed annotation of the log-rank test comparing survival across `stratify_by`'s levels (`survival::survdiff()`). It requires a stratified object -- calling it on an unstratified one errors, since a log-rank test needs at least two groups to compare:
 
-```{r}
+```{r logrank-pvalue}
 lung_sex |>
   er_tte(time, status == 2, stratify_by = sex) |>
   er_tte_add_curve() |>
@@ -92,7 +92,7 @@ lung_sex |>
 
 `er_tte_add_model()` overlays a fitted parametric $S(t)$ curve (with an uncertainty band) on top of the Kaplan-Meier estimate, for any model implementing `er_predict_survival()` (see [Implementing the model interface](model-interface.html)). This article uses `ertte`, the package that implements the full model interface for time-to-event models, fitting an accelerated failure time model:
 
-```{r}
+```{r model-aft}
 mod <- ertte_aft(Surv(time, status == 2) ~ sex, lung_sex)
 
 lung_sex |>
@@ -104,7 +104,7 @@ lung_sex |>
 
 `model` may reference covariates beyond the strata variable; erplots fills any other covariate from the plot data with a reference value (first factor level or numeric mean), the same approach `er_plot_add_model()` uses. A Cox model works the same way, and doesn't require `stratify_by` to be set at all:
 
-```{r}
+```{r model-cox}
 mod_cox <- ertte_coxph(Surv(time, status == 2) ~ age, lung)
 
 lung |>
@@ -120,7 +120,7 @@ Since `age` isn't a stratification variable here, `er_tte_add_model()` predicts 
 
 `er_tte_theme()` adjusts labels, titles, axis limits, and the overall ggplot2 theme, without changing which variable drives which aesthetic. As with `er_plot_theme()`/`er_vpc_theme()`, every argument defaults to `NULL` ("leave unchanged"), so repeated calls only touch the fields they supply:
 
-```{r}
+```{r theming}
 lung_sex |>
   er_tte(time, status == 2, stratify_by = sex) |>
   er_tte_add_curve() |>
@@ -135,9 +135,23 @@ lung_sex |>
   plot()
 ```
 
-One theming argument is structural rather than purely cosmetic: `xlim` overwrites the time axis's limits directly, and those limits are what `er_tte_add_model()`'s default `time_grid` and `er_tte_add_risktable()`'s default `times` are computed from *at add-layer time*. So `er_tte_theme(xlim = ...)` needs to be called before those layers to affect their defaults -- calling it afterwards only changes the curve panel's own displayed range:
+`subtitle`/`caption` add further plot-level text, and `ylim` overrides the survival-probability axis's displayed range -- purely cosmetic, since a survival probability is always modelled on `[0, 1]` regardless of what's shown:
 
-```{r}
+```{r theming-labels}
+lung_sex |>
+  er_tte(time, status == 2, stratify_by = sex) |>
+  er_tte_add_curve() |>
+  er_tte_theme(
+    subtitle = "Lung cancer cohort",
+    caption = "Source: survival::lung",
+    ylim = c(0, 1.05)
+  ) |>
+  plot()
+```
+
+One theming argument is structural rather than purely cosmetic, unlike `ylim` above: `xlim` overwrites the time axis's limits directly, and those limits are what `er_tte_add_model()`'s default `time_grid` and `er_tte_add_risktable()`'s default `times` are computed from *at add-layer time*. So `er_tte_theme(xlim = ...)` needs to be called before those layers to affect their defaults -- calling it afterwards only changes the curve panel's own displayed range:
+
+```{r theming-xlim}
 lung |>
   er_tte(time, status == 2) |>
   er_tte_theme(xlim = c(0, 600)) |>
@@ -145,5 +159,39 @@ lung |>
   er_tte_add_risktable() |>
   plot()
 ```
+
+`format_p` controls how the log-rank annotation's p-value is displayed:
+
+```{r theming-format-p}
+lung_sex |>
+  er_tte(time, status == 2, stratify_by = sex) |>
+  er_tte_add_curve() |>
+  er_tte_add_pvalue() |>
+  er_tte_theme(format_p = scales::label_pvalue(accuracy = 0.0001, add_p = TRUE)) |>
+  plot()
+```
+
+`draw_key` swaps the legend glyph the curve/model layers use, e.g. a point instead of the default filled rectangle:
+
+```{r theming-draw-key}
+lung_sex |>
+  er_tte(time, status == 2, stratify_by = sex) |>
+  er_tte_add_curve() |>
+  er_tte_theme(draw_key = ggplot2::draw_key_point) |>
+  plot()
+```
+
+`height_curve`/`height_risktable` set the relative heights patchwork gives to the two stacked panels once `er_tte_add_risktable()` is in play -- supplying only one leaves the other unchanged:
+
+```{r theming-heights}
+lung |>
+  er_tte(time, status == 2) |>
+  er_tte_add_curve() |>
+  er_tte_add_risktable() |>
+  er_tte_theme(height_curve = 3, height_risktable = 2) |>
+  plot()
+```
+
+`format_percent` is also accepted and stored, reserved for a future risk-table/survival-probability builder that formats a value as a percentage -- no built-in TTE style currently reads it, so setting it has no visible effect today.
 
 For anything `er_tte_theme()` doesn't cover, `+ ggplot2::theme(...)`/`+ ggplot2::labs(...)` remains the general-purpose escape hatch on the ggplot2 object `plot()` returns -- though note that once `er_tte_add_risktable()` is in play, the result is a patchwork composition of two panels rather than a single ggplot2 object, so such additions only apply to the top-level object, not automatically to both panels.
