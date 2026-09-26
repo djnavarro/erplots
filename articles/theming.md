@@ -1,4 +1,4 @@
-# Theming erplots
+# Theming exposure-response plots
 
 The goal of this article is to discuss the
 [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
@@ -312,7 +312,7 @@ erglm_data |>
 
 ## Where to next
 
-- [The plotting
+- [The exposure-response plotting
   grammar](https://erplots.djnavarro.net/articles/design.md) explains
   the layer-composition rules
   [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)

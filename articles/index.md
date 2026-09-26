@@ -8,6 +8,10 @@
   responses](https://erplots.djnavarro.net/articles/plot-continuous.md):
 - [Plotting count
   responses](https://erplots.djnavarro.net/articles/plot-count.md):
+- [Theming exposure-response
+  plots](https://erplots.djnavarro.net/articles/theming.md):
+- [The exposure-response plotting
+  grammar](https://erplots.djnavarro.net/articles/design.md):
 
 ### Other plot types
 
@@ -16,14 +20,8 @@
 - [Time-to-event
   plots](https://erplots.djnavarro.net/articles/plot-tte.md):
 
-### Theming plots
+### Other topics
 
-- [Theming erplots](https://erplots.djnavarro.net/articles/theming.md):
-
-### Technical topics
-
-- [Understanding the erplots
-  grammar](https://erplots.djnavarro.net/articles/design.md):
 - [Extending
   erplots](https://erplots.djnavarro.net/articles/extending.md):
 - [Implementing the model

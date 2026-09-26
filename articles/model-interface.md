@@ -2,11 +2,12 @@
 
 erplots never fits a model. Every plot it draws is built from
 predictions, simulations, or summary statistics that some *other* object
-hands it, via three S3 generics:
+hands it, via four S3 generics:
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
 and
-[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
+[`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
 Collectively these are “the model interface”, documented tersely at
 [`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md).
 This article exists because that help topic is a contract, not a
@@ -15,14 +16,16 @@ implementing one actually looks like, or why the contract is shaped the
 way it is. If you maintain a modelling package and want its model
 objects to work with
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-and friends, this is the article to read.
+and friends – or, for a time-to-event model specifically, with
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
+– this is the article to read.
 
 You’re assumed to already know your way around S3 dispatch,
 [`predict()`](https://rdrr.io/r/stats/predict.html) methods, and the
 general shape of a modelling package – this article doesn’t re-explain
-those. What it does explain is the erplots-specific part: which three
-generics to implement, what each one is *for*, and what erplots does
-with the result once you’ve implemented it.
+those. What it does explain is the erplots-specific part: which of the
+four generics to implement, what each one is *for*, and what erplots
+does with the result once you’ve implemented it.
 
 ``` r
 
@@ -63,6 +66,18 @@ unlocks spaghetti plots and VPCs; adding
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 unlocks p-value/coefficient/goodness-of-fit annotations. None of the
 three depends on any other being implemented.
+
+[`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+sits apart from these three: it has nothing to do with
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)
+at all, and only matters if your model should also plug into
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)’s
+survival-curve overlay in the separate
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+mini-grammar. It has no `NULL`-returning default either – a model with
+no survival-curve support should simply not implement it, and
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
+errors informatively if it’s called with one anyway.
 
 ## `er_predict()`: the one you must write
 
@@ -573,9 +588,140 @@ populates `coefficients` with a builder that actually reads
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
 job is only to make the data available.
 
+## `er_predict_survival()`: the `er_tte()` model overlay
+
+``` r
+
+er_predict_survival(model, newdata, time_grid, conf_level = 0.95, ...)
+```
+
+Powers a single, specific thing:
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)’s
+parametric `S(t)` curve/ribbon, overlaid on a Kaplan-Meier estimate in
+the separate
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+mini-grammar (time on the x-axis, survival probability on the y-axis –
+see [Time-to-event
+plots](https://erplots.djnavarro.net/articles/plot-tte.md)). It has
+nothing to do with
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md);
+a model that implements
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+gets no benefit from also implementing this one, or vice versa.
+
+The contract differs from
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+in one structural way: `newdata` carries one row per covariate profile
+(e.g. one row per stratification level), with *no* time column at all –
+times come from the separate `time_grid` argument instead. Return
+`newdata` cross-joined with `time_grid` (one row per `newdata` row ×
+`time_grid` value), with three columns added: `time`, `fit_survival`
+(the point estimate of `S(time | newdata row)`), `ci_lower`, and
+`ci_upper`. Unlike
+[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
+`fit_resp`, there’s no ambiguity about scale to get right here – a
+survival probability only ever has one scale, `[0, 1]`.
+
+There’s no `NULL`-returning default method, unlike
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md):
+a model with no survival-curve support should simply not implement this
+generic at all, and
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
+errors informatively (naming the model’s class) if it’s called with one
+anyway.
+
+### A worked example
+
+Suppose your modelling package fits parametric survival models via
+[`survival::survreg()`](https://rdrr.io/pkg/survival/man/survreg.html).
+A Weibull or log-normal fit needs its own scale parameter accounted for,
+but the exponential case – where proportional hazards and accelerated
+failure time coincide – keeps the maths simple enough to work through by
+hand, so that’s what this example uses:
+
+``` r
+
+library(survival)
+
+fit_toy_survival <- function(formula, data) {
+  fit <- survreg(formula, data = data, dist = "exponential")
+  class(fit) <- c("toy_survival", class(fit))
+  fit
+}
+
+lung_sex <- lung |> transform(sex = factor(sex, labels = c("Male", "Female")))
+mod_survival <- fit_toy_survival(Surv(time, status == 2) ~ sex, lung_sex)
+class(mod_survival)
+#> [1] "toy_survival" "survreg"
+```
+
+[`survreg()`](https://rdrr.io/pkg/survival/man/survreg.html)’s
+exponential model is an accelerated-failure-time model on the log-time
+scale, `log(T) = X * beta + error`, with `error`’s distribution fixed
+(no separate scale parameter to estimate, unlike Weibull/log-normal).
+That means `S(t | x) = exp(-t * exp(-X * beta))`, and
+`coef(model)`/`vcov(model)` already give you everything needed for both
+the point estimate and its uncertainty – no numerical delta method
+required, since the linear predictor `X * beta` enters `S(t | x)`
+through a strictly monotonic transform. That monotonicity is what lets
+the method below build a confidence interval by computing one for the
+*linear predictor* first, then mapping its two endpoints through
+`S(t | x)`, rather than propagating a standard error through a nonlinear
+function the way `er_predict.toy_emax()` had to earlier in this article:
+
+``` r
+
+er_predict_survival.toy_survival <- function(model, newdata, time_grid, conf_level = 0.95, ...) {
+  z <- -qnorm((1 - conf_level) / 2)
+
+  X <- model.matrix(delete.response(terms(model)), data = newdata)
+  beta <- coef(model)
+  eta <- as.vector(X %*% beta)
+  se_eta <- sqrt(rowSums((X %*% vcov(model)) * X))
+
+  grid <- newdata[rep(seq_len(nrow(newdata)), each = length(time_grid)), , drop = FALSE]
+  grid$time <- rep(time_grid, times = nrow(newdata))
+  eta <- rep(eta, each = length(time_grid))
+  se_eta <- rep(se_eta, each = length(time_grid))
+
+  grid$fit_survival <- exp(-grid$time * exp(-eta))
+  grid$ci_lower <- exp(-grid$time * exp(-(eta - z * se_eta)))
+  grid$ci_upper <- exp(-grid$time * exp(-(eta + z * se_eta)))
+  rownames(grid) <- NULL
+  grid
+}
+```
+
+That’s the whole method. Plugged into
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md),
+it overlays the fitted exponential curve (with its confidence band) on
+top of the Kaplan-Meier estimate for each stratum:
+
+``` r
+
+lung_sex |>
+  er_tte(time, status == 2, stratify_by = sex) |>
+  er_tte_add_curve() |>
+  er_tte_add_model(mod_survival) |>
+  plot()
+```
+
+![](model-interface_files/figure-html/toy-survival-plot-1.png)
+
+The exponential fit is visibly too smooth relative to the Kaplan-Meier
+step curve – a single constant hazard per stratum can’t reproduce the
+data’s own shape – which is exactly the kind of model-vs-data mismatch
+an `S(t)` overlay like this one exists to make visible. A Weibull or
+log-normal fit would track the step curve more closely, at the cost of
+an extra scale parameter this simplified method doesn’t handle –
+extending it that way is a reasonable next step for a real
+implementation, not covered here.
+
 ## Testing your implementation
 
-There’s no formal conformance checker for this interface – it’s three
+There’s no formal conformance checker for this interface – it’s four
 plain S3 generics, so the real test is simply exercising the layers that
 call them:
 
@@ -594,17 +740,32 @@ call them:
   [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
   populates) exercises
   [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
+- `er_tte_add_model(your_model)` exercises
+  [`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  – a separate check from the four above, since it belongs to the
+  [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+  grammar rather than
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md).
 
 If you only implement
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
-that’s a complete, valid implementation – the other two are additive,
-not phases of a single required rollout. And if a method genuinely can’t
-do better than the default (`NULL`), leaving it unimplemented is the
-correct choice, not a gap to apologise for: every erplots builder that
-depends on
+that’s a complete, valid implementation –
+[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+are additive, not phases of a single required rollout, and
+[`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+is unrelated to all three (it only matters if your model also has
+something to say about
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)’s
+time-to-event grammar). And if a method genuinely can’t do better than
+the default (`NULL`), leaving it unimplemented is the correct choice,
+not a gap to apologise for: every erplots builder that depends on
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 already has to handle “not available” gracefully, since the default
 method returns `NULL` for every model class that hasn’t implemented one.
+[`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+is the one exception to that pattern – its default method errors rather
+than returning `NULL`, since there’s no plotting fallback for a survival
+curve nobody can compute.
 
 If your method requires an argument beyond the fixed contract (like
 `toy_landmark`’s `landmark_time` above), remember that exercising it
@@ -615,7 +776,7 @@ same way `toy_landmark`’s did above.
 
 ## Real-world implementations
 
-The two examples above are toy classes built for this article. Two real
+The examples above are toy classes built for this article. Three real
 packages implement this interface for production modelling code, and are
 worth reading directly if you want to see the pattern applied to a less
 simplified model:
@@ -644,17 +805,35 @@ simplified model:
   predictions bounded in `[0, 1]` and to draw Bernoulli rather than
   Gaussian noise for `sim_resp`, rather than needing a fourth, separate
   set of methods.
+- [ertte](https://github.com/djnavarro/ertte) implements the full
+  interface for time-to-event models:
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/
+  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  methods for scalar landmark-binary/RMST reductions of a survival curve
+  (letting a time-to-event model plug into the ordinary
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)
+  grammar too), plus `er_predict_survival.ertte_model()` – wrapping its
+  own
+  [`ertte_predict()`](https://ertte.djnavarro.net/reference/ertte_predict.html)
+  – for the full `S(t)` curve overlay
+  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
+  needs. Unlike `toy_survival` above, it handles the Weibull/log-normal
+  scale parameter this article’s simplified exponential example
+  sidesteps, via
+  [`ertte_predict()`](https://ertte.djnavarro.net/reference/ertte_predict.html)’s
+  own machinery rather than the from-scratch delta method used here.
 
-Both are `Suggests`-only dependencies of erplots (see `DESCRIPTION`),
-used here only as worked examples – there’s no requirement to depend on
-either to implement this interface for your own model class.
+All three are `Suggests`-only dependencies of erplots (see
+`DESCRIPTION`), used here only as worked examples – there’s no
+requirement to depend on any of them to implement this interface for
+your own model class.
 
 ## See also
 
 - [`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md)
   for the terse, canonical statement of the contract this article
   expands on.
-- [The plotting
+- [The exposure-response plotting
   grammar](https://erplots.djnavarro.net/articles/design.md) for how
   [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
@@ -665,3 +844,10 @@ either to implement this interface for your own model class.
   your model works with the built-in layers, you also want to change
   *how* a layer draws that model’s output – a different kind of
   extensibility from the one this article covers.
+- [Time-to-event
+  plots](https://erplots.djnavarro.net/articles/plot-tte.md) for
+  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)’s
+  overlay in action against a real implementation (`ertte`), and the
+  rest of the
+  [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+  grammar it plugs into.

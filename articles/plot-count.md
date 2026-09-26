@@ -11,8 +11,9 @@ response data. This article focuses on **count data**, using a Poisson
 model fitted using the erglm package. It covers the substantive aspects
 of plot construction, not the superficial features like labels,
 palettes, and visual theme. Those are covered by the [theming
-erplots](https://erplots.djnavarro.net/articles/theming.md) article,
-which applies unchanged regardless of response type.
+exposure-response
+plots](https://erplots.djnavarro.net/articles/theming.md) article, which
+applies unchanged regardless of response type.
 
 ``` r
 

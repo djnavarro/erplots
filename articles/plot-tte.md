@@ -44,7 +44,7 @@ lung |>
   plot()
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-2-1.png)
+![](plot-tte_files/figure-html/single-curve-1.png)
 
 [`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)
 adds a tick mark at every censoring time, layered on top of the curve:
@@ -58,7 +58,7 @@ lung |>
   plot()
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-3-1.png)
+![](plot-tte_files/figure-html/curve-censor-1.png)
 
 [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)
 adds a number-at-risk panel, stacked below the curve via patchwork, with
@@ -74,7 +74,7 @@ lung |>
   plot()
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-4-1.png)
+![](plot-tte_files/figure-html/curve-censor-risktable-1.png)
 
 ## Stratified curves
 
@@ -98,7 +98,7 @@ lung_sex |>
   plot()
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-5-1.png)
+![](plot-tte_files/figure-html/stratified-curve-1.png)
 
 A genuinely continuous covariate, like `age`, needs binning into groups
 first –
@@ -114,7 +114,7 @@ lung |>
   plot()
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-6-1.png)
+![](plot-tte_files/figure-html/stratified-continuous-covariate-1.png)
 
 ### Log-rank test annotation
 
@@ -134,7 +134,7 @@ lung_sex |>
   plot()
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-7-1.png)
+![](plot-tte_files/figure-html/logrank-pvalue-1.png)
 
 ## Overlaying a parametric model
 
@@ -159,7 +159,7 @@ lung_sex |>
   plot()
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-8-1.png)
+![](plot-tte_files/figure-html/model-aft-1.png)
 
 `model` may reference covariates beyond the strata variable; erplots
 fills any other covariate from the plot data with a reference value
@@ -179,7 +179,7 @@ lung |>
   plot()
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-9-1.png)
+![](plot-tte_files/figure-html/model-cox-1.png)
 
 Since `age` isn’t a stratification variable here,
 [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
@@ -211,10 +211,31 @@ lung_sex |>
   plot()
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-10-1.png)
+![](plot-tte_files/figure-html/theming-1.png)
 
-One theming argument is structural rather than purely cosmetic: `xlim`
-overwrites the time axis’s limits directly, and those limits are what
+`subtitle`/`caption` add further plot-level text, and `ylim` overrides
+the survival-probability axis’s displayed range – purely cosmetic, since
+a survival probability is always modelled on `[0, 1]` regardless of
+what’s shown:
+
+``` r
+
+lung_sex |>
+  er_tte(time, status == 2, stratify_by = sex) |>
+  er_tte_add_curve() |>
+  er_tte_theme(
+    subtitle = "Lung cancer cohort",
+    caption = "Source: survival::lung",
+    ylim = c(0, 1.05)
+  ) |>
+  plot()
+```
+
+![](plot-tte_files/figure-html/theming-labels-1.png)
+
+One theming argument is structural rather than purely cosmetic, unlike
+`ylim` above: `xlim` overwrites the time axis’s limits directly, and
+those limits are what
 [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)’s
 default `time_grid` and
 [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)’s
@@ -235,7 +256,57 @@ lung |>
 #> (`geom_step()`).
 ```
 
-![](plot-tte_files/figure-html/unnamed-chunk-11-1.png)
+![](plot-tte_files/figure-html/theming-xlim-1.png)
+
+`format_p` controls how the log-rank annotation’s p-value is displayed:
+
+``` r
+
+lung_sex |>
+  er_tte(time, status == 2, stratify_by = sex) |>
+  er_tte_add_curve() |>
+  er_tte_add_pvalue() |>
+  er_tte_theme(format_p = scales::label_pvalue(accuracy = 0.0001, add_p = TRUE)) |>
+  plot()
+```
+
+![](plot-tte_files/figure-html/theming-format-p-1.png)
+
+`draw_key` swaps the legend glyph the curve/model layers use, e.g. a
+point instead of the default filled rectangle:
+
+``` r
+
+lung_sex |>
+  er_tte(time, status == 2, stratify_by = sex) |>
+  er_tte_add_curve() |>
+  er_tte_theme(draw_key = ggplot2::draw_key_point) |>
+  plot()
+```
+
+![](plot-tte_files/figure-html/theming-draw-key-1.png)
+
+`height_curve`/`height_risktable` set the relative heights patchwork
+gives to the two stacked panels once
+[`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)
+is in play – supplying only one leaves the other unchanged:
+
+``` r
+
+lung |>
+  er_tte(time, status == 2) |>
+  er_tte_add_curve() |>
+  er_tte_add_risktable() |>
+  er_tte_theme(height_curve = 3, height_risktable = 2) |>
+  plot()
+```
+
+![](plot-tte_files/figure-html/theming-heights-1.png)
+
+`format_percent` is also accepted and stored, reserved for a future
+risk-table/survival-probability builder that formats a value as a
+percentage – no built-in TTE style currently reads it, so setting it has
+no visible effect today.
 
 For anything
 [`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)

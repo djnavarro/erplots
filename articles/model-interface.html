@@ -40,16 +40,14 @@
     <li><a class="dropdown-item" href="../articles/plot-binary.html">Plotting binary responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
+    <li><a class="dropdown-item" href="../articles/theming.html">Theming exposure-response plots</a></li>
+    <li><a class="dropdown-item" href="../articles/design.html">The exposure-response plotting grammar</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Other plot types</h6></li>
     <li><a class="dropdown-item" href="../articles/plot-vpc.html">Visual predictive checks</a></li>
     <li><a class="dropdown-item" href="../articles/plot-tte.html">Time-to-event plots</a></li>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Theming plots</h6></li>
-    <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Technical topics</h6></li>
-    <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Other topics</h6></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
     <li><a class="dropdown-item" href="../articles/model-interface.html">Implementing the model interface</a></li>
     <li><a class="dropdown-item" href="../articles/internals.html">The built plot object (internal structure)</a></li>
@@ -94,21 +92,23 @@
     
 <p>erplots never fits a model. Every plot it draws is built from
 predictions, simulations, or summary statistics that some <em>other</em>
-object hands it, via three S3 generics: <code><a href="../reference/er_model_interface.html">er_predict()</a></code>,
-<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>, and <code><a href="../reference/er_model_interface.html">er_summary()</a></code>. Collectively
-these are “the model interface”, documented tersely at
-<code><a href="../reference/er_model_interface.html">?er_model_interface</a></code>. This article exists because that help
-topic is a contract, not a tutorial: it tells you what each generic must
-return, but not what implementing one actually looks like, or why the
-contract is shaped the way it is. If you maintain a modelling package
-and want its model objects to work with <code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code>
-and friends, this is the article to read.</p>
+object hands it, via four S3 generics: <code><a href="../reference/er_model_interface.html">er_predict()</a></code>,
+<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>, <code><a href="../reference/er_model_interface.html">er_summary()</a></code>, and
+<code><a href="../reference/er_model_interface.html">er_predict_survival()</a></code>. Collectively these are “the model
+interface”, documented tersely at <code><a href="../reference/er_model_interface.html">?er_model_interface</a></code>. This
+article exists because that help topic is a contract, not a tutorial: it
+tells you what each generic must return, but not what implementing one
+actually looks like, or why the contract is shaped the way it is. If you
+maintain a modelling package and want its model objects to work with
+<code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code> and friends – or, for a time-to-event
+model specifically, with <code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code> – this is the
+article to read.</p>
 <p>You’re assumed to already know your way around S3 dispatch,
 <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> methods, and the general shape of a modelling
 package – this article doesn’t re-explain those. What it does explain is
-the erplots-specific part: which three generics to implement, what each
-one is <em>for</em>, and what erplots does with the result once you’ve
-implemented it.</p>
+the erplots-specific part: which of the four generics to implement, what
+each one is <em>for</em>, and what erplots does with the result once
+you’ve implemented it.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>
@@ -136,6 +136,15 @@ model curve/ribbon layer working; adding <code><a href="../reference/er_model_in
 unlocks spaghetti plots and VPCs; adding <code><a href="../reference/er_model_interface.html">er_summary()</a></code>
 unlocks p-value/coefficient/goodness-of-fit annotations. None of the
 three depends on any other being implemented.</p>
+<p><code><a href="../reference/er_model_interface.html">er_predict_survival()</a></code> sits apart from these three: it
+has nothing to do with <code><a href="../reference/er_plot.html">er_plot()</a></code>/<code><a href="../reference/er_vpc.html">er_vpc()</a></code> at
+all, and only matters if your model should also plug into
+<code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>’s survival-curve overlay in the separate
+<code><a href="../reference/er_tte.html">er_tte()</a></code> mini-grammar. It has no
+<code>NULL</code>-returning default either – a model with no
+survival-curve support should simply not implement it, and
+<code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code> errors informatively if it’s called with
+one anyway.</p>
 </div>
 <div class="section level2">
 <h2 id="er_predict-the-one-you-must-write">
@@ -588,9 +597,121 @@ behalf. Matching a model whose <code><a href="../reference/er_model_interface.ht
 </div>
 </div>
 <div class="section level2">
+<h2 id="er_predict_survival-the-er_tte-model-overlay">
+<code>er_predict_survival()</code>: the <code>er_tte()</code> model
+overlay<a class="anchor" aria-label="anchor" href="#er_predict_survival-the-er_tte-model-overlay"></a>
+</h2>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/er_model_interface.html">er_predict_survival</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span>, <span class="va">time_grid</span>, conf_level <span class="op">=</span> <span class="fl">0.95</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<p>Powers a single, specific thing: <code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>’s
+parametric <code>S(t)</code> curve/ribbon, overlaid on a Kaplan-Meier
+estimate in the separate <code><a href="../reference/er_tte.html">er_tte()</a></code> mini-grammar (time on the
+x-axis, survival probability on the y-axis – see <a href="plot-tte.html">Time-to-event plots</a>). It has nothing to do with
+<code><a href="../reference/er_plot.html">er_plot()</a></code>/<code><a href="../reference/er_vpc.html">er_vpc()</a></code>; a model that implements
+<code><a href="../reference/er_model_interface.html">er_predict()</a></code>/
+<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/<code><a href="../reference/er_model_interface.html">er_summary()</a></code> gets no benefit
+from also implementing this one, or vice versa.</p>
+<p>The contract differs from <code><a href="../reference/er_model_interface.html">er_predict()</a></code>’s in one
+structural way: <code>newdata</code> carries one row per covariate
+profile (e.g. one row per stratification level), with <em>no</em> time
+column at all – times come from the separate <code>time_grid</code>
+argument instead. Return <code>newdata</code> cross-joined with
+<code>time_grid</code> (one row per <code>newdata</code> row ×
+<code>time_grid</code> value), with three columns added:
+<code>time</code>, <code>fit_survival</code> (the point estimate of
+<code>S(time | newdata row)</code>), <code>ci_lower</code>, and
+<code>ci_upper</code>. Unlike <code><a href="../reference/er_model_interface.html">er_predict()</a></code>’s
+<code>fit_resp</code>, there’s no ambiguity about scale to get right
+here – a survival probability only ever has one scale,
+<code>[0, 1]</code>.</p>
+<p>There’s no <code>NULL</code>-returning default method, unlike
+<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/ <code><a href="../reference/er_model_interface.html">er_summary()</a></code>: a model with no
+survival-curve support should simply not implement this generic at all,
+and <code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code> errors informatively (naming the
+model’s class) if it’s called with one anyway.</p>
+<div class="section level3">
+<h3 id="a-worked-example-2">A worked example<a class="anchor" aria-label="anchor" href="#a-worked-example-2"></a>
+</h3>
+<p>Suppose your modelling package fits parametric survival models via
+<code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survival::survreg()</a></code>. A Weibull or log-normal fit needs its
+own scale parameter accounted for, but the exponential case – where
+proportional hazards and accelerated failure time coincide – keeps the
+maths simple enough to work through by hand, so that’s what this example
+uses:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit_toy_survival</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></span><span class="op">(</span><span class="va">formula</span>, data <span class="op">=</span> <span class="va">data</span>, dist <span class="op">=</span> <span class="st">"exponential"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"toy_survival"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">fit</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">lung_sex</span> <span class="op">&lt;-</span> <span class="va">lung</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span>sex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sex</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Male"</span>, <span class="st">"Female"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">mod_survival</span> <span class="op">&lt;-</span> <span class="fu">fit_toy_survival</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">~</span> <span class="va">sex</span>, <span class="va">lung_sex</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">mod_survival</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "toy_survival" "survreg"</span></span></code></pre></div>
+<p><code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg()</a></code>’s exponential model is an
+accelerated-failure-time model on the log-time scale,
+<code>log(T) = X * beta + error</code>, with <code>error</code>’s
+distribution fixed (no separate scale parameter to estimate, unlike
+Weibull/log-normal). That means
+<code>S(t | x) = exp(-t * exp(-X * beta))</code>, and
+<code>coef(model)</code>/<code>vcov(model)</code> already give you
+everything needed for both the point estimate and its uncertainty – no
+numerical delta method required, since the linear predictor
+<code>X * beta</code> enters <code>S(t | x)</code> through a strictly
+monotonic transform. That monotonicity is what lets the method below
+build a confidence interval by computing one for the <em>linear
+predictor</em> first, then mapping its two endpoints through
+<code>S(t | x)</code>, rather than propagating a standard error through
+a nonlinear function the way <code>er_predict.toy_emax()</code> had to
+earlier in this article:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">er_predict_survival.toy_survival</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span>, <span class="va">time_grid</span>, <span class="va">conf_level</span> <span class="op">=</span> <span class="fl">0.95</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">z</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">qnorm</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">conf_level</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/delete.response.html" class="external-link">delete.response</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/terms.html" class="external-link">terms</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">newdata</span><span class="op">)</span></span>
+<span>  <span class="va">beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span>  <span class="va">eta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">beta</span><span class="op">)</span></span>
+<span>  <span class="va">se_eta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="op">(</span><span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">grid</span> <span class="op">&lt;-</span> <span class="va">newdata</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">newdata</span><span class="op">)</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">time_grid</span><span class="op">)</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span>  <span class="va">grid</span><span class="op">$</span><span class="va">time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">time_grid</span>, times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">newdata</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">eta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">eta</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">time_grid</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">se_eta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">se_eta</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">time_grid</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">grid</span><span class="op">$</span><span class="va">fit_survival</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">grid</span><span class="op">$</span><span class="va">time</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">eta</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">grid</span><span class="op">$</span><span class="va">ci_lower</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">grid</span><span class="op">$</span><span class="va">time</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">eta</span> <span class="op">-</span> <span class="va">z</span> <span class="op">*</span> <span class="va">se_eta</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">grid</span><span class="op">$</span><span class="va">ci_upper</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">grid</span><span class="op">$</span><span class="va">time</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">eta</span> <span class="op">+</span> <span class="va">z</span> <span class="op">*</span> <span class="va">se_eta</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">grid</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span>  <span class="va">grid</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>That’s the whole method. Plugged into
+<code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>, it overlays the fitted exponential
+curve (with its confidence band) on top of the Kaplan-Meier estimate for
+each stratum:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_model.html">er_tte_add_model</a></span><span class="op">(</span><span class="va">mod_survival</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="model-interface_files/figure-html/toy-survival-plot-1.png" class="r-plt" alt="" width="700"></p>
+<p>The exponential fit is visibly too smooth relative to the
+Kaplan-Meier step curve – a single constant hazard per stratum can’t
+reproduce the data’s own shape – which is exactly the kind of
+model-vs-data mismatch an <code>S(t)</code> overlay like this one exists
+to make visible. A Weibull or log-normal fit would track the step curve
+more closely, at the cost of an extra scale parameter this simplified
+method doesn’t handle – extending it that way is a reasonable next step
+for a real implementation, not covered here.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="testing-your-implementation">Testing your implementation<a class="anchor" aria-label="anchor" href="#testing-your-implementation"></a>
 </h2>
-<p>There’s no formal conformance checker for this interface – it’s three
+<p>There’s no formal conformance checker for this interface – it’s four
 plain S3 generics, so the real test is simply exercising the layers that
 call them:</p>
 <ul>
@@ -609,15 +730,29 @@ additionally exercises <code><a href="../reference/er_model_interface.html">er_s
 <code>er_plot_add_summary(model = your_model)</code> (paired with
 whichever summary builder matches what your <code><a href="../reference/er_model_interface.html">er_summary()</a></code>
 populates) exercises <code><a href="../reference/er_model_interface.html">er_summary()</a></code>.</li>
+<li>
+<code>er_tte_add_model(your_model)</code> exercises
+<code><a href="../reference/er_model_interface.html">er_predict_survival()</a></code> – a separate check from the four
+above, since it belongs to the <code><a href="../reference/er_tte.html">er_tte()</a></code> grammar rather than
+<code><a href="../reference/er_plot.html">er_plot()</a></code>/<code><a href="../reference/er_vpc.html">er_vpc()</a></code>.</li>
 </ul>
 <p>If you only implement <code><a href="../reference/er_model_interface.html">er_predict()</a></code>, that’s a complete,
-valid implementation – the other two are additive, not phases of a
-single required rollout. And if a method genuinely can’t do better than
-the default (<code>NULL</code>), leaving it unimplemented is the correct
-choice, not a gap to apologise for: every erplots builder that depends
-on <code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/<code><a href="../reference/er_model_interface.html">er_summary()</a></code> already has to
+valid implementation –
+<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/<code><a href="../reference/er_model_interface.html">er_summary()</a></code> are additive, not
+phases of a single required rollout, and
+<code><a href="../reference/er_model_interface.html">er_predict_survival()</a></code> is unrelated to all three (it only
+matters if your model also has something to say about
+<code><a href="../reference/er_tte.html">er_tte()</a></code>’s time-to-event grammar). And if a method
+genuinely can’t do better than the default (<code>NULL</code>), leaving
+it unimplemented is the correct choice, not a gap to apologise for:
+every erplots builder that depends on
+<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/<code><a href="../reference/er_model_interface.html">er_summary()</a></code> already has to
 handle “not available” gracefully, since the default method returns
-<code>NULL</code> for every model class that hasn’t implemented one.</p>
+<code>NULL</code> for every model class that hasn’t implemented one.
+<code><a href="../reference/er_model_interface.html">er_predict_survival()</a></code> is the one exception to that pattern
+– its default method errors rather than returning <code>NULL</code>,
+since there’s no plotting fallback for a survival curve nobody can
+compute.</p>
 <p>If your method requires an argument beyond the fixed contract (like
 <code>toy_landmark</code>’s <code>landmark_time</code> above), remember
 that exercising it means passing
@@ -630,10 +765,10 @@ above.</p>
 <div class="section level2">
 <h2 id="real-world-implementations">Real-world implementations<a class="anchor" aria-label="anchor" href="#real-world-implementations"></a>
 </h2>
-<p>The two examples above are toy classes built for this article. Two
-real packages implement this interface for production modelling code,
-and are worth reading directly if you want to see the pattern applied to
-a less simplified model:</p>
+<p>The examples above are toy classes built for this article. Three real
+packages implement this interface for production modelling code, and are
+worth reading directly if you want to see the pattern applied to a less
+simplified model:</p>
 <ul>
 <li>
 <a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a> wraps
@@ -665,11 +800,25 @@ methods via ordinary S3 inheritance; the methods branch internally (on
 bounded in <code>[0, 1]</code> and to draw Bernoulli rather than
 Gaussian noise for <code>sim_resp</code>, rather than needing a fourth,
 separate set of methods.</li>
+<li>
+<a href="https://github.com/djnavarro/ertte" class="external-link">ertte</a> implements
+the full interface for time-to-event models:
+<code><a href="../reference/er_model_interface.html">er_predict()</a></code>/<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/
+<code><a href="../reference/er_model_interface.html">er_summary()</a></code> methods for scalar landmark-binary/RMST
+reductions of a survival curve (letting a time-to-event model plug into
+the ordinary <code><a href="../reference/er_plot.html">er_plot()</a></code>/<code><a href="../reference/er_vpc.html">er_vpc()</a></code> grammar too),
+plus <code>er_predict_survival.ertte_model()</code> – wrapping its own
+<code><a href="https://ertte.djnavarro.net/reference/ertte_predict.html" class="external-link">ertte_predict()</a></code> – for the full <code>S(t)</code> curve
+overlay <code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code> needs. Unlike
+<code>toy_survival</code> above, it handles the Weibull/log-normal scale
+parameter this article’s simplified exponential example sidesteps, via
+<code><a href="https://ertte.djnavarro.net/reference/ertte_predict.html" class="external-link">ertte_predict()</a></code>’s own machinery rather than the
+from-scratch delta method used here.</li>
 </ul>
-<p>Both are <code>Suggests</code>-only dependencies of erplots (see
+<p>All three are <code>Suggests</code>-only dependencies of erplots (see
 <code>DESCRIPTION</code>), used here only as worked examples – there’s
-no requirement to depend on either to implement this interface for your
-own model class.</p>
+no requirement to depend on any of them to implement this interface for
+your own model class.</p>
 </div>
 <div class="section level2">
 <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
@@ -679,8 +828,8 @@ own model class.</p>
 <code><a href="../reference/er_model_interface.html">?er_model_interface</a></code> for the terse, canonical statement
 of the contract this article expands on.</li>
 <li>
-<a href="design.html">The plotting grammar</a> for how
-<code><a href="../reference/er_model_interface.html">er_predict()</a></code>/
+<a href="design.html">The exposure-response plotting grammar</a> for
+how <code><a href="../reference/er_model_interface.html">er_predict()</a></code>/
 <code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/<code><a href="../reference/er_model_interface.html">er_summary()</a></code>’s outputs flow into
 the layers that consume them (<code>config$predictions</code>,
 <code>config$summary</code>, <code>config$p_value</code>, and so
@@ -690,6 +839,11 @@ on).</li>
 works with the built-in layers, you also want to change <em>how</em> a
 layer draws that model’s output – a different kind of extensibility from
 the one this article covers.</li>
+<li>
+<a href="plot-tte.html">Time-to-event plots</a> for
+<code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>’s overlay in action against a real
+implementation (<code>ertte</code>), and the rest of the
+<code><a href="../reference/er_tte.html">er_tte()</a></code> grammar it plugs into.</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

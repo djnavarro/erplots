@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Understanding the erplots grammar • erplots</title>
+<title>The exposure-response plotting grammar • erplots</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Atkinson_Hyperlegible-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Understanding the erplots grammar">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The exposure-response plotting grammar">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -40,16 +40,14 @@
     <li><a class="dropdown-item" href="../articles/plot-binary.html">Plotting binary responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
+    <li><a class="dropdown-item" href="../articles/theming.html">Theming exposure-response plots</a></li>
+    <li><a class="dropdown-item" href="../articles/design.html">The exposure-response plotting grammar</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Other plot types</h6></li>
     <li><a class="dropdown-item" href="../articles/plot-vpc.html">Visual predictive checks</a></li>
     <li><a class="dropdown-item" href="../articles/plot-tte.html">Time-to-event plots</a></li>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Theming plots</h6></li>
-    <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Technical topics</h6></li>
-    <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Other topics</h6></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
     <li><a class="dropdown-item" href="../articles/model-interface.html">Implementing the model interface</a></li>
     <li><a class="dropdown-item" href="../articles/internals.html">The built plot object (internal structure)</a></li>
@@ -83,7 +81,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Understanding the erplots grammar</h1>
+      <h1>The exposure-response plotting grammar</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/djnavarro/erplots/blob/main/vignettes/articles/design.Rmd" class="external-link"><code>vignettes/articles/design.Rmd</code></a></small>
@@ -117,10 +115,10 @@ to how plots are built in the ggplot2 package. The first function you
 call is always <code><a href="../reference/er_plot.html">er_plot()</a></code>, which creates an empty object of
 class <code>er_plot</code>. When you do this, it stores the data set
 internally and keeps track of which columns correspond to the exposure,
-response, and stratification variables. You then pipe it through through
-one or more <em>layer</em> functions, each of which adds one visual
-layer, and then finish by calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to generate the
-plot. A typical plot generation pipeline might look like this:</p>
+response, and stratification variables. You then pipe it through one or
+more <em>layer</em> functions, each of which adds one visual layer, and
+then finish by calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to generate the plot. A
+typical plot generation pipeline might look like this:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -139,7 +137,7 @@ erplots package itself. In this case, we fit the model using
 implements the erplots model interface functions, the erplots package
 knows how to extract everything it needs from the model.</li>
 <li>Second, notice that at the end of the pipeline we call
-<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> explicitly.One difference between ggplot2 and
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> explicitly. One difference between ggplot2 and
 erplots is that erplots makes a strong distinction between calling
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> on the plot object (outputs a written description
 of the plot) and calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on the plot object (renders
@@ -386,7 +384,7 @@ layer draws. None of it touches <em>how the composed plot looks</em> –
 labels, axis limits, the overall ggplot2 theme, the discrete colour/fill
 palette, formatters, and so on. That’s a deliberately separate,
 orthogonal knob, <code><a href="../reference/er_plot_theme.html">er_plot_theme()</a></code>, covered in its own
-article: <a href="theming.html">Theming erplots</a>.</p>
+article: <a href="theming.html">Theming exposure-response plots</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="extending-erplots">Extending erplots<a class="anchor" aria-label="anchor" href="#extending-erplots"></a>

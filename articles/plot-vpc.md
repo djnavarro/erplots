@@ -70,7 +70,7 @@ erglm_data |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-3-1.png)
+![](plot-vpc_files/figure-html/binary-vpc-exposure-1.png)
 
 ### VPC by continuous covariate
 
@@ -90,7 +90,7 @@ erglm_data |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-4-1.png)
+![](plot-vpc_files/figure-html/binary-vpc-weight-1.png)
 
 ### VPC by discrete covariate
 
@@ -111,7 +111,7 @@ erglm_data |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-5-1.png)
+![](plot-vpc_files/figure-html/binary-vpc-sex-1.png)
 
 ## Stratified panels
 
@@ -141,7 +141,7 @@ erglm_data |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-6-1.png)
+![](plot-vpc_files/figure-html/stratified-sex-1.png)
 
 A genuinely continuous covariate, like `weight`, needs binning into
 groups first –
@@ -158,7 +158,7 @@ erglm_data |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-7-1.png)
+![](plot-vpc_files/figure-html/stratified-weight-grp-1.png)
 
 `stratify_by` must resolve to a different variable than `plot_by` (which
 defaults to the exposure variable) – faceting by the exact variable
@@ -202,7 +202,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-9-1.png)
+![](plot-vpc_files/figure-html/continuous-vpc-mean-errorbar-1.png)
 
 The plot renders correctly, but the only thing it shows is whether the
 model can correctly predict the mean response within each bin. Because
@@ -233,7 +233,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-10-1.png)
+![](plot-vpc_files/figure-html/continuous-vpc-quantile-line-1.png)
 
 This works well, and is usually the best choice, but one thing that is
 missing in this plot is an expression of uncertainty about the observed
@@ -260,7 +260,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-11-1.png)
+![](plot-vpc_files/figure-html/continuous-vpc-quantile-errorbar-1.png)
 
 ### VPC by continuous covariate
 
@@ -294,7 +294,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-12-1.png)
+![](plot-vpc_files/figure-html/continuous-vpc-cnt-a-errorbar-1.png)
 
 For comparison, the plot below shows the same VPC in the ribbon style.
 The two show the same underlying comparison styled differently; which
@@ -319,7 +319,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-13-1.png)
+![](plot-vpc_files/figure-html/continuous-vpc-cnt-a-ribbon-1.png)
 
 ### VPC by discrete covariate
 
@@ -340,7 +340,7 @@ erglm_data |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-14-1.png)
+![](plot-vpc_files/figure-html/continuous-vpc-sex-errorbar-1.png)
 
 ## Theming
 
@@ -367,17 +367,70 @@ erglm_data |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-15-1.png)
+![](plot-vpc_files/figure-html/theming-1.png)
 
 Note that `xlab` labels `plot_by` (the VPC’s actual x-axis variable),
 not necessarily `exposure` – the two only coincide when `plot_by` wasn’t
 overridden.
+
+`subtitle`/`caption` add further plot-level text, and `strata_lab`
+relabels the facet strip prefix for a stratified VPC (errors if
+`stratify_by` wasn’t set in
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)):
+
+``` r
+
+mod_strat <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
+
+erglm_data |>
+  er_vpc(exposure = aucss, response = ae1, stratify_by = sex) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod_strat, seed = 1234) |>
+  er_vpc_theme(
+    strata_lab = "Sex",
+    subtitle = "Binary response",
+    caption = "Source: erglm_data"
+  ) |>
+  plot()
+```
+
+![](plot-vpc_files/figure-html/theming-labels-1.png)
+
+`xlim`/`ylim` override the axis limits
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)
+otherwise computes automatically from the data, applied via
+`ggplot2::coord_cartesian(clip = "off")`:
+
+``` r
+
+erglm_data |>
+  er_vpc(exposure = aucss, response = ae1) |>
+  er_vpc_add_observed() |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  er_vpc_theme(xlim = c(-100, 3000), ylim = c(-0.05, 1.05)) |>
+  plot()
+```
+
+![](plot-vpc_files/figure-html/theming-limits-1.png)
+
+Narrowing the limits far enough to clip an actual marker produces a
+warning naming which bins were hidden, rather than silently dropping
+them – the bin’s own summary statistic is still computed from every
+observation in it either way, only its plotted position is affected.
+
 [`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)
-doesn’t cover everything: there’s no argument for the observed/simulated
+doesn’t cover everything. There’s no argument for the observed/simulated
 colour scale, for instance, since it’s fixed to keep the two aligned
-across builders that mix colour and fill for the same distinction. For
-anything not covered, `+ ggplot2::theme(...)`/`+ ggplot2::labs(...)` on
-the object returned by
+across builders that mix colour and fill for the same distinction.
+`format_percent`/`format_number` are accepted and stored, intended to
+format the rate/mean value attached to each bin’s summary
+(`config$summary$y_mid_lbl`), but no built-in VPC style currently draws
+that label on the plot – they’re there for a custom `style` builder to
+read (see [Extending
+erplots](https://erplots.djnavarro.net/articles/extending.md)), not for
+a visible effect on any of the built-in idioms shown in this article.
+For anything else not covered,
+`+ ggplot2::theme(...)`/`+ ggplot2::labs(...)` on the object returned by
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) remains the
 general-purpose escape hatch.
 
@@ -391,7 +444,7 @@ illegibility tends to vary from plot to plot, it is almost impossible to
 build in an automated fix to this problem. Instead of attempting an
 automated fix that will very likely not work, the
 [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)
-mini-grammar exposes some customization tools that you can use to clean
+mini-grammar exposes some customisation tools that you can use to clean
 up a VPC plot that doesn’t look very nice. In this section, we outline
 some of the options that you have.
 
@@ -432,7 +485,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-17-1.png)
+![](plot-vpc_files/figure-html/errorbar-collision-1.png)
 
 There’s no simple fix for this: in this plot we have unpleasant
 collisions between the observed and simulated layers, *and* between the
@@ -478,7 +531,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-18-1.png)
+![](plot-vpc_files/figure-html/errorbar-dodge-fix-1.png)
 
 It takes a little bit of trial and error to find values that work in any
 specific case (and it does help to take a close look at the
@@ -516,7 +569,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-19-1.png)
+![](plot-vpc_files/figure-html/ribbon-collision-1.png)
 
 Sometimes you can improve legibility in this case by placing more
 emphasis on the edges of the bands, and reducing the salience of the
@@ -544,7 +597,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-20-1.png)
+![](plot-vpc_files/figure-html/ribbon-edges-fix-1.png)
 
 Ultimately, in this situation the most likely resolution is that you
 would have to revert from five quantile bands to the usual three:
@@ -570,7 +623,7 @@ emax_df |>
   plot()
 ```
 
-![](plot-vpc_files/figure-html/unnamed-chunk-21-1.png)
+![](plot-vpc_files/figure-html/ribbon-three-quantiles-1.png)
 
 Some of the distributional information is lost, but overall the plot is
 a lot easier to understand.

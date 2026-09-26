@@ -19,10 +19,10 @@ will handle the rest.
 
 This article discusses that extension mechanism, by showing you how to
 write a “builder” function. It assumes you’re already familiar with the
-erplots mini-language described in [the plot grammar
-article](https://erplots.djnavarro.net/articles/design.md) (layers,
-singleton/additive semantics, stratification); and have a good sense of
-the overall process of building plots with the package.
+erplots mini-language described in [the exposure-response plotting
+grammar article](https://erplots.djnavarro.net/articles/design.md)
+(layers, singleton/additive semantics, stratification); and have a good
+sense of the overall process of building plots with the package.
 
 ``` r
 
@@ -148,13 +148,13 @@ and
 [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
 alternatives all feel like the wrong way to display the data summaries
 by exposure quantile. Instead, you would prefer to draw these binwise
-summaries using a `geom_crossbar()`. Personally I think that’s a bad way
-to do it, but you may have a good reason for wanting this that I haven’t
-considered. So you decide to write your own builder function for this.
-And since the quantile layer is mostly dependent on the `config$summary`
-field, that’s the place to start. When doing so, it helps to look at
-what `config$summary` actually contains, and the most reliable way to do
-that is to ask erplots to show you: write a tiny “spy” builder that just
+summaries using a `geom_crossbar()`. This isn’t usually a great choice –
+more on that below – but you may have a good reason for wanting it, so
+you decide to write your own builder function for this. And since the
+quantile layer is mostly dependent on the `config$summary` field, that’s
+the place to start. When doing so, it helps to look at what
+`config$summary` actually contains, and the most reliable way to do that
+is to ask erplots to show you: write a tiny “spy” builder that just
 prints `config` and draws nothing, and pass it in as the `style` for the
 layer you want to inspect:
 
@@ -198,9 +198,9 @@ indicator variable that you might want to use in your builder function:
 - `y_mid_lbl`, `y_lwr_lbl`, `y_upr_lbl`, and `y_lbl` support the
   built-in label geom that
   [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
-  draws alongside its error bar. If we we wanted to use labels in our
-  plot we would need these columns, but since we plan to skip that we
-  can ignore them.
+  draws alongside its error bar. If we wanted to use labels in our plot
+  we would need these columns, but since we plan to skip that we can
+  ignore them.
 
 Now that we understand what `config$summary` already provides, writing
 the builder itself is very straightforward. All we need is a small
@@ -244,13 +244,13 @@ erglm_data |>
 
 ![](extending_files/figure-html/builder-example-plot-1.png)
 
-I am not at all convinced this is a good way to create an
-exposure-response plot: in statistical graphics, the “cross bar” visual
-idiom is almost always used to show distributional information (i.e., it
-feels like a boxplot without the whiskers). Using it to display a mean
-and confidence interval is almost certainly going to confuse anyone
-looking at your plot. Even so, it’s convenient to illustrate how to
-design a builder function.
+This is not, in general, a good way to create an exposure-response plot:
+in statistical graphics, the “cross bar” visual idiom is almost always
+used to show distributional information (i.e., it feels like a boxplot
+without the whiskers). Using it to display a mean and confidence
+interval is almost certainly going to confuse anyone looking at your
+plot. Even so, it’s convenient to illustrate how to design a builder
+function.
 
 Before moving on, there are a few things worth noting about this
 builder, all of which are generalisable to any layer:
@@ -617,6 +617,287 @@ all. It exists for the less common case where a builder changes *where*
 its output goes, or *what* one of its aesthetics represents, and the
 rest of the plot needs to be told so it can label things correctly. See
 [`?er_style`](https://erplots.djnavarro.net/reference/er_style.md) for
-the full public-API contract, and [the plot grammar
-article](https://erplots.djnavarro.net/articles/design.md) for how these
-layers fit together more broadly.
+the full public-API contract, and [the exposure-response plotting
+grammar article](https://erplots.djnavarro.net/articles/design.md) for
+how these layers fit together more broadly.
+
+## Writing a custom builder for `er_vpc()`
+
+Everything above is about
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s own
+builders.
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) (see
+[Visual predictive
+checks](https://erplots.djnavarro.net/articles/plot-vpc.md)) has its
+own, narrower shared signature:
+
+``` r
+function(data, config, exposure, response, theme, ...)
+```
+
+Two arguments from
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s
+signature are missing: `stratify` and `strata`. A VPC builder never
+needs to know about stratification directly – an optional `stratify_by`
+only ever facets the finished plot
+([`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html)),
+never recolours it, and every `config` table a builder reads from
+already carries the `.vpc_stratum` column that facet needs. A builder
+just draws its geoms once, the same way whether the object is stratified
+or not; faceting happens afterwards, outside the builder entirely.
+
+`config$summary` is the table both
+[`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+and
+[`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+(the defaults) plot from: one row per bin, with
+`y_mid`/`ci_lower`/`ci_upper` and, depending on
+`config$is_numeric_group`, either `.vpc_bin` (a categorical `plot_by`)
+or `x_median`/`x_mid` (a numeric one) to plot at. `config$percentiles`
+is the table the quantile-line/quantile-errorbar idioms read instead –
+one row per bin *and* per requested percentile – and is only computed
+for a continuous/count response with `probs` set; a builder that expects
+it should check for `NULL` the way every built-in one does, or declare
+`response_types` (below) so
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+catch the mismatch earlier.
+
+### A worked example
+
+Suppose the default point-and-solid-errorbar look for the observed layer
+doesn’t stand out enough against a ribbon-heavy simulated layer. Diamond
+markers with a dashed error bar are one easy way to make the observed
+side visually distinct, built the same way
+[`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+itself is, straight from `config$summary`:
+
+``` r
+
+er_style_vpc_observed_diamond <- er_style_tag(
+  function(data, config, exposure, response, theme, ...) {
+    x_var <- if (config$is_numeric_group) "x_median" else ".vpc_bin"
+    list(
+      ggplot2::geom_errorbar(
+        data = config$summary,
+        mapping = ggplot2::aes(x = .data[[x_var]], ymin = ci_lower, ymax = ci_upper, color = "Observed"),
+        width = 0.15, linetype = "dashed",
+        inherit.aes = FALSE
+      ),
+      ggplot2::geom_point(
+        data = config$summary,
+        mapping = ggplot2::aes(x = .data[[x_var]], y = y_mid, color = "Observed"),
+        shape = 18, size = 3,
+        inherit.aes = FALSE
+      )
+    )
+  },
+  layer = "observed",
+  response_types = c("binary", "continuous", "count"),
+  plot_by_types = c("continuous", "discrete"),
+  marker_source = "summary"
+)
+```
+
+Plugged in for the observed layer only – there’s no requirement to
+customise both sides of the comparison at once – it pairs without
+incident against the default simulated builder:
+
+``` r
+
+mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+
+erglm_data |>
+  er_vpc(exposure = aucss, response = ae1) |>
+  er_vpc_add_observed(style = er_style_vpc_observed_diamond) |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  plot()
+```
+
+![](extending_files/figure-html/vpc-custom-plot-1.png)
+
+### VPC-specific `er_style_tag()` arguments
+
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+recognise four \[er_style_tag()\] arguments beyond `layer` (checked the
+same way as `er_plot_add_*()`’s own `layer` tag above), none of which
+apply to an
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
+builder:
+
+| Argument | Applies to | Required? | What it controls |
+|----|----|----|----|
+| `response_types` | Any VPC builder | No – unchecked if unset | Which of `"binary"`/`"continuous"`/`"count"` responses the builder supports |
+| `plot_by_types` | Any VPC builder | No – unchecked if unset | Whether the builder supports a `"continuous"` (numeric) `plot_by`, a `"discrete"` (categorical) one, or both |
+| `layout` | Any VPC builder | No – unchecked if unset | `"categorical"` (plots at discrete bin locations) vs. `"continuous"` (plots at each bin’s numeric midpoint) – **different values from the data layer’s own `"overlay"`/`"panel"` pair above**, and checked between the observed and simulated builder rather than against a fixed rule |
+| `marker_source` | Any VPC builder | No – unchecked if unset | Which config table (`"summary"` or `"percentiles"`) the builder actually draws its marker(s) from, read by [`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)’s `xlim`/`ylim` clipping check (see [Visual predictive checks](https://erplots.djnavarro.net/articles/plot-vpc.html#theming)) |
+
+`response_types`/`plot_by_types` are checked against the VPC object’s
+own data, not against another builder –
+[`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
+declares `response_types = c("continuous", "count")` (it needs
+`config$percentiles`, never computed for a binary response), so pairing
+it with a binary-response VPC errors immediately, before any binning
+happens:
+
+``` r
+
+erglm_data |>
+  er_vpc(exposure = aucss, response = ae1) |>
+  er_vpc_add_observed(style = er_style_vpc_observed_quantile_line)
+#> Error in `.check_style_response_type()`:
+#> ! `style` does not support a "binary" response.
+#> ℹ It only supports: "continuous", "count".
+```
+
+`layout`, by contrast, is checked between the *two* builders passed to
+[`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md),
+not against the data – pairing a `"categorical"`-layout builder with a
+`"continuous"`-layout one would otherwise plot the two sides of the
+comparison at inconsistent x-positions for the same bin:
+
+``` r
+
+stub_categorical <- er_style_tag(
+  function(data, config, exposure, response, theme, ...) list(),
+  layer = "observed", layout = "categorical"
+)
+stub_continuous <- er_style_tag(
+  function(data, config, exposure, response, theme, ...) list(),
+  layer = "simulated", layout = "continuous"
+)
+
+mod_gauss <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+
+erglm_data |>
+  er_vpc(exposure = aucss, response = biomarker_change) |>
+  er_vpc_add_observed(style = stub_categorical) |>
+  er_vpc_add_simulated(model = mod_gauss, seed = 1234, style = stub_continuous)
+#> Error in `.check_vpc_layout_match()`:
+#> ! The observed layer's builder is tagged layout = "categorical", but the simulated layer's builder is tagged layout = "continuous".
+#> ℹ A "categorical" builder plots at discrete bin locations; a "continuous" builder plots at each bin's numeric midpoint -- pairing them plots the two layers at inconsistent x-positions.
+#> ℹ Use a layout-matched pair (e.g. `er_style_vpc_observed_quantile_line()` + `er_style_vpc_simulated_quantile_ribbon()`).
+#> ℹ Or leave `layout` untagged, like `er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()` and `er_style_vpc_observed_quantile_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()` do, to skip this check entirely.
+```
+
+None of the built-in idioms actually disagree this way – the two
+built-in `layout`-tagged builders
+([`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/
+[`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md))
+are already a matched pair, and every other built-in pair leaves
+`layout` untagged entirely, since their x-position adapts to `plot_by`’s
+type at build time rather than being fixed. The check exists for a
+custom builder that *does* commit to one family or the other.
+
+## Writing a custom builder for `er_tte()`
+
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) (see
+[Time-to-event
+plots](https://erplots.djnavarro.net/articles/plot-tte.md)) has its own
+shared signature too, closer to
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s than
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)’s:
+
+``` r
+function(data, config, stratify, time, strata, theme, ...)
+```
+
+`time` replaces `exposure`/`response` – a time-to-event plot has one
+axis-pair variable, not two – and otherwise the shape matches
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s
+exactly, including the same `stratify`/`strata` pair a VPC builder
+doesn’t get, since TTE stratification *does* map to colour/fill directly
+(one Kaplan-Meier curve per stratum, same panel), unlike VPC’s
+facet-only stratification.
+
+`config`’s contents differ by layer: the curve layer gets `config$table`
+(the tidy Kaplan-Meier table, with a `(0, 1)` origin row already
+prepended) and `config$time_upper`; the censor layer gets a
+`config$table` already filtered to censoring events; the risktable layer
+gets its own `config$table`/`config$breaks`; the pvalue layer gets
+`config$p_value`/ `config$corner_distance`; the model layer gets
+`config$predictions`/ `config$time_grid`. A custom builder for a given
+layer reads whichever of these its own layer actually populates – see
+each layer’s own `er_style_tte_*()` help page for the exact shape.
+
+### A worked example
+
+A Kaplan-Meier confidence band is drawn as a series of
+[`ggplot2::geom_rect()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
+rectangles (see
+[`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)’s
+own documentation for why), which makes building one from scratch more
+work than it’s worth for a small addition like a reference line at 50%
+survival. Wrapping the built-in curve builder and adding one more geom
+is the more direct route:
+
+``` r
+
+library(survival)
+
+er_style_tte_curve_median <- er_style_tag(
+  function(data, config, stratify, time, strata, theme, ...,
+           show_ci = TRUE, ribbon_alpha = 0.15, linewidth = 1) {
+    geoms <- er_style_tte_curve_km(
+      data, config, stratify, time, strata, theme,
+      show_ci = show_ci, ribbon_alpha = ribbon_alpha, linewidth = linewidth
+    )
+    c(geoms, list(
+      ggplot2::geom_hline(yintercept = 0.5, linetype = "dashed", color = "grey40")
+    ))
+  },
+  layer = "curve"
+)
+```
+
+``` r
+
+lung_sex <- lung |> transform(sex = factor(sex, labels = c("Male", "Female")))
+
+lung_sex |>
+  er_tte(time, status == 2, stratify_by = sex) |>
+  er_tte_add_curve(style = er_style_tte_curve_median) |>
+  plot()
+```
+
+![](extending_files/figure-html/tte-custom-plot-1.png)
+
+The `layer` tag works identically to
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s own
+– the same `er_style_tag(fn, layer = ...)` mechanism, checked by every
+`er_tte_add_*()` function against the layer it was actually called from,
+just with five more valid values (`"curve"`, `"censor"`, `"risktable"`,
+`"pvalue"`, alongside `"model"` for
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)).
+A builder tagged for the wrong one errors immediately:
+
+``` r
+
+lung_sex |>
+  er_tte(time, status == 2, stratify_by = sex) |>
+  er_tte_add_curve(style = er_style_tte_censor_ticks)
+#> Error in `.check_style_layer()`:
+#> ! `style` is tagged for the "censor" layer, but was passed to a "curve" layer function.
+#> ℹ Use a builder tagged `er_style_tag(fn, layer = "curve")` (or with no `layer` tag at all).
+```
+
+None of
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)’s own
+extra tags (`response_types`, `plot_by_types`, the VPC flavour of
+`layout`, `marker_source`) apply to a TTE builder –
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) has only
+one response variable shape (a
+[`Surv()`](https://rdrr.io/pkg/survival/man/Surv.html)-style time/event
+pair) and one x-axis variable (`time`, always continuous), so there’s
+nothing for those tags to distinguish.
+
+See
+[`?er_style_tte_curve`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)/[`?er_style_tte_censor`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md)/[`?er_style_tte_risktable`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)/
+[`?er_style_tte_pvalue`](https://erplots.djnavarro.net/reference/er_style_tte_pvalue.md)/[`?er_style_tte_model`](https://erplots.djnavarro.net/reference/er_style_tte_model.md)
+for each layer’s own `config` contents in full, and [The
+exposure-response plotting
+grammar](https://erplots.djnavarro.net/articles/design.md)/[Implementing
+the model
+interface](https://erplots.djnavarro.net/articles/model-interface.md)
+for how
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)’s
+builder relates to \[er_predict_survival()\] specifically.

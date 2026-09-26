@@ -1,4 +1,4 @@
-# Understanding the erplots grammar
+# The exposure-response plotting grammar
 
 The goal of this article is to describe the **grammar** that erplots
 uses to generate exposure-response plots. It’s not intended to describe
@@ -28,8 +28,8 @@ is always
 creates an empty object of class `er_plot`. When you do this, it stores
 the data set internally and keeps track of which columns correspond to
 the exposure, response, and stratification variables. You then pipe it
-through through one or more *layer* functions, each of which adds one
-visual layer, and then finish by calling
+through one or more *layer* functions, each of which adds one visual
+layer, and then finish by calling
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) to generate the
 plot. A typical plot generation pipeline might look like this:
 
@@ -56,9 +56,9 @@ There are a few features to notice here.
   functions, the erplots package knows how to extract everything it
   needs from the model.
 - Second, notice that at the end of the pipeline we call
-  [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
-  explicitly.One difference between ggplot2 and erplots is that erplots
-  makes a strong distinction between calling
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) explicitly.
+  One difference between ggplot2 and erplots is that erplots makes a
+  strong distinction between calling
   [`print()`](https://rdrr.io/r/base/print.html) on the plot object
   (outputs a written description of the plot) and calling
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) on the plot
@@ -267,8 +267,8 @@ touches *how the composed plot looks* – labels, axis limits, the overall
 ggplot2 theme, the discrete colour/fill palette, formatters, and so on.
 That’s a deliberately separate, orthogonal knob,
 [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md),
-covered in its own article: [Theming
-erplots](https://erplots.djnavarro.net/articles/theming.md).
+covered in its own article: [Theming exposure-response
+plots](https://erplots.djnavarro.net/articles/theming.md).
 
 ## Extending erplots
 

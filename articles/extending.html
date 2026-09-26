@@ -40,16 +40,14 @@
     <li><a class="dropdown-item" href="../articles/plot-binary.html">Plotting binary responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-continuous.html">Plotting continuous responses</a></li>
     <li><a class="dropdown-item" href="../articles/plot-count.html">Plotting count responses</a></li>
+    <li><a class="dropdown-item" href="../articles/theming.html">Theming exposure-response plots</a></li>
+    <li><a class="dropdown-item" href="../articles/design.html">The exposure-response plotting grammar</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Other plot types</h6></li>
     <li><a class="dropdown-item" href="../articles/plot-vpc.html">Visual predictive checks</a></li>
     <li><a class="dropdown-item" href="../articles/plot-tte.html">Time-to-event plots</a></li>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Theming plots</h6></li>
-    <li><a class="dropdown-item" href="../articles/theming.html">Theming erplots</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Technical topics</h6></li>
-    <li><a class="dropdown-item" href="../articles/design.html">Understanding the erplots grammar</a></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Other topics</h6></li>
     <li><a class="dropdown-item" href="../articles/extending.html">Extending erplots</a></li>
     <li><a class="dropdown-item" href="../articles/model-interface.html">Implementing the model interface</a></li>
     <li><a class="dropdown-item" href="../articles/internals.html">The built plot object (internal structure)</a></li>
@@ -109,10 +107,10 @@ the exposure-response plot that you need to modify, and then erplots
 will handle the rest.</p>
 <p>This article discusses that extension mechanism, by showing you how
 to write a “builder” function. It assumes you’re already familiar with
-the erplots mini-language described in <a href="design.html">the plot
-grammar article</a> (layers, singleton/additive semantics,
-stratification); and have a good sense of the overall process of
-building plots with the package.</p>
+the erplots mini-language described in <a href="design.html">the
+exposure-response plotting grammar article</a> (layers,
+singleton/additive semantics, stratification); and have a good sense of
+the overall process of building plots with the package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>
@@ -376,16 +374,16 @@ we can work through an example. Let’s suppose the built-in
 <code><a href="../reference/er_style_quantile.html">er_style_quantile_pointrange()</a></code> alternatives all feel like
 the wrong way to display the data summaries by exposure quantile.
 Instead, you would prefer to draw these binwise summaries using a
-<code>geom_crossbar()</code>. Personally I think that’s a bad way to do
-it, but you may have a good reason for wanting this that I haven’t
-considered. So you decide to write your own builder function for this.
-And since the quantile layer is mostly dependent on the
-<code>config$summary</code> field, that’s the place to start. When doing
-so, it helps to look at what <code>config$summary</code> actually
-contains, and the most reliable way to do that is to ask erplots to show
-you: write a tiny “spy” builder that just prints <code>config</code> and
-draws nothing, and pass it in as the <code>style</code> for the layer
-you want to inspect:</p>
+<code>geom_crossbar()</code>. This isn’t usually a great choice – more
+on that below – but you may have a good reason for wanting it, so you
+decide to write your own builder function for this. And since the
+quantile layer is mostly dependent on the <code>config$summary</code>
+field, that’s the place to start. When doing so, it helps to look at
+what <code>config$summary</code> actually contains, and the most
+reliable way to do that is to ask erplots to show you: write a tiny
+“spy” builder that just prints <code>config</code> and draws nothing,
+and pass it in as the <code>style</code> for the layer you want to
+inspect:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -427,8 +425,8 @@ interval bounds. Our builder will need these too.</li>
 <code>y_mid_lbl</code>, <code>y_lwr_lbl</code>,
 <code>y_upr_lbl</code>, and <code>y_lbl</code> support the built-in
 label geom that <code><a href="../reference/er_style_quantile.html">er_style_quantile_errorbar()</a></code> draws
-alongside its error bar. If we we wanted to use labels in our plot we
-would need these columns, but since we plan to skip that we can ignore
+alongside its error bar. If we wanted to use labels in our plot we would
+need these columns, but since we plan to skip that we can ignore
 them.</li>
 </ul>
 <p>Now that we understand what <code>config$summary</code> already
@@ -465,13 +463,13 @@ rest. Here’s what it looks like when we use it:</p>
 <span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_quantile_crossbar</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="extending_files/figure-html/builder-example-plot-1.png" class="r-plt" alt="" width="700"></p>
-<p>I am not at all convinced this is a good way to create an
-exposure-response plot: in statistical graphics, the “cross bar” visual
-idiom is almost always used to show distributional information (i.e., it
-feels like a boxplot without the whiskers). Using it to display a mean
-and confidence interval is almost certainly going to confuse anyone
-looking at your plot. Even so, it’s convenient to illustrate how to
-design a builder function.</p>
+<p>This is not, in general, a good way to create an exposure-response
+plot: in statistical graphics, the “cross bar” visual idiom is almost
+always used to show distributional information (i.e., it feels like a
+boxplot without the whiskers). Using it to display a mean and confidence
+interval is almost certainly going to confuse anyone looking at your
+plot. Even so, it’s convenient to illustrate how to design a builder
+function.</p>
 <p>Before moving on, there are a few things worth noting about this
 builder, all of which are generalisable to any layer:</p>
 <ul>
@@ -856,8 +854,290 @@ all. It exists for the less common case where a builder changes
 <em>where</em> its output goes, or <em>what</em> one of its aesthetics
 represents, and the rest of the plot needs to be told so it can label
 things correctly. See <code><a href="../reference/er_style.html">?er_style</a></code> for the full public-API
-contract, and <a href="design.html">the plot grammar article</a> for how
-these layers fit together more broadly.</p>
+contract, and <a href="design.html">the exposure-response plotting
+grammar article</a> for how these layers fit together more broadly.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="writing-a-custom-builder-for-er_vpc">Writing a custom builder for <code>er_vpc()</code><a class="anchor" aria-label="anchor" href="#writing-a-custom-builder-for-er_vpc"></a>
+</h2>
+<p>Everything above is about <code><a href="../reference/er_plot.html">er_plot()</a></code>’s own builders.
+<code><a href="../reference/er_vpc.html">er_vpc()</a></code> (see <a href="plot-vpc.html">Visual predictive
+checks</a>) has its own, narrower shared signature:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="cf">function</span>(data, config, exposure, response, theme, ...)</span></code></pre></div>
+<p>Two arguments from <code><a href="../reference/er_plot.html">er_plot()</a></code>’s signature are missing:
+<code>stratify</code> and <code>strata</code>. A VPC builder never needs
+to know about stratification directly – an optional
+<code>stratify_by</code> only ever facets the finished plot
+(<code><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">ggplot2::facet_wrap()</a></code>), never recolours it, and every
+<code>config</code> table a builder reads from already carries the
+<code>.vpc_stratum</code> column that facet needs. A builder just draws
+its geoms once, the same way whether the object is stratified or not;
+faceting happens afterwards, outside the builder entirely.</p>
+<p><code>config$summary</code> is the table both
+<code><a href="../reference/er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code> and
+<code><a href="../reference/er_style_vpc_simulated.html">er_style_vpc_simulated_mean_errorbar()</a></code> (the defaults) plot
+from: one row per bin, with
+<code>y_mid</code>/<code>ci_lower</code>/<code>ci_upper</code> and,
+depending on <code>config$is_numeric_group</code>, either
+<code>.vpc_bin</code> (a categorical <code>plot_by</code>) or
+<code>x_median</code>/<code>x_mid</code> (a numeric one) to plot at.
+<code>config$percentiles</code> is the table the
+quantile-line/quantile-errorbar idioms read instead – one row per bin
+<em>and</em> per requested percentile – and is only computed for a
+continuous/count response with <code>probs</code> set; a builder that
+expects it should check for <code>NULL</code> the way every built-in one
+does, or declare <code>response_types</code> (below) so
+<code><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/<code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>
+catch the mismatch earlier.</p>
+<div class="section level3">
+<h3 id="a-worked-example-1">A worked example<a class="anchor" aria-label="anchor" href="#a-worked-example-1"></a>
+</h3>
+<p>Suppose the default point-and-solid-errorbar look for the observed
+layer doesn’t stand out enough against a ribbon-heavy simulated layer.
+Diamond markers with a dashed error bar are one easy way to make the
+observed side visually distinct, built the same way
+<code><a href="../reference/er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code> itself is, straight
+from <code>config$summary</code>:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">er_style_vpc_observed_diamond</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">x_var</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">config</span><span class="op">$</span><span class="va">is_numeric_group</span><span class="op">)</span> <span class="st">"x_median"</span> <span class="kw">else</span> <span class="st">".vpc_bin"</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_errorbar</a></span><span class="op">(</span></span>
+<span>        data <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">summary</span>,</span>
+<span>        mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">x_var</span><span class="op">]</span><span class="op">]</span>, ymin <span class="op">=</span> <span class="va">ci_lower</span>, ymax <span class="op">=</span> <span class="va">ci_upper</span>, color <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span>,</span>
+<span>        width <span class="op">=</span> <span class="fl">0.15</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>,</span>
+<span>        inherit.aes <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span></span>
+<span>        data <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">summary</span>,</span>
+<span>        mapping <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.data</span><span class="op">[[</span><span class="va">x_var</span><span class="op">]</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">y_mid</span>, color <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span>,</span>
+<span>        shape <span class="op">=</span> <span class="fl">18</span>, size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>        inherit.aes <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>      <span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span>,</span>
+<span>  layer <span class="op">=</span> <span class="st">"observed"</span>,</span>
+<span>  response_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"binary"</span>, <span class="st">"continuous"</span>, <span class="st">"count"</span><span class="op">)</span>,</span>
+<span>  plot_by_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"continuous"</span>, <span class="st">"discrete"</span><span class="op">)</span>,</span>
+<span>  marker_source <span class="op">=</span> <span class="st">"summary"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Plugged in for the observed layer only – there’s no requirement to
+customise both sides of the comparison at once – it pairs without
+incident against the default simulated builder:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_diamond</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="extending_files/figure-html/vpc-custom-plot-1.png" class="r-plt" alt="" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="vpc-specific-er_style_tag-arguments">VPC-specific <code>er_style_tag()</code> arguments<a class="anchor" aria-label="anchor" href="#vpc-specific-er_style_tag-arguments"></a>
+</h3>
+<p><code><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/<code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>
+recognise four [er_style_tag()] arguments beyond <code>layer</code>
+(checked the same way as <code>er_plot_add_*()</code>’s own
+<code>layer</code> tag above), none of which apply to an
+<code><a href="../reference/er_plot.html">er_plot()</a></code> builder:</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Argument</th>
+<th>Applies to</th>
+<th>Required?</th>
+<th>What it controls</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>response_types</code></td>
+<td>Any VPC builder</td>
+<td>No – unchecked if unset</td>
+<td>Which of
+<code>"binary"</code>/<code>"continuous"</code>/<code>"count"</code>
+responses the builder supports</td>
+</tr>
+<tr class="even">
+<td><code>plot_by_types</code></td>
+<td>Any VPC builder</td>
+<td>No – unchecked if unset</td>
+<td>Whether the builder supports a <code>"continuous"</code> (numeric)
+<code>plot_by</code>, a <code>"discrete"</code> (categorical) one, or
+both</td>
+</tr>
+<tr class="odd">
+<td><code>layout</code></td>
+<td>Any VPC builder</td>
+<td>No – unchecked if unset</td>
+<td>
+<code>"categorical"</code> (plots at discrete bin locations)
+vs. <code>"continuous"</code> (plots at each bin’s numeric midpoint) –
+<strong>different values from the data layer’s own
+<code>"overlay"</code>/<code>"panel"</code> pair above</strong>, and
+checked between the observed and simulated builder rather than against a
+fixed rule</td>
+</tr>
+<tr class="even">
+<td><code>marker_source</code></td>
+<td>Any VPC builder</td>
+<td>No – unchecked if unset</td>
+<td>Which config table (<code>"summary"</code> or
+<code>"percentiles"</code>) the builder actually draws its marker(s)
+from, read by <code><a href="../reference/er_vpc_theme.html">er_vpc_theme()</a></code>’s
+<code>xlim</code>/<code>ylim</code> clipping check (see <a href="plot-vpc.html#theming">Visual predictive checks</a>)</td>
+</tr>
+</tbody>
+</table>
+<p><code>response_types</code>/<code>plot_by_types</code> are checked
+against the VPC object’s own data, not against another builder –
+<code><a href="../reference/er_style_vpc_observed.html">er_style_vpc_observed_quantile_line()</a></code> declares
+<code>response_types = c("continuous", "count")</code> (it needs
+<code>config$percentiles</code>, never computed for a binary response),
+so pairing it with a binary-response VPC errors immediately, before any
+binning happens:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_line</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `.check_style_response_type()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> `style` does not support a "binary" response.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> It only supports: "continuous", "count".</span></span></code></pre></div>
+<p><code>layout</code>, by contrast, is checked between the <em>two</em>
+builders passed to
+<code><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/<code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>,
+not against the data – pairing a <code>"categorical"</code>-layout
+builder with a <code>"continuous"</code>-layout one would otherwise plot
+the two sides of the comparison at inconsistent x-positions for the same
+bin:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">stub_categorical</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  layer <span class="op">=</span> <span class="st">"observed"</span>, layout <span class="op">=</span> <span class="st">"categorical"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">stub_continuous</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">exposure</span>, <span class="va">response</span>, <span class="va">theme</span>, <span class="va">...</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  layer <span class="op">=</span> <span class="st">"simulated"</span>, layout <span class="op">=</span> <span class="st">"continuous"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mod_gauss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">biomarker_change</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">stub_categorical</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod_gauss</span>, seed <span class="op">=</span> <span class="fl">1234</span>, style <span class="op">=</span> <span class="va">stub_continuous</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `.check_vpc_layout_match()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> The observed layer's builder is tagged layout = "categorical", but the simulated layer's builder is tagged layout = "continuous".</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> A "categorical" builder plots at discrete bin locations; a "continuous" builder plots at each bin's numeric midpoint -- pairing them plots the two layers at inconsistent x-positions.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Use a layout-matched pair (e.g. `er_style_vpc_observed_quantile_line()` + `er_style_vpc_simulated_quantile_ribbon()`).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Or leave `layout` untagged, like `er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()` and `er_style_vpc_observed_quantile_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()` do, to skip this check entirely.</span></span></code></pre></div>
+<p>None of the built-in idioms actually disagree this way – the two
+built-in <code>layout</code>-tagged builders
+(<code><a href="../reference/er_style_vpc_observed.html">er_style_vpc_observed_quantile_line()</a></code>/
+<code><a href="../reference/er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_ribbon()</a></code>) are already a
+matched pair, and every other built-in pair leaves <code>layout</code>
+untagged entirely, since their x-position adapts to
+<code>plot_by</code>’s type at build time rather than being fixed. The
+check exists for a custom builder that <em>does</em> commit to one
+family or the other.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="writing-a-custom-builder-for-er_tte">Writing a custom builder for <code>er_tte()</code><a class="anchor" aria-label="anchor" href="#writing-a-custom-builder-for-er_tte"></a>
+</h2>
+<p><code><a href="../reference/er_tte.html">er_tte()</a></code> (see <a href="plot-tte.html">Time-to-event
+plots</a>) has its own shared signature too, closer to
+<code><a href="../reference/er_plot.html">er_plot()</a></code>’s than <code><a href="../reference/er_vpc.html">er_vpc()</a></code>’s:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="cf">function</span>(data, config, stratify, time, strata, theme, ...)</span></code></pre></div>
+<p><code>time</code> replaces
+<code>exposure</code>/<code>response</code> – a time-to-event plot has
+one axis-pair variable, not two – and otherwise the shape matches
+<code><a href="../reference/er_plot.html">er_plot()</a></code>’s exactly, including the same
+<code>stratify</code>/<code>strata</code> pair a VPC builder doesn’t
+get, since TTE stratification <em>does</em> map to colour/fill directly
+(one Kaplan-Meier curve per stratum, same panel), unlike VPC’s
+facet-only stratification.</p>
+<p><code>config</code>’s contents differ by layer: the curve layer gets
+<code>config$table</code> (the tidy Kaplan-Meier table, with a
+<code>(0, 1)</code> origin row already prepended) and
+<code>config$time_upper</code>; the censor layer gets a
+<code>config$table</code> already filtered to censoring events; the
+risktable layer gets its own
+<code>config$table</code>/<code>config$breaks</code>; the pvalue layer
+gets <code>config$p_value</code>/ <code>config$corner_distance</code>;
+the model layer gets <code>config$predictions</code>/
+<code>config$time_grid</code>. A custom builder for a given layer reads
+whichever of these its own layer actually populates – see each layer’s
+own <code>er_style_tte_*()</code> help page for the exact shape.</p>
+<div class="section level3">
+<h3 id="a-worked-example-2">A worked example<a class="anchor" aria-label="anchor" href="#a-worked-example-2"></a>
+</h3>
+<p>A Kaplan-Meier confidence band is drawn as a series of
+<code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">ggplot2::geom_rect()</a></code> rectangles (see
+<code><a href="../reference/er_style_tte_curve.html">er_style_tte_curve_km()</a></code>’s own documentation for why), which
+makes building one from scratch more work than it’s worth for a small
+addition like a reference line at 50% survival. Wrapping the built-in
+curve builder and adding one more geom is the more direct route:</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">er_style_tte_curve_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">time</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span>,</span>
+<span>           <span class="va">show_ci</span> <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">ribbon_alpha</span> <span class="op">=</span> <span class="fl">0.15</span>, <span class="va">linewidth</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">geoms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tte_curve.html">er_style_tte_curve_km</a></span><span class="op">(</span></span>
+<span>      <span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">time</span>, <span class="va">strata</span>, <span class="va">theme</span>,</span>
+<span>      show_ci <span class="op">=</span> <span class="va">show_ci</span>, ribbon_alpha <span class="op">=</span> <span class="va">ribbon_alpha</span>, linewidth <span class="op">=</span> <span class="va">linewidth</span></span>
+<span>    <span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">geoms</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.5</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"grey40"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>,</span>
+<span>  layer <span class="op">=</span> <span class="st">"curve"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">&lt;-</span> <span class="va">lung</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span>sex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sex</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Male"</span>, <span class="st">"Female"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_tte_curve_median</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="extending_files/figure-html/tte-custom-plot-1.png" class="r-plt" alt="" width="700"></p>
+<p>The <code>layer</code> tag works identically to
+<code><a href="../reference/er_plot.html">er_plot()</a></code>’s own – the same
+<code>er_style_tag(fn, layer = ...)</code> mechanism, checked by every
+<code>er_tte_add_*()</code> function against the layer it was actually
+called from, just with five more valid values (<code>"curve"</code>,
+<code>"censor"</code>, <code>"risktable"</code>, <code>"pvalue"</code>,
+alongside <code>"model"</code> for <code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>). A
+builder tagged for the wrong one errors immediately:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_tte_censor_ticks</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `.check_style_layer()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> `style` is tagged for the "censor" layer, but was passed to a "curve" layer function.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Use a builder tagged `er_style_tag(fn, layer = "curve")` (or with no `layer` tag at all).</span></span></code></pre></div>
+<p>None of <code><a href="../reference/er_vpc.html">er_vpc()</a></code>’s own extra tags
+(<code>response_types</code>, <code>plot_by_types</code>, the VPC
+flavour of <code>layout</code>, <code>marker_source</code>) apply to a
+TTE builder – <code><a href="../reference/er_tte.html">er_tte()</a></code> has only one response variable shape
+(a <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv()</a></code>-style time/event pair) and one x-axis variable
+(<code>time</code>, always continuous), so there’s nothing for those
+tags to distinguish.</p>
+<p>See
+<code><a href="../reference/er_style_tte_curve.html">?er_style_tte_curve</a></code>/<code><a href="../reference/er_style_tte_censor.html">?er_style_tte_censor</a></code>/<code><a href="../reference/er_style_tte_risktable.html">?er_style_tte_risktable</a></code>/
+<code><a href="../reference/er_style_tte_pvalue.html">?er_style_tte_pvalue</a></code>/<code><a href="../reference/er_style_tte_model.html">?er_style_tte_model</a></code> for
+each layer’s own <code>config</code> contents in full, and <a href="design.html">The exposure-response plotting grammar</a>/<a href="model-interface.html">Implementing the model interface</a> for how
+<code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>’s builder relates to
+[er_predict_survival()] specifically.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
