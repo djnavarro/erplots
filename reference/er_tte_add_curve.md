@@ -21,7 +21,9 @@ er_tte_add_curve(object, style = NULL, ...)
 - style:
 
   Function drawing the KM curve/ribbon. Defaults to
-  [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md).
+  [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md),
+  or the registered label `"km"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 - ...:
 

@@ -156,7 +156,7 @@ are tagged with the structural family they belong to via
 `er_style_data_overlay()` and `er_style_data_hex()` use the overlay
 layout, drawing in the main panel; `er_style_data_boxjitter()` uses the
 panel layout and is binary-response only. All built-in data builders are
-also tagged `layer = "data"`, so
+also tagged `layer = "plot_data"`, so
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 errors if given a builder tagged for another layer.
 
@@ -167,7 +167,7 @@ ggplot2's own default mid-intensity blue. Override it with
 `er_plot_theme(fill_continuous = ...)`.
 
 Because its geoms cover the whole panel, `er_style_data_hex()` is tagged
-`er_style_tag(fn, zorder = "background")` (see
+`er_style_tag(fn, draw_order = "background")` (see
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)),
 so it's drawn before the model/summary/quantile layers rather than on
 top of them; its default `alpha = 0.85` gives those layers a little

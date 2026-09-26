@@ -143,11 +143,17 @@ A geom, or a list of geoms; see
 omits the ribbon; `er_style_model_spaghetti()` draws simulated draws
 instead of a ribbon, for models that implement
 [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
-All three are tagged `er_style_tag(fn, layer = "model")`, so
+All three are tagged `er_style_tag(fn, layer = "plot_model")`, so
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 errors informatively if handed one of these tagged for a different layer
 entirely (e.g. `"summary"`, meant for
 [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)).
+Each also carries a registered short-string label –
+`"ribbonline"`/`"line"`/`"spaghetti"` respectively – so
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+`style` argument can take that string instead of the function itself
+(see
+[`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 for the shared builder interface these functions implement, including

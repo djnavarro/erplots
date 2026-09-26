@@ -25,7 +25,10 @@ er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
   [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md);
   see
   [`er_style_vpc_observed()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
-  for the other built-in options.
+  for the other built-in options. Or one of the registered short-string
+  labels for this layer – currently `"mean_errorbar"`,
+  `"quantile_line"`, `"quantile_errorbar"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 - ...:
 

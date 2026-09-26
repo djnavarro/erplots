@@ -5,9 +5,7 @@ Builder functions for the `simulated` layer
 drawing the simulated side of a visual predictive check as a mean +
 percentile interval per bin (the default, adaptive to `plot_by`'s type),
 continuous-x percentile bands, or a point/interval per bin *and* per
-requested percentile. See
-[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md)
-for the shared interface every VPC-grammar builder implements.
+requested percentile.
 
 ## Usage
 
@@ -162,6 +160,10 @@ A list of geoms; see
 
 ## Details
 
+See
+[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md)
+for the shared interface every VPC-grammar builder implements.
+
 `er_style_vpc_simulated_mean_errorbar()` (the default) plots
 `config$summary`'s mean + percentile interval (of the mean, across
 replicates), adapting its x-position to `plot_by`'s type
@@ -170,7 +172,7 @@ replicates), adapting its x-position to `plot_by`'s type
 numeric median (`x_median`, from `config$summary`) on the `plot_by`'s
 own numeric scale when `plot_by` is numeric. Because it adapts its
 x-position family at build time rather than declaring one statically, it
-carries no `layout` tag – pair it with
+carries no `vpc_layout` tag – pair it with
 [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md),
 which mirrors the same adaptive logic.
 
@@ -189,8 +191,8 @@ without it errors.
 percentile – for pairing with
 [`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md).
 Like that builder (and like `er_style_vpc_simulated_mean_errorbar()`),
-it adapts its x-position to `plot_by`'s type, carries no `layout` tag,
-supports both a numeric and a categorical `plot_by`, and requires a
+it adapts its x-position to `plot_by`'s type, carries no `vpc_layout`
+tag, supports both a numeric and a categorical `plot_by`, and requires a
 continuous/count response, erroring informatively without
 `config$percentiles`. As with the observed-layer counterpart, when more
 than one percentile is requested they are currently all plotted at the

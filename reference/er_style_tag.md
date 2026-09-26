@@ -1,7 +1,11 @@
-# Tag a builder with structural/aesthetic metadata
+# Register a builder's structural/aesthetic metadata
 
-Attaches the self-declared metadata a custom `er_style_*()`-style
-function can carry.
+`er_style_tag()` is the shared self-declaration mechanism every
+`er_style_*()` builder – across all three grammars,
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)/[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+alike – can opt into, attaching metadata that the relevant `_add_*()`
+function later reads back off it and checks itself against.
 
 ## Usage
 
@@ -9,13 +13,16 @@ function can carry.
 er_style_tag(
   style,
   layout = NULL,
+  vpc_layout = NULL,
   fill_role = NULL,
   y_role = NULL,
   layer = NULL,
-  zorder = NULL,
+  draw_order = NULL,
   response_types = NULL,
   plot_by_types = NULL,
-  marker_source = NULL
+  marker_source = NULL,
+  label = NULL,
+  overwrite = FALSE
 )
 ```
 
@@ -23,21 +30,28 @@ er_style_tag(
 
 - style:
 
-  A function matching the standard `er_style_*()` signature (see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)).
+  A function matching the standard signature for the grammar it's meant
+  for – see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
+  ([`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)),
+  [`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md)
+  ([`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)), or
+  [`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+  ([`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)).
 
 - layout:
 
-  One of `"overlay"`, `"panel"`, `"categorical"`, or `"continuous"`, or
-  `NULL` (the default) to leave this tag unset. The
-  `"overlay"`/`"panel"` pair is for a data-layer builder
-  ([`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-  documents what each structural family means); the `"categorical"`/
-  `"continuous"` pair is for a VPC observed/simulated builder
+  One of `"overlay"` or `"panel"`, or `NULL` (the default) to leave this
+  tag unset. Data-layer
+  ([`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md))
+  builders only – see "Details".
+
+- vpc_layout:
+
+  One of `"categorical"` or `"continuous"`, or `NULL` (the default) to
+  leave this tag unset. VPC observed/simulated
   ([`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md))
-  and marks whether it plots at discrete bin locations or at each bin's
-  numeric exposure midpoint – see
-  [`er_style_vpc_observed()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/[`er_style_vpc_simulated()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md).
+  builders only – see "Details".
 
 - fill_role:
 
@@ -51,14 +65,16 @@ er_style_tag(
 
 - layer:
 
-  One of `"model"`, `"summary"`, `"quantile"`, `"data"`, `"group"`,
-  `"observed"`, `"simulated"`, `"curve"`, `"censor"`, `"risktable"`,
-  `"tte_model"`, or `"tte_summary"`, naming which
+  One of `"plot_model"`, `"plot_summary"`, `"plot_quantile"`,
+  `"plot_data"`, `"plot_group"`, `"vpc_observed"`, `"vpc_simulated"`,
+  `"tte_curve"`, `"tte_censor"`, `"tte_risktable"`, `"tte_model"`, or
+  `"tte_summary"`, naming which
   `er_plot_add_*()`/`er_vpc_add_*()`/`er_tte_add_*()` layer the builder
   is meant to be used with, or `NULL` (the default) to leave this tag
-  unset. See "Details".
+  unset. Each value is prefixed with the grammar it belongs to
+  (`plot_`/`vpc_`/`tte_`) – see "Details".
 
-- zorder:
+- draw_order:
 
   One of `"foreground"` or `"background"`, or `NULL` (the default,
   equivalent to `"foreground"`) to leave this tag unset. Only meaningful
@@ -89,46 +105,82 @@ er_style_tag(
   `config$percentiles`) it actually draws its marker(s) from, or `NULL`
   (the default) to leave this tag unset. See "Details".
 
+- label:
+
+  A single string, or `NULL` (the default) to leave this tag unset.
+  Requires `layer` to also be set in the same call. Registers `style` so
+  it can be selected by this short string (e.g. `style = "logrank"`)
+  instead of the function itself, wherever the corresponding `_add_*()`
+  function looks it up. See
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md).
+
+- overwrite:
+
+  Logical, default `FALSE`. Only meaningful together with `label`;
+  ignored otherwise. Controls what happens when the `(layer, label)`
+  pair is already registered to a *different* function: `FALSE` (the
+  default) errors; `TRUE` replaces the existing registration
+  unconditionally. Re-registering the identical function is always a
+  silent no-op regardless of `overwrite`. See "Details".
+
 ## Value
 
 `style`, with whichever of the `"er_style_layout"`/
-`"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`/
-`"er_style_zorder"`/`"er_style_response_types"`/
-`"er_style_plot_by_types"`/`"er_style_vpc_marker_source"` attributes
-were requested attached.
+`"er_style_vpc_layout"`/`"er_style_fill_role"`/`"er_style_y_role"`/
+`"er_style_layer"`/`"er_style_draw_order"`/`"er_style_response_types"`/
+`"er_style_plot_by_types"`/`"er_style_vpc_marker_source"`/
+`"er_style_label"` attributes were requested attached. When `label` is
+supplied, `style` is also registered as a side effect – see
+[`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md).
 
 ## Details
 
-The metadata to be supplied indicate which *structural* family a
-data-layer builder belongs to (`layout`), what a builder's `fill`
-aesthetic means when it isn't strata (`fill_role`), what a group-layer
-builder's y-axis means when it isn't the group variable itself
-(`y_role`), which layer a builder is meant to be plugged into (`layer`),
-and where an overlay-layout data builder's geoms sit relative to the
-model/summary/quantile layers when they share the main panel (`zorder`).
-All five arguments are optional and independent – pass only the ones a
-given builder needs, in one call, rather than chaining separate setters.
+In that sense it functions as an informal builder registry – not a
+lookup table you register *into*, but a way of stamping a function with
+metadata another function can later read back off it and act on,
+entirely by attribute, with no central list anywhere. Every built-in
+builder carries a tag; nothing requires a custom builder to.
 
-`layout` is a required tag for a data-layer builder:
+Ten tags exist today, each optional and independent – pass only the ones
+a given builder needs, in one call, rather than chaining separate
+setters. They fall into four groups, one per section below:
+
+- Structural tags (`layout`, `vpc_layout`) – which structural family a
+  builder belongs to.
+
+- The layer tag (`layer`) – which layer a builder is meant to be plugged
+  into.
+
+- Rendering and labelling hints (`fill_role`, `y_role`, `draw_order`).
+
+- Type-checking tags for VPC builders (`response_types`,
+  `plot_by_types`, `marker_source`).
+
+- Registering a label (`label`, `overwrite`).
+
+## Structural tags
+
+`layout` is a required tag for a data-layer builder specifically:
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 reads it off `style` to decide whether to place the output geoms into
 the main panel (`layout = "overlay"`) or to put them into separate
-strip-like panels above and below the main panel (`layout = "panel"`)
+strip-like panels above and below the main panel (`layout = "panel"`).
+No other layer or grammar uses this tag.
 
-For a VPC observed/simulated builder, `layout` is optional but, when
-present on both the observed and simulated builder passed to a given
-`er_vpc` object, is checked for agreement:
+`vpc_layout` is the VPC analogue, but optional rather than required, and
+checked between two builders rather than read for a structural decision:
+when present on both the observed and simulated builder passed to a
+given `er_vpc` object,
 [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
-errors if the simulated builder's `layout` (`"categorical"`, discrete
-bin locations; or `"continuous"`, numeric bin-midpoint locations, e.g.
-[`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md))
-disagrees with the observed builder's own. This catches the case where
-the two families would otherwise silently plot at different x-positions
-for the same bin – e.g. pairing a builder that always plots at discrete
-bin labels with
+errors if they disagree (`"categorical"`, discrete bin locations; or
+`"continuous"`, numeric bin-midpoint locations, e.g.
+[`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)).
+This catches the case where the two families would otherwise silently
+plot at different x-positions for the same bin – e.g. pairing a builder
+that always plots at discrete bin labels with
 [`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)'s
 numeric midpoints. Use a layout-matched pair instead (built-ins already
-are), or leave `layout` untagged – as
+are), or leave `vpc_layout` untagged – as
 [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/
 [`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
 and
@@ -137,6 +189,34 @@ and
 do, since both pairs adapt their x-position to `plot_by`'s type at build
 time rather than declaring one family statically – to skip the check
 entirely, the same opt-in treatment `layer` gets.
+
+## The layer tag
+
+`layer` is optional, but unlike `fill_role`/`y_role` it isn't read for
+labelling. It's read by every `er_plot_add_*()`/`er_vpc_add_*()`/
+`er_tte_add_*()` function to catch a builder plugged into the wrong
+layer – e.g. passing a quantile builder to
+[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
+or an [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
+summary builder to
+[`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)
+– with an informative error instead of whatever failure results from
+that layer's `config` shape not matching what the builder expects. All
+built-in builders carry this tag. It is a flat namespace checked only by
+string equality, but every value is grammar-prefixed by convention
+(`plot_`/`vpc_`/`tte_`) – e.g. `"plot_model"`/`"plot_summary"` for
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) vs.
+`"tte_model"`/`"tte_summary"` for
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) – so two
+grammars whose builders share neither a signature nor a `config` shape
+can never collide by accident, and the prefix also makes a value's
+owning grammar legible on sight, including in
+[`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)'s
+own `layer` column. A custom builder that omits `layer` is never
+checked: it is opt-in, not a requirement like `layout` is for a
+data-layer builder.
+
+## Rendering and labelling hints
 
 `fill_role` and `y_role` are both optional, and can be used to title a
 legend/axis correctly: `fill_role = "density"` (used by
@@ -149,27 +229,7 @@ variable itself. A builder that omits either tag keeps the default
 behaviour (`fill` means strata; the y-axis is titled with the group
 variable's label), which is correct for most builders.
 
-`layer` is also optional, but unlike `fill_role`/`y_role` it isn't read
-for labelling. It's read by every `er_plot_add_*()` function
-([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-checks `style` against `"model"`;
-[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
-checks `style` against `"summary"`;
-[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
-against `"quantile"`;
-[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-against `"data"`;
-[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
-against `"group"`) to catch a builder plugged into the wrong layer –
-e.g. passing a quantile builder to
-[`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
-– with an informative error instead of whatever failure results from
-that layer's `config` shape not matching what the builder expects. All
-built-in builders carry this tag. A custom builder that omits it is
-never checked: `layer` is opt-in, not a requirement like `layout` is for
-a data-layer builder.
-
-`zorder` only applies to an overlay-layout data builder
+`draw_order` only applies to an overlay-layout data builder
 (`layout = "overlay"`), and controls whether its geoms are drawn before
 or after the model/summary/quantile layers when they share the main
 panel. `"foreground"`, the default for a builder that omits this tag
@@ -181,11 +241,13 @@ a model ribbon. `"background"` (used by
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md))
 draws the data geoms first, so a builder whose geoms cover the whole
 panel (leaving no gaps for what's underneath to show through) doesn't
-bury the model curve or summary annotation. `zorder` has no effect on a
-panel-layout data builder (e.g.
+bury the model curve or summary annotation. `draw_order` has no effect
+on a panel-layout data builder (e.g.
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)),
 since those geoms are drawn in their own separate panels, never sharing
 space with the model/ summary/quantile layers.
+
+## Type-checking tags for VPC builders
 
 `response_types` and `plot_by_types` are both optional, and – unlike
 every other tag above – are checked against the *data*, not another
@@ -210,12 +272,12 @@ keeps working unchanged (though it's then responsible for guarding
 against its own incompatible inputs, the way every built-in VPC builder
 still does internally as a fallback).
 
-`marker_source` is also optional and VPC-specific, read by
-`.clip_vpc_config_to_limits()` (see
-[`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)'s
-`xlim`/`ylim`) to decide which of a VPC observed/simulated builder's two
-config tables to crop-and-warn against when a marker falls outside the
-plotted axis limits. A builder that plots `config$summary` (e.g.
+`marker_source` is also optional and VPC-specific. It's used when
+cropping a built VPC to `xlim`/`ylim` (see
+[`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md))
+to decide which of a builder's two config tables to check for a marker
+falling outside the plotted axis limits. A builder that plots
+`config$summary` (e.g.
 [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md))
 should tag `marker_source = "summary"`; one that plots
 `config$percentiles` (e.g.
@@ -225,10 +287,34 @@ should tag `marker_source = "percentiles"`. An untagged builder has both
 tables checked, which is always safe but can produce a spurious warning
 about a table the builder never actually draws from.
 
+## Registering a label
+
+`label` is unlike every tag above, in that it isn't purely descriptive:
+supplying it registers `style` as a side effect, so that the
+corresponding `_add_*()` function can accept the string in place of
+`style` itself. It requires `layer` in the same call – the registry is
+keyed by `(layer, label)`, not `label` alone, which is what lets two
+different layers reuse the same label string with no ambiguity (each
+`_add_*()` function only ever looks inside its own layer's partition).
+Wired up for every `_add_*()` function in the package – see
+[`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)
+for the full list of registered `(layer, label)` pairs.
+
+Re-registering the same `(layer, label)` pair with the identical
+function is always a silent no-op (this is what makes reloading the
+package, which re-tags every built-in builder, safe). Re-registering it
+with a *different* function errors by default – e.g. re-running a script
+that edits a custom labelled builder's body and re-tags it hits this –
+unless `overwrite = TRUE` is passed, which replaces the registration
+unconditionally.
+
 ## See also
 
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
-[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md),
+[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md),
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md),
+[`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)
 
 ## Examples
 
@@ -241,6 +327,6 @@ build_data_density <- er_style_tag(
     )
   },
   layout = "overlay",
-  layer = "data"
+  layer = "plot_data"
 )
 ```

@@ -21,7 +21,9 @@ er_tte_add_censor(object, style = NULL, ...)
 - style:
 
   Function drawing the censoring marks. Defaults to
-  [`er_style_tte_censor_ticks()`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md).
+  [`er_style_tte_censor_ticks()`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md),
+  or the registered label `"ticks"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 - ...:
 

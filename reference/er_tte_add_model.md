@@ -42,7 +42,9 @@ er_tte_add_model(
 - style:
 
   Function drawing the model curve/ribbon. Defaults to
-  [`er_style_tte_model_line()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md).
+  [`er_style_tte_model_line()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md),
+  or the registered label `"line"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 - conf_level:
 

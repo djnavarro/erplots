@@ -43,7 +43,10 @@ er_plot_add_summary(
 - style:
 
   Function drawing the summary annotation, defaulting to
-  [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md).
+  [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md),
+  or one of the registered short-string labels for this layer –
+  currently `"pvalue"`, `"n"`, `"coefficients"`, `"gof"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 - conf_level:
 

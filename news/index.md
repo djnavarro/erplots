@@ -93,6 +93,24 @@
   own stratification (facet-only here, since a VPC has no colour/fill
   precedence rule to reconcile). Errors if `stratify_by` resolves to the
   same variable as `plot_by`.
+- [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+  gains a `label` argument for registering a builder under a short
+  string (e.g. `label = "logrank"`), so the corresponding `_add_*()`
+  function’s `style` argument can be given that string instead of the
+  function itself (e.g. `er_plot_add_model(mod, style = "spaghetti")` in
+  place of `style = er_style_model_spaghetti`). Every built-in builder
+  across all three grammars is tagged with one; see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)
+  to list what’s registered (optionally filtered to one `layer`), and
+  [`?er_style_tag`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+  for the full naming/lookup contract. `label` requires `layer` to also
+  be set in the same call, since the registry is keyed by
+  `(layer, label)`, not `label` alone. A new `overwrite` argument
+  (default `FALSE`) controls what happens when re-registering a
+  `(layer, label)` pair already assigned to a *different* function:
+  errors by default; `overwrite = TRUE` replaces it unconditionally.
+  Re-registering the identical function is always a silent no-op
+  regardless of `overwrite`.
 
 ### Improvements
 
@@ -107,6 +125,34 @@
 
 ### Breaking changes
 
+- [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)’s
+  `zorder` argument is renamed to `draw_order` (same
+  `"foreground"`/`"background"` values); a builder tagged with the old
+  name needs updating
+  (e.g. `er_style_tag(fn, draw_order = "background")` in place of
+  `zorder = "background")`). `layout` is split into two independent
+  arguments: `layout` keeps its existing `"overlay"`/ `"panel"` meaning
+  for a data-layer builder, while a VPC observed/ simulated builder’s
+  `"categorical"`/`"continuous"` distinction moves to a new `vpc_layout`
+  argument – the two had shared one argument and attribute despite
+  meaning unrelated things. See
+  [`?er_style_tag`](https://erplots.djnavarro.net/reference/er_style_tag.md).
+- [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)’s
+  `layer` values are renamed to be grammar-prefixed:
+  `"model"`/`"summary"`/`"quantile"`/`"data"`/`"group"`
+  ([`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md))
+  become
+  `"plot_model"`/`"plot_summary"`/`"plot_quantile"`/`"plot_data"`/
+  `"plot_group"`; `"observed"`/`"simulated"`
+  ([`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md))
+  become `"vpc_observed"`/`"vpc_simulated"`;
+  `"curve"`/`"censor"`/`"risktable"`
+  ([`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md))
+  become `"tte_curve"`/`"tte_censor"`/`"tte_risktable"`.
+  `"tte_model"`/`"tte_summary"` are unchanged (already
+  grammar-prefixed). A custom builder tagged with one of the old values
+  needs updating; see
+  [`?er_style_tag`](https://erplots.djnavarro.net/reference/er_style_tag.md).
 - `stratify_by` must now name a discrete/categorical variable in
   [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md); a
   numeric column errors instead of being automatically split into
@@ -153,6 +199,11 @@
 
 ### Documentation
 
+- [`?er_style_tag`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+  is rewritten to describe the mechanism as a whole – the shared
+  self-declaration system every built-in builder across
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)/[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+  carries – rather than describing each argument in isolation.
 - Added
   [`?er_style_vpc`](https://erplots.djnavarro.net/reference/er_style_vpc.md)/[`?er_style_tte`](https://erplots.djnavarro.net/reference/er_style_tte.md),
   documenting the shared builder interface for

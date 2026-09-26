@@ -2,12 +2,10 @@
 
 Builder functions for the `risktable` layer
 ([`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)),
-drawing a row of risk counts per stratum at a grid of time points. See
-[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
-for the shared interface every TTE-grammar builder implements. Unlike
-every other TTE-grammar builder, this one's geoms are drawn into their
-own patchwork panel below the curve, not onto the curve's panel directly
-– see
+drawing a row of risk counts per stratum at a grid of time points.
+Unlike every other TTE-grammar builder, this one's geoms are drawn into
+their own patchwork panel below the curve, not onto the curve's panel
+directly – see
 [`er_tte_build()`](https://erplots.djnavarro.net/reference/er_tte_build.md).
 
 ## Usage
@@ -70,6 +68,10 @@ er_style_tte_risktable_text(
 A geom, or a list of geoms.
 
 ## Details
+
+See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for the shared interface every TTE-grammar builder implements.
 
 Rows are ordered top-to-bottom in the same order strata first appear in
 `config$table` (reversed, since a ggplot2 discrete y-axis plots its

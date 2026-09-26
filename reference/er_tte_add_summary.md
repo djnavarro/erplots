@@ -52,7 +52,11 @@ er_tte_add_summary(
 
 - style:
 
-  Function drawing the annotation. Defaults to
+  Function drawing the annotation, or one of the registered short-string
+  labels for this layer – currently `"logrank"`, `"n"`,
+  `"coefficients"`, `"gof"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
+  Defaults to
   [`er_style_tte_summary_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md).
 
 - conf_level:

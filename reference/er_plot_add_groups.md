@@ -37,7 +37,10 @@ er_plot_add_groups(
   [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md).
   Applied to every grouping variable added by this call; see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
-  and "Details".
+  and "Details". Or one of the registered short-string labels for this
+  layer – currently `"boxplot"`, `"violin"`, `"histogram"`,
+  `"linerange"`, `"boxjitter"`, `"violinjitter"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 - bins:
 
@@ -89,8 +92,8 @@ standard
 signature can be supplied instead. If `style` is tagged with a `layer`
 (via
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md))
-other than `"group"`, this errors informatively; an untagged builder is
-never checked.
+other than `"plot_group"`, this errors informatively; an untagged
+builder is never checked.
 
 `keep_strata = TRUE` errors if `group_by` is itself the plot's
 stratification variable, since that would mean grouping and stratifying

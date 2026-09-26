@@ -292,9 +292,9 @@ legend. erplots solves this by letting a builder carry metadata as
 **attributes on the function itself**, set by a single wrapper function,
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md),
 with one optional argument per piece of metadata (`layout`, `fill_role`,
-`y_role`, `layer`, `zorder`). It wraps a builder and returns it back,
-attributes attached, so it composes naturally with assignment, and a
-builder that needs more than one tag only needs one call:
+`y_role`, `layer`, `draw_order`). It wraps a builder and returns it
+back, attributes attached, so it composes naturally with assignment, and
+a builder that needs more than one tag only needs one call:
 
 ``` r
 
@@ -455,16 +455,19 @@ once it’s drawn. `layer` is different: it’s read by the
 at all, purely to catch a builder plugged into the wrong slot. Every
 built-in builder declares it –
 [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
-is tagged `layer = "quantile"`,
+is tagged `layer = "plot_quantile"`,
 [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md)
-is tagged `layer = "group"`, and so on for all five layers (`"model"`,
-`"summary"`, `"quantile"`, `"data"`, `"group"` – `"summary"` is its own
-layer,
+is tagged `layer = "plot_group"`, and so on for all five layers
+(`"plot_model"`, `"plot_summary"`, `"plot_quantile"`, `"plot_data"`,
+`"plot_group"` – `"plot_summary"` is its own layer,
 [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
-independent of the model layer). Passing a builder tagged for one layer
-into a different layer’s `er_plot_add_*()` call errors immediately,
-naming both the layer the builder was tagged for and the layer it was
-actually passed to:
+independent of the model layer). Every value is prefixed with the
+grammar it belongs to (`plot_`/`vpc_`/`tte_`) – see “Writing a custom
+builder for
+[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)” below
+for why. Passing a builder tagged for one layer into a different layer’s
+`er_plot_add_*()` call errors immediately, naming both the layer the
+builder was tagged for and the layer it was actually passed to:
 
 ``` r
 
@@ -473,14 +476,14 @@ erglm_data |>
   er_plot_add_model(mod) |>
   er_plot_add_data(style = er_style_quantile_errorbar)
 #> Error in `.check_style_layer()`:
-#> ! `style` is tagged for the "quantile" layer, but was passed to a "data" layer function.
-#> ℹ Use a builder tagged `er_style_tag(fn, layer = "data")` (or with no `layer` tag at all).
+#> ! `style` is tagged for the "plot_quantile" layer, but was passed to a "plot_data" layer function.
+#> ℹ Use a builder tagged `er_style_tag(fn, layer = "plot_data")` (or with no `layer` tag at all).
 ```
 
 ``` r
 
 attr(er_style_quantile_errorbar, "er_style_layer")
-#> [1] "quantile"
+#> [1] "plot_quantile"
 ```
 
 Unlike `layout`, `layer` is entirely optional – a custom builder that
@@ -490,7 +493,7 @@ it’s passed to. This means existing custom builders written before
 get an earlier, more specific error if it’s ever passed to the wrong
 place by mistake.
 
-### `zorder`: where an overlay-layout data builder’s geoms sit in the main panel
+### `draw_order`: where an overlay-layout data builder’s geoms sit in the main panel
 
 The model, summary, and quantile layers always draw in the same fixed
 order relative to each other when they share the main panel. An
@@ -501,15 +504,15 @@ whose individual points should never be hidden behind a translucent
 model ribbon. But a builder whose geoms cover the *whole* panel, with no
 gaps for anything underneath to show through, would completely bury the
 model curve and summary annotation by drawing last in the same way.
-`er_style_tag(style, zorder = "background")` tells erplots to draw that
-builder’s geoms *first* instead, so the model/summary/quantile layers
-are drawn on top of it.
+`er_style_tag(style, draw_order = "background")` tells erplots to draw
+that builder’s geoms *first* instead, so the model/summary/quantile
+layers are drawn on top of it.
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 is tagged this way:
 
 ``` r
 
-attr(er_style_data_hex, "er_style_zorder")
+attr(er_style_data_hex, "er_style_draw_order")
 #> [1] "background"
 ```
 
@@ -532,7 +535,7 @@ er_style_data_density_fill <- er_style_tag(
     )
   },
   layout = "overlay",
-  zorder = "background"
+  draw_order = "background"
 )
 
 erglm_data |>
@@ -542,10 +545,10 @@ erglm_data |>
   plot()
 ```
 
-![](extending_files/figure-html/zorder-custom-1.png)
+![](extending_files/figure-html/draw-order-custom-1.png)
 
 The model curve stays visible because the filled contours were drawn
-first. Omitting the `zorder` tag (or setting it to `"foreground"`,
+first. Omitting the `draw_order` tag (or setting it to `"foreground"`,
 equivalent to the default) draws exactly the same contours *after* the
 model curve instead, burying it completely:
 
@@ -570,9 +573,9 @@ erglm_data |>
   plot()
 ```
 
-![](extending_files/figure-html/zorder-foreground-1.png)
+![](extending_files/figure-html/draw-order-foreground-1.png)
 
-`zorder` only has an effect on an `"overlay"`-layout data builder. A
+`draw_order` only has an effect on an `"overlay"`-layout data builder. A
 `"panel"`-layout builder’s geoms
 (e.g. [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md))
 are drawn in their own, separate patchwork panel, never sharing space
@@ -581,8 +584,8 @@ set.
 
 ### One function, five independent arguments
 
-`layout`, `fill_role`, `y_role`, `layer`, and `zorder` are all set via
-the same
+`layout`, `fill_role`, `y_role`, `layer`, and `draw_order` are all set
+via the same
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
 call rather than five separate wrapper functions. Each argument is
 independent and optional (aside from `layout` being mandatory for a
@@ -597,14 +600,15 @@ my_density_builder <- er_style_tag(
   my_density_builder,
   layout = "overlay",
   fill_role = "density",
-  layer = "data",
-  zorder = "background"
+  layer = "plot_data",
+  draw_order = "background"
 )
 ```
 
 This is close to what the built-in
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-does (it sets `layout`, `fill_role`, `layer`, and `zorder` together).
+does (it sets `layout`, `fill_role`, `layer`, and `draw_order`
+together).
 
 ### Summary
 
@@ -614,7 +618,7 @@ does (it sets `layout`, `fill_role`, `layer`, and `zorder` together).
 | `fill_role` | Any builder mapping `fill` | No – defaults to strata | Legend title for a non-strata `fill` aesthetic (e.g. `"density"`) |
 | `y_role` | Group-layer builders only | No – defaults to the group variable’s label | y-axis title when the y-axis isn’t the group variable itself (e.g. `"count"`) |
 | `layer` | Any builder | No – unchecked if unset | Which `er_plot_add_*()` the builder is meant for; mismatches error immediately |
-| `zorder` | `"overlay"`-layout data builders only | No – defaults to `"foreground"` | `"foreground"` (drawn after model/summary/quantile) vs. `"background"` (drawn before) |
+| `draw_order` | `"overlay"`-layout data builders only | No – defaults to `"foreground"` | `"foreground"` (drawn after model/summary/quantile) vs. `"background"` (drawn before) |
 
 None of this machinery is needed for a builder that draws a familiar
 idiom in a familiar slot – the crossbar example above needed no tags at
@@ -696,7 +700,7 @@ er_style_vpc_observed_diamond <- er_style_tag(
       )
     )
   },
-  layer = "observed",
+  layer = "vpc_observed",
   response_types = c("binary", "continuous", "count"),
   plot_by_types = c("continuous", "discrete"),
   marker_source = "summary"
@@ -734,7 +738,7 @@ builder:
 |----|----|----|----|
 | `response_types` | Any VPC builder | No – unchecked if unset | Which of `"binary"`/`"continuous"`/`"count"` responses the builder supports |
 | `plot_by_types` | Any VPC builder | No – unchecked if unset | Whether the builder supports a `"continuous"` (numeric) `plot_by`, a `"discrete"` (categorical) one, or both |
-| `layout` | Any VPC builder | No – unchecked if unset | `"categorical"` (plots at discrete bin locations) vs. `"continuous"` (plots at each bin’s numeric midpoint) – **different values from the data layer’s own `"overlay"`/`"panel"` pair above**, and checked between the observed and simulated builder rather than against a fixed rule |
+| `vpc_layout` | Any VPC builder | No – unchecked if unset | `"categorical"` (plots at discrete bin locations) vs. `"continuous"` (plots at each bin’s numeric midpoint) – **a separate argument from the data layer’s own `layout`, which uses an unrelated `"overlay"`/`"panel"` pair**, and checked between the observed and simulated builder rather than against a fixed rule |
 | `marker_source` | Any VPC builder | No – unchecked if unset | Which config table (`"summary"` or `"percentiles"`) the builder actually draws its marker(s) from, read by [`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)’s `xlim`/`ylim` clipping check (see [Visual predictive checks](https://erplots.djnavarro.net/articles/plot-vpc.html#theming)) |
 
 `response_types`/`plot_by_types` are checked against the VPC object’s
@@ -755,7 +759,8 @@ erglm_data |>
 #> ℹ It only supports: "continuous", "count".
 ```
 
-`layout`, by contrast, is checked between the *two* builders passed to
+`vpc_layout`, by contrast, is checked between the *two* builders passed
+to
 [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md),
 not against the data – pairing a `"categorical"`-layout builder with a
 `"continuous"`-layout one would otherwise plot the two sides of the
@@ -765,11 +770,11 @@ comparison at inconsistent x-positions for the same bin:
 
 stub_categorical <- er_style_tag(
   function(data, config, exposure, response, theme, ...) list(),
-  layer = "observed", layout = "categorical"
+  layer = "vpc_observed", vpc_layout = "categorical"
 )
 stub_continuous <- er_style_tag(
   function(data, config, exposure, response, theme, ...) list(),
-  layer = "simulated", layout = "continuous"
+  layer = "vpc_simulated", vpc_layout = "continuous"
 )
 
 mod_gauss <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
@@ -779,20 +784,20 @@ erglm_data |>
   er_vpc_add_observed(style = stub_categorical) |>
   er_vpc_add_simulated(model = mod_gauss, seed = 1234, style = stub_continuous)
 #> Error in `.check_vpc_layout_match()`:
-#> ! The observed layer's builder is tagged layout = "categorical", but the simulated layer's builder is tagged layout = "continuous".
+#> ! The observed layer's builder is tagged vpc_layout = "categorical", but the simulated layer's builder is tagged vpc_layout = "continuous".
 #> ℹ A "categorical" builder plots at discrete bin locations; a "continuous" builder plots at each bin's numeric midpoint -- pairing them plots the two layers at inconsistent x-positions.
 #> ℹ Use a layout-matched pair (e.g. `er_style_vpc_observed_quantile_line()` + `er_style_vpc_simulated_quantile_ribbon()`).
-#> ℹ Or leave `layout` untagged, like `er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()` and `er_style_vpc_observed_quantile_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()` do, to skip this check entirely.
+#> ℹ Or leave `vpc_layout` untagged, like `er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()` and `er_style_vpc_observed_quantile_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()` do, to skip this check entirely.
 ```
 
 None of the built-in idioms actually disagree this way – the two
-built-in `layout`-tagged builders
+built-in `vpc_layout`-tagged builders
 ([`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/
 [`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md))
 are already a matched pair, and every other built-in pair leaves
-`layout` untagged entirely, since their x-position adapts to `plot_by`’s
-type at build time rather than being fixed. The check exists for a
-custom builder that *does* commit to one family or the other.
+`vpc_layout` untagged entirely, since their x-position adapts to
+`plot_by`’s type at build time rather than being fixed. The check exists
+for a custom builder that *does* commit to one family or the other.
 
 ## Writing a custom builder for `er_tte()`
 
@@ -855,7 +860,7 @@ er_style_tte_curve_median <- er_style_tag(
       ggplot2::geom_hline(yintercept = 0.5, linetype = "dashed", color = "grey40")
     ))
   },
-  layer = "curve"
+  layer = "tte_curve"
 )
 ```
 
@@ -875,12 +880,13 @@ The `layer` tag works identically to
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s own
 – the same `er_style_tag(fn, layer = ...)` mechanism, checked by every
 `er_tte_add_*()` function against the layer it was actually called from,
-just with five more valid values: `"curve"`, `"censor"`, `"risktable"`
-(unique to this grammar), plus `"tte_model"`/`"tte_summary"` for
+just with five more valid values, all prefixed `tte_`: `"tte_curve"`,
+`"tte_censor"`, `"tte_risktable"`, `"tte_model"`, and `"tte_summary"`.
+The `tte_` prefix is what lets
 [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)/[`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)
-– namespaced separately from
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s own
-`"model"`/`"summary"` tags, since a TTE builder and an
+mint their own distinct values rather than colliding with
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s
+`"plot_model"`/`"plot_summary"`, since a TTE builder and an
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
 builder share neither a signature nor `config` contents, so a builder
 written for one grammar should never silently pass the tag check for the
@@ -892,14 +898,14 @@ lung_sex |>
   er_tte(time, status == 2, stratify_by = sex) |>
   er_tte_add_curve(style = er_style_tte_censor_ticks)
 #> Error in `.check_style_layer()`:
-#> ! `style` is tagged for the "censor" layer, but was passed to a "curve" layer function.
-#> ℹ Use a builder tagged `er_style_tag(fn, layer = "curve")` (or with no `layer` tag at all).
+#> ! `style` is tagged for the "tte_censor" layer, but was passed to a "tte_curve" layer function.
+#> ℹ Use a builder tagged `er_style_tag(fn, layer = "tte_curve")` (or with no `layer` tag at all).
 ```
 
 None of
 [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)’s own
-extra tags (`response_types`, `plot_by_types`, the VPC flavour of
-`layout`, `marker_source`) apply to a TTE builder –
+extra tags (`response_types`, `plot_by_types`, `vpc_layout`,
+`marker_source`) apply to a TTE builder –
 [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) has only
 one response variable shape (a
 [`Surv()`](https://rdrr.io/pkg/survival/man/Surv.html)-style time/event

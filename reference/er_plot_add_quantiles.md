@@ -38,7 +38,10 @@ er_plot_add_quantiles(
 
   Function drawing the quantile summary; defaults to
   [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
-  (point + error bar).
+  (point + error bar). Or one of the registered short-string labels for
+  this layer – currently `"errorbar"`, `"errorbar_vlines"`,
+  `"pointrange"`, `"pointrange_vlines"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 - bins:
 

@@ -127,16 +127,18 @@ the API: any function <code>function(data, config, exposure, response, theme, ..
 builder, passed as <code>style</code> to <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/
 <code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>.</p>
 <p>A custom builder can self-declare metadata via <code><a href="er_style_tag.html">er_style_tag()</a></code>:
-<code>layout</code> (<code>"categorical"</code>/<code>"continuous"</code>, checked for agreement between
-the observed and simulated builders paired on one <code>er_vpc</code> object),
-<code>layer</code> (<code>"observed"</code>/<code>"simulated"</code>, checked against the layer the
-builder was actually passed to), <code>response_types</code>/<code>plot_by_types</code>
-(checked against <code>object$response$type</code>/<code>object$group$type</code>), and
-<code>marker_source</code> (which of <code>config$summary</code>/<code>config$percentiles</code> the
-builder actually draws from, used by <code><a href="er_vpc_theme.html">er_vpc_theme()</a></code>'s <code>xlim</code>/<code>ylim</code>
-cropping). All five are optional and independent – see <code><a href="er_style_tag.html">er_style_tag()</a></code>
-for the full explanation of each, including which built-in builders use
-them and why.</p>
+<code>vpc_layout</code> (<code>"categorical"</code>/<code>"continuous"</code>, checked for agreement
+between the observed and simulated builders paired on one <code>er_vpc</code>
+object – distinct from the data layer's own <code>layout</code> tag, which uses
+an unrelated <code>"overlay"</code>/<code>"panel"</code> pair), <code>layer</code> (<code>"observed"</code>/
+<code>"simulated"</code>, checked against the layer the builder was actually
+passed to), <code>response_types</code>/<code>plot_by_types</code> (checked against
+<code>object$response$type</code>/<code>object$group$type</code>), and <code>marker_source</code>
+(which of <code>config$summary</code>/<code>config$percentiles</code> the builder actually
+draws from, used by <code><a href="er_vpc_theme.html">er_vpc_theme()</a></code>'s <code>xlim</code>/<code>ylim</code> cropping). All
+five are optional and independent – see <code><a href="er_style_tag.html">er_style_tag()</a></code> for the full
+explanation of each, including which built-in builders use them and
+why.</p>
 <p>Both <code>observed</code> and <code>simulated</code> are <strong>singleton</strong> layers: calling
 <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/<code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> again replaces the
 previous builder rather than adding another one.</p>

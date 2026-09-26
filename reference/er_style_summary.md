@@ -162,7 +162,7 @@ field (see
 reserved `glance` column, showing only whichever of those four are
 actually present and non-`NA`; it draws nothing if none of them are
 available, or if the layer is stratified. All four builders are tagged
-`er_style_tag(fn, layer = "summary")`, so
+`er_style_tag(fn, layer = "plot_summary")`, so
 [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
 errors informatively if a builder tagged for a different layer is passed
 to it instead.

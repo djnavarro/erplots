@@ -3,15 +3,11 @@
 drawing the simulated side of a visual predictive check as a
 mean + percentile interval per bin (the default, adaptive to
 plot_by's type), continuous-x percentile bands, or a
-point/interval per bin and per requested percentile. See
-er_style_vpc() for the shared interface every VPC-grammar builder
-implements."><meta property="og:description" content="Builder functions for the simulated layer (er_vpc_add_simulated()),
+point/interval per bin and per requested percentile."><meta property="og:description" content="Builder functions for the simulated layer (er_vpc_add_simulated()),
 drawing the simulated side of a visual predictive check as a
 mean + percentile interval per bin (the default, adaptive to
 plot_by's type), continuous-x percentile bands, or a
-point/interval per bin and per requested percentile. See
-er_style_vpc() for the shared interface every VPC-grammar builder
-implements."></head><body>
+point/interval per bin and per requested percentile."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -76,9 +72,7 @@ implements."></head><body>
 drawing the simulated side of a visual predictive check as a
 mean + percentile interval per bin (the default, adaptive to
 <code>plot_by</code>'s type), continuous-x percentile bands, or a
-point/interval per bin <em>and</em> per requested percentile. See
-<code><a href="er_style_vpc.html">er_style_vpc()</a></code> for the shared interface every VPC-grammar builder
-implements.</p>
+point/interval per bin <em>and</em> per requested percentile.</p>
     </div>
 
     <div class="section level2">
@@ -231,7 +225,9 @@ docs.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>er_style_vpc_simulated_mean_errorbar()</code> (the default) plots
+    <p>See <code><a href="er_style_vpc.html">er_style_vpc()</a></code> for the shared interface every VPC-grammar
+builder implements.</p>
+<p><code>er_style_vpc_simulated_mean_errorbar()</code> (the default) plots
 <code>config$summary</code>'s mean + percentile interval (of the mean, across
 replicates), adapting its x-position to <code>plot_by</code>'s type
 (<code>config$is_numeric_group</code>): equally spaced at each bin's categorical
@@ -239,7 +235,7 @@ replicates), adapting its x-position to <code>plot_by</code>'s type
 bin's numeric median (<code>x_median</code>, from <code>config$summary</code>) on the
 <code>plot_by</code>'s own numeric scale when <code>plot_by</code> is numeric. Because it adapts its
 x-position family at build time rather than declaring one statically,
-it carries no <code>layout</code> tag – pair it with
+it carries no <code>vpc_layout</code> tag – pair it with
 <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code>, which mirrors the same
 adaptive logic.</p>
 <p><code>er_style_vpc_simulated_quantile_ribbon()</code> plots <code>config$percentiles</code>
@@ -254,7 +250,7 @@ without it errors.</p>
 percentile – for pairing with
 <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_errorbar()</a></code>. Like that builder (and
 like <code>er_style_vpc_simulated_mean_errorbar()</code>), it adapts its
-x-position to <code>plot_by</code>'s type, carries no <code>layout</code> tag, supports
+x-position to <code>plot_by</code>'s type, carries no <code>vpc_layout</code> tag, supports
 both a numeric and a categorical <code>plot_by</code>, and requires a
 continuous/count response, erroring informatively without
 <code>config$percentiles</code>. As with the observed-layer counterpart, when

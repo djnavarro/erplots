@@ -100,7 +100,10 @@ plots (a tidyselection of variables).</p></dd>
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Function drawing each group panel – defaults to
 <code><a href="er_style_group.html">er_style_group_boxplot()</a></code>. Applied to every grouping variable added
-by this call; see <code><a href="er_style.html">er_style()</a></code> and "Details".</p></dd>
+by this call; see <code><a href="er_style.html">er_style()</a></code> and "Details". Or one of the
+registered short-string labels for this layer – currently
+<code>"boxplot"</code>, <code>"violin"</code>, <code>"histogram"</code>, <code>"linerange"</code>,
+<code>"boxjitter"</code>, <code>"violinjitter"</code> (see <code><a href="er_style_labels.html">er_style_labels()</a></code>).</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
@@ -144,7 +147,7 @@ rather than replacing it.</p>
 other built-in <code>style</code> options; any function matching the standard
 <code>(data, config, stratify, exposure, response, strata, theme, ...)</code>
 signature can be supplied instead. If <code>style</code> is tagged with a
-<code>layer</code> (via <code><a href="er_style_tag.html">er_style_tag()</a></code>) other than <code>"group"</code>, this errors
+<code>layer</code> (via <code><a href="er_style_tag.html">er_style_tag()</a></code>) other than <code>"plot_group"</code>, this errors
 informatively; an untagged builder is never checked.</p>
 <p><code>keep_strata = TRUE</code> errors if <code>group_by</code> is itself the plot's
 stratification variable, since that would mean grouping and

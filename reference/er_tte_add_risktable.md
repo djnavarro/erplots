@@ -23,7 +23,9 @@ er_tte_add_risktable(object, style = NULL, times = NULL, n_times = 6, ...)
 - style:
 
   Function drawing the risk-count labels. Defaults to
-  [`er_style_tte_risktable_text()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md).
+  [`er_style_tte_risktable_text()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md),
+  or the registered label `"text"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 - times:
 

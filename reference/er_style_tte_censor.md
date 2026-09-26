@@ -2,9 +2,7 @@
 
 Builder functions for the `censor` layer
 ([`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)),
-marking each censoring time directly on the Kaplan-Meier curve. See
-[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
-for the shared interface every TTE-grammar builder implements.
+marking each censoring time directly on the Kaplan-Meier curve.
 
 ## Usage
 
@@ -76,6 +74,10 @@ er_style_tte_censor_ticks(
 A geom, or a list of geoms.
 
 ## Details
+
+See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for the shared interface every TTE-grammar builder implements.
 
 A censoring-only row of the KM table (`n_censor > 0`, `n_event == 0`)
 carries the survival value the curve already had going into that time –

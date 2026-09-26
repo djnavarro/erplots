@@ -34,7 +34,11 @@ er_plot_add_model(
 
 - style:
 
-  Function drawing the model curve/ribbon. Defaults to
+  Function drawing the model curve/ribbon, or one of the registered
+  short-string labels for this layer – currently `"ribbonline"`,
+  `"line"`, `"spaghetti"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
+  Defaults to
   [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md).
 
 - conf_level:
@@ -114,6 +118,13 @@ erglm_data |>
   er_plot_add_model(mod, style = er_style_model_spaghetti) |>
   plot()
 
+# the same spaghetti plot, selected by its registered label instead
+# (see `?er_style_labels`)
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod, style = "spaghetti") |>
+  plot()
+
 # plug in a fully custom model-curve builder
 build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme, ...) {
   ggplot2::geom_line(
@@ -138,6 +149,8 @@ erglm_data |>
 }
 
 #> Using seed = 3953. Pass `seed = 3953` to reproduce this result.
+
+#> Using seed = 8038. Pass `seed = 8038` to reproduce this result.
 
 
 

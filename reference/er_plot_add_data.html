@@ -94,7 +94,9 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <code><a href="er_style_data.html">er_style_data_overlay()</a></code>. Any function matching the standard
 <code>(data, config, stratify, exposure, response, strata, theme, ...)</code>
 signature and tagged with <code><a href="er_style_tag.html">er_style_tag()</a></code> can be supplied instead;
-see <code><a href="er_style.html">er_style()</a></code> and "Details".</p></dd>
+see <code><a href="er_style.html">er_style()</a></code> and "Details". Or one of the registered
+short-string labels for this layer – currently <code>"overlay"</code>,
+<code>"hex"</code>, <code>"boxjitter"</code> (see <code><a href="er_style_labels.html">er_style_labels()</a></code>).</p></dd>
 
 
 <dt id="arg-panel">panel<a class="anchor" aria-label="anchor" href="#arg-panel"></a></dt>
@@ -150,7 +152,7 @@ incidental: <code><a href="er_style_data.html">er_style_data_overlay()</a></code
 panels, and <code><a href="er_style_data.html">er_style_data_boxjitter()</a></code> can never be merged into the main
 panel. See <code><a href="er_style_tag.html">er_style_tag()</a></code> and <code><a href="er_style.html">er_style()</a></code> for how to tag a custom
 builder the same way. If <code>style</code> is tagged with a <code>layer</code> other than
-<code>"data"</code>, <code>er_plot_add_data()</code> errors informatively; an untagged
+<code>"plot_data"</code>, <code>er_plot_add_data()</code> errors informatively; an untagged
 builder is never checked (only <code>layout</code> is a hard requirement).</p>
     </div>
     <div class="section level2">

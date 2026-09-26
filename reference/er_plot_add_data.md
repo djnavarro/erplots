@@ -34,7 +34,9 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
   [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
   can be supplied instead; see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
-  and "Details".
+  and "Details". Or one of the registered short-string labels for this
+  layer – currently `"overlay"`, `"hex"`, `"boxjitter"` (see
+  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
 
 - panel:
 
@@ -97,7 +99,7 @@ can never be merged into the main panel. See
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
 and [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
 for how to tag a custom builder the same way. If `style` is tagged with
-a `layer` other than `"data"`, `er_plot_add_data()` errors
+a `layer` other than `"plot_data"`, `er_plot_add_data()` errors
 informatively; an untagged builder is never checked (only `layout` is a
 hard requirement).
 

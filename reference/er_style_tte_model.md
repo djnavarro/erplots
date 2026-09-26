@@ -3,9 +3,7 @@
 Builder functions for the `model` layer
 ([`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)),
 drawing a fitted parametric `S(t)` curve with an optional uncertainty
-band. See
-[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
-for the shared interface every TTE-grammar builder implements.
+band.
 
 ## Usage
 
@@ -78,6 +76,10 @@ er_style_tte_model_line(
 A geom, or a list of geoms.
 
 ## Details
+
+See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for the shared interface every TTE-grammar builder implements.
 
 Unlike
 [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)'s

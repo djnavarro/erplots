@@ -5,9 +5,7 @@ Builder functions for the `observed` layer
 drawing the observed side of a visual predictive check as a mean/rate +
 confidence interval per bin (the default, adaptive to `plot_by`'s type),
 a continuous-x line of empirical percentiles, or a point/interval per
-bin *and* per requested percentile. See
-[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md)
-for the shared interface every VPC-grammar builder implements.
+bin *and* per requested percentile.
 
 ## Usage
 
@@ -129,6 +127,10 @@ A list of geoms; see
 
 ## Details
 
+See
+[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md)
+for the shared interface every VPC-grammar builder implements.
+
 `er_style_vpc_observed_mean_errorbar()` (the default) plots
 `config$summary`'s rate/mean + confidence interval, adapting its
 x-position to `plot_by`'s type (`config$is_numeric_group`): equally
@@ -136,7 +138,8 @@ spaced at each bin's categorical (or quantile-bin) label when `plot_by`
 is categorical, or at each bin's numeric median (`x_median`, from
 `config$summary`) on `plot_by`'s own numeric scale when `plot_by` is
 numeric. Because it adapts its x-position family at build time rather
-than declaring one statically, it carries no `layout` tag – pair it with
+than declaring one statically, it carries no `vpc_layout` tag – pair it
+with
 [`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md),
 which mirrors the same adaptive logic.
 
@@ -160,7 +163,7 @@ bin's categorical (or quantile-bin) label when `plot_by` is categorical,
 or at each bin's numeric median (`x_median`, from `config$percentiles`)
 on `plot_by`'s own numeric scale when `plot_by` is numeric. Because it
 adapts its x-position family at build time rather than declaring one
-statically, it carries no `layout` tag. Unlike
+statically, it carries no `vpc_layout` tag. Unlike
 `er_style_vpc_observed_quantile_line()`/
 [`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md),
 it supports a categorical `plot_by` as well as a numeric one; like it,

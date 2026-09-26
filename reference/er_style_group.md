@@ -213,7 +213,7 @@ only – exposure position on the x-axis is never perturbed), the same
 idea
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
 applies to the data layer. All built-in group builders are tagged
-`layer = "group"`, so
+`layer = "plot_group"`, so
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
 errors if given one tagged for another layer.
 

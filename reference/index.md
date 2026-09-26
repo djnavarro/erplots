@@ -103,7 +103,12 @@ data and the simulated data.
 Tag a new builder function with the required metadata
 
 - [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
-  : Tag a builder with structural/aesthetic metadata
+  : Register a builder's structural/aesthetic metadata
+
+- [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)
+  :
+
+  List builders registered for string-based `style` dispatch
 
 ## Builder functions for exposure-response plots
 

@@ -211,14 +211,14 @@ to <code>0.4</code>); fill transparency for <code>er_style_data_hex()</code> (de
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for the <code>data</code> layer (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>) are tagged with the structural family they belong to via <code><a href="er_style_tag.html">er_style_tag()</a></code>. <code>er_style_data_overlay()</code> and <code>er_style_data_hex()</code> use the overlay layout, drawing in the main panel; <code>er_style_data_boxjitter()</code> uses the panel layout and is binary-response only. All built-in data builders are also tagged <code>layer = "data"</code>, so <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> errors if given a builder tagged for another layer.</p>
+    <p>Builders for the <code>data</code> layer (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>) are tagged with the structural family they belong to via <code><a href="er_style_tag.html">er_style_tag()</a></code>. <code>er_style_data_overlay()</code> and <code>er_style_data_hex()</code> use the overlay layout, drawing in the main panel; <code>er_style_data_boxjitter()</code> uses the panel layout and is binary-response only. All built-in data builders are also tagged <code>layer = "plot_data"</code>, so <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> errors if given a builder tagged for another layer.</p>
 <p><code>er_style_data_hex()</code> defaults to a light-grey-to-navy (<code>"grey90"</code> to
 <code>"#132B43"</code>) fill gradient, so a cell's fill fades toward the panel
 background as its count approaches zero rather than starting at
 ggplot2's own default mid-intensity blue. Override it with
 <code>er_plot_theme(fill_continuous = ...)</code>.</p>
 <p>Because its geoms cover the whole panel, <code>er_style_data_hex()</code> is
-tagged <code>er_style_tag(fn, zorder = "background")</code> (see <code><a href="er_style_tag.html">er_style_tag()</a></code>),
+tagged <code>er_style_tag(fn, draw_order = "background")</code> (see <code><a href="er_style_tag.html">er_style_tag()</a></code>),
 so it's drawn before the model/summary/quantile layers rather than on
 top of them; its default <code>alpha = 0.85</code> gives those layers a little
 extra visibility through even a densely populated hex cell.</p>

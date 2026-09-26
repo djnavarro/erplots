@@ -120,8 +120,8 @@ for worked custom builders (a dashed model curve, a quantile crossbar,
 and a data-overlay density, respectively). An overlay-layout data
 builder can additionally declare, via the same
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
-call's `zorder` argument, whether its geoms are drawn before or after
-the model/summary/quantile layers when they share the main panel –
+call's `draw_order` argument, whether its geoms are drawn before or
+after the model/summary/quantile layers when they share the main panel –
 relevant for a builder whose geoms cover the whole panel (e.g.
 [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)),
 which would otherwise bury those layers by drawing on top of them; see
@@ -136,11 +136,12 @@ recompute anything erplots already derived from `data`/`exposure`/
 layers.
 
 A custom builder can optionally self-declare which layer it's meant for
-via `er_style_tag(builder, layer = ...)` (one of `"model"`, `"summary"`,
-`"quantile"`, `"data"`, `"group"`). Every `er_plot_add_*()` function
-checks a builder's `layer` tag, if it has one, against the layer it was
-actually passed to, erroring immediately if they disagree – e.g. passing
-a builder tagged `layer = "quantile"` to
+via `er_style_tag(builder, layer = ...)` (one of `"plot_model"`,
+`"plot_summary"`, `"plot_quantile"`, `"plot_data"`, `"plot_group"`).
+Every `er_plot_add_*()` function checks a builder's `layer` tag, if it
+has one, against the layer it was actually passed to, erroring
+immediately if they disagree – e.g. passing a builder tagged
+`layer = "plot_quantile"` to
 [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
 errors rather than calling the builder with a `config` shape it wasn't
 written for. This tag is entirely optional (unlike `layout`, which is

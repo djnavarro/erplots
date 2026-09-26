@@ -86,13 +86,15 @@ geom or list of geoms can stand in for a built-in builder, passed as
 
 A custom builder can self-declare metadata via
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md):
-`layout` (`"categorical"`/`"continuous"`, checked for agreement between
-the observed and simulated builders paired on one `er_vpc` object),
-`layer` (`"observed"`/`"simulated"`, checked against the layer the
-builder was actually passed to), `response_types`/`plot_by_types`
-(checked against `object$response$type`/`object$group$type`), and
-`marker_source` (which of `config$summary`/`config$percentiles` the
-builder actually draws from, used by
+`vpc_layout` (`"categorical"`/`"continuous"`, checked for agreement
+between the observed and simulated builders paired on one `er_vpc`
+object – distinct from the data layer's own `layout` tag, which uses an
+unrelated `"overlay"`/`"panel"` pair), `layer` (`"observed"`/
+`"simulated"`, checked against the layer the builder was actually passed
+to), `response_types`/`plot_by_types` (checked against
+`object$response$type`/`object$group$type`), and `marker_source` (which
+of `config$summary`/`config$percentiles` the builder actually draws
+from, used by
 [`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)'s
 `xlim`/`ylim` cropping). All five are optional and independent – see
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
