@@ -1,5 +1,23 @@
 # erplots 0.2.0
 
+## New features
+
+* Added `er_tte()`, a third mini-grammar (alongside `er_plot()`/`er_vpc()`)
+  for Kaplan-Meier/survival-over-time figures, built around a time axis,
+  a survival-probability axis, and an optional discrete `stratify_by`.
+  Five singleton layers: `er_tte_add_curve()` (the KM step curve +
+  confidence band), `er_tte_add_censor()` (censoring tick marks),
+  `er_tte_add_risktable()` (a number-at-risk panel stacked below the
+  curve), `er_tte_add_pvalue()` (a log-rank test annotation, for a
+  stratified object), and `er_tte_add_model()` (a fitted parametric
+  `S(t)` curve/ribbon overlay). `er_tte_theme()` styles labels, titles,
+  axis limits, formatters, the legend key, and panel heights, mirroring
+  `er_plot_theme()`/`er_vpc_theme()`. See the new `plot-tte` vignette.
+* Added `er_predict_survival()`, a fourth model-interface generic (see
+  `?er_model_interface`) powering `er_tte_add_model()`'s `S(t)` overlay.
+  The new companion package `ertte` (`Suggests`/`Remotes`-only, GitHub-
+  only like `erglm`/`emaxnls`) implements it, alongside the existing
+  `er_predict()`/`er_simulate()`/`er_summary()` methods.
 * `cut_quantile()`/`cut_exposure_quantile()` gain a `ties` argument
   controlling how a value that sits exactly on an interior quantile break
   is assigned (`"upward"`, the default and prior behaviour; `"downward"`;
@@ -27,7 +45,6 @@
   *the exposure variable itself* differently than `er_plot_add_quantiles()`
   does, since the two panels would then show inconsistent quantile bins
   for the same variable.
-
 * `er_vpc()` gains `ties`/`quantile_type`/`labeller` for `plot_by`, plus
   a `seed` argument for reproducing a `"split-even"` tie-break. Unlike
   the `er_plot_add_quantiles()`/`er_plot_add_groups()` arguments above,
@@ -36,19 +53,45 @@
   and simulated layers must always bin `plot_by` identically --
   `er_vpc_add_simulated()`'s own `seed` argument now also seeds its
   independent `"split-even"` tie-break.
+* `er_vpc()` gains an optional `stratify_by` for faceting a VPC into one
+  panel per discrete stratum, mirroring `er_plot()`'s own stratification
+  (facet-only here, since a VPC has no colour/fill precedence rule to
+  reconcile). Errors if `stratify_by` resolves to the same variable as
+  `plot_by`.
+
+## Improvements
+
+* `emaxnls` is back in `Suggests`/`Remotes` (pinned to
+  `emaxnls (>= 0.1.1.9000)`, the GitHub development version), and its
+  gated examples in `?erplots_data` are reinstated, now that `emaxnls`
+  registers the `er_predict()`/`er_simulate()`/`er_summary()` methods.
+  It had been stripped for the 0.1.0 CRAN submission, ahead of that
+  registration landing.
 
 ## Breaking changes
 
 * `stratify_by` must now name a discrete/categorical variable in
-  `er_vpc()` (and in the not-yet-released `er_tte()`); a numeric column
-  errors instead of being automatically split into quantile bins. The
-  `n_strata` argument is removed from both. Bin a continuous covariate
-  yourself first with `cut_quantile()`/`cut_exposure_quantile()`, which
-  also gives full control over bin count, tie-breaking, and labels --
-  see `?er_vpc`/`?er_tte`.
+  `er_vpc()`; a numeric column errors instead of being automatically
+  split into quantile bins, and the `n_strata` argument is removed. Bin
+  a continuous covariate yourself first with `cut_quantile()`/
+  `cut_exposure_quantile()`, which also gives full control over bin
+  count, tie-breaking, and labels -- see `?er_vpc`. (`er_tte()`'s own
+  `stratify_by` has the same discrete-only requirement from the outset,
+  being new in this release.)
 
 ## Bug fixes
 
+* `er_plot_add_model()`'s curve/ribbon no longer goes stale after
+  `er_plot_theme(xlim = ...)` narrows or widens the exposure axis once
+  the model layer has already been added -- the prediction grid is now
+  recomputed at build time rather than cached from add-layer time (#14).
+* The data, quantile, and group layers now drop (and warn about) any
+  observations falling outside `er_plot_theme(xlim = )`/`ylim = )`,
+  instead of silently handing them to a geom that renders past the
+  visible panel with no visual cue (#16).
+* `er_vpc_add_observed()`/`er_vpc_add_simulated()` summary markers
+  falling outside `er_vpc_theme(xlim = )`/`ylim = )` are now dropped,
+  with a warning, instead of silently drawn past the panel (#17).
 * `er_plot()` now errors clearly when `stratify_by` names a numeric
   column, instead of silently mapping it to a continuous colour scale
   (which broke every stratified builder's discrete-groups assumption --
