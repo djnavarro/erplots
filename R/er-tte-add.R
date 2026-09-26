@@ -2,15 +2,15 @@
 
 #' Add a Kaplan-Meier curve layer
 #'
-#' Adds the curve layer: a Kaplan-Meier step curve with a confidence
-#' band, computed from the fit already stored on `object$km` (see
-#' [er_tte()]) -- no recomputation happens here. Singleton (a second
-#' call replaces the previous one).
+#' Adds the curve layer to a TTE plot: a Kaplan-Meier step curve with a 
+#' confidence band, computed from the fit already contained within the plot 
+#' object.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
-#' @param style Function drawing the KM curve/ribbon. Defaults to
-#'   [er_style_tte_curve_km()], or the registered label `"km"` (see
-#'   [er_style_labels()]).
+#' @param style Style used to draw the Kaplan-Meier curve and ribbon. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"km"`, the default), or a builder function used to compute the
+#'   relevant plot object (see "Styles" below). 
 #' @param ... Additional named arguments forwarded unchanged to `style`
 #'   at build time (e.g. [er_style_tte_curve_km()]'s `show_ci`/
 #'   `ribbon_alpha`/`linewidth`).
@@ -71,9 +71,10 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 #' call replaces the previous one).
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
-#' @param style Function drawing the censoring marks. Defaults to
-#'   [er_style_tte_censor_ticks()], or the registered label `"ticks"` (see
-#'   [er_style_labels()]).
+#' @param style Style used to draw the censoring marks layer. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"ticks"`, the default), or a builder function used to compute the
+#'   relevant plot object (see "Styles" below). 
 #' @param ... Additional named arguments forwarded unchanged to `style`
 #'   at build time (e.g. [er_style_tte_censor_ticks()]'s `shape`/
 #'   `size`/`stroke`).
@@ -131,9 +132,10 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #' replaces the previous one).
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
-#' @param style Function drawing the risk-count labels. Defaults to
-#'   [er_style_tte_risktable_text()], or the registered label `"text"`
-#'   (see [er_style_labels()]).
+#' @param style Style used to generate the at-risk table in the plot. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"text"`, the default), or a builder function used to compute the
+#'   relevant plot object (see "Styles" below). 
 #' @param times Numeric vector of time points at which to report the
 #'   number at risk, or `NULL` (the default) to use `n_times` evenly
 #'   spaced breaks spanning `object$time$limits`.
@@ -209,9 +211,10 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #'   [er_predict_survival()].
 #' @param keep_strata Logical; whether this layer should draw one curve
 #'   per stratum level. Defaults to `!is.null(object$strata)`.
-#' @param style Function drawing the model curve/ribbon. Defaults to
-#'   [er_style_tte_model_line()], or the registered label `"line"` (see
-#'   [er_style_labels()]).
+#' #' @param style Style used to draw the model-based survival curve. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"line"`, the default), or a builder function used to compute the
+#'   relevant plot object (see "Styles" below). 
 #' @param conf_level Confidence level for the prediction band. Defaults
 #'   to `0.95`.
 #' @param time_grid Numeric vector of times at which to predict `S(t)`,
@@ -308,9 +311,10 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_tte()], `FALSE` otherwise.
-#' @param style Function drawing the annotation, or one of the registered
-#'   short-string labels for this layer (see "Styles" below). Defaults
-#'   to [er_style_tte_summary_logrank()].
+#' @param style Style used to produce the summary layer annotation. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"logrank"`, the default), or a builder function used to compute the
+#'   relevant plot object (see "Styles" below). 
 #' @param conf_level Confidence level forwarded to [er_summary()] (see
 #'   `?er_model_interface`). Defaults to `0.95`. Ignored when `model` is
 #'   `NULL`.

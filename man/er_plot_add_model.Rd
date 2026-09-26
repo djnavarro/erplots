@@ -21,9 +21,10 @@ er_plot_add_model(
 
 \item{keep_strata}{Logical; whether this layer should use stratification.}
 
-\item{style}{Function drawing the model curve/ribbon, or one of the
-registered short-string labels for this layer (see "Styles" below).
-Defaults to \code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}}.}
+\item{style}{Style used to draw the model curve/ribbon layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"ribbonline"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{conf_level}{Confidence level for the prediction ribbon. Defaults
 to \code{0.95}.}

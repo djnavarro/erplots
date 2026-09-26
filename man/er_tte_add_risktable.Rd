@@ -9,9 +9,10 @@ er_tte_add_risktable(object, style = NULL, times = NULL, n_times = 6, ...)
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_tte}).}
 
-\item{style}{Function drawing the risk-count labels. Defaults to
-\code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}}, or the registered label \code{"text"}
-(see \code{\link[=er_style_labels]{er_style_labels()}}).}
+\item{style}{Style used to generate the at-risk table in the plot. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"text"}, the default), or a builder function used to compute the
+relevant plot object (see "Styles" below).}
 
 \item{times}{Numeric vector of time points at which to report the
 number at risk, or \code{NULL} (the default) to use \code{n_times} evenly

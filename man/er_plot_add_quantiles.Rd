@@ -23,9 +23,10 @@ er_plot_add_quantiles(
 split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the quantile summary; defaults to
-\code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar). Or one of the
-registered short-string labels for this layer (see "Styles" below).}
+\item{style}{Style used to draw the quantile summary layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"errorbar"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{bins}{Number of exposure bins (not counting placebo). Defaults
 to \code{4}.}

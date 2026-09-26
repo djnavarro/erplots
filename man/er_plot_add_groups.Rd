@@ -22,10 +22,10 @@ er_plot_add_groups(
 \item{group_by}{Grouping variables to define groups for distribution
 plots (a tidyselection of variables).}
 
-\item{style}{Function drawing each group panel -- defaults to
-\code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}}. Applied to every grouping variable added
-by this call; see \code{\link[=er_style]{er_style()}} and "Details". Or one of the
-registered short-string labels for this layer (see "Styles" below).}
+\item{style}{Style used to draw a exposures by groups layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"boxplot"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{bins}{Number of quantile bins used for continuous grouping
 variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).

@@ -2,18 +2,17 @@
 % Please edit documentation in R/er-vpc-add.R
 \name{er_vpc_add_observed}
 \alias{er_vpc_add_observed}
-\title{Add the observed-data layer to an \code{er_vpc} VPC}
+\title{Add the observed-data layer to a VPC plot}
 \usage{
 er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
 }
 \arguments{
 \item{object}{Partially constructed VPC (has S3 class \code{er_vpc}).}
 
-\item{style}{A function determining how the observed layer is drawn.
-Defaults to \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}; see
-\code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}} for the other built-in options. Or one of
-the registered short-string labels for this layer (see "Styles"
-below).}
+\item{style}{Style used to draw the VPC observed data layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"mean_errorbar"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{...}{Additional named arguments forwarded to \code{style}.}
 }

@@ -14,12 +14,10 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. See
 "Details" for how this interacts with a builder's structural family.}
 
-\item{style}{Function drawing the data layer -- defaults to
-\code{\link[=er_style_data_overlay]{er_style_data_overlay()}}. Any function matching the standard
-\verb{(data, config, stratify, exposure, response, strata, theme, ...)}
-signature and tagged with \code{\link[=er_style_tag]{er_style_tag()}} can be supplied instead;
-see \code{\link[=er_style]{er_style()}} and "Details". Or one of the registered
-short-string labels for this layer (see "Styles" below).}
+\item{style}{Style used to draw the data layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"overlay"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
 default). Only meaningful for \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} on a

@@ -2,7 +2,7 @@
 % Please edit documentation in R/er-vpc-add.R
 \name{er_vpc_add_simulated}
 \alias{er_vpc_add_simulated}
-\title{Add the simulated-data layer to an \code{er_vpc} VPC}
+\title{Add the simulated-data layer to a VPC plot}
 \usage{
 er_vpc_add_simulated(
   object,
@@ -34,11 +34,10 @@ this layer's random tie-break when \code{\link[=er_vpc]{er_vpc()}}'s \code{ties}
 \code{"split-even"} -- see \code{\link[=er_vpc]{er_vpc()}}'s own \code{seed} argument for the
 observed layer's independent tie-break seed.}
 
-\item{style}{A function determining how the simulated layer is drawn.
-Defaults to \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}; see
-\code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}} for the other built-in options. Or one of
-the registered short-string labels for this layer (see "Styles"
-below).}
+\item{style}{Style used to draw the VPC simulation layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"mean_errorbar"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{simulate_args}{A named list of additional arguments forwarded to
 \code{\link[=er_simulate]{er_simulate()}}, only used with \code{model}. Distinct from \code{...} the

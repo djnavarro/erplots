@@ -9,9 +9,10 @@ er_tte_add_curve(object, style = NULL, ...)
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_tte}).}
 
-\item{style}{Function drawing the KM curve/ribbon. Defaults to
-\code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}, or the registered label \code{"km"} (see
-\code{\link[=er_style_labels]{er_style_labels()}}).}
+\item{style}{Style used to draw the Kaplan-Meier curve and ribbon. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"km"}, the default), or a builder function used to compute the
+relevant plot object (see "Styles" below).}
 
 \item{...}{Additional named arguments forwarded unchanged to \code{style}
 at build time (e.g. \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}'s \code{show_ci}/
@@ -21,10 +22,9 @@ at build time (e.g. \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}
 The input \code{object}, with the curve layer added.
 }
 \description{
-Adds the curve layer: a Kaplan-Meier step curve with a confidence
-band, computed from the fit already stored on \code{object$km} (see
-\code{\link[=er_tte]{er_tte()}}) -- no recomputation happens here. Singleton (a second
-call replaces the previous one).
+Adds the curve layer to a TTE plot: a Kaplan-Meier step curve with a
+confidence band, computed from the fit already contained within the plot
+object.
 }
 \section{Styles}{
 

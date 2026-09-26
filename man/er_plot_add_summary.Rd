@@ -26,9 +26,10 @@ purely descriptive builder (e.g. \code{\link[=er_style_summary_n]{er_style_summa
 split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the summary annotation, defaulting to
-\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}, or one of the registered short-string
-labels for this layer (see "Styles" below).}
+\item{style}{Style used to draw the summary annotation layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"pvalue"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (used,
 e.g., for the \code{conf_low}/\code{conf_high} columns of its \code{coefficients}

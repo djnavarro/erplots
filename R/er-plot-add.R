@@ -9,9 +9,10 @@
 #' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param model A fitted exposure-response model. Must implement [er_predict()].
 #' @param keep_strata Logical; whether this layer should use stratification.
-#' @param style Function drawing the model curve/ribbon, or one of the
-#'   registered short-string labels for this layer (see "Styles" below).
-#'   Defaults to [er_style_model_ribbonline()].
+#' @param style Style used to draw the model curve/ribbon layer. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"ribbonline"`, the default), or a builder function used to 
+#'   compute the relevant plot object (see "Styles" below). 
 #' @param conf_level Confidence level for the prediction ribbon. Defaults
 #'   to `0.95`.
 #' @param predict_args A named list of additional arguments forwarded to
@@ -144,9 +145,10 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
-#' @param style Function drawing the summary annotation, defaulting to
-#'   [er_style_summary_pvalue()], or one of the registered short-string
-#'   labels for this layer (see "Styles" below).
+#' @param style Style used to draw the summary annotation layer. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"pvalue"`, the default), or a builder function used to 
+#'   compute the relevant plot object (see "Styles" below). 
 #' @param conf_level Confidence level forwarded to [er_summary()] (used,
 #'   e.g., for the `conf_low`/`conf_high` columns of its `coefficients`
 #'   result -- see `?er_model_interface`). Defaults to `0.95`. Ignored
@@ -236,9 +238,10 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
-#' @param style Function drawing the quantile summary; defaults to
-#'   [er_style_quantile_errorbar()] (point + error bar). Or one of the
-#'   registered short-string labels for this layer (see "Styles" below).
+#' @param style Style used to draw the quantile summary layer. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"errorbar"`, the default), or a builder function used to 
+#'   compute the relevant plot object (see "Styles" below). 
 #' @param bins Number of exposure bins (not counting placebo). Defaults
 #'   to `4`.
 #' @param conf_level Confidence level for the interval. Defaults to `0.95`.
@@ -393,12 +396,10 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. See
 #'   "Details" for how this interacts with a builder's structural family.
-#' @param style Function drawing the data layer -- defaults to
-#'   [er_style_data_overlay()]. Any function matching the standard
-#'   `(data, config, stratify, exposure, response, strata, theme, ...)`
-#'   signature and tagged with [er_style_tag()] can be supplied instead;
-#'   see [er_style()] and "Details". Or one of the registered
-#'   short-string labels for this layer (see "Styles" below).
+#' @param style Style used to draw the data layer. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"overlay"`, the default), or a builder function used to 
+#'   compute the relevant plot object (see "Styles" below). 
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
 #'   default). Only meaningful for [er_style_data_boxjitter()] on a
 #'   binary response; see "Details" for when `"both"` is required.
@@ -579,10 +580,10 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param group_by Grouping variables to define groups for distribution
 #'   plots (a tidyselection of variables).
-#' @param style Function drawing each group panel -- defaults to
-#'   [er_style_group_boxplot()]. Applied to every grouping variable added
-#'   by this call; see [er_style()] and "Details". Or one of the
-#'   registered short-string labels for this layer (see "Styles" below).
+#' @param style Style used to draw a exposures by groups layer. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"boxplot"`, the default), or a builder function used to 
+#'   compute the relevant plot object (see "Styles" below). 
 #' @param bins Number of quantile bins used for continuous grouping
 #'   variables (`NULL`, the default, uses [cut_quantile()]'s own default).
 #'   Applied identically to every grouping variable added by this call.

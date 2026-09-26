@@ -29,9 +29,10 @@ ignore it.}
 split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_tte]{er_tte()}}, \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the annotation, or one of the registered
-short-string labels for this layer (see "Styles" below). Defaults
-to \code{\link[=er_style_tte_summary_logrank]{er_style_tte_summary_logrank()}}.}
+\item{style}{Style used to produce the summary layer annotation. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"logrank"}, the default), or a builder function used to compute the
+relevant plot object (see "Styles" below).}
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (see
 \code{?er_model_interface}). Defaults to \code{0.95}. Ignored when \code{model} is

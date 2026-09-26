@@ -1,5 +1,5 @@
 
-#' Add the observed-data layer to an `er_vpc` VPC
+#' Add the observed-data layer to a VPC plot
 #'
 #' Bins the observed data by `plot_by` (see [er_vpc()]) and computes its
 #' response summary (rate/mean + confidence interval, plus empirical
@@ -7,11 +7,10 @@
 #' against a simulated layer added via [er_vpc_add_simulated()].
 #'
 #' @param object Partially constructed VPC (has S3 class `er_vpc`).
-#' @param style A function determining how the observed layer is drawn.
-#'   Defaults to [er_style_vpc_observed_mean_errorbar()]; see
-#'   [er_style_vpc_observed()] for the other built-in options. Or one of
-#'   the registered short-string labels for this layer (see "Styles"
-#'   below).
+#' @param style Style used to draw the VPC observed data layer. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"mean_errorbar"`, the default), or a builder function used to 
+#'   compute the relevant plot object (see "Styles" below). 
 #' @param ... Additional named arguments forwarded to `style`.
 #'
 #' @returns `object`, with `object$layer$observed` populated.
@@ -59,7 +58,7 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 }
 
 
-#' Add the simulated-data layer to an `er_vpc` VPC
+#' Add the simulated-data layer to a VPC plot
 #'
 #' Bins simulated data using the same cutpoints [er_vpc_add_observed()]
 #' already computed, and summarizes it (mean + a percentile interval
@@ -79,11 +78,10 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #'   this layer's random tie-break when [er_vpc()]'s `ties` is
 #'   `"split-even"` -- see [er_vpc()]'s own `seed` argument for the
 #'   observed layer's independent tie-break seed.
-#' @param style A function determining how the simulated layer is drawn.
-#'   Defaults to [er_style_vpc_simulated_mean_errorbar()]; see
-#'   [er_style_vpc_simulated()] for the other built-in options. Or one of
-#'   the registered short-string labels for this layer (see "Styles"
-#'   below).
+#' @param style Style used to draw the VPC simulation layer. Can 
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"mean_errorbar"`, the default), or a builder function used to 
+#'   compute the relevant plot object (see "Styles" below).
 #' @param simulate_args A named list of additional arguments forwarded to
 #'   [er_simulate()], only used with `model`. Distinct from `...` the
 #'   same way [er_plot_add_model()]'s `predict_args` is distinct from its
