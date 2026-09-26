@@ -98,9 +98,15 @@ Kaplan-Meier table's own naming).
 still retitles the resulting legend with `strata$label` afterwards.
 
 `er_style_tte_model_line()` is tagged
-`er_style_tag(fn, layer = "model")`, so
+`er_style_tag(fn, layer = "tte_model")` – distinct from
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+own `"model"` tag, since the two grammars' model builders share no
+signature or `config` contents – so
 [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
-errors informatively if handed a builder tagged for a different layer.
+errors informatively if handed a builder tagged for a different layer
+(including
+[`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+own builders).
 
 ## See also
 

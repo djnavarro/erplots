@@ -2,10 +2,10 @@
 
 Assembles the layers into a ggplot2 object: a blank axes-only survival
 panel (time x-axis, survival probability y-axis), plus the curve,
-censor, pvalue, and model layers' geoms, when present
+censor, summary, and model layers' geoms, when present
 ([`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md),
 [`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md),
-[`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md),
+[`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md),
 [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)).
 When a risktable layer is also present
 ([`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)),
@@ -46,4 +46,4 @@ is called automatically when
 [`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md),
 [`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md),
 [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md),
-[`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md)
+[`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)

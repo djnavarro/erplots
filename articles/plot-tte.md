@@ -116,25 +116,53 @@ lung |>
 
 ![](plot-tte_files/figure-html/stratified-continuous-covariate-1.png)
 
-### Log-rank test annotation
+### Summary annotation
 
-[`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md)
-adds a corner-placed annotation of the log-rank test comparing survival
-across `stratify_by`’s levels
-([`survival::survdiff()`](https://rdrr.io/pkg/survival/man/survdiff.html)).
-It requires a stratified object – calling it on an unstratified one
-errors, since a log-rank test needs at least two groups to compare:
+[`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)
+adds a corner-placed text/label annotation. Its default style,
+[`er_style_tte_summary_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md),
+compares survival across `stratify_by`’s levels
+([`survival::survdiff()`](https://rdrr.io/pkg/survival/man/survdiff.html));
+on an unstratified object, or one with only 1 stratum level present in
+the data, it simply draws nothing (a log-rank test needs at least two
+groups to compare) rather than erroring:
 
 ``` r
 
 lung_sex |>
   er_tte(time, status == 2, stratify_by = sex) |>
   er_tte_add_curve() |>
-  er_tte_add_pvalue() |>
+  er_tte_add_summary() |>
   plot()
 ```
 
 ![](plot-tte_files/figure-html/logrank-pvalue-1.png)
+
+Other builders don’t depend on `stratify_by` at all.
+[`er_style_tte_summary_n()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
+draws subject/event counts (one line per stratum when stratified, a
+single overall line otherwise):
+
+``` r
+
+lung |>
+  er_tte(time, status == 2) |>
+  er_tte_add_curve() |>
+  er_tte_add_summary(style = er_style_tte_summary_n) |>
+  plot()
+```
+
+![](plot-tte_files/figure-html/summary-n-1.png)
+
+[`er_style_tte_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)/[`er_style_tte_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
+draw from a fitted model’s own \[er_summary()\] result instead, passed
+via
+[`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)’s
+`model` argument – independent of whatever model, if any, was passed to
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md).
+See [Implementing the model
+interface](https://erplots.djnavarro.net/articles/model-interface.md)
+for what a model needs to implement to support this.
 
 ## Overlaying a parametric model
 
@@ -200,7 +228,7 @@ only touch the fields they supply:
 lung_sex |>
   er_tte(time, status == 2, stratify_by = sex) |>
   er_tte_add_curve() |>
-  er_tte_add_pvalue() |>
+  er_tte_add_summary() |>
   er_tte_theme(
     xlab = "Days",
     ylab = "Overall survival",
@@ -265,7 +293,7 @@ lung |>
 lung_sex |>
   er_tte(time, status == 2, stratify_by = sex) |>
   er_tte_add_curve() |>
-  er_tte_add_pvalue() |>
+  er_tte_add_summary() |>
   er_tte_theme(format_p = scales::label_pvalue(accuracy = 0.0001, add_p = TRUE)) |>
   plot()
 ```

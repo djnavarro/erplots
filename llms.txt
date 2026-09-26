@@ -121,7 +121,7 @@ the quantile summaries, textual summaries, and the exposure group plots.
 
 The compositional mini-grammar for designing
 Kaplan-Meier/survival-over-time plots, dividing plot structure distinct
-layers for survival curves, censoring markers, risk tables, p-value
+layers for survival curves, censoring markers, risk tables, textual
 summaries, and the survival model.
 
 - [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) : The
@@ -136,8 +136,8 @@ summaries, and the survival model.
 - [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)
   : Add a number-at-risk panel
 
-- [`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md)
-  : Add a log-rank test annotation layer
+- [`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)
+  : Add a summary annotation layer
 
 - [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
   : Add a parametric survival-curve overlay layer
@@ -229,8 +229,11 @@ corresponding layer in the time-to-event plot.
   : Censoring-mark builders for the TTE grammar
 - [`er_style_tte_risktable_text()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)
   : Number-at-risk builders for the TTE grammar
-- [`er_style_tte_pvalue_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_pvalue.md)
-  : Log-rank test annotation builders for the TTE grammar
+- [`er_style_tte_summary_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
+  [`er_style_tte_summary_n()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
+  [`er_style_tte_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
+  [`er_style_tte_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
+  : Summary annotation builders for the TTE grammar
 - [`er_style_tte_model_line()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md)
   : Model-curve builders for the TTE grammar
 

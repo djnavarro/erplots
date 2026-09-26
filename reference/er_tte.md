@@ -61,8 +61,8 @@ censoring marks
 ([`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)),
 a number-at-risk panel
 ([`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)),
-log-rank annotation
-([`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md)),
+summary annotation
+([`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)),
 and a parametric model overlay
 ([`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md))
 – read from this shared fit rather than recomputing it (the model layer

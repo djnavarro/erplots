@@ -1114,10 +1114,16 @@ curve builder and adding one more geom is the more direct route:</p>
 <code><a href="../reference/er_plot.html">er_plot()</a></code>’s own – the same
 <code>er_style_tag(fn, layer = ...)</code> mechanism, checked by every
 <code>er_tte_add_*()</code> function against the layer it was actually
-called from, just with five more valid values (<code>"curve"</code>,
-<code>"censor"</code>, <code>"risktable"</code>, <code>"pvalue"</code>,
-alongside <code>"model"</code> for <code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>). A
-builder tagged for the wrong one errors immediately:</p>
+called from, just with five more valid values: <code>"curve"</code>,
+<code>"censor"</code>, <code>"risktable"</code> (unique to this
+grammar), plus <code>"tte_model"</code>/<code>"tte_summary"</code> for
+<code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>/<code><a href="../reference/er_tte_add_summary.html">er_tte_add_summary()</a></code> –
+namespaced separately from <code><a href="../reference/er_plot.html">er_plot()</a></code>’s own
+<code>"model"</code>/<code>"summary"</code> tags, since a TTE builder
+and an <code><a href="../reference/er_plot.html">er_plot()</a></code> builder share neither a signature nor
+<code>config</code> contents, so a builder written for one grammar
+should never silently pass the tag check for the other. A builder tagged
+for the wrong one errors immediately:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1134,7 +1140,7 @@ TTE builder – <code><a href="../reference/er_tte.html">er_tte()</a></code> has
 tags to distinguish.</p>
 <p>See
 <code><a href="../reference/er_style_tte_curve.html">?er_style_tte_curve</a></code>/<code><a href="../reference/er_style_tte_censor.html">?er_style_tte_censor</a></code>/<code><a href="../reference/er_style_tte_risktable.html">?er_style_tte_risktable</a></code>/
-<code><a href="../reference/er_style_tte_pvalue.html">?er_style_tte_pvalue</a></code>/<code><a href="../reference/er_style_tte_model.html">?er_style_tte_model</a></code> for
+<code><a href="../reference/er_style_tte_summary.html">?er_style_tte_summary</a></code>/<code><a href="../reference/er_style_tte_model.html">?er_style_tte_model</a></code> for
 each layer’s own <code>config</code> contents in full, and <a href="design.html">The exposure-response plotting grammar</a>/<a href="model-interface.html">Implementing the model interface</a> for how
 <code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>’s builder relates to
 [er_predict_survival()] specifically.</p>

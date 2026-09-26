@@ -156,8 +156,11 @@ column (named after <code>strata$var</code>) rather than a fixed name – unlike
 named <code>strata</code> (the tidied Kaplan-Meier table's own naming).
 <code><a href="er_tte_build.html">er_tte_build()</a></code> still retitles the resulting legend with
 <code>strata$label</code> afterwards.</p>
-<p><code>er_style_tte_model_line()</code> is tagged <code>er_style_tag(fn, layer = "model")</code>, so <code><a href="er_tte_add_model.html">er_tte_add_model()</a></code> errors informatively if handed a
-builder tagged for a different layer.</p>
+<p><code>er_style_tte_model_line()</code> is tagged <code>er_style_tag(fn, layer = "tte_model")</code> – distinct from <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>'s own <code>"model"</code>
+tag, since the two grammars' model builders share no signature or
+<code>config</code> contents – so <code><a href="er_tte_add_model.html">er_tte_add_model()</a></code> errors informatively if
+handed a builder tagged for a different layer (including
+<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>'s own builders).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

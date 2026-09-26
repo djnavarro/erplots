@@ -16,8 +16,10 @@
   (censoring tick marks),
   [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)
   (a number-at-risk panel stacked below the curve),
-  [`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md)
-  (a log-rank test annotation, for a stratified object), and
+  [`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)
+  (a corner-placed text/label annotation – a log-rank test by default,
+  or subject/event counts or a fitted model’s
+  coefficients/goodness-of-fit via `style`), and
   [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
   (a fitted parametric `S(t)` curve/ribbon overlay).
   [`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)

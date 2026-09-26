@@ -172,20 +172,38 @@ control over bin count, tie-breaking, and labels:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-tte_files/figure-html/stratified-continuous-covariate-1.png" class="r-plt" alt="" width="700"></p>
 <div class="section level3">
-<h3 id="log-rank-test-annotation">Log-rank test annotation<a class="anchor" aria-label="anchor" href="#log-rank-test-annotation"></a>
+<h3 id="summary-annotation">Summary annotation<a class="anchor" aria-label="anchor" href="#summary-annotation"></a>
 </h3>
-<p><code><a href="../reference/er_tte_add_pvalue.html">er_tte_add_pvalue()</a></code> adds a corner-placed annotation of
-the log-rank test comparing survival across <code>stratify_by</code>’s
-levels (<code><a href="https://rdrr.io/pkg/survival/man/survdiff.html" class="external-link">survival::survdiff()</a></code>). It requires a stratified
-object – calling it on an unstratified one errors, since a log-rank test
-needs at least two groups to compare:</p>
+<p><code><a href="../reference/er_tte_add_summary.html">er_tte_add_summary()</a></code> adds a corner-placed text/label
+annotation. Its default style,
+<code><a href="../reference/er_style_tte_summary.html">er_style_tte_summary_logrank()</a></code>, compares survival across
+<code>stratify_by</code>’s levels (<code><a href="https://rdrr.io/pkg/survival/man/survdiff.html" class="external-link">survival::survdiff()</a></code>);
+on an unstratified object, or one with only 1 stratum level present in
+the data, it simply draws nothing (a log-rank test needs at least two
+groups to compare) rather than erroring:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_tte_add_pvalue.html">er_tte_add_pvalue</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_summary.html">er_tte_add_summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-tte_files/figure-html/logrank-pvalue-1.png" class="r-plt" alt="" width="700"></p>
+<p>Other builders don’t depend on <code>stratify_by</code> at all.
+<code><a href="../reference/er_style_tte_summary.html">er_style_tte_summary_n()</a></code> draws subject/event counts (one
+line per stratum when stratified, a single overall line otherwise):</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lung</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_summary.html">er_tte_add_summary</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_tte_summary_n</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-tte_files/figure-html/summary-n-1.png" class="r-plt" alt="" width="700"></p>
+<p><code><a href="../reference/er_style_tte_summary.html">er_style_tte_summary_coefficients()</a></code>/<code><a href="../reference/er_style_tte_summary.html">er_style_tte_summary_gof()</a></code>
+draw from a fitted model’s own [er_summary()] result instead, passed via
+<code><a href="../reference/er_tte_add_summary.html">er_tte_add_summary()</a></code>’s <code>model</code> argument –
+independent of whatever model, if any, was passed to
+<code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>. See <a href="model-interface.html">Implementing the model interface</a> for
+what a model needs to implement to support this.</p>
 </div>
 </div>
 <div class="section level2">
@@ -198,7 +216,7 @@ for any model implementing <code><a href="../reference/er_model_interface.html">
 article uses <code>ertte</code>, the package that implements the full
 model interface for time-to-event models, fitting an accelerated failure
 time model:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ertte.djnavarro.net/reference/ertte_aft.html" class="external-link">ertte_aft</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">~</span> <span class="va">sex</span>, <span class="va">lung_sex</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
@@ -212,7 +230,7 @@ variable; erplots fills any other covariate from the plot data with a
 reference value (first factor level or numeric mean), the same approach
 <code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code> uses. A Cox model works the same way,
 and doesn’t require <code>stratify_by</code> to be set at all:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_cox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ertte.djnavarro.net/reference/ertte_coxph.html" class="external-link">ertte_coxph</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span>, <span class="va">lung</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">lung</span> <span class="op">|&gt;</span></span>
@@ -235,11 +253,11 @@ aesthetic. As with
 <code><a href="../reference/er_plot_theme.html">er_plot_theme()</a></code>/<code><a href="../reference/er_vpc_theme.html">er_vpc_theme()</a></code>, every argument
 defaults to <code>NULL</code> (“leave unchanged”), so repeated calls
 only touch the fields they supply:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_tte_add_pvalue.html">er_tte_add_pvalue</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_summary.html">er_tte_add_summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_theme.html">er_tte_theme</a></span><span class="op">(</span></span>
 <span>    xlab <span class="op">=</span> <span class="st">"Days"</span>,</span>
 <span>    ylab <span class="op">=</span> <span class="st">"Overall survival"</span>,</span>
@@ -253,7 +271,7 @@ only touch the fields they supply:</p>
 text, and <code>ylim</code> overrides the survival-probability axis’s
 displayed range – purely cosmetic, since a survival probability is
 always modelled on <code>[0, 1]</code> regardless of what’s shown:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -273,7 +291,7 @@ computed from <em>at add-layer time</em>. So
 <code>er_tte_theme(xlim = ...)</code> needs to be called before those
 layers to affect their defaults – calling it afterwards only changes the
 curve panel’s own displayed range:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_theme.html">er_tte_theme</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">600</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -285,17 +303,17 @@ curve panel’s own displayed range:</p>
 <p><img src="plot-tte_files/figure-html/theming-xlim-1.png" class="r-plt" alt="" width="700"></p>
 <p><code>format_p</code> controls how the log-rank annotation’s p-value
 is displayed:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_tte_add_pvalue.html">er_tte_add_pvalue</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_summary.html">er_tte_add_summary</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_theme.html">er_tte_theme</a></span><span class="op">(</span>format_p <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_pvalue.html" class="external-link">label_pvalue</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">0.0001</span>, add_p <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-tte_files/figure-html/theming-format-p-1.png" class="r-plt" alt="" width="700"></p>
 <p><code>draw_key</code> swaps the legend glyph the curve/model layers
 use, e.g. a point instead of the default filled rectangle:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -306,7 +324,7 @@ use, e.g. a point instead of the default filled rectangle:</p>
 relative heights patchwork gives to the two stacked panels once
 <code><a href="../reference/er_tte_add_risktable.html">er_tte_add_risktable()</a></code> is in play – supplying only one
 leaves the other unchanged:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>

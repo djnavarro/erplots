@@ -23,6 +23,7 @@ er_tte_theme(
   theme_extra = NULL,
   format_p = NULL,
   format_percent = NULL,
+  format_number = NULL,
   draw_key = NULL,
   height_curve = NULL,
   height_risktable = NULL
@@ -85,8 +86,8 @@ er_tte_theme(
   Formatter function (typically from
   [`scales::label_pvalue()`](https://scales.r-lib.org/reference/label_pvalue.html)),
   used by
-  [`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md)'s
-  annotation.
+  [`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)'s
+  log-rank annotation.
 
 - format_percent:
 
@@ -94,6 +95,15 @@ er_tte_theme(
   [`scales::label_percent()`](https://scales.r-lib.org/reference/label_percent.html)),
   reserved for a future TTE builder that formats a survival
   probability/risk-table count as a percentage.
+
+- format_number:
+
+  Formatter function (typically from
+  [`scales::label_number()`](https://scales.r-lib.org/reference/label_number.html)),
+  used by
+  [`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)'s
+  [`er_style_tte_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)/[`er_style_tte_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
+  builders to format coefficient/goodness-of-fit values.
 
 - draw_key:
 

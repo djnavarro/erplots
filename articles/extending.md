@@ -865,10 +865,16 @@ The `layer` tag works identically to
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s own
 – the same `er_style_tag(fn, layer = ...)` mechanism, checked by every
 `er_tte_add_*()` function against the layer it was actually called from,
-just with five more valid values (`"curve"`, `"censor"`, `"risktable"`,
-`"pvalue"`, alongside `"model"` for
-[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)).
-A builder tagged for the wrong one errors immediately:
+just with five more valid values: `"curve"`, `"censor"`, `"risktable"`
+(unique to this grammar), plus `"tte_model"`/`"tte_summary"` for
+[`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)/[`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)
+– namespaced separately from
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s own
+`"model"`/`"summary"` tags, since a TTE builder and an
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
+builder share neither a signature nor `config` contents, so a builder
+written for one grammar should never silently pass the tag check for the
+other. A builder tagged for the wrong one errors immediately:
 
 ``` r
 
@@ -892,7 +898,7 @@ nothing for those tags to distinguish.
 
 See
 [`?er_style_tte_curve`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)/[`?er_style_tte_censor`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md)/[`?er_style_tte_risktable`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)/
-[`?er_style_tte_pvalue`](https://erplots.djnavarro.net/reference/er_style_tte_pvalue.md)/[`?er_style_tte_model`](https://erplots.djnavarro.net/reference/er_style_tte_model.md)
+[`?er_style_tte_summary`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)/[`?er_style_tte_model`](https://erplots.djnavarro.net/reference/er_style_tte_model.md)
 for each layer’s own `config` contents in full, and [The
 exposure-response plotting
 grammar](https://erplots.djnavarro.net/articles/design.md)/[Implementing

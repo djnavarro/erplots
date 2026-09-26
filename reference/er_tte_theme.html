@@ -91,6 +91,7 @@ mapped to which aesthetic – that's the builder's job via <code>style</code>
 <span>  theme_extra <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  format_p <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  format_percent <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  format_number <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  draw_key <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  height_curve <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  height_risktable <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -151,13 +152,20 @@ with additional theme tweaks layered on top of <code>theme_base</code>. See
 
 <dt id="arg-format-p">format_p<a class="anchor" aria-label="anchor" href="#arg-format-p"></a></dt>
 <dd><p>Formatter function (typically from <code><a href="https://scales.r-lib.org/reference/label_pvalue.html" class="external-link">scales::label_pvalue()</a></code>),
-used by <code><a href="er_tte_add_pvalue.html">er_tte_add_pvalue()</a></code>'s annotation.</p></dd>
+used by <code><a href="er_tte_add_summary.html">er_tte_add_summary()</a></code>'s log-rank annotation.</p></dd>
 
 
 <dt id="arg-format-percent">format_percent<a class="anchor" aria-label="anchor" href="#arg-format-percent"></a></dt>
 <dd><p>Formatter function (typically from
 <code><a href="https://scales.r-lib.org/reference/label_percent.html" class="external-link">scales::label_percent()</a></code>), reserved for a future TTE builder that
 formats a survival probability/risk-table count as a percentage.</p></dd>
+
+
+<dt id="arg-format-number">format_number<a class="anchor" aria-label="anchor" href="#arg-format-number"></a></dt>
+<dd><p>Formatter function (typically from
+<code><a href="https://scales.r-lib.org/reference/label_number.html" class="external-link">scales::label_number()</a></code>), used by <code><a href="er_tte_add_summary.html">er_tte_add_summary()</a></code>'s
+<code><a href="er_style_tte_summary.html">er_style_tte_summary_coefficients()</a></code>/<code><a href="er_style_tte_summary.html">er_style_tte_summary_gof()</a></code>
+builders to format coefficient/goodness-of-fit values.</p></dd>
 
 
 <dt id="arg-draw-key">draw_key<a class="anchor" aria-label="anchor" href="#arg-draw-key"></a></dt>

@@ -189,9 +189,9 @@ Defaults to <code>0.05</code>.</p></dd>
 <dt id="arg-fields">fields<a class="anchor" aria-label="anchor" href="#arg-fields"></a></dt>
 <dd><p>Fields from <code>glance</code> to include for <code>er_style_summary_gof()</code>,
 and the order they're shown in: one or more of <code>"n"</code> (labelled "N"),
-<code>"aic"</code> ("AIC"), <code>"bic"</code> ("BIC"), or <code>"r_squared"</code> (<code>"R\u00b2"</code>). Defaults
-to all four, in that order. A field is shown only when both present
-and non-<code>NA</code> in the model's <code>glance</code> result.</p></dd>
+<code>"aic"</code> ("AIC"), <code>"bic"</code> ("BIC"), or <code>"r_squared"</code> (labelled
+"R-squared"). Defaults to all four, in that order. A field is shown
+only when both present and non-<code>NA</code> in the model's <code>glance</code> result.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -211,7 +211,7 @@ for models with several parameters and no single privileged p-value
 <code>coefficients</code> wasn't supplied, or if the layer is stratified.
 <code>er_style_summary_gof()</code> draws a single-line, comma-separated
 goodness-of-fit annotation from the model's <code>glance</code> field (see
-<code><a href="er_model_interface.html">er_summary()</a></code>) – a curated subset (<code>N</code>, <code>AIC</code>, <code>BIC</code>, <code>R\u00b2</code>) rather
+<code><a href="er_model_interface.html">er_summary()</a></code>) – a curated subset (<code>N</code>, <code>AIC</code>, <code>BIC</code>, R-squared) rather
 than every reserved <code>glance</code> column, showing only whichever of those
 four are actually present and non-<code>NA</code>; it draws nothing if none of them
 are available, or if the layer is stratified. All four builders are

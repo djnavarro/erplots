@@ -133,9 +133,9 @@ er_style_summary_gof(
 
   Fields from `glance` to include for `er_style_summary_gof()`, and the
   order they're shown in: one or more of `"n"` (labelled "N"), `"aic"`
-  ("AIC"), `"bic"` ("BIC"), or `"r_squared"` (`"R\u00b2"`). Defaults to
-  all four, in that order. A field is shown only when both present and
-  non-`NA` in the model's `glance` result.
+  ("AIC"), `"bic"` ("BIC"), or `"r_squared"` (labelled "R-squared").
+  Defaults to all four, in that order. A field is shown only when both
+  present and non-`NA` in the model's `glance` result.
 
 ## Value
 
@@ -158,7 +158,7 @@ stratified. `er_style_summary_gof()` draws a single-line,
 comma-separated goodness-of-fit annotation from the model's `glance`
 field (see
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md))
-– a curated subset (`N`, `AIC`, `BIC`, `R\u00b2`) rather than every
+– a curated subset (`N`, `AIC`, `BIC`, R-squared) rather than every
 reserved `glance` column, showing only whichever of those four are
 actually present and non-`NA`; it draws nothing if none of them are
 available, or if the layer is stratified. All four builders are tagged
