@@ -27,6 +27,20 @@ NULL
 # preference for explicit opt-in over a silent, potentially surprising
 # default -- see AGENTS.md's opt-in-seeding gotcha for the same
 # philosophy applied elsewhere.
+#
+# Staleness under covr::package_coverage(): a raw function reference
+# stashed here at registration time can go stale, because covr
+# reassigns each instrumented function's *body* in place after the
+# package has already loaded (see AGENTS.md's covr gotcha) -- producing
+# a new function object under the same namespace binding, which our
+# earlier-captured reference doesn't track. `.resolve_style_binding()`
+# below sidesteps this by re-resolving to whichever *currently* bound
+# object in `style`'s own environment still carries matching
+# `er_style_layer`/`er_style_label` attributes, rather than trusting the
+# stored reference directly -- attributes survive covr's swap (it copies
+# `attributes(target_value)` onto the replacement), so this works
+# whether or not `style` has been instrumented. Every lookup path
+# (`.lookup_style_label()`, `er_style_labels()`) goes through it.
 
 .er_style_registry <- new.env(parent = emptyenv())
 
@@ -72,6 +86,23 @@ NULL
       }
     ))
   }
+  .resolve_style_binding(layer, label, style)
+}
+
+#' @noRd
+.resolve_style_binding <- function(layer, label, style) {
+  env <- environment(style)
+  if (is.null(env)) return(style)
+
+  for (nm in ls(env, all.names = TRUE)) {
+    candidate <- tryCatch(get(nm, envir = env, inherits = FALSE), error = function(e) NULL)
+    if (is.function(candidate) &&
+        identical(attr(candidate, "er_style_layer"), layer) &&
+        identical(attr(candidate, "er_style_label"), label)) {
+      return(candidate)
+    }
+  }
+
   style
 }
 
@@ -100,10 +131,14 @@ er_style_labels <- function(layer = NULL) {
   }
 
   parts <- strsplit(keys, "::", fixed = TRUE)
+  layers <- vapply(parts, `[[`, character(1), 1)
+  labels <- vapply(parts, `[[`, character(1), 2)
+  raw_styles <- unname(mget(keys, envir = .er_style_registry))
+
   out <- tibble::tibble(
-    layer = vapply(parts, `[[`, character(1), 1),
-    label = vapply(parts, `[[`, character(1), 2),
-    style = unname(mget(keys, envir = .er_style_registry))
+    layer = layers,
+    label = labels,
+    style = Map(.resolve_style_binding, layers, labels, raw_styles)
   )
 
   if (!is.null(layer)) out <- out[out$layer == layer, ]

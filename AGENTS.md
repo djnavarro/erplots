@@ -700,6 +700,49 @@ edit if forgotten:
   `devtools::document()` won't guarantee it loads before a style file
   that calls it at load time (R sources `R/*.R` alphabetically by
   default, and `-` sorts before `.`).
+- **`covr::package_coverage()` breaks `identical()` comparisons against
+  a function object stashed in `.er_style_registry`
+  (`R/er-style-registry.R`), even though the same comparisons pass under
+  `devtools::test()`/`R CMD check`.** `.register_style_label()` captures
+  a direct reference to a builder function as a side effect of the
+  top-level `er_style_tag(fn, ..., label = ...)` call that runs once
+  when the package loads. `covr` doesn't just source the whole package
+  once with instrumentation baked in -- it loads the package normally
+  first, then walks the namespace afterwards and reassigns each
+  function's `body()` in place to an instrumented copy (inserting
+  `covr:::count(...)` calls). That reassignment produces a *new*
+  function object bound to the same name in the namespace, but doesn't
+  touch objects elsewhere that already captured a reference to the old,
+  pre-instrumented function -- and the registry is exactly such an
+  object, since it grabbed its copy before covr's later swap. Any test
+  doing `expect_identical(<resolved-from-registry>, some_builder)` (the
+  "accepts a registered label string in place of style" tests, plus
+  `er_style_labels()`'s own listing test) then fails under coverage,
+  comparing a stale uninstrumented function against a freshly
+  instrumented one looked up straight from the namespace -- 14 failures
+  of exactly this shape were traced back to this on 2026-09-26. Every
+  *other* `expect_identical(config$style, some_builder)` test in the
+  suite is unaffected, because those resolve `style` through an ordinary
+  default-argument expression (re-evaluated fresh from the namespace at
+  call time), not a value captured early into a mutable registry. Fixed
+  on 2026-09-26 via `.resolve_style_binding()` (`R/er-style-registry.R`),
+  called from both `.lookup_style_label()` and `er_style_labels()`: a
+  plain `getFromNamespace(name, "erplots")`-by-name re-resolution turned
+  out not to work, since a built-in style is tagged via the
+  self-reassignment pattern `x <- er_style_tag(x, ..., label = ...)`
+  (correctly re-resolvable by name, once tagging completes) but the
+  `?er_style_tag` docs' own worked example -- `build_data_density <-
+  er_style_tag(function(...) {...}, ...)` -- tags an anonymous function
+  assigned to an unrelated name, which no by-name lookup can recover.
+  `.resolve_style_binding()` instead re-scans `environment(style)` (the
+  namespace, for a built-in; the caller's own environment, for a custom
+  builder) for whichever *currently* bound object still carries matching
+  `er_style_layer`/`er_style_label` attributes, returning that instead of
+  the possibly-stale stored reference. This works because covr's
+  in-place swap copies `attributes(target_value)` onto the instrumented
+  replacement, so the attribute pair survives even though function
+  identity doesn't -- confirmed by reading `covr:::replacement()`'s
+  source directly.
 - **`er_plot()`/`er_vpc()` call `dplyr::ungroup()` on `data` (and, for
   `er_vpc()`, `sim`) internally.** A grouped or rowwise input tibble
   would otherwise break `.by = `-based `summarise()` calls and silently
