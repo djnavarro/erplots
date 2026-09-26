@@ -1,10 +1,11 @@
 #' Number-at-risk builders for the TTE grammar
 #'
 #' Builder functions for the `risktable` layer ([er_tte_add_risktable()]),
-#' drawing a row of risk counts per stratum at a grid of time points.
-#' Unlike every other TTE-grammar builder, this one's geoms are drawn
-#' into their own patchwork panel below the curve, not onto the curve's
-#' panel directly -- see [er_tte_build()].
+#' drawing a row of risk counts per stratum at a grid of time points. See
+#' [er_style_tte()] for the shared interface every TTE-grammar builder
+#' implements. Unlike every other TTE-grammar builder, this one's geoms
+#' are drawn into their own patchwork panel below the curve, not onto the
+#' curve's panel directly -- see [er_tte_build()].
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame (`object$data`).
@@ -44,7 +45,7 @@
 #'   plot()
 #'
 #' @name er_style_tte_risktable
-#' @seealso [er_tte_add_risktable()]
+#' @seealso [er_tte_add_risktable()], [er_style_tte()]
 NULL
 
 #' @rdname er_style_tte_risktable

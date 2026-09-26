@@ -34,6 +34,12 @@ their own family-specific pages, one per layer:
 \item \code{\link[=er_style_group]{er_style_group()}} -- the \code{group} layer (\code{\link[=er_plot_add_groups]{er_plot_add_groups()}})
 }
 
+\code{er_vpc()}/\code{er_tte()} have their own, separate builder interfaces --
+\code{\link[=er_style_vpc]{er_style_vpc()}}/\code{\link[=er_style_tte]{er_style_tte()}} -- since neither shares this
+signature exactly (\verb{er_vpc_*()} builders have no \code{stratify}/\code{strata}
+pair; \verb{er_tte_*()} builders take \code{time} instead of \code{exposure}/
+\code{response}).
+
 Arguments are standardised to allow users to write their own
 as needed
 }
@@ -173,5 +179,6 @@ call site if they weren't named.
 
 \seealso{
 \code{\link[=er_style_model]{er_style_model()}}, \code{\link[=er_style_summary]{er_style_summary()}}, \code{\link[=er_style_quantile]{er_style_quantile()}},
-\code{\link[=er_style_data]{er_style_data()}}, \code{\link[=er_style_group]{er_style_group()}}, \code{\link[=er_style_tag]{er_style_tag()}}
+\code{\link[=er_style_data]{er_style_data()}}, \code{\link[=er_style_group]{er_style_group()}}, \code{\link[=er_style_tag]{er_style_tag()}}, \code{\link[=er_style_vpc]{er_style_vpc()}},
+\code{\link[=er_style_tte]{er_style_tte()}}
 }

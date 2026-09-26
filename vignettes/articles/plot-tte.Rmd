@@ -98,7 +98,7 @@ lung |>
   plot()
 ```
 
-`er_style_tte_summary_coefficients()`/`er_style_tte_summary_gof()` draw from a fitted model's own [er_summary()] result instead, passed via `er_tte_add_summary()`'s `model` argument -- independent of whatever model, if any, was passed to `er_tte_add_model()`. See [Implementing the model interface](model-interface.html) for what a model needs to implement to support this.
+`er_style_tte_summary_coefficients()`/`er_style_tte_summary_gof()` draw from a fitted model's own `er_summary()` result instead, passed via `er_tte_add_summary()`'s `model` argument -- independent of whatever model, if any, was passed to `er_tte_add_model()`. See [Implementing the model interface](model-interface.html) for what a model needs to implement to support this.
 
 ## Overlaying a parametric model
 

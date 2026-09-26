@@ -53,10 +53,8 @@ A geom, or a list of geoms.
 \description{
 Builder functions for the \code{curve} layer (\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}),
 drawing the Kaplan-Meier estimate as a step function with an optional
-step-shaped confidence band. Shares the same \verb{function(data, config, stratify, time, strata, theme, ...)} signature every TTE-grammar
-builder implements -- the TTE analogue of \code{\link[=er_style]{er_style()}}'s shared
-interface for the \code{er_plot()} grammar, adapted for a time x-axis/
-survival-probability y-axis instead of exposure/response.
+step-shaped confidence band. See \code{\link[=er_style_tte]{er_style_tte()}} for the shared
+interface every TTE-grammar builder implements.
 }
 \details{
 A Kaplan-Meier confidence band is a step function, just like the
@@ -88,5 +86,5 @@ lung |>
 
 }
 \seealso{
-\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}
+\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}, \code{\link[=er_style_tte]{er_style_tte()}}
 }

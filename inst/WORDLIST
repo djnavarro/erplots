@@ -8,10 +8,10 @@ Emax
 Errorbar
 GLM's
 Garwood
-Gotchas
 Lifecycle
 Poisson
 R's
+RMST
 TTE
 VPC
 VPC's
@@ -46,6 +46,7 @@ overplot
 overplots
 pharmacometric
 pharmacometricians
+pkgdown
 pointrange
 pvalue
 recomputation

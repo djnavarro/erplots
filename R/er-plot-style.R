@@ -29,6 +29,12 @@
 #' - [er_style_data()] -- the `data` layer ([er_plot_add_data()])
 #' - [er_style_group()] -- the `group` layer ([er_plot_add_groups()])
 #'
+#' `er_vpc()`/`er_tte()` have their own, separate builder interfaces --
+#' [er_style_vpc()]/[er_style_tte()] -- since neither shares this
+#' signature exactly (`er_vpc_*()` builders have no `stratify`/`strata`
+#' pair; `er_tte_*()` builders take `time` instead of `exposure`/
+#' `response`).
+#'
 #' Arguments are standardised to allow users to write their own 
 #' as needed
 #' 
@@ -163,7 +169,8 @@
 #'
 #' @name er_style
 #' @seealso [er_style_model()], [er_style_summary()], [er_style_quantile()],
-#' [er_style_data()], [er_style_group()], [er_style_tag()]
+#' [er_style_data()], [er_style_group()], [er_style_tag()], [er_style_vpc()],
+#' [er_style_tte()]
 #' 
 NULL
 

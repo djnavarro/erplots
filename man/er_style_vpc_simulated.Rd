@@ -125,7 +125,9 @@ Builder functions for the \code{simulated} layer (\code{\link[=er_vpc_add_simula
 drawing the simulated side of a visual predictive check as a
 mean + percentile interval per bin (the default, adaptive to
 \code{plot_by}'s type), continuous-x percentile bands, or a
-point/interval per bin \emph{and} per requested percentile.
+point/interval per bin \emph{and} per requested percentile. See
+\code{\link[=er_style_vpc]{er_style_vpc()}} for the shared interface every VPC-grammar builder
+implements.
 }
 \details{
 \code{er_style_vpc_simulated_mean_errorbar()} (the default) plots
@@ -205,5 +207,5 @@ if (requireNamespace("erglm", quietly = TRUE)) {
 
 }
 \seealso{
-\code{\link[=er_style]{er_style()}}, \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}
+\code{\link[=er_style_vpc]{er_style_vpc()}}, \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}
 }

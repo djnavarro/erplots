@@ -52,8 +52,8 @@ A geom, or a list of geoms.
 \description{
 Builder functions for the \code{model} layer (\code{\link[=er_tte_add_model]{er_tte_add_model()}}),
 drawing a fitted parametric \code{S(t)} curve with an optional uncertainty
-band. Shares the same \verb{function(data, config, stratify, time, strata, theme, ...)} signature every TTE-grammar builder implements -- see
-\link{er_style_tte_curve} for the shared interface.
+band. See \code{\link[=er_style_tte]{er_style_tte()}} for the shared interface every TTE-grammar
+builder implements.
 }
 \details{
 Unlike \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}'s Kaplan-Meier step curve,
@@ -90,5 +90,5 @@ if (requireNamespace("ertte", quietly = TRUE)) {
 
 }
 \seealso{
-\code{\link[=er_tte_add_model]{er_tte_add_model()}}, \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}
+\code{\link[=er_tte_add_model]{er_tte_add_model()}}, \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}, \code{\link[=er_style_tte]{er_style_tte()}}
 }

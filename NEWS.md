@@ -106,6 +106,15 @@
   variable was always split into `cut_quantile()`/`cut_exposure_quantile()`'s
   own default of 4 bins, regardless of what `bins` was set to.
 
+## Documentation
+
+* Added `?er_style_vpc`/`?er_style_tte`, documenting the shared builder
+  interface for `er_vpc()`/`er_tte()` builders, alongside the existing
+  `?er_style` for `er_plot()`. Previously this material was scattered
+  across each builder family's own help page.
+* Fixed several cross-reference links in the pkgdown articles that
+  previously rendered as literal bracketed text instead of a hyperlink.
+
 # erplots 0.1.2
 
 Addresses CRAN reviewer feedback on the 0.1.1 submission. User-facing changes:

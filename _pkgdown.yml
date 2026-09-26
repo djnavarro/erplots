@@ -49,6 +49,7 @@ reference:
 - title: Builder functions for time-to-event plots
   desc: Low level functions to draw specific components of a time-to-event plot. Each function supports one option for the `style` argument to the corresponding layer in the time-to-event plot.
 - contents:
+  - er_style_tte
   - er_style_tte_curve
   - er_style_tte_censor
   - er_style_tte_risktable
@@ -57,6 +58,7 @@ reference:
 - title: Builder functions for visual predictive check plots
   desc: Low level functions to draw specific components of a VPC plot. Each function supports one option for the `style` argument to the corresponding layer in the VPC plot.
 - contents:
+  - er_style_vpc
   - er_style_vpc_observed
   - er_style_vpc_simulated
 - title: Confidence intervals

@@ -71,6 +71,7 @@ Collate:
     'er-tte-style-model.R'
     'er-tte-style-risktable.R'
     'er-tte-style-summary.R'
+    'er-tte-style.R'
     'er-tte-theme.R'
     'er-vpc-add.R'
     'er-vpc-api.R'
@@ -78,6 +79,7 @@ Collate:
     'er-vpc-layer.R'
     'er-vpc-style-observed.R'
     'er-vpc-style-simulated.R'
+    'er-vpc-style.R'
     'er-vpc-theme.R'
     'utils-helpers.R'
 Language: en-GB

@@ -51,8 +51,9 @@ A geom, or a list of geoms.
 }
 \description{
 Builder functions for the \code{censor} layer (\code{\link[=er_tte_add_censor]{er_tte_add_censor()}}),
-marking each censoring time directly on the Kaplan-Meier curve.
-Shares the same \verb{function(data, config, stratify, time, strata, theme, ...)} signature every TTE-grammar builder implements.
+marking each censoring time directly on the Kaplan-Meier curve. See
+\code{\link[=er_style_tte]{er_style_tte()}} for the shared interface every TTE-grammar builder
+implements.
 }
 \details{
 A censoring-only row of the KM table (\code{n_censor > 0}, \code{n_event == 0})
@@ -79,5 +80,5 @@ lung |>
 
 }
 \seealso{
-\code{\link[=er_tte_add_censor]{er_tte_add_censor()}}
+\code{\link[=er_tte_add_censor]{er_tte_add_censor()}}, \code{\link[=er_style_tte]{er_style_tte()}}
 }

@@ -2,11 +2,8 @@
 #'
 #' Builder functions for the `curve` layer ([er_tte_add_curve()]),
 #' drawing the Kaplan-Meier estimate as a step function with an optional
-#' step-shaped confidence band. Shares the same `function(data, config,
-#' stratify, time, strata, theme, ...)` signature every TTE-grammar
-#' builder implements -- the TTE analogue of [er_style()]'s shared
-#' interface for the `er_plot()` grammar, adapted for a time x-axis/
-#' survival-probability y-axis instead of exposure/response.
+#' step-shaped confidence band. See [er_style_tte()] for the shared
+#' interface every TTE-grammar builder implements.
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame (`object$data`).
@@ -60,7 +57,7 @@
 #'   plot()
 #'
 #' @name er_style_tte_curve
-#' @seealso [er_tte_add_curve()]
+#' @seealso [er_tte_add_curve()], [er_style_tte()]
 NULL
 
 #' @rdname er_style_tte_curve

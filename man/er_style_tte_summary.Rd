@@ -166,5 +166,5 @@ lung |>
 
 }
 \seealso{
-\code{\link[=er_tte_add_summary]{er_tte_add_summary()}}
+\code{\link[=er_tte_add_summary]{er_tte_add_summary()}}, \code{\link[=er_style_tte]{er_style_tte()}}
 }

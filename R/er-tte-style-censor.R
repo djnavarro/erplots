@@ -1,9 +1,9 @@
 #' Censoring-mark builders for the TTE grammar
 #'
 #' Builder functions for the `censor` layer ([er_tte_add_censor()]),
-#' marking each censoring time directly on the Kaplan-Meier curve.
-#' Shares the same `function(data, config, stratify, time, strata,
-#' theme, ...)` signature every TTE-grammar builder implements.
+#' marking each censoring time directly on the Kaplan-Meier curve. See
+#' [er_style_tte()] for the shared interface every TTE-grammar builder
+#' implements.
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame (`object$data`).
@@ -52,7 +52,7 @@
 #'   plot()
 #'
 #' @name er_style_tte_censor
-#' @seealso [er_tte_add_censor()]
+#' @seealso [er_tte_add_censor()], [er_style_tte()]
 NULL
 
 #' @rdname er_style_tte_censor

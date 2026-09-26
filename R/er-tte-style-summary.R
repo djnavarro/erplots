@@ -88,7 +88,7 @@
 #'   plot()
 #'
 #' @name er_style_tte_summary
-#' @seealso [er_tte_add_summary()]
+#' @seealso [er_tte_add_summary()], [er_style_tte()]
 NULL
 
 #' @rdname er_style_tte_summary

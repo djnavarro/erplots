@@ -2,9 +2,8 @@
 #'
 #' Builder functions for the `model` layer ([er_tte_add_model()]),
 #' drawing a fitted parametric `S(t)` curve with an optional uncertainty
-#' band. Shares the same `function(data, config, stratify, time, strata,
-#' theme, ...)` signature every TTE-grammar builder implements -- see
-#' [er_style_tte_curve] for the shared interface.
+#' band. See [er_style_tte()] for the shared interface every TTE-grammar
+#' builder implements.
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame (`object$data`).
@@ -61,7 +60,7 @@
 #'     plot()
 #' }
 #'
-#' @seealso [er_tte_add_model()], [er_style_tte_curve_km()]
+#' @seealso [er_tte_add_model()], [er_style_tte_curve_km()], [er_style_tte()]
 #'
 #' @name er_style_tte_model
 NULL

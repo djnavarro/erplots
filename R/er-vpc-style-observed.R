@@ -4,7 +4,9 @@
 #' drawing the observed side of a visual predictive check as a
 #' mean/rate + confidence interval per bin (the default, adaptive to
 #' `plot_by`'s type), a continuous-x line of empirical percentiles, or a
-#' point/interval per bin *and* per requested percentile.
+#' point/interval per bin *and* per requested percentile. See
+#' [er_style_vpc()] for the shared interface every VPC-grammar builder
+#' implements.
 #'
 #' @include er-plot-style.R
 #' @param data The original data frame.
@@ -134,7 +136,7 @@
 #' }
 #'
 #' @name er_style_vpc_observed
-#' @seealso [er_style()], [er_style_vpc_simulated()]
+#' @seealso [er_style_vpc()], [er_style_vpc_simulated()]
 NULL
 
 #' @rdname er_style_vpc_observed

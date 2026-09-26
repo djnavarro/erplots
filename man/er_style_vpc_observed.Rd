@@ -102,7 +102,9 @@ Builder functions for the \code{observed} layer (\code{\link[=er_vpc_add_observe
 drawing the observed side of a visual predictive check as a
 mean/rate + confidence interval per bin (the default, adaptive to
 \code{plot_by}'s type), a continuous-x line of empirical percentiles, or a
-point/interval per bin \emph{and} per requested percentile.
+point/interval per bin \emph{and} per requested percentile. See
+\code{\link[=er_style_vpc]{er_style_vpc()}} for the shared interface every VPC-grammar builder
+implements.
 }
 \details{
 \code{er_style_vpc_observed_mean_errorbar()} (the default) plots
@@ -189,5 +191,5 @@ if (requireNamespace("erglm", quietly = TRUE)) {
 
 }
 \seealso{
-\code{\link[=er_style]{er_style()}}, \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}
+\code{\link[=er_style_vpc]{er_style_vpc()}}, \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}
 }

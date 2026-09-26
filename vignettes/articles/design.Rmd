@@ -167,7 +167,7 @@ to:
   stratification should fall back to one panel per stratum level
   instead of a shared legend -- the concrete instance of "a layer's own
   encoding takes precedence" that motivated the general rule. See
-  [er_plot_add_data()] for the full breakdown.
+  `er_plot_add_data()` for the full breakdown.
 
 A `config$color_role` tag (`"strata"` or `"response"`) records which
 meaning applies for a given data-layer build, so erplots knows whether

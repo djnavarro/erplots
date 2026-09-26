@@ -45,10 +45,11 @@ A geom, or a list of geoms.
 }
 \description{
 Builder functions for the \code{risktable} layer (\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}),
-drawing a row of risk counts per stratum at a grid of time points.
-Unlike every other TTE-grammar builder, this one's geoms are drawn
-into their own patchwork panel below the curve, not onto the curve's
-panel directly -- see \code{\link[=er_tte_build]{er_tte_build()}}.
+drawing a row of risk counts per stratum at a grid of time points. See
+\code{\link[=er_style_tte]{er_style_tte()}} for the shared interface every TTE-grammar builder
+implements. Unlike every other TTE-grammar builder, this one's geoms
+are drawn into their own patchwork panel below the curve, not onto the
+curve's panel directly -- see \code{\link[=er_tte_build]{er_tte_build()}}.
 }
 \details{
 Rows are ordered top-to-bottom in the same order strata first appear
@@ -69,5 +70,5 @@ lung |>
 
 }
 \seealso{
-\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}
+\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}, \code{\link[=er_style_tte]{er_style_tte()}}
 }
