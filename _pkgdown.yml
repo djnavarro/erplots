@@ -74,16 +74,25 @@ reference:
   - erplots_data
 
 articles:
-  - title:
-    navbar:
+  - title: Exposure-response plots
+    navbar: Exposure-response plots
     contents:
       - articles/plot-binary
       - articles/plot-continuous
       - articles/plot-count
+  - title: Other plot types
+    navbar: Other plot types
+    contents:
       - articles/plot-vpc
       - articles/plot-tte
-      - articles/design
+  - title: Theming plots
+    navbar: Theming plots
+    contents:
       - articles/theming
+  - title: Technical topics
+    navbar: Technical topics
+    contents:
+      - articles/design
       - articles/extending
       - articles/model-interface
       - articles/internals
