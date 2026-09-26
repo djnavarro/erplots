@@ -29,10 +29,10 @@ A tibble with one row per registered `(layer, label)` pair and columns
 ``` r
 er_style_labels("tte_summary")
 #> # A tibble: 4 × 3
-#>   layer       label        style 
-#>   <chr>       <chr>        <list>
-#> 1 tte_summary coefficients <fn>  
-#> 2 tte_summary gof          <fn>  
-#> 3 tte_summary logrank      <fn>  
-#> 4 tte_summary n            <fn>  
+#>   layer       label        style       
+#>   <chr>       <chr>        <named list>
+#> 1 tte_summary coefficients <fn>        
+#> 2 tte_summary gof          <fn>        
+#> 3 tte_summary logrank      <fn>        
+#> 4 tte_summary n            <fn>        
 ```
