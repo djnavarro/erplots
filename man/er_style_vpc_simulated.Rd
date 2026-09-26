@@ -46,6 +46,8 @@ er_style_vpc_simulated_mean_errorbar(
   point_size = 2,
   errorbar_width = NULL,
   dodge = 0,
+  show_label = FALSE,
+  label_size = 3,
   ...
 )
 }
@@ -116,6 +118,15 @@ own range) applied to \code{er_style_vpc_simulated_quantile_errorbar()}'s
 requested \code{probs} within a single bin. Default \code{0} (the previous
 behaviour); see \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}'s own \code{prob_dodge_width}
 docs.}
+
+\item{show_label}{For \code{er_style_vpc_simulated_mean_errorbar()} only:
+whether to draw \code{config$summary}'s \code{y_mid_lbl} (the mean, formatted
+via \code{\link[=er_vpc_theme]{er_vpc_theme()}}'s \code{format_percent}/\code{format_number}) as a text
+label just above each point's upper CI bound. Default \code{FALSE} (no
+label, the previous behaviour); see
+\code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}'s own \code{show_label} docs.}
+
+\item{label_size}{Text size for \code{show_label}'s label. Defaults to \code{3}.}
 }
 \value{
 A list of geoms; see \code{\link[=er_style]{er_style()}}.

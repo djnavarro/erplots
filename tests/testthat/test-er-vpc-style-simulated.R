@@ -63,6 +63,25 @@ test_that("er_style_vpc_simulated_mean_errorbar() plots at the equally-spaced bi
   expect_true(rlang::quo_get_expr(geoms[[2]]$mapping$x) == ".vpc_bin")
 })
 
+test_that("er_style_vpc_simulated_mean_errorbar()'s show_label defaults to FALSE, and adds a text geom when TRUE", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) |>
+    er_vpc_add_observed() |>
+    er_vpc_add_simulated(model = er_test_mod1, nsim = 5, seed = 813)
+
+  geoms_default <- er_style_vpc_simulated_mean_errorbar(
+    er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme
+  )
+  expect_length(geoms_default, 2)
+
+  geoms_labelled <- er_style_vpc_simulated_mean_errorbar(
+    er_test_data, vpc$layer$simulated$config, vpc$exposure, vpc$response, vpc$theme,
+    show_label = TRUE
+  )
+  expect_length(geoms_labelled, 3)
+  expect_s3_class(geoms_labelled[[3]]$geom, "GeomText")
+  expect_true(rlang::quo_get_expr(geoms_labelled[[3]]$mapping$label) == "y_mid_lbl")
+})
+
 test_that("the default mean_errorbar pair shares consistent x-positions for a continuous plot_by", {
   vpc <- er_test_data |>
     er_vpc(aucss, ae1) |>

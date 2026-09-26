@@ -41,6 +41,25 @@
   unname(offsets[as.character(probs)])
 }
 
+# Shared `show_label`/`label_size` handling for
+# `er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()`
+# -- draws `config$summary`'s `y_mid_lbl` (formatted via
+# `er_vpc_theme(format_percent = , format_number = )`, see issue #22)
+# just above each point's upper CI bound, at whichever x column
+# (`x_median` or `.vpc_bin`) the caller's own branch is already plotting
+# at. Opt-in (`show_label` defaults to `FALSE` on both builders) so the
+# previous, unlabelled default appearance is unchanged unless requested.
+#' @noRd
+.vpc_mean_label_geom <- function(data, x_var, label_size) {
+  ggplot2::geom_text(
+    data = data,
+    mapping = ggplot2::aes(x = .data[[x_var]], y = ci_upper, label = y_mid_lbl),
+    size = label_size,
+    vjust = -0.5,
+    inherit.aes = FALSE
+  )
+}
+
 
 # layer_vpc_observed -----------------------------------------------------------
 

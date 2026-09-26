@@ -47,10 +47,14 @@ with additional theme tweaks layered on top of \code{theme_base}. See
 "Details" for its default and replacement semantics.}
 
 \item{format_percent, format_number}{Formatter functions (typically
-from \verb{scales::label_*()}), used to format the rate/mean displayed
-in the observed/simulated summaries for a binary response
-(\code{format_percent}) or a continuous/count response (\code{format_number}).
-Default to \code{scales::label_percent(accuracy = 1)} and
+from \verb{scales::label_*()}), used to compute \code{config$summary$y_mid_lbl}
+for a binary response (\code{format_percent}) or a continuous/count
+response (\code{format_number}). Displayed by
+\code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}/
+\code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}} only when their own
+\code{show_label = TRUE} (default \code{FALSE}) -- otherwise computed but not
+drawn by any built-in builder. Default to
+\code{scales::label_percent(accuracy = 1)} and
 \code{scales::label_number(accuracy = 0.01)} respectively.}
 }
 \value{

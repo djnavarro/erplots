@@ -9,6 +9,28 @@ test_that("er_style_tte_risktable_text draws a geom_text with one row per stratu
   expect_equal(unique(as.character(geoms[[1]]$data$strata)), "All")
 })
 
+test_that("er_style_tte_risktable_text's show_percent defaults to FALSE (a bare count)", {
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_risktable(times = c(0, 100, 300))
+  geoms <- er_style_tte_risktable_text(
+    data = NULL, config = obj$layer$risktable$config, stratify = FALSE,
+    time = obj$time, strata = NULL, theme = obj$theme
+  )
+  expect_equal(as.character(geoms[[1]]$data$.label), as.character(obj$layer$risktable$config$table$n_risk))
+})
+
+test_that("er_style_tte_risktable_text's show_percent = TRUE appends a percent of the stratum's baseline size", {
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_risktable(times = c(0, 100, 300))
+  geoms <- er_style_tte_risktable_text(
+    data = NULL, config = obj$layer$risktable$config, stratify = FALSE,
+    time = obj$time, strata = NULL, theme = obj$theme, show_percent = TRUE
+  )
+  table <- obj$layer$risktable$config$table
+  expected <- paste0(table$n_risk, " (", obj$theme$format_percent(table$n_risk / table$n_baseline), ")")
+  expect_equal(geoms[[1]]$data$.label, expected)
+  # baseline (time = 0) n_risk should equal n_baseline, i.e. 100%
+  expect_equal(table$n_risk[table$time == 0], table$n_baseline[table$time == 0])
+})
+
 test_that("er_style_tte_risktable_text's config$table has a row per stratum per break", {
   df <- survival::lung
   df$sex <- factor(df$sex, labels = c("Male", "Female"))
@@ -17,6 +39,16 @@ test_that("er_style_tte_risktable_text's config$table has a row per stratum per 
   tbl <- obj$layer$risktable$config$table
   expect_setequal(unique(tbl$strata), c("Male", "Female"))
   expect_equal(nrow(tbl), length(unique(tbl$time)) * 2)
+})
+
+test_that("er_style_tte_risktable_text's config$table's n_baseline matches each stratum's own starting size", {
+  df <- survival::lung
+  df$sex <- factor(df$sex, labels = c("Male", "Female"))
+  obj <- df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_risktable(n_times = 5)
+
+  tbl <- obj$layer$risktable$config$table
+  expect_equal(unique(tbl$n_baseline[tbl$strata == "Male"]), sum(df$sex == "Male"))
+  expect_equal(unique(tbl$n_baseline[tbl$strata == "Female"]), sum(df$sex == "Female"))
 })
 
 test_that("er_style_tte_risktable_text's n_risk values match summary.survfit() directly", {

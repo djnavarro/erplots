@@ -78,6 +78,14 @@
 
 ## Improvements
 
+* `er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()`
+  gain an opt-in `show_label`/`label_size` pair that draws each bin's
+  formatted rate/mean above its error bar, making `er_vpc_theme()`'s
+  `format_percent`/`format_number` arguments actually visible (#22).
+* `er_style_tte_risktable_text()` gains an opt-in `show_percent`
+  argument that appends each break's number at risk as a percentage of
+  its stratum's baseline size, using `er_tte_theme()`'s `format_percent`
+  (#22).
 * `emaxnls` is back in `Suggests`/`Remotes` (pinned to
   `emaxnls (>= 0.1.1.9000)`, the GitHub development version), and its
   gated examples in `?erplots_data` are reinstated, now that `emaxnls`

@@ -63,8 +63,9 @@
 #' @param format_p Formatter function (typically from `scales::label_pvalue()`),
 #'   used by [er_tte_add_summary()]'s log-rank annotation.
 #' @param format_percent Formatter function (typically from
-#'   `scales::label_percent()`), reserved for a future TTE builder that
-#'   formats a survival probability/risk-table count as a percentage.
+#'   `scales::label_percent()`), used by
+#'   [er_style_tte_risktable_text()]'s `show_percent` argument to format
+#'   a risk-table count as a percentage of its stratum's baseline size.
 #' @param format_number Formatter function (typically from
 #'   `scales::label_number()`), used by [er_tte_add_summary()]'s
 #'   `er_style_tte_summary_coefficients()`/`er_style_tte_summary_gof()`

@@ -770,6 +770,7 @@ cut_quantile <- function(x, n = 4,
 utils::globalVariables(c(
   ".er_tte_event",
   ".er_tte_strata",
+  ".label",
   "n_event",
   "ci_lower",
   "ci_upper",

@@ -39,6 +39,8 @@ er_style_vpc_observed_mean_errorbar(
   point_size = 2,
   errorbar_width = NULL,
   dodge = 0,
+  show_label = FALSE,
+  label_size = 3,
   ...
 )
 }
@@ -93,6 +95,14 @@ supplied). Default \code{0} (all \code{probs} plotted at the same position,
 the previous behaviour). Useful when several \code{probs}' error bars
 overlap enough to be unreadable. Same numeric-\code{plot_by}-only
 restriction as \code{dodge}.}
+
+\item{show_label}{For \code{er_style_vpc_observed_mean_errorbar()} only:
+whether to draw \code{config$summary}'s \code{y_mid_lbl} (the rate/mean,
+formatted via \code{\link[=er_vpc_theme]{er_vpc_theme()}}'s \code{format_percent}/\code{format_number})
+as a text label just above each point's upper CI bound. Default
+\code{FALSE} (no label, the previous behaviour).}
+
+\item{label_size}{Text size for \code{show_label}'s label. Defaults to \code{3}.}
 }
 \value{
 A list of geoms; see \code{\link[=er_style]{er_style()}}.

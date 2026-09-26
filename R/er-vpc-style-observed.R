@@ -46,6 +46,12 @@
 #'   the previous behaviour). Useful when several `probs`' error bars
 #'   overlap enough to be unreadable. Same numeric-`plot_by`-only
 #'   restriction as `dodge`.
+#' @param show_label For `er_style_vpc_observed_mean_errorbar()` only:
+#'   whether to draw `config$summary`'s `y_mid_lbl` (the rate/mean,
+#'   formatted via [er_vpc_theme()]'s `format_percent`/`format_number`)
+#'   as a text label just above each point's upper CI bound. Default
+#'   `FALSE` (no label, the previous behaviour).
+#' @param label_size Text size for `show_label`'s label. Defaults to `3`.
 #' @param ... Additional named arguments forwarded from
 #'   [er_vpc_add_observed()]'s own `...`.
 #'
@@ -252,7 +258,7 @@ er_style_vpc_observed_quantile_errorbar <- er_style_tag(
 #' @export
 er_style_vpc_observed_mean_errorbar <- function(data, config, exposure, response, theme,
                                                  point_size = 2, errorbar_width = NULL,
-                                                 dodge = 0, ...) {
+                                                 dodge = 0, show_label = FALSE, label_size = 3, ...) {
   if (is.null(errorbar_width)) {
     errorbar_width <- if (config$is_numeric_group) 0.025 else 0.2
   }
@@ -264,7 +270,7 @@ er_style_vpc_observed_mean_errorbar <- function(data, config, exposure, response
     # `config$summary` directly
     summary <- config$summary
     summary$x_median <- summary$x_median + .vpc_dodge_step(dodge, config$group_limits)
-    list(
+    geoms <- list(
       ggplot2::geom_errorbar(
         data = summary,
         mapping = ggplot2::aes(x = x_median, ymin = ci_lower, ymax = ci_upper, color = "Observed"),
@@ -278,6 +284,8 @@ er_style_vpc_observed_mean_errorbar <- function(data, config, exposure, response
         inherit.aes = FALSE
       )
     )
+    if (show_label) geoms <- c(geoms, list(.vpc_mean_label_geom(summary, "x_median", label_size)))
+    geoms
   } else {
     if (dodge != 0) {
       rlang::warn(c(
@@ -285,7 +293,7 @@ er_style_vpc_observed_mean_errorbar <- function(data, config, exposure, response
         "i" = "Dodging a categorical `plot_by`'s bin positions isn't implemented yet."
       ))
     }
-    list(
+    geoms <- list(
       ggplot2::geom_errorbar(
         data = config$summary,
         mapping = ggplot2::aes(x = .vpc_bin, ymin = ci_lower, ymax = ci_upper, color = "Observed"),
@@ -299,6 +307,8 @@ er_style_vpc_observed_mean_errorbar <- function(data, config, exposure, response
         inherit.aes = FALSE
       )
     )
+    if (show_label) geoms <- c(geoms, list(.vpc_mean_label_geom(config$summary, ".vpc_bin", label_size)))
+    geoms
   }
 }
 er_style_vpc_observed_mean_errorbar <- er_style_tag(

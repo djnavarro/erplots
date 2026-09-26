@@ -121,13 +121,27 @@
 
   fit_summary <- summary(object$km$fit, times = breaks, extend = TRUE)
 
+  # baseline (time-zero) number at risk per stratum, from the fit's own
+  # `n` component -- used by `er_style_tte_risktable_text()`'s
+  # `show_percent` argument to express each break's `n_risk` as a
+  # percentage of the stratum's own starting size (see issue #22)
   if (is.null(object$strata)) {
-    table <- tibble::tibble(time = fit_summary$time, n_risk = fit_summary$n.risk, strata = "All")
-  } else {
     table <- tibble::tibble(
-      time    = fit_summary$time,
-      n_risk  = fit_summary$n.risk,
-      strata  = sub("^[^=]+=", "", as.character(fit_summary$strata))
+      time = fit_summary$time, n_risk = fit_summary$n.risk, strata = "All",
+      n_baseline = object$km$fit$n
+    )
+  } else {
+    strata_vals <- sub("^[^=]+=", "", as.character(fit_summary$strata))
+    # `survfit()$n` (unlike `$strata`) isn't reliably named, so its names
+    # are borrowed from `$strata` instead -- both are indexed in the same
+    # per-stratum order
+    n_baseline <- object$km$fit$n
+    names(n_baseline) <- sub("^[^=]+=", "", names(object$km$fit$strata))
+    table <- tibble::tibble(
+      time       = fit_summary$time,
+      n_risk     = fit_summary$n.risk,
+      strata     = strata_vals,
+      n_baseline = unname(n_baseline[strata_vals])
     )
   }
 

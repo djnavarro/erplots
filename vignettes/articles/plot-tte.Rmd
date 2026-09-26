@@ -204,6 +204,14 @@ lung |>
   plot()
 ```
 
-`format_percent` is also accepted and stored, reserved for a future risk-table/survival-probability builder that formats a value as a percentage -- no built-in TTE style currently reads it, so setting it has no visible effect today.
+`format_percent` formats a value as a percentage; pass `show_percent = TRUE` to `er_style_tte_risktable_text()` to display each break's number at risk as a percentage of its stratum's own baseline (time-zero) size, alongside the bare count:
+
+```{r theming-percent}
+lung |>
+  er_tte(time, status == 2) |>
+  er_tte_add_curve() |>
+  er_tte_add_risktable(style = er_style_tte_risktable_text, show_percent = TRUE) |>
+  plot()
+```
 
 For anything `er_tte_theme()` doesn't cover, `+ ggplot2::theme(...)`/`+ ggplot2::labs(...)` remains the general-purpose escape hatch on the ggplot2 object `plot()` returns -- though note that once `er_tte_add_risktable()` is in play, the result is a patchwork composition of two panels rather than a single ggplot2 object, so such additions only apply to the top-level object, not automatically to both panels.

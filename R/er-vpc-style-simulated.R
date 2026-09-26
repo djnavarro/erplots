@@ -40,6 +40,13 @@
 #'   requested `probs` within a single bin. Default `0` (the previous
 #'   behaviour); see [er_style_vpc_observed()]'s own `prob_dodge_width`
 #'   docs.
+#' @param show_label For `er_style_vpc_simulated_mean_errorbar()` only:
+#'   whether to draw `config$summary`'s `y_mid_lbl` (the mean, formatted
+#'   via [er_vpc_theme()]'s `format_percent`/`format_number`) as a text
+#'   label just above each point's upper CI bound. Default `FALSE` (no
+#'   label, the previous behaviour); see
+#'   [er_style_vpc_observed()]'s own `show_label` docs.
+#' @param label_size Text size for `show_label`'s label. Defaults to `3`.
 #' @param ribbon_alpha Fill transparency for
 #'   `er_style_vpc_simulated_quantile_ribbon()`'s bands. Defaults to `0.3`.
 #' @param ribbon_edges Whether `er_style_vpc_simulated_quantile_ribbon()`
@@ -306,7 +313,7 @@ er_style_vpc_simulated_quantile_errorbar <- er_style_tag(
 #' @export
 er_style_vpc_simulated_mean_errorbar <- function(data, config, exposure, response, theme,
                                                   point_size = 2, errorbar_width = NULL,
-                                                  dodge = 0, ...) {
+                                                  dodge = 0, show_label = FALSE, label_size = 3, ...) {
   if (is.null(errorbar_width)) {
     errorbar_width <- if (config$is_numeric_group) 0.025 else 0.2
   }
@@ -318,7 +325,7 @@ er_style_vpc_simulated_mean_errorbar <- function(data, config, exposure, respons
     # `config$summary` directly
     summary <- config$summary
     summary$x_median <- summary$x_median + .vpc_dodge_step(dodge, config$group_limits)
-    list(
+    geoms <- list(
       ggplot2::geom_errorbar(
         data = summary,
         mapping = ggplot2::aes(x = x_median, ymin = ci_lower, ymax = ci_upper, color = "Simulated"),
@@ -332,6 +339,8 @@ er_style_vpc_simulated_mean_errorbar <- function(data, config, exposure, respons
         inherit.aes = FALSE
       )
     )
+    if (show_label) geoms <- c(geoms, list(.vpc_mean_label_geom(summary, "x_median", label_size)))
+    geoms
   } else {
     if (dodge != 0) {
       rlang::warn(c(
@@ -339,7 +348,7 @@ er_style_vpc_simulated_mean_errorbar <- function(data, config, exposure, respons
         "i" = "Dodging a categorical `plot_by`'s bin positions isn't implemented yet."
       ))
     }
-    list(
+    geoms <- list(
       ggplot2::geom_errorbar(
         data = config$summary,
         mapping = ggplot2::aes(x = .vpc_bin, ymin = ci_lower, ymax = ci_upper, color = "Simulated"),
@@ -353,6 +362,8 @@ er_style_vpc_simulated_mean_errorbar <- function(data, config, exposure, respons
         inherit.aes = FALSE
       )
     )
+    if (show_label) geoms <- c(geoms, list(.vpc_mean_label_geom(config$summary, ".vpc_bin", label_size)))
+    geoms
   }
 }
 er_style_vpc_simulated_mean_errorbar <- er_style_tag(

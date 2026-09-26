@@ -52,6 +52,32 @@ test_that("er_style_vpc_observed_mean_errorbar() plots at the equally-spaced bin
   expect_true(rlang::quo_get_expr(geoms[[2]]$mapping$x) == ".vpc_bin")
 })
 
+test_that("er_style_vpc_observed_mean_errorbar()'s show_label defaults to FALSE, and adds a text geom when TRUE", {
+  vpc <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
+  geoms_default <- er_style_vpc_observed_mean_errorbar(
+    er_test_data, vpc$layer$observed$config, vpc$exposure, vpc$response, vpc$theme
+  )
+  expect_length(geoms_default, 2)
+
+  geoms_labelled <- er_style_vpc_observed_mean_errorbar(
+    er_test_data, vpc$layer$observed$config, vpc$exposure, vpc$response, vpc$theme,
+    show_label = TRUE
+  )
+  expect_length(geoms_labelled, 3)
+  expect_s3_class(geoms_labelled[[3]]$geom, "GeomText")
+  expect_true(rlang::quo_get_expr(geoms_labelled[[3]]$mapping$label) == "y_mid_lbl")
+})
+
+test_that("er_style_vpc_observed_mean_errorbar()'s show_label also works for a categorical plot_by", {
+  vpc <- er_vpc(er_test_data, aucss, ae1, plot_by = sex) |> er_vpc_add_observed()
+  geoms <- er_style_vpc_observed_mean_errorbar(
+    er_test_data, vpc$layer$observed$config, vpc$exposure, vpc$response, vpc$theme,
+    show_label = TRUE
+  )
+  expect_length(geoms, 3)
+  expect_s3_class(geoms[[3]]$geom, "GeomText")
+})
+
 test_that("er_style_vpc_observed_mean_errorbar() works for every response type and plot_by type", {
   vpc_binary <- er_vpc(er_test_data, aucss, ae1) |> er_vpc_add_observed()
   vpc_continuous <- er_vpc(er_test_data, aucss, biomarker_change) |> er_vpc_add_observed()

@@ -59,8 +59,9 @@ with additional theme tweaks layered on top of \code{theme_base}. See
 used by \code{\link[=er_tte_add_summary]{er_tte_add_summary()}}'s log-rank annotation.}
 
 \item{format_percent}{Formatter function (typically from
-\code{scales::label_percent()}), reserved for a future TTE builder that
-formats a survival probability/risk-table count as a percentage.}
+\code{scales::label_percent()}), used by
+\code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}}'s \code{show_percent} argument to format
+a risk-table count as a percentage of its stratum's baseline size.}
 
 \item{format_number}{Formatter function (typically from
 \code{scales::label_number()}), used by \code{\link[=er_tte_add_summary]{er_tte_add_summary()}}'s

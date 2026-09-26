@@ -13,17 +13,19 @@ er_style_tte_risktable_text(
   strata,
   theme,
   ...,
-  text_size = 3.5
+  text_size = 3.5,
+  show_percent = FALSE
 )
 }
 \arguments{
 \item{data}{The original data frame (\code{object$data}).}
 
 \item{config}{Configuration for the risktable layer (populated by
-\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}): \code{config$table} (\code{time}/\code{n_risk}/\code{strata},
-one row per requested time break per stratum) and \code{config$breaks}
-(the time breaks themselves, also used as the curve panel's x-axis
-ticks).}
+\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}): \code{config$table} (\code{time}/\code{n_risk}/\code{strata}/
+\code{n_baseline} -- the stratum's time-zero number at risk, used by
+\code{show_percent} below -- one row per requested time break per
+stratum) and \code{config$breaks} (the time breaks themselves, also used
+as the curve panel's x-axis ticks).}
 
 \item{stratify}{Logical: whether the fit is stratified
 (\code{!is.null(object$strata)}).}
@@ -39,6 +41,11 @@ ticks).}
 \code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}'s own \code{...}.}
 
 \item{text_size}{Size of the risk-count text. Default \code{3.5}.}
+
+\item{show_percent}{Whether to append each break's \code{n_risk} as a
+percentage of that stratum's own baseline (time-zero) size,
+formatted via \code{\link[=er_tte_theme]{er_tte_theme()}}'s \code{format_percent}. Default \code{FALSE}
+(a bare count, the previous behaviour).}
 }
 \value{
 A geom, or a list of geoms.
@@ -58,6 +65,12 @@ Rows are ordered top-to-bottom in the same order strata first appear
 in \code{config$table} (reversed, since a ggplot2 discrete y-axis plots
 its first level at the bottom); an unstratified fit gets a single
 \code{"All"} row.
+
+\code{show_percent = TRUE} displays \code{"<n_risk> (<percent>\%)"} instead of a
+bare \code{n_risk}, using \code{\link[=er_tte_theme]{er_tte_theme()}}'s \code{format_percent} (defaulting
+to \code{scales::label_percent(accuracy = 1)}) to format
+\code{n_risk / n_baseline} -- see \code{config} above for where \code{n_baseline}
+comes from.
 
 \code{er_style_tte_risktable_text()} is tagged \code{er_style_tag(fn, layer = "risktable")}, so \code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}} errors informatively if
 handed a builder tagged for a different layer.

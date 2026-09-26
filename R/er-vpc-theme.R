@@ -51,10 +51,14 @@
 #'   with additional theme tweaks layered on top of `theme_base`. See
 #'   "Details" for its default and replacement semantics.
 #' @param format_percent,format_number Formatter functions (typically
-#'   from `scales::label_*()`), used to format the rate/mean displayed
-#'   in the observed/simulated summaries for a binary response
-#'   (`format_percent`) or a continuous/count response (`format_number`).
-#'   Default to `scales::label_percent(accuracy = 1)` and
+#'   from `scales::label_*()`), used to compute `config$summary$y_mid_lbl`
+#'   for a binary response (`format_percent`) or a continuous/count
+#'   response (`format_number`). Displayed by
+#'   [er_style_vpc_observed_mean_errorbar()]/
+#'   [er_style_vpc_simulated_mean_errorbar()] only when their own
+#'   `show_label = TRUE` (default `FALSE`) -- otherwise computed but not
+#'   drawn by any built-in builder. Default to
+#'   `scales::label_percent(accuracy = 1)` and
 #'   `scales::label_number(accuracy = 0.01)` respectively.
 #'
 #' @returns The input `object`, with the requested theme fields updated.
