@@ -17,6 +17,11 @@
 #'
 #' @returns The input `object`, with the curve layer added.
 #'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"km"` | [er_style_tte_curve_km()] | Kaplan-Meier step curve with a confidence band (the only built-in, and the default). |
+#'
 #' @examples
 #' library(survival)
 #' lung |>
@@ -70,6 +75,11 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 #'   `size`/`stroke`).
 #'
 #' @returns The input `object`, with the censor layer added.
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"ticks"` | [er_style_tte_censor_ticks()] | Tick marks at each censoring time, on the curve's current step height (the only built-in, and the default). |
 #'
 #' @examples
 #' library(survival)
@@ -132,6 +142,11 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #' the curve panel's x-axis tick marks, so the two panels'
 #' [patchwork::wrap_plots()]-collected x-axis lines up exactly --
 #' see [er_tte_build()].
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"text"` | [er_style_tte_risktable_text()] | Number-at-risk counts as a text grid, one row per stratum (the only built-in, and the default). |
 #'
 #' @examples
 #' library(survival)
@@ -214,6 +229,11 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #'
 #' @returns The input `object`, with the model layer added.
 #'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"line"` | [er_style_tte_model_line()] | Fitted `S(t)` curve with an uncertainty band (the only built-in, and the default). |
+#'
 #' @seealso [er_tte()], [er_style_tte_model_line()], [er_model_interface]
 #'
 #' @export
@@ -275,9 +295,8 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_tte()], `FALSE` otherwise.
 #' @param style Function drawing the annotation, or one of the registered
-#'   short-string labels for this layer -- currently `"logrank"`, `"n"`,
-#'   `"coefficients"`, `"gof"` (see [er_style_labels()]).
-#'   Defaults to [er_style_tte_summary_logrank()].
+#'   short-string labels for this layer (see "Styles" below). Defaults
+#'   to [er_style_tte_summary_logrank()].
 #' @param conf_level Confidence level forwarded to [er_summary()] (see
 #'   `?er_model_interface`). Defaults to `0.95`. Ignored when `model` is
 #'   `NULL`.
@@ -302,6 +321,14 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #' erroring -- a log-rank test needs at least 2 groups to compare. Other
 #' builders (e.g. [er_style_tte_summary_n()]) work regardless of
 #' stratification.
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"logrank"` | [er_style_tte_summary_logrank()] | Log-rank test p-value comparing survival across `stratify_by`'s levels (the default). |
+#' | `"n"` | [er_style_tte_summary_n()] | Subject/event counts; model- and stratification-agnostic. |
+#' | `"coefficients"` | [er_style_tte_summary_coefficients()] | One line per model parameter, from `model`'s [er_summary()] `coefficients` table. |
+#' | `"gof"` | [er_style_tte_summary_gof()] | A goodness-of-fit annotation from `model`'s [er_summary()] `glance` table. |
 #'
 #' @examples
 #' library(survival)

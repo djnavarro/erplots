@@ -10,9 +10,8 @@
 #' @param style A function determining how the observed layer is drawn.
 #'   Defaults to [er_style_vpc_observed_mean_errorbar()]; see
 #'   [er_style_vpc_observed()] for the other built-in options. Or one of
-#'   the registered short-string labels for this layer -- currently
-#'   `"mean_errorbar"`, `"quantile_line"`, `"quantile_errorbar"` (see
-#'   [er_style_labels()]).
+#'   the registered short-string labels for this layer (see "Styles"
+#'   below).
 #' @param ... Additional named arguments forwarded to `style`.
 #'
 #' @returns `object`, with `object$layer$observed` populated.
@@ -21,6 +20,13 @@
 #' [er_vpc()] itself (rather than here) so the observed and simulated
 #' layers can't disagree about how the comparison is binned or
 #' summarized.
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"mean_errorbar"` | [er_style_vpc_observed_mean_errorbar()] | Mean/rate + CI per bin, x-position adaptive to `plot_by`'s type (the default). |
+#' | `"quantile_line"` | [er_style_vpc_observed_quantile_line()] | One line per requested percentile against a continuous `plot_by` axis. |
+#' | `"quantile_errorbar"` | [er_style_vpc_observed_quantile_errorbar()] | Point + error bar per bin and per requested percentile. |
 #'
 #' @seealso [er_vpc()], [er_vpc_add_simulated()], [er_style_vpc_observed()]
 #'
@@ -72,9 +78,8 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #' @param style A function determining how the simulated layer is drawn.
 #'   Defaults to [er_style_vpc_simulated_mean_errorbar()]; see
 #'   [er_style_vpc_simulated()] for the other built-in options. Or one of
-#'   the registered short-string labels for this layer -- currently
-#'   `"mean_errorbar"`, `"quantile_ribbon"`, `"quantile_errorbar"` (see
-#'   [er_style_labels()]).
+#'   the registered short-string labels for this layer (see "Styles"
+#'   below).
 #' @param simulate_args A named list of additional arguments forwarded to
 #'   [er_simulate()], only used with `model`. Distinct from `...` the
 #'   same way [er_plot_add_model()]'s `predict_args` is distinct from its
@@ -92,6 +97,13 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #'
 #' `conf_level`/`probs` are set once on [er_vpc()] itself (rather than
 #' here), so the observed and simulated layers always agree on them.
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"mean_errorbar"` | [er_style_vpc_simulated_mean_errorbar()] | Mean/rate + CI per bin, x-position adaptive to `plot_by`'s type (the default). |
+#' | `"quantile_ribbon"` | [er_style_vpc_simulated_quantile_ribbon()] | One ribbon per requested percentile against a continuous `plot_by` axis. |
+#' | `"quantile_errorbar"` | [er_style_vpc_simulated_quantile_errorbar()] | Point + error bar per bin and per requested percentile. |
 #'
 #' @seealso [er_vpc()], [er_vpc_add_observed()], [er_style_vpc_simulated()]
 #'

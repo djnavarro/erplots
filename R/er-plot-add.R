@@ -10,8 +10,7 @@
 #' @param model A fitted exposure-response model. Must implement [er_predict()].
 #' @param keep_strata Logical; whether this layer should use stratification.
 #' @param style Function drawing the model curve/ribbon, or one of the
-#'   registered short-string labels for this layer -- currently
-#'   `"ribbonline"`, `"line"`, `"spaghetti"` (see [er_style_labels()]).
+#'   registered short-string labels for this layer (see "Styles" below).
 #'   Defaults to [er_style_model_ribbonline()].
 #' @param conf_level Confidence level for the prediction ribbon. Defaults
 #'   to `0.95`.
@@ -35,6 +34,13 @@
 #' Reusing a single `...` for both would risk a silent name collision if
 #' a style builder and a model's `er_predict()` method happened to share
 #' an argument name for unrelated purposes.
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"ribbonline"` | [er_style_model_ribbonline()] | Fitted curve with an uncertainty ribbon (the default). |
+#' | `"line"` | [er_style_model_line()] | Fitted curve only, no ribbon. |
+#' | `"spaghetti"` | [er_style_model_spaghetti()] | Fitted curve plus a spaghetti plot of simulated draws, for models implementing [er_simulate()]. |
 #'
 #' @returns The input `object`, with the model layer added.
 #'
@@ -136,8 +142,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
 #' @param style Function drawing the summary annotation, defaulting to
 #'   [er_style_summary_pvalue()], or one of the registered short-string
-#'   labels for this layer -- currently `"pvalue"`, `"n"`,
-#'   `"coefficients"`, `"gof"` (see [er_style_labels()]).
+#'   labels for this layer (see "Styles" below).
 #' @param conf_level Confidence level forwarded to [er_summary()] (used,
 #'   e.g., for the `conf_low`/`conf_high` columns of its `coefficients`
 #'   result -- see `?er_model_interface`). Defaults to `0.95`. Ignored
@@ -149,6 +154,14 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #' @param ... Additional named arguments forwarded, unchanged, to `style`
 #'   when it's called at build time; see [er_style()]'s "Passing extra
 #'   arguments to a builder" section. Must be named.
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"pvalue"` | [er_style_summary_pvalue()] | A formatted p-value from the model's [er_summary()] result (the default). |
+#' | `"n"` | [er_style_summary_n()] | Observation counts; model-agnostic, works with `model = NULL`. |
+#' | `"coefficients"` | [er_style_summary_coefficients()] | One line per model parameter, from [er_summary()]'s `coefficients` table. |
+#' | `"gof"` | [er_style_summary_gof()] | A goodness-of-fit annotation (N/AIC/BIC/R-squared) from [er_summary()]'s `glance` table. |
 #'
 #' @returns The input `object`, with the summary layer added.
 #'
@@ -217,9 +230,7 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
 #' @param style Function drawing the quantile summary; defaults to
 #'   [er_style_quantile_errorbar()] (point + error bar). Or one of the
-#'   registered short-string labels for this layer -- currently
-#'   `"errorbar"`, `"errorbar_vlines"`, `"pointrange"`,
-#'   `"pointrange_vlines"` (see [er_style_labels()]).
+#'   registered short-string labels for this layer (see "Styles" below).
 #' @param bins Number of exposure bins (not counting placebo). Defaults
 #'   to `4`.
 #' @param conf_level Confidence level for the interval. Defaults to `0.95`.
@@ -249,6 +260,14 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' error) if the two disagree in that specific case; pass matching values
 #' to both calls to avoid the warning, or ignore it if the difference is
 #' intentional.
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"errorbar"` | [er_style_quantile_errorbar()] | Point + error bar per bin (the default). |
+#' | `"errorbar_vlines"` | [er_style_quantile_errorbar_vlines()] | `"errorbar"` plus a labelled vline at every bin boundary. |
+#' | `"pointrange"` | [er_style_quantile_pointrange()] | Point + range per bin, via [ggplot2::geom_pointrange()]. |
+#' | `"pointrange_vlines"` | [er_style_quantile_pointrange_vlines()] | `"pointrange"` plus a labelled vline at every bin boundary. |
 #'
 #'
 #' @examples
@@ -367,8 +386,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'   `(data, config, stratify, exposure, response, strata, theme, ...)`
 #'   signature and tagged with [er_style_tag()] can be supplied instead;
 #'   see [er_style()] and "Details". Or one of the registered
-#'   short-string labels for this layer -- currently `"overlay"`,
-#'   `"hex"`, `"boxjitter"` (see [er_style_labels()]).
+#'   short-string labels for this layer (see "Styles" below).
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
 #'   default). Only meaningful for [er_style_data_boxjitter()] on a
 #'   binary response; see "Details" for when `"both"` is required.
@@ -381,7 +399,14 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'   random jitter on every render.
 #'
 #' @returns The input `object`, with the data layer added.
-#' 
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"overlay"` | [er_style_data_overlay()] | Raw points (jittered for a binary response) drawn on the main panel (the default). |
+#' | `"hex"` | [er_style_data_hex()] | 2D hexbin density of the raw points on the main panel. |
+#' | `"boxjitter"` | [er_style_data_boxjitter()] | Boxplot + jittered points in a stacked panel, split by response (binary response only). |
+#'
 #' @section Default builders:
 #' The default builder for the data layer is `er_style_data_overlay()`, 
 #' which creates a plain scatter plot for
@@ -541,9 +566,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' @param style Function drawing each group panel -- defaults to
 #'   [er_style_group_boxplot()]. Applied to every grouping variable added
 #'   by this call; see [er_style()] and "Details". Or one of the
-#'   registered short-string labels for this layer -- currently
-#'   `"boxplot"`, `"violin"`, `"histogram"`, `"linerange"`,
-#'   `"boxjitter"`, `"violinjitter"` (see [er_style_labels()]).
+#'   registered short-string labels for this layer (see "Styles" below).
 #' @param bins Number of quantile bins used for continuous grouping
 #'   variables (`NULL`, the default, uses [cut_quantile()]'s own default).
 #'   Applied identically to every grouping variable added by this call.
@@ -588,6 +611,16 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' exposure variable, which risks silently disagreeing with
 #' [er_plot_add_quantiles()]'s own exposure-binning; [er_plot_build()]
 #' warns (doesn't error) if the two disagree in that specific case.
+#'
+#' @section Styles:
+#' | Label | Builder | Description |
+#' | --- | --- | --- |
+#' | `"boxplot"` | [er_style_group_boxplot()] | Boxplot per group level, group levels on the y-axis (the default). |
+#' | `"violin"` | [er_style_group_violin()] | Violin per group level, group levels on the y-axis. |
+#' | `"histogram"` | [er_style_group_histogram()] | Histogram per group level, group levels on facet strips, y-axis freed for counts. |
+#' | `"linerange"` | [er_style_group_linerange()] | Median dot with inner/outer-range lines per group level, group levels on the y-axis. |
+#' | `"boxjitter"` | [er_style_group_boxjitter()] | `"boxplot"` with jittered raw exposure values overlaid. |
+#' | `"violinjitter"` | [er_style_group_violinjitter()] | `"violin"` with jittered raw exposure values overlaid. |
 #'
 #' @examples
 #' if (requireNamespace("erglm", quietly = TRUE)) {

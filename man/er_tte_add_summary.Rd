@@ -30,9 +30,8 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_tte]{er_tte()}}, \code{FALSE} otherwise.}
 
 \item{style}{Function drawing the annotation, or one of the registered
-short-string labels for this layer -- currently \code{"logrank"}, \code{"n"},
-\code{"coefficients"}, \code{"gof"} (see \code{\link[=er_style_labels]{er_style_labels()}}).
-Defaults to \code{\link[=er_style_tte_summary_logrank]{er_style_tte_summary_logrank()}}.}
+short-string labels for this layer (see "Styles" below). Defaults
+to \code{\link[=er_style_tte_summary_logrank]{er_style_tte_summary_logrank()}}.}
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (see
 \code{?er_model_interface}). Defaults to \code{0.95}. Ignored when \code{model} is
@@ -70,6 +69,16 @@ erroring -- a log-rank test needs at least 2 groups to compare. Other
 builders (e.g. \code{\link[=er_style_tte_summary_n]{er_style_tte_summary_n()}}) work regardless of
 stratification.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"logrank"} \tab \code{\link[=er_style_tte_summary_logrank]{er_style_tte_summary_logrank()}} \tab Log-rank test p-value comparing survival across \code{stratify_by}'s levels (the default). \cr
+   \code{"n"} \tab \code{\link[=er_style_tte_summary_n]{er_style_tte_summary_n()}} \tab Subject/event counts; model- and stratification-agnostic. \cr
+   \code{"coefficients"} \tab \code{\link[=er_style_tte_summary_coefficients]{er_style_tte_summary_coefficients()}} \tab One line per model parameter, from \code{model}'s \code{\link[=er_summary]{er_summary()}} \code{coefficients} table. \cr
+   \code{"gof"} \tab \code{\link[=er_style_tte_summary_gof]{er_style_tte_summary_gof()}} \tab A goodness-of-fit annotation from \code{model}'s \code{\link[=er_summary]{er_summary()}} \code{glance} table. \cr
+}
+}
+
 \examples{
 library(survival)
 lung |>

@@ -266,7 +266,7 @@ Built-in builders, by layer:
 | summary | `er_style_summary_pvalue()` (default), `er_style_summary_n()`, `er_style_summary_coefficients()`, `er_style_summary_gof()` |
 | quantile | `er_style_quantile_errorbar()` (default), `er_style_quantile_pointrange()`, and each's `_vlines` variant (adds a labelled `geom_vline()` at every quantile-bin boundary, including the two outer edges) |
 | data | `er_style_data_overlay()` (default, `"overlay"`), `er_style_data_hex()` (`"overlay"`, 2D density via `geom_hex()`, requires `hexbin`), `er_style_data_boxjitter()` (`"panel"`, binary-response only) |
-| group | `er_style_group_boxplot()` (default), `er_style_group_violin()`, `er_style_group_histogram()`, `er_style_group_boxjitter()`, `er_style_group_violinjitter()` |
+| group | `er_style_group_boxplot()` (default), `er_style_group_violin()`, `er_style_group_histogram()`, `er_style_group_linerange()`, `er_style_group_boxjitter()`, `er_style_group_violinjitter()` |
 
 ### The VPC mini-grammar
 

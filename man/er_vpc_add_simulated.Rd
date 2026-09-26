@@ -37,9 +37,8 @@ observed layer's independent tie-break seed.}
 \item{style}{A function determining how the simulated layer is drawn.
 Defaults to \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}; see
 \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}} for the other built-in options. Or one of
-the registered short-string labels for this layer -- currently
-\code{"mean_errorbar"}, \code{"quantile_ribbon"}, \code{"quantile_errorbar"} (see
-\code{\link[=er_style_labels]{er_style_labels()}}).}
+the registered short-string labels for this layer (see "Styles"
+below).}
 
 \item{simulate_args}{A named list of additional arguments forwarded to
 \code{\link[=er_simulate]{er_simulate()}}, only used with \code{model}. Distinct from \code{...} the
@@ -67,6 +66,15 @@ only mean predictions -- this function errors informatively if
 \code{conf_level}/\code{probs} are set once on \code{\link[=er_vpc]{er_vpc()}} itself (rather than
 here), so the observed and simulated layers always agree on them.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"mean_errorbar"} \tab \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}} \tab Mean/rate + CI per bin, x-position adaptive to \code{plot_by}'s type (the default). \cr
+   \code{"quantile_ribbon"} \tab \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}} \tab One ribbon per requested percentile against a continuous \code{plot_by} axis. \cr
+   \code{"quantile_errorbar"} \tab \code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}} \tab Point + error bar per bin and per requested percentile. \cr
+}
+}
+
 \seealso{
 \code{\link[=er_vpc]{er_vpc()}}, \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}, \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}
 }

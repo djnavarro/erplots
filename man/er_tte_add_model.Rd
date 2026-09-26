@@ -65,6 +65,13 @@ implicit in \code{model} itself -- see \link{er_model_interface}'s "Details".
 erplots does not check that \code{model} was fit on the same time/event
 variables as the plot; the caller must ensure compatibility.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"line"} \tab \code{\link[=er_style_tte_model_line]{er_style_tte_model_line()}} \tab Fitted \code{S(t)} curve with an uncertainty band (the only built-in, and the default). \cr
+}
+}
+
 \seealso{
 \code{\link[=er_tte]{er_tte()}}, \code{\link[=er_style_tte_model_line]{er_style_tte_model_line()}}, \link{er_model_interface}
 }

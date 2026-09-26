@@ -12,9 +12,8 @@ er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
 \item{style}{A function determining how the observed layer is drawn.
 Defaults to \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}; see
 \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}} for the other built-in options. Or one of
-the registered short-string labels for this layer -- currently
-\code{"mean_errorbar"}, \code{"quantile_line"}, \code{"quantile_errorbar"} (see
-\code{\link[=er_style_labels]{er_style_labels()}}).}
+the registered short-string labels for this layer (see "Styles"
+below).}
 
 \item{...}{Additional named arguments forwarded to \code{style}.}
 }
@@ -33,6 +32,15 @@ against a simulated layer added via \code{\link[=er_vpc_add_simulated]{er_vpc_ad
 layers can't disagree about how the comparison is binned or
 summarized.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"mean_errorbar"} \tab \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}} \tab Mean/rate + CI per bin, x-position adaptive to \code{plot_by}'s type (the default). \cr
+   \code{"quantile_line"} \tab \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}} \tab One line per requested percentile against a continuous \code{plot_by} axis. \cr
+   \code{"quantile_errorbar"} \tab \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}} \tab Point + error bar per bin and per requested percentile. \cr
+}
+}
+
 \seealso{
 \code{\link[=er_vpc]{er_vpc()}}, \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}, \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}
 }

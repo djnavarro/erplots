@@ -19,8 +19,7 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \verb{(data, config, stratify, exposure, response, strata, theme, ...)}
 signature and tagged with \code{\link[=er_style_tag]{er_style_tag()}} can be supplied instead;
 see \code{\link[=er_style]{er_style()}} and "Details". Or one of the registered
-short-string labels for this layer -- currently \code{"overlay"},
-\code{"hex"}, \code{"boxjitter"} (see \code{\link[=er_style_labels]{er_style_labels()}}).}
+short-string labels for this layer (see "Styles" below).}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
 default). Only meaningful for \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} on a
@@ -42,6 +41,15 @@ Adds the data layer: individual observations. By default, points are drawn
 as an overlay showing the exposure and response values in the main panel of
 the plot, but other possibilities are available.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"overlay"} \tab \code{\link[=er_style_data_overlay]{er_style_data_overlay()}} \tab Raw points (jittered for a binary response) drawn on the main panel (the default). \cr
+   \code{"hex"} \tab \code{\link[=er_style_data_hex]{er_style_data_hex()}} \tab 2D hexbin density of the raw points on the main panel. \cr
+   \code{"boxjitter"} \tab \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} \tab Boxplot + jittered points in a stacked panel, split by response (binary response only). \cr
+}
+}
+
 \section{Default builders}{
 
 The default builder for the data layer is \code{er_style_data_overlay()},

@@ -28,8 +28,7 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 
 \item{style}{Function drawing the summary annotation, defaulting to
 \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}, or one of the registered short-string
-labels for this layer -- currently \code{"pvalue"}, \code{"n"},
-\code{"coefficients"}, \code{"gof"} (see \code{\link[=er_style_labels]{er_style_labels()}}).}
+labels for this layer (see "Styles" below).}
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (used,
 e.g., for the \code{conf_low}/\code{conf_high} columns of its \code{coefficients}
@@ -53,6 +52,16 @@ Adds the summary layer: a text/label annotation placed in whichever
 corner of the base panel is furthest from the observed data, computed
 from the raw \verb{(exposure, response)} coordinates of the data.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"pvalue"} \tab \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}} \tab A formatted p-value from the model's \code{\link[=er_summary]{er_summary()}} result (the default). \cr
+   \code{"n"} \tab \code{\link[=er_style_summary_n]{er_style_summary_n()}} \tab Observation counts; model-agnostic, works with \code{model = NULL}. \cr
+   \code{"coefficients"} \tab \code{\link[=er_style_summary_coefficients]{er_style_summary_coefficients()}} \tab One line per model parameter, from \code{\link[=er_summary]{er_summary()}}'s \code{coefficients} table. \cr
+   \code{"gof"} \tab \code{\link[=er_style_summary_gof]{er_style_summary_gof()}} \tab A goodness-of-fit annotation (N/AIC/BIC/R-squared) from \code{\link[=er_summary]{er_summary()}}'s \code{glance} table. \cr
+}
+}
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)

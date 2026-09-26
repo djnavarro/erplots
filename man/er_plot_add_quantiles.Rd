@@ -25,9 +25,7 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 
 \item{style}{Function drawing the quantile summary; defaults to
 \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar). Or one of the
-registered short-string labels for this layer -- currently
-\code{"errorbar"}, \code{"errorbar_vlines"}, \code{"pointrange"},
-\code{"pointrange_vlines"} (see \code{\link[=er_style_labels]{er_style_labels()}}).}
+registered short-string labels for this layer (see "Styles" below).}
 
 \item{bins}{Number of exposure bins (not counting placebo). Defaults
 to \code{4}.}
@@ -70,6 +68,16 @@ error) if the two disagree in that specific case; pass matching values
 to both calls to avoid the warning, or ignore it if the difference is
 intentional.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"errorbar"} \tab \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} \tab Point + error bar per bin (the default). \cr
+   \code{"errorbar_vlines"} \tab \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}} \tab \code{"errorbar"} plus a labelled vline at every bin boundary. \cr
+   \code{"pointrange"} \tab \code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}} \tab Point + range per bin, via \code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}}. \cr
+   \code{"pointrange_vlines"} \tab \code{\link[=er_style_quantile_pointrange_vlines]{er_style_quantile_pointrange_vlines()}} \tab \code{"pointrange"} plus a labelled vline at every bin boundary. \cr
+}
+}
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)

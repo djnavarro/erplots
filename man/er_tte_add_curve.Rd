@@ -26,6 +26,13 @@ band, computed from the fit already stored on \code{object$km} (see
 \code{\link[=er_tte]{er_tte()}}) -- no recomputation happens here. Singleton (a second
 call replaces the previous one).
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"km"} \tab \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}} \tab Kaplan-Meier step curve with a confidence band (the only built-in, and the default). \cr
+}
+}
+
 \examples{
 library(survival)
 lung |>

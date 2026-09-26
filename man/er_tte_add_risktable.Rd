@@ -41,6 +41,13 @@ the curve panel's x-axis tick marks, so the two panels'
 \code{\link[patchwork:wrap_plots]{patchwork::wrap_plots()}}-collected x-axis lines up exactly --
 see \code{\link[=er_tte_build]{er_tte_build()}}.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"text"} \tab \code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}} \tab Number-at-risk counts as a text grid, one row per stratum (the only built-in, and the default). \cr
+}
+}
+
 \examples{
 library(survival)
 lung |>

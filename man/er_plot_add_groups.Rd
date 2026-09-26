@@ -25,9 +25,7 @@ plots (a tidyselection of variables).}
 \item{style}{Function drawing each group panel -- defaults to
 \code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}}. Applied to every grouping variable added
 by this call; see \code{\link[=er_style]{er_style()}} and "Details". Or one of the
-registered short-string labels for this layer -- currently
-\code{"boxplot"}, \code{"violin"}, \code{"histogram"}, \code{"linerange"},
-\code{"boxjitter"}, \code{"violinjitter"} (see \code{\link[=er_style_labels]{er_style_labels()}}).}
+registered short-string labels for this layer (see "Styles" below).}
 
 \item{bins}{Number of quantile bins used for continuous grouping
 variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).
@@ -83,6 +81,18 @@ exposure variable, which risks silently disagreeing with
 \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}'s own exposure-binning; \code{\link[=er_plot_build]{er_plot_build()}}
 warns (doesn't error) if the two disagree in that specific case.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"boxplot"} \tab \code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}} \tab Boxplot per group level, group levels on the y-axis (the default). \cr
+   \code{"violin"} \tab \code{\link[=er_style_group_violin]{er_style_group_violin()}} \tab Violin per group level, group levels on the y-axis. \cr
+   \code{"histogram"} \tab \code{\link[=er_style_group_histogram]{er_style_group_histogram()}} \tab Histogram per group level, group levels on facet strips, y-axis freed for counts. \cr
+   \code{"linerange"} \tab \code{\link[=er_style_group_linerange]{er_style_group_linerange()}} \tab Median dot with inner/outer-range lines per group level, group levels on the y-axis. \cr
+   \code{"boxjitter"} \tab \code{\link[=er_style_group_boxjitter]{er_style_group_boxjitter()}} \tab \code{"boxplot"} with jittered raw exposure values overlaid. \cr
+   \code{"violinjitter"} \tab \code{\link[=er_style_group_violinjitter]{er_style_group_violinjitter()}} \tab \code{"violin"} with jittered raw exposure values overlaid. \cr
+}
+}
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)

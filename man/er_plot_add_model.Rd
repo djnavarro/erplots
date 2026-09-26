@@ -22,8 +22,7 @@ er_plot_add_model(
 \item{keep_strata}{Logical; whether this layer should use stratification.}
 
 \item{style}{Function drawing the model curve/ribbon, or one of the
-registered short-string labels for this layer -- currently
-\code{"ribbonline"}, \code{"line"}, \code{"spaghetti"} (see \code{\link[=er_style_labels]{er_style_labels()}}).
+registered short-string labels for this layer (see "Styles" below).
 Defaults to \code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}}.}
 
 \item{conf_level}{Confidence level for the prediction ribbon. Defaults
@@ -56,6 +55,15 @@ Reusing a single \code{...} for both would risk a silent name collision if
 a style builder and a model's \code{er_predict()} method happened to share
 an argument name for unrelated purposes.
 }
+\section{Styles}{
+\tabular{lll}{
+   Label \tab Builder \tab Description \cr
+   \code{"ribbonline"} \tab \code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}} \tab Fitted curve with an uncertainty ribbon (the default). \cr
+   \code{"line"} \tab \code{\link[=er_style_model_line]{er_style_model_line()}} \tab Fitted curve only, no ribbon. \cr
+   \code{"spaghetti"} \tab \code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} \tab Fitted curve plus a spaghetti plot of simulated draws, for models implementing \code{\link[=er_simulate]{er_simulate()}}. \cr
+}
+}
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
 library(erglm)
