@@ -60,6 +60,21 @@
   (facet-only here, since a VPC has no colour/fill precedence rule to
   reconcile). Errors if `stratify_by` resolves to the same variable as
   `plot_by`.
+* `er_style_tag()` gains a `label` argument for registering a builder
+  under a short string (e.g. `label = "logrank"`), so the corresponding
+  `_add_*()` function's `style` argument can be given that string
+  instead of the function itself (e.g.
+  `er_plot_add_model(mod, style = "spaghetti")` in place of `style =
+  er_style_model_spaghetti`). Every built-in builder across all three
+  grammars is tagged with one; see `er_style_labels()` to list what's
+  registered (optionally filtered to one `layer`), and `?er_style_tag`
+  for the full naming/lookup contract. `label` requires `layer` to also
+  be set in the same call, since the registry is keyed by `(layer,
+  label)`, not `label` alone. A new `overwrite` argument (default
+  `FALSE`) controls what happens when re-registering a `(layer, label)`
+  pair already assigned to a *different* function: errors by default;
+  `overwrite = TRUE` replaces it unconditionally. Re-registering the
+  identical function is always a silent no-op regardless of `overwrite`.
 
 ## Improvements
 
@@ -72,6 +87,24 @@
 
 ## Breaking changes
 
+* `er_style_tag()`'s `zorder` argument is renamed to `draw_order` (same
+  `"foreground"`/`"background"` values); a builder tagged with the old
+  name needs updating (e.g. `er_style_tag(fn, draw_order = "background")`
+  in place of `zorder = "background")`). `layout` is split into two
+  independent arguments: `layout` keeps its existing `"overlay"`/
+  `"panel"` meaning for a data-layer builder, while a VPC observed/
+  simulated builder's `"categorical"`/`"continuous"` distinction moves to
+  a new `vpc_layout` argument -- the two had shared one argument and
+  attribute despite meaning unrelated things. See `?er_style_tag`.
+* `er_style_tag()`'s `layer` values are renamed to be grammar-prefixed:
+  `"model"`/`"summary"`/`"quantile"`/`"data"`/`"group"` (`er_plot()`)
+  become `"plot_model"`/`"plot_summary"`/`"plot_quantile"`/`"plot_data"`/
+  `"plot_group"`; `"observed"`/`"simulated"` (`er_vpc()`) become
+  `"vpc_observed"`/`"vpc_simulated"`; `"curve"`/`"censor"`/`"risktable"`
+  (`er_tte()`) become `"tte_curve"`/`"tte_censor"`/`"tte_risktable"`.
+  `"tte_model"`/`"tte_summary"` are unchanged (already grammar-prefixed).
+  A custom builder tagged with one of the old values needs updating; see
+  `?er_style_tag`.
 * `stratify_by` must now name a discrete/categorical variable in
   `er_vpc()`; a numeric column errors instead of being automatically
   split into quantile bins, and the `n_strata` argument is removed. Bin
@@ -108,6 +141,10 @@
 
 ## Documentation
 
+* `?er_style_tag` is rewritten to describe the mechanism as a whole --
+  the shared self-declaration system every built-in builder across
+  `er_plot()`/`er_vpc()`/`er_tte()` carries -- rather than describing
+  each argument in isolation.
 * Added `?er_style_vpc`/`?er_style_tte`, documenting the shared builder
   interface for `er_vpc()`/`er_tte()` builders, alongside the existing
   `?er_style` for `er_plot()`. Previously this material was scattered

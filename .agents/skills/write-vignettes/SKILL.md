@@ -127,7 +127,7 @@ group layers).
   noun in front of every code-initial sentence; only add one where it
   genuinely reads better.
 - **Avoid unexplained jargon.** Where a term is genuinely necessary
-  (singleton/additive, layout family, zorder), it's the article's job to
+  (singleton/additive, layout family, draw_order), it's the article's job to
   define it in prose the first time it's used, not assume the reader
   already knows the internal vocabulary from `AGENTS.md`.
 - **British/Australian spelling**: colour, behaviour, visualise, centred.

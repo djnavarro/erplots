@@ -114,7 +114,7 @@ spaced at each bin's categorical (or quantile-bin) label when
 \code{plot_by} is categorical, or at each bin's numeric median (\code{x_median},
 from \code{config$summary}) on \code{plot_by}'s own numeric scale when \code{plot_by} is
 numeric. Because it adapts its x-position family at build time rather
-than declaring one statically, it carries no \code{layout} tag -- pair it
+than declaring one statically, it carries no \code{vpc_layout} tag -- pair it
 with \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}, which mirrors the same
 adaptive logic.
 
@@ -136,7 +136,7 @@ bin's categorical (or quantile-bin) label when \code{plot_by} is
 categorical, or at each bin's numeric median (\code{x_median}, from
 \code{config$percentiles}) on \code{plot_by}'s own numeric scale when \code{plot_by} is
 numeric. Because it adapts its x-position family at build time rather
-than declaring one statically, it carries no \code{layout} tag. Unlike
+than declaring one statically, it carries no \code{vpc_layout} tag. Unlike
 \code{er_style_vpc_observed_quantile_line()}/
 \code{er_style_vpc_simulated_quantile_ribbon()}, it supports a categorical
 \code{plot_by} as well as a numeric one; like it, it requires a

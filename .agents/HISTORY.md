@@ -1732,3 +1732,155 @@ double duty across grammars needed splitting. `er_style_tag()`'s valid
 `layer` list (`R/er-plot-style.R`) grew the two new values rather than
 becoming grammar-scoped in general, since a flat namespace is
 sufficient once the actual collisions are gone.
+
+## Renaming `er_style_tag()`'s `zorder` argument to `draw_order`, and splitting `layout` into `layout`/`vpc_layout`
+
+`er_style_tag()` had grown, across the `er_plot()`/`er_vpc()`/`er_tte()`
+grammars, into a de facto shared builder-registration mechanism, which
+prompted a naming review of two of its arguments.
+
+`zorder` (values `"foreground"`/`"background"`, controlling whether an
+overlay-layout data builder's geoms draw before or after the model/
+summary/quantile layers when they share the main panel) was renamed to
+`draw_order`. `zorder`/z-index conventionally implies numeric stacking
+order; this tag is a two-valued before/after switch, not a numeric
+depth, so the name overstated what it does. Renamed the argument, the
+`"er_style_zorder"` attribute (now `"er_style_draw_order"`), and the
+internal reader `.style_zorder()` (now `.style_draw_order()`) together;
+only one call site outside `R/er-plot-style.R` itself
+(`R/er-plot-api.R`, `R/er-plot-build.R`) plus one built-in user
+(`er_style_data_hex()`) needed updating.
+
+`layout` had also been overloaded: the data layer's `"overlay"`/`"panel"`
+pair and a VPC observed/simulated builder's `"categorical"`/`"continuous"`
+pair shared one argument name and one attribute
+(`"er_style_layout"`), despite meaning unrelated things and never being
+checked against each other. `match.arg()` on the combined four-value
+vocabulary also meant tagging a VPC builder with `"overlay"` (or a data
+builder with `"categorical"`) would silently pass validation. Split into
+two arguments: `layout` (data-layer only, `"overlay"`/`"panel"`,
+unchanged) and `vpc_layout` (VPC-only, `"categorical"`/`"continuous"`,
+new), each with its own attribute (`"er_style_layout"`/
+`"er_style_vpc_layout"`) and its own `match.arg()` vocabulary. The two
+built-ins that used the VPC pair (`er_style_vpc_observed_quantile_line()`/
+`er_style_vpc_simulated_quantile_ribbon()`) moved to `vpc_layout =
+"continuous"`; `.check_vpc_layout_match()`'s error message now names
+`vpc_layout` rather than `layout`.
+
+Both were straight renames (no deprecation shim), consistent with the
+package's general "no deprecation shims" convention -- see AGENTS.md's
+"Gotchas" section.
+
+## Grammar-prefixing every `layer` tag value
+
+Follow-up to "Namespacing the `"model"`/`"summary"` layer tags per
+grammar" above, which had minted `"tte_model"`/`"tte_summary"` as one-off
+exceptions to an otherwise bare-word `layer` vocabulary
+(`"model"`/`"summary"`/`"quantile"`/`"data"`/`"group"` for `er_plot()`,
+`"observed"`/`"simulated"` for `er_vpc()`, `"curve"`/`"censor"`/
+`"risktable"` for `er_tte()`). Generalized that exception into a
+package-wide convention: every `layer` value is now prefixed with the
+grammar it belongs to. `er_plot()`'s five values became `"plot_model"`/
+`"plot_summary"`/`"plot_quantile"`/`"plot_data"`/`"plot_group"`;
+`er_vpc()`'s two became `"vpc_observed"`/`"vpc_simulated"`; `er_tte()`'s
+three grammar-unique values became `"tte_curve"`/`"tte_censor"`/
+`"tte_risktable"`; `"tte_model"`/`"tte_summary"` were already correctly
+prefixed and needed no change.
+
+Motivation was purely readability, not correctness -- `.check_style_layer()`
+was, and remains, plain string equality with no notion of which grammar a
+value belongs to, so the old bare-word values (`"data"`, `"group"`, etc.)
+were never actually ambiguous in practice, just opaque to read: nothing
+in the string itself told a reader (or `er_style_labels()`'s `layer`
+column) which of the three grammars owned it. The prefix makes that
+legible on sight, and, as a side effect, makes a future accidental
+cross-grammar collision structurally impossible rather than merely
+avoided by convention (as the previous fix's one-off `"tte_model"`/
+`"tte_summary"` split already demonstrated the *pattern* for, without
+generalizing it).
+
+Renamed everywhere the values are minted, checked, or documented:
+every built-in builder's `er_style_tag(..., layer = ...)` call across
+all ten `R/er-{plot,vpc,tte}-style-*.R` files; every `_add_*()`
+function's `.check_style_layer()`/`.lookup_style_label()` call in
+`R/er-plot-add.R`/`R/er-vpc-add.R`/`R/er-tte-add.R`; the `match.arg()`
+vocabulary and roxygen (`@param layer`, the "Details" discussion of the
+flat-namespace collision risk, and the worked `@examples`) in
+`R/er-plot-style.R`; the registered-label rollout's own registry keys
+(no registry *logic* change -- `(layer, label)` keys just shifted to the
+new `layer` half); tests asserting `attr(builder, "er_style_layer")`
+values or constructing a mismatched-layer stub; and the `extending.Rmd`/
+`AGENTS.md` prose walking through the tag. Test regex checks against
+`.check_style_layer()`'s error message (e.g. `expect_error(..., "curve")`)
+needed no changes, since they match a substring and every new value
+still contains its old bare word (`"tte_curve"` still matches `"curve"`).
+Straight rename, no deprecation shim, consistent with the package's
+"no deprecation shims" convention.
+
+## Resolving the label/registry redefinition-safety question
+
+Follow-up to the string-label `style` dispatch prototype (`R/er-style-registry.R`,
+`er_style_tag(fn, label = ...)`), rolled out to every layer/grammar's
+built-in builders. One design question had been deliberately left open:
+`.register_style_label()`'s collision check compared a candidate
+registration to any existing one via `identical()`, silently no-oping
+when they matched and erroring otherwise -- which meant re-running a
+script that edits a *custom* labelled builder's body and re-tags it
+(an ordinary interactive workflow) would error on the second run, since
+the edited function is never `identical()` to the one already
+registered under that `(layer, label)` key.
+
+Resolved by adding an `overwrite` argument to `er_style_tag()`, default
+`FALSE` (preserving the existing error-on-collision behaviour), that
+when `TRUE` replaces an existing `(layer, label)` registration
+unconditionally, regardless of whether the new function is identical to
+the old one. Chose an explicit opt-in over the alternative of
+downgrading the default to a warning-and-overwrite: erroring by default
+and requiring deliberate intent to replace a registration matches the
+package's existing preference for explicit opt-in over a silently
+permissive default (the same philosophy behind the opt-in-only RNG
+seeding rule in AGENTS.md's "Gotchas" section) -- and a warning-by-default
+would have silently let a *different* author's builder overwrite an
+already-registered label with no engineered friction to prevent it.
+`overwrite` requires `label` in the same call (mirroring `label`'s own
+requirement that `layer` be set) and must be a single, non-`NA` logical
+-- both checked eagerly in `er_style_tag()` before reaching
+`.register_style_label()`. Re-registering the identical function is
+still always a silent no-op regardless of `overwrite`, since that path
+never represents an actual collision (e.g. reloading the package, which
+re-tags every built-in builder on every `devtools::load_all()`).
+
+Still undecided: whether to drop **prototype** from the docs/`NEWS.md`
+and commit the mechanism as real API at all -- see `PLAN.md`.
+
+## Committing string-label `style` dispatch as real API
+
+Follow-up to the two entries above. With the redefinition-safety gap
+closed (an explicit `overwrite` argument on `er_style_tag()`, defaulting
+to erroring on a genuine collision), the one open design question was
+whether to keep the whole `label`/registry mechanism flagged
+**prototype** indefinitely, commit it as permanent public API, or revert
+it. Decided to commit: the mechanism was already fully built, tested
+(1576 tests passing at the time), and generalized cleanly to all 34
+built-in builders across all three grammars with no per-layer special
+casing, so leaving it flagged **prototype** any longer would only have
+left users unsure whether to rely on it, without reducing the
+maintenance surface at all -- the code and tests already had to stay
+correct either way. The remaining objections (no concrete user request
+motivated it; `label` is still the one `er_style_tag()` argument with a
+side effect -- a registry write -- rather than a pure attribute stamp)
+were judged real but not disqualifying: the side effect is isolated to
+one opt-in argument and clearly documented, and it isn't a CRAN concern
+(a package writing to its own internal environment is ordinary --
+S3 method registries and caches do the same).
+
+Dropped every **Prototype** marker from user-facing docs: `?er_style_tag`'s
+`@param label`/`@details`, every `_add_*()` function's `@param style`
+roxygen (`R/er-plot-add.R`/`R/er-vpc-add.R`/`R/er-tte-add.R`),
+`er_style_model_ribbonline()`'s `@details` (`R/er-plot-style-model.R`),
+and the internal top-of-file comment in `R/er-style-registry.R`. Added a
+`NEWS.md` entry under `## New features` for the mechanism itself
+(`er_style_tag(label = , overwrite = )`, `er_style_labels()`) --
+previously withheld pending this decision, unlike the `zorder`/`layout`
+rename and the `layer` grammar-prefixing, which already had entries
+since they were never in question.

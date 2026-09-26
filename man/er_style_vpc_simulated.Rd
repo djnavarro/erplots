@@ -138,7 +138,7 @@ replicates), adapting its x-position to \code{plot_by}'s type
 bin's numeric median (\code{x_median}, from \code{config$summary}) on the
 \code{plot_by}'s own numeric scale when \code{plot_by} is numeric. Because it adapts its
 x-position family at build time rather than declaring one statically,
-it carries no \code{layout} tag -- pair it with
+it carries no \code{vpc_layout} tag -- pair it with
 \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}, which mirrors the same
 adaptive logic.
 
@@ -155,7 +155,7 @@ without it errors.
 percentile -- for pairing with
 \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}. Like that builder (and
 like \code{er_style_vpc_simulated_mean_errorbar()}), it adapts its
-x-position to \code{plot_by}'s type, carries no \code{layout} tag, supports
+x-position to \code{plot_by}'s type, carries no \code{vpc_layout} tag, supports
 both a numeric and a categorical \code{plot_by}, and requires a
 continuous/count response, erroring informatively without
 \code{config$percentiles}. As with the observed-layer counterpart, when

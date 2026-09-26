@@ -5,7 +5,7 @@
 #' comparing survival across `stratify_by`'s levels, a supplied model's
 #' [er_summary()] result, or observation/event counts.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame (`object$data`).
 #' @param config Configuration for the summary layer (populated by
 #'   [er_tte_add_summary()]): `config$logrank_p_value` (the log-rank
@@ -128,7 +128,7 @@ er_style_tte_summary_logrank <- function(data, config, stratify, time, strata, t
 
   return(geoms)
 }
-er_style_tte_summary_logrank <- er_style_tag(er_style_tte_summary_logrank, layer = "tte_summary")
+er_style_tte_summary_logrank <- er_style_tag(er_style_tte_summary_logrank, layer = "tte_summary", label = "logrank")
 
 #' @rdname er_style_tte_summary
 #' @export
@@ -177,7 +177,7 @@ er_style_tte_summary_n <- function(data, config, stratify, time, strata, theme,
 
   return(geoms)
 }
-er_style_tte_summary_n <- er_style_tag(er_style_tte_summary_n, layer = "tte_summary")
+er_style_tte_summary_n <- er_style_tag(er_style_tte_summary_n, layer = "tte_summary", label = "n")
 
 #' @rdname er_style_tte_summary
 #' @export
@@ -228,7 +228,7 @@ er_style_tte_summary_coefficients <- function(data, config, stratify, time, stra
 
   return(geoms)
 }
-er_style_tte_summary_coefficients <- er_style_tag(er_style_tte_summary_coefficients, layer = "tte_summary")
+er_style_tte_summary_coefficients <- er_style_tag(er_style_tte_summary_coefficients, layer = "tte_summary", label = "coefficients")
 
 #' @rdname er_style_tte_summary
 #' @export
@@ -293,4 +293,4 @@ er_style_tte_summary_gof <- function(data, config, stratify, time, strata, theme
 
   return(geoms)
 }
-er_style_tte_summary_gof <- er_style_tag(er_style_tte_summary_gof, layer = "tte_summary")
+er_style_tte_summary_gof <- er_style_tag(er_style_tte_summary_gof, layer = "tte_summary", label = "gof")

@@ -10,7 +10,8 @@ er_tte_add_censor(object, style = NULL, ...)
 \item{object}{Partially constructed plot (has S3 class \code{er_tte}).}
 
 \item{style}{Function drawing the censoring marks. Defaults to
-\code{\link[=er_style_tte_censor_ticks]{er_style_tte_censor_ticks()}}.}
+\code{\link[=er_style_tte_censor_ticks]{er_style_tte_censor_ticks()}}, or the registered label \code{"ticks"} (see
+\code{\link[=er_style_labels]{er_style_labels()}}).}
 
 \item{...}{Additional named arguments forwarded unchanged to \code{style}
 at build time (e.g. \code{\link[=er_style_tte_censor_ticks]{er_style_tte_censor_ticks()}}'s \code{shape}/

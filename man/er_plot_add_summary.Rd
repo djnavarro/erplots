@@ -27,7 +27,9 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
 
 \item{style}{Function drawing the summary annotation, defaulting to
-\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}.}
+\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}, or one of the registered short-string
+labels for this layer -- currently \code{"pvalue"}, \code{"n"},
+\code{"coefficients"}, \code{"gof"} (see \code{\link[=er_style_labels]{er_style_labels()}}).}
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (used,
 e.g., for the \code{conf_low}/\code{conf_high} columns of its \code{coefficients}

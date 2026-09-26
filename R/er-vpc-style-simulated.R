@@ -8,7 +8,7 @@
 #' [er_style_vpc()] for the shared interface every VPC-grammar builder
 #' implements.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame.
 #' @param config Configuration for the simulated layer.
 #' @param exposure Exposure variable.
@@ -71,7 +71,7 @@
 #' bin's numeric median (`x_median`, from `config$summary`) on the
 #' `plot_by`'s own numeric scale when `plot_by` is numeric. Because it adapts its
 #' x-position family at build time rather than declaring one statically,
-#' it carries no `layout` tag -- pair it with
+#' it carries no `vpc_layout` tag -- pair it with
 #' [er_style_vpc_observed_mean_errorbar()], which mirrors the same
 #' adaptive logic.
 #'
@@ -88,7 +88,7 @@
 #' percentile -- for pairing with
 #' [er_style_vpc_observed_quantile_errorbar()]. Like that builder (and
 #' like `er_style_vpc_simulated_mean_errorbar()`), it adapts its
-#' x-position to `plot_by`'s type, carries no `layout` tag, supports
+#' x-position to `plot_by`'s type, carries no `vpc_layout` tag, supports
 #' both a numeric and a categorical `plot_by`, and requires a
 #' continuous/count response, erroring informatively without
 #' `config$percentiles`. As with the observed-layer counterpart, when
@@ -220,10 +220,11 @@ er_style_vpc_simulated_quantile_ribbon <- function(data, config, exposure, respo
 }
 er_style_vpc_simulated_quantile_ribbon <- er_style_tag(
   er_style_vpc_simulated_quantile_ribbon,
-  layer = "simulated", layout = "continuous",
+  layer = "vpc_simulated", vpc_layout = "continuous",
   response_types = c("continuous", "count"),
   plot_by_types = "continuous",
-  marker_source = "percentiles"
+  marker_source = "percentiles",
+  label = "quantile_ribbon"
 )
 
 
@@ -291,10 +292,11 @@ er_style_vpc_simulated_quantile_errorbar <- function(data, config, exposure, res
 }
 er_style_vpc_simulated_quantile_errorbar <- er_style_tag(
   er_style_vpc_simulated_quantile_errorbar,
-  layer = "simulated",
+  layer = "vpc_simulated",
   response_types = c("continuous", "count"),
   plot_by_types = c("continuous", "discrete"),
-  marker_source = "percentiles"
+  marker_source = "percentiles",
+  label = "quantile_errorbar"
 )
 
 
@@ -353,8 +355,9 @@ er_style_vpc_simulated_mean_errorbar <- function(data, config, exposure, respons
 }
 er_style_vpc_simulated_mean_errorbar <- er_style_tag(
   er_style_vpc_simulated_mean_errorbar,
-  layer = "simulated",
+  layer = "vpc_simulated",
   response_types = c("binary", "continuous", "count"),
   plot_by_types = c("continuous", "discrete"),
-  marker_source = "summary"
+  marker_source = "summary",
+  label = "mean_errorbar"
 )

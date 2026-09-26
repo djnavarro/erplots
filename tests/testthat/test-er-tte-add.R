@@ -20,6 +20,11 @@ test_that("er_tte_add_curve errors when style is not a function", {
   expect_error(survival::lung |> er_tte(time, status == 2) |> er_tte_add_curve(style = 1), "must be a function")
 })
 
+test_that("er_tte_add_curve accepts a registered label string in place of style", {
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_curve(style = "km")
+  expect_identical(obj$layer$curve$style, er_style_tte_curve_km)
+})
+
 test_that("er_tte_add_curve errors when a builder tagged for a different layer is passed", {
   expect_error(
     survival::lung |> er_tte(time, status == 2) |> er_tte_add_curve(style = er_style_summary_pvalue),
@@ -85,6 +90,11 @@ test_that("er_tte_add_censor errors when style is not a function", {
   expect_error(survival::lung |> er_tte(time, status == 2) |> er_tte_add_censor(style = 1), "must be a function")
 })
 
+test_that("er_tte_add_censor accepts a registered label string in place of style", {
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_censor(style = "ticks")
+  expect_identical(obj$layer$censor$style, er_style_tte_censor_ticks)
+})
+
 test_that("er_tte_add_censor errors when a builder tagged for a different layer is passed", {
   expect_error(
     survival::lung |> er_tte(time, status == 2) |> er_tte_add_censor(style = er_style_tte_curve_km),
@@ -134,6 +144,11 @@ test_that("er_tte_add_risktable errors on a non-er_tte object", {
 
 test_that("er_tte_add_risktable errors when style is not a function", {
   expect_error(survival::lung |> er_tte(time, status == 2) |> er_tte_add_risktable(style = 1), "must be a function")
+})
+
+test_that("er_tte_add_risktable accepts a registered label string in place of style", {
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_risktable(style = "text")
+  expect_identical(obj$layer$risktable$style, er_style_tte_risktable_text)
 })
 
 test_that("er_tte_add_risktable errors when a builder tagged for a different layer is passed", {
@@ -195,12 +210,28 @@ test_that("er_tte_add_summary is a singleton -- a second call replaces the first
   expect_identical(obj$layer$summary$dots, list(inset = 0.2))
 })
 
-test_that("er_tte_add_summary errors when style is not a function", {
+test_that("er_tte_add_summary errors when style is not a function or a registered label", {
   df <- survival::lung
   df$sex <- factor(df$sex, labels = c("Male", "Female"))
   expect_error(
     df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_summary(style = 1),
     "must be a function"
+  )
+})
+
+test_that("er_tte_add_summary() accepts a registered label string in place of style", {
+  df <- survival::lung
+  df$sex <- factor(df$sex, labels = c("Male", "Female"))
+  obj <- df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_summary(style = "n")
+  expect_identical(obj$layer$summary$style, er_style_tte_summary_n)
+})
+
+test_that("er_tte_add_summary() errors informatively for an unregistered label string", {
+  df <- survival::lung
+  df$sex <- factor(df$sex, labels = c("Male", "Female"))
+  expect_error(
+    df |> er_tte(time, status == 2, stratify_by = sex) |> er_tte_add_summary(style = "not_a_real_label"),
+    "not_a_real_label"
   )
 })
 
@@ -263,6 +294,12 @@ test_that("er_tte_add_model adds a model layer with the default style", {
   mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
   obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod)
   expect_false(is.null(obj$layer$model))
+  expect_identical(obj$layer$model$style, er_style_tte_model_line)
+})
+
+test_that("er_tte_add_model accepts a registered label string in place of style", {
+  mod <- er_test_toy_tte_model(survival::Surv(time, status == 2) ~ 1, survival::lung)
+  obj <- survival::lung |> er_tte(time, status == 2) |> er_tte_add_model(mod, style = "line")
   expect_identical(obj$layer$model$style, er_style_tte_model_line)
 })
 

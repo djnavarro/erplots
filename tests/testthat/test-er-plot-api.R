@@ -734,6 +734,11 @@ test_that("er_plot_add_summary() works without a model at all", {
   expect_true(ggplot2::is_ggplot(built$output))
 })
 
+test_that("er_plot_add_summary() accepts a registered label string in place of style", {
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_summary(style = "n")
+  expect_identical(plt$layer$summary$config$style, er_style_summary_n)
+})
+
 test_that("er_plot_add_summary() computes p_value regardless of stratify, but er_style_summary_pvalue() suppresses it when stratified", {
   plt_strat <- er_test_data |>
     er_plot(aucss, ae1, stratify_by = sex) |>
@@ -755,9 +760,21 @@ test_that("er_plot_add_summary() computes p_value regardless of stratify, but er
   expect_identical(geoms, list())
 })
 
-test_that("er_plot_add_model() rejects a non-function style", {
+test_that("er_plot_add_model() rejects a non-function, non-string style", {
   plt <- er_test_data |> er_plot(aucss, ae1)
-  expect_error(er_plot_add_model(plt, er_test_mod1, style = "not a function"))
+  expect_error(er_plot_add_model(plt, er_test_mod1, style = 42), "must be a function")
+})
+
+test_that("er_plot_add_model() errors informatively for an unregistered style label", {
+  plt <- er_test_data |> er_plot(aucss, ae1)
+  expect_error(er_plot_add_model(plt, er_test_mod1, style = "not a function"), "not a function")
+})
+
+test_that("er_plot_add_model() accepts a registered label string in place of style", {
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1, style = "line")
+  expect_identical(plt$layer$model$config$style, er_style_model_line)
 })
 
 test_that("er_plot_add_quantiles() accepts a custom style", {
@@ -781,6 +798,22 @@ test_that("er_plot_add_quantiles() accepts a custom style", {
 test_that("er_plot_add_quantiles() rejects a non-function style", {
   plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_model(er_test_mod1)
   expect_error(er_plot_add_quantiles(plt, style = "not a function"))
+})
+
+test_that("er_plot_add_quantiles() accepts a registered label string in place of style", {
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_quantiles(style = "pointrange")
+  expect_identical(plt$layer$quantile$config$style, er_style_quantile_pointrange)
+})
+
+test_that("er_plot_add_data() accepts a registered label string in place of style, for both structural families", {
+  plt_overlay <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_data(style = "overlay")
+  expect_identical(plt_overlay$layer$overlay$config$style, er_style_data_overlay)
+
+  plt_panel <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_data(style = "boxjitter")
+  expect_identical(plt_panel$layer$data$config$style, er_style_data_boxjitter)
 })
 
 test_that("er_plot_add_data() accepts a custom style for both the overlay and panel structural families", {
@@ -823,6 +856,15 @@ test_that("er_plot_add_data() rejects a style with no declared layout", {
   expect_error(er_plot_add_data(plt, style = untagged_builder))
 })
 
+test_that("er_plot_add_groups() accepts a registered label string, applied to every grouping variable", {
+  plt <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_model(er_test_mod1) |>
+    er_plot_add_groups(c(aucss, sex), style = "violin")
+
+  expect_true(all(purrr::map_lgl(plt$layer$group$config, \(cfg) identical(cfg$style, er_style_group_violin))))
+})
+
 test_that("er_plot_add_groups() accepts a custom style, applied to every grouping variable", {
   custom_group_builder <- function(data, config, stratify, exposure, response, strata, theme) {
     ggplot2::geom_violin(
@@ -848,32 +890,32 @@ test_that("er_plot_add_groups() rejects a non-function style", {
 test_that("er_style_tag() attaches a layer attribute, validated against a fixed set", {
   fn <- function(data, config, stratify, exposure, response, strata, theme) list()
 
-  tagged <- er_style_tag(fn, layer = "quantile")
-  expect_identical(attr(tagged, "er_style_layer"), "quantile")
+  tagged <- er_style_tag(fn, layer = "plot_quantile")
+  expect_identical(attr(tagged, "er_style_layer"), "plot_quantile")
 
   expect_error(er_style_tag(fn, layer = "not_a_layer"))
 })
 
-test_that("er_style_tag() attaches a zorder attribute, validated against a fixed set", {
+test_that("er_style_tag() attaches a draw_order attribute, validated against a fixed set", {
   fn <- function(data, config, stratify, exposure, response, strata, theme) list()
 
-  tagged <- er_style_tag(fn, zorder = "background")
-  expect_identical(attr(tagged, "er_style_zorder"), "background")
+  tagged <- er_style_tag(fn, draw_order = "background")
+  expect_identical(attr(tagged, "er_style_draw_order"), "background")
 
-  expect_error(er_style_tag(fn, zorder = "not_a_zorder"))
+  expect_error(er_style_tag(fn, draw_order = "not_a_draw_order"))
 
   # an untagged builder has no attribute set...
-  expect_null(attr(fn, "er_style_zorder"))
-  # ...but `.style_zorder()` defaults it to "foreground"
-  expect_identical(erplots:::.style_zorder(fn), "foreground")
-  expect_identical(erplots:::.style_zorder(tagged), "background")
+  expect_null(attr(fn, "er_style_draw_order"))
+  # ...but `.style_draw_order()` defaults it to "foreground"
+  expect_identical(erplots:::.style_draw_order(fn), "foreground")
+  expect_identical(erplots:::.style_draw_order(tagged), "background")
 })
 
-test_that("er_style_data_hex() is tagged zorder = \"background\"", {
-  expect_identical(attr(er_style_data_hex, "er_style_zorder"), "background")
+test_that("er_style_data_hex() is tagged draw_order = \"background\"", {
+  expect_identical(attr(er_style_data_hex, "er_style_draw_order"), "background")
 })
 
-test_that("a zorder = \"background\" overlay style draws before model/summary/quantile geoms", {
+test_that("a draw_order = \"background\" overlay style draws before model/summary/quantile geoms", {
   skip_if_not_installed("hexbin")
 
   background_builder <- er_style_tag(
@@ -885,7 +927,7 @@ test_that("a zorder = \"background\" overlay style draws before model/summary/qu
       )
     },
     layout = "overlay",
-    zorder = "background"
+    draw_order = "background"
   )
 
   plt <- er_test_data |>
@@ -919,20 +961,20 @@ test_that("the default (foreground) overlay style still draws after model/summar
 })
 
 test_that("built-in builders are tagged with their layer", {
-  expect_identical(attr(er_style_model_ribbonline, "er_style_layer"), "model")
-  expect_identical(attr(er_style_model_line, "er_style_layer"), "model")
-  expect_identical(attr(er_style_model_spaghetti, "er_style_layer"), "model")
-  expect_identical(attr(er_style_summary_pvalue, "er_style_layer"), "summary")
-  expect_identical(attr(er_style_quantile_errorbar, "er_style_layer"), "quantile")
-  expect_identical(attr(er_style_quantile_errorbar_vlines, "er_style_layer"), "quantile")
-  expect_identical(attr(er_style_quantile_pointrange, "er_style_layer"), "quantile")
-  expect_identical(attr(er_style_quantile_pointrange_vlines, "er_style_layer"), "quantile")
-  expect_identical(attr(er_style_data_overlay, "er_style_layer"), "data")
-  expect_identical(attr(er_style_data_boxjitter, "er_style_layer"), "data")
-  expect_identical(attr(er_style_data_hex, "er_style_layer"), "data")
-  expect_identical(attr(er_style_group_boxplot, "er_style_layer"), "group")
-  expect_identical(attr(er_style_group_violin, "er_style_layer"), "group")
-  expect_identical(attr(er_style_group_histogram, "er_style_layer"), "group")
+  expect_identical(attr(er_style_model_ribbonline, "er_style_layer"), "plot_model")
+  expect_identical(attr(er_style_model_line, "er_style_layer"), "plot_model")
+  expect_identical(attr(er_style_model_spaghetti, "er_style_layer"), "plot_model")
+  expect_identical(attr(er_style_summary_pvalue, "er_style_layer"), "plot_summary")
+  expect_identical(attr(er_style_quantile_errorbar, "er_style_layer"), "plot_quantile")
+  expect_identical(attr(er_style_quantile_errorbar_vlines, "er_style_layer"), "plot_quantile")
+  expect_identical(attr(er_style_quantile_pointrange, "er_style_layer"), "plot_quantile")
+  expect_identical(attr(er_style_quantile_pointrange_vlines, "er_style_layer"), "plot_quantile")
+  expect_identical(attr(er_style_data_overlay, "er_style_layer"), "plot_data")
+  expect_identical(attr(er_style_data_boxjitter, "er_style_layer"), "plot_data")
+  expect_identical(attr(er_style_data_hex, "er_style_layer"), "plot_data")
+  expect_identical(attr(er_style_group_boxplot, "er_style_layer"), "plot_group")
+  expect_identical(attr(er_style_group_violin, "er_style_layer"), "plot_group")
+  expect_identical(attr(er_style_group_histogram, "er_style_layer"), "plot_group")
 })
 
 test_that("er_plot_add_model() errors informatively for a wrong-layer style", {

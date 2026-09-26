@@ -4,7 +4,7 @@
 #' observations either as an overlay on the main panel or as separate
 #' boxplot/jitter panels.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame.
 #' @param config Configuration for the specific plot.
 #' @param stratify Logical: whether to stratify.
@@ -40,7 +40,7 @@
 #'   jittered points. Defaults to `0.6`.
 #' @param bins Number of hex bins for `er_style_data_hex()`. Defaults to `30`.
 #'
-#' @details Builders for the `data` layer ([er_plot_add_data()]) are tagged with the structural family they belong to via [er_style_tag()]. `er_style_data_overlay()` and `er_style_data_hex()` use the overlay layout, drawing in the main panel; `er_style_data_boxjitter()` uses the panel layout and is binary-response only. All built-in data builders are also tagged `layer = "data"`, so [er_plot_add_data()] errors if given a builder tagged for another layer.
+#' @details Builders for the `data` layer ([er_plot_add_data()]) are tagged with the structural family they belong to via [er_style_tag()]. `er_style_data_overlay()` and `er_style_data_hex()` use the overlay layout, drawing in the main panel; `er_style_data_boxjitter()` uses the panel layout and is binary-response only. All built-in data builders are also tagged `layer = "plot_data"`, so [er_plot_add_data()] errors if given a builder tagged for another layer.
 #'
 #' `er_style_data_hex()` defaults to a light-grey-to-navy (`"grey90"` to
 #' `"#132B43"`) fill gradient, so a cell's fill fades toward the panel
@@ -49,7 +49,7 @@
 #' `er_plot_theme(fill_continuous = ...)`.
 #'
 #' Because its geoms cover the whole panel, `er_style_data_hex()` is
-#' tagged `er_style_tag(fn, zorder = "background")` (see [er_style_tag()]),
+#' tagged `er_style_tag(fn, draw_order = "background")` (see [er_style_tag()]),
 #' so it's drawn before the model/summary/quantile layers rather than on
 #' top of them; its default `alpha = 0.85` gives those layers a little
 #' extra visibility through even a densely populated hex cell.
@@ -182,7 +182,7 @@ er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposur
   )
 
   return(geoms)
-}, layout = "panel", layer = "data")
+}, layout = "panel", layer = "plot_data", label = "boxjitter")
 
 
 #' @rdname er_style_data
@@ -232,7 +232,7 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
   )
 
   return(geoms)
-}, layout = "overlay", layer = "data")
+}, layout = "overlay", layer = "plot_data", label = "overlay")
 
 
 #' @rdname er_style_data
@@ -298,4 +298,4 @@ er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, res
   }
 
   return(geoms)
-}, layout = "overlay", fill_role = "density", layer = "data", zorder = "background")
+}, layout = "overlay", fill_role = "density", layer = "plot_data", draw_order = "background", label = "hex")

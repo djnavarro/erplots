@@ -291,7 +291,7 @@ er_plot_build <- function(object) {
   }
   if (!is.null(object$layer$data)) object$plot$data <- .build_data_plot(object)
   if (!is.null(object$layer$group)) object$plot$group <- .build_group_plot(object)
-  if (!is.null(object$layer$overlay) && !identical(.style_zorder(object$layer$overlay$config$style), "background")) {
+  if (!is.null(object$layer$overlay) && !identical(.style_draw_order(object$layer$overlay$config$style), "background")) {
     object$plot$base <- object$plot$base + .build_overlay_geoms(object)
   }
 

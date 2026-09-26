@@ -48,5 +48,5 @@ test_that("er_style_tte_censor_ticks returns no geoms when config$table is empty
 })
 
 test_that("er_style_tte_censor_ticks is tagged for the censor layer", {
-  expect_equal(attr(er_style_tte_censor_ticks, "er_style_layer"), "censor")
+  expect_equal(attr(er_style_tte_censor_ticks, "er_style_layer"), "tte_censor")
 })

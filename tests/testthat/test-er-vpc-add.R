@@ -43,6 +43,12 @@ test_that("er_vpc_add_observed() rejects a style tagged for the wrong layer", {
   )
 })
 
+test_that("er_vpc_add_observed() accepts a registered label string in place of style", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
+    er_vpc_add_observed(style = "quantile_line")
+  expect_identical(vpc$layer$observed$config$style, er_style_vpc_observed_quantile_line)
+})
+
 test_that("er_vpc_add_observed() requires named ... arguments", {
   vpc <- er_vpc(er_test_data, aucss, ae1)
   expect_error(
@@ -65,6 +71,13 @@ test_that("er_vpc_add_simulated() rejects a style tagged for the wrong layer", {
     er_vpc_add_simulated(vpc, model = er_test_mod1, seed = 1, style = er_style_vpc_observed_mean_errorbar),
     "observed"
   )
+})
+
+test_that("er_vpc_add_simulated() accepts a registered label string in place of style", {
+  vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>
+    er_vpc_add_observed(style = "quantile_line") |>
+    er_vpc_add_simulated(model = er_test_mod_gaussian, nsim = 5, seed = 902, style = "quantile_ribbon")
+  expect_identical(vpc$layer$simulated$config$style, er_style_vpc_simulated_quantile_ribbon)
 })
 
 test_that("er_vpc_add_simulated() requires exactly one of sim/model", {
@@ -100,12 +113,12 @@ test_that("er_vpc_add_simulated() errors informatively when sim_resp is unavaila
 
 test_that("er_vpc_add_simulated() errors on a categorical/continuous layout mismatch", {
   # `er_style_vpc_observed_quantile_line()`/`er_style_vpc_simulated_quantile_ribbon()`
-  # are the only built-ins that still statically declare a `layout` tag
+  # are the only built-ins that still statically declare a `vpc_layout` tag
   # (both `"continuous"`); a locally-tagged `"categorical"` stand-in
   # exercises the mismatch check against them.
   categorical_stub <- er_style_tag(
     function(data, config, exposure, response, theme, ...) list(),
-    layer = "simulated", layout = "categorical"
+    layer = "vpc_simulated", vpc_layout = "categorical"
   )
 
   vpc <- er_vpc(er_test_data, aucss, biomarker_change) |>

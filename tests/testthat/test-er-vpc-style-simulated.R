@@ -20,15 +20,15 @@ test_that("er_style_vpc_simulated_quantile_ribbon() errors when percentiles aren
   )
 })
 
-test_that("er_style_vpc_simulated_quantile_ribbon() is tagged for the simulated layer and continuous layout", {
-  expect_equal(attr(er_style_vpc_simulated_quantile_ribbon, "er_style_layer"), "simulated")
-  expect_equal(attr(er_style_vpc_simulated_quantile_ribbon, "er_style_layout"), "continuous")
+test_that("er_style_vpc_simulated_quantile_ribbon() is tagged for the simulated layer and continuous vpc_layout", {
+  expect_equal(attr(er_style_vpc_simulated_quantile_ribbon, "er_style_layer"), "vpc_simulated")
+  expect_equal(attr(er_style_vpc_simulated_quantile_ribbon, "er_style_vpc_layout"), "continuous")
 })
 
-test_that("er_style_vpc_simulated_mean_errorbar() is the default and carries no layout tag", {
+test_that("er_style_vpc_simulated_mean_errorbar() is the default and carries no vpc_layout tag", {
   expect_identical(eval(formals(er_vpc_add_simulated)$style), er_style_vpc_simulated_mean_errorbar)
-  expect_null(attr(er_style_vpc_simulated_mean_errorbar, "er_style_layout"))
-  expect_equal(attr(er_style_vpc_simulated_mean_errorbar, "er_style_layer"), "simulated")
+  expect_null(attr(er_style_vpc_simulated_mean_errorbar, "er_style_vpc_layout"))
+  expect_equal(attr(er_style_vpc_simulated_mean_errorbar, "er_style_layer"), "vpc_simulated")
   expect_equal(
     attr(er_style_vpc_simulated_mean_errorbar, "er_style_response_types"),
     c("binary", "continuous", "count")
@@ -132,8 +132,8 @@ test_that("er_vpc_add_simulated() rejects er_style_vpc_simulated_quantile_errorb
 })
 
 test_that("built-in simulated builders are tagged appropriately, including quantile_errorbar", {
-  expect_equal(attr(er_style_vpc_simulated_quantile_errorbar, "er_style_layer"), "simulated")
-  expect_null(attr(er_style_vpc_simulated_quantile_errorbar, "er_style_layout"))
+  expect_equal(attr(er_style_vpc_simulated_quantile_errorbar, "er_style_layer"), "vpc_simulated")
+  expect_null(attr(er_style_vpc_simulated_quantile_errorbar, "er_style_vpc_layout"))
   expect_equal(
     attr(er_style_vpc_simulated_quantile_errorbar, "er_style_response_types"),
     c("continuous", "count")

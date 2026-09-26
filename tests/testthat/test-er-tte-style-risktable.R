@@ -27,5 +27,5 @@ test_that("er_style_tte_risktable_text's n_risk values match summary.survfit() d
 })
 
 test_that("er_style_tte_risktable_text is tagged for the risktable layer", {
-  expect_equal(attr(er_style_tte_risktable_text, "er_style_layer"), "risktable")
+  expect_equal(attr(er_style_tte_risktable_text, "er_style_layer"), "tte_risktable")
 })

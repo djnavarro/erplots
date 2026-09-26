@@ -55,5 +55,5 @@ test_that("er_style_tte_curve_km errors informatively without config$table (fall
 })
 
 test_that("er_style_tte_curve_km is tagged for the curve layer", {
-  expect_equal(attr(er_style_tte_curve_km, "er_style_layer"), "curve")
+  expect_equal(attr(er_style_tte_curve_km, "er_style_layer"), "tte_curve")
 })

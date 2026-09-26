@@ -4,7 +4,7 @@
 #' drawing a point/interval summary per exposure quantile bin as an error bar
 #' or a pointrange, optionally with bin-boundary vlines.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame.
 #' @param config Configuration for the specific plot.
 #' @param stratify Logical: whether to stratify.
@@ -41,7 +41,7 @@
 #' exposure and the overall maximum exposure, not just the boundaries
 #' shared between two adjacent bins -- so a reader can see every bin
 #' edge from the plot alone. All built-in quantile builders are tagged
-#' `er_style_tag(fn, layer = "quantile")`, so [er_plot_add_quantiles()]
+#' `er_style_tag(fn, layer = "plot_quantile")`, so [er_plot_add_quantiles()]
 #' errors informatively if handed a builder tagged for a different
 #' layer.
 #'
@@ -382,7 +382,7 @@ er_style_quantile_errorbar <- function(data, config, stratify, exposure, respons
   geoms <- list(point, bar, label)
   return(geoms)
 }
-er_style_quantile_errorbar <- er_style_tag(er_style_quantile_errorbar, layer = "quantile")
+er_style_quantile_errorbar <- er_style_tag(er_style_quantile_errorbar, layer = "plot_quantile", label = "errorbar")
 
 
 #' @rdname er_style_quantile
@@ -415,7 +415,7 @@ er_style_quantile_errorbar_vlines <- function(data, config, stratify, exposure, 
   }
   out
 }
-er_style_quantile_errorbar_vlines <- er_style_tag(er_style_quantile_errorbar_vlines, layer = "quantile")
+er_style_quantile_errorbar_vlines <- er_style_tag(er_style_quantile_errorbar_vlines, layer = "plot_quantile", label = "errorbar_vlines")
 
 
 #' @rdname er_style_quantile
@@ -485,7 +485,7 @@ er_style_quantile_pointrange <- function(data, config, stratify, exposure, respo
   geoms <- list(range, label)
   return(geoms)
 }
-er_style_quantile_pointrange <- er_style_tag(er_style_quantile_pointrange, layer = "quantile")
+er_style_quantile_pointrange <- er_style_tag(er_style_quantile_pointrange, layer = "plot_quantile", label = "pointrange")
 
 
 #' @rdname er_style_quantile
@@ -519,4 +519,4 @@ er_style_quantile_pointrange_vlines <- function(data, config, stratify, exposure
   }
   out
 }
-er_style_quantile_pointrange_vlines <- er_style_tag(er_style_quantile_pointrange_vlines, layer = "quantile")
+er_style_quantile_pointrange_vlines <- er_style_tag(er_style_quantile_pointrange_vlines, layer = "plot_quantile", label = "pointrange_vlines")

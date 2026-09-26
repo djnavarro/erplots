@@ -36,7 +36,10 @@ observed layer's independent tie-break seed.}
 
 \item{style}{A function determining how the simulated layer is drawn.
 Defaults to \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}; see
-\code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}} for the other built-in options.}
+\code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}} for the other built-in options. Or one of
+the registered short-string labels for this layer -- currently
+\code{"mean_errorbar"}, \code{"quantile_ribbon"}, \code{"quantile_errorbar"} (see
+\code{\link[=er_style_labels]{er_style_labels()}}).}
 
 \item{simulate_args}{A named list of additional arguments forwarded to
 \code{\link[=er_simulate]{er_simulate()}}, only used with \code{model}. Distinct from \code{...} the

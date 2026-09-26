@@ -4,7 +4,7 @@
 #' the fitted exposure-response curve as a ribbon-and-line, a line alone, or a
 #' spaghetti plot of simulated draws.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame
 #' @param config Configuration for the specific plot
 #' @param stratify Logical indicating whether to stratify
@@ -42,9 +42,13 @@
 #' @details `er_style_model_ribbonline()` is the default; `er_style_model_line()`
 #' omits the ribbon; `er_style_model_spaghetti()` draws simulated draws
 #' instead of a ribbon, for models that implement [er_simulate()]. All three are tagged
-#' `er_style_tag(fn, layer = "model")`, so [er_plot_add_model()]
+#' `er_style_tag(fn, layer = "plot_model")`, so [er_plot_add_model()]
 #' errors informatively if handed one of these tagged for a different
 #' layer entirely (e.g. `"summary"`, meant for [er_plot_add_summary()]).
+#' Each also carries a registered short-string label --
+#' `"ribbonline"`/`"line"`/`"spaghetti"` respectively -- so
+#' [er_plot_add_model()]'s `style` argument can take that string instead
+#' of the function itself (see [er_style_labels()]).
 #'
 #' See [er_style()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
@@ -205,7 +209,7 @@ er_style_model_ribbonline <- function(data, config, stratify, exposure, response
   geoms <- c(geoms, list(model_line))
   return(geoms)
 }
-er_style_model_ribbonline <- er_style_tag(er_style_model_ribbonline, layer = "model")
+er_style_model_ribbonline <- er_style_tag(er_style_model_ribbonline, layer = "plot_model", label = "ribbonline")
 
 
 #' @rdname er_style_model
@@ -243,7 +247,7 @@ er_style_model_line <- function(data, config, stratify, exposure, response, stra
   geoms <- list(model_line)
   return(geoms)
 }
-er_style_model_line <- er_style_tag(er_style_model_line, layer = "model")
+er_style_model_line <- er_style_tag(er_style_model_line, layer = "plot_model", label = "line")
 
 
 #' @rdname er_style_model
@@ -336,4 +340,4 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
   geoms <- list(model_spaghetti, model_line)
   return(geoms)
 }
-er_style_model_spaghetti <- er_style_tag(er_style_model_spaghetti, layer = "model")
+er_style_model_spaghetti <- er_style_tag(er_style_model_spaghetti, layer = "plot_model", label = "spaghetti")

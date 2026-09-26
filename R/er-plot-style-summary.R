@@ -4,7 +4,7 @@
 #' drawing a text/label annotation from a model's p-value, coefficients,
 #' goodness-of-fit statistics, or observation counts.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame.
 #' @param config Configuration for the specific plot.
 #' @param stratify Logical: whether to stratify.
@@ -39,7 +39,7 @@
 #' than every reserved `glance` column, showing only whichever of those
 #' four are actually present and non-`NA`; it draws nothing if none of them
 #' are available, or if the layer is stratified. All four builders are
-#' tagged `er_style_tag(fn, layer = "summary")`, so [er_plot_add_summary()]
+#' tagged `er_style_tag(fn, layer = "plot_summary")`, so [er_plot_add_summary()]
 #' errors informatively if a builder tagged for a different layer is passed
 #' to it instead.
 #'
@@ -129,7 +129,7 @@ er_style_summary_pvalue <- function(data, config, stratify, exposure, response, 
 
   return(geoms)
 }
-er_style_summary_pvalue <- er_style_tag(er_style_summary_pvalue, layer = "summary")
+er_style_summary_pvalue <- er_style_tag(er_style_summary_pvalue, layer = "plot_summary", label = "pvalue")
 
 #' @rdname er_style_summary
 #' @export
@@ -175,7 +175,7 @@ er_style_summary_n <- function(data, config, stratify, exposure, response, strat
 
   return(geoms)
 }
-er_style_summary_n <- er_style_tag(er_style_summary_n, layer = "summary")
+er_style_summary_n <- er_style_tag(er_style_summary_n, layer = "plot_summary", label = "n")
 
 #' @rdname er_style_summary
 #' @export
@@ -226,7 +226,7 @@ er_style_summary_coefficients <- function(data, config, stratify, exposure, resp
 
   return(geoms)
 }
-er_style_summary_coefficients <- er_style_tag(er_style_summary_coefficients, layer = "summary")
+er_style_summary_coefficients <- er_style_tag(er_style_summary_coefficients, layer = "plot_summary", label = "coefficients")
 
 #' @rdname er_style_summary
 #' @export
@@ -292,4 +292,4 @@ er_style_summary_gof <- function(data, config, stratify, exposure, response, str
 
   return(geoms)
 }
-er_style_summary_gof <- er_style_tag(er_style_summary_gof, layer = "summary")
+er_style_summary_gof <- er_style_tag(er_style_summary_gof, layer = "plot_summary", label = "gof")

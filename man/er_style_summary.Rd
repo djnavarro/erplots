@@ -125,7 +125,7 @@ goodness-of-fit annotation from the model's \code{glance} field (see
 than every reserved \code{glance} column, showing only whichever of those
 four are actually present and non-\code{NA}; it draws nothing if none of them
 are available, or if the layer is stratified. All four builders are
-tagged \code{er_style_tag(fn, layer = "summary")}, so \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}
+tagged \code{er_style_tag(fn, layer = "plot_summary")}, so \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}
 errors informatively if a builder tagged for a different layer is passed
 to it instead.
 

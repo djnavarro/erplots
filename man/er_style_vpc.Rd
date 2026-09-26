@@ -67,16 +67,18 @@ builder, passed as \code{style} to \code{\link[=er_vpc_add_observed]{er_vpc_add_
 \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}.
 
 A custom builder can self-declare metadata via \code{\link[=er_style_tag]{er_style_tag()}}:
-\code{layout} (\code{"categorical"}/\code{"continuous"}, checked for agreement between
-the observed and simulated builders paired on one \code{er_vpc} object),
-\code{layer} (\code{"observed"}/\code{"simulated"}, checked against the layer the
-builder was actually passed to), \code{response_types}/\code{plot_by_types}
-(checked against \code{object$response$type}/\code{object$group$type}), and
-\code{marker_source} (which of \code{config$summary}/\code{config$percentiles} the
-builder actually draws from, used by \code{\link[=er_vpc_theme]{er_vpc_theme()}}'s \code{xlim}/\code{ylim}
-cropping). All five are optional and independent -- see \code{\link[=er_style_tag]{er_style_tag()}}
-for the full explanation of each, including which built-in builders use
-them and why.
+\code{vpc_layout} (\code{"categorical"}/\code{"continuous"}, checked for agreement
+between the observed and simulated builders paired on one \code{er_vpc}
+object -- distinct from the data layer's own \code{layout} tag, which uses
+an unrelated \code{"overlay"}/\code{"panel"} pair), \code{layer} (\code{"observed"}/
+\code{"simulated"}, checked against the layer the builder was actually
+passed to), \code{response_types}/\code{plot_by_types} (checked against
+\code{object$response$type}/\code{object$group$type}), and \code{marker_source}
+(which of \code{config$summary}/\code{config$percentiles} the builder actually
+draws from, used by \code{\link[=er_vpc_theme]{er_vpc_theme()}}'s \code{xlim}/\code{ylim} cropping). All
+five are optional and independent -- see \code{\link[=er_style_tag]{er_style_tag()}} for the full
+explanation of each, including which built-in builders use them and
+why.
 
 Both \code{observed} and \code{simulated} are \strong{singleton} layers: calling
 \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}/\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}} again replaces the

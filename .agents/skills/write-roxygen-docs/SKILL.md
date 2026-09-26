@@ -114,7 +114,7 @@ Match documentation density to how novel the content actually is:
   the tag — is correct.
 - Once `@details` covers more than three or four distinct sub-topics (e.g.
   `er_style_tag()` documenting `layout`, `fill_role`, `y_role`, `layer`,
-  `zorder`, and the two VPC-only type-checking attributes together), break
+  `draw_order`, and the two VPC-only type-checking attributes together), break
   it into markdown headings or `@section` blocks, one per sub-topic, instead
   of one long unbroken block of paragraphs. A reader looking for one
   specific fact shouldn't have to read the whole section serially to find

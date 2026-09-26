@@ -11,7 +11,10 @@ er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
 
 \item{style}{A function determining how the observed layer is drawn.
 Defaults to \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}; see
-\code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}} for the other built-in options.}
+\code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}} for the other built-in options. Or one of
+the registered short-string labels for this layer -- currently
+\code{"mean_errorbar"}, \code{"quantile_line"}, \code{"quantile_errorbar"} (see
+\code{\link[=er_style_labels]{er_style_labels()}}).}
 
 \item{...}{Additional named arguments forwarded to \code{style}.}
 }

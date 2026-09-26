@@ -5,7 +5,7 @@
 #' band. See [er_style_tte()] for the shared interface every TTE-grammar
 #' builder implements.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame (`object$data`).
 #' @param config Configuration for the model layer (populated by
 #'   [er_tte_add_model()]): `config$predictions` (the prediction tibble
@@ -106,4 +106,4 @@ er_style_tte_model_line <- function(data, config, stratify, time, strata, theme,
 
   return(geoms)
 }
-er_style_tte_model_line <- er_style_tag(er_style_tte_model_line, layer = "tte_model")
+er_style_tte_model_line <- er_style_tag(er_style_tte_model_line, layer = "tte_model", label = "line")

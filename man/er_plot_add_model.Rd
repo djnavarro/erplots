@@ -21,7 +21,10 @@ er_plot_add_model(
 
 \item{keep_strata}{Logical; whether this layer should use stratification.}
 
-\item{style}{Function drawing the model curve/ribbon. Defaults to \code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}}.}
+\item{style}{Function drawing the model curve/ribbon, or one of the
+registered short-string labels for this layer -- currently
+\code{"ribbonline"}, \code{"line"}, \code{"spaghetti"} (see \code{\link[=er_style_labels]{er_style_labels()}}).
+Defaults to \code{\link[=er_style_model_ribbonline]{er_style_model_ribbonline()}}.}
 
 \item{conf_level}{Confidence level for the prediction ribbon. Defaults
 to \code{0.95}.}
@@ -66,6 +69,13 @@ erglm_data |>
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod, style = er_style_model_spaghetti) |>
+  plot()
+
+# the same spaghetti plot, selected by its registered label instead
+# (see `?er_style_labels`)
+erglm_data |>
+  er_plot(aucss, ae1) |>
+  er_plot_add_model(mod, style = "spaghetti") |>
   plot()
 
 # plug in a fully custom model-curve builder

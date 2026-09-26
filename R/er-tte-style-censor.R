@@ -5,7 +5,7 @@
 #' [er_style_tte()] for the shared interface every TTE-grammar builder
 #' implements.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame (`object$data`).
 #' @param config Configuration for the censor layer (populated by
 #'   [er_tte_add_censor()]): `config$table` (the subset of the tidy KM
@@ -79,4 +79,4 @@ er_style_tte_censor_ticks <- function(data, config, stratify, time, strata, them
     )
   )
 }
-er_style_tte_censor_ticks <- er_style_tag(er_style_tte_censor_ticks, layer = "censor")
+er_style_tte_censor_ticks <- er_style_tag(er_style_tte_censor_ticks, layer = "tte_censor", label = "ticks")

@@ -7,7 +7,7 @@
 #' are drawn into their own patchwork panel below the curve, not onto the
 #' curve's panel directly -- see [er_tte_build()].
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame (`object$data`).
 #' @param config Configuration for the risktable layer (populated by
 #'   [er_tte_add_risktable()]): `config$table` (`time`/`n_risk`/`strata`,
@@ -65,4 +65,4 @@ er_style_tte_risktable_text <- function(data, config, stratify, time, strata, th
     )
   )
 }
-er_style_tte_risktable_text <- er_style_tag(er_style_tte_risktable_text, layer = "risktable")
+er_style_tte_risktable_text <- er_style_tag(er_style_tte_risktable_text, layer = "tte_risktable", label = "text")

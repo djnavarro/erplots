@@ -189,15 +189,26 @@ named). See `?er_style` and `vignettes/articles/extending.Rmd` for the
 full custom-builder walkthrough, including what `config` contains per
 layer.
 
-A builder self-declares metadata via `er_style_tag(fn, layout = NULL,
-fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL,
-response_types = NULL, plot_by_types = NULL)` -- seven independent,
-optional attributes (only `layout` is mandatory, and only for a
-data-layer builder):
+`er_style_tag()` is the shared self-declaration mechanism every built-in
+builder across all three grammars carries, and it's grown into a de
+facto (if informal) builder registry: not a lookup table a builder is
+registered *into*, but a way of stamping a function with attributes that
+the relevant `_add_*()` function later reads back off it. A builder
+self-declares metadata via `er_style_tag(fn, layout = NULL, vpc_layout =
+NULL, fill_role = NULL, y_role = NULL, layer = NULL, draw_order = NULL,
+response_types = NULL, plot_by_types = NULL, marker_source = NULL)` --
+nine independent, optional attributes (only `layout` is mandatory, and
+only for a data-layer builder):
 
-- **`layout`** (`"overlay"`/`"panel"`) -- which structural family a data
-  builder belongs to (see above). Mandatory for data-layer builders;
-  `er_plot_add_data()` errors if missing.
+- **`layout`** (`"overlay"`/`"panel"`) -- which structural family a
+  data-layer builder belongs to (see above). Mandatory for data-layer
+  builders; `er_plot_add_data()` errors if missing.
+- **`vpc_layout`** (`"categorical"`/`"continuous"`) -- the VPC analogue
+  of `layout`, but optional, and checked between the observed/simulated
+  builder pair rather than read for a structural decision: whether a VPC
+  observed/simulated builder plots at discrete bin locations or at each
+  bin's numeric midpoint. A deliberately separate argument from `layout`
+  (unrelated value space), not a shared one.
 - **`fill_role`** (e.g. `"density"`) -- tells `.polish_labels()`/
   `.polish_scales()` that a builder's `fill` means something other than
   strata (e.g. `er_style_data_hex()`'s bin density), so the legend is
@@ -207,12 +218,17 @@ data-layer builder):
   builder's y-axis is something other than the categorical group
   variable (e.g. `er_style_group_histogram()`'s facet-based layout puts
   counts on y).
-- **`layer`** (one of `"model"`, `"summary"`, `"quantile"`, `"data"`,
-  `"group"`, `"observed"`, `"simulated"`) -- checked, not just stored:
-  each `er_plot_add_*()`/`er_vpc_add_*()` function errors immediately if
-  a builder tagged for a different layer is passed to it. Optional --
-  an untagged builder is simply never checked.
-- **`zorder`** (`"foreground"` default, or `"background"`) -- only
+- **`layer`** (one of `"plot_model"`, `"plot_summary"`, `"plot_quantile"`,
+  `"plot_data"`, `"plot_group"`, `"vpc_observed"`, `"vpc_simulated"`,
+  `"tte_curve"`, `"tte_censor"`, `"tte_risktable"`, `"tte_model"`,
+  `"tte_summary"`) -- checked, not just stored: each
+  `er_plot_add_*()`/`er_vpc_add_*()`/`er_tte_add_*()` function errors
+  immediately if a builder tagged for a different layer is passed to it.
+  Optional -- an untagged builder is simply never checked. Every value
+  is prefixed with the grammar it belongs to (`plot_`/`vpc_`/`tte_`);
+  see "Gotchas" below for why this convention matters even though the
+  check itself is plain string equality.
+- **`draw_order`** (`"foreground"` default, or `"background"`) -- only
   matters for an `"overlay"`-layout data builder. `"background"` draws
   the overlay's geoms *before* model/summary/quantile (so a
   full-panel-coverage builder like `er_style_data_hex()` doesn't bury
@@ -234,6 +250,13 @@ data-layer builder):
   builder that skips these tags is responsible for guarding against
   incompatible inputs itself, the way every built-in VPC builder still
   does internally as a fallback.
+- **`marker_source`** (`"summary"`/`"percentiles"`) -- VPC-specific;
+  names which of a VPC builder's two config tables it actually draws its
+  marker(s) from, read by `.clip_vpc_config_to_limits()` (`er_vpc_theme()`'s
+  `xlim`/`ylim` cropping) to decide which table to check. Optional -- an
+  untagged builder has both tables checked, always safe but occasionally
+  producing a spurious warning about a table the builder never draws
+  from.
 
 Built-in builders, by layer:
 
@@ -330,7 +353,7 @@ Three visual idioms, chosen by `style`:
 - **Adaptive mean/errorbar idiom** (default): `er_style_vpc_observed_mean_errorbar()`
   / `er_style_vpc_simulated_mean_errorbar()` -- point/errorbar of the
   mean/rate + CI, with an x-position that adapts to `object$group$type`
-  at build time rather than declaring one `layout` statically:
+  at build time rather than declaring one `vpc_layout` statically:
   equally-spaced at each bin's discrete `.vpc_bin` location when
   `plot_by` is categorical, or at each bin's numeric *median*
   (`x_median`, computed alongside `x_mid` in both `.layer_vpc_*()`
@@ -340,14 +363,14 @@ Three visual idioms, chosen by `style`:
   support every response type and both `plot_by` types
   (`response_types = c("binary", "continuous", "count")`,
   `plot_by_types = c("continuous", "discrete")`), and neither carries a
-  `layout` tag -- since the x-position family is chosen dynamically from
+  `vpc_layout` tag -- since the x-position family is chosen dynamically from
   the data rather than fixed per builder, `.check_vpc_layout_match()`
   can't meaningfully check it statically, so it's skipped (the same
   opt-in treatment an untagged custom builder gets). Pair the two
   together; pairing either with a builder from one of the two idioms
   below risks an x-position mismatch that `.check_vpc_layout_match()`
   won't catch.
-- **Continuous-x percentile-band idiom** (`layout = "continuous"`):
+- **Continuous-x percentile-band idiom** (`vpc_layout = "continuous"`):
   `er_style_vpc_observed_quantile_line()` / `er_style_vpc_simulated_quantile_ribbon()` --
   one line/ribbon per requested percentile against a continuous exposure
   x-axis (bin midpoint, `x_mid`). Continuous/count responses only (a
@@ -364,7 +387,7 @@ Three visual idioms, chosen by `style`:
   same adaptive x-position as the mean/errorbar default (`.vpc_bin` for
   a categorical `plot_by`, `x_median` -- computed alongside `x_mid` in
   `config$percentiles` -- for a numeric one); like the mean/errorbar
-  pair, neither carries a `layout` tag. When more than one percentile is
+  pair, neither carries a `vpc_layout` tag. When more than one percentile is
   requested they currently overplot at the same x-position within a bin
   rather than being dodged apart -- dodging support is deferred to a
   future PR. Unlike the percentile-band idiom above, `config$percentiles`
@@ -375,7 +398,7 @@ Three visual idioms, chosen by `style`:
   response only) as a fallback.
 
 `er_vpc_add_simulated()` checks the observed and simulated builders'
-`layout` tags against each other (`.check_vpc_layout_match()` in
+`vpc_layout` tags against each other (`.check_vpc_layout_match()` in
 `R/er-plot-style.R`) and errors if they disagree -- e.g. pairing a
 builder that always plots at discrete bin locations with
 `er_style_vpc_simulated_quantile_ribbon()`'s numeric midpoints would
@@ -385,7 +408,7 @@ the same opt-in treatment the `layer` tag gets -- which is why both the
 mean/errorbar and quantile-errorbar idioms above are untagged: their
 x-position family is chosen from the data at build time, not declared
 statically. `probs` can't diverge between the two layers the way
-`layout` still can, since it's set once on `er_vpc()` and read from
+`vpc_layout` still can, since it's set once on `er_vpc()` and read from
 `object$group` by both `.layer_vpc_*()` functions.
 
 The simulated layer's geoms are always added before the observed layer's,
@@ -463,12 +486,12 @@ analogue of `er_style()`'s interface):
   when the layer is stratified, same restriction as their `er_plot()`
   counterparts). All four are tagged `er_style_tag(fn, layer =
   "tte_summary")` -- namespaced separately from `er_plot_add_summary()`'s
-  own `"summary"` tag, so a builder written for one grammar can't
+  own `"plot_summary"` tag, so a builder written for one grammar can't
   silently pass the tag check for the other (see "Gotchas").
 - **`er_tte_add_model()`** -- a fitted parametric `S(t)` curve/ribbon
   overlay (`er_style_tte_model_line()`, the default -- tagged
   `er_style_tag(fn, layer = "tte_model")`, namespaced separately from
-  `er_plot_add_model()`'s own `"model"` tag; see "Gotchas"), via the
+  `er_plot_add_model()`'s own `"plot_model"` tag; see "Gotchas"), via the
   [er_predict_survival()] generic (see "The model interface" above) --
   the one TTE layer that calls out to a caller-supplied model, mirroring
   `er_plot_add_model()`'s `keep_strata`/`predict_args` design. `model`
@@ -573,21 +596,25 @@ edit if forgotten:
   string equality only (`.check_style_layer()` in `R/er-plot-style.R`)
   -- a `er_tte_add_*()`/`er_plot_add_*()`/`er_vpc_add_*()` function
   never knows which grammar a tag "belongs to", only whether the string
-  matches.** `"curve"`/`"censor"`/`"risktable"` are unique to
-  `er_tte()`, and `"observed"`/`"simulated"` to `er_vpc()`, so no
+  matches.** Every value is grammar-prefixed by convention (`plot_`/
+  `vpc_`/`tte_`) precisely because the check itself can't tell grammars
+  apart: `"tte_curve"`/`"tte_censor"`/`"tte_risktable"` are unique to
+  `er_tte()`, and `"vpc_observed"`/`"vpc_simulated"` to `er_vpc()`, so no
   collision is possible there. `er_tte_add_model()`/`er_tte_add_summary()`
-  deliberately use their own `"tte_model"`/`"tte_summary"` values rather
-  than reusing `er_plot_add_model()`/`er_plot_add_summary()`'s
-  `"model"`/`"summary"` -- an earlier version shared those two strings
-  across both grammars, which meant an `er_plot()` builder passed to
+  mint their own `"tte_model"`/`"tte_summary"` values rather than reusing
+  `er_plot_add_model()`/`er_plot_add_summary()`'s `"plot_model"`/
+  `"plot_summary"` -- an earlier version shared the bare `"model"`/
+  `"summary"` strings across both grammars (before either the `plot_`/
+  `tte_` prefix convention or the `tte_model`/`tte_summary` split
+  existed), which meant an `er_plot()` builder passed to
   `er_tte_add_summary()` (or vice versa) silently passed the tag check;
   for a builder whose body returns early before touching a formal
   argument the other grammar doesn't supply (e.g.
   `er_style_summary_pvalue()`'s `is.null(config$p_value)` guard), this
   produced a silent no-op instead of an error. Any new grammar-specific
-  builder family should mint its own `layer` string rather than reusing
-  one from a different grammar, unless the two genuinely share a
-  signature and `config` shape.
+  builder family should mint its own grammar-prefixed `layer` string
+  rather than reusing one from a different grammar, unless the two
+  genuinely share a signature and `config` shape.
 - **`.build_vpc_plot()` gives the colour and fill scales identical, fixed
   `limits` (`.vpc_source_levels <- c("Observed", "Simulated")`, defined
   in `R/er-vpc-layer.R`).** Without this, a builder pair that mixes
@@ -774,9 +801,9 @@ holds ten articles:
   ...)` for TTE), a worked custom builder for each (a diamond-marker VPC
   observed builder; a TTE curve builder adding a median-survival
   reference line), and the VPC-specific `er_style_tag()` arguments
-  (`response_types`, `plot_by_types`, VPC's own `layout` values
-  `"categorical"`/`"continuous"` -- distinct from the data layer's
-  `"overlay"`/`"panel"` pair -- and `marker_source`).
+  (`response_types`, `plot_by_types`, `vpc_layout`
+  (`"categorical"`/`"continuous"`) -- a separate argument from the data
+  layer's own `layout` (`"overlay"`/`"panel"`) -- and `marker_source`).
 - `model-interface.Rmd` -- "Implementing the model interface", aimed at
   maintainers of *other* modelling packages (distinct audience from
   `extending.Rmd`): three self-contained toy model classes built from

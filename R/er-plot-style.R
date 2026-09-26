@@ -84,11 +84,11 @@
 #' [er_plot_add_data()] for worked custom builders (a dashed model curve,
 #' a quantile crossbar, and a data-overlay density, respectively). An
 #' overlay-layout data builder can additionally declare, via the same
-#' [er_style_tag()] call's `zorder` argument, whether its geoms are drawn
-#' before or after the model/summary/quantile layers when they share the
-#' main panel -- relevant for a builder whose geoms cover the whole panel
-#' (e.g. `er_style_data_hex()`), which would otherwise bury those layers
-#' by drawing on top of them; see [er_style_data()] for the full
+#' [er_style_tag()] call's `draw_order` argument, whether its geoms are
+#' drawn before or after the model/summary/quantile layers when they share
+#' the main panel -- relevant for a builder whose geoms cover the whole
+#' panel (e.g. `er_style_data_hex()`), which would otherwise bury those
+#' layers by drawing on top of them; see [er_style_data()] for the full
 #' explanation.
 #'
 #' A custom builder receives the same pre-computed `config` a built-in
@@ -99,12 +99,12 @@
 #' layers.
 #'
 #' A custom builder can optionally self-declare which layer it's meant
-#' for via `er_style_tag(builder, layer = ...)` (one of `"model"`,
-#' `"summary"`, `"quantile"`, `"data"`, `"group"`). Every
+#' for via `er_style_tag(builder, layer = ...)` (one of `"plot_model"`,
+#' `"plot_summary"`, `"plot_quantile"`, `"plot_data"`, `"plot_group"`). Every
 #' `er_plot_add_*()` function checks a builder's `layer` tag, if it has
 #' one, against the layer it was actually passed to, erroring
 #' immediately if they disagree -- e.g. passing a builder tagged
-#' `layer = "quantile"` to [er_plot_add_data()] errors rather than
+#' `layer = "plot_quantile"` to [er_plot_add_data()] errors rather than
 #' calling the builder with a `config` shape it wasn't written for.
 #' This tag is entirely optional (unlike `layout`, which is mandatory
 #' for a data-layer builder specifically) -- an untagged custom builder
@@ -175,32 +175,44 @@
 NULL
 
 
-#' Tag a builder with structural/aesthetic metadata
+#' Register a builder's structural/aesthetic metadata
 #'
-#' Attaches the self-declared metadata a custom `er_style_*()`-style
-#' function can carry.
-#' 
-#' @param style A function matching the standard `er_style_*()` signature
-#'   (see [er_style()]).
-#' @param layout One of `"overlay"`, `"panel"`, `"categorical"`, or
-#'   `"continuous"`, or `NULL` (the default) to leave this tag unset. The
-#'   `"overlay"`/`"panel"` pair is for a data-layer builder ([er_plot_add_data()]
-#'   documents what each structural family means); the `"categorical"`/
-#'   `"continuous"` pair is for a VPC observed/simulated builder
-#'   ([er_vpc_add_observed()]/[er_vpc_add_simulated()]) and marks whether it
-#'   plots at discrete bin locations or at each bin's numeric exposure
-#'   midpoint -- see [er_style_vpc_observed()]/[er_style_vpc_simulated()].
+#' `er_style_tag()` is the single, shared self-declaration mechanism every
+#' `er_style_*()` builder in the package -- across all three grammars,
+#' [er_plot()]/[er_vpc()]/[er_tte()] alike -- can opt into. Attaching a tag
+#' turns a plain builder function into one the relevant `_add_*()` function
+#' can check itself against: which structural family it belongs to, which
+#' layer it's meant for, which response/`plot_by` types it supports, and a
+#' couple of narrower rendering/labelling hints. In that sense it functions
+#' as an informal builder registry -- not a lookup table you register
+#' *into*, but a way of stamping a function with metadata another function
+#' can later read back off it and act on, entirely by attribute, with no
+#' central list anywhere. Every built-in builder carries a tag; nothing
+#' requires a custom builder to.
+#'
+#' @param style A function matching the standard signature for the grammar
+#'   it's meant for -- see [er_style()] (`er_plot()`), [er_style_vpc()]
+#'   (`er_vpc()`), or [er_style_tte()] (`er_tte()`).
+#' @param layout One of `"overlay"` or `"panel"`, or `NULL` (the default) to
+#'   leave this tag unset. Data-layer ([er_plot_add_data()]) builders only --
+#'   see "Details".
+#' @param vpc_layout One of `"categorical"` or `"continuous"`, or `NULL`
+#'   (the default) to leave this tag unset. VPC observed/simulated
+#'   ([er_vpc_add_observed()]/[er_vpc_add_simulated()]) builders only -- see
+#'   "Details".
 #' @param fill_role A string naming what the builder's `fill` aesthetic
 #'   represents, or `NULL` (the default) to leave this tag unset.
 #' @param y_role A string naming what the builder's y-axis represents, 
 #'   or `NULL` (the default) to leave this tag unset.
-#' @param layer One of `"model"`, `"summary"`, `"quantile"`, `"data"`,
-#'   `"group"`, `"observed"`, `"simulated"`, `"curve"`, `"censor"`,
-#'   `"risktable"`, `"tte_model"`, or `"tte_summary"`, naming which
+#' @param layer One of `"plot_model"`, `"plot_summary"`, `"plot_quantile"`,
+#'   `"plot_data"`, `"plot_group"`, `"vpc_observed"`, `"vpc_simulated"`,
+#'   `"tte_curve"`, `"tte_censor"`, `"tte_risktable"`, `"tte_model"`, or
+#'   `"tte_summary"`, naming which
 #'   `er_plot_add_*()`/`er_vpc_add_*()`/`er_tte_add_*()` layer the
 #'   builder is meant to be used with, or `NULL` (the default) to leave
-#'   this tag unset. See "Details".
-#' @param zorder One of `"foreground"` or `"background"`, or `NULL` (the
+#'   this tag unset. Each value is prefixed with the grammar it belongs to
+#'   (`plot_`/`vpc_`/`tte_`) -- see "Details".
+#' @param draw_order One of `"foreground"` or `"background"`, or `NULL` (the
 #'   default, equivalent to `"foreground"`) to leave this tag unset. Only
 #'   meaningful for an overlay-layout data builder; see "Details".
 #' @param response_types A character vector with one or more of
@@ -218,43 +230,58 @@ NULL
 #'   (`config$summary` or `config$percentiles`) it actually draws its
 #'   marker(s) from, or `NULL` (the default) to leave this tag unset. See
 #'   "Details".
+#' @param label A single string, or `NULL` (the default) to leave this tag
+#'   unset. Requires `layer` to also be set in the same
+#'   call. Registers `style` so it can be selected by this short string
+#'   (e.g. `style = "logrank"`) instead of the function itself, wherever
+#'   the corresponding `_add_*()` function looks it up. See
+#'   [er_style_labels()].
+#' @param overwrite Logical, default `FALSE`. Only meaningful together with
+#'   `label`; ignored otherwise. Controls what happens when the `(layer,
+#'   label)` pair is already registered to a *different* function:
+#'   `FALSE` (the default) errors; `TRUE` replaces the existing
+#'   registration unconditionally. Re-registering the identical function
+#'   is always a silent no-op regardless of `overwrite`. See "Details".
 #'
 #' @returns `style`, with whichever of the `"er_style_layout"`/
-#'   `"er_style_fill_role"`/`"er_style_y_role"`/`"er_style_layer"`/
-#'   `"er_style_zorder"`/`"er_style_response_types"`/
-#'   `"er_style_plot_by_types"`/`"er_style_vpc_marker_source"` attributes
-#'   were requested attached.
+#'   `"er_style_vpc_layout"`/`"er_style_fill_role"`/`"er_style_y_role"`/
+#'   `"er_style_layer"`/`"er_style_draw_order"`/`"er_style_response_types"`/
+#'   `"er_style_plot_by_types"`/`"er_style_vpc_marker_source"`/
+#'   `"er_style_label"` attributes were requested attached. When `label` is
+#'   supplied, `style` is also registered as a side effect -- see
+#'   [er_style_labels()].
 #'
 
 #' @details
-#' The metadata to be supplied indicate which *structural* family a
-#' data-layer builder belongs to (`layout`), what a builder's `fill`
-#' aesthetic means when it isn't strata (`fill_role`), what a group-layer
-#' builder's y-axis means when it isn't the group variable itself
-#' (`y_role`), which layer a builder is meant to be plugged into
-#' (`layer`), and where an overlay-layout data builder's geoms sit
-#' relative to the model/summary/quantile layers when they share the main
-#' panel (`zorder`). All five arguments are optional and independent --
-#' pass only the ones a given builder needs, in one call, rather than
-#' chaining separate setters.
+#' Nine tags exist today, each optional and independent -- pass only the
+#' ones a given builder needs, in one call, rather than chaining separate
+#' setters. They fall into three groups: which *structural* family a
+#' builder belongs to (`layout` for the data layer, `vpc_layout` for a VPC
+#' builder -- deliberately two separate arguments, not one shared value
+#' space, since the two pairs mean unrelated things), which layer it's
+#' meant to be plugged into (`layer`, a flat namespace shared across all
+#' three grammars), and a handful of narrower rendering/labelling/checking
+#' hints (`fill_role`, `y_role`, `draw_order`, `response_types`,
+#' `plot_by_types`, `marker_source`).
 #'
-#' `layout` is a required tag for a data-layer builder:
+#' `layout` is a required tag for a data-layer builder specifically:
 #' [er_plot_add_data()] reads it off `style` to decide whether to place 
 #' the output geoms into the main panel (`layout = "overlay"`) or to put them into
-#' separate strip-like panels above and below the main panel (`layout = "panel"`)
+#' separate strip-like panels above and below the main panel (`layout = "panel"`).
+#' No other layer or grammar uses this tag.
 #'
-#' For a VPC observed/simulated builder, `layout` is optional but, when
-#' present on both the observed and simulated builder passed to a given
-#' `er_vpc` object, is checked for agreement: [er_vpc_add_simulated()]
-#' errors if the simulated builder's `layout` (`"categorical"`, discrete
-#' bin locations; or `"continuous"`, numeric bin-midpoint locations, e.g.
-#' [er_style_vpc_simulated_quantile_ribbon()]) disagrees with the
-#' observed builder's own. This catches the case where the two families
-#' would otherwise silently plot at different x-positions for the same
-#' bin -- e.g. pairing a builder that always plots at discrete bin
-#' labels with [er_style_vpc_simulated_quantile_ribbon()]'s numeric
-#' midpoints. Use a layout-matched pair instead (built-ins already are),
-#' or leave `layout` untagged -- as [er_style_vpc_observed_mean_errorbar()]/
+#' `vpc_layout` is the VPC analogue, but optional rather than required, and
+#' checked between two builders rather than read for a structural decision:
+#' when present on both the observed and simulated builder passed to a
+#' given `er_vpc` object, [er_vpc_add_simulated()] errors if they disagree
+#' (`"categorical"`, discrete bin locations; or `"continuous"`, numeric
+#' bin-midpoint locations, e.g. [er_style_vpc_simulated_quantile_ribbon()]).
+#' This catches the case where the two families would otherwise silently
+#' plot at different x-positions for the same bin -- e.g. pairing a builder
+#' that always plots at discrete bin labels with
+#' [er_style_vpc_simulated_quantile_ribbon()]'s numeric midpoints. Use a
+#' layout-matched pair instead (built-ins already are), or leave
+#' `vpc_layout` untagged -- as [er_style_vpc_observed_mean_errorbar()]/
 #' [er_style_vpc_simulated_mean_errorbar()] and
 #' [er_style_vpc_observed_quantile_errorbar()]/
 #' [er_style_vpc_simulated_quantile_errorbar()] do, since both pairs
@@ -273,20 +300,24 @@ NULL
 #' correct for most builders.
 #'
 #' `layer` is also optional, but unlike `fill_role`/`y_role` it isn't read
-#' for labelling. It's read by every `er_plot_add_*()` function
-#' (`er_plot_add_model()` checks `style` against `"model"`;
-#' `er_plot_add_summary()` checks `style` against `"summary"`;
-#' `er_plot_add_quantiles()`
-#' against `"quantile"`; `er_plot_add_data()` against `"data"`;
-#' `er_plot_add_groups()` against `"group"`) to catch a builder plugged
-#' into the wrong layer -- e.g. passing a quantile builder to
-#' `er_plot_add_data()` -- with an informative error instead of whatever
-#' failure results from that layer's `config` shape not matching what the
-#' builder expects. All built-in builders carry this tag. A custom
-#' builder that omits it is never checked: `layer` is opt-in, not a
-#' requirement like `layout` is for a data-layer builder.
+#' for labelling. It's read by every `er_plot_add_*()`/`er_vpc_add_*()`/
+#' `er_tte_add_*()` function to catch a builder plugged into the wrong
+#' layer -- e.g. passing a quantile builder to `er_plot_add_data()`, or an
+#' `er_plot()` summary builder to `er_tte_add_summary()` -- with an
+#' informative error instead of whatever failure results from that layer's
+#' `config` shape not matching what the builder expects. All built-in
+#' builders carry this tag. It is a flat namespace checked only by string
+#' equality, but every value is grammar-prefixed by convention
+#' (`plot_`/`vpc_`/`tte_`) -- e.g. `"plot_model"`/`"plot_summary"` for
+#' `er_plot()` vs. `"tte_model"`/`"tte_summary"` for `er_tte()` -- so two
+#' grammars whose builders share neither a signature nor a `config` shape
+#' can never collide by accident, and the prefix also makes a value's
+#' owning grammar legible on sight, including in [er_style_labels()]'s own
+#' `layer` column. A custom builder that omits `layer` is never checked:
+#' it is opt-in, not a requirement like `layout` is for a data-layer
+#' builder.
 #'
-#' `zorder` only applies to an overlay-layout data builder (`layout =
+#' `draw_order` only applies to an overlay-layout data builder (`layout =
 #' "overlay"`), and controls whether its geoms are drawn before or after
 #' the model/summary/quantile layers when they share the main panel.
 #' `"foreground"`, the default for a builder that omits this tag (e.g.
@@ -296,7 +327,7 @@ NULL
 #' `"background"` (used by `er_style_data_hex()`) draws the data geoms
 #' first, so a builder whose geoms cover the whole panel (leaving no gaps
 #' for what's underneath to show through) doesn't bury the model curve or
-#' summary annotation. `zorder` has no effect on a panel-layout data
+#' summary annotation. `draw_order` has no effect on a panel-layout data
 #' builder (e.g. `er_style_data_boxjitter()`), since those geoms are
 #' drawn in their own separate panels, never sharing space with the model/
 #' summary/quantile layers.
@@ -335,7 +366,27 @@ NULL
 #' checked, which is always safe but can produce a spurious warning about
 #' a table the builder never actually draws from.
 #'
-#' @seealso [er_plot_add_data()], [er_style()]
+#' `label` is unlike every tag above, in that it isn't purely
+#' descriptive: supplying it registers `style` as a side effect, so that
+#' the corresponding `_add_*()` function can accept the string in place of
+#' `style` itself. It requires `layer` in the same call -- the registry is
+#' keyed by `(layer, label)`, not `label` alone, which is what lets two
+#' different layers reuse the same label string with no ambiguity (each
+#' `_add_*()` function only ever looks inside its own layer's partition).
+#' Wired up for every `_add_*()` function in the package -- see
+#' [er_style_labels()] for the full list of registered `(layer, label)`
+#' pairs.
+#'
+#' Re-registering the same `(layer, label)` pair with the identical
+#' function is always a silent no-op (this is what makes reloading the
+#' package, which re-tags every built-in builder, safe). Re-registering it
+#' with a *different* function errors by default -- e.g. re-running a
+#' script that edits a custom labelled builder's body and re-tags it hits
+#' this -- unless `overwrite = TRUE` is passed, which replaces the
+#' registration unconditionally.
+#'
+#' @seealso [er_plot_add_data()], [er_style()], [er_style_vpc()],
+#'   [er_style_tte()], [er_style_labels()]
 #'
 #' @examples
 #' build_data_density <- er_style_tag(
@@ -346,17 +397,31 @@ NULL
 #'     )
 #'   },
 #'   layout = "overlay",
-#'   layer = "data"
+#'   layer = "plot_data"
 #' )
 #'
 #' @export
-er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, layer = NULL, zorder = NULL,
-                          response_types = NULL, plot_by_types = NULL, marker_source = NULL) {
+er_style_tag <- function(style, layout = NULL, vpc_layout = NULL, fill_role = NULL, y_role = NULL, layer = NULL,
+                          draw_order = NULL, response_types = NULL, plot_by_types = NULL, marker_source = NULL,
+                          label = NULL, overwrite = FALSE) {
   if (!is.function(style)) rlang::abort("`style` must be a function")
+  if (!is.logical(overwrite) || length(overwrite) != 1 || is.na(overwrite)) {
+    rlang::abort("`overwrite` must be `TRUE` or `FALSE`.")
+  }
+  if (!is.null(label) && is.null(layer)) {
+    rlang::abort("`label` requires `layer` to also be set in the same call.")
+  }
+  if (overwrite && is.null(label)) {
+    rlang::abort("`overwrite` requires `label` to also be set in the same call.")
+  }
 
   if (!is.null(layout)) {
-    layout <- match.arg(layout, c("overlay", "panel", "categorical", "continuous"))
+    layout <- match.arg(layout, c("overlay", "panel"))
     attr(style, "er_style_layout") <- layout
+  }
+  if (!is.null(vpc_layout)) {
+    vpc_layout <- match.arg(vpc_layout, c("categorical", "continuous"))
+    attr(style, "er_style_vpc_layout") <- vpc_layout
   }
   if (!is.null(fill_role)) {
     attr(style, "er_style_fill_role") <- fill_role
@@ -366,14 +431,15 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   }
   if (!is.null(layer)) {
     layer <- match.arg(layer, c(
-      "model", "summary", "quantile", "data", "group", "observed", "simulated",
-      "curve", "censor", "risktable", "tte_model", "tte_summary"
+      "plot_model", "plot_summary", "plot_quantile", "plot_data", "plot_group",
+      "vpc_observed", "vpc_simulated",
+      "tte_curve", "tte_censor", "tte_risktable", "tte_model", "tte_summary"
     ))
     attr(style, "er_style_layer") <- layer
   }
-  if (!is.null(zorder)) {
-    zorder <- match.arg(zorder, c("foreground", "background"))
-    attr(style, "er_style_zorder") <- zorder
+  if (!is.null(draw_order)) {
+    draw_order <- match.arg(draw_order, c("foreground", "background"))
+    attr(style, "er_style_draw_order") <- draw_order
   }
   if (!is.null(response_types)) {
     response_types <- match.arg(response_types, c("binary", "continuous", "count"), several.ok = TRUE)
@@ -386,6 +452,10 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
   if (!is.null(marker_source)) {
     marker_source <- match.arg(marker_source, c("summary", "percentiles"))
     attr(style, "er_style_vpc_marker_source") <- marker_source
+  }
+  if (!is.null(label)) {
+    attr(style, "er_style_label") <- label
+    .register_style_label(layer, label, style, overwrite = overwrite)
   }
 
   style
@@ -406,7 +476,7 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 
 #' @noRd
 .style_vpc_layout <- function(style) {
-  attr(style, "er_style_layout")
+  attr(style, "er_style_vpc_layout")
 }
 
 #' @noRd
@@ -425,9 +495,9 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 }
 
 #' @noRd
-.style_zorder <- function(style) {
-  zorder <- attr(style, "er_style_zorder")
-  if (is.null(zorder)) "foreground" else zorder
+.style_draw_order <- function(style) {
+  draw_order <- attr(style, "er_style_draw_order")
+  if (is.null(draw_order)) "foreground" else draw_order
 }
 
 #' @noRd
@@ -488,12 +558,12 @@ er_style_tag <- function(style, layout = NULL, fill_role = NULL, y_role = NULL, 
 
   rlang::abort(c(
     paste0(
-      "The observed layer's builder is tagged layout = \"", observed_layout,
-      "\", but the simulated layer's builder is tagged layout = \"", simulated_layout, "\"."
+      "The observed layer's builder is tagged vpc_layout = \"", observed_layout,
+      "\", but the simulated layer's builder is tagged vpc_layout = \"", simulated_layout, "\"."
     ),
     "i" = "A \"categorical\" builder plots at discrete bin locations; a \"continuous\" builder plots at each bin's numeric midpoint -- pairing them plots the two layers at inconsistent x-positions.",
     "i" = "Use a layout-matched pair (e.g. `er_style_vpc_observed_quantile_line()` + `er_style_vpc_simulated_quantile_ribbon()`).",
-    "i" = "Or leave `layout` untagged, like `er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()` and `er_style_vpc_observed_quantile_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()` do, to skip this check entirely."
+    "i" = "Or leave `vpc_layout` untagged, like `er_style_vpc_observed_mean_errorbar()`/`er_style_vpc_simulated_mean_errorbar()` and `er_style_vpc_observed_quantile_errorbar()`/`er_style_vpc_simulated_quantile_errorbar()` do, to skip this check entirely."
   ))
 }
 

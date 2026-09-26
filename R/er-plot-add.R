@@ -9,7 +9,10 @@
 #' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param model A fitted exposure-response model. Must implement [er_predict()].
 #' @param keep_strata Logical; whether this layer should use stratification.
-#' @param style Function drawing the model curve/ribbon. Defaults to [er_style_model_ribbonline()].
+#' @param style Function drawing the model curve/ribbon, or one of the
+#'   registered short-string labels for this layer -- currently
+#'   `"ribbonline"`, `"line"`, `"spaghetti"` (see [er_style_labels()]).
+#'   Defaults to [er_style_model_ribbonline()].
 #' @param conf_level Confidence level for the prediction ribbon. Defaults
 #'   to `0.95`.
 #' @param predict_args A named list of additional arguments forwarded to
@@ -50,6 +53,13 @@
 #'   er_plot_add_model(mod, style = er_style_model_spaghetti) |>
 #'   plot()
 #'
+#' # the same spaghetti plot, selected by its registered label instead
+#' # (see `?er_style_labels`)
+#' erglm_data |>
+#'   er_plot(aucss, ae1) |>
+#'   er_plot_add_model(mod, style = "spaghetti") |>
+#'   plot()
+#'
 #' # plug in a fully custom model-curve builder
 #' build_model_dashed <- function(data, config, stratify, exposure, response, strata, theme, ...) {
 #'   ggplot2::geom_line(
@@ -85,11 +95,14 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
   .check_dots_named(dots)
   .check_dots_named(predict_args, arg = "predict_args")
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("plot_model", style, arg = "style")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
   style <- style %||% er_style_model_ribbonline
-  .check_style_layer(style, "model", arg = "style")
+  .check_style_layer(style, "plot_model", arg = "style")
 
   object$layer$model <- .layer_model(
     object = object, 
@@ -122,7 +135,9 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
 #' @param style Function drawing the summary annotation, defaulting to
-#'   [er_style_summary_pvalue()].
+#'   [er_style_summary_pvalue()], or one of the registered short-string
+#'   labels for this layer -- currently `"pvalue"`, `"n"`,
+#'   `"coefficients"`, `"gof"` (see [er_style_labels()]).
 #' @param conf_level Confidence level forwarded to [er_summary()] (used,
 #'   e.g., for the `conf_low`/`conf_high` columns of its `coefficients`
 #'   result -- see `?er_model_interface`). Defaults to `0.95`. Ignored
@@ -165,11 +180,14 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
   .check_dots_named(dots)
   .check_dots_named(summary_args, arg = "summary_args")
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("plot_summary", style, arg = "style")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
   style <- style %||% er_style_summary_pvalue
-  .check_style_layer(style, "summary")
+  .check_style_layer(style, "plot_summary")
 
   object$layer$summary <- .layer_summary(
     object = object,
@@ -198,7 +216,10 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
 #' @param style Function drawing the quantile summary; defaults to
-#'   [er_style_quantile_errorbar()] (point + error bar).
+#'   [er_style_quantile_errorbar()] (point + error bar). Or one of the
+#'   registered short-string labels for this layer -- currently
+#'   `"errorbar"`, `"errorbar_vlines"`, `"pointrange"`,
+#'   `"pointrange_vlines"` (see [er_style_labels()]).
 #' @param bins Number of exposure bins (not counting placebo). Defaults
 #'   to `4`.
 #' @param conf_level Confidence level for the interval. Defaults to `0.95`.
@@ -303,11 +324,14 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
   dots <- rlang::list2(...)
   .check_dots_named(dots)
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("plot_quantile", style, arg = "style")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
 
   style <- style %||% er_style_quantile_errorbar
-  .check_style_layer(style, "quantile")
+  .check_style_layer(style, "plot_quantile")
 
   object$layer$quantile <- .layer_quantile(
     object = object,
@@ -342,7 +366,9 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'   [er_style_data_overlay()]. Any function matching the standard
 #'   `(data, config, stratify, exposure, response, strata, theme, ...)`
 #'   signature and tagged with [er_style_tag()] can be supplied instead;
-#'   see [er_style()] and "Details".
+#'   see [er_style()] and "Details". Or one of the registered
+#'   short-string labels for this layer -- currently `"overlay"`,
+#'   `"hex"`, `"boxjitter"` (see [er_style_labels()]).
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
 #'   default). Only meaningful for [er_style_data_boxjitter()] on a
 #'   binary response; see "Details" for when `"both"` is required.
@@ -384,7 +410,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' panels, and `er_style_data_boxjitter()` can never be merged into the main
 #' panel. See [er_style_tag()] and [er_style()] for how to tag a custom
 #' builder the same way. If `style` is tagged with a `layer` other than
-#' `"data"`, [er_plot_add_data()] errors informatively; an untagged
+#' `"plot_data"`, [er_plot_add_data()] errors informatively; an untagged
 #' builder is never checked (only `layout` is a hard requirement).
 #'
 #' @section Effect of `keep_strata`:
@@ -454,10 +480,13 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
   dots <- rlang::list2(...)
   .check_dots_named(dots)
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("plot_data", style, arg = "style")
 
   style <- style %||% er_style_data_overlay
-  .check_style_layer(style, "data")
+  .check_style_layer(style, "plot_data")
   layout <- .style_layout(style)
 
   if (layout == "overlay" && panel != "both") {
@@ -511,7 +540,10 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   plots (a tidyselection of variables).
 #' @param style Function drawing each group panel -- defaults to
 #'   [er_style_group_boxplot()]. Applied to every grouping variable added
-#'   by this call; see [er_style()] and "Details".
+#'   by this call; see [er_style()] and "Details". Or one of the
+#'   registered short-string labels for this layer -- currently
+#'   `"boxplot"`, `"violin"`, `"histogram"`, `"linerange"`,
+#'   `"boxjitter"`, `"violinjitter"` (see [er_style_labels()]).
 #' @param bins Number of quantile bins used for continuous grouping
 #'   variables (`NULL`, the default, uses [cut_quantile()]'s own default).
 #'   Applied identically to every grouping variable added by this call.
@@ -540,7 +572,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' other built-in `style` options; any function matching the standard
 #' `(data, config, stratify, exposure, response, strata, theme, ...)`
 #' signature can be supplied instead. If `style` is tagged with a
-#' `layer` (via [er_style_tag()]) other than `"group"`, this errors
+#' `layer` (via [er_style_tag()]) other than `"plot_group"`, this errors
 #' informatively; an untagged builder is never checked.
 #'
 #' `keep_strata = TRUE` errors if `group_by` is itself the plot's
@@ -586,13 +618,16 @@ er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep
   dots <- rlang::list2(...)
   .check_dots_named(dots)
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("plot_group", style, arg = "style")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata$name)
   group_cols <- tidyselect::eval_select(rlang::enquo(group_by), object$data) 
   group_cols <- names(group_cols)
 
   style <- style %||% er_style_group_boxplot
-  .check_style_layer(style, "group")
+  .check_style_layer(style, "plot_group")
 
   new_group <- .layer_group(
     object = object,

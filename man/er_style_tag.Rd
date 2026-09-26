@@ -2,32 +2,36 @@
 % Please edit documentation in R/er-plot-style.R
 \name{er_style_tag}
 \alias{er_style_tag}
-\title{Tag a builder with structural/aesthetic metadata}
+\title{Register a builder's structural/aesthetic metadata}
 \usage{
 er_style_tag(
   style,
   layout = NULL,
+  vpc_layout = NULL,
   fill_role = NULL,
   y_role = NULL,
   layer = NULL,
-  zorder = NULL,
+  draw_order = NULL,
   response_types = NULL,
   plot_by_types = NULL,
-  marker_source = NULL
+  marker_source = NULL,
+  label = NULL,
+  overwrite = FALSE
 )
 }
 \arguments{
-\item{style}{A function matching the standard \verb{er_style_*()} signature
-(see \code{\link[=er_style]{er_style()}}).}
+\item{style}{A function matching the standard signature for the grammar
+it's meant for -- see \code{\link[=er_style]{er_style()}} (\code{er_plot()}), \code{\link[=er_style_vpc]{er_style_vpc()}}
+(\code{er_vpc()}), or \code{\link[=er_style_tte]{er_style_tte()}} (\code{er_tte()}).}
 
-\item{layout}{One of \code{"overlay"}, \code{"panel"}, \code{"categorical"}, or
-\code{"continuous"}, or \code{NULL} (the default) to leave this tag unset. The
-\code{"overlay"}/\code{"panel"} pair is for a data-layer builder (\code{\link[=er_plot_add_data]{er_plot_add_data()}}
-documents what each structural family means); the \code{"categorical"}/
-\code{"continuous"} pair is for a VPC observed/simulated builder
-(\code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}/\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}) and marks whether it
-plots at discrete bin locations or at each bin's numeric exposure
-midpoint -- see \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}}/\code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}}.}
+\item{layout}{One of \code{"overlay"} or \code{"panel"}, or \code{NULL} (the default) to
+leave this tag unset. Data-layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}}) builders only --
+see "Details".}
+
+\item{vpc_layout}{One of \code{"categorical"} or \code{"continuous"}, or \code{NULL}
+(the default) to leave this tag unset. VPC observed/simulated
+(\code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}/\code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}) builders only -- see
+"Details".}
 
 \item{fill_role}{A string naming what the builder's \code{fill} aesthetic
 represents, or \code{NULL} (the default) to leave this tag unset.}
@@ -35,14 +39,16 @@ represents, or \code{NULL} (the default) to leave this tag unset.}
 \item{y_role}{A string naming what the builder's y-axis represents,
 or \code{NULL} (the default) to leave this tag unset.}
 
-\item{layer}{One of \code{"model"}, \code{"summary"}, \code{"quantile"}, \code{"data"},
-\code{"group"}, \code{"observed"}, \code{"simulated"}, \code{"curve"}, \code{"censor"},
-\code{"risktable"}, \code{"tte_model"}, or \code{"tte_summary"}, naming which
+\item{layer}{One of \code{"plot_model"}, \code{"plot_summary"}, \code{"plot_quantile"},
+\code{"plot_data"}, \code{"plot_group"}, \code{"vpc_observed"}, \code{"vpc_simulated"},
+\code{"tte_curve"}, \code{"tte_censor"}, \code{"tte_risktable"}, \code{"tte_model"}, or
+\code{"tte_summary"}, naming which
 \verb{er_plot_add_*()}/\verb{er_vpc_add_*()}/\verb{er_tte_add_*()} layer the
 builder is meant to be used with, or \code{NULL} (the default) to leave
-this tag unset. See "Details".}
+this tag unset. Each value is prefixed with the grammar it belongs to
+(\code{plot_}/\code{vpc_}/\code{tte_}) -- see "Details".}
 
-\item{zorder}{One of \code{"foreground"} or \code{"background"}, or \code{NULL} (the
+\item{draw_order}{One of \code{"foreground"} or \code{"background"}, or \code{NULL} (the
 default, equivalent to \code{"foreground"}) to leave this tag unset. Only
 meaningful for an overlay-layout data builder; see "Details".}
 
@@ -63,47 +69,73 @@ which of a VPC observed/simulated builder's two config tables
 (\code{config$summary} or \code{config$percentiles}) it actually draws its
 marker(s) from, or \code{NULL} (the default) to leave this tag unset. See
 "Details".}
+
+\item{label}{A single string, or \code{NULL} (the default) to leave this tag
+unset. Requires \code{layer} to also be set in the same
+call. Registers \code{style} so it can be selected by this short string
+(e.g. \code{style = "logrank"}) instead of the function itself, wherever
+the corresponding \verb{_add_*()} function looks it up. See
+\code{\link[=er_style_labels]{er_style_labels()}}.}
+
+\item{overwrite}{Logical, default \code{FALSE}. Only meaningful together with
+\code{label}; ignored otherwise. Controls what happens when the \verb{(layer, label)} pair is already registered to a \emph{different} function:
+\code{FALSE} (the default) errors; \code{TRUE} replaces the existing
+registration unconditionally. Re-registering the identical function
+is always a silent no-op regardless of \code{overwrite}. See "Details".}
 }
 \value{
 \code{style}, with whichever of the \code{"er_style_layout"}/
-\code{"er_style_fill_role"}/\code{"er_style_y_role"}/\code{"er_style_layer"}/
-\code{"er_style_zorder"}/\code{"er_style_response_types"}/
-\code{"er_style_plot_by_types"}/\code{"er_style_vpc_marker_source"} attributes
-were requested attached.
+\code{"er_style_vpc_layout"}/\code{"er_style_fill_role"}/\code{"er_style_y_role"}/
+\code{"er_style_layer"}/\code{"er_style_draw_order"}/\code{"er_style_response_types"}/
+\code{"er_style_plot_by_types"}/\code{"er_style_vpc_marker_source"}/
+\code{"er_style_label"} attributes were requested attached. When \code{label} is
+supplied, \code{style} is also registered as a side effect -- see
+\code{\link[=er_style_labels]{er_style_labels()}}.
 }
 \description{
-Attaches the self-declared metadata a custom \verb{er_style_*()}-style
-function can carry.
+\code{er_style_tag()} is the single, shared self-declaration mechanism every
+\verb{er_style_*()} builder in the package -- across all three grammars,
+\code{\link[=er_plot]{er_plot()}}/\code{\link[=er_vpc]{er_vpc()}}/\code{\link[=er_tte]{er_tte()}} alike -- can opt into. Attaching a tag
+turns a plain builder function into one the relevant \verb{_add_*()} function
+can check itself against: which structural family it belongs to, which
+layer it's meant for, which response/\code{plot_by} types it supports, and a
+couple of narrower rendering/labelling hints. In that sense it functions
+as an informal builder registry -- not a lookup table you register
+\emph{into}, but a way of stamping a function with metadata another function
+can later read back off it and act on, entirely by attribute, with no
+central list anywhere. Every built-in builder carries a tag; nothing
+requires a custom builder to.
 }
 \details{
-The metadata to be supplied indicate which \emph{structural} family a
-data-layer builder belongs to (\code{layout}), what a builder's \code{fill}
-aesthetic means when it isn't strata (\code{fill_role}), what a group-layer
-builder's y-axis means when it isn't the group variable itself
-(\code{y_role}), which layer a builder is meant to be plugged into
-(\code{layer}), and where an overlay-layout data builder's geoms sit
-relative to the model/summary/quantile layers when they share the main
-panel (\code{zorder}). All five arguments are optional and independent --
-pass only the ones a given builder needs, in one call, rather than
-chaining separate setters.
+Nine tags exist today, each optional and independent -- pass only the
+ones a given builder needs, in one call, rather than chaining separate
+setters. They fall into three groups: which \emph{structural} family a
+builder belongs to (\code{layout} for the data layer, \code{vpc_layout} for a VPC
+builder -- deliberately two separate arguments, not one shared value
+space, since the two pairs mean unrelated things), which layer it's
+meant to be plugged into (\code{layer}, a flat namespace shared across all
+three grammars), and a handful of narrower rendering/labelling/checking
+hints (\code{fill_role}, \code{y_role}, \code{draw_order}, \code{response_types},
+\code{plot_by_types}, \code{marker_source}).
 
-\code{layout} is a required tag for a data-layer builder:
+\code{layout} is a required tag for a data-layer builder specifically:
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} reads it off \code{style} to decide whether to place
 the output geoms into the main panel (\code{layout = "overlay"}) or to put them into
-separate strip-like panels above and below the main panel (\code{layout = "panel"})
+separate strip-like panels above and below the main panel (\code{layout = "panel"}).
+No other layer or grammar uses this tag.
 
-For a VPC observed/simulated builder, \code{layout} is optional but, when
-present on both the observed and simulated builder passed to a given
-\code{er_vpc} object, is checked for agreement: \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}
-errors if the simulated builder's \code{layout} (\code{"categorical"}, discrete
-bin locations; or \code{"continuous"}, numeric bin-midpoint locations, e.g.
-\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}) disagrees with the
-observed builder's own. This catches the case where the two families
-would otherwise silently plot at different x-positions for the same
-bin -- e.g. pairing a builder that always plots at discrete bin
-labels with \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}'s numeric
-midpoints. Use a layout-matched pair instead (built-ins already are),
-or leave \code{layout} untagged -- as \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}/
+\code{vpc_layout} is the VPC analogue, but optional rather than required, and
+checked between two builders rather than read for a structural decision:
+when present on both the observed and simulated builder passed to a
+given \code{er_vpc} object, \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}} errors if they disagree
+(\code{"categorical"}, discrete bin locations; or \code{"continuous"}, numeric
+bin-midpoint locations, e.g. \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}).
+This catches the case where the two families would otherwise silently
+plot at different x-positions for the same bin -- e.g. pairing a builder
+that always plots at discrete bin labels with
+\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}'s numeric midpoints. Use a
+layout-matched pair instead (built-ins already are), or leave
+\code{vpc_layout} untagged -- as \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}/
 \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}} and
 \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}/
 \code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}} do, since both pairs
@@ -122,20 +154,24 @@ the y-axis is titled with the group variable's label), which is
 correct for most builders.
 
 \code{layer} is also optional, but unlike \code{fill_role}/\code{y_role} it isn't read
-for labelling. It's read by every \verb{er_plot_add_*()} function
-(\code{er_plot_add_model()} checks \code{style} against \code{"model"};
-\code{er_plot_add_summary()} checks \code{style} against \code{"summary"};
-\code{er_plot_add_quantiles()}
-against \code{"quantile"}; \code{er_plot_add_data()} against \code{"data"};
-\code{er_plot_add_groups()} against \code{"group"}) to catch a builder plugged
-into the wrong layer -- e.g. passing a quantile builder to
-\code{er_plot_add_data()} -- with an informative error instead of whatever
-failure results from that layer's \code{config} shape not matching what the
-builder expects. All built-in builders carry this tag. A custom
-builder that omits it is never checked: \code{layer} is opt-in, not a
-requirement like \code{layout} is for a data-layer builder.
+for labelling. It's read by every \verb{er_plot_add_*()}/\verb{er_vpc_add_*()}/
+\verb{er_tte_add_*()} function to catch a builder plugged into the wrong
+layer -- e.g. passing a quantile builder to \code{er_plot_add_data()}, or an
+\code{er_plot()} summary builder to \code{er_tte_add_summary()} -- with an
+informative error instead of whatever failure results from that layer's
+\code{config} shape not matching what the builder expects. All built-in
+builders carry this tag. It is a flat namespace checked only by string
+equality, but every value is grammar-prefixed by convention
+(\code{plot_}/\code{vpc_}/\code{tte_}) -- e.g. \code{"plot_model"}/\code{"plot_summary"} for
+\code{er_plot()} vs. \code{"tte_model"}/\code{"tte_summary"} for \code{er_tte()} -- so two
+grammars whose builders share neither a signature nor a \code{config} shape
+can never collide by accident, and the prefix also makes a value's
+owning grammar legible on sight, including in \code{\link[=er_style_labels]{er_style_labels()}}'s own
+\code{layer} column. A custom builder that omits \code{layer} is never checked:
+it is opt-in, not a requirement like \code{layout} is for a data-layer
+builder.
 
-\code{zorder} only applies to an overlay-layout data builder (\code{layout = "overlay"}), and controls whether its geoms are drawn before or after
+\code{draw_order} only applies to an overlay-layout data builder (\code{layout = "overlay"}), and controls whether its geoms are drawn before or after
 the model/summary/quantile layers when they share the main panel.
 \code{"foreground"}, the default for a builder that omits this tag (e.g.
 \code{er_style_data_overlay()}), draws the data geoms last, on top of
@@ -144,7 +180,7 @@ points, which should never be hidden behind a model ribbon.
 \code{"background"} (used by \code{er_style_data_hex()}) draws the data geoms
 first, so a builder whose geoms cover the whole panel (leaving no gaps
 for what's underneath to show through) doesn't bury the model curve or
-summary annotation. \code{zorder} has no effect on a panel-layout data
+summary annotation. \code{draw_order} has no effect on a panel-layout data
 builder (e.g. \code{er_style_data_boxjitter()}), since those geoms are
 drawn in their own separate panels, never sharing space with the model/
 summary/quantile layers.
@@ -182,6 +218,25 @@ plotted axis limits. A builder that plots \code{config$summary} (e.g.
 \code{marker_source = "percentiles"}. An untagged builder has both tables
 checked, which is always safe but can produce a spurious warning about
 a table the builder never actually draws from.
+
+\code{label} is unlike every tag above, in that it isn't purely
+descriptive: supplying it registers \code{style} as a side effect, so that
+the corresponding \verb{_add_*()} function can accept the string in place of
+\code{style} itself. It requires \code{layer} in the same call -- the registry is
+keyed by \verb{(layer, label)}, not \code{label} alone, which is what lets two
+different layers reuse the same label string with no ambiguity (each
+\verb{_add_*()} function only ever looks inside its own layer's partition).
+Wired up for every \verb{_add_*()} function in the package -- see
+\code{\link[=er_style_labels]{er_style_labels()}} for the full list of registered \verb{(layer, label)}
+pairs.
+
+Re-registering the same \verb{(layer, label)} pair with the identical
+function is always a silent no-op (this is what makes reloading the
+package, which re-tags every built-in builder, safe). Re-registering it
+with a \emph{different} function errors by default -- e.g. re-running a
+script that edits a custom labelled builder's body and re-tags it hits
+this -- unless \code{overwrite = TRUE} is passed, which replaces the
+registration unconditionally.
 }
 \examples{
 build_data_density <- er_style_tag(
@@ -192,10 +247,11 @@ build_data_density <- er_style_tag(
     )
   },
   layout = "overlay",
-  layer = "data"
+  layer = "plot_data"
 )
 
 }
 \seealso{
-\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_style]{er_style()}}
+\code{\link[=er_plot_add_data]{er_plot_add_data()}}, \code{\link[=er_style]{er_style()}}, \code{\link[=er_style_vpc]{er_style_vpc()}},
+\code{\link[=er_style_tte]{er_style_tte()}}, \code{\link[=er_style_labels]{er_style_labels()}}
 }

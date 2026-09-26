@@ -5,7 +5,7 @@
 #' step-shaped confidence band. See [er_style_tte()] for the shared
 #' interface every TTE-grammar builder implements.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame (`object$data`).
 #' @param config Configuration for the curve layer (populated by
 #'   [er_tte_add_curve()]): `config$table` (the tidy KM table, with a
@@ -106,4 +106,4 @@ er_style_tte_curve_km <- function(data, config, stratify, time, strata, theme, .
 
   return(geoms)
 }
-er_style_tte_curve_km <- er_style_tag(er_style_tte_curve_km, layer = "curve")
+er_style_tte_curve_km <- er_style_tag(er_style_tte_curve_km, layer = "tte_curve", label = "km")

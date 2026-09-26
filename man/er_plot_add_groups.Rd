@@ -24,7 +24,10 @@ plots (a tidyselection of variables).}
 
 \item{style}{Function drawing each group panel -- defaults to
 \code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}}. Applied to every grouping variable added
-by this call; see \code{\link[=er_style]{er_style()}} and "Details".}
+by this call; see \code{\link[=er_style]{er_style()}} and "Details". Or one of the
+registered short-string labels for this layer -- currently
+\code{"boxplot"}, \code{"violin"}, \code{"histogram"}, \code{"linerange"},
+\code{"boxjitter"}, \code{"violinjitter"} (see \code{\link[=er_style_labels]{er_style_labels()}}).}
 
 \item{bins}{Number of quantile bins used for continuous grouping
 variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).
@@ -63,7 +66,7 @@ rather than replacing it.
 other built-in \code{style} options; any function matching the standard
 \verb{(data, config, stratify, exposure, response, strata, theme, ...)}
 signature can be supplied instead. If \code{style} is tagged with a
-\code{layer} (via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"group"}, this errors
+\code{layer} (via \code{\link[=er_style_tag]{er_style_tag()}}) other than \code{"plot_group"}, this errors
 informatively; an untagged builder is never checked.
 
 \code{keep_strata = TRUE} errors if \code{group_by} is itself the plot's

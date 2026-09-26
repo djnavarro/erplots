@@ -57,6 +57,7 @@ Collate:
     'er-plot-compose.R'
     'er-plot-layer.R'
     'er-plot-style.R'
+    'er-style-registry.R'
     'er-plot-style-data.R'
     'er-plot-style-group.R'
     'er-plot-style-model.R'

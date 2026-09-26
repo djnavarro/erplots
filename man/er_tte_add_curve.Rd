@@ -10,7 +10,8 @@ er_tte_add_curve(object, style = NULL, ...)
 \item{object}{Partially constructed plot (has S3 class \code{er_tte}).}
 
 \item{style}{Function drawing the KM curve/ribbon. Defaults to
-\code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}.}
+\code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}, or the registered label \code{"km"} (see
+\code{\link[=er_style_labels]{er_style_labels()}}).}
 
 \item{...}{Additional named arguments forwarded unchanged to \code{style}
 at build time (e.g. \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}'s \code{show_ci}/

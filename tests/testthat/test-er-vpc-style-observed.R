@@ -14,15 +14,15 @@ test_that("er_style_vpc_observed_quantile_line() errors when percentiles aren't 
   )
 })
 
-test_that("er_style_vpc_observed_quantile_line() is tagged for the observed layer and continuous layout", {
-  expect_equal(attr(er_style_vpc_observed_quantile_line, "er_style_layer"), "observed")
-  expect_equal(attr(er_style_vpc_observed_quantile_line, "er_style_layout"), "continuous")
+test_that("er_style_vpc_observed_quantile_line() is tagged for the observed layer and continuous vpc_layout", {
+  expect_equal(attr(er_style_vpc_observed_quantile_line, "er_style_layer"), "vpc_observed")
+  expect_equal(attr(er_style_vpc_observed_quantile_line, "er_style_vpc_layout"), "continuous")
 })
 
-test_that("er_style_vpc_observed_mean_errorbar() is the default and carries no layout tag", {
+test_that("er_style_vpc_observed_mean_errorbar() is the default and carries no vpc_layout tag", {
   expect_identical(eval(formals(er_vpc_add_observed)$style), er_style_vpc_observed_mean_errorbar)
-  expect_null(attr(er_style_vpc_observed_mean_errorbar, "er_style_layout"))
-  expect_equal(attr(er_style_vpc_observed_mean_errorbar, "er_style_layer"), "observed")
+  expect_null(attr(er_style_vpc_observed_mean_errorbar, "er_style_vpc_layout"))
+  expect_equal(attr(er_style_vpc_observed_mean_errorbar, "er_style_layer"), "vpc_observed")
   expect_equal(
     attr(er_style_vpc_observed_mean_errorbar, "er_style_response_types"),
     c("binary", "continuous", "count")
@@ -127,8 +127,8 @@ test_that("er_vpc_add_observed() rejects er_style_vpc_observed_quantile_errorbar
 })
 
 test_that("built-in observed builders are tagged appropriately, including quantile_errorbar", {
-  expect_equal(attr(er_style_vpc_observed_quantile_errorbar, "er_style_layer"), "observed")
-  expect_null(attr(er_style_vpc_observed_quantile_errorbar, "er_style_layout"))
+  expect_equal(attr(er_style_vpc_observed_quantile_errorbar, "er_style_layer"), "vpc_observed")
+  expect_null(attr(er_style_vpc_observed_quantile_errorbar, "er_style_vpc_layout"))
   expect_equal(
     attr(er_style_vpc_observed_quantile_errorbar, "er_style_response_types"),
     c("continuous", "count")

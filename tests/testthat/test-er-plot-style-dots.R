@@ -45,7 +45,7 @@ test_that("er_plot_add_quantiles() forwards `...` to style", {
       seen$dots <- rlang::list2(...)
       list()
     },
-    layer = "quantile"
+    layer = "plot_quantile"
   )
 
   plt <- er_test_data |>

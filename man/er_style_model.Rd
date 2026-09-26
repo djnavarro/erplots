@@ -108,9 +108,13 @@ spaghetti plot of simulated draws.
 \code{er_style_model_ribbonline()} is the default; \code{er_style_model_line()}
 omits the ribbon; \code{er_style_model_spaghetti()} draws simulated draws
 instead of a ribbon, for models that implement \code{\link[=er_simulate]{er_simulate()}}. All three are tagged
-\code{er_style_tag(fn, layer = "model")}, so \code{\link[=er_plot_add_model]{er_plot_add_model()}}
+\code{er_style_tag(fn, layer = "plot_model")}, so \code{\link[=er_plot_add_model]{er_plot_add_model()}}
 errors informatively if handed one of these tagged for a different
 layer entirely (e.g. \code{"summary"}, meant for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}).
+Each also carries a registered short-string label --
+\code{"ribbonline"}/\code{"line"}/\code{"spaghetti"} respectively -- so
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{style} argument can take that string instead
+of the function itself (see \code{\link[=er_style_labels]{er_style_labels()}}).
 
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.

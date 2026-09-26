@@ -57,16 +57,18 @@
 #' [er_vpc_add_simulated()].
 #'
 #' A custom builder can self-declare metadata via [er_style_tag()]:
-#' `layout` (`"categorical"`/`"continuous"`, checked for agreement between
-#' the observed and simulated builders paired on one `er_vpc` object),
-#' `layer` (`"observed"`/`"simulated"`, checked against the layer the
-#' builder was actually passed to), `response_types`/`plot_by_types`
-#' (checked against `object$response$type`/`object$group$type`), and
-#' `marker_source` (which of `config$summary`/`config$percentiles` the
-#' builder actually draws from, used by [er_vpc_theme()]'s `xlim`/`ylim`
-#' cropping). All five are optional and independent -- see [er_style_tag()]
-#' for the full explanation of each, including which built-in builders use
-#' them and why.
+#' `vpc_layout` (`"categorical"`/`"continuous"`, checked for agreement
+#' between the observed and simulated builders paired on one `er_vpc`
+#' object -- distinct from the data layer's own `layout` tag, which uses
+#' an unrelated `"overlay"`/`"panel"` pair), `layer` (`"observed"`/
+#' `"simulated"`, checked against the layer the builder was actually
+#' passed to), `response_types`/`plot_by_types` (checked against
+#' `object$response$type`/`object$group$type`), and `marker_source`
+#' (which of `config$summary`/`config$percentiles` the builder actually
+#' draws from, used by [er_vpc_theme()]'s `xlim`/`ylim` cropping). All
+#' five are optional and independent -- see [er_style_tag()] for the full
+#' explanation of each, including which built-in builders use them and
+#' why.
 #'
 #' Both `observed` and `simulated` are **singleton** layers: calling
 #' [er_vpc_add_observed()]/[er_vpc_add_simulated()] again replaces the

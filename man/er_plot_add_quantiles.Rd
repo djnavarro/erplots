@@ -24,7 +24,10 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
 
 \item{style}{Function drawing the quantile summary; defaults to
-\code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar).}
+\code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar). Or one of the
+registered short-string labels for this layer -- currently
+\code{"errorbar"}, \code{"errorbar_vlines"}, \code{"pointrange"},
+\code{"pointrange_vlines"} (see \code{\link[=er_style_labels]{er_style_labels()}}).}
 
 \item{bins}{Number of exposure bins (not counting placebo). Defaults
 to \code{4}.}

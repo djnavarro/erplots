@@ -4,7 +4,7 @@
 #' the exposure distribution for a grouping variable as a boxplot, violin, or
 #' histogram panel.
 #'
-#' @include er-plot-style.R
+#' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame.
 #' @param config Configuration for the specific plot.
 #' @param stratify Logical: whether to stratify.
@@ -44,7 +44,7 @@
 #'   data layer (see [er_style_data()]); with no `seed`, each render
 #'   draws a fresh jitter.
 #'
-#' @details `er_style_group_boxplot()` and `er_style_group_violin()` put group levels on the y-axis; `er_style_group_histogram()` puts them on facet strips and frees the y-axis for counts; `er_style_group_linerange()` also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. `er_style_group_boxjitter()`/`er_style_group_violinjitter()` are thin wrappers around `er_style_group_boxplot()`/`er_style_group_violin()` that additionally overlay jittered raw exposure values (vertical jitter only -- exposure position on the x-axis is never perturbed), the same idea `er_style_data_boxjitter()` applies to the data layer. All built-in group builders are tagged `layer = "group"`, so [er_plot_add_groups()] errors if given one tagged for another layer.
+#' @details `er_style_group_boxplot()` and `er_style_group_violin()` put group levels on the y-axis; `er_style_group_histogram()` puts them on facet strips and frees the y-axis for counts; `er_style_group_linerange()` also puts group levels on the y-axis, summarising each level's exposure distribution as a median dot flanked by an inner-range and outer-range line rather than a full boxplot/violin shape. `er_style_group_boxjitter()`/`er_style_group_violinjitter()` are thin wrappers around `er_style_group_boxplot()`/`er_style_group_violin()` that additionally overlay jittered raw exposure values (vertical jitter only -- exposure position on the x-axis is never perturbed), the same idea `er_style_data_boxjitter()` applies to the data layer. All built-in group builders are tagged `layer = "plot_group"`, so [er_plot_add_groups()] errors if given one tagged for another layer.
 #'
 #' See [er_style()] for the shared builder interface these functions implement.
 #'
@@ -147,7 +147,7 @@ er_style_group_boxplot <- function(data, config, stratify, exposure, response, s
 
   return(geoms)
 }
-er_style_group_boxplot <- er_style_tag(er_style_group_boxplot, layer = "group")
+er_style_group_boxplot <- er_style_tag(er_style_group_boxplot, layer = "plot_group", label = "boxplot")
 
 
 #' @rdname er_style_group
@@ -206,7 +206,7 @@ er_style_group_histogram <- function(data, config, stratify, exposure, response,
 
   return(geoms)
 }
-er_style_group_histogram <- er_style_tag(er_style_group_histogram, y_role = "count", layer = "group")
+er_style_group_histogram <- er_style_tag(er_style_group_histogram, y_role = "count", layer = "plot_group", label = "histogram")
 
 
 #' @rdname er_style_group
@@ -249,7 +249,7 @@ er_style_group_violin <- function(data, config, stratify, exposure, response, st
 
   return(geoms)
 }
-er_style_group_violin <- er_style_tag(er_style_group_violin, layer = "group")
+er_style_group_violin <- er_style_tag(er_style_group_violin, layer = "plot_group", label = "violin")
 
 
 #' @rdname er_style_group
@@ -369,7 +369,7 @@ er_style_group_linerange <- function(data, config, stratify, exposure, response,
 
   return(geoms)
 }
-er_style_group_linerange <- er_style_tag(er_style_group_linerange, layer = "group")
+er_style_group_linerange <- er_style_tag(er_style_group_linerange, layer = "plot_group", label = "linerange")
 
 
 #' Compute dodged, vertically-jittered y positions for a stratified group jitter overlay
@@ -468,7 +468,7 @@ er_style_group_boxjitter <- function(data, config, stratify, exposure, response,
 
   c(geoms, list(jitter_geom))
 }
-er_style_group_boxjitter <- er_style_tag(er_style_group_boxjitter, layer = "group")
+er_style_group_boxjitter <- er_style_tag(er_style_group_boxjitter, layer = "plot_group", label = "boxjitter")
 
 
 #' @rdname er_style_group
@@ -513,4 +513,4 @@ er_style_group_violinjitter <- function(data, config, stratify, exposure, respon
 
   c(geoms, list(jitter_geom))
 }
-er_style_group_violinjitter <- er_style_tag(er_style_group_violinjitter, layer = "group")
+er_style_group_violinjitter <- er_style_tag(er_style_group_violinjitter, layer = "plot_group", label = "violinjitter")

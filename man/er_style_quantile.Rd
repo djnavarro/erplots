@@ -145,7 +145,7 @@ including the two outer boundaries at the minimum non-placebo
 exposure and the overall maximum exposure, not just the boundaries
 shared between two adjacent bins -- so a reader can see every bin
 edge from the plot alone. All built-in quantile builders are tagged
-\code{er_style_tag(fn, layer = "quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}
+\code{er_style_tag(fn, layer = "plot_quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}}
 errors informatively if handed a builder tagged for a different
 layer.
 

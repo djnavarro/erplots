@@ -18,7 +18,9 @@ split by the plot's stratification variable; defaults to \code{TRUE} if
 \code{\link[=er_style_data_overlay]{er_style_data_overlay()}}. Any function matching the standard
 \verb{(data, config, stratify, exposure, response, strata, theme, ...)}
 signature and tagged with \code{\link[=er_style_tag]{er_style_tag()}} can be supplied instead;
-see \code{\link[=er_style]{er_style()}} and "Details".}
+see \code{\link[=er_style]{er_style()}} and "Details". Or one of the registered
+short-string labels for this layer -- currently \code{"overlay"},
+\code{"hex"}, \code{"boxjitter"} (see \code{\link[=er_style_labels]{er_style_labels()}}).}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
 default). Only meaningful for \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} on a
@@ -70,7 +72,7 @@ incidental: \code{er_style_data_overlay()} can never be routed into upper/lower
 panels, and \code{er_style_data_boxjitter()} can never be merged into the main
 panel. See \code{\link[=er_style_tag]{er_style_tag()}} and \code{\link[=er_style]{er_style()}} for how to tag a custom
 builder the same way. If \code{style} is tagged with a \code{layer} other than
-\code{"data"}, \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors informatively; an untagged
+\code{"plot_data"}, \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors informatively; an untagged
 builder is never checked (only \code{layout} is a hard requirement).
 }
 

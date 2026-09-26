@@ -92,11 +92,11 @@ call site, so no such tagging is needed there. See the \verb{@examples} on
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} for worked custom builders (a dashed model curve,
 a quantile crossbar, and a data-overlay density, respectively). An
 overlay-layout data builder can additionally declare, via the same
-\code{\link[=er_style_tag]{er_style_tag()}} call's \code{zorder} argument, whether its geoms are drawn
-before or after the model/summary/quantile layers when they share the
-main panel -- relevant for a builder whose geoms cover the whole panel
-(e.g. \code{er_style_data_hex()}), which would otherwise bury those layers
-by drawing on top of them; see \code{\link[=er_style_data]{er_style_data()}} for the full
+\code{\link[=er_style_tag]{er_style_tag()}} call's \code{draw_order} argument, whether its geoms are
+drawn before or after the model/summary/quantile layers when they share
+the main panel -- relevant for a builder whose geoms cover the whole
+panel (e.g. \code{er_style_data_hex()}), which would otherwise bury those
+layers by drawing on top of them; see \code{\link[=er_style_data]{er_style_data()}} for the full
 explanation.
 
 A custom builder receives the same pre-computed \code{config} a built-in
@@ -107,12 +107,12 @@ recompute anything erplots already derived from \code{data}/\code{exposure}/
 layers.
 
 A custom builder can optionally self-declare which layer it's meant
-for via \code{er_style_tag(builder, layer = ...)} (one of \code{"model"},
-\code{"summary"}, \code{"quantile"}, \code{"data"}, \code{"group"}). Every
+for via \code{er_style_tag(builder, layer = ...)} (one of \code{"plot_model"},
+\code{"plot_summary"}, \code{"plot_quantile"}, \code{"plot_data"}, \code{"plot_group"}). Every
 \verb{er_plot_add_*()} function checks a builder's \code{layer} tag, if it has
 one, against the layer it was actually passed to, erroring
 immediately if they disagree -- e.g. passing a builder tagged
-\code{layer = "quantile"} to \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors rather than
+\code{layer = "plot_quantile"} to \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors rather than
 calling the builder with a \code{config} shape it wasn't written for.
 This tag is entirely optional (unlike \code{layout}, which is mandatory
 for a data-layer builder specifically) -- an untagged custom builder

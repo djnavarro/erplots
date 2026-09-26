@@ -3,7 +3,7 @@
 # See `?er_style_tag`'s "Details" -- these two tags are checked against
 # an `er_vpc` object's `response$type`/`group$type` at
 # `er_vpc_add_observed()`/`er_vpc_add_simulated()` time, not against
-# another builder the way `layer`/`layout` are.
+# another builder the way `layer`/`vpc_layout` are.
 
 test_that("er_style_tag() round-trips response_types/plot_by_types as attributes", {
   fn <- function(data, config, exposure, response, theme, ...) list()
@@ -22,7 +22,7 @@ test_that("er_style_tag() validates response_types/plot_by_types against their v
 
 test_that("er_style_tag() leaves response_types/plot_by_types unset by default", {
   fn <- function(data, config, exposure, response, theme, ...) list()
-  tagged <- er_style_tag(fn, layer = "observed")
+  tagged <- er_style_tag(fn, layer = "vpc_observed")
 
   expect_null(attr(tagged, "er_style_response_types"))
   expect_null(attr(tagged, "er_style_plot_by_types"))

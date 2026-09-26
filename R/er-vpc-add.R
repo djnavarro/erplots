@@ -9,7 +9,10 @@
 #' @param object Partially constructed VPC (has S3 class `er_vpc`).
 #' @param style A function determining how the observed layer is drawn.
 #'   Defaults to [er_style_vpc_observed_mean_errorbar()]; see
-#'   [er_style_vpc_observed()] for the other built-in options.
+#'   [er_style_vpc_observed()] for the other built-in options. Or one of
+#'   the registered short-string labels for this layer -- currently
+#'   `"mean_errorbar"`, `"quantile_line"`, `"quantile_errorbar"` (see
+#'   [er_style_labels()]).
 #' @param ... Additional named arguments forwarded to `style`.
 #'
 #' @returns `object`, with `object$layer$observed` populated.
@@ -28,8 +31,11 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
   .check_dots_named(dots)
 
   if (!inherits(object, "er_vpc")) rlang::abort("`object` must be an er_vpc object.")
-  if (!is.function(style)) rlang::abort("`style` must be a function.")
-  .check_style_layer(style, "observed", arg = "style")
+  if (!is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function or a registered label string.")
+  }
+  if (is.character(style)) style <- .lookup_style_label("vpc_observed", style, arg = "style")
+  .check_style_layer(style, "vpc_observed", arg = "style")
   .check_style_response_type(style, object$response$type, arg = "style")
   .check_style_plot_by_type(style, object$group$type, arg = "style")
 
@@ -65,7 +71,10 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #'   observed layer's independent tie-break seed.
 #' @param style A function determining how the simulated layer is drawn.
 #'   Defaults to [er_style_vpc_simulated_mean_errorbar()]; see
-#'   [er_style_vpc_simulated()] for the other built-in options.
+#'   [er_style_vpc_simulated()] for the other built-in options. Or one of
+#'   the registered short-string labels for this layer -- currently
+#'   `"mean_errorbar"`, `"quantile_ribbon"`, `"quantile_errorbar"` (see
+#'   [er_style_labels()]).
 #' @param simulate_args A named list of additional arguments forwarded to
 #'   [er_simulate()], only used with `model`. Distinct from `...` the
 #'   same way [er_plot_add_model()]'s `predict_args` is distinct from its
@@ -102,8 +111,11 @@ er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, s
       "i" = "Call `er_vpc_add_observed()` before `er_vpc_add_simulated()`."
     ))
   }
-  if (!is.function(style)) rlang::abort("`style` must be a function.")
-  .check_style_layer(style, "simulated", arg = "style")
+  if (!is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function or a registered label string.")
+  }
+  if (is.character(style)) style <- .lookup_style_label("vpc_simulated", style, arg = "style")
+  .check_style_layer(style, "vpc_simulated", arg = "style")
   .check_style_response_type(style, object$response$type, arg = "style")
   .check_style_plot_by_type(style, object$group$type, arg = "style")
   .check_vpc_layout_match(object$layer$observed$config$style, style)

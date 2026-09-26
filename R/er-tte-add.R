@@ -9,7 +9,8 @@
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param style Function drawing the KM curve/ribbon. Defaults to
-#'   [er_style_tte_curve_km()].
+#'   [er_style_tte_curve_km()], or the registered label `"km"` (see
+#'   [er_style_labels()]).
 #' @param ... Additional named arguments forwarded unchanged to `style`
 #'   at build time (e.g. [er_style_tte_curve_km()]'s `show_ci`/
 #'   `ribbon_alpha`/`linewidth`).
@@ -37,10 +38,13 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
   dots <- rlang::list2(...)
   .check_dots_named(dots)
   if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("tte_curve", style, arg = "style")
 
   style <- style %||% er_style_tte_curve_km
-  .check_style_layer(style, "curve", arg = "style")
+  .check_style_layer(style, "tte_curve", arg = "style")
 
   object$layer$curve <- .layer_tte_curve(object = object, style = style, dots = dots)
 
@@ -59,7 +63,8 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param style Function drawing the censoring marks. Defaults to
-#'   [er_style_tte_censor_ticks()].
+#'   [er_style_tte_censor_ticks()], or the registered label `"ticks"` (see
+#'   [er_style_labels()]).
 #' @param ... Additional named arguments forwarded unchanged to `style`
 #'   at build time (e.g. [er_style_tte_censor_ticks()]'s `shape`/
 #'   `size`/`stroke`).
@@ -82,10 +87,13 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
   dots <- rlang::list2(...)
   .check_dots_named(dots)
   if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("tte_censor", style, arg = "style")
 
   style <- style %||% er_style_tte_censor_ticks
-  .check_style_layer(style, "censor", arg = "style")
+  .check_style_layer(style, "tte_censor", arg = "style")
 
   object$layer$censor <- .layer_tte_censor(object = object, style = style, dots = dots)
 
@@ -106,7 +114,8 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param style Function drawing the risk-count labels. Defaults to
-#'   [er_style_tte_risktable_text()].
+#'   [er_style_tte_risktable_text()], or the registered label `"text"`
+#'   (see [er_style_labels()]).
 #' @param times Numeric vector of time points at which to report the
 #'   number at risk, or `NULL` (the default) to use `n_times` evenly
 #'   spaced breaks spanning `object$time$limits`.
@@ -140,7 +149,10 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
   dots <- rlang::list2(...)
   .check_dots_named(dots)
   if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("tte_risktable", style, arg = "style")
 
   if (!is.null(times) && (!is.numeric(times) || length(times) < 1L || any(!is.finite(times)) || any(times < 0))) {
     rlang::abort("`times` must be a numeric vector of non-negative values, or NULL.")
@@ -150,7 +162,7 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
   }
 
   style <- style %||% er_style_tte_risktable_text
-  .check_style_layer(style, "risktable", arg = "style")
+  .check_style_layer(style, "tte_risktable", arg = "style")
 
   object$layer$risktable <- .layer_tte_risktable(object = object, style = style, dots = dots, times = times, n_times = n_times)
 
@@ -173,7 +185,8 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #' @param keep_strata Logical; whether this layer should draw one curve
 #'   per stratum level. Defaults to `!is.null(object$strata)`.
 #' @param style Function drawing the model curve/ribbon. Defaults to
-#'   [er_style_tte_model_line()].
+#'   [er_style_tte_model_line()], or the registered label `"line"` (see
+#'   [er_style_labels()]).
 #' @param conf_level Confidence level for the prediction band. Defaults
 #'   to `0.95`.
 #' @param time_grid Numeric vector of times at which to predict `S(t)`,
@@ -212,7 +225,10 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
   .check_dots_named(dots)
   .check_dots_named(predict_args, arg = "predict_args")
   if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("tte_model", style, arg = "style")
   if (!is.null(time_grid) && (!is.numeric(time_grid) || length(time_grid) < 1L || any(!is.finite(time_grid)) || any(time_grid < 0))) {
     rlang::abort("`time_grid` must be a numeric vector of non-negative values, or NULL.")
   }
@@ -258,8 +274,10 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #' @param keep_strata Logical, indicating whether this layer should be
 #'   split by the plot's stratification variable; defaults to `TRUE` if
 #'   `stratify_by` was set in [er_tte()], `FALSE` otherwise.
-#' @param style Function drawing the annotation. Defaults to
-#'   [er_style_tte_summary_logrank()].
+#' @param style Function drawing the annotation, or one of the registered
+#'   short-string labels for this layer -- currently `"logrank"`, `"n"`,
+#'   `"coefficients"`, `"gof"` (see [er_style_labels()]).
+#'   Defaults to [er_style_tte_summary_logrank()].
 #' @param conf_level Confidence level forwarded to [er_summary()] (see
 #'   `?er_model_interface`). Defaults to `0.95`. Ignored when `model` is
 #'   `NULL`.
@@ -311,7 +329,10 @@ er_tte_add_summary <- function(object, model = NULL, keep_strata = NULL, style =
   .check_dots_named(dots)
   .check_dots_named(summary_args, arg = "summary_args")
   if (!inherits(object, "er_tte")) rlang::abort("`object` must be an er_tte object")
-  if (!is.null(style) && !is.function(style)) rlang::abort("`style` must be a function or NULL")
+  if (!is.null(style) && !is.function(style) && !is.character(style)) {
+    rlang::abort("`style` must be a function, a registered label string, or NULL")
+  }
+  if (is.character(style)) style <- .lookup_style_label("tte_summary", style, arg = "style")
   if (is.null(keep_strata)) keep_strata <- !is.null(object$strata)
 
   style <- style %||% er_style_tte_summary_logrank

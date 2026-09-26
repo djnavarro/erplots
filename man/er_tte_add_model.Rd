@@ -25,7 +25,8 @@ er_tte_add_model(
 per stratum level. Defaults to \code{!is.null(object$strata)}.}
 
 \item{style}{Function drawing the model curve/ribbon. Defaults to
-\code{\link[=er_style_tte_model_line]{er_style_tte_model_line()}}.}
+\code{\link[=er_style_tte_model_line]{er_style_tte_model_line()}}, or the registered label \code{"line"} (see
+\code{\link[=er_style_labels]{er_style_labels()}}).}
 
 \item{conf_level}{Confidence level for the prediction band. Defaults
 to \code{0.95}.}
