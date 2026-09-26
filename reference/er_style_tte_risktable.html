@@ -85,7 +85,8 @@ panel directly – see <code><a href="er_tte_build.html">er_tte_build()</a></cod
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  text_size <span class="op">=</span> <span class="fl">3.5</span></span>
+<span>  text_size <span class="op">=</span> <span class="fl">3.5</span>,</span>
+<span>  show_percent <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,10 +100,11 @@ panel directly – see <code><a href="er_tte_build.html">er_tte_build()</a></cod
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
 <dd><p>Configuration for the risktable layer (populated by
-<code><a href="er_tte_add_risktable.html">er_tte_add_risktable()</a></code>): <code>config$table</code> (<code>time</code>/<code>n_risk</code>/<code>strata</code>,
-one row per requested time break per stratum) and <code>config$breaks</code>
-(the time breaks themselves, also used as the curve panel's x-axis
-ticks).</p></dd>
+<code><a href="er_tte_add_risktable.html">er_tte_add_risktable()</a></code>): <code>config$table</code> (<code>time</code>/<code>n_risk</code>/<code>strata</code>/
+<code>n_baseline</code> – the stratum's time-zero number at risk, used by
+<code>show_percent</code> below – one row per requested time break per
+stratum) and <code>config$breaks</code> (the time breaks themselves, also used
+as the curve panel's x-axis ticks).</p></dd>
 
 
 <dt id="arg-stratify">stratify<a class="anchor" aria-label="anchor" href="#arg-stratify"></a></dt>
@@ -131,6 +133,13 @@ ticks).</p></dd>
 <dt id="arg-text-size">text_size<a class="anchor" aria-label="anchor" href="#arg-text-size"></a></dt>
 <dd><p>Size of the risk-count text. Default <code>3.5</code>.</p></dd>
 
+
+<dt id="arg-show-percent">show_percent<a class="anchor" aria-label="anchor" href="#arg-show-percent"></a></dt>
+<dd><p>Whether to append each break's <code>n_risk</code> as a
+percentage of that stratum's own baseline (time-zero) size,
+formatted via <code><a href="er_tte_theme.html">er_tte_theme()</a></code>'s <code>format_percent</code>. Default <code>FALSE</code>
+(a bare count, the previous behaviour).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -144,6 +153,11 @@ builder implements.</p>
 in <code>config$table</code> (reversed, since a ggplot2 discrete y-axis plots
 its first level at the bottom); an unstratified fit gets a single
 <code>"All"</code> row.</p>
+<p><code>show_percent = TRUE</code> displays <code>"&lt;n_risk&gt; (&lt;percent&gt;%)"</code> instead of a
+bare <code>n_risk</code>, using <code><a href="er_tte_theme.html">er_tte_theme()</a></code>'s <code>format_percent</code> (defaulting
+to <code>scales::label_percent(accuracy = 1)</code>) to format
+<code>n_risk / n_baseline</code> – see <code>config</code> above for where <code>n_baseline</code>
+comes from.</p>
 <p><code>er_style_tte_risktable_text()</code> is tagged <code>er_style_tag(fn, layer = "risktable")</code>, so <code><a href="er_tte_add_risktable.html">er_tte_add_risktable()</a></code> errors informatively if
 handed a builder tagged for a different layer.</p>
     </div>

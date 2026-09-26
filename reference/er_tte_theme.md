@@ -93,8 +93,10 @@ er_tte_theme(
 
   Formatter function (typically from
   [`scales::label_percent()`](https://scales.r-lib.org/reference/label_percent.html)),
-  reserved for a future TTE builder that formats a survival
-  probability/risk-table count as a percentage.
+  used by
+  [`er_style_tte_risktable_text()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)'s
+  `show_percent` argument to format a risk-table count as a percentage
+  of its stratum's baseline size.
 
 - format_number:
 

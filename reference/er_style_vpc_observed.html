@@ -109,6 +109,8 @@ point/interval per bin <em>and</em> per requested percentile.</p>
 <span>  point_size <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  errorbar_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dodge <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  show_label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  label_size <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -186,6 +188,18 @@ supplied). Default <code>0</code> (all <code>probs</code> plotted at the same po
 the previous behaviour). Useful when several <code>probs</code>' error bars
 overlap enough to be unreadable. Same numeric-<code>plot_by</code>-only
 restriction as <code>dodge</code>.</p></dd>
+
+
+<dt id="arg-show-label">show_label<a class="anchor" aria-label="anchor" href="#arg-show-label"></a></dt>
+<dd><p>For <code>er_style_vpc_observed_mean_errorbar()</code> only:
+whether to draw <code>config$summary</code>'s <code>y_mid_lbl</code> (the rate/mean,
+formatted via <code><a href="er_vpc_theme.html">er_vpc_theme()</a></code>'s <code>format_percent</code>/<code>format_number</code>)
+as a text label just above each point's upper CI bound. Default
+<code>FALSE</code> (no label, the previous behaviour).</p></dd>
+
+
+<dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
+<dd><p>Text size for <code>show_label</code>'s label. Defaults to <code>3</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

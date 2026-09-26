@@ -418,18 +418,29 @@ warning naming which bins were hidden, rather than silently dropping
 them – the bin’s own summary statistic is still computed from every
 observation in it either way, only its plotted position is affected.
 
+`format_percent`/`format_number` format the rate/mean value attached to
+each bin’s summary (`config$summary$y_mid_lbl`); pass
+`show_label = TRUE` to
+[`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/[`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+to actually draw that label above each point’s error bar:
+
+``` r
+
+erglm_data |>
+  er_vpc(exposure = aucss, response = ae1) |>
+  er_vpc_add_observed(show_label = TRUE) |>
+  er_vpc_add_simulated(model = mod, seed = 1234) |>
+  er_vpc_theme(format_percent = scales::label_percent(accuracy = 0.1)) |>
+  plot()
+```
+
+![](plot-vpc_files/figure-html/theming-format-label-1.png)
+
 [`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)
 doesn’t cover everything. There’s no argument for the observed/simulated
 colour scale, for instance, since it’s fixed to keep the two aligned
-across builders that mix colour and fill for the same distinction.
-`format_percent`/`format_number` are accepted and stored, intended to
-format the rate/mean value attached to each bin’s summary
-(`config$summary$y_mid_lbl`), but no built-in VPC style currently draws
-that label on the plot – they’re there for a custom `style` builder to
-read (see [Extending
-erplots](https://erplots.djnavarro.net/articles/extending.md)), not for
-a visible effect on any of the built-in idioms shown in this article.
-For anything else not covered,
+across builders that mix colour and fill for the same distinction. For
+anything else not covered,
 `+ ggplot2::theme(...)`/`+ ggplot2::labs(...)` on the object returned by
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) remains the
 general-purpose escape hatch.

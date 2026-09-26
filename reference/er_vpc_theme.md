@@ -73,10 +73,15 @@ er_vpc_theme(
 - format_percent, format_number:
 
   Formatter functions (typically from `scales::label_*()`), used to
-  format the rate/mean displayed in the observed/simulated summaries for
-  a binary response (`format_percent`) or a continuous/count response
-  (`format_number`). Default to `scales::label_percent(accuracy = 1)`
-  and `scales::label_number(accuracy = 0.01)` respectively.
+  compute `config$summary$y_mid_lbl` for a binary response
+  (`format_percent`) or a continuous/count response (`format_number`).
+  Displayed by
+  [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/
+  [`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+  only when their own `show_label = TRUE` (default `FALSE`) – otherwise
+  computed but not drawn by any built-in builder. Default to
+  `scales::label_percent(accuracy = 1)` and
+  `scales::label_number(accuracy = 0.01)` respectively.
 
 ## Value
 

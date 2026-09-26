@@ -332,10 +332,18 @@ leaves the other unchanged:</p>
 <span>  <span class="fu"><a href="../reference/er_tte_theme.html">er_tte_theme</a></span><span class="op">(</span>height_curve <span class="op">=</span> <span class="fl">3</span>, height_risktable <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-tte_files/figure-html/theming-heights-1.png" class="r-plt" alt="" width="700"></p>
-<p><code>format_percent</code> is also accepted and stored, reserved for
-a future risk-table/survival-probability builder that formats a value as
-a percentage – no built-in TTE style currently reads it, so setting it
-has no visible effect today.</p>
+<p><code>format_percent</code> formats a value as a percentage; pass
+<code>show_percent = TRUE</code> to
+<code><a href="../reference/er_style_tte_risktable.html">er_style_tte_risktable_text()</a></code> to display each break’s
+number at risk as a percentage of its stratum’s own baseline (time-zero)
+size, alongside the bare count:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lung</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte_add_risktable.html">er_tte_add_risktable</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_tte_risktable_text</span>, show_percent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-tte_files/figure-html/theming-percent-1.png" class="r-plt" alt="" width="700"></p>
 <p>For anything <code><a href="../reference/er_tte_theme.html">er_tte_theme()</a></code> doesn’t cover,
 <code>+ ggplot2::theme(...)</code>/<code>+ ggplot2::labs(...)</code>
 remains the general-purpose escape hatch on the ggplot2 object

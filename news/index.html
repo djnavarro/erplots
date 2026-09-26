@@ -82,6 +82,10 @@
 <div class="section level3">
 <h3 id="improvements-0-2-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2-0"></a></h3>
 <ul><li>
+<code><a href="../reference/er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code>/<code><a href="../reference/er_style_vpc_simulated.html">er_style_vpc_simulated_mean_errorbar()</a></code> gain an opt-in <code>show_label</code>/<code>label_size</code> pair that draws each bin’s formatted rate/mean above its error bar, making <code><a href="../reference/er_vpc_theme.html">er_vpc_theme()</a></code>’s <code>format_percent</code>/<code>format_number</code> arguments actually visible (<a href="https://github.com/djnavarro/erplots/issues/22" class="external-link">#22</a>).</li>
+<li>
+<code><a href="../reference/er_style_tte_risktable.html">er_style_tte_risktable_text()</a></code> gains an opt-in <code>show_percent</code> argument that appends each break’s number at risk as a percentage of its stratum’s baseline size, using <code><a href="../reference/er_tte_theme.html">er_tte_theme()</a></code>’s <code>format_percent</code> (<a href="https://github.com/djnavarro/erplots/issues/22" class="external-link">#22</a>).</li>
+<li>
 <code>emaxnls</code> is back in <code>Suggests</code>/<code>Remotes</code> (pinned to <code>emaxnls (&gt;= 0.1.1.9000)</code>, the GitHub development version), and its gated examples in <code><a href="../reference/erplots_data.html">?erplots_data</a></code> are reinstated, now that <code>emaxnls</code> registers the <code><a href="../reference/er_model_interface.html">er_predict()</a></code>/<code><a href="../reference/er_model_interface.html">er_simulate()</a></code>/<code><a href="../reference/er_model_interface.html">er_summary()</a></code> methods. It had been stripped for the 0.1.0 CRAN submission, ahead of that registration landing.</li>
 </ul></div>
 <div class="section level3">

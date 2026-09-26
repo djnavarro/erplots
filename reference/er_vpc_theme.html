@@ -138,10 +138,14 @@ with additional theme tweaks layered on top of <code>theme_base</code>. See
 
 <dt id="arg-format-percent-format-number">format_percent, format_number<a class="anchor" aria-label="anchor" href="#arg-format-percent-format-number"></a></dt>
 <dd><p>Formatter functions (typically
-from <code>scales::label_*()</code>), used to format the rate/mean displayed
-in the observed/simulated summaries for a binary response
-(<code>format_percent</code>) or a continuous/count response (<code>format_number</code>).
-Default to <code>scales::label_percent(accuracy = 1)</code> and
+from <code>scales::label_*()</code>), used to compute <code>config$summary$y_mid_lbl</code>
+for a binary response (<code>format_percent</code>) or a continuous/count
+response (<code>format_number</code>). Displayed by
+<code><a href="er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code>/
+<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_mean_errorbar()</a></code> only when their own
+<code>show_label = TRUE</code> (default <code>FALSE</code>) – otherwise computed but not
+drawn by any built-in builder. Default to
+<code>scales::label_percent(accuracy = 1)</code> and
 <code>scales::label_number(accuracy = 0.01)</code> respectively.</p></dd>
 
 </dl></div>

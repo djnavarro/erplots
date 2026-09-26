@@ -332,10 +332,22 @@ lung |>
 
 ![](plot-tte_files/figure-html/theming-heights-1.png)
 
-`format_percent` is also accepted and stored, reserved for a future
-risk-table/survival-probability builder that formats a value as a
-percentage – no built-in TTE style currently reads it, so setting it has
-no visible effect today.
+`format_percent` formats a value as a percentage; pass
+`show_percent = TRUE` to
+[`er_style_tte_risktable_text()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)
+to display each break’s number at risk as a percentage of its stratum’s
+own baseline (time-zero) size, alongside the bare count:
+
+``` r
+
+lung |>
+  er_tte(time, status == 2) |>
+  er_tte_add_curve() |>
+  er_tte_add_risktable(style = er_style_tte_risktable_text, show_percent = TRUE) |>
+  plot()
+```
+
+![](plot-tte_files/figure-html/theming-percent-1.png)
 
 For anything
 [`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)

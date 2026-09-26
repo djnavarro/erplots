@@ -425,17 +425,24 @@ applied via <code>ggplot2::coord_cartesian(clip = "off")</code>:</p>
 warning naming which bins were hidden, rather than silently dropping
 them – the bin’s own summary statistic is still computed from every
 observation in it either way, only its plotted position is affected.</p>
+<p><code>format_percent</code>/<code>format_number</code> format the
+rate/mean value attached to each bin’s summary
+(<code>config$summary$y_mid_lbl</code>); pass
+<code>show_label = TRUE</code> to
+<code><a href="../reference/er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code>/<code><a href="../reference/er_style_vpc_simulated.html">er_style_vpc_simulated_mean_errorbar()</a></code>
+to actually draw that label above each point’s error bar:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>show_label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_theme.html">er_vpc_theme</a></span><span class="op">(</span>format_percent <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html" class="external-link">label_percent</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plot-vpc_files/figure-html/theming-format-label-1.png" class="r-plt" alt="" width="700"></p>
 <p><code><a href="../reference/er_vpc_theme.html">er_vpc_theme()</a></code> doesn’t cover everything. There’s no
 argument for the observed/simulated colour scale, for instance, since
 it’s fixed to keep the two aligned across builders that mix colour and
-fill for the same distinction.
-<code>format_percent</code>/<code>format_number</code> are accepted and
-stored, intended to format the rate/mean value attached to each bin’s
-summary (<code>config$summary$y_mid_lbl</code>), but no built-in VPC
-style currently draws that label on the plot – they’re there for a
-custom <code>style</code> builder to read (see <a href="extending.html">Extending erplots</a>), not for a visible effect
-on any of the built-in idioms shown in this article. For anything else
-not covered,
+fill for the same distinction. For anything else not covered,
 <code>+ ggplot2::theme(...)</code>/<code>+ ggplot2::labs(...)</code> on
 the object returned by <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> remains the general-purpose
 escape hatch.</p>
@@ -453,7 +460,7 @@ attempting an automated fix that will very likely not work, the
 <code><a href="../reference/er_vpc.html">er_vpc()</a></code> mini-grammar exposes some customisation tools that
 you can use to clean up a VPC plot that doesn’t look very nice. In this
 section, we outline some of the options that you have.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://emaxnls.djnavarro.net/reference/emax_nls.html" class="external-link">emax_nls</a></span><span class="op">(</span></span>
 <span>  structural_model <span class="op">=</span> <span class="va">rsp_1</span> <span class="op">~</span> <span class="va">exp_1</span>,</span>
 <span>  covariate_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">E0</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">Emax</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">logEC50</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -469,7 +476,7 @@ for this model rather than the usual three. This is rarely a good idea
 because it leads to terrible crowding in the plot. Here’s what happens
 if we do this, using errorbar styling for both the observed data and the
 model simulations:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
@@ -508,7 +515,7 @@ position.</li>
 themselves, giving the eye more room to separate bars that remain close
 together after dodging</li>
 </ul>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
@@ -550,7 +557,7 @@ quantiles, and then ribbons to show model predictions and uncertainty at
 each quantile. In this case, however, the confidence bands are so
 closely packed together that they blend together visually and it is
 impossible to tell where the boundaries are:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
@@ -571,7 +578,7 @@ impossible to tell where the boundaries are:</p>
 emphasis on the edges of the bands, and reducing the salience of the
 band shading. The code below illustrates this, and it helps somewhat,
 but the plot is still difficult to read:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>
@@ -592,7 +599,7 @@ but the plot is still difficult to read:</p>
 <p><img src="plot-vpc_files/figure-html/ribbon-edges-fix-1.png" class="r-plt" alt="" width="700"></p>
 <p>Ultimately, in this situation the most likely resolution is that you
 would have to revert from five quantile bands to the usual three:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span></span>
 <span>    exposure <span class="op">=</span> <span class="va">exp_1</span>,</span>

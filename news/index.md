@@ -114,6 +114,18 @@
 
 ### Improvements
 
+- [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/[`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
+  gain an opt-in `show_label`/`label_size` pair that draws each bin’s
+  formatted rate/mean above its error bar, making
+  [`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)’s
+  `format_percent`/`format_number` arguments actually visible
+  ([\#22](https://github.com/djnavarro/erplots/issues/22)).
+- [`er_style_tte_risktable_text()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)
+  gains an opt-in `show_percent` argument that appends each break’s
+  number at risk as a percentage of its stratum’s baseline size, using
+  [`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)’s
+  `format_percent`
+  ([\#22](https://github.com/djnavarro/erplots/issues/22)).
 - `emaxnls` is back in `Suggests`/`Remotes` (pinned to
   `emaxnls (>= 0.1.1.9000)`, the GitHub development version), and its
   gated examples in

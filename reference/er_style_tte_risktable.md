@@ -19,7 +19,8 @@ er_style_tte_risktable_text(
   strata,
   theme,
   ...,
-  text_size = 3.5
+  text_size = 3.5,
+  show_percent = FALSE
 )
 ```
 
@@ -33,9 +34,10 @@ er_style_tte_risktable_text(
 
   Configuration for the risktable layer (populated by
   [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)):
-  `config$table` (`time`/`n_risk`/`strata`, one row per requested time
-  break per stratum) and `config$breaks` (the time breaks themselves,
-  also used as the curve panel's x-axis ticks).
+  `config$table` (`time`/`n_risk`/`strata`/ `n_baseline` – the stratum's
+  time-zero number at risk, used by `show_percent` below – one row per
+  requested time break per stratum) and `config$breaks` (the time breaks
+  themselves, also used as the curve panel's x-axis ticks).
 
 - stratify:
 
@@ -63,6 +65,14 @@ er_style_tte_risktable_text(
 
   Size of the risk-count text. Default `3.5`.
 
+- show_percent:
+
+  Whether to append each break's `n_risk` as a percentage of that
+  stratum's own baseline (time-zero) size, formatted via
+  [`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)'s
+  `format_percent`. Default `FALSE` (a bare count, the previous
+  behaviour).
+
 ## Value
 
 A geom, or a list of geoms.
@@ -77,6 +87,13 @@ Rows are ordered top-to-bottom in the same order strata first appear in
 `config$table` (reversed, since a ggplot2 discrete y-axis plots its
 first level at the bottom); an unstratified fit gets a single `"All"`
 row.
+
+`show_percent = TRUE` displays `"<n_risk> (<percent>%)"` instead of a
+bare `n_risk`, using
+[`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)'s
+`format_percent` (defaulting to `scales::label_percent(accuracy = 1)`)
+to format `n_risk / n_baseline` – see `config` above for where
+`n_baseline` comes from.
 
 `er_style_tte_risktable_text()` is tagged
 `er_style_tag(fn, layer = "risktable")`, so
