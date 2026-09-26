@@ -26,18 +26,13 @@ reference:
   - er_tte_theme
   - er_tte_build
 - title: Visual predictive check plots
-  desc: The compositional mini-grammar for desigining visual predictive check plots, dividing plot structure into distinct layers for the observed data and the simulated data.
+  desc: The compositional mini-grammar for designing visual predictive check plots, dividing plot structure into distinct layers for the observed data and the simulated data.
 - contents:
   - er_vpc
   - er_vpc_add_observed
   - er_vpc_add_simulated
   - er_vpc_theme
   - er_vpc_build
-- title: Builder function metadata
-  desc: Tag a new builder function with the required metadata 
-  contents: 
-  - er_style_tag
-  - er_style_labels
 - title: Builder functions for exposure-response plots
   desc: Low level functions to draw specific components of an exposure-response plot. Each function supports one option for the `style` argument to the corresponding layer in the exposure-response plot.
 - contents: 
@@ -62,19 +57,24 @@ reference:
   - er_style_vpc
   - er_style_vpc_observed
   - er_style_vpc_simulated
+- title: Builder function metadata
+  desc: Functions used to tag a new builder function with the required metadata and report on that metadata.
+  contents: 
+  - er_style_tag
+  - er_style_labels
 - title: Confidence intervals
-  desc: Helper functions to compute confidence intervals
+  desc: Helper functions to compute confidence intervals.
 - contents:
   - ci_clopper_pearson
   - ci_poisson
   - ci_t
   - ci_quantile
 - title: Model interface
-  desc: Generic functions that define the interface between models and plots
+  desc: Generic functions that define the interface between models and plots.
 - contents:
   - er_model_interface
 - title: Other
-  desc: Other functions and objects
+  desc: Other functions and objects.
 - contents:
   - cut_quantile
   - erplots_data
