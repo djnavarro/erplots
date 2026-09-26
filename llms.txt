@@ -181,6 +181,13 @@ data and the simulated data.
 
   Build and render an `er_vpc` object
 
+## Builder function metadata
+
+Tag a new builder function with the required metadata
+
+- [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+  : Tag a builder with structural/aesthetic metadata
+
 ## Builder functions for exposure-response plots
 
 Low level functions to draw specific components of an exposure-response
@@ -189,8 +196,6 @@ corresponding layer in the exposure-response plot.
 
 - [`er_style`](https://erplots.djnavarro.net/reference/er_style.md) :
   Builder functions for exposure-response plots
-- [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
-  : Tag a builder with structural/aesthetic metadata
 - [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md)
   [`er_style_model_line()`](https://erplots.djnavarro.net/reference/er_style_model.md)
   [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)
