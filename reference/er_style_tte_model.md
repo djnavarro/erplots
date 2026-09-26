@@ -3,11 +3,9 @@
 Builder functions for the `model` layer
 ([`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)),
 drawing a fitted parametric `S(t)` curve with an optional uncertainty
-band. Shares the same
-`function(data, config, stratify, time, strata, theme, ...)` signature
-every TTE-grammar builder implements – see
-[er_style_tte_curve](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)
-for the shared interface.
+band. See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for the shared interface every TTE-grammar builder implements.
 
 ## Usage
 
@@ -111,7 +109,8 @@ own builders).
 ## See also
 
 [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md),
-[`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)
+[`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md),
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
 
 ## Examples
 

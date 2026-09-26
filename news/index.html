@@ -99,6 +99,11 @@
 <li>
 <code><a href="../reference/er_plot_add_groups.html">er_plot_add_groups()</a></code>’s <code>bins</code> argument now actually controls the number of quantile bins used for a continuous grouping variable. Previously documented but silently ignored – every continuous grouping variable was always split into <code><a href="../reference/cut_quantile.html">cut_quantile()</a></code>/<code><a href="../reference/cut_quantile.html">cut_exposure_quantile()</a></code>’s own default of 4 bins, regardless of what <code>bins</code> was set to.</li>
 </ul></div>
+<div class="section level3">
+<h3 id="documentation-0-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0"></a></h3>
+<ul><li>Added <code><a href="../reference/er_style_vpc.html">?er_style_vpc</a></code>/<code><a href="../reference/er_style_tte.html">?er_style_tte</a></code>, documenting the shared builder interface for <code><a href="../reference/er_vpc.html">er_vpc()</a></code>/<code><a href="../reference/er_tte.html">er_tte()</a></code> builders, alongside the existing <code><a href="../reference/er_style.html">?er_style</a></code> for <code><a href="../reference/er_plot.html">er_plot()</a></code>. Previously this material was scattered across each builder family’s own help page.</li>
+<li>Fixed several cross-reference links in the pkgdown articles that previously rendered as literal bracketed text instead of a hyperlink.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.2" id="erplots-012">erplots 0.1.2<a class="anchor" aria-label="anchor" href="#erplots-012"></a></h2><p class="text-muted">CRAN release: 2026-09-09</p>

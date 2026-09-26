@@ -196,10 +196,11 @@ understand what it does and use it when constructing a plot.</p>
 function is to make sure that it takes the expected arguments, and uses
 those arguments in a manner that is consistent with what the erplots
 grammar expects. Specifically, every builder function must have this
-signature”</p>
+signature, documented in full at <code><a href="../reference/er_style.html">er_style()</a></code>:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="cf">function</span>(data, config, stratify, exposure, response, strata, theme, ...)</span></code></pre></div>
-<p>When writing the function itself, you should be aware of what erplots
-will pass into your function within each of these slots:</p>
+<p>The table below is a quick summary of what erplots passes into each
+slot; see <code><a href="../reference/er_style.html">er_style()</a></code> if you need the complete
+reference:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -266,7 +267,7 @@ called at build time. Extra arguments must be named – they’re appended
 positionally after the seven standard arguments, so an unnamed one would
 silently bind to the wrong parameter. A builder that doesn’t need any
 extra arguments simply declares <code>...</code> and ignores it, as
-every builder in this article does; see <code><a href="../reference/er_style.html">?er_style</a></code>’s own
+every builder in this article does; see <code><a href="../reference/er_style.html">er_style()</a></code>’s own
 “Passing extra arguments to a builder” section (and
 <code><a href="../reference/er_style_model.html">er_style_model_spaghetti()</a></code>’s use of a <code>seed</code>
 passed this way) for a worked example.</p>
@@ -665,11 +666,11 @@ wrong slot. Every built-in builder declares it –
 tagged <code>layer = "group"</code>, and so on for all five layers
 (<code>"model"</code>, <code>"summary"</code>, <code>"quantile"</code>,
 <code>"data"</code>, <code>"group"</code> – <code>"summary"</code> is
-its own layer, [er_plot_add_summary()], independent of the model layer).
-Passing a builder tagged for one layer into a different layer’s
-<code>er_plot_add_*()</code> call errors immediately, naming both the
-layer the builder was tagged for and the layer it was actually passed
-to:</p>
+its own layer, <code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code>, independent of the
+model layer). Passing a builder tagged for one layer into a different
+layer’s <code>er_plot_add_*()</code> call errors immediately, naming
+both the layer the builder was tagged for and the layer it was actually
+passed to:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -853,7 +854,7 @@ idiom in a familiar slot – the crossbar example above needed no tags at
 all. It exists for the less common case where a builder changes
 <em>where</em> its output goes, or <em>what</em> one of its aesthetics
 represents, and the rest of the plot needs to be told so it can label
-things correctly. See <code><a href="../reference/er_style.html">?er_style</a></code> for the full public-API
+things correctly. See <code><a href="../reference/er_style.html">er_style()</a></code> for the full public-API
 contract, and <a href="design.html">the exposure-response plotting
 grammar article</a> for how these layers fit together more broadly.</p>
 </div>
@@ -863,17 +864,15 @@ grammar article</a> for how these layers fit together more broadly.</p>
 </h2>
 <p>Everything above is about <code><a href="../reference/er_plot.html">er_plot()</a></code>’s own builders.
 <code><a href="../reference/er_vpc.html">er_vpc()</a></code> (see <a href="plot-vpc.html">Visual predictive
-checks</a>) has its own, narrower shared signature:</p>
+checks</a>) has its own, narrower shared signature, documented in full
+at <code><a href="../reference/er_style_vpc.html">er_style_vpc()</a></code>:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="cf">function</span>(data, config, exposure, response, theme, ...)</span></code></pre></div>
-<p>Two arguments from <code><a href="../reference/er_plot.html">er_plot()</a></code>’s signature are missing:
-<code>stratify</code> and <code>strata</code>. A VPC builder never needs
-to know about stratification directly – an optional
-<code>stratify_by</code> only ever facets the finished plot
-(<code><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">ggplot2::facet_wrap()</a></code>), never recolours it, and every
-<code>config</code> table a builder reads from already carries the
-<code>.vpc_stratum</code> column that facet needs. A builder just draws
-its geoms once, the same way whether the object is stratified or not;
-faceting happens afterwards, outside the builder entirely.</p>
+<p>The main difference from <code><a href="../reference/er_plot.html">er_plot()</a></code>’s signature is that
+<code>stratify</code>/ <code>strata</code> are missing – a VPC builder
+never needs to know about stratification directly, since
+<code><a href="../reference/er_vpc.html">er_vpc()</a></code>’s <code>stratify_by</code> only ever facets the
+finished plot rather than recolouring it. See
+<code><a href="../reference/er_style_vpc.html">er_style_vpc()</a></code> for the full rationale.</p>
 <p><code>config$summary</code> is the table both
 <code><a href="../reference/er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code> and
 <code><a href="../reference/er_style_vpc_simulated.html">er_style_vpc_simulated_mean_errorbar()</a></code> (the defaults) plot
@@ -940,10 +939,10 @@ incident against the default simulated builder:</p>
 <h3 id="vpc-specific-er_style_tag-arguments">VPC-specific <code>er_style_tag()</code> arguments<a class="anchor" aria-label="anchor" href="#vpc-specific-er_style_tag-arguments"></a>
 </h3>
 <p><code><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/<code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>
-recognise four [er_style_tag()] arguments beyond <code>layer</code>
-(checked the same way as <code>er_plot_add_*()</code>’s own
-<code>layer</code> tag above), none of which apply to an
-<code><a href="../reference/er_plot.html">er_plot()</a></code> builder:</p>
+recognise four <code><a href="../reference/er_style_tag.html">er_style_tag()</a></code> arguments beyond
+<code>layer</code> (checked the same way as
+<code>er_plot_add_*()</code>’s own <code>layer</code> tag above), none
+of which apply to an <code><a href="../reference/er_plot.html">er_plot()</a></code> builder:</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -1054,17 +1053,16 @@ family or the other.</p>
 <h2 id="writing-a-custom-builder-for-er_tte">Writing a custom builder for <code>er_tte()</code><a class="anchor" aria-label="anchor" href="#writing-a-custom-builder-for-er_tte"></a>
 </h2>
 <p><code><a href="../reference/er_tte.html">er_tte()</a></code> (see <a href="plot-tte.html">Time-to-event
-plots</a>) has its own shared signature too, closer to
-<code><a href="../reference/er_plot.html">er_plot()</a></code>’s than <code><a href="../reference/er_vpc.html">er_vpc()</a></code>’s:</p>
+plots</a>) has its own shared signature too, documented in full at
+<code><a href="../reference/er_style_tte.html">er_style_tte()</a></code>, closer to <code><a href="../reference/er_plot.html">er_plot()</a></code>’s than
+<code><a href="../reference/er_vpc.html">er_vpc()</a></code>’s:</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="cf">function</span>(data, config, stratify, time, strata, theme, ...)</span></code></pre></div>
 <p><code>time</code> replaces
-<code>exposure</code>/<code>response</code> – a time-to-event plot has
-one axis-pair variable, not two – and otherwise the shape matches
-<code><a href="../reference/er_plot.html">er_plot()</a></code>’s exactly, including the same
-<code>stratify</code>/<code>strata</code> pair a VPC builder doesn’t
-get, since TTE stratification <em>does</em> map to colour/fill directly
-(one Kaplan-Meier curve per stratum, same panel), unlike VPC’s
-facet-only stratification.</p>
+<code>exposure</code>/<code>response</code>, and unlike a VPC builder, a
+TTE builder does get <code>stratify</code>/<code>strata</code>: TTE
+stratification maps to colour/fill directly (one Kaplan-Meier curve per
+stratum, same panel) rather than VPC’s facet-only treatment. See
+<code><a href="../reference/er_style_tte.html">er_style_tte()</a></code> for the full rationale.</p>
 <p><code>config</code>’s contents differ by layer: the curve layer gets
 <code>config$table</code> (the tidy Kaplan-Meier table, with a
 <code>(0, 1)</code> origin row already prepended) and
@@ -1075,8 +1073,10 @@ risktable layer gets its own
 gets <code>config$p_value</code>/ <code>config$corner_distance</code>;
 the model layer gets <code>config$predictions</code>/
 <code>config$time_grid</code>. A custom builder for a given layer reads
-whichever of these its own layer actually populates – see each layer’s
-own <code>er_style_tte_*()</code> help page for the exact shape.</p>
+whichever of these its own layer actually populates – see
+<code><a href="../reference/er_style_tte_curve.html">er_style_tte_curve()</a></code>/
+<code><a href="../reference/er_style_tte_censor.html">er_style_tte_censor()</a></code>/<code><a href="../reference/er_style_tte_risktable.html">er_style_tte_risktable()</a></code>/<code><a href="../reference/er_style_tte_summary.html">er_style_tte_summary()</a></code>/
+<code><a href="../reference/er_style_tte_model.html">er_style_tte_model()</a></code> for the exact shape of each.</p>
 <div class="section level3">
 <h3 id="a-worked-example-2">A worked example<a class="anchor" aria-label="anchor" href="#a-worked-example-2"></a>
 </h3>
@@ -1138,12 +1138,10 @@ TTE builder – <code><a href="../reference/er_tte.html">er_tte()</a></code> has
 (a <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv()</a></code>-style time/event pair) and one x-axis variable
 (<code>time</code>, always continuous), so there’s nothing for those
 tags to distinguish.</p>
-<p>See
-<code><a href="../reference/er_style_tte_curve.html">?er_style_tte_curve</a></code>/<code><a href="../reference/er_style_tte_censor.html">?er_style_tte_censor</a></code>/<code><a href="../reference/er_style_tte_risktable.html">?er_style_tte_risktable</a></code>/
-<code><a href="../reference/er_style_tte_summary.html">?er_style_tte_summary</a></code>/<code><a href="../reference/er_style_tte_model.html">?er_style_tte_model</a></code> for
-each layer’s own <code>config</code> contents in full, and <a href="design.html">The exposure-response plotting grammar</a>/<a href="model-interface.html">Implementing the model interface</a> for how
-<code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>’s builder relates to
-[er_predict_survival()] specifically.</p>
+<p>See <a href="design.html">The exposure-response plotting
+grammar</a>/<a href="model-interface.html">Implementing the model
+interface</a> for how <code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code>’s builder relates
+to <code><a href="../reference/er_model_interface.html">er_predict_survival()</a></code> specifically.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

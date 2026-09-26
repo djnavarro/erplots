@@ -3,14 +3,9 @@
 Builder functions for the `curve` layer
 ([`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md)),
 drawing the Kaplan-Meier estimate as a step function with an optional
-step-shaped confidence band. Shares the same
-`function(data, config, stratify, time, strata, theme, ...)` signature
-every TTE-grammar builder implements – the TTE analogue of
-[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-shared interface for the
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
-grammar, adapted for a time x-axis/ survival-probability y-axis instead
-of exposure/response.
+step-shaped confidence band. See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for the shared interface every TTE-grammar builder implements.
 
 ## Usage
 
@@ -110,7 +105,8 @@ errors informatively if handed a builder tagged for a different layer.
 
 ## See also
 
-[`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md)
+[`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md),
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
 
 ## Examples
 

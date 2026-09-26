@@ -151,6 +151,20 @@
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)’s
   own default of 4 bins, regardless of what `bins` was set to.
 
+### Documentation
+
+- Added
+  [`?er_style_vpc`](https://erplots.djnavarro.net/reference/er_style_vpc.md)/[`?er_style_tte`](https://erplots.djnavarro.net/reference/er_style_tte.md),
+  documenting the shared builder interface for
+  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)/[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+  builders, alongside the existing
+  [`?er_style`](https://erplots.djnavarro.net/reference/er_style.md) for
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md).
+  Previously this material was scattered across each builder family’s
+  own help page.
+- Fixed several cross-reference links in the pkgdown articles that
+  previously rendered as literal bracketed text instead of a hyperlink.
+
 ## erplots 0.1.2
 
 CRAN release: 2026-09-09

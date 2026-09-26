@@ -68,14 +68,17 @@ The main constraint that you need to satisfy when writing a builder
 function is to make sure that it takes the expected arguments, and uses
 those arguments in a manner that is consistent with what the erplots
 grammar expects. Specifically, every builder function must have this
-signature”
+signature, documented in full at
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md):
 
 ``` r
 function(data, config, stratify, exposure, response, strata, theme, ...)
 ```
 
-When writing the function itself, you should be aware of what erplots
-will pass into your function within each of these slots:
+The table below is a quick summary of what erplots passes into each
+slot; see
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md) if
+you need the complete reference:
 
 | Argument | What it is |
 |----|----|
@@ -99,8 +102,8 @@ must be named – they’re appended positionally after the seven standard
 arguments, so an unnamed one would silently bind to the wrong parameter.
 A builder that doesn’t need any extra arguments simply declares `...`
 and ignores it, as every builder in this article does; see
-[`?er_style`](https://erplots.djnavarro.net/reference/er_style.md)’s own
-“Passing extra arguments to a builder” section (and
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)’s
+own “Passing extra arguments to a builder” section (and
 [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md)’s
 use of a `seed` passed this way) for a worked example.
 
@@ -456,10 +459,12 @@ is tagged `layer = "quantile"`,
 [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md)
 is tagged `layer = "group"`, and so on for all five layers (`"model"`,
 `"summary"`, `"quantile"`, `"data"`, `"group"` – `"summary"` is its own
-layer, \[er_plot_add_summary()\], independent of the model layer).
-Passing a builder tagged for one layer into a different layer’s
-`er_plot_add_*()` call errors immediately, naming both the layer the
-builder was tagged for and the layer it was actually passed to:
+layer,
+[`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
+independent of the model layer). Passing a builder tagged for one layer
+into a different layer’s `er_plot_add_*()` call errors immediately,
+naming both the layer the builder was tagged for and the layer it was
+actually passed to:
 
 ``` r
 
@@ -616,7 +621,7 @@ idiom in a familiar slot – the crossbar example above needed no tags at
 all. It exists for the less common case where a builder changes *where*
 its output goes, or *what* one of its aesthetics represents, and the
 rest of the plot needs to be told so it can label things correctly. See
-[`?er_style`](https://erplots.djnavarro.net/reference/er_style.md) for
+[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md) for
 the full public-API contract, and [the exposure-response plotting
 grammar article](https://erplots.djnavarro.net/articles/design.md) for
 how these layers fit together more broadly.
@@ -629,22 +634,22 @@ builders.
 [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) (see
 [Visual predictive
 checks](https://erplots.djnavarro.net/articles/plot-vpc.md)) has its
-own, narrower shared signature:
+own, narrower shared signature, documented in full at
+[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md):
 
 ``` r
 function(data, config, exposure, response, theme, ...)
 ```
 
-Two arguments from
+The main difference from
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s
-signature are missing: `stratify` and `strata`. A VPC builder never
-needs to know about stratification directly – an optional `stratify_by`
-only ever facets the finished plot
-([`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html)),
-never recolours it, and every `config` table a builder reads from
-already carries the `.vpc_stratum` column that facet needs. A builder
-just draws its geoms once, the same way whether the object is stratified
-or not; faceting happens afterwards, outside the builder entirely.
+signature is that `stratify`/ `strata` are missing – a VPC builder never
+needs to know about stratification directly, since
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)’s
+`stratify_by` only ever facets the finished plot rather than recolouring
+it. See
+[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md)
+for the full rationale.
 
 `config$summary` is the table both
 [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
@@ -718,9 +723,10 @@ erglm_data |>
 ### VPC-specific `er_style_tag()` arguments
 
 [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
-recognise four \[er_style_tag()\] arguments beyond `layer` (checked the
-same way as `er_plot_add_*()`’s own `layer` tag above), none of which
-apply to an
+recognise four
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+arguments beyond `layer` (checked the same way as `er_plot_add_*()`’s
+own `layer` tag above), none of which apply to an
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
 builder:
 
@@ -793,7 +799,9 @@ custom builder that *does* commit to one family or the other.
 [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) (see
 [Time-to-event
 plots](https://erplots.djnavarro.net/articles/plot-tte.md)) has its own
-shared signature too, closer to
+shared signature too, documented in full at
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md),
+closer to
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s than
 [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)’s:
 
@@ -801,13 +809,12 @@ shared signature too, closer to
 function(data, config, stratify, time, strata, theme, ...)
 ```
 
-`time` replaces `exposure`/`response` – a time-to-event plot has one
-axis-pair variable, not two – and otherwise the shape matches
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s
-exactly, including the same `stratify`/`strata` pair a VPC builder
-doesn’t get, since TTE stratification *does* map to colour/fill directly
-(one Kaplan-Meier curve per stratum, same panel), unlike VPC’s
-facet-only stratification.
+`time` replaces `exposure`/`response`, and unlike a VPC builder, a TTE
+builder does get `stratify`/`strata`: TTE stratification maps to
+colour/fill directly (one Kaplan-Meier curve per stratum, same panel)
+rather than VPC’s facet-only treatment. See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for the full rationale.
 
 `config`’s contents differ by layer: the curve layer gets `config$table`
 (the tidy Kaplan-Meier table, with a `(0, 1)` origin row already
@@ -817,7 +824,10 @@ gets its own `config$table`/`config$breaks`; the pvalue layer gets
 `config$p_value`/ `config$corner_distance`; the model layer gets
 `config$predictions`/ `config$time_grid`. A custom builder for a given
 layer reads whichever of these its own layer actually populates – see
-each layer’s own `er_style_tte_*()` help page for the exact shape.
+[`er_style_tte_curve()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)/
+[`er_style_tte_censor()`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md)/[`er_style_tte_risktable()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)/[`er_style_tte_summary()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)/
+[`er_style_tte_model()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md)
+for the exact shape of each.
 
 ### A worked example
 
@@ -896,14 +906,12 @@ one response variable shape (a
 pair) and one x-axis variable (`time`, always continuous), so there’s
 nothing for those tags to distinguish.
 
-See
-[`?er_style_tte_curve`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)/[`?er_style_tte_censor`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md)/[`?er_style_tte_risktable`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)/
-[`?er_style_tte_summary`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)/[`?er_style_tte_model`](https://erplots.djnavarro.net/reference/er_style_tte_model.md)
-for each layer’s own `config` contents in full, and [The
-exposure-response plotting
+See [The exposure-response plotting
 grammar](https://erplots.djnavarro.net/articles/design.md)/[Implementing
 the model
 interface](https://erplots.djnavarro.net/articles/model-interface.md)
 for how
 [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)’s
-builder relates to \[er_predict_survival()\] specifically.
+builder relates to
+[`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+specifically.

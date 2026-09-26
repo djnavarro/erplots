@@ -190,7 +190,8 @@ own builders).
 
 ## See also
 
-[`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)
+[`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md),
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
 
 ## Examples
 

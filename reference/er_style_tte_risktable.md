@@ -2,10 +2,12 @@
 
 Builder functions for the `risktable` layer
 ([`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)),
-drawing a row of risk counts per stratum at a grid of time points.
-Unlike every other TTE-grammar builder, this one's geoms are drawn into
-their own patchwork panel below the curve, not onto the curve's panel
-directly – see
+drawing a row of risk counts per stratum at a grid of time points. See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for the shared interface every TTE-grammar builder implements. Unlike
+every other TTE-grammar builder, this one's geoms are drawn into their
+own patchwork panel below the curve, not onto the curve's panel directly
+– see
 [`er_tte_build()`](https://erplots.djnavarro.net/reference/er_tte_build.md).
 
 ## Usage
@@ -81,7 +83,8 @@ errors informatively if handed a builder tagged for a different layer.
 
 ## See also
 
-[`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)
+[`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md),
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
 
 ## Examples
 

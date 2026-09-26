@@ -155,8 +155,9 @@ lung |>
 ![](plot-tte_files/figure-html/summary-n-1.png)
 
 [`er_style_tte_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)/[`er_style_tte_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
-draw from a fitted model’s own \[er_summary()\] result instead, passed
-via
+draw from a fitted model’s own
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+result instead, passed via
 [`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)’s
 `model` argument – independent of whatever model, if any, was passed to
 [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md).

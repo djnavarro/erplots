@@ -5,7 +5,9 @@ Builder functions for the `simulated` layer
 drawing the simulated side of a visual predictive check as a mean +
 percentile interval per bin (the default, adaptive to `plot_by`'s type),
 continuous-x percentile bands, or a point/interval per bin *and* per
-requested percentile.
+requested percentile. See
+[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md)
+for the shared interface every VPC-grammar builder implements.
 
 ## Usage
 
@@ -215,7 +217,7 @@ even where the fills themselves are illegible.
 
 ## See also
 
-[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md),
+[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md),
 [`er_style_vpc_observed()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
 
 ## Examples

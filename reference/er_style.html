@@ -92,7 +92,12 @@ their own family-specific pages, one per layer:</p><ul><li><p><code><a href="er_
 <li><p><code><a href="er_style_quantile.html">er_style_quantile()</a></code> – the <code>quantile</code> layer (<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>)</p></li>
 <li><p><code><a href="er_style_data.html">er_style_data()</a></code> – the <code>data</code> layer (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>)</p></li>
 <li><p><code><a href="er_style_group.html">er_style_group()</a></code> – the <code>group</code> layer (<code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>)</p></li>
-</ul><p>Arguments are standardised to allow users to write their own
+</ul><p><code><a href="er_vpc.html">er_vpc()</a></code>/<code><a href="er_tte.html">er_tte()</a></code> have their own, separate builder interfaces –
+<code><a href="er_style_vpc.html">er_style_vpc()</a></code>/<code><a href="er_style_tte.html">er_style_tte()</a></code> – since neither shares this
+signature exactly (<code>er_vpc_*()</code> builders have no <code>stratify</code>/<code>strata</code>
+pair; <code>er_tte_*()</code> builders take <code>time</code> instead of <code>exposure</code>/
+<code>response</code>).</p>
+<p>Arguments are standardised to allow users to write their own
 as needed</p>
     </div>
     <div class="section level2">
@@ -224,7 +229,8 @@ call site if they weren't named.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_style_model.html">er_style_model()</a></code>, <code><a href="er_style_summary.html">er_style_summary()</a></code>, <code><a href="er_style_quantile.html">er_style_quantile()</a></code>,
-<code><a href="er_style_data.html">er_style_data()</a></code>, <code><a href="er_style_group.html">er_style_group()</a></code>, <code><a href="er_style_tag.html">er_style_tag()</a></code></p></div>
+<code><a href="er_style_data.html">er_style_data()</a></code>, <code><a href="er_style_group.html">er_style_group()</a></code>, <code><a href="er_style_tag.html">er_style_tag()</a></code>, <code><a href="er_style_vpc.html">er_style_vpc()</a></code>,
+<code><a href="er_style_tte.html">er_style_tte()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

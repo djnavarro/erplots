@@ -208,7 +208,9 @@ that builder belongs to:
   itself, in which case stratification should fall back to one panel per
   stratum level instead of a shared legend – the concrete instance of “a
   layer’s own encoding takes precedence” that motivated the general
-  rule. See \[er_plot_add_data()\] for the full breakdown.
+  rule. See
+  [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
+  for the full breakdown.
 
 A `config$color_role` tag (`"strata"` or `"response"`) records which
 meaning applies for a given data-layer build, so erplots knows whether

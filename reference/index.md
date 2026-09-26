@@ -145,6 +145,8 @@ Low level functions to draw specific components of a time-to-event plot.
 Each function supports one option for the `style` argument to the
 corresponding layer in the time-to-event plot.
 
+- [`er_style_tte`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+  : Builder functions for time-to-event plots
 - [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)
   : Kaplan-Meier curve builders for the TTE grammar
 - [`er_style_tte_censor_ticks()`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md)
@@ -165,6 +167,8 @@ Low level functions to draw specific components of a VPC plot. Each
 function supports one option for the `style` argument to the
 corresponding layer in the VPC plot.
 
+- [`er_style_vpc`](https://erplots.djnavarro.net/reference/er_style_vpc.md)
+  : Builder functions for VPC plots
 - [`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
   [`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
   [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)

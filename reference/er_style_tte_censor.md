@@ -2,9 +2,9 @@
 
 Builder functions for the `censor` layer
 ([`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)),
-marking each censoring time directly on the Kaplan-Meier curve. Shares
-the same `function(data, config, stratify, time, strata, theme, ...)`
-signature every TTE-grammar builder implements.
+marking each censoring time directly on the Kaplan-Meier curve. See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for the shared interface every TTE-grammar builder implements.
 
 ## Usage
 
@@ -97,7 +97,8 @@ errors informatively if handed a builder tagged for a different layer.
 
 ## See also
 
-[`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)
+[`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md),
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
 
 ## Examples
 

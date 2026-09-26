@@ -47,6 +47,13 @@ family-specific pages, one per layer:
   – the `group` layer
   ([`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md))
 
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)/[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+have their own, separate builder interfaces –
+[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md)/[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+– since neither shares this signature exactly (`er_vpc_*()` builders
+have no `stratify`/`strata` pair; `er_tte_*()` builders take `time`
+instead of `exposure`/ `response`).
+
 Arguments are standardised to allow users to write their own as needed
 
 ## Arguments
@@ -214,4 +221,6 @@ only at the `er_plot_add_*()` call site if they weren't named.
 [`er_style_quantile()`](https://erplots.djnavarro.net/reference/er_style_quantile.md),
 [`er_style_data()`](https://erplots.djnavarro.net/reference/er_style_data.md),
 [`er_style_group()`](https://erplots.djnavarro.net/reference/er_style_group.md),
-[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
+[`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md),
+[`er_style_vpc()`](https://erplots.djnavarro.net/reference/er_style_vpc.md),
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
