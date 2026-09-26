@@ -51,7 +51,7 @@ er_style_tte_pvalue_logrank(
 
 - strata:
 
-  `object$strata` (`var`/`label`/`type`/`n_strata`).
+  `object$strata` (`var`/`label`).
 
 - theme:
 

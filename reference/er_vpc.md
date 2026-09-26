@@ -17,10 +17,13 @@ er_vpc(
   response_type = "auto",
   plot_by = NULL,
   n_bins = 4,
+  ties = "upward",
+  quantile_type = 7,
+  labeller = NULL,
   stratify_by = NULL,
-  n_strata = 4,
   conf_level = 0.95,
-  probs = c(0.1, 0.5, 0.9)
+  probs = c(0.1, 0.5, 0.9),
+  seed = NULL
 )
 ```
 
@@ -55,22 +58,33 @@ er_vpc(
 
   Number of quantile bins, when `plot_by` is numeric. Defaults to `4`.
 
+- ties, quantile_type, labeller:
+
+  Control how a numeric `plot_by` is split into quantile bins – passed
+  straight through to
+  [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md),
+  see its documentation for what each controls. Set here, on `er_vpc()`
+  itself, rather than on
+  [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md),
+  because the two layers must always agree on how `plot_by` is binned –
+  [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+  reuses these exact settings (via
+  [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)'s
+  attributes on the observed layer's own binned column) rather than
+  re-resolving them, so both sides always stay in sync.
+
 - stratify_by:
 
   Optional variable (unquoted) splitting the VPC into one facet panel
   per level, via
-  [`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html).
-  A categorical variable is used as-is; a numeric variable is
-  automatically split into `n_strata` quantile bins (placebo, i.e. `0`,
-  kept in its own bin when `stratify_by` is the exposure variable
-  itself), with a message reporting that this happened. Must resolve to
-  a different variable than `plot_by`. Defaults to `NULL` (no faceting,
-  a single panel, matching prior behaviour).
-
-- n_strata:
-
-  Number of quantile bins, when `stratify_by` is numeric. Ignored when
-  `stratify_by` is `NULL` or categorical. Defaults to `4`.
+  [`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html),
+  used as-is. Must be discrete – a numeric column errors; bin it
+  yourself first with
+  [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+  and pass the resulting factor, for full control over bin
+  count/tie-breaking/labels. Must resolve to a different variable than
+  `plot_by`. Defaults to `NULL` (no faceting, a single panel, matching
+  prior behaviour).
 
 - conf_level:
 
@@ -84,6 +98,18 @@ er_vpc(
   [`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)/[`er_style_vpc_simulated_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md);
   ignored by the default adaptive mean/errorbar pair). Only computed for
   a continuous/count response. Defaults to `c(0.1, 0.5, 0.9)`.
+
+- seed:
+
+  Optional single number seeding the observed layer's random tie-break
+  when `ties` is `"split-even"` (ignored otherwise). `NULL` (the
+  default) draws from the ambient RNG stream. The simulated layer's own
+  `"split-even"` tie-break is instead seeded by
+  [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)'s
+  own `seed` argument – the two are independent random draws over
+  different data (the observed rows vs. the, typically larger, simulated
+  replicate pool), so each is seeded by the call that actually performs
+  it.
 
 ## Value
 

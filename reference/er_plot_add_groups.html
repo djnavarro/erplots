@@ -71,6 +71,9 @@ grouping variables are binned into quantiles first).</p>
 <span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ties <span class="op">=</span> <span class="st">"upward"</span>,</span>
+<span>  quantile_type <span class="op">=</span> <span class="fl">7</span>,</span>
+<span>  labeller <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -96,7 +99,8 @@ by this call; see <code><a href="er_style.html">er_style()</a></code> and "Detai
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
 <dd><p>Number of quantile bins used for continuous grouping
-variables (<code>NULL</code>, the default, uses <code><a href="cut_quantile.html">cut_quantile()</a></code>'s own default).</p></dd>
+variables (<code>NULL</code>, the default, uses <code><a href="cut_quantile.html">cut_quantile()</a></code>'s own default).
+Applied identically to every grouping variable added by this call.</p></dd>
 
 
 <dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
@@ -104,6 +108,14 @@ variables (<code>NULL</code>, the default, uses <code><a href="cut_quantile.html
 split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <code>stratify_by</code> was set in <code><a href="er_plot.html">er_plot()</a></code>, <code>FALSE</code> otherwise. See
 "Details" for an error case.</p></dd>
+
+
+<dt id="arg-ties-quantile-type-labeller">ties, quantile_type, labeller<a class="anchor" aria-label="anchor" href="#arg-ties-quantile-type-labeller"></a></dt>
+<dd><p>Passed straight through to
+<code><a href="cut_quantile.html">cut_quantile()</a></code>/<code><a href="cut_quantile.html">cut_exposure_quantile()</a></code> to control how a
+continuous grouping variable is split into bins – see their
+documentation for what each controls. Applied identically to every
+grouping variable added by this call.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -132,6 +144,14 @@ informatively; an untagged builder is never checked.</p>
 stratification variable, since that would mean grouping and
 stratifying by the same column at once; pass <code>keep_strata = FALSE</code>
 for that grouping variable instead.</p>
+<p><code>bins</code>/<code>ties</code>/<code>quantile_type</code>/<code>labeller</code> are local to this call –
+different grouping variables (including across separate
+<code>er_plot_add_groups()</code> calls) aren't required to agree, and generally
+shouldn't: they're usually different variables with no reason to share
+a binning scheme. The one exception is grouping by the plot's own
+exposure variable, which risks silently disagreeing with
+<code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>'s own exposure-binning; <code><a href="er_plot_build.html">er_plot_build()</a></code>
+warns (doesn't error) if the two disagree in that specific case.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

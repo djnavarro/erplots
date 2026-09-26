@@ -49,7 +49,10 @@ are additive (each call adds a panel).
 `stratify_by` declares a discrete variable used for colour/fill across
 layers; each layer's `keep_strata` controls whether it uses
 stratification. Rows with `NA` in the stratification variable are kept
-as their own level.
+as their own level. A numeric `stratify_by` errors – bin it yourself
+first with
+[`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+and pass the resulting factor.
 
 `response_type` governs response-scale defaults and which interval
 method the quantile and VPC layers use; see `response_type` below and

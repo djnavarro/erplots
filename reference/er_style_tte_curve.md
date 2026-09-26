@@ -54,8 +54,7 @@ er_style_tte_curve_km(
 
 - strata:
 
-  `object$strata` (`var`/`label`/`type`/`n_strata`), or `NULL` when
-  unstratified.
+  `object$strata` (`var`/`label`), or `NULL` when unstratified.
 
 - theme:
 

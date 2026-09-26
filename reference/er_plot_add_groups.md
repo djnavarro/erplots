@@ -13,6 +13,9 @@ er_plot_add_groups(
   style = NULL,
   bins = NULL,
   keep_strata = NULL,
+  ties = "upward",
+  quantile_type = 7,
+  labeller = NULL,
   ...
 )
 ```
@@ -41,7 +44,8 @@ er_plot_add_groups(
   Number of quantile bins used for continuous grouping variables
   (`NULL`, the default, uses
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)'s
-  own default).
+  own default). Applied identically to every grouping variable added by
+  this call.
 
 - keep_strata:
 
@@ -49,6 +53,14 @@ er_plot_add_groups(
   stratification variable; defaults to `TRUE` if `stratify_by` was set
   in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
   `FALSE` otherwise. See "Details" for an error case.
+
+- ties, quantile_type, labeller:
+
+  Passed straight through to
+  [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+  to control how a continuous grouping variable is split into bins – see
+  their documentation for what each controls. Applied identically to
+  every grouping variable added by this call.
 
 - ...:
 
@@ -84,6 +96,17 @@ never checked.
 stratification variable, since that would mean grouping and stratifying
 by the same column at once; pass `keep_strata = FALSE` for that grouping
 variable instead.
+
+`bins`/`ties`/`quantile_type`/`labeller` are local to this call –
+different grouping variables (including across separate
+`er_plot_add_groups()` calls) aren't required to agree, and generally
+shouldn't: they're usually different variables with no reason to share a
+binning scheme. The one exception is grouping by the plot's own exposure
+variable, which risks silently disagreeing with
+[`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)'s
+own exposure-binning;
+[`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
+warns (doesn't error) if the two disagree in that specific case.
 
 ## See also
 

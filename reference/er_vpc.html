@@ -72,10 +72,13 @@ and render with <code><a href="https://rdrr.io/r/graphics/plot.default.html" cla
 <span>  response_type <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  plot_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_bins <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  ties <span class="op">=</span> <span class="st">"upward"</span>,</span>
+<span>  quantile_type <span class="op">=</span> <span class="fl">7</span>,</span>
+<span>  labeller <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  stratify_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  n_strata <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span></span>
+<span>  probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -114,21 +117,27 @@ with no binning.</p></dd>
 Defaults to <code>4</code>.</p></dd>
 
 
+<dt id="arg-ties-quantile-type-labeller">ties, quantile_type, labeller<a class="anchor" aria-label="anchor" href="#arg-ties-quantile-type-labeller"></a></dt>
+<dd><p>Control how a numeric <code>plot_by</code> is
+split into quantile bins – passed straight through to
+<code><a href="cut_quantile.html">cut_exposure_quantile()</a></code>, see its documentation for what each
+controls. Set here, on <code>er_vpc()</code> itself, rather than on
+<code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>/<code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>, because the two
+layers must always agree on how <code>plot_by</code> is binned –
+<code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> reuses these exact settings (via
+<code><a href="cut_quantile.html">cut_exposure_quantile()</a></code>'s attributes on the observed layer's own
+binned column) rather than re-resolving them, so both sides always
+stay in sync.</p></dd>
+
+
 <dt id="arg-stratify-by">stratify_by<a class="anchor" aria-label="anchor" href="#arg-stratify-by"></a></dt>
 <dd><p>Optional variable (unquoted) splitting the VPC into
-one facet panel per level, via <code><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">ggplot2::facet_wrap()</a></code>. A
-categorical variable is used as-is; a numeric variable is
-automatically split into <code>n_strata</code> quantile bins (placebo, i.e.
-<code>0</code>, kept in its own bin when <code>stratify_by</code> is the exposure variable
-itself), with a message reporting that this happened. Must resolve
-to a different variable than <code>plot_by</code>. Defaults to <code>NULL</code> (no
-faceting, a single panel, matching prior behaviour).</p></dd>
-
-
-<dt id="arg-n-strata">n_strata<a class="anchor" aria-label="anchor" href="#arg-n-strata"></a></dt>
-<dd><p>Number of quantile bins, when <code>stratify_by</code> is
-numeric. Ignored when <code>stratify_by</code> is <code>NULL</code> or categorical.
-Defaults to <code>4</code>.</p></dd>
+one facet panel per level, via <code><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">ggplot2::facet_wrap()</a></code>, used as-is.
+Must be discrete – a numeric column errors; bin it yourself first
+with <code><a href="cut_quantile.html">cut_quantile()</a></code>/<code><a href="cut_quantile.html">cut_exposure_quantile()</a></code> and pass the
+resulting factor, for full control over bin count/tie-breaking/labels.
+Must resolve to a different variable than <code>plot_by</code>. Defaults to
+<code>NULL</code> (no faceting, a single panel, matching prior behaviour).</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
@@ -143,6 +152,17 @@ Defaults to <code>0.95</code>.</p></dd>
 <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_errorbar()</a></code>/<code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_errorbar()</a></code>;
 ignored by the default adaptive mean/errorbar pair). Only computed
 for a continuous/count response. Defaults to <code>c(0.1, 0.5, 0.9)</code>.</p></dd>
+
+
+<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dd><p>Optional single number seeding the observed layer's random
+tie-break when <code>ties</code> is <code>"split-even"</code> (ignored otherwise). <code>NULL</code>
+(the default) draws from the ambient RNG stream. The simulated
+layer's own <code>"split-even"</code> tie-break is instead seeded by
+<code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>'s own <code>seed</code> argument – the two are
+independent random draws over different data (the observed rows vs.
+the, typically larger, simulated replicate pool), so each is seeded
+by the call that actually performs it.</p></dd>
 
 </dl></div>
     <div class="section level2">

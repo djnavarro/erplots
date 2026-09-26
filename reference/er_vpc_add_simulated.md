@@ -47,7 +47,13 @@ er_vpc_add_simulated(
 
 - seed:
 
-  Optional RNG seed, only used with `model`.
+  Optional RNG seed. Used for `model`'s own simulation draws, and also
+  (regardless of whether `sim`/`model` was supplied) to seed this
+  layer's random tie-break when
+  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)'s
+  `ties` is `"split-even"` – see
+  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)'s own
+  `seed` argument for the observed layer's independent tie-break seed.
 
 - style:
 

@@ -65,9 +65,24 @@ additionally keeping placebo (<code>0</code>) observations in their own bin.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cut_exposure_quantile</span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">4</span>, is_placebo <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cut_exposure_quantile</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  n <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  is_placebo <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ties <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"upward"</span>, <span class="st">"downward"</span>, <span class="st">"split-even"</span><span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  quantile_type <span class="op">=</span> <span class="fl">7</span>,</span>
+<span>  labeller <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">cut_quantile</span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">cut_quantile</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  n <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  ties <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"upward"</span>, <span class="st">"downward"</span>, <span class="st">"split-even"</span><span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  quantile_type <span class="op">=</span> <span class="fl">7</span>,</span>
+<span>  labeller <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -85,12 +100,48 @@ additionally keeping placebo (<code>0</code>) observations in their own bin.</p>
 <dt id="arg-is-placebo">is_placebo<a class="anchor" aria-label="anchor" href="#arg-is-placebo"></a></dt>
 <dd><p>Logical vector indicating placebo samples</p></dd>
 
+
+<dt id="arg-ties">ties<a class="anchor" aria-label="anchor" href="#arg-ties"></a></dt>
+<dd><p>Rule for assigning a value that sits exactly on an interior
+break point, where the bin membership would otherwise be ambiguous.
+<code>"upward"</code> (the default, matching prior behaviour) is equivalent to
+<code><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut()</a></code> with <code>right = TRUE</code>; <code>"downward"</code> is equivalent to <code>right = FALSE</code>; <code>"split-even"</code> randomly divides each tied group between its
+two candidate bins so that final bin sizes are as equal as possible,
+rather than sending every tied value the same direction.</p></dd>
+
+
+<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dd><p>Optional single number used to seed the random tie-break
+used by <code>ties = "split-even"</code> (ignored for <code>"upward"</code>/<code>"downward"</code>,
+which involve no randomness). <code>NULL</code> (the default) draws from the
+ambient RNG stream and so is not reproducible across calls; pass a
+seed for reproducible bin assignment.</p></dd>
+
+
+<dt id="arg-quantile-type">quantile_type<a class="anchor" aria-label="anchor" href="#arg-quantile-type"></a></dt>
+<dd><p>Integer between 1 and 9, passed straight through
+as <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">stats::quantile()</a></code>'s own <code>type</code> argument to compute the
+quantile break points. Defaults to <code>7</code>, matching
+<code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">stats::quantile()</a></code>'s own default.</p></dd>
+
+
+<dt id="arg-labeller">labeller<a class="anchor" aria-label="anchor" href="#arg-labeller"></a></dt>
+<dd><p>Controls the labels used for the <code>n</code> quantile bins
+(<code>cut_exposure_quantile()</code>'s separate <code>"Placebo"</code> level is always
+used as-is, regardless of <code>labeller</code>). <code>NULL</code> (the default) labels
+bins <code>"Q1"</code>, <code>"Q2"</code>, etc. A function is called as <code>labeller(n, breaks)</code> (the actual bin count and the <code>n + 1</code> quantile cutpoints,
+after any resolution-driven fallback – see <code>@details</code> below) and
+must return a character vector of length <code>n</code>; this is the hook for,
+e.g., range-style labels built from <code>breaks</code>. A character vector is
+used directly as the <code>n</code> labels.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A factor. <code>cut_exposure_quantile()</code>'s result additionally
-carries a <code>"breaks"</code> attribute holding the <code>n + 1</code> quantile
-cutpoints used to form the bins.</p>
+    <p>A factor with <code>"ties"</code> and <code>"quantile_type"</code> attributes
+recording those two arguments. <code>cut_exposure_quantile()</code>'s result
+additionally carries a <code>"breaks"</code> attribute holding the <code>n + 1</code>
+quantile cutpoints used to form the bins.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -103,7 +154,10 @@ supports, rather than erroring or silently showing fewer bins with
 no explanation. <code>cut_exposure_quantile()</code>'s <code>"breaks"</code> attribute is
 read back out by quantile-layer builders that draw bin-boundary
 separators (e.g. <code><a href="er_style_quantile.html">er_style_quantile_errorbar_vlines()</a></code>) via
-<code>attr(exposure_bins, "breaks")</code>.</p>
+<code>attr(exposure_bins, "breaks")</code>. Because that fallback can lower <code>n</code>
+below what was originally requested, a character-vector <code>labeller</code>
+is length-checked against the <em>actual</em> bin count, not the requested
+one, and errors informatively on a mismatch.</p>
     </div>
 
     <div class="section level2">
@@ -114,6 +168,10 @@ separators (e.g. <code><a href="er_style_quantile.html">er_style_quantile_errorb
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [26] Q4 Q1 Q3 Q1 Q4 Q3 Q3 Q1 Q2 Q4 Q3 Q2 Q2 Q3 Q3 Q1 Q4 Q2 Q3 Q1 Q1 Q1 Q3 Q2 Q3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [51] Q2 Q1 Q4 Q4 Q3 Q4 Q2 Q1 Q2 Q4 Q1 Q1 Q1 Q4 Q3 Q4 Q2 Q4 Q4 Q4 Q4 Q2 Q1 Q2 Q4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [76] Q3 Q3 Q4 Q4 Q3 Q2 Q4 Q2 Q2 Q1 Q2 Q1 Q1 Q1 Q4 Q1 Q2 Q3 Q1 Q3 Q2 Q3 Q3 Q1 Q4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"ties")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] upward</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"quantile_type")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: Q1 Q2 Q3 Q4</span>
 <span class="r-in"><span><span class="fu">cut_exposure_quantile</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [1] Q4 Q2 Q4 Q2 Q1 Q1 Q2 Q1 Q2 Q1 Q3 Q3 Q1 Q4 Q3 Q2 Q3 Q1 Q3 Q1 Q1 Q3 Q4 Q2 Q3</span>
@@ -123,7 +181,68 @@ separators (e.g. <code><a href="er_style_quantile.html">er_style_quantile_errorb
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"breaks")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         0%        25%        50%        75%       100% </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.02229473 0.39187595 0.79633523 1.14824248 2.64893203 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"ties")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] upward</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"quantile_type")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: Placebo Q1 Q2 Q3 Q4</span>
+<span class="r-in"><span><span class="fu">cut_quantile</span><span class="op">(</span><span class="va">x</span>, ties <span class="op">=</span> <span class="st">"split-even"</span>, seed <span class="op">=</span> <span class="fl">8213</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] Q4 Q3 Q4 Q3 Q2 Q2 Q3 Q2 Q2 Q3 Q1 Q3 Q2 Q1 Q1 Q3 Q1 Q2 Q4 Q2 Q2 Q1 Q4 Q3 Q4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [26] Q4 Q1 Q3 Q1 Q4 Q3 Q3 Q1 Q2 Q4 Q3 Q2 Q2 Q3 Q3 Q1 Q4 Q2 Q3 Q1 Q1 Q1 Q3 Q2 Q3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [51] Q2 Q1 Q4 Q4 Q3 Q4 Q2 Q1 Q2 Q4 Q1 Q1 Q1 Q4 Q3 Q4 Q2 Q4 Q4 Q4 Q4 Q2 Q1 Q2 Q4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [76] Q3 Q3 Q4 Q4 Q3 Q2 Q4 Q2 Q2 Q1 Q2 Q1 Q1 Q1 Q4 Q1 Q2 Q3 Q1 Q3 Q2 Q3 Q3 Q1 Q4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"ties")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] split-even</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"quantile_type")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Levels: Q1 Q2 Q3 Q4</span>
+<span class="r-in"><span><span class="fu">cut_quantile</span><span class="op">(</span><span class="va">x</span>, quantile_type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] Q4 Q3 Q4 Q3 Q2 Q2 Q3 Q2 Q2 Q3 Q1 Q3 Q2 Q1 Q1 Q3 Q1 Q2 Q4 Q2 Q2 Q1 Q4 Q3 Q4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [26] Q4 Q1 Q3 Q1 Q4 Q3 Q3 Q1 Q2 Q4 Q3 Q2 Q2 Q3 Q3 Q1 Q4 Q2 Q3 Q1 Q1 Q1 Q3 Q2 Q3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [51] Q2 Q1 Q4 Q4 Q3 Q4 Q2 Q1 Q2 Q4 Q1 Q1 Q1 Q4 Q3 Q4 Q2 Q4 Q4 Q4 Q4 Q2 Q1 Q2 Q4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [76] Q3 Q3 Q4 Q4 Q3 Q2 Q4 Q2 Q2 Q1 Q2 Q1 Q1 Q1 Q4 Q1 Q2 Q3 Q1 Q3 Q2 Q3 Q3 Q1 Q4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"ties")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] upward</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"quantile_type")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Levels: Q1 Q2 Q3 Q4</span>
+<span class="r-in"><span><span class="fu">cut_quantile</span><span class="op">(</span><span class="va">x</span>, labeller <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span>, <span class="va">breaks</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Group "</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] Group 4 Group 3 Group 4 Group 3 Group 2 Group 2 Group 3 Group 2 Group 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [10] Group 3 Group 1 Group 3 Group 2 Group 1 Group 1 Group 3 Group 1 Group 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [19] Group 4 Group 2 Group 2 Group 1 Group 4 Group 3 Group 4 Group 4 Group 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [28] Group 3 Group 1 Group 4 Group 3 Group 3 Group 1 Group 2 Group 4 Group 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [37] Group 2 Group 2 Group 3 Group 3 Group 1 Group 4 Group 2 Group 3 Group 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [46] Group 1 Group 1 Group 3 Group 2 Group 3 Group 2 Group 1 Group 4 Group 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [55] Group 3 Group 4 Group 2 Group 1 Group 2 Group 4 Group 1 Group 1 Group 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [64] Group 4 Group 3 Group 4 Group 2 Group 4 Group 4 Group 4 Group 4 Group 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [73] Group 1 Group 2 Group 4 Group 3 Group 3 Group 4 Group 4 Group 3 Group 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [82] Group 4 Group 2 Group 2 Group 1 Group 2 Group 1 Group 1 Group 1 Group 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [91] Group 1 Group 2 Group 3 Group 1 Group 3 Group 2 Group 3 Group 3 Group 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [100] Group 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"ties")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] upward</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"quantile_type")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Levels: Group 1 Group 2 Group 3 Group 4</span>
+<span class="r-in"><span><span class="fu">cut_quantile</span><span class="op">(</span><span class="va">x</span>, labeller <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Low"</span>, <span class="st">"Mid-low"</span>, <span class="st">"Mid-high"</span>, <span class="st">"High"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] High     Mid-high High     Mid-high Mid-low  Mid-low  Mid-high Mid-low </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [9] Mid-low  Mid-high Low      Mid-high Mid-low  Low      Low      Mid-high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [17] Low      Mid-low  High     Mid-low  Mid-low  Low      High     Mid-high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [25] High     High     Low      Mid-high Low      High     Mid-high Mid-high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [33] Low      Mid-low  High     Mid-high Mid-low  Mid-low  Mid-high Mid-high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [41] Low      High     Mid-low  Mid-high Low      Low      Low      Mid-high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [49] Mid-low  Mid-high Mid-low  Low      High     High     Mid-high High    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [57] Mid-low  Low      Mid-low  High     Low      Low      Low      High    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [65] Mid-high High     Mid-low  High     High     High     High     Mid-low </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [73] Low      Mid-low  High     Mid-high Mid-high High     High     Mid-high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [81] Mid-low  High     Mid-low  Mid-low  Low      Mid-low  Low      Low     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [89] Low      High     Low      Mid-low  Mid-high Low      Mid-high Mid-low </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [97] Mid-high Mid-high Low      High    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"ties")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] upward</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"quantile_type")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Levels: Low Mid-low Mid-high High</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

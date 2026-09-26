@@ -117,7 +117,7 @@ erglm_data |>
 
 `plot_by` changes *what’s binned* along the x-axis; `stratify_by`
 instead keeps the x-axis as-is and splits the plot into one facet panel
-per level of some other variable, via
+per level of some other, discrete variable, via
 [`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html).
 It’s useful when you want to check the model against a covariate without
 giving up the usual exposure-response view. Unlike `plot_by`,
@@ -128,11 +128,9 @@ and
 [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
 behave exactly as before within each panel.
 
-### Discrete `stratify_by`
-
-A categorical `stratify_by` is used as-is, one panel per level. Here we
-reuse the `ae1 ~ aucss + sex` model from above, faceting by `sex` while
-keeping `aucss` on the x-axis:
+`stratify_by` must name a discrete/categorical variable, used as-is –
+one panel per level. Here we reuse the `ae1 ~ aucss + sex` model from
+above, faceting by `sex` while keeping `aucss` on the x-axis:
 
 ``` r
 
@@ -145,24 +143,19 @@ erglm_data |>
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-6-1.png)
 
-### Continuous `stratify_by`
-
-A numeric `stratify_by` is automatically split into `n_strata` quantile
-bins (4 by default), and
-[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) reports
-a message when it does this, since it’s a decision made on your behalf.
-Here we facet by `weight`, overriding the default with `n_strata = 3`:
+A genuinely continuous covariate, like `weight`, needs binning into
+groups first –
+[`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+give full control over bin count, tie-breaking, and labels:
 
 ``` r
 
 erglm_data |> 
-  er_vpc(exposure = aucss, response = ae1, stratify_by = weight, n_strata = 3) |>
+  transform(weight_grp = cut_quantile(weight, n = 3)) |>
+  er_vpc(exposure = aucss, response = ae1, stratify_by = weight_grp) |>
   er_vpc_add_observed() |>
   er_vpc_add_simulated(model = mod, seed = 1234) |>
   plot()
-#> `stratify_by` (`weight`) is numeric; splitting into 3 quantile bins for
-#> faceting. Pass a categorical variable to `stratify_by`, or set `n_strata` to
-#> change the bin count.
 ```
 
 ![](plot-vpc_files/figure-html/unnamed-chunk-7-1.png)

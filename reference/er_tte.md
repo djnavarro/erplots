@@ -14,7 +14,7 @@ layers can express.
 ## Usage
 
 ``` r
-er_tte(data, time, event, stratify_by = NULL, n_strata = 4, conf_level = 0.95)
+er_tte(data, time, event, stratify_by = NULL, conf_level = 0.95)
 ```
 
 ## Arguments
@@ -35,15 +35,9 @@ er_tte(data, time, event, stratify_by = NULL, n_strata = 4, conf_level = 0.95)
 
 - stratify_by:
 
-  Optional stratification variable (unquoted, bare column name). A
-  categorical variable is used as-is; a numeric variable is split into
-  `n_strata` quantile bins. Defaults to `NULL` (a single, unstratified
-  curve).
-
-- n_strata:
-
-  Number of quantile bins, when `stratify_by` is numeric. Ignored when
-  `stratify_by` is `NULL` or categorical. Defaults to `4`.
+  Optional stratification variable (unquoted, bare column name), used
+  as-is. Must be discrete – a numeric column errors. Defaults to `NULL`
+  (a single, unstratified curve).
 
 - conf_level:
 
@@ -99,17 +93,18 @@ requires of a `response_type = "binary"` response.
 Optional `stratify_by` splits the Kaplan-Meier estimate into one curve
 per level, via
 [`survival::survfit()`](https://rdrr.io/pkg/survival/man/survfit.html)'s
-`~ strata` formula side – mirroring
-[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)'s
-`stratify_by`: a categorical variable is used as-is; a numeric variable
-is automatically split into `n_strata` quantile bins (via
-[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md),
-so `0`/placebo is kept in its own bin), with a message reporting that
-this happened. Unlike `time`/`event`, `stratify_by` must be a bare
-column name (not an arbitrary expression), matching
+`~ strata` formula side. It must name a discrete/categorical variable –
+mirroring
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)'s own
+`stratify_by`, a numeric one errors; bin it yourself first with
+[`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+and pass the resulting factor, for full control over bin
+count/tie-breaking/labels. Unlike `time`/`event`, `stratify_by` must be
+a bare column name (not an arbitrary expression), matching
 `exposure`/`response`/`stratify_by` elsewhere in the package.
 `object$km$table` gains a `strata` column when stratified;
-`object$strata` (`var`/`label`/`type`/`n_strata`) mirrors
+`object$strata` (`var`/`label`) mirrors
 [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)'s own
 `object$strata`.
 
@@ -134,8 +129,8 @@ lung |>
 #>   plot layers: <none>
 #>   output built: no
 
-# `lung$sex` is coded numerically (1/2); convert to a factor first, or
-# a numeric `stratify_by` is quantile-binned instead of used as-is
+# `lung$sex` is coded numerically (1/2); `stratify_by` requires a
+# discrete variable, so convert it to a factor first
 lung |>
   transform(sex = factor(sex, labels = c("Male", "Female"))) |>
   er_tte(time, status == 2, stratify_by = sex)
@@ -143,7 +138,7 @@ lung |>
 #>   tte variables:
 #>     - time:   time
 #>     - event:  status == 2
-#>     - stratify_by: sex (discrete)
+#>     - stratify_by: sex
 #>   kaplan-meier fit:
 #>     - Male: n=138, events=112, median=270
 #>     - Female: n=90, events=53, median=426

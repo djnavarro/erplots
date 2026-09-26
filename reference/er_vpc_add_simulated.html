@@ -105,7 +105,11 @@ Defaults to <code>100</code>.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Optional RNG seed, only used with <code>model</code>.</p></dd>
+<dd><p>Optional RNG seed. Used for <code>model</code>'s own simulation draws,
+and also (regardless of whether <code>sim</code>/<code>model</code> was supplied) to seed
+this layer's random tie-break when <code><a href="er_vpc.html">er_vpc()</a></code>'s <code>ties</code> is
+<code>"split-even"</code> – see <code><a href="er_vpc.html">er_vpc()</a></code>'s own <code>seed</code> argument for the
+observed layer's independent tie-break seed.</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>

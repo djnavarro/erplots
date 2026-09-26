@@ -51,8 +51,7 @@ er_style_tte_model_line(
 
 - strata:
 
-  `object$strata` (`var`/`label`/`type`/`n_strata`), or `NULL` when
-  unstratified.
+  `object$strata` (`var`/`label`), or `NULL` when unstratified.
 
 - theme:
 

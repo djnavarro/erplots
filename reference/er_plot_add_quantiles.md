@@ -14,6 +14,9 @@ er_plot_add_quantiles(
   style = NULL,
   bins = 4,
   conf_level = 0.95,
+  ties = "upward",
+  quantile_type = 7,
+  labeller = NULL,
   ...
 )
 ```
@@ -45,6 +48,13 @@ er_plot_add_quantiles(
 
   Confidence level for the interval. Defaults to `0.95`.
 
+- ties, quantile_type, labeller:
+
+  Passed straight through to
+  [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+  to control how the exposure variable is split into bins – see its
+  documentation for what each controls.
+
 - ...:
 
   Additional named arguments forwarded, unchanged, to `style` when it's
@@ -73,6 +83,15 @@ default to `"continuous"` and are summarised the same way as any other
 continuous response unless `response_type = "count"` is declared
 explicitly in
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md).
+
+`bins`/`ties`/`quantile_type`/`labeller` are local to this layer – they
+aren't shared with
+[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
+even when that layer groups by the same exposure variable.
+[`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
+warns (doesn't error) if the two disagree in that specific case; pass
+matching values to both calls to avoid the warning, or ignore it if the
+difference is intentional.
 
 ## See also
 

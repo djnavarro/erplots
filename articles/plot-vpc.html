@@ -175,21 +175,18 @@ the two groups:</p>
 </h2>
 <p><code>plot_by</code> changes <em>what’s binned</em> along the x-axis;
 <code>stratify_by</code> instead keeps the x-axis as-is and splits the
-plot into one facet panel per level of some other variable, via
-<code><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">ggplot2::facet_wrap()</a></code>. It’s useful when you want to check
-the model against a covariate without giving up the usual
+plot into one facet panel per level of some other, discrete variable,
+via <code><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">ggplot2::facet_wrap()</a></code>. It’s useful when you want to
+check the model against a covariate without giving up the usual
 exposure-response view. Unlike <code>plot_by</code>,
 <code>stratify_by</code> never changes what’s plotted on the x-axis or
 how it’s binned – both <code><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed()</a></code> and
 <code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> behave exactly as before within each
 panel.</p>
-<div class="section level3">
-<h3 id="discrete-stratify_by">Discrete <code>stratify_by</code><a class="anchor" aria-label="anchor" href="#discrete-stratify_by"></a>
-</h3>
-<p>A categorical <code>stratify_by</code> is used as-is, one panel per
-level. Here we reuse the <code>ae1 ~ aucss + sex</code> model from
-above, faceting by <code>sex</code> while keeping <code>aucss</code> on
-the x-axis:</p>
+<p><code>stratify_by</code> must name a discrete/categorical variable,
+used as-is – one panel per level. Here we reuse the
+<code>ae1 ~ aucss + sex</code> model from above, faceting by
+<code>sex</code> while keeping <code>aucss</code> on the x-axis:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -197,31 +194,23 @@ the x-axis:</p>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-vpc_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
-</div>
-<div class="section level3">
-<h3 id="continuous-stratify_by">Continuous <code>stratify_by</code><a class="anchor" aria-label="anchor" href="#continuous-stratify_by"></a>
-</h3>
-<p>A numeric <code>stratify_by</code> is automatically split into
-<code>n_strata</code> quantile bins (4 by default), and
-<code><a href="../reference/er_vpc.html">er_vpc()</a></code> reports a message when it does this, since it’s a
-decision made on your behalf. Here we facet by <code>weight</code>,
-overriding the default with <code>n_strata = 3</code>:</p>
+<p>A genuinely continuous covariate, like <code>weight</code>, needs
+binning into groups first –
+<code><a href="../reference/cut_quantile.html">cut_quantile()</a></code>/<code><a href="../reference/cut_quantile.html">cut_exposure_quantile()</a></code> give
+full control over bin count, tie-breaking, and labels:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">weight</span>, n_strata <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span>weight_grp <span class="op">=</span> <span class="fu"><a href="../reference/cut_quantile.html">cut_quantile</a></span><span class="op">(</span><span class="va">weight</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">weight_grp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; `stratify_by` (`weight`) is numeric; splitting into 3 quantile bins for</span></span>
-<span><span class="co">#&gt; faceting. Pass a categorical variable to `stratify_by`, or set `n_strata` to</span></span>
-<span><span class="co">#&gt; change the bin count.</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-vpc_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
 <p><code>stratify_by</code> must resolve to a different variable than
 <code>plot_by</code> (which defaults to the exposure variable) –
 faceting by the exact variable already driving the x-axis binning would
 give each panel a single bin, so <code><a href="../reference/er_vpc.html">er_vpc()</a></code> errors rather
 than allow it.</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="continuous-response">Continuous response<a class="anchor" aria-label="anchor" href="#continuous-response"></a>

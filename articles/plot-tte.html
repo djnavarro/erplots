@@ -142,11 +142,9 @@ stacked below the curve via patchwork, with a shared x-axis:</p>
 <p>Passing <code>stratify_by</code> to <code><a href="../reference/er_tte.html">er_tte()</a></code> splits the
 Kaplan-Meier estimate into one curve per level
 (<code>survival::survfit(... ~ strata)</code>), and every layer added
-afterwards follows suit. <code>lung$sex</code> is coded numerically
-(1/2), so we convert it to a factor first – otherwise a numeric
-<code>stratify_by</code> is automatically quantile-binned rather than
-used as-is (useful for a genuinely continuous covariate, not what we
-want here):</p>
+afterwards follows suit. <code>stratify_by</code> must name a
+discrete/categorical variable – <code>lung$sex</code> is coded
+numerically (1/2), so we convert it to a factor first:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung_sex</span> <span class="op">&lt;-</span> <span class="va">lung</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span>sex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sex</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Male"</span>, <span class="st">"Female"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -157,17 +155,15 @@ want here):</p>
 <span>  <span class="fu"><a href="../reference/er_tte_add_risktable.html">er_tte_add_risktable</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-tte_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
-<p>A numeric <code>stratify_by</code> is split into
-<code>n_strata</code> quantile bins instead, with a message reporting
-that this happened:</p>
+<p>A genuinely continuous covariate, like <code>age</code>, needs
+binning into groups first – <code><a href="../reference/cut_quantile.html">cut_quantile()</a></code> gives full
+control over bin count, tie-breaking, and labels:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lung</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">age</span>, n_strata <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span>age_grp <span class="op">=</span> <span class="fu"><a href="../reference/cut_quantile.html">cut_quantile</a></span><span class="op">(</span><span class="va">age</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_tte.html">er_tte</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">age_grp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_tte_add_curve.html">er_tte_add_curve</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; `stratify_by` (`age`) is numeric; splitting into 3 quantile bins. Pass a</span></span>
-<span><span class="co">#&gt; categorical variable to `stratify_by`, or set `n_strata` to change the bin</span></span>
-<span><span class="co">#&gt; count.</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-tte_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
 <div class="section level3">
 <h3 id="log-rank-test-annotation">Log-rank test annotation<a class="anchor" aria-label="anchor" href="#log-rank-test-annotation"></a>

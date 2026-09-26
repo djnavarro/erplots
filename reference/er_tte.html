@@ -77,7 +77,7 @@ the natural coordinate system for a Kaplan-Meier curve, not something
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_tte</span><span class="op">(</span><span class="va">data</span>, <span class="va">time</span>, <span class="va">event</span>, stratify_by <span class="op">=</span> <span class="cn">NULL</span>, n_strata <span class="op">=</span> <span class="fl">4</span>, conf_level <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_tte</span><span class="op">(</span><span class="va">data</span>, <span class="va">time</span>, <span class="va">event</span>, stratify_by <span class="op">=</span> <span class="cn">NULL</span>, conf_level <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -100,15 +100,8 @@ the natural coordinate system for a Kaplan-Meier curve, not something
 
 <dt id="arg-stratify-by">stratify_by<a class="anchor" aria-label="anchor" href="#arg-stratify-by"></a></dt>
 <dd><p>Optional stratification variable (unquoted, bare
-column name). A categorical variable is used as-is; a numeric
-variable is split into <code>n_strata</code> quantile bins. Defaults to <code>NULL</code>
-(a single, unstratified curve).</p></dd>
-
-
-<dt id="arg-n-strata">n_strata<a class="anchor" aria-label="anchor" href="#arg-n-strata"></a></dt>
-<dd><p>Number of quantile bins, when <code>stratify_by</code> is
-numeric. Ignored when <code>stratify_by</code> is <code>NULL</code> or categorical.
-Defaults to <code>4</code>.</p></dd>
+column name), used as-is. Must be discrete – a numeric column
+errors. Defaults to <code>NULL</code> (a single, unstratified curve).</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
@@ -148,16 +141,16 @@ or a numeric vector taking only the values <code>0</code> (censored) and <code>1
 (event) – exactly the same binary encoding <code><a href="er_plot.html">er_plot()</a></code> requires of a
 <code>response_type = "binary"</code> response.</p>
 <p>Optional <code>stratify_by</code> splits the Kaplan-Meier estimate into one curve
-per level, via <code><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survival::survfit()</a></code>'s <code>~ strata</code> formula side –
-mirroring <code><a href="er_vpc.html">er_vpc()</a></code>'s <code>stratify_by</code>: a categorical variable is used
-as-is; a numeric variable is automatically split into <code>n_strata</code>
-quantile bins (via <code><a href="cut_quantile.html">cut_exposure_quantile()</a></code>, so <code>0</code>/placebo is kept
-in its own bin), with a message reporting that this happened. Unlike
-<code>time</code>/<code>event</code>, <code>stratify_by</code> must be a bare column name (not an
-arbitrary expression), matching <code>exposure</code>/<code>response</code>/<code>stratify_by</code>
+per level, via <code><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survival::survfit()</a></code>'s <code>~ strata</code> formula side. It
+must name a discrete/categorical variable – mirroring <code><a href="er_plot.html">er_plot()</a></code>/
+<code><a href="er_vpc.html">er_vpc()</a></code>'s own <code>stratify_by</code>, a numeric one errors; bin it yourself
+first with <code><a href="cut_quantile.html">cut_quantile()</a></code>/<code><a href="cut_quantile.html">cut_exposure_quantile()</a></code> and pass the
+resulting factor, for full control over bin count/tie-breaking/labels.
+Unlike <code>time</code>/<code>event</code>, <code>stratify_by</code> must be a bare column name (not
+an arbitrary expression), matching <code>exposure</code>/<code>response</code>/<code>stratify_by</code>
 elsewhere in the package. <code>object$km$table</code> gains a <code>strata</code> column
-when stratified; <code>object$strata</code> (<code>var</code>/<code>label</code>/<code>type</code>/<code>n_strata</code>)
-mirrors <code><a href="er_vpc.html">er_vpc()</a></code>'s own <code>object$strata</code>.</p>
+when stratified; <code>object$strata</code> (<code>var</code>/<code>label</code>) mirrors <code><a href="er_vpc.html">er_vpc()</a></code>'s
+own <code>object$strata</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -180,8 +173,8 @@ mirrors <code><a href="er_vpc.html">er_vpc()</a></code>'s own <code>object$strat
 <span class="r-out co"><span class="r-pr">#&gt;</span>   plot layers: &lt;none&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   output built: no</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># `lung$sex` is coded numerically (1/2); convert to a factor first, or</span></span></span>
-<span class="r-in"><span><span class="co"># a numeric `stratify_by` is quantile-binned instead of used as-is</span></span></span>
+<span class="r-in"><span><span class="co"># `lung$sex` is coded numerically (1/2); `stratify_by` requires a</span></span></span>
+<span class="r-in"><span><span class="co"># discrete variable, so convert it to a factor first</span></span></span>
 <span class="r-in"><span><span class="va">lung</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span>sex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sex</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Male"</span>, <span class="st">"Female"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">er_tte</span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span> <span class="op">==</span> <span class="fl">2</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span></span></span>
@@ -189,7 +182,7 @@ mirrors <code><a href="er_vpc.html">er_vpc()</a></code>'s own <code>object$strat
 <span class="r-out co"><span class="r-pr">#&gt;</span>   tte variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     - time:   time</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     - event:  status == 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     - stratify_by: sex (discrete)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     - stratify_by: sex</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   kaplan-meier fit:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     - Male: n=138, events=112, median=270</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     - Female: n=90, events=53, median=426</span>

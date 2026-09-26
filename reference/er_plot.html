@@ -93,7 +93,7 @@
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Layers are either singleton or additive: model, summary, quantile, and data layers are singleton (a second call replaces the previous); groups are additive (each call adds a panel).</p>
-<p><code>stratify_by</code> declares a discrete variable used for colour/fill across layers; each layer's <code>keep_strata</code> controls whether it uses stratification. Rows with <code>NA</code> in the stratification variable are kept as their own level.</p>
+<p><code>stratify_by</code> declares a discrete variable used for colour/fill across layers; each layer's <code>keep_strata</code> controls whether it uses stratification. Rows with <code>NA</code> in the stratification variable are kept as their own level. A numeric <code>stratify_by</code> errors – bin it yourself first with <code><a href="cut_quantile.html">cut_quantile()</a></code>/<code><a href="cut_quantile.html">cut_exposure_quantile()</a></code> and pass the resulting factor.</p>
 <p><code>response_type</code> governs response-scale defaults and which interval method the quantile and VPC layers use; see <code>response_type</code> below and <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code> for details.</p>
     </div>
     <div class="section level2">

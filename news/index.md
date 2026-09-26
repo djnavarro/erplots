@@ -2,6 +2,89 @@
 
 ## erplots 0.2.0
 
+- [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+  gain a `ties` argument controlling how a value that sits exactly on an
+  interior quantile break is assigned (`"upward"`, the default and prior
+  behaviour; `"downward"`; or `"split-even"`, which randomly balances
+  tied values between the two candidate bins), plus an opt-in `seed`
+  argument for reproducing `"split-even"`’s random tie-break. The
+  resolved rule is recorded as a `"ties"` attribute on the returned
+  factor.
+
+- [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+  gain a `quantile_type` argument, passed straight through to
+  \[stats::quantile()\]’s own `type` argument for computing the quantile
+  break points. Defaults to `7` (unchanged prior behaviour) and is
+  recorded as a `"quantile_type"` attribute on the returned factor.
+
+- [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+  gain a `labeller` argument for customising quantile-bin labels: a
+  function called as `labeller(n, breaks)`, or a character vector used
+  directly. Defaults to `NULL` (unchanged `"Q1"`/`"Q2"`/… labelling);
+  [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)’s
+  separate `"Placebo"` level is untouched by `labeller`.
+
+- [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)/[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
+  gain `ties`/ `quantile_type`/`labeller` arguments, forwarded to
+  [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md).
+  These are local to each call – they aren’t required to agree across
+  different
+  [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
+  calls, or with
+  [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
+  – except in one case:
+  [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
+  now warns if
+  [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
+  bins *the exposure variable itself* differently than
+  [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
+  does, since the two panels would then show inconsistent quantile bins
+  for the same variable.
+
+- [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) gains
+  `ties`/`quantile_type`/`labeller` for `plot_by`, plus a `seed`
+  argument for reproducing a `"split-even"` tie-break. Unlike the
+  [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)/[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
+  arguments above, these live on
+  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) itself
+  rather than on
+  [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md),
+  since the observed and simulated layers must always bin `plot_by`
+  identically –
+  [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)’s
+  own `seed` argument now also seeds its independent `"split-even"`
+  tie-break.
+
+### Breaking changes
+
+- `stratify_by` must now name a discrete/categorical variable in
+  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) (and
+  in the not-yet-released
+  [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)); a
+  numeric column errors instead of being automatically split into
+  quantile bins. The `n_strata` argument is removed from both. Bin a
+  continuous covariate yourself first with
+  [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md),
+  which also gives full control over bin count, tie-breaking, and labels
+  – see
+  [`?er_vpc`](https://erplots.djnavarro.net/reference/er_vpc.md)/[`?er_tte`](https://erplots.djnavarro.net/reference/er_tte.md).
+
+### Bug fixes
+
+- [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) now
+  errors clearly when `stratify_by` names a numeric column, instead of
+  silently mapping it to a continuous colour scale (which broke every
+  stratified builder’s discrete-groups assumption – ribbons, per-stratum
+  lines, dodging – with no warning). `stratify_by` has always been
+  documented as requiring a discrete variable; this was simply never
+  validated.
+- [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)’s
+  `bins` argument now actually controls the number of quantile bins used
+  for a continuous grouping variable. Previously documented but silently
+  ignored – every continuous grouping variable was always split into
+  [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)’s
+  own default of 4 bins, regardless of what `bins` was set to.
+
 ## erplots 0.1.2
 
 CRAN release: 2026-09-09
