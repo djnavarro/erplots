@@ -2,6 +2,40 @@
 
 ## erplots 0.2.0
 
+### New features
+
+- Added [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md),
+  a third mini-grammar (alongside
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md))
+  for Kaplan-Meier/survival-over-time figures, built around a time axis,
+  a survival-probability axis, and an optional discrete `stratify_by`.
+  Five singleton layers:
+  [`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md)
+  (the KM step curve + confidence band),
+  [`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)
+  (censoring tick marks),
+  [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)
+  (a number-at-risk panel stacked below the curve),
+  [`er_tte_add_pvalue()`](https://erplots.djnavarro.net/reference/er_tte_add_pvalue.md)
+  (a log-rank test annotation, for a stratified object), and
+  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
+  (a fitted parametric `S(t)` curve/ribbon overlay).
+  [`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)
+  styles labels, titles, axis limits, formatters, the legend key, and
+  panel heights, mirroring
+  [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)/[`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md).
+  See the new `plot-tte` vignette.
+- Added
+  [`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+  a fourth model-interface generic (see
+  [`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md))
+  powering
+  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)’s
+  `S(t)` overlay. The new companion package `ertte`
+  (`Suggests`/`Remotes`-only, GitHub- only like `erglm`/`emaxnls`)
+  implements it, alongside the existing
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  methods.
 - [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   gain a `ties` argument controlling how a value that sits exactly on an
   interior quantile break is assigned (`"upward"`, the default and prior
@@ -10,20 +44,17 @@
   argument for reproducing `"split-even"`’s random tie-break. The
   resolved rule is recorded as a `"ties"` attribute on the returned
   factor.
-
 - [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   gain a `quantile_type` argument, passed straight through to
   \[stats::quantile()\]’s own `type` argument for computing the quantile
   break points. Defaults to `7` (unchanged prior behaviour) and is
   recorded as a `"quantile_type"` attribute on the returned factor.
-
 - [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   gain a `labeller` argument for customising quantile-bin labels: a
   function called as `labeller(n, breaks)`, or a character vector used
   directly. Defaults to `NULL` (unchanged `"Q1"`/`"Q2"`/… labelling);
   [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)’s
   separate `"Placebo"` level is untouched by `labeller`.
-
 - [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)/[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
   gain `ties`/ `quantile_type`/`labeller` arguments, forwarded to
   [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md).
@@ -40,7 +71,6 @@
   [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
   does, since the two panels would then show inconsistent quantile bins
   for the same variable.
-
 - [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) gains
   `ties`/`quantile_type`/`labeller` for `plot_by`, plus a `seed`
   argument for reproducing a `"split-even"` tie-break. Unlike the
@@ -54,23 +84,57 @@
   [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)’s
   own `seed` argument now also seeds its independent `"split-even"`
   tie-break.
+- [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) gains
+  an optional `stratify_by` for faceting a VPC into one panel per
+  discrete stratum, mirroring
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s
+  own stratification (facet-only here, since a VPC has no colour/fill
+  precedence rule to reconcile). Errors if `stratify_by` resolves to the
+  same variable as `plot_by`.
+
+### Improvements
+
+- `emaxnls` is back in `Suggests`/`Remotes` (pinned to
+  `emaxnls (>= 0.1.1.9000)`, the GitHub development version), and its
+  gated examples in
+  [`?erplots_data`](https://erplots.djnavarro.net/reference/erplots_data.md)
+  are reinstated, now that `emaxnls` registers the
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  methods. It had been stripped for the 0.1.0 CRAN submission, ahead of
+  that registration landing.
 
 ### Breaking changes
 
 - `stratify_by` must now name a discrete/categorical variable in
-  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) (and
-  in the not-yet-released
-  [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)); a
+  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md); a
   numeric column errors instead of being automatically split into
-  quantile bins. The `n_strata` argument is removed from both. Bin a
+  quantile bins, and the `n_strata` argument is removed. Bin a
   continuous covariate yourself first with
-  [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md),
+  [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/
+  [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md),
   which also gives full control over bin count, tie-breaking, and labels
-  – see
-  [`?er_vpc`](https://erplots.djnavarro.net/reference/er_vpc.md)/[`?er_tte`](https://erplots.djnavarro.net/reference/er_tte.md).
+  – see [`?er_vpc`](https://erplots.djnavarro.net/reference/er_vpc.md).
+  ([`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)’s own
+  `stratify_by` has the same discrete-only requirement from the outset,
+  being new in this release.)
 
 ### Bug fixes
 
+- [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)’s
+  curve/ribbon no longer goes stale after `er_plot_theme(xlim = ...)`
+  narrows or widens the exposure axis once the model layer has already
+  been added – the prediction grid is now recomputed at build time
+  rather than cached from add-layer time
+  ([\#14](https://github.com/djnavarro/erplots/issues/14)).
+- The data, quantile, and group layers now drop (and warn about) any
+  observations falling outside `er_plot_theme(xlim = )`/`ylim = )`,
+  instead of silently handing them to a geom that renders past the
+  visible panel with no visual cue
+  ([\#16](https://github.com/djnavarro/erplots/issues/16)).
+- [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)/[`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
+  summary markers falling outside `er_vpc_theme(xlim = )`/`ylim = )` are
+  now dropped, with a warning, instead of silently drawn past the panel
+  ([\#17](https://github.com/djnavarro/erplots/issues/17)).
 - [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) now
   errors clearly when `stratify_by` names a numeric column, instead of
   silently mapping it to a continuous colour scale (which broke every
