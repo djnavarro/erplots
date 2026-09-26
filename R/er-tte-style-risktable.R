@@ -1,11 +1,10 @@
 #' Number-at-risk builders for the TTE grammar
 #'
 #' Builder functions for the `risktable` layer ([er_tte_add_risktable()]),
-#' drawing a row of risk counts per stratum at a grid of time points. See
-#' [er_style_tte()] for the shared interface every TTE-grammar builder
-#' implements. Unlike every other TTE-grammar builder, this one's geoms
-#' are drawn into their own patchwork panel below the curve, not onto the
-#' curve's panel directly -- see [er_tte_build()].
+#' drawing a row of risk counts per stratum at a grid of time points.
+#' Unlike every other TTE-grammar builder, this one's geoms are drawn
+#' into their own patchwork panel below the curve, not onto the curve's
+#' panel directly -- see [er_tte_build()].
 #'
 #' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame (`object$data`).
@@ -25,6 +24,9 @@
 #' @param text_size Size of the risk-count text. Default `3.5`.
 #'
 #' @details
+#' See [er_style_tte()] for the shared interface every TTE-grammar
+#' builder implements.
+#'
 #' Rows are ordered top-to-bottom in the same order strata first appear
 #' in `config$table` (reversed, since a ggplot2 discrete y-axis plots
 #' its first level at the bottom); an unstratified fit gets a single

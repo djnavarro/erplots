@@ -53,10 +53,12 @@ A geom, or a list of geoms.
 \description{
 Builder functions for the \code{curve} layer (\code{\link[=er_tte_add_curve]{er_tte_add_curve()}}),
 drawing the Kaplan-Meier estimate as a step function with an optional
-step-shaped confidence band. See \code{\link[=er_style_tte]{er_style_tte()}} for the shared
-interface every TTE-grammar builder implements.
+step-shaped confidence band.
 }
 \details{
+See \code{\link[=er_style_tte]{er_style_tte()}} for the shared interface every TTE-grammar
+builder implements.
+
 A Kaplan-Meier confidence band is a step function, just like the
 curve itself, but ggplot2 has no built-in "step ribbon" geom (unlike
 \code{\link[ggplot2:geom_step]{ggplot2::geom_step()}} for the line). \code{er_style_tte_curve_km()} works

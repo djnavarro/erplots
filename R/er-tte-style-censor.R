@@ -1,9 +1,7 @@
 #' Censoring-mark builders for the TTE grammar
 #'
 #' Builder functions for the `censor` layer ([er_tte_add_censor()]),
-#' marking each censoring time directly on the Kaplan-Meier curve. See
-#' [er_style_tte()] for the shared interface every TTE-grammar builder
-#' implements.
+#' marking each censoring time directly on the Kaplan-Meier curve.
 #'
 #' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame (`object$data`).
@@ -25,6 +23,9 @@
 #' @param stroke Point stroke width. Default `0.75`.
 #'
 #' @details
+#' See [er_style_tte()] for the shared interface every TTE-grammar
+#' builder implements.
+#'
 #' A censoring-only row of the KM table (`n_censor > 0`, `n_event == 0`)
 #' carries the survival value the curve already had going into that
 #' time -- Kaplan-Meier survival only drops at an *event* time -- so a

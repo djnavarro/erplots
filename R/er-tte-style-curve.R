@@ -2,8 +2,7 @@
 #'
 #' Builder functions for the `curve` layer ([er_tte_add_curve()]),
 #' drawing the Kaplan-Meier estimate as a step function with an optional
-#' step-shaped confidence band. See [er_style_tte()] for the shared
-#' interface every TTE-grammar builder implements.
+#' step-shaped confidence band.
 #'
 #' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame (`object$data`).
@@ -26,6 +25,9 @@
 #' @param linewidth Width of the step curve's line. Default `1`.
 #'
 #' @details
+#' See [er_style_tte()] for the shared interface every TTE-grammar
+#' builder implements.
+#'
 #' A Kaplan-Meier confidence band is a step function, just like the
 #' curve itself, but ggplot2 has no built-in "step ribbon" geom (unlike
 #' [ggplot2::geom_step()] for the line). `er_style_tte_curve_km()` works

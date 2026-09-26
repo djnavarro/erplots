@@ -51,11 +51,12 @@ A geom, or a list of geoms.
 }
 \description{
 Builder functions for the \code{censor} layer (\code{\link[=er_tte_add_censor]{er_tte_add_censor()}}),
-marking each censoring time directly on the Kaplan-Meier curve. See
-\code{\link[=er_style_tte]{er_style_tte()}} for the shared interface every TTE-grammar builder
-implements.
+marking each censoring time directly on the Kaplan-Meier curve.
 }
 \details{
+See \code{\link[=er_style_tte]{er_style_tte()}} for the shared interface every TTE-grammar
+builder implements.
+
 A censoring-only row of the KM table (\code{n_censor > 0}, \code{n_event == 0})
 carries the survival value the curve already had going into that
 time -- Kaplan-Meier survival only drops at an \emph{event} time -- so a

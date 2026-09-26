@@ -93,36 +93,40 @@ supplied, \code{style} is also registered as a side effect -- see
 \code{\link[=er_style_labels]{er_style_labels()}}.
 }
 \description{
-\code{er_style_tag()} is the single, shared self-declaration mechanism every
-\verb{er_style_*()} builder in the package -- across all three grammars,
-\code{\link[=er_plot]{er_plot()}}/\code{\link[=er_vpc]{er_vpc()}}/\code{\link[=er_tte]{er_tte()}} alike -- can opt into. Attaching a tag
-turns a plain builder function into one the relevant \verb{_add_*()} function
-can check itself against: which structural family it belongs to, which
-layer it's meant for, which response/\code{plot_by} types it supports, and a
-couple of narrower rendering/labelling hints. In that sense it functions
-as an informal builder registry -- not a lookup table you register
-\emph{into}, but a way of stamping a function with metadata another function
-can later read back off it and act on, entirely by attribute, with no
-central list anywhere. Every built-in builder carries a tag; nothing
-requires a custom builder to.
+\code{er_style_tag()} is the shared self-declaration mechanism every
+\verb{er_style_*()} builder -- across all three grammars, \code{\link[=er_plot]{er_plot()}}/
+\code{\link[=er_vpc]{er_vpc()}}/\code{\link[=er_tte]{er_tte()}} alike -- can opt into, attaching metadata that the
+relevant \verb{_add_*()} function later reads back off it and checks itself
+against.
 }
 \details{
-Nine tags exist today, each optional and independent -- pass only the
+In that sense it functions as an informal builder registry -- not a
+lookup table you register \emph{into}, but a way of stamping a function with
+metadata another function can later read back off it and act on,
+entirely by attribute, with no central list anywhere. Every built-in
+builder carries a tag; nothing requires a custom builder to.
+
+Ten tags exist today, each optional and independent -- pass only the
 ones a given builder needs, in one call, rather than chaining separate
-setters. They fall into three groups: which \emph{structural} family a
-builder belongs to (\code{layout} for the data layer, \code{vpc_layout} for a VPC
-builder -- deliberately two separate arguments, not one shared value
-space, since the two pairs mean unrelated things), which layer it's
-meant to be plugged into (\code{layer}, a flat namespace shared across all
-three grammars), and a handful of narrower rendering/labelling/checking
-hints (\code{fill_role}, \code{y_role}, \code{draw_order}, \code{response_types},
+setters. They fall into four groups, one per section below:
+\itemize{
+\item Structural tags (\code{layout}, \code{vpc_layout}) -- which structural family a
+builder belongs to.
+\item The layer tag (\code{layer}) -- which layer a builder is meant to be
+plugged into.
+\item Rendering and labelling hints (\code{fill_role}, \code{y_role}, \code{draw_order}).
+\item Type-checking tags for VPC builders (\code{response_types},
 \code{plot_by_types}, \code{marker_source}).
+\item Registering a label (\code{label}, \code{overwrite}).
+}
+}
+\section{Structural tags}{
 
 \code{layout} is a required tag for a data-layer builder specifically:
 \code{\link[=er_plot_add_data]{er_plot_add_data()}} reads it off \code{style} to decide whether to place
-the output geoms into the main panel (\code{layout = "overlay"}) or to put them into
-separate strip-like panels above and below the main panel (\code{layout = "panel"}).
-No other layer or grammar uses this tag.
+the output geoms into the main panel (\code{layout = "overlay"}) or to put
+them into separate strip-like panels above and below the main panel
+(\code{layout = "panel"}). No other layer or grammar uses this tag.
 
 \code{vpc_layout} is the VPC analogue, but optional rather than required, and
 checked between two builders rather than read for a structural decision:
@@ -142,19 +146,12 @@ layout-matched pair instead (built-ins already are), or leave
 adapt their x-position to \code{plot_by}'s type at build time rather than
 declaring one family statically -- to skip the check entirely, the
 same opt-in treatment \code{layer} gets.
+}
 
-\code{fill_role} and \code{y_role} are both optional, and can be used
-to title a legend/axis correctly: \code{fill_role = "density"} (used by
-\code{\link[=er_style_data_hex]{er_style_data_hex()}}) says a builder's \code{fill} aesthetic encodes bin
-density rather than strata; \code{y_role = "count"} (used by
-\code{\link[=er_style_group_histogram]{er_style_group_histogram()}}) says a group-layer builder's y-axis
-means counts rather than the group variable itself. A builder that
-omits either tag keeps the default behaviour (\code{fill} means strata;
-the y-axis is titled with the group variable's label), which is
-correct for most builders.
+\section{The layer tag}{
 
-\code{layer} is also optional, but unlike \code{fill_role}/\code{y_role} it isn't read
-for labelling. It's read by every \verb{er_plot_add_*()}/\verb{er_vpc_add_*()}/
+\code{layer} is optional, but unlike \code{fill_role}/\code{y_role} it isn't read for
+labelling. It's read by every \verb{er_plot_add_*()}/\verb{er_vpc_add_*()}/
 \verb{er_tte_add_*()} function to catch a builder plugged into the wrong
 layer -- e.g. passing a quantile builder to \code{er_plot_add_data()}, or an
 \code{er_plot()} summary builder to \code{er_tte_add_summary()} -- with an
@@ -170,6 +167,19 @@ owning grammar legible on sight, including in \code{\link[=er_style_labels]{er_s
 \code{layer} column. A custom builder that omits \code{layer} is never checked:
 it is opt-in, not a requirement like \code{layout} is for a data-layer
 builder.
+}
+
+\section{Rendering and labelling hints}{
+
+\code{fill_role} and \code{y_role} are both optional, and can be used
+to title a legend/axis correctly: \code{fill_role = "density"} (used by
+\code{\link[=er_style_data_hex]{er_style_data_hex()}}) says a builder's \code{fill} aesthetic encodes bin
+density rather than strata; \code{y_role = "count"} (used by
+\code{\link[=er_style_group_histogram]{er_style_group_histogram()}}) says a group-layer builder's y-axis
+means counts rather than the group variable itself. A builder that
+omits either tag keeps the default behaviour (\code{fill} means strata;
+the y-axis is titled with the group variable's label), which is
+correct for most builders.
 
 \code{draw_order} only applies to an overlay-layout data builder (\code{layout = "overlay"}), and controls whether its geoms are drawn before or after
 the model/summary/quantile layers when they share the main panel.
@@ -184,6 +194,9 @@ summary annotation. \code{draw_order} has no effect on a panel-layout data
 builder (e.g. \code{er_style_data_boxjitter()}), since those geoms are
 drawn in their own separate panels, never sharing space with the model/
 summary/quantile layers.
+}
+
+\section{Type-checking tags for VPC builders}{
 
 \code{response_types} and \code{plot_by_types} are both optional, and -- unlike
 every other tag above -- are checked against the \emph{data}, not another
@@ -206,18 +219,20 @@ unchanged (though it's then responsible for guarding against its own
 incompatible inputs, the way every built-in VPC builder still does
 internally as a fallback).
 
-\code{marker_source} is also optional and VPC-specific, read by
-\code{.clip_vpc_config_to_limits()} (see \code{\link[=er_vpc_theme]{er_vpc_theme()}}'s \code{xlim}/\code{ylim})
-to decide which of a VPC observed/simulated builder's two config
-tables to crop-and-warn against when a marker falls outside the
-plotted axis limits. A builder that plots \code{config$summary} (e.g.
-\code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}) should tag
+\code{marker_source} is also optional and VPC-specific. It's used when
+cropping a built VPC to \code{xlim}/\code{ylim} (see \code{\link[=er_vpc_theme]{er_vpc_theme()}}) to decide
+which of a builder's two config tables to check for a marker falling
+outside the plotted axis limits. A builder that plots \code{config$summary}
+(e.g. \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}) should tag
 \code{marker_source = "summary"}; one that plots \code{config$percentiles}
 (e.g. \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}},
 \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}) should tag
 \code{marker_source = "percentiles"}. An untagged builder has both tables
 checked, which is always safe but can produce a spurious warning about
 a table the builder never actually draws from.
+}
+
+\section{Registering a label}{
 
 \code{label} is unlike every tag above, in that it isn't purely
 descriptive: supplying it registers \code{style} as a side effect, so that
@@ -238,6 +253,7 @@ script that edits a custom labelled builder's body and re-tags it hits
 this -- unless \code{overwrite = TRUE} is passed, which replaces the
 registration unconditionally.
 }
+
 \examples{
 build_data_density <- er_style_tag(
   function(data, config, stratify, exposure, response, strata, theme, ...) {

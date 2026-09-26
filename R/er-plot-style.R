@@ -177,18 +177,11 @@ NULL
 
 #' Register a builder's structural/aesthetic metadata
 #'
-#' `er_style_tag()` is the single, shared self-declaration mechanism every
-#' `er_style_*()` builder in the package -- across all three grammars,
-#' [er_plot()]/[er_vpc()]/[er_tte()] alike -- can opt into. Attaching a tag
-#' turns a plain builder function into one the relevant `_add_*()` function
-#' can check itself against: which structural family it belongs to, which
-#' layer it's meant for, which response/`plot_by` types it supports, and a
-#' couple of narrower rendering/labelling hints. In that sense it functions
-#' as an informal builder registry -- not a lookup table you register
-#' *into*, but a way of stamping a function with metadata another function
-#' can later read back off it and act on, entirely by attribute, with no
-#' central list anywhere. Every built-in builder carries a tag; nothing
-#' requires a custom builder to.
+#' `er_style_tag()` is the shared self-declaration mechanism every
+#' `er_style_*()` builder -- across all three grammars, [er_plot()]/
+#' [er_vpc()]/[er_tte()] alike -- can opt into, attaching metadata that the
+#' relevant `_add_*()` function later reads back off it and checks itself
+#' against.
 #'
 #' @param style A function matching the standard signature for the grammar
 #'   it's meant for -- see [er_style()] (`er_plot()`), [er_style_vpc()]
@@ -253,22 +246,31 @@ NULL
 #'
 
 #' @details
-#' Nine tags exist today, each optional and independent -- pass only the
-#' ones a given builder needs, in one call, rather than chaining separate
-#' setters. They fall into three groups: which *structural* family a
-#' builder belongs to (`layout` for the data layer, `vpc_layout` for a VPC
-#' builder -- deliberately two separate arguments, not one shared value
-#' space, since the two pairs mean unrelated things), which layer it's
-#' meant to be plugged into (`layer`, a flat namespace shared across all
-#' three grammars), and a handful of narrower rendering/labelling/checking
-#' hints (`fill_role`, `y_role`, `draw_order`, `response_types`,
-#' `plot_by_types`, `marker_source`).
+#' In that sense it functions as an informal builder registry -- not a
+#' lookup table you register *into*, but a way of stamping a function with
+#' metadata another function can later read back off it and act on,
+#' entirely by attribute, with no central list anywhere. Every built-in
+#' builder carries a tag; nothing requires a custom builder to.
 #'
+#' Ten tags exist today, each optional and independent -- pass only the
+#' ones a given builder needs, in one call, rather than chaining separate
+#' setters. They fall into four groups, one per section below:
+#'
+#' - Structural tags (`layout`, `vpc_layout`) -- which structural family a
+#'   builder belongs to.
+#' - The layer tag (`layer`) -- which layer a builder is meant to be
+#'   plugged into.
+#' - Rendering and labelling hints (`fill_role`, `y_role`, `draw_order`).
+#' - Type-checking tags for VPC builders (`response_types`,
+#'   `plot_by_types`, `marker_source`).
+#' - Registering a label (`label`, `overwrite`).
+#'
+#' @section Structural tags:
 #' `layout` is a required tag for a data-layer builder specifically:
-#' [er_plot_add_data()] reads it off `style` to decide whether to place 
-#' the output geoms into the main panel (`layout = "overlay"`) or to put them into
-#' separate strip-like panels above and below the main panel (`layout = "panel"`).
-#' No other layer or grammar uses this tag.
+#' [er_plot_add_data()] reads it off `style` to decide whether to place
+#' the output geoms into the main panel (`layout = "overlay"`) or to put
+#' them into separate strip-like panels above and below the main panel
+#' (`layout = "panel"`). No other layer or grammar uses this tag.
 #'
 #' `vpc_layout` is the VPC analogue, but optional rather than required, and
 #' checked between two builders rather than read for a structural decision:
@@ -289,18 +291,9 @@ NULL
 #' declaring one family statically -- to skip the check entirely, the
 #' same opt-in treatment `layer` gets.
 #'
-#' `fill_role` and `y_role` are both optional, and can be used
-#' to title a legend/axis correctly: `fill_role = "density"` (used by
-#' [er_style_data_hex()]) says a builder's `fill` aesthetic encodes bin
-#' density rather than strata; `y_role = "count"` (used by
-#' [er_style_group_histogram()]) says a group-layer builder's y-axis
-#' means counts rather than the group variable itself. A builder that
-#' omits either tag keeps the default behaviour (`fill` means strata;
-#' the y-axis is titled with the group variable's label), which is
-#' correct for most builders.
-#'
-#' `layer` is also optional, but unlike `fill_role`/`y_role` it isn't read
-#' for labelling. It's read by every `er_plot_add_*()`/`er_vpc_add_*()`/
+#' @section The layer tag:
+#' `layer` is optional, but unlike `fill_role`/`y_role` it isn't read for
+#' labelling. It's read by every `er_plot_add_*()`/`er_vpc_add_*()`/
 #' `er_tte_add_*()` function to catch a builder plugged into the wrong
 #' layer -- e.g. passing a quantile builder to `er_plot_add_data()`, or an
 #' `er_plot()` summary builder to `er_tte_add_summary()` -- with an
@@ -317,6 +310,17 @@ NULL
 #' it is opt-in, not a requirement like `layout` is for a data-layer
 #' builder.
 #'
+#' @section Rendering and labelling hints:
+#' `fill_role` and `y_role` are both optional, and can be used
+#' to title a legend/axis correctly: `fill_role = "density"` (used by
+#' [er_style_data_hex()]) says a builder's `fill` aesthetic encodes bin
+#' density rather than strata; `y_role = "count"` (used by
+#' [er_style_group_histogram()]) says a group-layer builder's y-axis
+#' means counts rather than the group variable itself. A builder that
+#' omits either tag keeps the default behaviour (`fill` means strata;
+#' the y-axis is titled with the group variable's label), which is
+#' correct for most builders.
+#'
 #' `draw_order` only applies to an overlay-layout data builder (`layout =
 #' "overlay"`), and controls whether its geoms are drawn before or after
 #' the model/summary/quantile layers when they share the main panel.
@@ -332,6 +336,7 @@ NULL
 #' drawn in their own separate panels, never sharing space with the model/
 #' summary/quantile layers.
 #'
+#' @section Type-checking tags for VPC builders:
 #' `response_types` and `plot_by_types` are both optional, and -- unlike
 #' every other tag above -- are checked against the *data*, not another
 #' builder: [er_vpc_add_observed()]/[er_vpc_add_simulated()] each check
@@ -353,12 +358,11 @@ NULL
 #' incompatible inputs, the way every built-in VPC builder still does
 #' internally as a fallback).
 #'
-#' `marker_source` is also optional and VPC-specific, read by
-#' `.clip_vpc_config_to_limits()` (see [er_vpc_theme()]'s `xlim`/`ylim`)
-#' to decide which of a VPC observed/simulated builder's two config
-#' tables to crop-and-warn against when a marker falls outside the
-#' plotted axis limits. A builder that plots `config$summary` (e.g.
-#' [er_style_vpc_observed_mean_errorbar()]) should tag
+#' `marker_source` is also optional and VPC-specific. It's used when
+#' cropping a built VPC to `xlim`/`ylim` (see [er_vpc_theme()]) to decide
+#' which of a builder's two config tables to check for a marker falling
+#' outside the plotted axis limits. A builder that plots `config$summary`
+#' (e.g. [er_style_vpc_observed_mean_errorbar()]) should tag
 #' `marker_source = "summary"`; one that plots `config$percentiles`
 #' (e.g. [er_style_vpc_observed_quantile_line()],
 #' [er_style_vpc_observed_quantile_errorbar()]) should tag
@@ -366,6 +370,7 @@ NULL
 #' checked, which is always safe but can produce a spurious warning about
 #' a table the builder never actually draws from.
 #'
+#' @section Registering a label:
 #' `label` is unlike every tag above, in that it isn't purely
 #' descriptive: supplying it registers `style` as a side effect, so that
 #' the corresponding `_add_*()` function can accept the string in place of

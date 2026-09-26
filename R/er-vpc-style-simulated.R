@@ -4,9 +4,7 @@
 #' drawing the simulated side of a visual predictive check as a
 #' mean + percentile interval per bin (the default, adaptive to
 #' `plot_by`'s type), continuous-x percentile bands, or a
-#' point/interval per bin *and* per requested percentile. See
-#' [er_style_vpc()] for the shared interface every VPC-grammar builder
-#' implements.
+#' point/interval per bin *and* per requested percentile.
 #'
 #' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame.
@@ -63,7 +61,11 @@
 #' @param ... Additional named arguments forwarded from
 #'   [er_vpc_add_simulated()]'s own `...`.
 #'
-#' @details `er_style_vpc_simulated_mean_errorbar()` (the default) plots
+#' @details
+#' See [er_style_vpc()] for the shared interface every VPC-grammar
+#' builder implements.
+#'
+#' `er_style_vpc_simulated_mean_errorbar()` (the default) plots
 #' `config$summary`'s mean + percentile interval (of the mean, across
 #' replicates), adapting its x-position to `plot_by`'s type
 #' (`config$is_numeric_group`): equally spaced at each bin's categorical

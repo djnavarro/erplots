@@ -52,10 +52,12 @@ A geom, or a list of geoms.
 \description{
 Builder functions for the \code{model} layer (\code{\link[=er_tte_add_model]{er_tte_add_model()}}),
 drawing a fitted parametric \code{S(t)} curve with an optional uncertainty
-band. See \code{\link[=er_style_tte]{er_style_tte()}} for the shared interface every TTE-grammar
-builder implements.
+band.
 }
 \details{
+See \code{\link[=er_style_tte]{er_style_tte()}} for the shared interface every TTE-grammar
+builder implements.
+
 Unlike \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}'s Kaplan-Meier step curve,
 \code{config$predictions} is a smooth prediction grid (one row per
 \code{newdata} row x \code{config$time_grid} value), so \code{er_style_tte_model_line()}

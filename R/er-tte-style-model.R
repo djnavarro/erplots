@@ -2,8 +2,7 @@
 #'
 #' Builder functions for the `model` layer ([er_tte_add_model()]),
 #' drawing a fitted parametric `S(t)` curve with an optional uncertainty
-#' band. See [er_style_tte()] for the shared interface every TTE-grammar
-#' builder implements.
+#' band.
 #'
 #' @include er-plot-style.R er-style-registry.R
 #' @param data The original data frame (`object$data`).
@@ -25,6 +24,9 @@
 #' @param linewidth Width of the curve's line. Default `1`.
 #'
 #' @details
+#' See [er_style_tte()] for the shared interface every TTE-grammar
+#' builder implements.
+#'
 #' Unlike [er_style_tte_curve_km()]'s Kaplan-Meier step curve,
 #' `config$predictions` is a smooth prediction grid (one row per
 #' `newdata` row x `config$time_grid` value), so `er_style_tte_model_line()`
