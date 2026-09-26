@@ -101,9 +101,7 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Function drawing the quantile summary; defaults to
 <code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code> (point + error bar). Or one of the
-registered short-string labels for this layer – currently
-<code>"errorbar"</code>, <code>"errorbar_vlines"</code>, <code>"pointrange"</code>,
-<code>"pointrange_vlines"</code> (see <code><a href="er_style_labels.html">er_style_labels()</a></code>).</p></dd>
+registered short-string labels for this layer (see "Styles" below).</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
@@ -147,6 +145,10 @@ error) if the two disagree in that specific case; pass matching values
 to both calls to avoid the warning, or ignore it if the difference is
 intentional.</p>
     </div>
+    <div class="section level2">
+    <h2 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a></h2>
+
+<table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"errorbar"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code></td><td>Point + error bar per bin (the default).</td></tr><tr><td><code>"errorbar_vlines"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_errorbar_vlines()</a></code></td><td><code>"errorbar"</code> plus a labelled vline at every bin boundary.</td></tr><tr><td><code>"pointrange"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_pointrange()</a></code></td><td>Point + range per bin, via <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>.</td></tr><tr><td><code>"pointrange_vlines"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_pointrange_vlines()</a></code></td><td><code>"pointrange"</code> plus a labelled vline at every bin boundary.</td></tr></table></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>, <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>,

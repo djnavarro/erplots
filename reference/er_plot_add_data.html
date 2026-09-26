@@ -95,8 +95,7 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <code>(data, config, stratify, exposure, response, strata, theme, ...)</code>
 signature and tagged with <code><a href="er_style_tag.html">er_style_tag()</a></code> can be supplied instead;
 see <code><a href="er_style.html">er_style()</a></code> and "Details". Or one of the registered
-short-string labels for this layer – currently <code>"overlay"</code>,
-<code>"hex"</code>, <code>"boxjitter"</code> (see <code><a href="er_style_labels.html">er_style_labels()</a></code>).</p></dd>
+short-string labels for this layer (see "Styles" below).</p></dd>
 
 
 <dt id="arg-panel">panel<a class="anchor" aria-label="anchor" href="#arg-panel"></a></dt>
@@ -119,6 +118,10 @@ random jitter on every render.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The input <code>object</code>, with the data layer added.</p>
     </div>
+    <div class="section level2">
+    <h2 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a></h2>
+
+<table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"overlay"</code></td><td><code><a href="er_style_data.html">er_style_data_overlay()</a></code></td><td>Raw points (jittered for a binary response) drawn on the main panel (the default).</td></tr><tr><td><code>"hex"</code></td><td><code><a href="er_style_data.html">er_style_data_hex()</a></code></td><td>2D hexbin density of the raw points on the main panel.</td></tr><tr><td><code>"boxjitter"</code></td><td><code><a href="er_style_data.html">er_style_data_boxjitter()</a></code></td><td>Boxplot + jittered points in a stacked panel, split by response (binary response only).</td></tr></table></div>
     <div class="section level2">
     <h2 id="default-builders">Default builders<a class="anchor" aria-label="anchor" href="#default-builders"></a></h2>
 

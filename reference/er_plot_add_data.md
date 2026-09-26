@@ -35,8 +35,7 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
   can be supplied instead; see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
   and "Details". Or one of the registered short-string labels for this
-  layer – currently `"overlay"`, `"hex"`, `"boxjitter"` (see
-  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
+  layer (see "Styles" below).
 
 - panel:
 
@@ -62,6 +61,15 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 ## Value
 
 The input `object`, with the data layer added.
+
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"overlay"` | [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md) | Raw points (jittered for a binary response) drawn on the main panel (the default). |
+| `"hex"` | [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md) | 2D hexbin density of the raw points on the main panel. |
+| `"boxjitter"` | [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md) | Boxplot + jittered points in a stacked panel, split by response (binary response only). |
 
 ## Default builders
 

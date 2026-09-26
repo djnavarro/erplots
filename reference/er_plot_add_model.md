@@ -35,10 +35,7 @@ er_plot_add_model(
 - style:
 
   Function drawing the model curve/ribbon, or one of the registered
-  short-string labels for this layer – currently `"ribbonline"`,
-  `"line"`, `"spaghetti"` (see
-  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
-  Defaults to
+  short-string labels for this layer (see "Styles" below). Defaults to
   [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md).
 
 - conf_level:
@@ -91,6 +88,15 @@ for both would risk a silent name collision if a style builder and a
 model's
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 method happened to share an argument name for unrelated purposes.
+
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"ribbonline"` | [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md) | Fitted curve with an uncertainty ribbon (the default). |
+| `"line"` | [`er_style_model_line()`](https://erplots.djnavarro.net/reference/er_style_model.md) | Fitted curve only, no ribbon. |
+| `"spaghetti"` | [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md) | Fitted curve plus a spaghetti plot of simulated draws, for models implementing [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md). |
 
 ## See also
 

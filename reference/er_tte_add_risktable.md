@@ -58,6 +58,13 @@ curve panel's x-axis tick marks, so the two panels'
 x-axis lines up exactly – see
 [`er_tte_build()`](https://erplots.djnavarro.net/reference/er_tte_build.md).
 
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"text"` | [`er_style_tte_risktable_text()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md) | Number-at-risk counts as a text grid, one row per stratum (the only built-in, and the default). |
+
 ## See also
 
 [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md),

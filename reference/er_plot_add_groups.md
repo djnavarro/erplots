@@ -38,9 +38,7 @@ er_plot_add_groups(
   Applied to every grouping variable added by this call; see
   [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
   and "Details". Or one of the registered short-string labels for this
-  layer – currently `"boxplot"`, `"violin"`, `"histogram"`,
-  `"linerange"`, `"boxjitter"`, `"violinjitter"` (see
-  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
+  layer (see "Styles" below).
 
 - bins:
 
@@ -110,6 +108,18 @@ variable, which risks silently disagreeing with
 own exposure-binning;
 [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
 warns (doesn't error) if the two disagree in that specific case.
+
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"boxplot"` | [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md) | Boxplot per group level, group levels on the y-axis (the default). |
+| `"violin"` | [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md) | Violin per group level, group levels on the y-axis. |
+| `"histogram"` | [`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md) | Histogram per group level, group levels on facet strips, y-axis freed for counts. |
+| `"linerange"` | [`er_style_group_linerange()`](https://erplots.djnavarro.net/reference/er_style_group.md) | Median dot with inner/outer-range lines per group level, group levels on the y-axis. |
+| `"boxjitter"` | [`er_style_group_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md) | `"boxplot"` with jittered raw exposure values overlaid. |
+| `"violinjitter"` | [`er_style_group_violinjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md) | `"violin"` with jittered raw exposure values overlaid. |
 
 ## See also
 

@@ -106,8 +106,7 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Function drawing the summary annotation, defaulting to
 <code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code>, or one of the registered short-string
-labels for this layer – currently <code>"pvalue"</code>, <code>"n"</code>,
-<code>"coefficients"</code>, <code>"gof"</code> (see <code><a href="er_style_labels.html">er_style_labels()</a></code>).</p></dd>
+labels for this layer (see "Styles" below).</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
@@ -134,6 +133,10 @@ arguments to a builder" section. Must be named.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The input <code>object</code>, with the summary layer added.</p>
     </div>
+    <div class="section level2">
+    <h2 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a></h2>
+
+<table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"pvalue"</code></td><td><code><a href="er_style_summary.html">er_style_summary_pvalue()</a></code></td><td>A formatted p-value from the model's <code><a href="er_model_interface.html">er_summary()</a></code> result (the default).</td></tr><tr><td><code>"n"</code></td><td><code><a href="er_style_summary.html">er_style_summary_n()</a></code></td><td>Observation counts; model-agnostic, works with <code>model = NULL</code>.</td></tr><tr><td><code>"coefficients"</code></td><td><code><a href="er_style_summary.html">er_style_summary_coefficients()</a></code></td><td>One line per model parameter, from <code><a href="er_model_interface.html">er_summary()</a></code>'s <code>coefficients</code> table.</td></tr><tr><td><code>"gof"</code></td><td><code><a href="er_style_summary.html">er_style_summary_gof()</a></code></td><td>A goodness-of-fit annotation (N/AIC/BIC/R-squared) from <code><a href="er_model_interface.html">er_summary()</a></code>'s <code>glance</code> table.</td></tr></table></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>, <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>,

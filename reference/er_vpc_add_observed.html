@@ -89,9 +89,8 @@ against a simulated layer added via <code><a href="er_vpc_add_simulated.html">er
 <dd><p>A function determining how the observed layer is drawn.
 Defaults to <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code>; see
 <code><a href="er_style_vpc_observed.html">er_style_vpc_observed()</a></code> for the other built-in options. Or one of
-the registered short-string labels for this layer – currently
-<code>"mean_errorbar"</code>, <code>"quantile_line"</code>, <code>"quantile_errorbar"</code> (see
-<code><a href="er_style_labels.html">er_style_labels()</a></code>).</p></dd>
+the registered short-string labels for this layer (see "Styles"
+below).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -109,6 +108,10 @@ the registered short-string labels for this layer – currently
 layers can't disagree about how the comparison is binned or
 summarized.</p>
     </div>
+    <div class="section level2">
+    <h2 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a></h2>
+
+<table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"mean_errorbar"</code></td><td><code><a href="er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code></td><td>Mean/rate + CI per bin, x-position adaptive to <code>plot_by</code>'s type (the default).</td></tr><tr><td><code>"quantile_line"</code></td><td><code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_line()</a></code></td><td>One line per requested percentile against a continuous <code>plot_by</code> axis.</td></tr><tr><td><code>"quantile_errorbar"</code></td><td><code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_errorbar()</a></code></td><td>Point + error bar per bin and per requested percentile.</td></tr></table></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_vpc.html">er_vpc()</a></code>, <code><a href="er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code>, <code><a href="er_style_vpc_observed.html">er_style_vpc_observed()</a></code></p></div>

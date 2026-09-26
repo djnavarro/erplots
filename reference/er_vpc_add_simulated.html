@@ -122,9 +122,8 @@ observed layer's independent tie-break seed.</p></dd>
 <dd><p>A function determining how the simulated layer is drawn.
 Defaults to <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_mean_errorbar()</a></code>; see
 <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated()</a></code> for the other built-in options. Or one of
-the registered short-string labels for this layer – currently
-<code>"mean_errorbar"</code>, <code>"quantile_ribbon"</code>, <code>"quantile_errorbar"</code> (see
-<code><a href="er_style_labels.html">er_style_labels()</a></code>).</p></dd>
+the registered short-string labels for this layer (see "Styles"
+below).</p></dd>
 
 
 <dt id="arg-simulate-args">simulate_args<a class="anchor" aria-label="anchor" href="#arg-simulate-args"></a></dt>
@@ -152,6 +151,10 @@ only mean predictions – this function errors informatively if
 <p><code>conf_level</code>/<code>probs</code> are set once on <code><a href="er_vpc.html">er_vpc()</a></code> itself (rather than
 here), so the observed and simulated layers always agree on them.</p>
     </div>
+    <div class="section level2">
+    <h2 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a></h2>
+
+<table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"mean_errorbar"</code></td><td><code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_mean_errorbar()</a></code></td><td>Mean/rate + CI per bin, x-position adaptive to <code>plot_by</code>'s type (the default).</td></tr><tr><td><code>"quantile_ribbon"</code></td><td><code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_ribbon()</a></code></td><td>One ribbon per requested percentile against a continuous <code>plot_by</code> axis.</td></tr><tr><td><code>"quantile_errorbar"</code></td><td><code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated_quantile_errorbar()</a></code></td><td>Point + error bar per bin and per requested percentile.</td></tr></table></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_vpc.html">er_vpc()</a></code>, <code><a href="er_vpc_add_observed.html">er_vpc_add_observed()</a></code>, <code><a href="er_style_vpc_simulated.html">er_style_vpc_simulated()</a></code></p></div>

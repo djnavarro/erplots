@@ -26,9 +26,7 @@ er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
   see
   [`er_style_vpc_observed()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md)
   for the other built-in options. Or one of the registered short-string
-  labels for this layer – currently `"mean_errorbar"`,
-  `"quantile_line"`, `"quantile_errorbar"` (see
-  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
+  labels for this layer (see "Styles" below).
 
 - ...:
 
@@ -44,6 +42,15 @@ er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
 [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) itself
 (rather than here) so the observed and simulated layers can't disagree
 about how the comparison is binned or summarized.
+
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"mean_errorbar"` | [`er_style_vpc_observed_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md) | Mean/rate + CI per bin, x-position adaptive to `plot_by`'s type (the default). |
+| `"quantile_line"` | [`er_style_vpc_observed_quantile_line()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md) | One line per requested percentile against a continuous `plot_by` axis. |
+| `"quantile_errorbar"` | [`er_style_vpc_observed_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_observed.md) | Point + error bar per bin and per requested percentile. |
 
 ## See also
 

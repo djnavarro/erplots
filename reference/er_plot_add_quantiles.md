@@ -39,9 +39,7 @@ er_plot_add_quantiles(
   Function drawing the quantile summary; defaults to
   [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
   (point + error bar). Or one of the registered short-string labels for
-  this layer – currently `"errorbar"`, `"errorbar_vlines"`,
-  `"pointrange"`, `"pointrange_vlines"` (see
-  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
+  this layer (see "Styles" below).
 
 - bins:
 
@@ -95,6 +93,16 @@ even when that layer groups by the same exposure variable.
 warns (doesn't error) if the two disagree in that specific case; pass
 matching values to both calls to avoid the warning, or ignore it if the
 difference is intentional.
+
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"errorbar"` | [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) | Point + error bar per bin (the default). |
+| `"errorbar_vlines"` | [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) | `"errorbar"` plus a labelled vline at every bin boundary. |
+| `"pointrange"` | [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) | Point + range per bin, via [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html). |
+| `"pointrange_vlines"` | [`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) | `"pointrange"` plus a labelled vline at every bin boundary. |
 
 ## See also
 

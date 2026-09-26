@@ -53,10 +53,7 @@ er_tte_add_summary(
 - style:
 
   Function drawing the annotation, or one of the registered short-string
-  labels for this layer – currently `"logrank"`, `"n"`,
-  `"coefficients"`, `"gof"` (see
-  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
-  Defaults to
+  labels for this layer (see "Styles" below). Defaults to
   [`er_style_tte_summary_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md).
 
 - conf_level:
@@ -100,6 +97,16 @@ one with only 1 stratum level present in the data, rather than erroring
 (e.g.
 [`er_style_tte_summary_n()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md))
 work regardless of stratification.
+
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"logrank"` | [`er_style_tte_summary_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md) | Log-rank test p-value comparing survival across `stratify_by`'s levels (the default). |
+| `"n"` | [`er_style_tte_summary_n()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md) | Subject/event counts; model- and stratification-agnostic. |
+| `"coefficients"` | [`er_style_tte_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md) | One line per model parameter, from `model`'s [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md) `coefficients` table. |
+| `"gof"` | [`er_style_tte_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md) | A goodness-of-fit annotation from `model`'s [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md) `glance` table. |
 
 ## See also
 

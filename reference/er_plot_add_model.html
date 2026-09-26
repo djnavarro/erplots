@@ -97,8 +97,7 @@ uncertainty ribbon, or possibly a spaghetti plot of simulated draws.</p>
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Function drawing the model curve/ribbon, or one of the
-registered short-string labels for this layer – currently
-<code>"ribbonline"</code>, <code>"line"</code>, <code>"spaghetti"</code> (see <code><a href="er_style_labels.html">er_style_labels()</a></code>).
+registered short-string labels for this layer (see "Styles" below).
 Defaults to <code><a href="er_style_model.html">er_style_model_ribbonline()</a></code>.</p></dd>
 
 
@@ -135,6 +134,10 @@ Reusing a single <code>...</code> for both would risk a silent name collision if
 a style builder and a model's <code><a href="er_model_interface.html">er_predict()</a></code> method happened to share
 an argument name for unrelated purposes.</p>
     </div>
+    <div class="section level2">
+    <h2 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a></h2>
+
+<table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"ribbonline"</code></td><td><code><a href="er_style_model.html">er_style_model_ribbonline()</a></code></td><td>Fitted curve with an uncertainty ribbon (the default).</td></tr><tr><td><code>"line"</code></td><td><code><a href="er_style_model.html">er_style_model_line()</a></code></td><td>Fitted curve only, no ribbon.</td></tr><tr><td><code>"spaghetti"</code></td><td><code><a href="er_style_model.html">er_style_model_spaghetti()</a></code></td><td>Fitted curve plus a spaghetti plot of simulated draws, for models implementing <code><a href="er_model_interface.html">er_simulate()</a></code>.</td></tr></table></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>, <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>,

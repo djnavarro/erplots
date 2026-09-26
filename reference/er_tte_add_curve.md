@@ -36,6 +36,13 @@ er_tte_add_curve(object, style = NULL, ...)
 
 The input `object`, with the curve layer added.
 
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"km"` | [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md) | Kaplan-Meier step curve with a confidence band (the only built-in, and the default). |
+
 ## See also
 
 [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md),

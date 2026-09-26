@@ -117,9 +117,8 @@ split by the plot's stratification variable; defaults to <code>TRUE</code> if
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Function drawing the annotation, or one of the registered
-short-string labels for this layer – currently <code>"logrank"</code>, <code>"n"</code>,
-<code>"coefficients"</code>, <code>"gof"</code> (see <code><a href="er_style_labels.html">er_style_labels()</a></code>).
-Defaults to <code><a href="er_style_tte_summary.html">er_style_tte_summary_logrank()</a></code>.</p></dd>
+short-string labels for this layer (see "Styles" below). Defaults
+to <code><a href="er_style_tte_summary.html">er_style_tte_summary_logrank()</a></code>.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
@@ -157,6 +156,10 @@ erroring – a log-rank test needs at least 2 groups to compare. Other
 builders (e.g. <code><a href="er_style_tte_summary.html">er_style_tte_summary_n()</a></code>) work regardless of
 stratification.</p>
     </div>
+    <div class="section level2">
+    <h2 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a></h2>
+
+<table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"logrank"</code></td><td><code><a href="er_style_tte_summary.html">er_style_tte_summary_logrank()</a></code></td><td>Log-rank test p-value comparing survival across <code>stratify_by</code>'s levels (the default).</td></tr><tr><td><code>"n"</code></td><td><code><a href="er_style_tte_summary.html">er_style_tte_summary_n()</a></code></td><td>Subject/event counts; model- and stratification-agnostic.</td></tr><tr><td><code>"coefficients"</code></td><td><code><a href="er_style_tte_summary.html">er_style_tte_summary_coefficients()</a></code></td><td>One line per model parameter, from <code>model</code>'s <code><a href="er_model_interface.html">er_summary()</a></code> <code>coefficients</code> table.</td></tr><tr><td><code>"gof"</code></td><td><code><a href="er_style_tte_summary.html">er_style_tte_summary_gof()</a></code></td><td>A goodness-of-fit annotation from <code>model</code>'s <code><a href="er_model_interface.html">er_summary()</a></code> <code>glance</code> table.</td></tr></table></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_tte.html">er_tte()</a></code>, <code><a href="er_style_tte_summary.html">er_style_tte_summary_logrank()</a></code></p></div>

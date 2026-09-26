@@ -36,6 +36,13 @@ er_tte_add_censor(object, style = NULL, ...)
 
 The input `object`, with the censor layer added.
 
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"ticks"` | [`er_style_tte_censor_ticks()`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md) | Tick marks at each censoring time, on the curve's current step height (the only built-in, and the default). |
+
 ## See also
 
 [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md),

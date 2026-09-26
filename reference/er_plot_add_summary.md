@@ -44,9 +44,8 @@ er_plot_add_summary(
 
   Function drawing the summary annotation, defaulting to
   [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md),
-  or one of the registered short-string labels for this layer –
-  currently `"pvalue"`, `"n"`, `"coefficients"`, `"gof"` (see
-  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
+  or one of the registered short-string labels for this layer (see
+  "Styles" below).
 
 - conf_level:
 
@@ -75,6 +74,16 @@ er_plot_add_summary(
 ## Value
 
 The input `object`, with the summary layer added.
+
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"pvalue"` | [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md) | A formatted p-value from the model's [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md) result (the default). |
+| `"n"` | [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md) | Observation counts; model-agnostic, works with `model = NULL`. |
+| `"coefficients"` | [`er_style_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_summary.md) | One line per model parameter, from [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)'s `coefficients` table. |
+| `"gof"` | [`er_style_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_summary.md) | A goodness-of-fit annotation (N/AIC/BIC/R-squared) from [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)'s `glance` table. |
 
 ## See also
 

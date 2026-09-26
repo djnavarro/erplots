@@ -92,6 +92,13 @@ never implicit in `model` itself – see
 erplots does not check that `model` was fit on the same time/event
 variables as the plot; the caller must ensure compatibility.
 
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"line"` | [`er_style_tte_model_line()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md) | Fitted `S(t)` curve with an uncertainty band (the only built-in, and the default). |
+
 ## See also
 
 [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md),

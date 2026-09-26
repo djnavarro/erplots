@@ -233,6 +233,17 @@
   own help page.
 - Fixed several cross-reference links in the pkgdown articles that
   previously rendered as literal bracketed text instead of a hyperlink.
+- Every layer-adding function
+  ([`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md),
+  [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md),
+  [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md),
+  [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md),
+  [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
+  [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md),
+  [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md),
+  and all five `er_tte_add_*()` functions) now documents a “Styles”
+  table listing every registered `style` label for that layer, linking
+  straight to each builder’s own help page.
 
 ## erplots 0.1.2
 

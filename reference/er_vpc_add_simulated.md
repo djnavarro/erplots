@@ -62,9 +62,7 @@ er_vpc_add_simulated(
   see
   [`er_style_vpc_simulated()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md)
   for the other built-in options. Or one of the registered short-string
-  labels for this layer – currently `"mean_errorbar"`,
-  `"quantile_ribbon"`, `"quantile_errorbar"` (see
-  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
+  labels for this layer (see "Styles" below).
 
 - simulate_args:
 
@@ -96,6 +94,15 @@ if `sim_resp` isn't available.
 [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) itself
 (rather than here), so the observed and simulated layers always agree on
 them.
+
+## Styles
+
+|  |  |  |
+|----|----|----|
+| Label | Builder | Description |
+| `"mean_errorbar"` | [`er_style_vpc_simulated_mean_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md) | Mean/rate + CI per bin, x-position adaptive to `plot_by`'s type (the default). |
+| `"quantile_ribbon"` | [`er_style_vpc_simulated_quantile_ribbon()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md) | One ribbon per requested percentile against a continuous `plot_by` axis. |
+| `"quantile_errorbar"` | [`er_style_vpc_simulated_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_vpc_simulated.md) | Point + error bar per bin and per requested percentile. |
 
 ## See also
 
