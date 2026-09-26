@@ -244,10 +244,11 @@ rounded to. Defaults to <code>0</code>.</p></dd>
 including the two outer boundaries at the minimum non-placebo
 exposure and the overall maximum exposure, not just the boundaries
 shared between two adjacent bins – so a reader can see every bin
-edge from the plot alone. All built-in quantile builders are tagged
-<code>er_style_tag(fn, layer = "plot_quantile")</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>
-errors informatively if handed a builder tagged for a different
-layer.</p>
+edge from the plot alone. A boundary whose exposure value falls
+outside a narrowed <code><a href="er_plot_theme.html">er_plot_theme()</a></code> <code>xlim</code> is dropped (with a
+warning), the same way a quantile summary marker is. All built-in
+quantile builders are tagged <code>er_style_tag(fn, layer = "plot_quantile")</code>, so <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code> errors informatively
+if handed a builder tagged for a different layer.</p>
 <p>The <code>_vlines</code> variants can also label each boundary with its
 exposure value (<code>vline_labels = TRUE</code>, off by default). Labels are
 drawn with <code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code> (an opaque background, since a

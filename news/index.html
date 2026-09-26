@@ -104,6 +104,8 @@
 <code><a href="../reference/er_plot.html">er_plot()</a></code> now errors clearly when <code>stratify_by</code> names a numeric column, instead of silently mapping it to a continuous colour scale (which broke every stratified builder’s discrete-groups assumption – ribbons, per-stratum lines, dodging – with no warning). <code>stratify_by</code> has always been documented as requiring a discrete variable; this was simply never validated.</li>
 <li>
 <code><a href="../reference/er_plot_add_groups.html">er_plot_add_groups()</a></code>’s <code>bins</code> argument now actually controls the number of quantile bins used for a continuous grouping variable. Previously documented but silently ignored – every continuous grouping variable was always split into <code><a href="../reference/cut_quantile.html">cut_quantile()</a></code>/<code><a href="../reference/cut_quantile.html">cut_exposure_quantile()</a></code>’s own default of 4 bins, regardless of what <code>bins</code> was set to.</li>
+<li>
+<code><a href="../reference/er_style_quantile.html">er_style_quantile_errorbar_vlines()</a></code>/<code><a href="../reference/er_style_quantile.html">er_style_quantile_pointrange_vlines()</a></code>’s bin-boundary lines/labels are now dropped (and warn), like every other layer’s out-of-range markers, when they fall outside <code>er_plot_theme(xlim = )</code>, instead of silently landing off the visible panel with no cue (<a href="https://github.com/djnavarro/erplots/issues/16" class="external-link">#16</a>).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-0-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0"></a></h3>

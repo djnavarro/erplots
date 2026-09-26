@@ -196,6 +196,12 @@
   ignored – every continuous grouping variable was always split into
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)’s
   own default of 4 bins, regardless of what `bins` was set to.
+- [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)/[`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)’s
+  bin-boundary lines/labels are now dropped (and warn), like every other
+  layer’s out-of-range markers, when they fall outside
+  `er_plot_theme(xlim = )`, instead of silently landing off the visible
+  panel with no cue
+  ([\#16](https://github.com/djnavarro/erplots/issues/16)).
 
 ### Documentation
 

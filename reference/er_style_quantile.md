@@ -184,8 +184,12 @@ the base builders; their `_vlines` variants add a line at every
 quantile-bin boundary – including the two outer boundaries at the
 minimum non-placebo exposure and the overall maximum exposure, not just
 the boundaries shared between two adjacent bins – so a reader can see
-every bin edge from the plot alone. All built-in quantile builders are
-tagged `er_style_tag(fn, layer = "plot_quantile")`, so
+every bin edge from the plot alone. A boundary whose exposure value
+falls outside a narrowed
+[`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
+`xlim` is dropped (with a warning), the same way a quantile summary
+marker is. All built-in quantile builders are tagged
+`er_style_tag(fn, layer = "plot_quantile")`, so
 [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
 errors informatively if handed a builder tagged for a different layer.
 
