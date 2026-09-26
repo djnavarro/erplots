@@ -1457,6 +1457,45 @@ the quantile layer's `_vlines` bin-boundary lines (drawn from
 concern than a whole summary marker vanishing, and is left as a known,
 minor, out-of-scope gap).
 
+## Quantile layer's `_vlines` bin-boundary lines clipped to (and warn about) narrowed `xlim`
+
+Follow-up to the previous entry, closing the one gap it deliberately left
+open: the quantile layer's `_vlines` builders
+(`er_style_quantile_errorbar_vlines()`/`_pointrange_vlines()`) draw a
+`geom_vline()`/`geom_label()` at every element of `config$breaks` -- a
+fixed set of cutpoints from `cut_exposure_quantile()`, independent of
+`config$summary` and, until now, never filtered against
+`exposure$limits`. Narrowing `xlim` via `er_plot_theme()` left a
+boundary line/label sitting outside the panel with no visual cue and no
+warning, the same silent-data-loss shape as the previous entry's bug,
+just for a line instead of a marker.
+
+Fixed with a new helper, `.clip_quantile_breaks_to_limits()`
+(`R/utils-helpers.R`), mirroring `.clip_quantile_summary_to_limits()`'s
+own filter-and-warn shape but operating on the flat numeric `breaks`
+vector rather than a summary data frame (so a dropped break is named by
+its own exposure value, not a bin label). Unlike every other clip fix,
+this one isn't wired in centrally at build time: `config$breaks` is only
+ever read by the two `_vlines` builder functions themselves (every other
+quantile style ignores it), so filtering it in `.build_quantile_geoms()`
+unconditionally would warn even for `er_style_quantile_errorbar()`/
+`_pointrange()`, which never draw a vline at all. Instead, each
+`_vlines` builder clips its own local copy of `config$breaks` once,
+before either `.quantile_boundary_vlines()` or
+`.quantile_boundary_vline_labels()` reads it (avoiding a duplicate
+warning from calling the clip twice).
+
+One follow-on fix this required: both helpers previously treated
+`length(breaks) < 2` as "nothing to draw" -- true before this change
+(`config$breaks` always has >= 2 elements when it exists at all, from
+`cut_exposure_quantile()`), but no longer true once clipping can leave
+exactly one break standing. Loosened to `< 1`, and
+`.quantile_boundary_vline_labels()`'s leftmost/rightmost-hangs-inward
+`vjust` logic (which assumed >= 2 breaks to pick a first/last index) now
+skips that adjustment and centres the label when only one break
+survives -- there's no reliable way to tell whether a lone surviving
+break sits near the visible window's left or right edge.
+
 ## VPC observed/simulated markers clipped to (and warn about) narrowed `xlim`/`ylim` (issue #17)
 
 Follow-up investigation, after #14/#15/#16, into whether `er_vpc()`/

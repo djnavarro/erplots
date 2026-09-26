@@ -109,6 +109,36 @@
   summary[keep, , drop = FALSE]
 }
 
+# The quantile layer's `_vlines` builders' own variant of
+# `.clip_quantile_summary_to_limits()`: `config$breaks` is a fixed set of
+# `n + 1` cutpoints from `cut_exposure_quantile()` (both interior and outer
+# bin boundaries), independent of `config$summary`, so it needs its own
+# filter -- narrowing `xlim` should hide a boundary line/label that falls
+# outside it, the same way it hides a summary marker. A dropped break has
+# no bin label of its own (unlike a dropped summary row, which is named by
+# its `exposure_bins` level), so the warning names the break's own value
+# instead.
+#' @noRd
+.clip_quantile_breaks_to_limits <- function(breaks, exposure_limits) {
+  if (is.null(breaks)) return(breaks)
+
+  keep <- breaks >= exposure_limits[1] & breaks <= exposure_limits[2]
+  n_dropped <- sum(!keep)
+  if (n_dropped > 0) {
+    rlang::warn(c(
+      sprintf(
+        "%d of %d quantile-bin boundary line%s fall%s outside the plotted axis limits and %s not shown: %s.",
+        n_dropped, length(breaks), if (n_dropped == 1) "" else "s",
+        if (n_dropped == 1) "s" else "", if (n_dropped == 1) "is" else "are",
+        paste(scales::label_number(big.mark = ",")(breaks[!keep]), collapse = ", ")
+      ),
+      "i" = "Widen `xlim` (via `er_plot_theme()`) to show it."
+    ))
+  }
+
+  breaks[keep]
+}
+
 # Shared response-value validation, used by both `er_plot()` and
 # `er_vpc()`: a declared `response_type = "binary"` response with values
 # outside {0, 1} silently shrinks the rate calculation's denominator

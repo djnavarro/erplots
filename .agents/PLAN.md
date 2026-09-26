@@ -15,21 +15,6 @@ the first). Overlaying two fitted curves on the same panel (e.g.
 comparing two models) isn't supported without a custom builder. Not
 scheduled -- no concrete need has surfaced yet.
 
-### Deferred: quantile layer's `_vlines` bin-boundary lines can still land outside a narrowed axis
-
-The model layer's stale-grid bug (#14) and the data/quantile/group
-layers' full-data-regardless-of-limits bug (both now fixed -- see
-`HISTORY.md`) covered every layer that draws a *point/marker* positioned
-by data. Not covered: the quantile layer's `_vlines` builders
-(`er_style_quantile_errorbar_vlines()`/`_pointrange_vlines()`) draw a
-labelled `geom_vline()` at every element of `config$breaks` -- a fixed
-set of cutpoints from `cut_exposure_quantile()`, independent of
-`config$summary` and never filtered against `exposure$limits`. A
-boundary line/label landing outside a narrowed `xlim` is a smaller
-concern than a whole summary marker silently vanishing (the case that
-motivated the fix), but is a known, minor gap if a future report surfaces
-it. Not scheduled.
-
 ### Deferred: VPC mini-grammar follow-ons (advanced)
 
 - A "binless"/LOESS-smoothed alternative to quantile binning (tidyvpc

@@ -40,10 +40,12 @@
 #' including the two outer boundaries at the minimum non-placebo
 #' exposure and the overall maximum exposure, not just the boundaries
 #' shared between two adjacent bins -- so a reader can see every bin
-#' edge from the plot alone. All built-in quantile builders are tagged
-#' `er_style_tag(fn, layer = "plot_quantile")`, so [er_plot_add_quantiles()]
-#' errors informatively if handed a builder tagged for a different
-#' layer.
+#' edge from the plot alone. A boundary whose exposure value falls
+#' outside a narrowed [er_plot_theme()] `xlim` is dropped (with a
+#' warning), the same way a quantile summary marker is. All built-in
+#' quantile builders are tagged `er_style_tag(fn, layer =
+#' "plot_quantile")`, so [er_plot_add_quantiles()] errors informatively
+#' if handed a builder tagged for a different layer.
 #'
 #' The `_vlines` variants can also label each boundary with its
 #' exposure value (`vline_labels = TRUE`, off by default). Labels are
@@ -177,7 +179,13 @@ NULL
 .quantile_boundary_vlines <- function(config, exposure, vline_colour = "grey50", vline_linetype = "dotted") {
 
   breaks <- config$breaks
-  if (is.null(breaks) || length(breaks) < 2) return(NULL)
+  # `length(breaks) == 0` happens either when there genuinely are no
+  # cutpoints, or when every one of them was clipped by a narrowed `xlim`
+  # (see `.clip_quantile_breaks_to_limits()`); either way there's nothing
+  # to draw. A single remaining break (e.g. all but one clipped) is still
+  # a valid, single vline to draw, unlike `config$breaks` being entirely
+  # absent.
+  if (is.null(breaks) || length(breaks) < 1) return(NULL)
 
   ggplot2::geom_vline(
     xintercept = breaks,
@@ -240,7 +248,9 @@ NULL
                                              digits = 0) {
 
   breaks <- config$breaks
-  if (is.null(breaks) || length(breaks) < 2) return(NULL)
+  # see `.quantile_boundary_vlines()`'s own comment: a single surviving
+  # break (after `xlim`-clipping) is still worth labelling.
+  if (is.null(breaks) || length(breaks) < 1) return(NULL)
 
   side <- if (identical(position, "auto")) {
     .quantile_label_side(config$corner_distance)
@@ -272,9 +282,14 @@ NULL
   # see the internal helper's own tests for a from-scratch derivation.
   # The leftmost boundary should hang right (into the panel), so it's
   # vjust = 1; the rightmost should hang left (also into the panel), so
-  # it's vjust = 0.
-  label_vjust[1] <- 1
-  label_vjust[n_breaks] <- 0
+  # it's vjust = 0. Skipped when only one break survives `xlim`-clipping
+  # (see `.quantile_boundary_vlines()`) -- there's no reliable way to
+  # tell whether the sole remaining break is near the left or right edge
+  # of the visible window, so it's left centred like an interior break.
+  if (n_breaks > 1) {
+    label_vjust[1] <- 1
+    label_vjust[n_breaks] <- 0
+  }
 
   args <- list(
     data = label_data,
@@ -398,6 +413,10 @@ er_style_quantile_errorbar_vlines <- function(data, config, stratify, exposure, 
                                                vline_label_inset = 0.05,
                                                vline_label_digits = 0, ...) {
   vline_label_position <- match.arg(vline_label_position)
+  # a boundary line/label whose exposure value falls outside the current
+  # `xlim` is dropped (with a warning) here, once, before either helper
+  # reads `config$breaks` -- see `.clip_quantile_breaks_to_limits()`.
+  config$breaks <- .clip_quantile_breaks_to_limits(config$breaks, exposure$limits)
   vlines <- .quantile_boundary_vlines(config, exposure, vline_colour, vline_linetype)
   geoms <- er_style_quantile_errorbar(
     data, config, stratify, exposure, response, strata, theme,
@@ -501,6 +520,9 @@ er_style_quantile_pointrange_vlines <- function(data, config, stratify, exposure
                                                   vline_label_inset = 0.05,
                                                   vline_label_digits = 0, ...) {
   vline_label_position <- match.arg(vline_label_position)
+  # see `er_style_quantile_errorbar_vlines()`'s own comment for why this
+  # clips `config$breaks` once, before either helper reads it.
+  config$breaks <- .clip_quantile_breaks_to_limits(config$breaks, exposure$limits)
   vlines <- .quantile_boundary_vlines(config, exposure, vline_colour, vline_linetype)
   geoms <- er_style_quantile_pointrange(
     data, config, stratify, exposure, response, strata, theme,

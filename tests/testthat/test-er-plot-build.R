@@ -58,6 +58,23 @@ test_that(".clip_quantile_summary_to_limits() doesn't warn when every marker is 
   expect_equal(nrow(out), 2)
 })
 
+test_that(".clip_quantile_breaks_to_limits() drops out-of-range breaks, names them, and warns", {
+  expect_warning(
+    out <- .clip_quantile_breaks_to_limits(c(0, 50, 600, 1200), c(0, 100)),
+    "2 of 4 quantile-bin boundary lines fall outside the plotted axis limits and are not shown: 600, 1,200"
+  )
+  expect_equal(out, c(0, 50))
+})
+
+test_that(".clip_quantile_breaks_to_limits() doesn't warn when every break is in range", {
+  expect_no_warning(out <- .clip_quantile_breaks_to_limits(c(0, 50, 100), c(0, 100)))
+  expect_equal(out, c(0, 50, 100))
+})
+
+test_that(".clip_quantile_breaks_to_limits() is a no-op on NULL breaks", {
+  expect_null(.clip_quantile_breaks_to_limits(NULL, c(0, 100)))
+})
+
 # integration: data overlay layer -----------------------------------------
 
 test_that("er_plot_build() drops out-of-window data-overlay points and warns, keyed to current xlim", {
@@ -150,6 +167,34 @@ test_that("er_plot_build() hides out-of-window quantile bin markers, warns, but 
   # only the Placebo bin (x_mid = 0) sits inside xlim = c(0, 100)
   expect_equal(nrow(narrow_points), 1)
   expect_equal(narrow_points$y, full_points$y[full_points$x == 0])
+})
+
+test_that("er_plot_build() hides out-of-window quantile-bin boundary vlines and warns", {
+  plt_wide <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_quantiles(bins = 4, style = er_style_quantile_errorbar_vlines)
+  built_wide <- er_plot_build(plt_wide)
+  gb_wide <- ggplot2::ggplot_build(built_wide$output)
+  vline_layer_wide <- which(vapply(gb_wide$plot$layers, function(l) inherits(l$geom, "GeomVline"), logical(1)))
+  full_vlines <- gb_wide$data[[vline_layer_wide]]
+  expect_equal(nrow(full_vlines), 5) # Placebo + 4 quantile-bin boundaries
+
+  # `config$breaks` for `aucss` (4 bins, excluding placebo) sit near
+  # 163/478/881/1638/3723; narrowing to `xlim = c(0, 300)` keeps only the
+  # first.
+  plt_narrow <- er_test_data |>
+    er_plot(aucss, ae1) |>
+    er_plot_add_quantiles(bins = 4, style = er_style_quantile_errorbar_vlines) |>
+    er_plot_theme(xlim = c(0, 300))
+
+  expect_warning(built_narrow <- er_plot_build(plt_narrow), "quantile-bin boundary line")
+
+  gb_narrow <- ggplot2::ggplot_build(built_narrow$output)
+  vline_layer_narrow <- which(vapply(gb_narrow$plot$layers, function(l) inherits(l$geom, "GeomVline"), logical(1)))
+  narrow_vlines <- gb_narrow$data[[vline_layer_narrow]]
+
+  expect_equal(nrow(narrow_vlines), 1)
+  expect_equal(narrow_vlines$xintercept, full_vlines$xintercept[1])
 })
 
 test_that("er_plot_build() does not warn about the quantile layer when every bin marker is in range", {
