@@ -39,19 +39,29 @@
 #' @param nsim Number of simulated draws for `er_style_model_spaghetti()`,
 #'   passed to [er_simulate()]. Default `100L`.
 #'
-#' @details `er_style_model_ribbonline()` is the default; `er_style_model_line()`
-#' omits the ribbon; `er_style_model_spaghetti()` draws simulated draws
-#' instead of a ribbon, for models that implement [er_simulate()]. All three are tagged
-#' `er_style_tag(fn, layer = "plot_model")`, so [er_plot_add_model()]
-#' errors informatively if handed one of these tagged for a different
-#' layer entirely (e.g. `"summary"`, meant for [er_plot_add_summary()]).
-#' Each also carries a registered short-string label --
-#' `"ribbonline"`/`"line"`/`"spaghetti"` respectively -- so
-#' [er_plot_add_model()]'s `style` argument can take that string instead
-#' of the function itself (see [er_style_labels()]).
-#'
+#' @details
 #' See [er_style()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
+#'
+#' @section Choosing a builder:
+#' All three builders draw the same fitted exposure-response curve;
+#' which one to reach for is a choice of how to convey uncertainty
+#' around it:
+#'
+#' * `er_style_model_ribbonline()` (the default) -- the curve plus a
+#'   shaded confidence ribbon.
+#' * `er_style_model_line()` -- the curve alone, omitting the ribbon.
+#' * `er_style_model_spaghetti()` -- the curve overlaid on individual
+#'   simulated draws instead of a ribbon, for models that implement
+#'   [er_simulate()].
+#'
+#' All three are tagged `er_style_tag(fn, layer = "plot_model")`, so
+#' [er_plot_add_model()] errors informatively if handed one of these
+#' tagged for a different layer entirely (e.g. `"summary"`, meant for
+#' [er_plot_add_summary()]). Each also carries a registered short-string
+#' label -- `"ribbonline"`/`"line"`/`"spaghetti"` respectively -- so
+#' [er_plot_add_model()]'s `style` argument can take that string instead
+#' of the function itself (see [er_style_labels()]).
 #'
 #' @returns A geom, or a list of geoms; see [er_style()].
 #'
