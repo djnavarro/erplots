@@ -149,10 +149,9 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #' @returns The input `object`, with the risktable layer added.
 #'
 #' @details
-#' The same time breaks used for the number-at-risk grid also become
-#' the curve panel's x-axis tick marks, so the two panels'
-#' [patchwork::wrap_plots()]-collected x-axis lines up exactly --
-#' see [er_tte_build()].
+#' The time breaks used for the number-at-risk grid also become
+#' the x-axis tick marks on the primary plot, so the two panels'
+#' collected x-axis lines up exactly (see [er_tte_build()]).
 #'
 #' @section Styles:
 #' The following pre-defined styles are available for this layer. Please
@@ -306,12 +305,8 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param model A fitted time-to-event model implementing [er_summary()],
-#'   or `NULL` (the default). Independent of whatever model, if any, was
-#'   passed to [er_tte_add_model()] -- only needed for builder styles
-#'   (e.g. [er_style_tte_summary_coefficients()]/
-#'   [er_style_tte_summary_gof()]) that produce model-based summaries;
-#'   the default log-rank builder and [er_style_tte_summary_n()] both
-#'   ignore it.
+#'   or `NULL` (the default). Only needed for styles that produce
+#'   model-based summaries, ignored by other style builder functions.
 #' @param keep_strata Logical; whether this layer should use stratification.
 #'   Defaults to `TRUE` when a stratification variable has been specified, 
 #'   and `FALSE` otherwise.

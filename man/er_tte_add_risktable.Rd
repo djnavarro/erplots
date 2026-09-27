@@ -35,10 +35,9 @@ grid of time points and computed from the fit already stored internally
 within the plot object.
 }
 \details{
-The same time breaks used for the number-at-risk grid also become
-the curve panel's x-axis tick marks, so the two panels'
-\code{\link[patchwork:wrap_plots]{patchwork::wrap_plots()}}-collected x-axis lines up exactly --
-see \code{\link[=er_tte_build]{er_tte_build()}}.
+The time breaks used for the number-at-risk grid also become
+the x-axis tick marks on the primary plot, so the two panels'
+collected x-axis lines up exactly (see \code{\link[=er_tte_build]{er_tte_build()}}).
 }
 \section{Styles}{
 

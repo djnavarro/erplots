@@ -18,12 +18,8 @@ er_tte_add_summary(
 \item{object}{Partially constructed plot (has S3 class \code{er_tte}).}
 
 \item{model}{A fitted time-to-event model implementing \code{\link[=er_summary]{er_summary()}},
-or \code{NULL} (the default). Independent of whatever model, if any, was
-passed to \code{\link[=er_tte_add_model]{er_tte_add_model()}} -- only needed for builder styles
-(e.g. \code{\link[=er_style_tte_summary_coefficients]{er_style_tte_summary_coefficients()}}/
-\code{\link[=er_style_tte_summary_gof]{er_style_tte_summary_gof()}}) that produce model-based summaries;
-the default log-rank builder and \code{\link[=er_style_tte_summary_n]{er_style_tte_summary_n()}} both
-ignore it.}
+or \code{NULL} (the default). Only needed for styles that produce
+model-based summaries, ignored by other style builder functions.}
 
 \item{keep_strata}{Logical; whether this layer should use stratification.
 Defaults to \code{TRUE} when a stratification variable has been specified,
