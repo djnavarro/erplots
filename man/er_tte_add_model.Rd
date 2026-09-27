@@ -57,7 +57,7 @@ time model, Cox proportional hazard model, etc). It uses the \code{model}
 object to create the predictions, using the \code{\link[=er_predict_survival]{er_predict_survival()}}
 method for the relevant model class to do the work. The \code{model} object
 is permitted to reference covariates other than the plot stratification
-variable: see the details section to \code{\link[=er_plot_add_model]{er_plot_add_model()}} for the
+variable: see the details section of \code{\link[=er_plot_add_model]{er_plot_add_model()}} for the
 specifics.
 
 Note that erplots does not check that \code{model} was fit on the same

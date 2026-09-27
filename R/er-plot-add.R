@@ -581,7 +581,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param group_by Grouping variables to define groups for distribution
 #'   plots (a tidyselection of variables).
-#' @param style Style used to draw a exposures by groups layer. Can 
+#' @param style Style used to draw the exposures-by-groups layer. Can 
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"boxplot"`, the default), or a builder function used to 
 #'   compute the relevant plot object (see "Styles" below). 

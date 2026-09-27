@@ -20,7 +20,7 @@ NULL
 # case when a package is reloaded and its built-in labels are re-tagged
 # at load time). Re-registering a *different* function under the same
 # key errors by default -- this is what makes re-running a script that
-# edits a custom labelled builder and re-taggs it error on the second
+# edits a custom labelled builder and re-tags it error on the second
 # run -- unless the caller passes `overwrite = TRUE` to `er_style_tag()`,
 # which replaces the registration unconditionally. Erroring by default
 # (rather than warning-and-overwriting) matches the package's general

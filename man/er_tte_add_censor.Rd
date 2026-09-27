@@ -22,7 +22,7 @@ The input \code{object}, with the censor layer added.
 }
 \description{
 Adds the censoring layer to a TTE plot, showing the times at which a
-a subject was censored, read from the fit already stored internally within
+subject was censored, read from the fit already stored internally within
 the plot object.
 }
 \section{Styles}{

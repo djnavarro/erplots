@@ -68,7 +68,7 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 #' Add a censoring-marks layer
 #'
 #' Adds the censoring layer to a TTE plot, showing the times at which a 
-#' a subject was censored, read from the fit already stored internally within 
+#' subject was censored, read from the fit already stored internally within 
 #' the plot object.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
@@ -236,7 +236,7 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #' object to create the predictions, using the [er_predict_survival()]
 #' method for the relevant model class to do the work. The `model` object
 #' is permitted to reference covariates other than the plot stratification
-#' variable: see the details section to [er_plot_add_model()] for the 
+#' variable: see the details section of [er_plot_add_model()] for the 
 #' specifics.
 #' 
 #' Note that erplots does not check that `model` was fit on the same 
@@ -301,7 +301,7 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #' Add a summary annotation layer
 #'
 #' Adds the summary layer to a TTE plot: a corner-placed text/label annotation, 
-#' summarising one or more aspects to the plot or the data.
+#' summarising one or more aspects of the plot or the data.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param model A fitted time-to-event model implementing [er_summary()],

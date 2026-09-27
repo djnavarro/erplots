@@ -45,7 +45,7 @@ The input \code{object}, with the summary layer added.
 }
 \description{
 Adds the summary layer to a TTE plot: a corner-placed text/label annotation,
-summarising one or more aspects to the plot or the data.
+summarising one or more aspects of the plot or the data.
 }
 \details{
 The annotation is placed in whichever corner of the panel is

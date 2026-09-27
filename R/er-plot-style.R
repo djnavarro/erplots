@@ -35,8 +35,8 @@
 #' pair; `er_tte_*()` builders take `time` instead of `exposure`/
 #' `response`).
 #'
-#' Arguments are standardised to allow users to write their own 
-#' as needed
+#' Arguments are standardised to allow users to write their own custom
+#' builders as needed.
 #' 
 #' @returns A geom, or a list of geoms. More precisely, a list of
 #' objects that can be added to a ggplot2 plot. The expectation is

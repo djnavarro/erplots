@@ -22,7 +22,7 @@ er_plot_add_groups(
 \item{group_by}{Grouping variables to define groups for distribution
 plots (a tidyselection of variables).}
 
-\item{style}{Style used to draw a exposures by groups layer. Can
+\item{style}{Style used to draw the exposures-by-groups layer. Can
 either be a string corresponding to one of the registered style labels
 (e.g., \code{"boxplot"}, the default), or a builder function used to
 compute the relevant plot object (see "Styles" below).}
