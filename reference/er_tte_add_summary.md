@@ -1,13 +1,7 @@
 # Add a summary annotation layer
 
-Adds the summary layer: a corner-placed text/label annotation, drawn
-from a log-rank test comparing survival across `stratify_by`'s levels
-(the default style,
-[`survival::survdiff()`](https://rdrr.io/pkg/survival/man/survdiff.html)),
-a supplied model's
-[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-result, or purely descriptive observation/event counts – depending on
-`style`. Singleton (a second call replaces the previous one).
+Adds the summary layer to a TTE plot: a corner-placed text/label
+annotation, summarising one or more aspects of the plot or the data.
 
 ## Usage
 
@@ -33,28 +27,21 @@ er_tte_add_summary(
 
   A fitted time-to-event model implementing
   [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
-  or `NULL` (the default). Independent of whatever model, if any, was
-  passed to
-  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
-  – only needed for builder styles (e.g.
-  [`er_style_tte_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)/
-  [`er_style_tte_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md))
-  that produce model-based summaries; the default log-rank builder and
-  [`er_style_tte_summary_n()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
-  both ignore it.
+  or `NULL` (the default). Only needed for styles that produce
+  model-based summaries, ignored by other style builder functions.
 
 - keep_strata:
 
-  Logical, indicating whether this layer should be split by the plot's
-  stratification variable; defaults to `TRUE` if `stratify_by` was set
-  in [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md),
-  `FALSE` otherwise.
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - style:
 
-  Function drawing the annotation, or one of the registered short-string
-  labels for this layer (see "Styles" below). Defaults to
-  [`er_style_tte_summary_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md).
+  Style used to produce the summary layer annotation. Can either be a
+  string corresponding to one of the registered style labels (e.g.,
+  `"logrank"`, the default), or a builder function used to compute the
+  relevant plot object (see "Styles" below).
 
 - conf_level:
 
@@ -67,17 +54,13 @@ er_tte_add_summary(
 - summary_args:
 
   A named list of additional arguments forwarded to
-  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
-  distinct from `...` the same way
-  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)'s
-  `predict_args` is distinct from its own `...` – see its "Details".
+  [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  when generating summaries.
 
 - ...:
 
-  Additional named arguments forwarded unchanged to `style` at build
-  time (e.g.
-  [`er_style_tte_summary_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)'s
-  `inset`/ `label_size`/`label_colour`/`label_fill`).
+  Additional named arguments forwarded to the `style` builder function
+  when the plot is built.
 
 ## Value
 
@@ -100,6 +83,10 @@ work regardless of stratification.
 
 ## Styles
 
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:
+
 |  |  |  |
 |----|----|----|
 | Label | Builder | Description |
@@ -107,6 +94,11 @@ work regardless of stratification.
 | `"n"` | [`er_style_tte_summary_n()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md) | Subject/event counts; model- and stratification-agnostic. |
 | `"coefficients"` | [`er_style_tte_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md) | One line per model parameter, from `model`'s [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md) `coefficients` table. |
 | `"gof"` | [`er_style_tte_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md) | A goodness-of-fit annotation from `model`'s [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md) `glance` table. |
+
+See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for details on how style builder functions are defined for the TTE
+mini-grammar, should a custom style be required.
 
 ## See also
 

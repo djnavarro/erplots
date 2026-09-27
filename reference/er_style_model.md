@@ -139,10 +139,24 @@ A geom, or a list of geoms; see
 
 ## Details
 
-`er_style_model_ribbonline()` is the default; `er_style_model_line()`
-omits the ribbon; `er_style_model_spaghetti()` draws simulated draws
-instead of a ribbon, for models that implement
-[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
+See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
+for the shared builder interface these functions implement, including
+how to write a custom builder of your own.
+
+## Choosing a builder
+
+All three builders draw the same fitted exposure-response curve; which
+one to reach for is a choice of how to convey uncertainty around it:
+
+- `er_style_model_ribbonline()` (the default) – the curve plus a shaded
+  confidence ribbon.
+
+- `er_style_model_line()` – the curve alone, omitting the ribbon.
+
+- `er_style_model_spaghetti()` – the curve overlaid on individual
+  simulated draws instead of a ribbon, for models that implement
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
+
 All three are tagged `er_style_tag(fn, layer = "plot_model")`, so
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
 errors informatively if handed one of these tagged for a different layer
@@ -154,10 +168,6 @@ Each also carries a registered short-string label –
 `style` argument can take that string instead of the function itself
 (see
 [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
-
-See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
-for the shared builder interface these functions implement, including
-how to write a custom builder of your own.
 
 ## See also
 

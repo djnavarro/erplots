@@ -92,13 +92,16 @@ uncertainty ribbon, or possibly a spaghetti plot of simulated draws.</p>
 
 
 <dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
-<dd><p>Logical; whether this layer should use stratification.</p></dd>
+<dd><p>Logical; whether this layer should use stratification.
+Defaults to <code>TRUE</code> when a stratification variable has been specified,
+and <code>FALSE</code> otherwise.</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
-<dd><p>Function drawing the model curve/ribbon, or one of the
-registered short-string labels for this layer (see "Styles" below).
-Defaults to <code><a href="er_style_model.html">er_style_model_ribbonline()</a></code>.</p></dd>
+<dd><p>Style used to draw the model curve/ribbon layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., <code>"ribbonline"</code>, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
@@ -108,14 +111,12 @@ to <code>0.95</code>.</p></dd>
 
 <dt id="arg-predict-args">predict_args<a class="anchor" aria-label="anchor" href="#arg-predict-args"></a></dt>
 <dd><p>A named list of additional arguments forwarded to
-<code><a href="er_model_interface.html">er_predict()</a></code> (e.g. a model-specific argument its <code><a href="er_model_interface.html">er_predict()</a></code>
-method requires beyond <code>model</code>/<code>newdata</code>/<code>conf_level</code>). Distinct
-from <code>...</code>: <code>predict_args</code> reaches <code><a href="er_model_interface.html">er_predict()</a></code>, <code>...</code> reaches
-<code>style</code> – see "Details".</p></dd>
+<code><a href="er_model_interface.html">er_predict()</a></code> when generating model-based predictions.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded unchanged to <code>style</code> at build time.</p></dd>
+<dd><p>Additional named arguments forwarded to the <code>style</code> builder
+function when the plot is built.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -124,20 +125,23 @@ from <code>...</code>: <code>predict_args</code> reaches <code><a href="er_model
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This layer uses <code><a href="er_model_interface.html">er_predict()</a></code> to compute model predictions on the response scale. <code>model</code> may reference covariates beyond the exposure and strata variables. erplots fills any additional covariates from the plot data with a reference value (first factor level or numeric mean) when building the prediction grid. erplots does not check that <code>model</code> was fit on the same exposure/response as the plot; the caller must ensure compatibility.</p>
-<p><code>predict_args</code> and <code>...</code> serve two different consumers and are kept
-separate rather than sharing one <code>...</code>: <code>predict_args</code> is spliced into
-the <code><a href="er_model_interface.html">er_predict()</a></code> call (e.g. <code>predict_args = list(landmark_time = 90)</code> for a model whose <code><a href="er_model_interface.html">er_predict()</a></code> method needs a <code>landmark_time</code>
-argument with no other slot in the fixed <code>er_predict(model, newdata, conf_level)</code> contract), while <code>...</code> is forwarded to <code>style</code> alone
-(see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra arguments to a builder" section).
-Reusing a single <code>...</code> for both would risk a silent name collision if
-a style builder and a model's <code><a href="er_model_interface.html">er_predict()</a></code> method happened to share
-an argument name for unrelated purposes.</p>
+    <p>This layer uses <code><a href="er_model_interface.html">er_predict()</a></code> to compute model predictions on the response
+scale. <code>model</code> may reference covariates beyond the exposure and strata
+variables. erplots fills any additional covariates from the plot data with
+a reference value (first factor level or numeric mean) when building the
+prediction grid. erplots does not check that <code>model</code> was fit on the same
+exposure/response as the plot; the caller must ensure compatibility.</p>
     </div>
     <div class="section level2">
     <h2 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a></h2>
 
-<table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"ribbonline"</code></td><td><code><a href="er_style_model.html">er_style_model_ribbonline()</a></code></td><td>Fitted curve with an uncertainty ribbon (the default).</td></tr><tr><td><code>"line"</code></td><td><code><a href="er_style_model.html">er_style_model_line()</a></code></td><td>Fitted curve only, no ribbon.</td></tr><tr><td><code>"spaghetti"</code></td><td><code><a href="er_style_model.html">er_style_model_spaghetti()</a></code></td><td>Fitted curve plus a spaghetti plot of simulated draws, for models implementing <code><a href="er_model_interface.html">er_simulate()</a></code>.</td></tr></table></div>
+
+<p>The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:</p><table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"ribbonline"</code></td><td><code><a href="er_style_model.html">er_style_model_ribbonline()</a></code></td><td>Fitted curve with an uncertainty ribbon (the default).</td></tr><tr><td><code>"line"</code></td><td><code><a href="er_style_model.html">er_style_model_line()</a></code></td><td>Fitted curve only, no ribbon.</td></tr><tr><td><code>"spaghetti"</code></td><td><code><a href="er_style_model.html">er_style_model_spaghetti()</a></code></td><td>Fitted curve plus a spaghetti plot of simulated draws, for models implementing <code><a href="er_model_interface.html">er_simulate()</a></code>.</td></tr></table><p>See <code><a href="er_style.html">er_style()</a></code> for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>, <code><a href="er_plot_add_quantiles.html">er_plot_add_quantiles()</a></code>,
@@ -180,8 +184,8 @@ an argument name for unrelated purposes.</p>
 <span class="r-in"><span>  <span class="fu">er_plot_add_model</span><span class="op">(</span><span class="va">mod</span>, style <span class="op">=</span> <span class="va">build_model_dashed</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># a model with a covariate beyond the exposure variable still works even when </span></span></span>
-<span class="r-in"><span><span class="co"># this layer isn't stratifying by it: `sex` is set to a reference value </span></span></span>
+<span class="r-in"><span><span class="co"># a model with a covariate beyond the exposure variable still works even when</span></span></span>
+<span class="r-in"><span><span class="co"># this layer isn't stratifying by it: `sex` is set to a reference value</span></span></span>
 <span class="r-in"><span><span class="co"># when building the prediction grid, which may not be what the user wants</span></span></span>
 <span class="r-in"><span><span class="va">mod_sex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span></span>

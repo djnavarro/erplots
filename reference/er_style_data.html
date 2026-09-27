@@ -211,7 +211,33 @@ to <code>0.4</code>); fill transparency for <code>er_style_data_hex()</code> (de
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Builders for the <code>data</code> layer (<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code>) are tagged with the structural family they belong to via <code><a href="er_style_tag.html">er_style_tag()</a></code>. <code>er_style_data_overlay()</code> and <code>er_style_data_hex()</code> use the overlay layout, drawing in the main panel; <code>er_style_data_boxjitter()</code> uses the panel layout and is binary-response only. All built-in data builders are also tagged <code>layer = "plot_data"</code>, so <code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> errors if given a builder tagged for another layer.</p>
+    <p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions
+implement.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="choosing-a-builder">Choosing a builder<a class="anchor" aria-label="anchor" href="#choosing-a-builder"></a></h2>
+
+
+<p>All three builders draw raw observations, but differ in structural
+family (see <code><a href="er_style_tag.html">er_style_tag()</a></code>'s <code>layout</code>) and which response types
+they support:</p><ul><li><p><code>er_style_data_overlay()</code> (the default) – raw points, overlaid
+directly on the main panel (<code>layout = "overlay"</code>). Any response
+type.</p></li>
+<li><p><code>er_style_data_hex()</code> – a 2D hexbin density overlay on the main
+panel instead of individual points (<code>layout = "overlay"</code>), useful
+when there are too many points for <code>er_style_data_overlay()</code> to
+stay legible. Requires the <code>hexbin</code> package.</p></li>
+<li><p><code>er_style_data_boxjitter()</code> – a boxplot + jitter panel stacked
+below/above the main panel instead of an overlay
+(<code>layout = "panel"</code>). Binary-response only.</p></li>
+</ul><p>All built-in data builders are also tagged <code>layer = "plot_data"</code>, so
+<code><a href="er_plot_add_data.html">er_plot_add_data()</a></code> errors if given a builder tagged for another
+layer.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="hex-fill-and-draw-order">Hex fill and draw order<a class="anchor" aria-label="anchor" href="#hex-fill-and-draw-order"></a></h2>
+
+
 <p><code>er_style_data_hex()</code> defaults to a light-grey-to-navy (<code>"grey90"</code> to
 <code>"#132B43"</code>) fill gradient, so a cell's fill fades toward the panel
 background as its count approaches zero rather than starting at
@@ -222,7 +248,6 @@ tagged <code>er_style_tag(fn, draw_order = "background")</code> (see <code><a hr
 so it's drawn before the model/summary/quantile layers rather than on
 top of them; its default <code>alpha = 0.85</code> gives those layers a little
 extra visibility through even a densely populated hex cell.</p>
-<p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions implement.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

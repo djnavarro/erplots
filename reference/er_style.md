@@ -54,7 +54,8 @@ have their own, separate builder interfaces –
 have no `stratify`/`strata` pair; `er_tte_*()` builders take `time`
 instead of `exposure`/ `response`).
 
-Arguments are standardised to allow users to write their own as needed
+Arguments are standardised to allow users to write their own custom
+builders as needed.
 
 ## Arguments
 

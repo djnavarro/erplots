@@ -30,13 +30,16 @@ er_plot_add_model(
 
 - keep_strata:
 
-  Logical; whether this layer should use stratification.
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - style:
 
-  Function drawing the model curve/ribbon, or one of the registered
-  short-string labels for this layer (see "Styles" below). Defaults to
-  [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md).
+  Style used to draw the model curve/ribbon layer. Can either be a
+  string corresponding to one of the registered style labels (e.g.,
+  `"ribbonline"`, the default), or a builder function used to compute
+  the relevant plot object (see "Styles" below).
 
 - conf_level:
 
@@ -46,17 +49,12 @@ er_plot_add_model(
 
   A named list of additional arguments forwarded to
   [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  (e.g. a model-specific argument its
-  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  method requires beyond `model`/`newdata`/`conf_level`). Distinct from
-  `...`: `predict_args` reaches
-  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
-  `...` reaches `style` – see "Details".
+  when generating model-based predictions.
 
 - ...:
 
-  Additional named arguments forwarded unchanged to `style` at build
-  time.
+  Additional named arguments forwarded to the `style` builder function
+  when the plot is built.
 
 ## Value
 
@@ -73,23 +71,11 @@ value (first factor level or numeric mean) when building the prediction
 grid. erplots does not check that `model` was fit on the same
 exposure/response as the plot; the caller must ensure compatibility.
 
-`predict_args` and `...` serve two different consumers and are kept
-separate rather than sharing one `...`: `predict_args` is spliced into
-the
-[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-call (e.g. `predict_args = list(landmark_time = 90)` for a model whose
-[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-method needs a `landmark_time` argument with no other slot in the fixed
-`er_predict(model, newdata, conf_level)` contract), while `...` is
-forwarded to `style` alone (see
-[`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-"Passing extra arguments to a builder" section). Reusing a single `...`
-for both would risk a silent name collision if a style builder and a
-model's
-[`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-method happened to share an argument name for unrelated purposes.
-
 ## Styles
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:
 
 |  |  |  |
 |----|----|----|
@@ -97,6 +83,10 @@ method happened to share an argument name for unrelated purposes.
 | `"ribbonline"` | [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md) | Fitted curve with an uncertainty ribbon (the default). |
 | `"line"` | [`er_style_model_line()`](https://erplots.djnavarro.net/reference/er_style_model.md) | Fitted curve only, no ribbon. |
 | `"spaghetti"` | [`er_style_model_spaghetti()`](https://erplots.djnavarro.net/reference/er_style_model.md) | Fitted curve plus a spaghetti plot of simulated draws, for models implementing [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md). |
+
+See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
+for details on how style builder functions are defined for the
+exposure-response mini-grammar, should a custom style be required.
 
 ## See also
 
@@ -144,8 +134,8 @@ erglm_data |>
   er_plot_add_model(mod, style = build_model_dashed) |>
   plot()
 
-# a model with a covariate beyond the exposure variable still works even when 
-# this layer isn't stratifying by it: `sex` is set to a reference value 
+# a model with a covariate beyond the exposure variable still works even when
+# this layer isn't stratifying by it: `sex` is set to a reference value
 # when building the prediction grid, which may not be what the user wants
 mod_sex <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
 erglm_data |>

@@ -1,6 +1,6 @@
 # Add a grouped exposure-distribution panel
 
-Adds a group layer: a boxplot/violin panel showing the *exposure*
+Adds a group layer: a boxplot/violin panel showing the exposure
 distribution, split by one or more grouping variables (continuous
 grouping variables are binned into quantiles first).
 
@@ -33,12 +33,10 @@ er_plot_add_groups(
 
 - style:
 
-  Function drawing each group panel – defaults to
-  [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md).
-  Applied to every grouping variable added by this call; see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
-  and "Details". Or one of the registered short-string labels for this
-  layer (see "Styles" below).
+  Style used to draw the group layer. Can either be a string
+  corresponding to one of the registered style labels (e.g.,
+  `"boxplot"`, the default), or a builder function used to compute the
+  relevant plot object (see "Styles" below).
 
 - bins:
 
@@ -50,10 +48,9 @@ er_plot_add_groups(
 
 - keep_strata:
 
-  Logical, indicating whether this layer should be split by the plot's
-  stratification variable; defaults to `TRUE` if `stratify_by` was set
-  in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-  `FALSE` otherwise. See "Details" for an error case.
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - ties, quantile_type, labeller:
 
@@ -65,11 +62,8 @@ er_plot_add_groups(
 
 - ...:
 
-  Additional named arguments forwarded, unchanged, to `style` when it's
-  called at build time (identically for every grouping variable added by
-  this call) – see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-  "Passing extra arguments to a builder" section. Must be named.
+  Additional named arguments forwarded to the `style` builder function
+  when the plot is built.
 
 ## Value
 
@@ -111,6 +105,10 @@ warns (doesn't error) if the two disagree in that specific case.
 
 ## Styles
 
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:
+
 |  |  |  |
 |----|----|----|
 | Label | Builder | Description |
@@ -120,6 +118,10 @@ warns (doesn't error) if the two disagree in that specific case.
 | `"linerange"` | [`er_style_group_linerange()`](https://erplots.djnavarro.net/reference/er_style_group.md) | Median dot with inner/outer-range lines per group level, group levels on the y-axis. |
 | `"boxjitter"` | [`er_style_group_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md) | `"boxplot"` with jittered raw exposure values overlaid. |
 | `"violinjitter"` | [`er_style_group_violinjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md) | `"violin"` with jittered raw exposure values overlaid. |
+
+See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
+for details on how style builder functions are defined for the
+exposure-response mini-grammar, should a custom style be required.
 
 ## See also
 

@@ -1,10 +1,9 @@
 # Distribution-free confidence interval for a sample quantile
 
 Computes a nonparametric confidence interval for a sample quantile using
-the order-statistic method (Conover, *Practical Nonparametric
-Statistics*): the interval endpoints are order statistics of `x`, chosen
-via the binomial distribution of ranks so that no assumption is made
-about the shape of `x`'s distribution.
+the order-statistic method: the interval endpoints are order statistics
+of `x`, chosen via the binomial distribution of ranks so that no
+assumption is made about the shape of `x`'s distribution.
 
 ## Usage
 
@@ -51,6 +50,11 @@ or an extreme `prob`. The candidate rank indices are clipped to
 `[1, length(x)]`, so a very small or extreme-`prob` bin returns a (still
 valid, but wider-than-nominal) interval built from the most extreme
 order statistics available rather than `NA`.
+
+## References
+
+Conover, W. J. (1999). *Practical Nonparametric Statistics* (3rd ed.).
+New York: John Wiley & Sons. ISBN 0-471-16068-7.
 
 ## Examples
 

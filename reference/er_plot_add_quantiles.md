@@ -29,17 +29,16 @@ er_plot_add_quantiles(
 
 - keep_strata:
 
-  Logical, indicating whether this layer should be split by the plot's
-  stratification variable; defaults to `TRUE` if `stratify_by` was set
-  in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-  `FALSE` otherwise.
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - style:
 
-  Function drawing the quantile summary; defaults to
-  [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md)
-  (point + error bar). Or one of the registered short-string labels for
-  this layer (see "Styles" below).
+  Style used to draw the quantile summary layer. Can either be a string
+  corresponding to one of the registered style labels (e.g.,
+  `"errorbar"`, the default), or a builder function used to compute the
+  relevant plot object (see "Styles" below).
 
 - bins:
 
@@ -58,8 +57,8 @@ er_plot_add_quantiles(
 
 - ...:
 
-  Additional named arguments forwarded, unchanged, to `style` when it's
-  called at build time. Arguments must be named.
+  Additional named arguments forwarded to the `style` builder function
+  when the plot is built.
 
 ## Value
 
@@ -96,6 +95,10 @@ difference is intentional.
 
 ## Styles
 
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:
+
 |  |  |  |
 |----|----|----|
 | Label | Builder | Description |
@@ -103,6 +106,10 @@ difference is intentional.
 | `"errorbar_vlines"` | [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) | `"errorbar"` plus a labelled vline at every bin boundary. |
 | `"pointrange"` | [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) | Point + range per bin, via [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html). |
 | `"pointrange_vlines"` | [`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) | `"pointrange"` plus a labelled vline at every bin boundary. |
+
+See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
+for details on how style builder functions are defined for the
+exposure-response mini-grammar, should a custom style be required.
 
 ## See also
 

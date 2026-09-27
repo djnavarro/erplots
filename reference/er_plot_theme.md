@@ -1,4 +1,4 @@
-# Adjust theme/labels for an `er_plot` object
+# Adjust theme/labels for an exposure-response plot
 
 Set axis/legend labels, plot titles/captions, axis limits, theme
 objects, discrete and continuous scale objects, formatters, legend key

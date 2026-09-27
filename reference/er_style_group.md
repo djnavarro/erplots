@@ -200,25 +200,54 @@ A geom, or a list of geoms; see
 
 ## Details
 
+See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
+for the shared builder interface these functions implement.
+
+## Choosing a builder
+
+All six builders show the same thing – a grouping variable's exposure
+distribution – as one of a few visual idioms:
+
+- `er_style_group_boxplot()` (the default) – a boxplot, group levels on
+  the y-axis.
+
+- `er_style_group_violin()` – a violin instead of a boxplot, same axis
+  layout.
+
+- `er_style_group_histogram()` – group levels on facet strips instead,
+  freeing the y-axis for counts.
+
+- `er_style_group_linerange()` – a median dot flanked by an inner-range
+  and outer-range line, instead of a full boxplot/violin shape; same
+  y-axis layout as the boxplot/violin builders.
+
+- `er_style_group_boxjitter()` / `er_style_group_violinjitter()` – thin
+  wrappers around `er_style_group_boxplot()`/ `er_style_group_violin()`
+  that additionally overlay jittered raw exposure values (see "Jittered
+  variants" below).
+
+All built-in group builders are tagged `layer = "plot_group"`, so
+[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
+errors if given one tagged for another layer.
+
+## Axis and facet layout
+
 `er_style_group_boxplot()` and `er_style_group_violin()` put group
 levels on the y-axis; `er_style_group_histogram()` puts them on facet
 strips and frees the y-axis for counts; `er_style_group_linerange()`
 also puts group levels on the y-axis, summarising each level's exposure
 distribution as a median dot flanked by an inner-range and outer-range
 line rather than a full boxplot/violin shape.
+
+## Jittered variants
+
 `er_style_group_boxjitter()`/`er_style_group_violinjitter()` are thin
 wrappers around `er_style_group_boxplot()`/`er_style_group_violin()`
 that additionally overlay jittered raw exposure values (vertical jitter
 only – exposure position on the x-axis is never perturbed), the same
 idea
 [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-applies to the data layer. All built-in group builders are tagged
-`layer = "plot_group"`, so
-[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
-errors if given one tagged for another layer.
-
-See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
-for the shared builder interface these functions implement.
+applies to the data layer.
 
 ## See also
 

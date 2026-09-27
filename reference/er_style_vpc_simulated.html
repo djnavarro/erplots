@@ -242,17 +242,50 @@ label, the previous behaviour); see
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>See <code><a href="er_style_vpc.html">er_style_vpc()</a></code> for the shared interface every VPC-grammar
 builder implements.</p>
-<p><code>er_style_vpc_simulated_mean_errorbar()</code> (the default) plots
-<code>config$summary</code>'s mean + percentile interval (of the mean, across
-replicates), adapting its x-position to <code>plot_by</code>'s type
-(<code>config$is_numeric_group</code>): equally spaced at each bin's categorical
-(or quantile-bin) label when <code>plot_by</code> is categorical, or at each
-bin's numeric median (<code>x_median</code>, from <code>config$summary</code>) on the
-<code>plot_by</code>'s own numeric scale when <code>plot_by</code> is numeric. Because it adapts its
-x-position family at build time rather than declaring one statically,
-it carries no <code>vpc_layout</code> tag – pair it with
+    </div>
+    <div class="section level2">
+    <h2 id="choosing-a-builder">Choosing a builder<a class="anchor" aria-label="anchor" href="#choosing-a-builder"></a></h2>
+
+
+<p>All three builders plot the simulated side of a bin against the
+observed side drawn by their <code><a href="er_style_vpc_observed.html">er_style_vpc_observed()</a></code> counterpart;
+which one to reach for depends on how much of the response's
+distribution you need to see, and what kind of response/<code>plot_by</code>
+you have:</p><ul><li><p><code>er_style_vpc_simulated_mean_errorbar()</code> (the default) – one
+point + percentile interval per bin, summarising the mean only.
+Works for every response type and either kind of <code>plot_by</code>. Start
+here unless you specifically need percentile bands.</p></li>
+<li><p><code>er_style_vpc_simulated_quantile_ribbon()</code> – a shaded band per
+requested percentile, for a fuller picture of the response's
+distribution across bins. Requires a continuous/count response and
+a numeric <code>plot_by</code>; pairs with
+<code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_line()</a></code>.</p></li>
+<li><p><code>er_style_vpc_simulated_quantile_errorbar()</code> – a point + interval
+per requested percentile per bin, the discrete-bin analogue of the
+ribbon idiom above. Same response-type restriction, but also works
+with a categorical <code>plot_by</code>; pairs with
+<code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_errorbar()</a></code>.</p></li>
+</ul></div>
+    <div class="section level2">
+    <h2 id="mean-errorbar-default-">Mean/errorbar (default)<a class="anchor" aria-label="anchor" href="#mean-errorbar-default-"></a></h2>
+
+
+<p><code>er_style_vpc_simulated_mean_errorbar()</code> plots <code>config$summary</code>'s
+mean + percentile interval (of the mean, across replicates), adapting
+its x-position to <code>plot_by</code>'s type (<code>config$is_numeric_group</code>):
+equally spaced at each bin's categorical (or quantile-bin) label when
+<code>plot_by</code> is categorical, or at each bin's numeric median (<code>x_median</code>,
+from <code>config$summary</code>) on the <code>plot_by</code>'s own numeric scale when
+<code>plot_by</code> is numeric. Because it adapts its x-position family at
+build time rather than declaring one statically, it carries no
+<code>vpc_layout</code> tag – pair it with
 <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_mean_errorbar()</a></code>, which mirrors the same
 adaptive logic.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="percentile-ribbon">Percentile ribbon<a class="anchor" aria-label="anchor" href="#percentile-ribbon"></a></h2>
+
+
 <p><code>er_style_vpc_simulated_quantile_ribbon()</code> plots <code>config$percentiles</code>
 – one shaded band (median line + interval) per requested percentile
 – at each bin's numeric midpoint on <code>plot_by</code>'s own numeric scale, for pairing
@@ -260,6 +293,11 @@ with <code><a href="er_style_vpc_observed.html">er_style_vpc_observed_quantile_l
 only computed for a continuous/count response (see <code><a href="er_vpc.html">er_vpc()</a></code>'s
 <code>probs</code> argument); calling <code>er_style_vpc_simulated_quantile_ribbon()</code>
 without it errors.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="percentile-errorbar">Percentile errorbar<a class="anchor" aria-label="anchor" href="#percentile-errorbar"></a></h2>
+
+
 <p><code>er_style_vpc_simulated_quantile_errorbar()</code> plots <code>config$percentiles</code>
 – a point + across-replicate percentile interval for each requested
 percentile – for pairing with
@@ -271,6 +309,11 @@ continuous/count response, erroring informatively without
 <code>config$percentiles</code>. As with the observed-layer counterpart, when
 more than one percentile is requested they are currently all plotted
 at the same x-position within a bin rather than dodged apart.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="legends-and-overlap">Legends and overlap<a class="anchor" aria-label="anchor" href="#legends-and-overlap"></a></h2>
+
+
 <p><code>er_style_vpc_simulated_mean_errorbar()</code>/<code>er_style_vpc_simulated_quantile_errorbar()</code>
 map a constant <code>color = "Simulated"</code>; <code>er_style_vpc_simulated_quantile_ribbon()</code>
 maps a constant <code>fill = "Simulated"</code>. ggplot2 merges either into the

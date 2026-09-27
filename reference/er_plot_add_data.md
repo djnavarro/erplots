@@ -18,24 +18,16 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 
 - keep_strata:
 
-  Logical, indicating whether this layer should be split by the plot's
-  stratification variable; defaults to `TRUE` if `stratify_by` was set
-  in [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md),
-  `FALSE` otherwise. See "Details" for how this interacts with a
-  builder's structural family.
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - style:
 
-  Function drawing the data layer – defaults to
-  [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md).
-  Any function matching the standard
-  `(data, config, stratify, exposure, response, strata, theme, ...)`
-  signature and tagged with
-  [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
-  can be supplied instead; see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
-  and "Details". Or one of the registered short-string labels for this
-  layer (see "Styles" below).
+  Style used to draw the data layer. Can either be a string
+  corresponding to one of the registered style labels (e.g.,
+  `"overlay"`, the default), or a builder function used to compute the
+  relevant plot object (see "Styles" below).
 
 - panel:
 
@@ -46,17 +38,8 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 
 - ...:
 
-  Additional named arguments forwarded, unchanged, to `style` when it's
-  called at build time – see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-  "Passing extra arguments to a builder" section. Must be named. The
-  built-in
-  [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)/[`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md)
-  builders read a `seed` from here to make their jitter reproducible
-  across repeated
-  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) calls on the
-  same object; omit it (the default) for a fresh random jitter on every
-  render.
+  Additional named arguments forwarded to the `style` builder function
+  when the plot is built.
 
 ## Value
 
@@ -64,12 +47,20 @@ The input `object`, with the data layer added.
 
 ## Styles
 
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:
+
 |  |  |  |
 |----|----|----|
 | Label | Builder | Description |
 | `"overlay"` | [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md) | Raw points (jittered for a binary response) drawn on the main panel (the default). |
 | `"hex"` | [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md) | 2D hexbin density of the raw points on the main panel. |
 | `"boxjitter"` | [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md) | Boxplot + jittered points in a stacked panel, split by response (binary response only). |
+
+See [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)
+for details on how style builder functions are defined for the
+exposure-response mini-grammar, should a custom style be required.
 
 ## Default builders
 

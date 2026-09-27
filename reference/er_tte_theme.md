@@ -1,4 +1,4 @@
-# Adjust theme/labels for an `er_tte` object
+# Adjust theme/labels for a time-to-event plot
 
 Set axis/legend labels, plot titles/captions, axis limits, theme
 objects, formatters, the legend key glyph, and relative panel heights

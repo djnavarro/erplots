@@ -1,4 +1,4 @@
-# Build and render an `er_plot` object
+# Build and render an exposure-response plot
 
 Assembles the layers into ggplot2 objects, applies shared theming and
 legend deduplication across layers, and composes the final output with

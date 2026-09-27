@@ -91,31 +91,20 @@ the quantile summaries, textual summaries, and the exposure group plots.
 
 - [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) :
   The exposure-response plotting mini-language
-
 - [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
   : Add a fitted-model curve/ribbon layer
-
 - [`er_plot_add_summary()`](https://erplots.djnavarro.net/reference/er_plot_add_summary.md)
   : Add a summary annotation layer
-
 - [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)
   : Add a quantile-binned response summary layer
-
 - [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
   : Add a raw-data layer
-
 - [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)
   : Add a grouped exposure-distribution panel
-
 - [`er_plot_theme()`](https://erplots.djnavarro.net/reference/er_plot_theme.md)
-  :
-
-  Adjust theme/labels for an `er_plot` object
-
+  : Adjust theme/labels for an exposure-response plot
 - [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
-  :
-
-  Build and render an `er_plot` object
+  : Build and render an exposure-response plot
 
 ## Time-to-event plots
 
@@ -126,31 +115,20 @@ summaries, and the survival model.
 
 - [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) : The
   time-to-event plotting mini-language
-
 - [`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md)
   : Add a Kaplan-Meier curve layer
-
 - [`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)
   : Add a censoring-marks layer
-
 - [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)
   : Add a number-at-risk panel
-
 - [`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)
   : Add a summary annotation layer
-
 - [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
-  : Add a parametric survival-curve overlay layer
-
+  : Add a model-based survival curve overlay
 - [`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)
-  :
-
-  Adjust theme/labels for an `er_tte` object
-
+  : Adjust theme/labels for a time-to-event plot
 - [`er_tte_build()`](https://erplots.djnavarro.net/reference/er_tte_build.md)
-  :
-
-  Build and render an `er_tte` object
+  : Build and render a time-to-event plot
 
 ## Visual predictive check plots
 
@@ -160,26 +138,14 @@ data and the simulated data.
 
 - [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md) : The
   exposure-response VPC mini-language
-
 - [`er_vpc_add_observed()`](https://erplots.djnavarro.net/reference/er_vpc_add_observed.md)
-  :
-
-  Add the observed-data layer to an `er_vpc` VPC
-
+  : Add the observed-data layer to a VPC plot
 - [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
-  :
-
-  Add the simulated-data layer to an `er_vpc` VPC
-
+  : Add the simulated-data layer to a VPC plot
 - [`er_vpc_theme()`](https://erplots.djnavarro.net/reference/er_vpc_theme.md)
-  :
-
-  Adjust theme/labels for an `er_vpc` object
-
+  : Adjust theme/labels for a VPC plot
 - [`er_vpc_build()`](https://erplots.djnavarro.net/reference/er_vpc_build.md)
-  :
-
-  Build and render an `er_vpc` object
+  : Build and render a VPC plot
 
 ## Builder functions for exposure-response plots
 

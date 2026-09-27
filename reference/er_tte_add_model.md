@@ -1,10 +1,7 @@
-# Add a parametric survival-curve overlay layer
+# Add a model-based survival curve overlay
 
-Adds the model layer: a fitted parametric `S(t)` curve (with an
-uncertainty band) from a time-to-event model, overlaid on the
-Kaplan-Meier curve already stored on `object$km` (see
-[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)).
-Singleton (a second call replaces the previous one).
+Adds the model layer to a TTE plot: a fitted survival curve with an
+uncertainty band derived from the corresponding time-to-event model.
 
 ## Usage
 
@@ -30,21 +27,20 @@ er_tte_add_model(
 - model:
 
   A fitted time-to-event model. Must implement
-  [`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  (see
-  [er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)).
+  [`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
 
 - keep_strata:
 
-  Logical; whether this layer should draw one curve per stratum level.
-  Defaults to `!is.null(object$strata)`.
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - style:
 
-  Function drawing the model curve/ribbon. Defaults to
-  [`er_style_tte_model_line()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md),
-  or the registered label `"line"` (see
-  [`er_style_labels()`](https://erplots.djnavarro.net/reference/er_style_labels.md)).
+  Style used to draw the model-based survival curve. Can either be a
+  string corresponding to one of the registered style labels (e.g.,
+  `"line"`, the default), or a builder function used to compute the
+  relevant plot object (see "Styles" below).
 
 - conf_level:
 
@@ -53,24 +49,18 @@ er_tte_add_model(
 - time_grid:
 
   Numeric vector of times at which to predict `S(t)`, or `NULL` (the
-  default) to use 100 points evenly spaced across `object$time$limits`.
+  default) to use 100 points evenly spaced across the time range.
 
 - predict_args:
 
   A named list of additional arguments forwarded to
   [`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-  (e.g. a model-specific argument its method requires beyond
-  `model`/`newdata`/`time_grid`/`conf_level`). Distinct from `...`:
-  `predict_args` reaches
-  [`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
-  `...` reaches `style` – mirroring
-  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
-  `predict_args`.
+  when generating model-based predictions.
 
 - ...:
 
-  Additional named arguments forwarded unchanged to `style` at build
-  time.
+  Additional named arguments forwarded to the `style` builder function
+  when the plot is built.
 
 ## Value
 
@@ -78,26 +68,37 @@ The input `object`, with the model layer added.
 
 ## Details
 
-`model` may reference covariates beyond the strata variable; erplots
-fills any additional covariate from the plot data with a reference value
-(first factor level or numeric mean), exactly as
+The model layer of a TTE plot is used to display predictions generated
+from an underlying survival model (e.g., parametric accelerated failure
+time model, Cox proportional hazards model, etc). It uses the `model`
+object to create the predictions, using the
+[`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+method for the relevant model class to do the work. The `model` object
+is permitted to reference covariates other than the plot stratification
+variable: see the details section of
 [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)
-does – see its "Details". Strata membership is carried on the `newdata`
-passed to
-[`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
-never implicit in `model` itself – see
-[er_model_interface](https://erplots.djnavarro.net/reference/er_model_interface.md)'s
-"Details".
+for the specifics.
 
-erplots does not check that `model` was fit on the same time/event
-variables as the plot; the caller must ensure compatibility.
+Note that erplots does not check that `model` was fit on the same
+time/event variables passed to the plot itself; it is left to the user
+to ensure that the data set provided to the model is consistent with the
+data provided to the TTE plot.
 
 ## Styles
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:
 
 |  |  |  |
 |----|----|----|
 | Label | Builder | Description |
 | `"line"` | [`er_style_tte_model_line()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md) | Fitted `S(t)` curve with an uncertainty band (the only built-in, and the default). |
+
+See
+[`er_style_tte()`](https://erplots.djnavarro.net/reference/er_style_tte.md)
+for details on how style builder functions are defined for the TTE
+mini-grammar, should a custom style be required.
 
 ## See also
 

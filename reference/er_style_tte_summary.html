@@ -195,10 +195,9 @@ as a fraction of the panel's width/height. Default <code>0.05</code>.</p></dd>
 <dt id="arg-fields">fields<a class="anchor" aria-label="anchor" href="#arg-fields"></a></dt>
 <dd><p>Fields from <code>glance</code> to include for
 <code>er_style_tte_summary_gof()</code>, and the order they're shown in: one
-or more of <code>"n"</code> (labelled "N"), <code>"aic"</code> ("AIC"), <code>"bic"</code> ("BIC"),
-or <code>"r_squared"</code> (labelled "R-squared"). Defaults to all four, in
-that order. A field is shown only when both present and non-<code>NA</code>
-in the model's <code>glance</code> result.</p></dd>
+or more of <code>"n"</code>, <code>"aic"</code>, <code>"bic"</code>, or <code>"r_squared"</code>. Defaults to
+all four, in that order. A field is shown only when both present and
+non-<code>NA</code> in the model's <code>glance</code> result.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -207,27 +206,68 @@ in the model's <code>glance</code> result.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>er_style_tte_summary_logrank()</code> (the default) places its annotation
-in whichever of the panel's 4 corners is currently furthest from the
-survival curve(s), using the same <code>(0, 1)</code>-rescaled corner-distance
+    <p>See <code><a href="er_style_tte.html">er_style_tte()</a></code> for the shared builder interface these
+functions implement.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="choosing-a-builder">Choosing a builder<a class="anchor" aria-label="anchor" href="#choosing-a-builder"></a></h2>
+
+
+<p>Each builder draws a different kind of annotation, with its own
+data requirements:</p><ul><li><p><code>er_style_tte_summary_logrank()</code> (the default) – a log-rank
+p-value comparing survival across <code>stratify_by</code>'s levels. Draws
+nothing on an unstratified object, or one with fewer than 2 strata
+levels present in the data.</p></li>
+<li><p><code>er_style_tte_summary_n()</code> – subject/event counts. Doesn't depend
+on a model or <code>stratify_by</code> at all.</p></li>
+<li><p><code>er_style_tte_summary_coefficients()</code> – one line per row of a
+supplied model's <code>coefficients</code> table (see <code><a href="er_model_interface.html">er_summary()</a></code>). Draws
+nothing without a model supplying <code>coefficients</code>, or if the layer
+is stratified.</p></li>
+<li><p><code>er_style_tte_summary_gof()</code> – a single-line goodness-of-fit
+summary from a supplied model's <code>glance</code> field. Same requirements
+and restrictions as <code>er_style_tte_summary_coefficients()</code>.</p></li>
+</ul></div>
+    <div class="section level2">
+    <h2 id="log-rank-test">Log-rank test<a class="anchor" aria-label="anchor" href="#log-rank-test"></a></h2>
+
+
+<p><code>er_style_tte_summary_logrank()</code> places its annotation in whichever
+of the panel's 4 corners is currently furthest from the survival
+curve(s), using the same <code>(0, 1)</code>-rescaled corner-distance
 calculation <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>'s own p-value annotation uses to
 avoid a plot's raw data points – here applied to the curve's own
 <code>(time, surv)</code> coordinates instead, since there's no raw per-subject
 scatter in this grammar for the annotation to avoid. It draws nothing
 if <code>config$logrank_p_value</code> is <code>NULL</code> (fewer than 2 strata levels
 present, including an unstratified object).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="subject-and-event-counts">Subject and event counts<a class="anchor" aria-label="anchor" href="#subject-and-event-counts"></a></h2>
+
+
 <p><code>er_style_tte_summary_n()</code> draws subject and event counts – one line
 per stratum when <code>stratify</code> is <code>TRUE</code>, a single overall line
 otherwise – and doesn't depend on a model or <code>stratify_by</code> at all.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="model-coefficients-and-goodness-of-fit">Model coefficients and goodness-of-fit<a class="anchor" aria-label="anchor" href="#model-coefficients-and-goodness-of-fit"></a></h2>
+
+
 <p><code>er_style_tte_summary_coefficients()</code> draws one line per row of the
 supplied model's <code>coefficients</code> table (see <code><a href="er_model_interface.html">er_summary()</a></code>'s
 <code>coefficients</code> field); it draws nothing if <code>coefficients</code> wasn't
 supplied, or if the layer is stratified. <code>er_style_tte_summary_gof()</code>
 draws a single-line, comma-separated goodness-of-fit annotation from
-the model's <code>glance</code> field – a curated subset (<code>N</code>, <code>AIC</code>, <code>BIC</code>,
+the model's <code>glance</code> field – a curated subset (N, AIC, BIC,
 R-squared) rather than every reserved <code>glance</code> column, showing only
 whichever of those four are actually present and non-<code>NA</code>; it draws
 nothing if none of them are available, or if the layer is stratified.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="tags">Tags<a class="anchor" aria-label="anchor" href="#tags"></a></h2>
+
+
 <p>All four builders are tagged <code>er_style_tag(fn, layer = "tte_summary")</code> – distinct from <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>'s own
 <code>"summary"</code> tag, since the two grammars' summary builders share no
 signature (<code>exposure</code>/<code>response</code> vs. <code>time</code>) – so

@@ -198,18 +198,28 @@ passed to <code><a href="er_model_interface.html">er_simulate()</a></code>. Defa
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>er_style_model_ribbonline()</code> is the default; <code>er_style_model_line()</code>
-omits the ribbon; <code>er_style_model_spaghetti()</code> draws simulated draws
-instead of a ribbon, for models that implement <code><a href="er_model_interface.html">er_simulate()</a></code>. All three are tagged
-<code>er_style_tag(fn, layer = "plot_model")</code>, so <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>
-errors informatively if handed one of these tagged for a different
-layer entirely (e.g. <code>"summary"</code>, meant for <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>).
-Each also carries a registered short-string label –
-<code>"ribbonline"</code>/<code>"line"</code>/<code>"spaghetti"</code> respectively – so
+    <p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions
+implement, including how to write a custom builder of your own.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="choosing-a-builder">Choosing a builder<a class="anchor" aria-label="anchor" href="#choosing-a-builder"></a></h2>
+
+
+<p>All three builders draw the same fitted exposure-response curve;
+which one to reach for is a choice of how to convey uncertainty
+around it:</p><ul><li><p><code>er_style_model_ribbonline()</code> (the default) – the curve plus a
+shaded confidence ribbon.</p></li>
+<li><p><code>er_style_model_line()</code> – the curve alone, omitting the ribbon.</p></li>
+<li><p><code>er_style_model_spaghetti()</code> – the curve overlaid on individual
+simulated draws instead of a ribbon, for models that implement
+<code><a href="er_model_interface.html">er_simulate()</a></code>.</p></li>
+</ul><p>All three are tagged <code>er_style_tag(fn, layer = "plot_model")</code>, so
+<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code> errors informatively if handed one of these
+tagged for a different layer entirely (e.g. <code>"summary"</code>, meant for
+<code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>). Each also carries a registered short-string
+label – <code>"ribbonline"</code>/<code>"line"</code>/<code>"spaghetti"</code> respectively – so
 <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>'s <code>style</code> argument can take that string instead
 of the function itself (see <code><a href="er_style_labels.html">er_style_labels()</a></code>).</p>
-<p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions
-implement, including how to write a custom builder of your own.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -188,9 +188,8 @@ Defaults to <code>0.05</code>.</p></dd>
 
 <dt id="arg-fields">fields<a class="anchor" aria-label="anchor" href="#arg-fields"></a></dt>
 <dd><p>Fields from <code>glance</code> to include for <code>er_style_summary_gof()</code>,
-and the order they're shown in: one or more of <code>"n"</code> (labelled "N"),
-<code>"aic"</code> ("AIC"), <code>"bic"</code> ("BIC"), or <code>"r_squared"</code> (labelled
-"R-squared"). Defaults to all four, in that order. A field is shown
+and the order they're shown in: one or more of <code>"n"</code>, <code>"aic"</code>, <code>"bic"</code>, or
+<code>"r_squared"</code>. Defaults to all four, in that order. A field is shown
 only when both present and non-<code>NA</code> in the model's <code>glance</code> result.</p></dd>
 
 </dl></div>
@@ -200,26 +199,39 @@ only when both present and non-<code>NA</code> in the model's <code>glance</code
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>er_style_summary_pvalue()</code>
-draws a formatted p-value from the model's <code><a href="er_model_interface.html">er_summary()</a></code> result;
-<code>er_style_summary_n()</code> draws observation counts and doesn't have to
-originate from a fitted model at all.
-<code>er_style_summary_coefficients()</code> draws one line per row of the model's
-<code>coefficients</code> table (see <code><a href="er_model_interface.html">er_summary()</a></code>'s <code>coefficients</code> field), useful
-for models with several parameters and no single privileged p-value
-(e.g. a multi-parameter nonlinear model); it draws nothing if
-<code>coefficients</code> wasn't supplied, or if the layer is stratified.
-<code>er_style_summary_gof()</code> draws a single-line, comma-separated
-goodness-of-fit annotation from the model's <code>glance</code> field (see
-<code><a href="er_model_interface.html">er_summary()</a></code>) – a curated subset (<code>N</code>, <code>AIC</code>, <code>BIC</code>, R-squared) rather
-than every reserved <code>glance</code> column, showing only whichever of those
-four are actually present and non-<code>NA</code>; it draws nothing if none of them
-are available, or if the layer is stratified. All four builders are
-tagged <code>er_style_tag(fn, layer = "plot_summary")</code>, so <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>
-errors informatively if a builder tagged for a different layer is passed
-to it instead.</p>
-<p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions
+    <p>See <code><a href="er_style.html">er_style()</a></code> for the shared builder interface these functions
 implement, including how to write a custom builder of your own.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="choosing-a-builder">Choosing a builder<a class="anchor" aria-label="anchor" href="#choosing-a-builder"></a></h2>
+
+
+<p>Each builder draws a different kind of annotation, with its own
+data requirements:</p><ul><li><p><code>er_style_summary_pvalue()</code> (the default) – a formatted p-value
+from the model's <code><a href="er_model_interface.html">er_summary()</a></code> result.</p></li>
+<li><p><code>er_style_summary_n()</code> – observation counts. Doesn't have to
+originate from a fitted model at all.</p></li>
+<li><p><code>er_style_summary_coefficients()</code> – one line per row of the
+model's <code>coefficients</code> table (see <code><a href="er_model_interface.html">er_summary()</a></code>'s <code>coefficients</code>
+field), useful for models with several parameters and no single
+privileged p-value (e.g. a multi-parameter nonlinear model). Draws
+nothing if <code>coefficients</code> wasn't supplied, or if the layer is
+stratified.</p></li>
+<li><p><code>er_style_summary_gof()</code> – a single-line, comma-separated
+goodness-of-fit annotation from the model's <code>glance</code> field (see
+<code><a href="er_model_interface.html">er_summary()</a></code>) – a curated subset (N, AIC, BIC, R-squared)
+rather than every reserved <code>glance</code> column, showing only whichever
+of those four are actually present and non-<code>NA</code>. Same restrictions
+as <code>er_style_summary_coefficients()</code>: draws nothing if none of
+those fields are available, or if the layer is stratified.</p></li>
+</ul></div>
+    <div class="section level2">
+    <h2 id="tags">Tags<a class="anchor" aria-label="anchor" href="#tags"></a></h2>
+
+
+<p>All four builders are tagged <code>er_style_tag(fn, layer = "plot_summary")</code>,
+so <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code> errors informatively if a builder tagged
+for a different layer is passed to it instead.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

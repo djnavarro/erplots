@@ -93,15 +93,16 @@ summarised with a point estimate and confidence interval.</p>
 
 
 <dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
-<dd><p>Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to <code>TRUE</code> if
-<code>stratify_by</code> was set in <code><a href="er_plot.html">er_plot()</a></code>, <code>FALSE</code> otherwise.</p></dd>
+<dd><p>Logical; whether this layer should use stratification.
+Defaults to <code>TRUE</code> when a stratification variable has been specified,
+and <code>FALSE</code> otherwise.</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
-<dd><p>Function drawing the quantile summary; defaults to
-<code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code> (point + error bar). Or one of the
-registered short-string labels for this layer (see "Styles" below).</p></dd>
+<dd><p>Style used to draw the quantile summary layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., <code>"errorbar"</code>, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).</p></dd>
 
 
 <dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
@@ -120,8 +121,8 @@ split into bins – see its documentation for what each controls.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded, unchanged, to <code>style</code>
-when it's called at build time. Arguments must be named.</p></dd>
+<dd><p>Additional named arguments forwarded to the <code>style</code> builder
+function when the plot is built.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -148,7 +149,13 @@ intentional.</p>
     <div class="section level2">
     <h2 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a></h2>
 
-<table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"errorbar"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code></td><td>Point + error bar per bin (the default).</td></tr><tr><td><code>"errorbar_vlines"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_errorbar_vlines()</a></code></td><td><code>"errorbar"</code> plus a labelled vline at every bin boundary.</td></tr><tr><td><code>"pointrange"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_pointrange()</a></code></td><td>Point + range per bin, via <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>.</td></tr><tr><td><code>"pointrange_vlines"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_pointrange_vlines()</a></code></td><td><code>"pointrange"</code> plus a labelled vline at every bin boundary.</td></tr></table></div>
+
+<p>The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:</p><table class="table table"><tr><td>Label</td><td>Builder</td><td>Description</td></tr><tr><td><code>"errorbar"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_errorbar()</a></code></td><td>Point + error bar per bin (the default).</td></tr><tr><td><code>"errorbar_vlines"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_errorbar_vlines()</a></code></td><td><code>"errorbar"</code> plus a labelled vline at every bin boundary.</td></tr><tr><td><code>"pointrange"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_pointrange()</a></code></td><td>Point + range per bin, via <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">ggplot2::geom_pointrange()</a></code>.</td></tr><tr><td><code>"pointrange_vlines"</code></td><td><code><a href="er_style_quantile.html">er_style_quantile_pointrange_vlines()</a></code></td><td><code>"pointrange"</code> plus a labelled vline at every bin boundary.</td></tr></table><p>See <code><a href="er_style.html">er_style()</a></code> for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="er_plot.html">er_plot()</a></code>, <code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>, <code><a href="er_plot_add_summary.html">er_plot_add_summary()</a></code>,
