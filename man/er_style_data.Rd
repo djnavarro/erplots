@@ -112,7 +112,33 @@ observations either as an overlay on the main panel or as separate
 boxplot/jitter panels.
 }
 \details{
-Builders for the \code{data} layer (\code{\link[=er_plot_add_data]{er_plot_add_data()}}) are tagged with the structural family they belong to via \code{\link[=er_style_tag]{er_style_tag()}}. \code{er_style_data_overlay()} and \code{er_style_data_hex()} use the overlay layout, drawing in the main panel; \code{er_style_data_boxjitter()} uses the panel layout and is binary-response only. All built-in data builders are also tagged \code{layer = "plot_data"}, so \code{\link[=er_plot_add_data]{er_plot_add_data()}} errors if given a builder tagged for another layer.
+See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
+implement.
+}
+\section{Choosing a builder}{
+
+All three builders draw raw observations, but differ in structural
+family (see \code{\link[=er_style_tag]{er_style_tag()}}'s \code{layout}) and which response types
+they support:
+\itemize{
+\item \code{er_style_data_overlay()} (the default) -- raw points, overlaid
+directly on the main panel (\code{layout = "overlay"}). Any response
+type.
+\item \code{er_style_data_hex()} -- a 2D hexbin density overlay on the main
+panel instead of individual points (\code{layout = "overlay"}), useful
+when there are too many points for \code{er_style_data_overlay()} to
+stay legible. Requires the \code{hexbin} package.
+\item \code{er_style_data_boxjitter()} -- a boxplot + jitter panel stacked
+below/above the main panel instead of an overlay
+(\code{layout = "panel"}). Binary-response only.
+}
+
+All built-in data builders are also tagged \code{layer = "plot_data"}, so
+\code{\link[=er_plot_add_data]{er_plot_add_data()}} errors if given a builder tagged for another
+layer.
+}
+
+\section{Hex fill and draw order}{
 
 \code{er_style_data_hex()} defaults to a light-grey-to-navy (\code{"grey90"} to
 \code{"#132B43"}) fill gradient, so a cell's fill fades toward the panel
@@ -125,9 +151,8 @@ tagged \code{er_style_tag(fn, draw_order = "background")} (see \code{\link[=er_s
 so it's drawn before the model/summary/quantile layers rather than on
 top of them; its default \code{alpha = 0.85} gives those layers a little
 extra visibility through even a densely populated hex cell.
-
-See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions implement.
 }
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
   library(erglm)
