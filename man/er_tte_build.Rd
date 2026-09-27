@@ -2,7 +2,7 @@
 % Please edit documentation in R/er-tte-api.R
 \name{er_tte_build}
 \alias{er_tte_build}
-\title{Build and render an \code{er_tte} object}
+\title{Build and render a time-to-event plot}
 \usage{
 er_tte_build(object)
 }

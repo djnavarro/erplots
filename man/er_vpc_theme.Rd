@@ -2,7 +2,7 @@
 % Please edit documentation in R/er-vpc-theme.R
 \name{er_vpc_theme}
 \alias{er_vpc_theme}
-\title{Adjust theme/labels for an \code{er_vpc} object}
+\title{Adjust theme/labels for a VPC plot}
 \usage{
 er_vpc_theme(
   object,

@@ -319,7 +319,7 @@ plot.er_tte <- function(x, y = NULL, ...) {
 
 # top level build function ----------------------------------------------------
 
-#' Build and render an `er_tte` object
+#' Build and render a time-to-event plot
 #'
 #' Assembles the layers into a ggplot2 object: a blank axes-only
 #' survival panel (time x-axis, survival probability y-axis), plus the

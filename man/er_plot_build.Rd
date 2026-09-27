@@ -2,7 +2,7 @@
 % Please edit documentation in R/er-plot-api.R
 \name{er_plot_build}
 \alias{er_plot_build}
-\title{Build and render an \code{er_plot} object}
+\title{Build and render an exposure-response plot}
 \usage{
 er_plot_build(object)
 }

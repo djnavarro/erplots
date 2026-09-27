@@ -2,7 +2,7 @@
 % Please edit documentation in R/er-tte-theme.R
 \name{er_tte_theme}
 \alias{er_tte_theme}
-\title{Adjust theme/labels for an \code{er_tte} object}
+\title{Adjust theme/labels for a time-to-event plot}
 \usage{
 er_tte_theme(
   object,
