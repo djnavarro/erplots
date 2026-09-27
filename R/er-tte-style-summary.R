@@ -31,15 +31,36 @@
 #' @param label_fill Label background fill. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
 #' @param fields Fields from `glance` to include for
 #'   `er_style_tte_summary_gof()`, and the order they're shown in: one
-#'   or more of `"n"` (labelled "N"), `"aic"` ("AIC"), `"bic"` ("BIC"),
-#'   or `"r_squared"` (labelled "R-squared"). Defaults to all four, in
-#'   that order. A field is shown only when both present and non-`NA`
-#'   in the model's `glance` result.
+#'   or more of `"n"`, `"aic"`, `"bic"`, or `"r_squared"`. Defaults to
+#'   all four, in that order. A field is shown only when both present and
+#'   non-`NA` in the model's `glance` result.
 #'
 #' @details
-#' `er_style_tte_summary_logrank()` (the default) places its annotation
-#' in whichever of the panel's 4 corners is currently furthest from the
-#' survival curve(s), using the same `(0, 1)`-rescaled corner-distance
+#' See [er_style_tte()] for the shared builder interface these
+#' functions implement.
+#'
+#' @section Choosing a builder:
+#' Each builder draws a different kind of annotation, with its own
+#' data requirements:
+#'
+#' * `er_style_tte_summary_logrank()` (the default) -- a log-rank
+#'   p-value comparing survival across `stratify_by`'s levels. Draws
+#'   nothing on an unstratified object, or one with fewer than 2 strata
+#'   levels present in the data.
+#' * `er_style_tte_summary_n()` -- subject/event counts. Doesn't depend
+#'   on a model or `stratify_by` at all.
+#' * `er_style_tte_summary_coefficients()` -- one line per row of a
+#'   supplied model's `coefficients` table (see [er_summary()]). Draws
+#'   nothing without a model supplying `coefficients`, or if the layer
+#'   is stratified.
+#' * `er_style_tte_summary_gof()` -- a single-line goodness-of-fit
+#'   summary from a supplied model's `glance` field. Same requirements
+#'   and restrictions as `er_style_tte_summary_coefficients()`.
+#'
+#' @section Log-rank test:
+#' `er_style_tte_summary_logrank()` places its annotation in whichever
+#' of the panel's 4 corners is currently furthest from the survival
+#' curve(s), using the same `(0, 1)`-rescaled corner-distance
 #' calculation [er_plot_add_summary()]'s own p-value annotation uses to
 #' avoid a plot's raw data points -- here applied to the curve's own
 #' `(time, surv)` coordinates instead, since there's no raw per-subject
@@ -47,20 +68,23 @@
 #' if `config$logrank_p_value` is `NULL` (fewer than 2 strata levels
 #' present, including an unstratified object).
 #'
+#' @section Subject and event counts:
 #' `er_style_tte_summary_n()` draws subject and event counts -- one line
 #' per stratum when `stratify` is `TRUE`, a single overall line
 #' otherwise -- and doesn't depend on a model or `stratify_by` at all.
 #'
+#' @section Model coefficients and goodness-of-fit:
 #' `er_style_tte_summary_coefficients()` draws one line per row of the
 #' supplied model's `coefficients` table (see [er_summary()]'s
 #' `coefficients` field); it draws nothing if `coefficients` wasn't
 #' supplied, or if the layer is stratified. `er_style_tte_summary_gof()`
 #' draws a single-line, comma-separated goodness-of-fit annotation from
-#' the model's `glance` field -- a curated subset (`N`, `AIC`, `BIC`,
+#' the model's `glance` field -- a curated subset (N, AIC, BIC,
 #' R-squared) rather than every reserved `glance` column, showing only
 #' whichever of those four are actually present and non-`NA`; it draws
 #' nothing if none of them are available, or if the layer is stratified.
 #'
+#' @section Tags:
 #' All four builders are tagged `er_style_tag(fn, layer =
 #' "tte_summary")` -- distinct from [er_plot_add_summary()]'s own
 #' `"summary"` tag, since the two grammars' summary builders share no

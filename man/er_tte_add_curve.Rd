@@ -9,28 +9,34 @@ er_tte_add_curve(object, style = NULL, ...)
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_tte}).}
 
-\item{style}{Function drawing the KM curve/ribbon. Defaults to
-\code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}, or the registered label \code{"km"} (see
-\code{\link[=er_style_labels]{er_style_labels()}}).}
+\item{style}{Style used to draw the Kaplan-Meier curve and ribbon. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"km"}, the default), or a builder function used to compute the
+relevant plot object (see "Styles" below).}
 
-\item{...}{Additional named arguments forwarded unchanged to \code{style}
-at build time (e.g. \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}'s \code{show_ci}/
-\code{ribbon_alpha}/\code{linewidth}).}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the curve layer added.
 }
 \description{
-Adds the curve layer: a Kaplan-Meier step curve with a confidence
-band, computed from the fit already stored on \code{object$km} (see
-\code{\link[=er_tte]{er_tte()}}) -- no recomputation happens here. Singleton (a second
-call replaces the previous one).
+Adds the curve layer to a TTE plot: a Kaplan-Meier step curve with a
+confidence band, computed from the fit already contained within the plot
+object.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"km"} \tab \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}} \tab Kaplan-Meier step curve with a confidence band (the only built-in, and the default). \cr
 }
+
+
+See \code{\link[=er_style_tte]{er_style_tte()}} for details on how style builder functions are
+defined for the TTE mini-grammar, should a custom style be required.
 }
 
 \examples{

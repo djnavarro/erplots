@@ -22,19 +22,18 @@ er_plot_add_groups(
 \item{group_by}{Grouping variables to define groups for distribution
 plots (a tidyselection of variables).}
 
-\item{style}{Function drawing each group panel -- defaults to
-\code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}}. Applied to every grouping variable added
-by this call; see \code{\link[=er_style]{er_style()}} and "Details". Or one of the
-registered short-string labels for this layer (see "Styles" below).}
+\item{style}{Style used to draw the group layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"boxplot"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{bins}{Number of quantile bins used for continuous grouping
 variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).
 Applied identically to every grouping variable added by this call.}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. See
-"Details" for an error case.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{ties, quantile_type, labeller}{Passed straight through to
 \code{\link[=cut_quantile]{cut_quantile()}}/\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} to control how a
@@ -42,16 +41,14 @@ continuous grouping variable is split into bins -- see their
 documentation for what each controls. Applied identically to every
 grouping variable added by this call.}
 
-\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time (identically for every grouping
-variable added by this call) -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section. Must be named.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with a group panel added.
 }
 \description{
-Adds a group layer: a boxplot/violin panel showing the \emph{exposure}
+Adds a group layer: a boxplot/violin panel showing the exposure
 distribution, split by one or more grouping variables (continuous
 grouping variables are binned into quantiles first).
 }
@@ -82,7 +79,10 @@ exposure variable, which risks silently disagreeing with
 warns (doesn't error) if the two disagree in that specific case.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"boxplot"} \tab \code{\link[=er_style_group_boxplot]{er_style_group_boxplot()}} \tab Boxplot per group level, group levels on the y-axis (the default). \cr
    \code{"violin"} \tab \code{\link[=er_style_group_violin]{er_style_group_violin()}} \tab Violin per group level, group levels on the y-axis. \cr
@@ -91,6 +91,11 @@ warns (doesn't error) if the two disagree in that specific case.
    \code{"boxjitter"} \tab \code{\link[=er_style_group_boxjitter]{er_style_group_boxjitter()}} \tab \code{"boxplot"} with jittered raw exposure values overlaid. \cr
    \code{"violinjitter"} \tab \code{\link[=er_style_group_violinjitter]{er_style_group_violinjitter()}} \tab \code{"violin"} with jittered raw exposure values overlaid. \cr
 }
+
+
+See \code{\link[=er_style]{er_style()}} for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.
 }
 
 \examples{

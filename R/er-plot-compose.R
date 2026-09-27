@@ -78,9 +78,9 @@
 
   # the data layer's `colour` aesthetic means strata everywhere except
   # when `config$color_role == "response"` (continuous/count response;
-  # there, `colour` is the response value itself, so its label is the 
-  # response's, not the strata's. When that response-coloured layer is also 
-  # faceted by stratum (more than one panel), each panel is tagged with its 
+  # there, `colour` is the response value itself, so its label is the
+  # response's, not the strata's. When that response-coloured layer is also
+  # faceted by stratum (more than one panel), each panel is tagged with its
   # stratum level via a plot title -- not the y-axis label, which patchwork's
   # `axes = "collect"` merges across all stacked panels (see
   # `er_plot_build()`), so a per-panel y-axis label would visually
@@ -189,7 +189,7 @@
 }
 
 .polish_arrangement <- function(object) {
-  
+
   plot_list <- list()
   plot_info <- tibble::tibble(
     id = integer(),
@@ -213,7 +213,7 @@
   for (panel_name in above_panels) {
     ind <- ind + 1L
     plot_list[[ind]] <- object$plot$data[[panel_name]]
-    plot_info <- plot_info |> 
+    plot_info <- plot_info |>
       tibble::add_row(
         id = ind,
         size = data_panel_height,
@@ -231,7 +231,7 @@
   if (!is.null(object$plot$base)) {
     ind <- ind + 1L
     plot_list[[ind]] <- object$plot$base
-    plot_info <- plot_info |> 
+    plot_info <- plot_info |>
       tibble::add_row(
         id = ind,
         size = object$theme$height$base,
@@ -243,7 +243,7 @@
   for (panel_name in below_panels) {
     ind <- ind + 1L
     plot_list[[ind]] <- object$plot$data[[panel_name]]
-    plot_info <- plot_info |> 
+    plot_info <- plot_info |>
       tibble::add_row(
         id = ind,
         size = data_panel_height,
@@ -251,14 +251,14 @@
         name = paste0("data_", panel_name)
       )
   }
-  
+
   if (!is.null(object$plot$group)) {
     group_n <- purrr::map_dbl(object$layer$group$config, \(vv) vv$n_groups)
     group_prop <- group_n / sum(group_n)
     for(g in seq_along(object$plot$group)) {
       ind <- ind + 1L
       plot_list[[ind]] <- object$plot$group[[g]]
-      plot_info <- plot_info |> 
+      plot_info <- plot_info |>
         tibble::add_row(
           id = ind,
           size = object$theme$height$group * group_prop[g],
@@ -302,7 +302,7 @@
   )
   stratified_plots <- unique(stratified_plots)
   has_legend <- composition$info |>
-    dplyr::filter(plot %in% stratified_plots) |> 
+    dplyr::filter(plot %in% stratified_plots) |>
     dplyr::pull(id)
   # Fewer than two legend-bearing plots means there's nothing to
   # deduplicate against (zero can happen if a future layer's `stratify`
@@ -310,7 +310,7 @@
   # already, nothing to strip).
   if (length(has_legend) <= 1L) return(composition)
   for(ind in has_legend[-1]) {
-    composition$plots[[ind]] <- composition$plots[[ind]] + 
+    composition$plots[[ind]] <- composition$plots[[ind]] +
       ggplot2::guides(
         color = ggplot2::guide_none(),
         fill = ggplot2::guide_none()

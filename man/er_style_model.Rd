@@ -105,20 +105,32 @@ the fitted exposure-response curve as a ribbon-and-line, a line alone, or a
 spaghetti plot of simulated draws.
 }
 \details{
-\code{er_style_model_ribbonline()} is the default; \code{er_style_model_line()}
-omits the ribbon; \code{er_style_model_spaghetti()} draws simulated draws
-instead of a ribbon, for models that implement \code{\link[=er_simulate]{er_simulate()}}. All three are tagged
-\code{er_style_tag(fn, layer = "plot_model")}, so \code{\link[=er_plot_add_model]{er_plot_add_model()}}
-errors informatively if handed one of these tagged for a different
-layer entirely (e.g. \code{"summary"}, meant for \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}).
-Each also carries a registered short-string label --
-\code{"ribbonline"}/\code{"line"}/\code{"spaghetti"} respectively -- so
-\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{style} argument can take that string instead
-of the function itself (see \code{\link[=er_style_labels]{er_style_labels()}}).
-
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.
 }
+\section{Choosing a builder}{
+
+All three builders draw the same fitted exposure-response curve;
+which one to reach for is a choice of how to convey uncertainty
+around it:
+\itemize{
+\item \code{er_style_model_ribbonline()} (the default) -- the curve plus a
+shaded confidence ribbon.
+\item \code{er_style_model_line()} -- the curve alone, omitting the ribbon.
+\item \code{er_style_model_spaghetti()} -- the curve overlaid on individual
+simulated draws instead of a ribbon, for models that implement
+\code{\link[=er_simulate]{er_simulate()}}.
+}
+
+All three are tagged \code{er_style_tag(fn, layer = "plot_model")}, so
+\code{\link[=er_plot_add_model]{er_plot_add_model()}} errors informatively if handed one of these
+tagged for a different layer entirely (e.g. \code{"summary"}, meant for
+\code{\link[=er_plot_add_summary]{er_plot_add_summary()}}). Each also carries a registered short-string
+label -- \code{"ribbonline"}/\code{"line"}/\code{"spaghetti"} respectively -- so
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{style} argument can take that string instead
+of the function itself (see \code{\link[=er_style_labels]{er_style_labels()}}).
+}
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
   library(erglm)

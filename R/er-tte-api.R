@@ -1,13 +1,10 @@
 
 #' The time-to-event plotting mini-language
 #'
-#' Create an `er_tte` specification for a Kaplan-Meier/survival-over-time
-#' figure. This is a separate mini-grammar from [er_plot()]/[er_vpc()]:
-#' those two share an exposure-response-vs-exposure coordinate system
-#' (`er_predict()`'s contract is "response value at a given exposure"),
-#' whereas `er_tte()` uses a time x-axis/survival-probability y-axis --
-#' the natural coordinate system for a Kaplan-Meier curve, not something
-#' `er_plot()`'s layers can express.
+#' Create an `er_tte` specification for a time-to-event plot.
+#' Build the plot by adding layers for survival curves,
+#' censoring markers, risk tables, textual summaries, and model predictions;
+#' render with `plot()`/`print()` or [er_tte_build()].
 #'
 #' @details
 #' `er_tte()` computes the (single-arm) Kaplan-Meier estimate once, via
@@ -319,17 +316,11 @@ plot.er_tte <- function(x, y = NULL, ...) {
 
 # top level build function ----------------------------------------------------
 
-#' Build and render an `er_tte` object
+#' Build and render a time-to-event plot
 #'
-#' Assembles the layers into a ggplot2 object: a blank axes-only
-#' survival panel (time x-axis, survival probability y-axis), plus the
-#' curve, censor, summary, and model layers' geoms, when present
-#' ([er_tte_add_curve()], [er_tte_add_censor()], [er_tte_add_summary()],
-#' [er_tte_add_model()]). When a risktable layer is also present
-#' ([er_tte_add_risktable()]), the result is instead a
-#' [patchwork::wrap_plots()] composition of two panels -- the curve
-#' panel described above, stacked above a number-at-risk panel -- with a
-#' shared, [patchwork::wrap_plots()]-collected x-axis.
+#' Assembles the layers for a time-to-event plot object: a survival panel that displays
+#' the curve, censor, summary, and model layers' geoms, when present. When a risk
+#' table layer is also present the result contains two panels stacked vertically.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #'

@@ -40,8 +40,31 @@
 #'   jittered points. Defaults to `0.6`.
 #' @param bins Number of hex bins for `er_style_data_hex()`. Defaults to `30`.
 #'
-#' @details Builders for the `data` layer ([er_plot_add_data()]) are tagged with the structural family they belong to via [er_style_tag()]. `er_style_data_overlay()` and `er_style_data_hex()` use the overlay layout, drawing in the main panel; `er_style_data_boxjitter()` uses the panel layout and is binary-response only. All built-in data builders are also tagged `layer = "plot_data"`, so [er_plot_add_data()] errors if given a builder tagged for another layer.
+#' @details
+#' See [er_style()] for the shared builder interface these functions
+#' implement.
 #'
+#' @section Choosing a builder:
+#' All three builders draw raw observations, but differ in structural
+#' family (see [er_style_tag()]'s `layout`) and which response types
+#' they support:
+#'
+#' * `er_style_data_overlay()` (the default) -- raw points, overlaid
+#'   directly on the main panel (`layout = "overlay"`). Any response
+#'   type.
+#' * `er_style_data_hex()` -- a 2D hexbin density overlay on the main
+#'   panel instead of individual points (`layout = "overlay"`), useful
+#'   when there are too many points for `er_style_data_overlay()` to
+#'   stay legible. Requires the `hexbin` package.
+#' * `er_style_data_boxjitter()` -- a boxplot + jitter panel stacked
+#'   below/above the main panel instead of an overlay
+#'   (`layout = "panel"`). Binary-response only.
+#'
+#' All built-in data builders are also tagged `layer = "plot_data"`, so
+#' [er_plot_add_data()] errors if given a builder tagged for another
+#' layer.
+#'
+#' @section Hex fill and draw order:
 #' `er_style_data_hex()` defaults to a light-grey-to-navy (`"grey90"` to
 #' `"#132B43"`) fill gradient, so a cell's fill fades toward the panel
 #' background as its count approaches zero rather than starting at
@@ -53,8 +76,6 @@
 #' so it's drawn before the model/summary/quantile layers rather than on
 #' top of them; its default `alpha = 0.85` gives those layers a little
 #' extra visibility through even a densely populated hex cell.
-#'
-#' See [er_style()] for the shared builder interface these functions implement.
 #'
 #' @returns A geom, or a list of geoms; see [er_style()].
 #'

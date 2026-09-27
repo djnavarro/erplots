@@ -15,11 +15,9 @@ A tibble with one row per registered \verb{(layer, label)} pair and
 columns \code{layer}, \code{label}, and \code{style} (the builder function itself).
 }
 \description{
-A builder tagged via \code{er_style_tag(fn, layer = ..., label = ...)} can be
-selected with a short string (e.g. \code{style = "logrank"}) instead of the
-function itself, wherever the corresponding \verb{_add_*()} function supports
-it. \code{er_style_labels()} lists what's currently registered, optionally
-filtered to a single \code{layer}.
+Style builder functions can be tagged with a \code{"label"} attribute used to
+register a convenient short name for that style: \code{er_style_labels()} lists
+the currently registered styles, optionally filtered to a single \code{layer}.
 }
 \examples{
 er_style_labels("tte_summary")

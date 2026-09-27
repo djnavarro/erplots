@@ -117,17 +117,47 @@ point/interval per bin \emph{and} per requested percentile.
 \details{
 See \code{\link[=er_style_vpc]{er_style_vpc()}} for the shared interface every VPC-grammar
 builder implements.
+}
+\section{Choosing a builder}{
 
-\code{er_style_vpc_observed_mean_errorbar()} (the default) plots
-\code{config$summary}'s rate/mean + confidence interval, adapting its
-x-position to \code{plot_by}'s type (\code{config$is_numeric_group}): equally
-spaced at each bin's categorical (or quantile-bin) label when
-\code{plot_by} is categorical, or at each bin's numeric median (\code{x_median},
-from \code{config$summary}) on \code{plot_by}'s own numeric scale when \code{plot_by} is
+All three builders plot the observed side of a bin against the
+simulated side drawn by their \code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}} counterpart;
+which one to reach for depends on how much of the response's
+distribution you need to see, and what kind of response/\code{plot_by}
+you have:
+\itemize{
+\item \code{er_style_vpc_observed_mean_errorbar()} (the default) -- one
+point + confidence interval per bin, summarising the rate/mean
+only. Works for every response type and either kind of \code{plot_by}.
+Start here unless you specifically need percentile bands.
+\item \code{er_style_vpc_observed_quantile_line()} -- a continuous line per
+requested percentile, for a fuller picture of the response's
+distribution across bins. Requires a continuous/count response and
+a numeric \code{plot_by}; pairs with
+\code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}}.
+\item \code{er_style_vpc_observed_quantile_errorbar()} -- a point + interval
+per requested percentile per bin, the discrete-bin analogue of the
+line idiom above. Same response-type restriction, but also works
+with a categorical \code{plot_by}; pairs with
+\code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}}.
+}
+}
+
+\section{Mean/errorbar (default)}{
+
+\code{er_style_vpc_observed_mean_errorbar()} plots \code{config$summary}'s
+rate/mean + confidence interval, adapting its x-position to
+\code{plot_by}'s type (\code{config$is_numeric_group}): equally spaced at each
+bin's categorical (or quantile-bin) label when \code{plot_by} is
+categorical, or at each bin's numeric median (\code{x_median}, from
+\code{config$summary}) on \code{plot_by}'s own numeric scale when \code{plot_by} is
 numeric. Because it adapts its x-position family at build time rather
-than declaring one statically, it carries no \code{vpc_layout} tag -- pair it
-with \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}, which mirrors the same
-adaptive logic.
+than declaring one statically, it carries no \code{vpc_layout} tag -- pair
+it with \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}, which mirrors the
+same adaptive logic.
+}
+
+\section{Percentile line}{
 
 \code{er_style_vpc_observed_quantile_line()} plots \code{config$percentiles} --
 one line per requested percentile -- at each bin's numeric midpoint on
@@ -136,6 +166,9 @@ one line per requested percentile -- at each bin's numeric midpoint on
 only computed for a continuous/count response (see \code{\link[=er_vpc]{er_vpc()}}'s
 \code{probs} argument); calling \code{er_style_vpc_observed_quantile_line()}
 without it errors.
+}
+
+\section{Percentile errorbar}{
 
 \code{er_style_vpc_observed_quantile_errorbar()} plots \code{config$percentiles}
 -- a point + confidence interval (via \code{\link[=ci_quantile]{ci_quantile()}}) for each
@@ -158,6 +191,9 @@ of them are currently plotted at the same x-position within a bin
 rather than dodged apart, so overlapping error bars/points are only
 distinguishable by their y-position -- dodging support may be added
 in a future release.
+}
+
+\section{Legends and overlap}{
 
 Each builder maps a constant \code{color = "Observed"}, so ggplot2 merges
 its legend entry with whatever the paired simulated-layer builder
@@ -175,6 +211,7 @@ argument docs above. Neither is automatic, because which collision is
 actually occurring (source-vs-source, \code{probs}-vs-\code{probs}, or both)
 depends on the data at hand.
 }
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
   library(erglm)

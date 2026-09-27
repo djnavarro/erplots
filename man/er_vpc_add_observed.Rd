@@ -2,29 +2,27 @@
 % Please edit documentation in R/er-vpc-add.R
 \name{er_vpc_add_observed}
 \alias{er_vpc_add_observed}
-\title{Add the observed-data layer to an \code{er_vpc} VPC}
+\title{Add the observed-data layer to a VPC plot}
 \usage{
 er_vpc_add_observed(object, style = er_style_vpc_observed_mean_errorbar, ...)
 }
 \arguments{
 \item{object}{Partially constructed VPC (has S3 class \code{er_vpc}).}
 
-\item{style}{A function determining how the observed layer is drawn.
-Defaults to \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}; see
-\code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}} for the other built-in options. Or one of
-the registered short-string labels for this layer (see "Styles"
-below).}
+\item{style}{Style used to draw the VPC observed data layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"mean_errorbar"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
-\item{...}{Additional named arguments forwarded to \code{style}.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 \code{object}, with \code{object$layer$observed} populated.
 }
 \description{
-Bins the observed data by \code{plot_by} (see \code{\link[=er_vpc]{er_vpc()}}) and computes its
-response summary (rate/mean + confidence interval, plus empirical
-percentiles for a continuous/count response), for later comparison
-against a simulated layer added via \code{\link[=er_vpc_add_simulated]{er_vpc_add_simulated()}}.
+Bins the observed data for a VPC plot and computes binned
+response summaries for later comparison against a simulated data layer.
 }
 \details{
 \code{plot_by}/\code{n_bins}/\code{conf_level}/\code{probs} are set once on
@@ -33,12 +31,19 @@ layers can't disagree about how the comparison is binned or
 summarized.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"mean_errorbar"} \tab \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}} \tab Mean/rate + CI per bin, x-position adaptive to \code{plot_by}'s type (the default). \cr
    \code{"quantile_line"} \tab \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}} \tab One line per requested percentile against a continuous \code{plot_by} axis. \cr
    \code{"quantile_errorbar"} \tab \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}} \tab Point + error bar per bin and per requested percentile. \cr
 }
+
+
+See \code{\link[=er_style_vpc]{er_style_vpc()}} for details on how style builder functions are
+defined for the VPC mini-grammar, should a custom style be required.
 }
 
 \seealso{

@@ -138,17 +138,41 @@ drawing a point/interval summary per exposure quantile bin as an error bar
 or a pointrange, optionally with bin-boundary vlines.
 }
 \details{
-\code{er_style_quantile_errorbar()} and
-\code{er_style_quantile_pointrange()} are the base builders; their
-\verb{_vlines} variants add a line at every quantile-bin boundary --
+See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
+implement, including how to write a custom builder of your own.
+}
+\section{Choosing a builder}{
+
+All four builders summarise the same per-bin point/interval; which
+one to reach for is a choice of visual idiom, independent of
+response type:
+\itemize{
+\item \code{er_style_quantile_errorbar()} (the default) -- a point with an
+error bar.
+\item \code{er_style_quantile_pointrange()} -- a point with a range line
+(\code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}}) instead of an error bar.
+\item \code{er_style_quantile_errorbar_vlines()} /
+\code{er_style_quantile_pointrange_vlines()} -- the same two idioms,
+plus a dotted vertical line at every quantile-bin boundary (see
+"Boundary lines" below).
+}
+
+All built-in quantile builders are tagged \code{er_style_tag(fn, layer = "plot_quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} errors informatively
+if handed a builder tagged for a different layer.
+}
+
+\section{Boundary lines}{
+
+The \verb{_vlines} variants add a line at every quantile-bin boundary --
 including the two outer boundaries at the minimum non-placebo
 exposure and the overall maximum exposure, not just the boundaries
 shared between two adjacent bins -- so a reader can see every bin
 edge from the plot alone. A boundary whose exposure value falls
 outside a narrowed \code{\link[=er_plot_theme]{er_plot_theme()}} \code{xlim} is dropped (with a
-warning), the same way a quantile summary marker is. All built-in
-quantile builders are tagged \code{er_style_tag(fn, layer = "plot_quantile")}, so \code{\link[=er_plot_add_quantiles]{er_plot_add_quantiles()}} errors informatively
-if handed a builder tagged for a different layer.
+warning), the same way a quantile summary marker is.
+}
+
+\section{Boundary labels}{
 
 The \verb{_vlines} variants can also label each boundary with its
 exposure value (\code{vline_labels = TRUE}, off by default). Labels are
@@ -162,6 +186,9 @@ collide; this works whether or not a summary layer is actually
 present, since both layers compute the same deterministic quantity
 independently. Override with \code{"top"}/\code{"bottom"} to place labels
 manually instead.
+}
+
+\section{Stratified dodging}{
 
 When stratified, all four builders horizontally dodge each quantile
 bin's points/bars/labels apart by \code{\link[=er_plot_theme]{er_plot_theme()}}'s \code{dodge_width}
@@ -169,10 +196,8 @@ bin's points/bars/labels apart by \code{\link[=er_plot_theme]{er_plot_theme()}}'
 stratification-wide setting controlled via \code{er_plot_theme()} rather
 than a per-builder argument here, since it's about how stratification
 lays out a dodged layer, not one builder's own visual style.
-
-See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
-implement, including how to write a custom builder of your own.
 }
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
   library(erglm)

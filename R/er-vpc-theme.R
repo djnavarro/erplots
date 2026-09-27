@@ -1,5 +1,5 @@
 
-#' Adjust theme/labels for an `er_vpc` object
+#' Adjust theme/labels for a VPC plot
 #'
 #' Set axis/legend labels, plot titles/captions, axis limits, theme
 #' objects, and formatters for a VPC. This does not change which variable

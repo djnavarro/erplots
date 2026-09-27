@@ -40,8 +40,8 @@ signature exactly (\verb{er_vpc_*()} builders have no \code{stratify}/\code{stra
 pair; \verb{er_tte_*()} builders take \code{time} instead of \code{exposure}/
 \code{response}).
 
-Arguments are standardised to allow users to write their own
-as needed
+Arguments are standardised to allow users to write their own custom
+builders as needed.
 }
 \section{Arguments}{
 

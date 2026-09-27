@@ -35,13 +35,13 @@
 #' pair; `er_tte_*()` builders take `time` instead of `exposure`/
 #' `response`).
 #'
-#' Arguments are standardised to allow users to write their own 
-#' as needed
-#' 
+#' Arguments are standardised to allow users to write their own custom
+#' builders as needed.
+#'
 #' @returns A geom, or a list of geoms. More precisely, a list of
 #' objects that can be added to a ggplot2 plot. The expectation is
 #' that these objects will be added to a partially constructed plot
-#' which, at a minimum, already has the base theme applied. For 
+#' which, at a minimum, already has the base theme applied. For
 #' "model", "summary", "quantile", and "overlay", the pieces will be
 #' added to a plot that already has a coord that sets the axis limits
 #' (the base plot). For the "data"
@@ -171,7 +171,7 @@
 #' @seealso [er_style_model()], [er_style_summary()], [er_style_quantile()],
 #' [er_style_data()], [er_style_group()], [er_style_tag()], [er_style_vpc()],
 #' [er_style_tte()]
-#' 
+#'
 NULL
 
 
@@ -195,7 +195,7 @@ NULL
 #'   "Details".
 #' @param fill_role A string naming what the builder's `fill` aesthetic
 #'   represents, or `NULL` (the default) to leave this tag unset.
-#' @param y_role A string naming what the builder's y-axis represents, 
+#' @param y_role A string naming what the builder's y-axis represents,
 #'   or `NULL` (the default) to leave this tag unset.
 #' @param layer One of `"plot_model"`, `"plot_summary"`, `"plot_quantile"`,
 #'   `"plot_data"`, `"plot_group"`, `"vpc_observed"`, `"vpc_simulated"`,

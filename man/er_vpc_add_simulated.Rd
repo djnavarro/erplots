@@ -2,7 +2,7 @@
 % Please edit documentation in R/er-vpc-add.R
 \name{er_vpc_add_simulated}
 \alias{er_vpc_add_simulated}
-\title{Add the simulated-data layer to an \code{er_vpc} VPC}
+\title{Add the simulated-data layer to a VPC plot}
 \usage{
 er_vpc_add_simulated(
   object,
@@ -34,27 +34,23 @@ this layer's random tie-break when \code{\link[=er_vpc]{er_vpc()}}'s \code{ties}
 \code{"split-even"} -- see \code{\link[=er_vpc]{er_vpc()}}'s own \code{seed} argument for the
 observed layer's independent tie-break seed.}
 
-\item{style}{A function determining how the simulated layer is drawn.
-Defaults to \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}}; see
-\code{\link[=er_style_vpc_simulated]{er_style_vpc_simulated()}} for the other built-in options. Or one of
-the registered short-string labels for this layer (see "Styles"
-below).}
+\item{style}{Style used to draw the VPC simulation layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"mean_errorbar"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{simulate_args}{A named list of additional arguments forwarded to
-\code{\link[=er_simulate]{er_simulate()}}, only used with \code{model}. Distinct from \code{...} the
-same way \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args} is distinct from its
-own \code{...} -- see that function's "Details" for the rationale.}
+\code{\link[=er_simulate]{er_simulate()}} when simulating from the model.}
 
-\item{...}{Additional named arguments forwarded to \code{style}.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 \code{object}, with \code{object$layer$simulated} populated.
 }
 \description{
-Bins simulated data using the same cutpoints \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}
-already computed, and summarizes it (mean + a percentile interval
-across replicates, plus simulated percentile bands for a
-continuous/count response).
+Bins the simulation data for a VPC plot and computes binned
+response summaries for comparison against the observed data layer.
 }
 \details{
 \code{sim} and \code{model} are mutually exclusive; supply exactly one. \code{model}
@@ -67,12 +63,19 @@ only mean predictions -- this function errors informatively if
 here), so the observed and simulated layers always agree on them.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"mean_errorbar"} \tab \code{\link[=er_style_vpc_simulated_mean_errorbar]{er_style_vpc_simulated_mean_errorbar()}} \tab Mean/rate + CI per bin, x-position adaptive to \code{plot_by}'s type (the default). \cr
    \code{"quantile_ribbon"} \tab \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}} \tab One ribbon per requested percentile against a continuous \code{plot_by} axis. \cr
    \code{"quantile_errorbar"} \tab \code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}} \tab Point + error bar per bin and per requested percentile. \cr
 }
+
+
+See \code{\link[=er_style_vpc]{er_style_vpc()}} for details on how style builder functions are
+defined for the VPC mini-grammar, should a custom style be required.
 }
 
 \seealso{

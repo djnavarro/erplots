@@ -96,9 +96,8 @@ Defaults to \code{0.05}.}
 \item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...}.}
 
 \item{fields}{Fields from \code{glance} to include for \code{er_style_summary_gof()},
-and the order they're shown in: one or more of \code{"n"} (labelled "N"),
-\code{"aic"} ("AIC"), \code{"bic"} ("BIC"), or \code{"r_squared"} (labelled
-"R-squared"). Defaults to all four, in that order. A field is shown
+and the order they're shown in: one or more of \code{"n"}, \code{"aic"}, \code{"bic"}, or
+\code{"r_squared"}. Defaults to all four, in that order. A field is shown
 only when both present and non-\code{NA} in the model's \code{glance} result.}
 }
 \value{
@@ -110,28 +109,41 @@ drawing a text/label annotation from a model's p-value, coefficients,
 goodness-of-fit statistics, or observation counts.
 }
 \details{
-\code{er_style_summary_pvalue()}
-draws a formatted p-value from the model's \code{\link[=er_summary]{er_summary()}} result;
-\code{er_style_summary_n()} draws observation counts and doesn't have to
-originate from a fitted model at all.
-\code{er_style_summary_coefficients()} draws one line per row of the model's
-\code{coefficients} table (see \code{\link[=er_summary]{er_summary()}}'s \code{coefficients} field), useful
-for models with several parameters and no single privileged p-value
-(e.g. a multi-parameter nonlinear model); it draws nothing if
-\code{coefficients} wasn't supplied, or if the layer is stratified.
-\code{er_style_summary_gof()} draws a single-line, comma-separated
-goodness-of-fit annotation from the model's \code{glance} field (see
-\code{\link[=er_summary]{er_summary()}}) -- a curated subset (\code{N}, \code{AIC}, \code{BIC}, R-squared) rather
-than every reserved \code{glance} column, showing only whichever of those
-four are actually present and non-\code{NA}; it draws nothing if none of them
-are available, or if the layer is stratified. All four builders are
-tagged \code{er_style_tag(fn, layer = "plot_summary")}, so \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}
-errors informatively if a builder tagged for a different layer is passed
-to it instead.
-
 See \code{\link[=er_style]{er_style()}} for the shared builder interface these functions
 implement, including how to write a custom builder of your own.
 }
+\section{Choosing a builder}{
+
+Each builder draws a different kind of annotation, with its own
+data requirements:
+\itemize{
+\item \code{er_style_summary_pvalue()} (the default) -- a formatted p-value
+from the model's \code{\link[=er_summary]{er_summary()}} result.
+\item \code{er_style_summary_n()} -- observation counts. Doesn't have to
+originate from a fitted model at all.
+\item \code{er_style_summary_coefficients()} -- one line per row of the
+model's \code{coefficients} table (see \code{\link[=er_summary]{er_summary()}}'s \code{coefficients}
+field), useful for models with several parameters and no single
+privileged p-value (e.g. a multi-parameter nonlinear model). Draws
+nothing if \code{coefficients} wasn't supplied, or if the layer is
+stratified.
+\item \code{er_style_summary_gof()} -- a single-line, comma-separated
+goodness-of-fit annotation from the model's \code{glance} field (see
+\code{\link[=er_summary]{er_summary()}}) -- a curated subset (N, AIC, BIC, R-squared)
+rather than every reserved \code{glance} column, showing only whichever
+of those four are actually present and non-\code{NA}. Same restrictions
+as \code{er_style_summary_coefficients()}: draws nothing if none of
+those fields are available, or if the layer is stratified.
+}
+}
+
+\section{Tags}{
+
+All four builders are tagged \code{er_style_tag(fn, layer = "plot_summary")},
+so \code{\link[=er_plot_add_summary]{er_plot_add_summary()}} errors informatively if a builder tagged
+for a different layer is passed to it instead.
+}
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
   library(erglm)

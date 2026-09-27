@@ -18,44 +18,34 @@ er_tte_add_summary(
 \item{object}{Partially constructed plot (has S3 class \code{er_tte}).}
 
 \item{model}{A fitted time-to-event model implementing \code{\link[=er_summary]{er_summary()}},
-or \code{NULL} (the default). Independent of whatever model, if any, was
-passed to \code{\link[=er_tte_add_model]{er_tte_add_model()}} -- only needed for builder styles
-(e.g. \code{\link[=er_style_tte_summary_coefficients]{er_style_tte_summary_coefficients()}}/
-\code{\link[=er_style_tte_summary_gof]{er_style_tte_summary_gof()}}) that produce model-based summaries;
-the default log-rank builder and \code{\link[=er_style_tte_summary_n]{er_style_tte_summary_n()}} both
-ignore it.}
+or \code{NULL} (the default). Only needed for styles that produce
+model-based summaries, ignored by other style builder functions.}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_tte]{er_tte()}}, \code{FALSE} otherwise.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the annotation, or one of the registered
-short-string labels for this layer (see "Styles" below). Defaults
-to \code{\link[=er_style_tte_summary_logrank]{er_style_tte_summary_logrank()}}.}
+\item{style}{Style used to produce the summary layer annotation. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"logrank"}, the default), or a builder function used to compute the
+relevant plot object (see "Styles" below).}
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (see
 \code{?er_model_interface}). Defaults to \code{0.95}. Ignored when \code{model} is
 \code{NULL}.}
 
 \item{summary_args}{A named list of additional arguments forwarded to
-\code{\link[=er_summary]{er_summary()}}, distinct from \code{...} the same way
-\code{\link[=er_tte_add_model]{er_tte_add_model()}}'s \code{predict_args} is distinct from its own
-\code{...} -- see its "Details".}
+\code{\link[=er_summary]{er_summary()}} when generating summaries.}
 
-\item{...}{Additional named arguments forwarded unchanged to \code{style}
-at build time (e.g. \code{\link[=er_style_tte_summary_logrank]{er_style_tte_summary_logrank()}}'s \code{inset}/
-\code{label_size}/\code{label_colour}/\code{label_fill}).}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the summary layer added.
 }
 \description{
-Adds the summary layer: a corner-placed text/label annotation, drawn
-from a log-rank test comparing survival across \code{stratify_by}'s levels
-(the default style, \code{survival::survdiff()}), a supplied model's
-\code{\link[=er_summary]{er_summary()}} result, or purely descriptive observation/event counts
--- depending on \code{style}. Singleton (a second call replaces the
-previous one).
+Adds the summary layer to a TTE plot: a corner-placed text/label annotation,
+summarising one or more aspects of the plot or the data.
 }
 \details{
 The annotation is placed in whichever corner of the panel is
@@ -70,13 +60,20 @@ builders (e.g. \code{\link[=er_style_tte_summary_n]{er_style_tte_summary_n()}}) 
 stratification.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"logrank"} \tab \code{\link[=er_style_tte_summary_logrank]{er_style_tte_summary_logrank()}} \tab Log-rank test p-value comparing survival across \code{stratify_by}'s levels (the default). \cr
    \code{"n"} \tab \code{\link[=er_style_tte_summary_n]{er_style_tte_summary_n()}} \tab Subject/event counts; model- and stratification-agnostic. \cr
    \code{"coefficients"} \tab \code{\link[=er_style_tte_summary_coefficients]{er_style_tte_summary_coefficients()}} \tab One line per model parameter, from \code{model}'s \code{\link[=er_summary]{er_summary()}} \code{coefficients} table. \cr
    \code{"gof"} \tab \code{\link[=er_style_tte_summary_gof]{er_style_tte_summary_gof()}} \tab A goodness-of-fit annotation from \code{model}'s \code{\link[=er_summary]{er_summary()}} \code{glance} table. \cr
 }
+
+
+See \code{\link[=er_style_tte]{er_style_tte()}} for details on how style builder functions are
+defined for the TTE mini-grammar, should a custom style be required.
 }
 
 \examples{

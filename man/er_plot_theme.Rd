@@ -2,7 +2,7 @@
 % Please edit documentation in R/er-plot-theme.R
 \name{er_plot_theme}
 \alias{er_plot_theme}
-\title{Adjust theme/labels for an \code{er_plot} object}
+\title{Adjust theme/labels for an exposure-response plot}
 \usage{
 er_plot_theme(
   object,

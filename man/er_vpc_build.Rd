@@ -2,7 +2,7 @@
 % Please edit documentation in R/er-vpc-api.R
 \name{er_vpc_build}
 \alias{er_vpc_build}
-\title{Build and render an \code{er_vpc} object}
+\title{Build and render a VPC plot}
 \usage{
 er_vpc_build(object)
 }

@@ -22,13 +22,14 @@ Only needed for builder styles (e.g.
 \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}) that produce model-based summaries; a
 purely descriptive builder (e.g. \code{\link[=er_style_summary_n]{er_style_summary_n()}}) ignores it.}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the summary annotation, defaulting to
-\code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}, or one of the registered short-string
-labels for this layer (see "Styles" below).}
+\item{style}{Style used to draw the summary annotation layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"pvalue"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (used,
 e.g., for the \code{conf_low}/\code{conf_high} columns of its \code{coefficients}
@@ -36,13 +37,10 @@ result -- see \code{?er_model_interface}). Defaults to \code{0.95}. Ignored
 when \code{model} is \code{NULL}.}
 
 \item{summary_args}{A named list of additional arguments forwarded to
-\code{\link[=er_summary]{er_summary()}}, distinct from \code{...} the same way
-\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args} is distinct from its own
-\code{...} -- see "Details" there.}
+\code{\link[=er_summary]{er_summary()}} when generating summaries.}
 
-\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time; see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section. Must be named.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the summary layer added.
@@ -53,13 +51,21 @@ corner of the base panel is furthest from the observed data, computed
 from the raw \verb{(exposure, response)} coordinates of the data.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"pvalue"} \tab \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}} \tab A formatted p-value from the model's \code{\link[=er_summary]{er_summary()}} result (the default). \cr
    \code{"n"} \tab \code{\link[=er_style_summary_n]{er_style_summary_n()}} \tab Observation counts; model-agnostic, works with \code{model = NULL}. \cr
    \code{"coefficients"} \tab \code{\link[=er_style_summary_coefficients]{er_style_summary_coefficients()}} \tab One line per model parameter, from \code{\link[=er_summary]{er_summary()}}'s \code{coefficients} table. \cr
    \code{"gof"} \tab \code{\link[=er_style_summary_gof]{er_style_summary_gof()}} \tab A goodness-of-fit annotation (N/AIC/BIC/R-squared) from \code{\link[=er_summary]{er_summary()}}'s \code{glance} table. \cr
 }
+
+
+See \code{\link[=er_style]{er_style()}} for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.
 }
 
 \examples{

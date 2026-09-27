@@ -102,10 +102,9 @@ as a fraction of the panel's width/height. Default \code{0.05}.}
 
 \item{fields}{Fields from \code{glance} to include for
 \code{er_style_tte_summary_gof()}, and the order they're shown in: one
-or more of \code{"n"} (labelled "N"), \code{"aic"} ("AIC"), \code{"bic"} ("BIC"),
-or \code{"r_squared"} (labelled "R-squared"). Defaults to all four, in
-that order. A field is shown only when both present and non-\code{NA}
-in the model's \code{glance} result.}
+or more of \code{"n"}, \code{"aic"}, \code{"bic"}, or \code{"r_squared"}. Defaults to
+all four, in that order. A field is shown only when both present and
+non-\code{NA} in the model's \code{glance} result.}
 }
 \value{
 A geom, or a list of geoms.
@@ -117,29 +116,64 @@ comparing survival across \code{stratify_by}'s levels, a supplied model's
 \code{\link[=er_summary]{er_summary()}} result, or observation/event counts.
 }
 \details{
-\code{er_style_tte_summary_logrank()} (the default) places its annotation
-in whichever of the panel's 4 corners is currently furthest from the
-survival curve(s), using the same \verb{(0, 1)}-rescaled corner-distance
+See \code{\link[=er_style_tte]{er_style_tte()}} for the shared builder interface these
+functions implement.
+}
+\section{Choosing a builder}{
+
+Each builder draws a different kind of annotation, with its own
+data requirements:
+\itemize{
+\item \code{er_style_tte_summary_logrank()} (the default) -- a log-rank
+p-value comparing survival across \code{stratify_by}'s levels. Draws
+nothing on an unstratified object, or one with fewer than 2 strata
+levels present in the data.
+\item \code{er_style_tte_summary_n()} -- subject/event counts. Doesn't depend
+on a model or \code{stratify_by} at all.
+\item \code{er_style_tte_summary_coefficients()} -- one line per row of a
+supplied model's \code{coefficients} table (see \code{\link[=er_summary]{er_summary()}}). Draws
+nothing without a model supplying \code{coefficients}, or if the layer
+is stratified.
+\item \code{er_style_tte_summary_gof()} -- a single-line goodness-of-fit
+summary from a supplied model's \code{glance} field. Same requirements
+and restrictions as \code{er_style_tte_summary_coefficients()}.
+}
+}
+
+\section{Log-rank test}{
+
+\code{er_style_tte_summary_logrank()} places its annotation in whichever
+of the panel's 4 corners is currently furthest from the survival
+curve(s), using the same \verb{(0, 1)}-rescaled corner-distance
 calculation \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}'s own p-value annotation uses to
 avoid a plot's raw data points -- here applied to the curve's own
 \verb{(time, surv)} coordinates instead, since there's no raw per-subject
 scatter in this grammar for the annotation to avoid. It draws nothing
 if \code{config$logrank_p_value} is \code{NULL} (fewer than 2 strata levels
 present, including an unstratified object).
+}
+
+\section{Subject and event counts}{
 
 \code{er_style_tte_summary_n()} draws subject and event counts -- one line
 per stratum when \code{stratify} is \code{TRUE}, a single overall line
 otherwise -- and doesn't depend on a model or \code{stratify_by} at all.
+}
+
+\section{Model coefficients and goodness-of-fit}{
 
 \code{er_style_tte_summary_coefficients()} draws one line per row of the
 supplied model's \code{coefficients} table (see \code{\link[=er_summary]{er_summary()}}'s
 \code{coefficients} field); it draws nothing if \code{coefficients} wasn't
 supplied, or if the layer is stratified. \code{er_style_tte_summary_gof()}
 draws a single-line, comma-separated goodness-of-fit annotation from
-the model's \code{glance} field -- a curated subset (\code{N}, \code{AIC}, \code{BIC},
+the model's \code{glance} field -- a curated subset (N, AIC, BIC,
 R-squared) rather than every reserved \code{glance} column, showing only
 whichever of those four are actually present and non-\code{NA}; it draws
 nothing if none of them are available, or if the layer is stratified.
+}
+
+\section{Tags}{
 
 All four builders are tagged \code{er_style_tag(fn, layer = "tte_summary")} -- distinct from \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}'s own
 \code{"summary"} tag, since the two grammars' summary builders share no
@@ -148,6 +182,7 @@ signature (\code{exposure}/\code{response} vs. \code{time}) -- so
 different layer is passed to it instead (including
 \code{\link[=er_plot_add_summary]{er_plot_add_summary()}}'s own builders).
 }
+
 \examples{
 library(survival)
 lung |>

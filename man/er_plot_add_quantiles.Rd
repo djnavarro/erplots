@@ -19,13 +19,14 @@ er_plot_add_quantiles(
 \arguments{
 \item{object}{Partially constructed plot, an \code{er_plot} object.}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the quantile summary; defaults to
-\code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} (point + error bar). Or one of the
-registered short-string labels for this layer (see "Styles" below).}
+\item{style}{Style used to draw the quantile summary layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"errorbar"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{bins}{Number of exposure bins (not counting placebo). Defaults
 to \code{4}.}
@@ -36,8 +37,8 @@ to \code{4}.}
 \code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} to control how the exposure variable is
 split into bins -- see its documentation for what each controls.}
 
-\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time. Arguments must be named.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the quantile layer added.
@@ -69,13 +70,21 @@ to both calls to avoid the warning, or ignore it if the difference is
 intentional.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"errorbar"} \tab \code{\link[=er_style_quantile_errorbar]{er_style_quantile_errorbar()}} \tab Point + error bar per bin (the default). \cr
    \code{"errorbar_vlines"} \tab \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}} \tab \code{"errorbar"} plus a labelled vline at every bin boundary. \cr
    \code{"pointrange"} \tab \code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}} \tab Point + range per bin, via \code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}}. \cr
    \code{"pointrange_vlines"} \tab \code{\link[=er_style_quantile_pointrange_vlines]{er_style_quantile_pointrange_vlines()}} \tab \code{"pointrange"} plus a labelled vline at every bin boundary. \cr
 }
+
+
+See \code{\link[=er_style]{er_style()}} for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.
 }
 
 \examples{

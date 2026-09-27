@@ -9,43 +9,48 @@ er_tte_add_risktable(object, style = NULL, times = NULL, n_times = 6, ...)
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_tte}).}
 
-\item{style}{Function drawing the risk-count labels. Defaults to
-\code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}}, or the registered label \code{"text"}
-(see \code{\link[=er_style_labels]{er_style_labels()}}).}
+\item{style}{Style used to generate the at-risk table in the plot. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"text"}, the default), or a builder function used to compute the
+relevant plot object (see "Styles" below).}
 
 \item{times}{Numeric vector of time points at which to report the
 number at risk, or \code{NULL} (the default) to use \code{n_times} evenly
-spaced breaks spanning \code{object$time$limits}.}
+spaced breaks across the time range.}
 
 \item{n_times}{Number of evenly spaced breaks to use when \code{times} is
 \code{NULL}. Must be a single whole number of at least 2. Ignored when
 \code{times} is supplied. Defaults to \code{6}.}
 
-\item{...}{Additional named arguments forwarded unchanged to \code{style}
-at build time (e.g. \code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}}'s \code{text_size}).}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the risktable layer added.
 }
 \description{
-Adds the risktable layer: a patchwork panel stacked below the curve,
-showing the number of subjects still at risk at a grid of time
-points (one row per stratum, when stratified) -- read from the fit
-already stored on \code{object$km} (see \code{\link[=er_tte]{er_tte()}}) via
-\code{summary.survfit(..., extend = TRUE)}. Singleton (a second call
-replaces the previous one).
+Adds the at-risk table layer to a TTE plot: a separate panel stacked
+below the curve, showing the number of subjects still at risk at a
+grid of time points, computed from the fit already stored internally
+within the plot object.
 }
 \details{
-The same time breaks used for the number-at-risk grid also become
-the curve panel's x-axis tick marks, so the two panels'
-\code{\link[patchwork:wrap_plots]{patchwork::wrap_plots()}}-collected x-axis lines up exactly --
-see \code{\link[=er_tte_build]{er_tte_build()}}.
+The time breaks used for the number-at-risk grid also become
+the x-axis tick marks on the primary plot, so the two panels'
+collected x-axis lines up exactly (see \code{\link[=er_tte_build]{er_tte_build()}}).
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"text"} \tab \code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}} \tab Number-at-risk counts as a text grid, one row per stratum (the only built-in, and the default). \cr
 }
+
+
+See \code{\link[=er_style_tte]{er_style_tte()}} for details on how style builder functions are
+defined for the TTE mini-grammar, should a custom style be required.
 }
 
 \examples{

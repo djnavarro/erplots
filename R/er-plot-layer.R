@@ -3,7 +3,7 @@
 
 .layer_model <- function(object, model, stratify, conf_level, style,
                           predict_args = list(), dots = list()) {
-  
+
   layer_model <- list()
   config <- list()
 
@@ -36,10 +36,10 @@
   # `.refresh_model_predictions()` at build time (`er_plot_build()`), so
   # it never actually reaches a builder.
   config$predictions <- .get_model_predictions(
-    config$model, 
-    config$conf_level, 
-    object$exposure, 
-    object$strata, 
+    config$model,
+    config$conf_level,
+    object$exposure,
+    object$strata,
     stratify,
     object$data,
     predict_args = predict_args
@@ -147,13 +147,13 @@
     dplyr::mutate(
       response = .data[[object$response$name]],
       exposure_bins = cut_exposure_quantile(
-        x = .data[[object$exposure$name]], 
+        x = .data[[object$exposure$name]],
         n = config$n_quantiles,
         ties = ties,
         quantile_type = quantile_type,
         labeller = labeller
       ),
-      strata = .get_strata_values(.data, object$strata$name)   
+      strata = .get_strata_values(.data, object$strata$name)
     )
 
   # quantile cutpoints (excluding placebo), for builders that draw
@@ -178,43 +178,43 @@
 
   # binary response: response *rate* per bin, via a Clopper-Pearson CI.
   # count response, when explicitly declared (`response_type = "count"`):
-  # bin *mean*, via an exact Poisson interval. continuous (and, when not 
-  # explicitly declared "count", an approximation for count) response: bin 
+  # bin *mean*, via an exact Poisson interval. continuous (and, when not
+  # explicitly declared "count", an approximation for count) response: bin
   # *mean*, via a t-interval. Label placement (y_lwr_lbl/y_upr_lbl/y_lbl) is
   # generalised across all branches below rather than duplicated, using
   # the response's own scale (`object$response$limits`) in place of the
   # binary-only [0, 1] assumption.
   if (object$response$type == "binary") {
-    config$summary <- binned |> 
+    config$summary <- binned |>
       dplyr::summarise(
         n1 = sum(response == 1, na.rm = TRUE),
         n0 = sum(response == 0, na.rm = TRUE),
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = n1 / (n0 + n1),
         y_mid_lbl = object$theme$format_percent(n1 / (n0 + n1)),
-        ci_lower = ci_clopper_pearson(n1, n0 + n1, config$conf_level)["lower"], 
+        ci_lower = ci_clopper_pearson(n1, n0 + n1, config$conf_level)["lower"],
         ci_upper = ci_clopper_pearson(n1, n0 + n1, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
       )
   } else if (object$response$type == "count") {
-    config$summary <- binned |> 
+    config$summary <- binned |>
       dplyr::summarise(
         n_units = sum(!is.na(response)),
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = mean(response, na.rm = TRUE),
         y_mid_lbl = object$theme$format_number(mean(response, na.rm = TRUE)),
-        ci_lower = ci_poisson(sum(response, na.rm = TRUE), n_units, config$conf_level)["lower"], 
+        ci_lower = ci_poisson(sum(response, na.rm = TRUE), n_units, config$conf_level)["lower"],
         ci_upper = ci_poisson(sum(response, na.rm = TRUE), n_units, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
-      ) |> 
+      ) |>
       dplyr::select(-n_units)
   } else {
-    config$summary <- binned |> 
+    config$summary <- binned |>
       dplyr::summarise(
         x_mid = mean(.data[[object$exposure$name]], na.rm = TRUE),
         y_mid = mean(response, na.rm = TRUE),
         y_mid_lbl = object$theme$format_number(mean(response, na.rm = TRUE)),
-        ci_lower = ci_t(response, config$conf_level)["lower"], 
+        ci_lower = ci_t(response, config$conf_level)["lower"],
         ci_upper = ci_t(response, config$conf_level)["upper"],
         .by = c("exposure_bins", "strata")
       )
@@ -224,17 +224,17 @@
   response_hi <- object$response$limits[2]
   margin <- 0.05 * (response_hi - response_lo)
 
-  config$summary <- config$summary |> 
+  config$summary <- config$summary |>
     dplyr::mutate(
       y_lwr_lbl = ci_lower - margin,
       y_upr_lbl = ci_upper + margin,
       y_lbl = dplyr::if_else(
-        (y_lwr_lbl - response_lo) > (response_hi - y_upr_lbl), 
-        y_lwr_lbl, 
+        (y_lwr_lbl - response_lo) > (response_hi - y_upr_lbl),
+        y_lwr_lbl,
         y_upr_lbl
       )
     )
-  
+
   # see `?er_style` for the `style` escape hatch; `er_plot_add_quantiles()`
   # has already resolved a default when the caller didn't supply one
   config$style <- style
@@ -256,7 +256,7 @@
 .layer_data <- function(object, stratify, panel, style, dots = list()) {
 
   layer_data <- list()
-  
+
   config <- list()
   config$layout <- "panel"
   config$panel <- panel
@@ -321,7 +321,7 @@
   }
 
   layer_data$stratify <- stratify
-  layer_data$config <- config 
+  layer_data$config <- config
 
   return(layer_data)
 }
@@ -397,7 +397,7 @@
     # see `?er_style`'s "Passing extra arguments to a builder" section
     config$dots <- dots
 
-    # data 
+    # data
     dat <- object$data
 
     # create factor from continuous grouping variables
@@ -405,18 +405,18 @@
       new_g <- paste0(".", g, "_quantile")
       new_g_sym <- dplyr::sym(new_g)
       if (g == object$exposure$name) {
-        dat <- dat |> 
+        dat <- dat |>
           dplyr::mutate(
-            {{new_g_sym}} := .data[[g]] |> 
-              cut_exposure_quantile(n = bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |> 
+            {{new_g_sym}} := .data[[g]] |>
+              cut_exposure_quantile(n = bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |>
               .set_label(.get_label(dat[[g]]) %||% g)
           )
-        
+
       } else {
-        dat <- dat |> 
+        dat <- dat |>
           dplyr::mutate(
-            {{new_g_sym}} := .data[[g]] |> 
-              cut_quantile(n = bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |> 
+            {{new_g_sym}} := .data[[g]] |>
+              cut_quantile(n = bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |>
               .set_label(.get_label(dat[[g]]) %||% g)
           )
       }
@@ -448,23 +448,23 @@
     )
 
     # store sample size information (for merge into plot labels)
-    config$counts <- dat |> 
+    config$counts <- dat |>
       dplyr::summarise(
         n   = sum(!is.na(.data[[object$exposure$name]])),
         lbl = paste0("N=", n),
         .by = config$groupings
-      ) |> 
-      dplyr::mutate(lvl = paste0(.data[[g]], " (", lbl, ")")) |> 
+      ) |>
+      dplyr::mutate(lvl = paste0(.data[[g]], " (", lbl, ")")) |>
       dplyr::arrange(.data[[g]])
 
     # store the number of groups plotted on the y-axis
     config$n_groups <- nrow(config$counts)
 
     # store a modified data set to use for plotting
-    config$data <- dat |> 
-      dplyr::select(dplyr::all_of(c(config$groupings, object$exposure$name))) |> 
+    config$data <- dat |>
+      dplyr::select(dplyr::all_of(c(config$groupings, object$exposure$name))) |>
       dplyr::left_join(config$counts, by = config$groupings)
-    
+
     layer_group$config[[g]] <- config
   }
 
@@ -575,10 +575,10 @@
 .get_model_predictions <- function(model, conf_level, exposure, strata, stratify, data,
                                     predict_args = list()) {
 
-  pred_dat <- seq(exposure$limits[1], exposure$limits[2], length.out = 300L) |> 
+  pred_dat <- seq(exposure$limits[1], exposure$limits[2], length.out = 300L) |>
     data.frame() |> .set_names(exposure$name)
-  
-  if (stratify) pred_dat <- pred_dat |> 
+
+  if (stratify) pred_dat <- pred_dat |>
     dplyr::cross_join(data.frame(strata$limits) |> .set_names(strata$name))
 
   # a fitted model's formula may reference covariates beyond the exposure
@@ -588,7 +588,7 @@
   # original fitting data at a single reference value. An `er_predict()`
   # method ignores extra columns it doesn't need, so this is harmless when
   # the model has no such covariates, and avoids the "object not found"
-  # crash inside `predict()` when it does 
+  # crash inside `predict()` when it does
   pred_dat <- .fill_reference_covariates(pred_dat, data)
 
   model_predictions <- rlang::exec(

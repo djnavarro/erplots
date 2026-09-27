@@ -266,7 +266,7 @@ plot.er_vpc <- function(x, y = NULL, ...) {
 
 # top level build function ----------------------------------------------------
 
-#' Build and render an `er_vpc` object
+#' Build and render a VPC plot
 #'
 #' Assembles the observed/simulated layers into a single ggplot2 object.
 #'

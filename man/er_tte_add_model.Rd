@@ -2,7 +2,7 @@
 % Please edit documentation in R/er-tte-add.R
 \name{er_tte_add_model}
 \alias{er_tte_add_model}
-\title{Add a parametric survival-curve overlay layer}
+\title{Add a model-based survival curve overlay}
 \usage{
 er_tte_add_model(
   object,
@@ -19,57 +19,64 @@ er_tte_add_model(
 \item{object}{Partially constructed plot (has S3 class \code{er_tte}).}
 
 \item{model}{A fitted time-to-event model. Must implement
-\code{\link[=er_predict_survival]{er_predict_survival()}} (see \link{er_model_interface}).}
+\code{\link[=er_predict_survival]{er_predict_survival()}}.}
 
-\item{keep_strata}{Logical; whether this layer should draw one curve
-per stratum level. Defaults to \code{!is.null(object$strata)}.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the model curve/ribbon. Defaults to
-\code{\link[=er_style_tte_model_line]{er_style_tte_model_line()}}, or the registered label \code{"line"} (see
-\code{\link[=er_style_labels]{er_style_labels()}}).}
+\item{style}{Style used to draw the model-based survival curve. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"line"}, the default), or a builder function used to compute the
+relevant plot object (see "Styles" below).}
 
 \item{conf_level}{Confidence level for the prediction band. Defaults
 to \code{0.95}.}
 
 \item{time_grid}{Numeric vector of times at which to predict \code{S(t)},
 or \code{NULL} (the default) to use 100 points evenly spaced across
-\code{object$time$limits}.}
+the time range.}
 
 \item{predict_args}{A named list of additional arguments forwarded to
-\code{\link[=er_predict_survival]{er_predict_survival()}} (e.g. a model-specific argument its method
-requires beyond \code{model}/\code{newdata}/\code{time_grid}/\code{conf_level}).
-Distinct from \code{...}: \code{predict_args} reaches \code{\link[=er_predict_survival]{er_predict_survival()}},
-\code{...} reaches \code{style} -- mirroring \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s
-\code{predict_args}.}
+\code{\link[=er_predict_survival]{er_predict_survival()}} when generating model-based predictions.}
 
-\item{...}{Additional named arguments forwarded unchanged to \code{style}
-at build time.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the model layer added.
 }
 \description{
-Adds the model layer: a fitted parametric \code{S(t)} curve (with an
-uncertainty band) from a time-to-event model, overlaid on the
-Kaplan-Meier curve already stored on \code{object$km} (see \code{\link[=er_tte]{er_tte()}}).
-Singleton (a second call replaces the previous one).
+Adds the model layer to a TTE plot: a fitted survival curve with an
+uncertainty band derived from the corresponding time-to-event model.
 }
 \details{
-\code{model} may reference covariates beyond the strata variable; erplots
-fills any additional covariate from the plot data with a reference
-value (first factor level or numeric mean), exactly as
-\code{\link[=er_plot_add_model]{er_plot_add_model()}} does -- see its "Details". Strata membership is
-carried on the \code{newdata} passed to \code{\link[=er_predict_survival]{er_predict_survival()}}, never
-implicit in \code{model} itself -- see \link{er_model_interface}'s "Details".
+The model layer of a TTE plot is used to display predictions generated
+from an underlying survival model (e.g., parametric accelerated failure
+time model, Cox proportional hazards model, etc). It uses the \code{model}
+object to create the predictions, using the \code{\link[=er_predict_survival]{er_predict_survival()}}
+method for the relevant model class to do the work. The \code{model} object
+is permitted to reference covariates other than the plot stratification
+variable: see the details section of \code{\link[=er_plot_add_model]{er_plot_add_model()}} for the
+specifics.
 
-erplots does not check that \code{model} was fit on the same time/event
-variables as the plot; the caller must ensure compatibility.
+Note that erplots does not check that \code{model} was fit on the same
+time/event variables passed to the plot itself; it is left to the user
+to ensure that the data set provided to the model is consistent with
+the data provided to the TTE plot.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"line"} \tab \code{\link[=er_style_tte_model_line]{er_style_tte_model_line()}} \tab Fitted \code{S(t)} curve with an uncertainty band (the only built-in, and the default). \cr
 }
+
+
+See \code{\link[=er_style_tte]{er_style_tte()}} for details on how style builder functions are
+defined for the TTE mini-grammar, should a custom style be required.
 }
 
 \seealso{

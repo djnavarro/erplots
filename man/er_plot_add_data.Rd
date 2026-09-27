@@ -9,29 +9,21 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_plot}).}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. See
-"Details" for how this interacts with a builder's structural family.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
-\item{style}{Function drawing the data layer -- defaults to
-\code{\link[=er_style_data_overlay]{er_style_data_overlay()}}. Any function matching the standard
-\verb{(data, config, stratify, exposure, response, strata, theme, ...)}
-signature and tagged with \code{\link[=er_style_tag]{er_style_tag()}} can be supplied instead;
-see \code{\link[=er_style]{er_style()}} and "Details". Or one of the registered
-short-string labels for this layer (see "Styles" below).}
+\item{style}{Style used to draw the data layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"overlay"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
 default). Only meaningful for \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} on a
 binary response; see "Details" for when \code{"both"} is required.}
 
-\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section. Must be named. The built-in
-\code{er_style_data_overlay()}/\code{er_style_data_boxjitter()} builders read a
-\code{seed} from here to make their jitter reproducible across repeated
-\code{plot()} calls on the same object; omit it (the default) for a fresh
-random jitter on every render.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the data layer added.
@@ -42,12 +34,20 @@ as an overlay showing the exposure and response values in the main panel of
 the plot, but other possibilities are available.
 }
 \section{Styles}{
-\tabular{lll}{
+
+The following pre-defined styles are available for this layer. Please
+see the documentation for the corresponding builder function to see what
+customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"overlay"} \tab \code{\link[=er_style_data_overlay]{er_style_data_overlay()}} \tab Raw points (jittered for a binary response) drawn on the main panel (the default). \cr
    \code{"hex"} \tab \code{\link[=er_style_data_hex]{er_style_data_hex()}} \tab 2D hexbin density of the raw points on the main panel. \cr
    \code{"boxjitter"} \tab \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} \tab Boxplot + jittered points in a stacked panel, split by response (binary response only). \cr
 }
+
+
+See \code{\link[=er_style]{er_style()}} for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.
 }
 
 \section{Default builders}{
