@@ -31,10 +31,9 @@ compute the relevant plot object (see "Styles" below).}
 variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).
 Applied identically to every grouping variable added by this call.}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. See
-"Details" for an error case.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{ties, quantile_type, labeller}{Passed straight through to
 \code{\link[=cut_quantile]{cut_quantile()}}/\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} to control how a

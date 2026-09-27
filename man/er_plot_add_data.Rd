@@ -9,10 +9,9 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_plot}).}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise. See
-"Details" for how this interacts with a builder's structural family.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{style}{Style used to draw the data layer. Can
 either be a string corresponding to one of the registered style labels

@@ -9,6 +9,8 @@
 #' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param model A fitted exposure-response model. Must implement [er_predict()].
 #' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified, 
+#'   and `FALSE` otherwise.
 #' @param style Style used to draw the model curve/ribbon layer. Can 
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"ribbonline"`, the default), or a builder function used to 
@@ -140,9 +142,9 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   Only needed for builder styles (e.g.
 #'   [er_style_summary_pvalue()]) that produce model-based summaries; a
 #'   purely descriptive builder (e.g. [er_style_summary_n()]) ignores it.
-#' @param keep_strata Logical, indicating whether this layer should be
-#'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified, 
+#'   and `FALSE` otherwise.
 #' @param style Style used to draw the summary annotation layer. Can 
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"pvalue"`, the default), or a builder function used to 
@@ -230,9 +232,9 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' summarised with a point estimate and confidence interval. 
 #' 
 #' @param object Partially constructed plot, an `er_plot` object.
-#' @param keep_strata Logical, indicating whether this layer should be
-#'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise.
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified, 
+#'   and `FALSE` otherwise.
 #' @param style Style used to draw the quantile summary layer. Can 
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"errorbar"`, the default), or a builder function used to 
@@ -387,10 +389,9 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' the plot, but other possibilities are available.  
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`).
-#' @param keep_strata Logical, indicating whether this layer should be
-#'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. See
-#'   "Details" for how this interacts with a builder's structural family.
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified, 
+#'   and `FALSE` otherwise.
 #' @param style Style used to draw the data layer. Can 
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"overlay"`, the default), or a builder function used to 
@@ -577,10 +578,9 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' @param bins Number of quantile bins used for continuous grouping
 #'   variables (`NULL`, the default, uses [cut_quantile()]'s own default).
 #'   Applied identically to every grouping variable added by this call.
-#' @param keep_strata Logical, indicating whether this layer should be
-#'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_plot()], `FALSE` otherwise. See
-#'   "Details" for an error case.
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified, 
+#'   and `FALSE` otherwise.
 #' @param ties,quantile_type,labeller Passed straight through to
 #'   [cut_quantile()]/[cut_exposure_quantile()] to control how a
 #'   continuous grouping variable is split into bins -- see their

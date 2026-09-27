@@ -25,9 +25,9 @@ passed to \code{\link[=er_tte_add_model]{er_tte_add_model()}} -- only needed for
 the default log-rank builder and \code{\link[=er_style_tte_summary_n]{er_style_tte_summary_n()}} both
 ignore it.}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_tte]{er_tte()}}, \code{FALSE} otherwise.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{style}{Style used to produce the summary layer annotation. Can
 either be a string corresponding to one of the registered style labels

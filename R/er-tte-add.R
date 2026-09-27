@@ -207,8 +207,9 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param model A fitted time-to-event model. Must implement
 #'   [er_predict_survival()].
-#' @param keep_strata Logical; whether this layer should draw one curve
-#'   per stratum level. Defaults to `!is.null(object$strata)`.
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified, 
+#'   and `FALSE` otherwise.
 #' @param style Style used to draw the model-based survival curve. Can 
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"line"`, the default), or a builder function used to compute the
@@ -306,9 +307,9 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #'   [er_style_tte_summary_gof()]) that produce model-based summaries;
 #'   the default log-rank builder and [er_style_tte_summary_n()] both
 #'   ignore it.
-#' @param keep_strata Logical, indicating whether this layer should be
-#'   split by the plot's stratification variable; defaults to `TRUE` if
-#'   `stratify_by` was set in [er_tte()], `FALSE` otherwise.
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified, 
+#'   and `FALSE` otherwise.
 #' @param style Style used to produce the summary layer annotation. Can 
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"logrank"`, the default), or a builder function used to compute the

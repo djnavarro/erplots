@@ -19,9 +19,9 @@ er_plot_add_quantiles(
 \arguments{
 \item{object}{Partially constructed plot, an \code{er_plot} object.}
 
-\item{keep_strata}{Logical, indicating whether this layer should be
-split by the plot's stratification variable; defaults to \code{TRUE} if
-\code{stratify_by} was set in \code{\link[=er_plot]{er_plot()}}, \code{FALSE} otherwise.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{style}{Style used to draw the quantile summary layer. Can
 either be a string corresponding to one of the registered style labels

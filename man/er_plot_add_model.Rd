@@ -19,7 +19,9 @@ er_plot_add_model(
 
 \item{model}{A fitted exposure-response model. Must implement \code{\link[=er_predict]{er_predict()}}.}
 
-\item{keep_strata}{Logical; whether this layer should use stratification.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{style}{Style used to draw the model curve/ribbon layer. Can
 either be a string corresponding to one of the registered style labels
