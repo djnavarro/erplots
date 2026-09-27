@@ -8,6 +8,13 @@ rather than marked "done" in place. Items are grouped by target release.
 
 ## 0.2 release
 
+No outstanding items. The `er_tte()` mini-grammar (the bulk of the 0.2
+scope) is complete, including full `ertte` integration -- see
+`HISTORY.md`'s "The `er_tte` grammar", "`er_tte_add_model()`", and
+"`er_tte_theme()`" entries for the design writeups.
+
+## 0.3 and later
+
 ### Deferred: an additive `model` layer
 
 Currently `er_plot_add_model()` is a singleton (a second call replaces
@@ -21,57 +28,14 @@ scheduled -- no concrete need has surfaced yet.
   supports this).
 - Prediction-correction (pcVPC).
 
+### Deferred: survival-curve VPC
 
-
-## Later release (proposed 0.2.0): TTE plotting grammar (`er_tte`) -- remaining work
-
-Tracked upstream in [ertte#1](https://github.com/djnavarro/ertte/issues/1)
-(Workstream C -- "TTE plotting grammar in `erplots`"), co-designed with the
-new `ertte` (time-to-event exposure-response modelling) package.
-
-**Done** (see `HISTORY.md`'s "The `er_tte` grammar", "`er_tte_add_model()`",
-and "`er_tte_theme()`" entries for the design writeups): the `er_tte()`
-object/Kaplan-Meier fit, all five layers -- `er_tte_add_curve()`,
-`er_tte_add_censor()`, `er_tte_add_risktable()`, `er_tte_add_summary()`,
-`er_tte_add_model()` -- and `er_tte_theme()`. The full pipeline from
-`PLAN.md`'s original sketch now works end to end:
-
-```r
-data |>
-  er_tte(time, event, stratify_by = NULL, conf_level = 0.95) |>
-  er_tte_add_curve() |>
-  er_tte_add_censor() |>
-  er_tte_add_risktable() |>
-  er_tte_add_summary() |>
-  er_tte_add_model(fit) |>
-  er_tte_theme(...) |>
-  plot()
-```
-
-**Done**: real `ertte` integration. `ertte` now implements
-`er_predict_survival.ertte_model()` (wrapping its own `ertte_predict()`),
-alongside its existing `er_predict()`/`er_simulate()`/`er_summary()`
-methods for the scalar landmark/RMST reductions used by
-`er_plot()`/`er_vpc()`. `ertte` has been added to `Suggests`/`Remotes` in
-`DESCRIPTION` (GitHub-only, like `erglm`/`emaxnls`), and
-`tests/testthat/test-tte-model-sync.R` is a dedicated integration test
-file gated with `skip_if_not_installed("ertte")`, comparing
-`er_predict_survival()` output against the test-only
-`er_test_toy_tte_model()` (`survival::survreg()`-based, in
-`tests/testthat/helper-toy-model.R`) across distributions/covariates, and
-exercising `er_tte_add_model()` end to end with real `ertte_aft()`/
-`ertte_coxph()` fits -- mirroring `test-toy-model-sync.R`'s `erglm`
-pattern.
-
-**Remaining, not yet scheduled for a specific release**: none currently
--- the one item previously tracked here (`er_tte_add_model()`'s
-continuous-`stratify_by` approximation) is now moot: `stratify_by` is
-required to be discrete across all three mini-grammars (`er_plot()`/
-`er_tte()`/`er_vpc()`), so there's no numeric-variable case left to
-approximate. See `HISTORY.md` for the writeup.
-
-**Explicitly deferred beyond even this release**: a survival-curve VPC
-(simulate event times from an `ertte` model, compare simulated vs.
-observed KM). The upstream issue phases this after the core `er_tte`
-grammar exists and after `ertte`'s `er_simulate`-equivalent contract is
-defined.
+A VPC analogue for the `er_tte()` grammar: simulate event times from a
+model that implements `er_predict_survival()` (or an `er_simulate()`-
+equivalent contract for survival models, not yet defined), and compare
+the resulting simulated Kaplan-Meier curve(s) against the observed KM
+curve -- mirroring what `er_vpc()` already does for the scalar-response
+grammars. Not scheduled: it depends on a simulation contract for
+survival models that doesn't exist yet in either `erplots` or any
+companion package, and no concrete need has surfaced beyond the general
+appeal of feature parity with `er_vpc()`.
