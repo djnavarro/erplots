@@ -20,10 +20,9 @@ than 2 non-missing values are supplied.
 }
 \description{
 Computes a nonparametric confidence interval for a sample quantile using
-the order-statistic method (Conover, \emph{Practical Nonparametric
-Statistics}): the interval endpoints are order statistics of \code{x}, chosen
-via the binomial distribution of ranks so that no assumption is made
-about the shape of \code{x}'s distribution.
+the order-statistic method: the interval endpoints are order statistics
+of \code{x}, chosen via the binomial distribution of ranks so that no assumption
+is made about the shape of \code{x}'s distribution.
 }
 \details{
 Used by \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}} to compute a confidence interval

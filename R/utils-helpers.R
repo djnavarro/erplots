@@ -353,13 +353,14 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 }
 
 
+# source: Conover, *Practical Nonparametric Statistics*
+
 #' Distribution-free confidence interval for a sample quantile
 #'
 #' Computes a nonparametric confidence interval for a sample quantile using
-#' the order-statistic method (Conover, *Practical Nonparametric
-#' Statistics*): the interval endpoints are order statistics of `x`, chosen
-#' via the binomial distribution of ranks so that no assumption is made
-#' about the shape of `x`'s distribution.
+#' the order-statistic method: the interval endpoints are order statistics 
+#' of `x`, chosen via the binomial distribution of ranks so that no assumption 
+#' is made about the shape of `x`'s distribution.
 #'
 #' @param x Numeric vector of observations
 #' @param prob Quantile probability (e.g. `0.1` for the tenth percentile)
