@@ -11,9 +11,8 @@
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"km"`, the default), or a builder function used to compute the
 #'   relevant plot object (see "Styles" below). 
-#' @param ... Additional named arguments forwarded unchanged to `style`
-#'   at build time (e.g. [er_style_tte_curve_km()]'s `show_ci`/
-#'   `ribbon_alpha`/`linewidth`).
+#' @param ... Additional named arguments forwarded to the `style` builder
+#'   function when the plot is built.
 #'
 #' @returns The input `object`, with the curve layer added.
 #'
@@ -75,9 +74,8 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"ticks"`, the default), or a builder function used to compute the
 #'   relevant plot object (see "Styles" below). 
-#' @param ... Additional named arguments forwarded unchanged to `style`
-#'   at build time (e.g. [er_style_tte_censor_ticks()]'s `shape`/
-#'   `size`/`stroke`).
+#' @param ... Additional named arguments forwarded to the `style` builder
+#'   function when the plot is built.
 #'
 #' @returns The input `object`, with the censor layer added.
 #'
@@ -142,8 +140,8 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #' @param n_times Number of evenly spaced breaks to use when `times` is
 #'   `NULL`. Must be a single whole number of at least 2. Ignored when
 #'   `times` is supplied. Defaults to `6`.
-#' @param ... Additional named arguments forwarded unchanged to `style`
-#'   at build time (e.g. [er_style_tte_risktable_text()]'s `text_size`).
+#' @param ... Additional named arguments forwarded to the `style` builder
+#'   function when the plot is built.
 #'
 #' @returns The input `object`, with the risktable layer added.
 #'
@@ -322,9 +320,8 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #'   [er_summary()], distinct from `...` the same way
 #'   [er_tte_add_model()]'s `predict_args` is distinct from its own
 #'   `...` -- see its "Details".
-#' @param ... Additional named arguments forwarded unchanged to `style`
-#'   at build time (e.g. [er_style_tte_summary_logrank()]'s `inset`/
-#'   `label_size`/`label_colour`/`label_fill`).
+#' @param ... Additional named arguments forwarded to the `style` builder
+#'   function when the plot is built.
 #'
 #' @returns The input `object`, with the summary layer added.
 #'

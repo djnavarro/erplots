@@ -41,9 +41,8 @@ when \code{model} is \code{NULL}.}
 \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args} is distinct from its own
 \code{...} -- see "Details" there.}
 
-\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time; see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section. Must be named.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the summary layer added.

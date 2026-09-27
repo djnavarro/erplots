@@ -42,10 +42,8 @@ continuous grouping variable is split into bins -- see their
 documentation for what each controls. Applied identically to every
 grouping variable added by this call.}
 
-\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time (identically for every grouping
-variable added by this call) -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section. Must be named.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with a group panel added.

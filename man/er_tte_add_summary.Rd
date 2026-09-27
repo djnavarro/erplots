@@ -43,9 +43,8 @@ relevant plot object (see "Styles" below).}
 \code{\link[=er_tte_add_model]{er_tte_add_model()}}'s \code{predict_args} is distinct from its own
 \code{...} -- see its "Details".}
 
-\item{...}{Additional named arguments forwarded unchanged to \code{style}
-at build time (e.g. \code{\link[=er_style_tte_summary_logrank]{er_style_tte_summary_logrank()}}'s \code{inset}/
-\code{label_size}/\code{label_colour}/\code{label_fill}).}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the summary layer added.

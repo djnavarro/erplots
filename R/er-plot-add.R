@@ -20,7 +20,8 @@
 #'   method requires beyond `model`/`newdata`/`conf_level`). Distinct
 #'   from `...`: `predict_args` reaches [er_predict()], `...` reaches
 #'   `style` -- see "Details".
-#' @param ... Additional named arguments forwarded unchanged to `style` at build time.
+#' @param ... Additional named arguments forwarded to the `style` builder
+#'   function when the plot is built.
 #'
 #' @details
 #' This layer uses [er_predict()] to compute model predictions on the response scale. `model` may reference covariates beyond the exposure and strata variables. erplots fills any additional covariates from the plot data with a reference value (first factor level or numeric mean) when building the prediction grid. erplots does not check that `model` was fit on the same exposure/response as the plot; the caller must ensure compatibility.
@@ -157,9 +158,8 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   [er_summary()], distinct from `...` the same way
 #'   [er_plot_add_model()]'s `predict_args` is distinct from its own
 #'   `...` -- see "Details" there.
-#' @param ... Additional named arguments forwarded, unchanged, to `style`
-#'   when it's called at build time; see [er_style()]'s "Passing extra
-#'   arguments to a builder" section. Must be named.
+#' @param ... Additional named arguments forwarded to the `style` builder
+#'   function when the plot is built.
 #'
 #' @section Styles:
 #' The following pre-defined styles are available for this layer. Please
@@ -248,8 +248,8 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' @param ties,quantile_type,labeller Passed straight through to
 #'   [cut_exposure_quantile()] to control how the exposure variable is
 #'   split into bins -- see its documentation for what each controls.
-#' @param ... Additional named arguments forwarded, unchanged, to `style`
-#'   when it's called at build time. Arguments must be named.
+#' @param ... Additional named arguments forwarded to the `style` builder
+#'   function when the plot is built.
 #'
 #' @returns The input `object`, with the quantile layer added.
 #' 
@@ -403,13 +403,8 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
 #'   default). Only meaningful for [er_style_data_boxjitter()] on a
 #'   binary response; see "Details" for when `"both"` is required.
-#' @param ... Additional named arguments forwarded, unchanged, to `style`
-#'   when it's called at build time -- see [er_style()]'s "Passing extra
-#'   arguments to a builder" section. Must be named. The built-in
-#'   `er_style_data_overlay()`/`er_style_data_boxjitter()` builders read a
-#'   `seed` from here to make their jitter reproducible across repeated
-#'   `plot()` calls on the same object; omit it (the default) for a fresh
-#'   random jitter on every render.
+#' @param ... Additional named arguments forwarded to the `style` builder
+#'   function when the plot is built.
 #'
 #' @returns The input `object`, with the data layer added.
 #'
@@ -596,10 +591,8 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   continuous grouping variable is split into bins -- see their
 #'   documentation for what each controls. Applied identically to every
 #'   grouping variable added by this call.
-#' @param ... Additional named arguments forwarded, unchanged, to `style`
-#'   when it's called at build time (identically for every grouping
-#'   variable added by this call) -- see [er_style()]'s "Passing extra
-#'   arguments to a builder" section. Must be named.
+#' @param ... Additional named arguments forwarded to the `style` builder
+#'   function when the plot is built.
 #'
 #' @returns The input `object`, with a group panel added.
 #' 

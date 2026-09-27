@@ -35,7 +35,8 @@ method requires beyond \code{model}/\code{newdata}/\code{conf_level}). Distinct
 from \code{...}: \code{predict_args} reaches \code{\link[=er_predict]{er_predict()}}, \code{...} reaches
 \code{style} -- see "Details".}
 
-\item{...}{Additional named arguments forwarded unchanged to \code{style} at build time.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the model layer added.

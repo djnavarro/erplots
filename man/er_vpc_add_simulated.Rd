@@ -44,7 +44,8 @@ compute the relevant plot object (see "Styles" below).}
 same way \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args} is distinct from its
 own \code{...} -- see that function's "Details" for the rationale.}
 
-\item{...}{Additional named arguments forwarded to \code{style}.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 \code{object}, with \code{object$layer$simulated} populated.

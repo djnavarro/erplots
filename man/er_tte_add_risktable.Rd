@@ -22,8 +22,8 @@ spaced breaks spanning \code{object$time$limits}.}
 \code{NULL}. Must be a single whole number of at least 2. Ignored when
 \code{times} is supplied. Defaults to \code{6}.}
 
-\item{...}{Additional named arguments forwarded unchanged to \code{style}
-at build time (e.g. \code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}}'s \code{text_size}).}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the risktable layer added.

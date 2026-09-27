@@ -23,13 +23,8 @@ compute the relevant plot object (see "Styles" below).}
 default). Only meaningful for \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} on a
 binary response; see "Details" for when \code{"both"} is required.}
 
-\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time -- see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section. Must be named. The built-in
-\code{er_style_data_overlay()}/\code{er_style_data_boxjitter()} builders read a
-\code{seed} from here to make their jitter reproducible across repeated
-\code{plot()} calls on the same object; omit it (the default) for a fresh
-random jitter on every render.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the data layer added.

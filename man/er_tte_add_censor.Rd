@@ -14,9 +14,8 @@ either be a string corresponding to one of the registered style labels
 (e.g., \code{"ticks"}, the default), or a builder function used to compute the
 relevant plot object (see "Styles" below).}
 
-\item{...}{Additional named arguments forwarded unchanged to \code{style}
-at build time (e.g. \code{\link[=er_style_tte_censor_ticks]{er_style_tte_censor_ticks()}}'s \code{shape}/
-\code{size}/\code{stroke}).}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the censor layer added.

@@ -14,7 +14,8 @@ either be a string corresponding to one of the registered style labels
 (e.g., \code{"mean_errorbar"}, the default), or a builder function used to
 compute the relevant plot object (see "Styles" below).}
 
-\item{...}{Additional named arguments forwarded to \code{style}.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 \code{object}, with \code{object$layer$observed} populated.

@@ -37,8 +37,8 @@ to \code{4}.}
 \code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} to control how the exposure variable is
 split into bins -- see its documentation for what each controls.}
 
-\item{...}{Additional named arguments forwarded, unchanged, to \code{style}
-when it's called at build time. Arguments must be named.}
+\item{...}{Additional named arguments forwarded to the \code{style} builder
+function when the plot is built.}
 }
 \value{
 The input \code{object}, with the quantile layer added.
