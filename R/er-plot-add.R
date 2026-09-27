@@ -23,18 +23,12 @@
 #'   function when the plot is built.
 #'
 #' @details
-#' This layer uses [er_predict()] to compute model predictions on the response scale. `model` may reference covariates beyond the exposure and strata variables. erplots fills any additional covariates from the plot data with a reference value (first factor level or numeric mean) when building the prediction grid. erplots does not check that `model` was fit on the same exposure/response as the plot; the caller must ensure compatibility.
-#'
-#' `predict_args` and `...` serve two different consumers and are kept
-#' separate rather than sharing one `...`: `predict_args` is spliced into
-#' the [er_predict()] call (e.g. `predict_args = list(landmark_time =
-#' 90)` for a model whose `er_predict()` method needs a `landmark_time`
-#' argument with no other slot in the fixed `er_predict(model, newdata,
-#' conf_level)` contract), while `...` is forwarded to `style` alone
-#' (see [er_style()]'s "Passing extra arguments to a builder" section).
-#' Reusing a single `...` for both would risk a silent name collision if
-#' a style builder and a model's `er_predict()` method happened to share
-#' an argument name for unrelated purposes.
+#' This layer uses [er_predict()] to compute model predictions on the response 
+#' scale. `model` may reference covariates beyond the exposure and strata 
+#' variables. erplots fills any additional covariates from the plot data with 
+#' a reference value (first factor level or numeric mean) when building the 
+#' prediction grid. erplots does not check that `model` was fit on the same 
+#' exposure/response as the plot; the caller must ensure compatibility.
 #'
 #' @section Styles:
 #' The following pre-defined styles are available for this layer. Please

@@ -45,16 +45,12 @@ Adds the model layer: a fitted exposure-response curve with an
 uncertainty ribbon, or possibly a spaghetti plot of simulated draws.
 }
 \details{
-This layer uses \code{\link[=er_predict]{er_predict()}} to compute model predictions on the response scale. \code{model} may reference covariates beyond the exposure and strata variables. erplots fills any additional covariates from the plot data with a reference value (first factor level or numeric mean) when building the prediction grid. erplots does not check that \code{model} was fit on the same exposure/response as the plot; the caller must ensure compatibility.
-
-\code{predict_args} and \code{...} serve two different consumers and are kept
-separate rather than sharing one \code{...}: \code{predict_args} is spliced into
-the \code{\link[=er_predict]{er_predict()}} call (e.g. \code{predict_args = list(landmark_time = 90)} for a model whose \code{er_predict()} method needs a \code{landmark_time}
-argument with no other slot in the fixed \code{er_predict(model, newdata, conf_level)} contract), while \code{...} is forwarded to \code{style} alone
-(see \code{\link[=er_style]{er_style()}}'s "Passing extra arguments to a builder" section).
-Reusing a single \code{...} for both would risk a silent name collision if
-a style builder and a model's \code{er_predict()} method happened to share
-an argument name for unrelated purposes.
+This layer uses \code{\link[=er_predict]{er_predict()}} to compute model predictions on the response
+scale. \code{model} may reference covariates beyond the exposure and strata
+variables. erplots fills any additional covariates from the plot data with
+a reference value (first factor level or numeric mean) when building the
+prediction grid. erplots does not check that \code{model} was fit on the same
+exposure/response as the plot; the caller must ensure compatibility.
 }
 \section{Styles}{
 
