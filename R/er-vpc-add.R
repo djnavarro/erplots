@@ -32,6 +32,9 @@
 #' | `"quantile_line"` | [er_style_vpc_observed_quantile_line()] | One line per requested percentile against a continuous `plot_by` axis. |
 #' | `"quantile_errorbar"` | [er_style_vpc_observed_quantile_errorbar()] | Point + error bar per bin and per requested percentile. |
 #'
+#' See [er_style_vpc()] for details on how style builder functions are 
+#' defined for the VPC mini-grammar, should a custom style be required.
+#'
 #' @seealso [er_vpc()], [er_vpc_add_simulated()], [er_style_vpc_observed()]
 #'
 #' @export
@@ -110,6 +113,9 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #' | `"mean_errorbar"` | [er_style_vpc_simulated_mean_errorbar()] | Mean/rate + CI per bin, x-position adaptive to `plot_by`'s type (the default). |
 #' | `"quantile_ribbon"` | [er_style_vpc_simulated_quantile_ribbon()] | One ribbon per requested percentile against a continuous `plot_by` axis. |
 #' | `"quantile_errorbar"` | [er_style_vpc_simulated_quantile_errorbar()] | Point + error bar per bin and per requested percentile. |
+#'
+#' See [er_style_vpc()] for details on how style builder functions are 
+#' defined for the VPC mini-grammar, should a custom style be required.
 #'
 #' @seealso [er_vpc()], [er_vpc_add_observed()], [er_style_vpc_simulated()]
 #'

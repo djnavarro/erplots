@@ -80,6 +80,11 @@ customisation options are available:\tabular{lll}{
    \code{"pointrange"} \tab \code{\link[=er_style_quantile_pointrange]{er_style_quantile_pointrange()}} \tab Point + range per bin, via \code{\link[ggplot2:geom_pointrange]{ggplot2::geom_pointrange()}}. \cr
    \code{"pointrange_vlines"} \tab \code{\link[=er_style_quantile_pointrange_vlines]{er_style_quantile_pointrange_vlines()}} \tab \code{"pointrange"} plus a labelled vline at every bin boundary. \cr
 }
+
+
+See \code{\link[=er_style]{er_style()}} for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.
 }
 
 \examples{

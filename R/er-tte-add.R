@@ -25,6 +25,9 @@
 #' | --- | --- | --- |
 #' | `"km"` | [er_style_tte_curve_km()] | Kaplan-Meier step curve with a confidence band (the only built-in, and the default). |
 #'
+#' See [er_style_tte()] for details on how style builder functions are 
+#' defined for the TTE mini-grammar, should a custom style be required.
+#' 
 #' @examples
 #' library(survival)
 #' lung |>
@@ -88,6 +91,9 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 #' | --- | --- | --- |
 #' | `"ticks"` | [er_style_tte_censor_ticks()] | Tick marks at each censoring time, on the curve's current step height (the only built-in, and the default). |
 #'
+#' See [er_style_tte()] for details on how style builder functions are 
+#' defined for the TTE mini-grammar, should a custom style be required.
+#' 
 #' @examples
 #' library(survival)
 #' lung |>
@@ -160,6 +166,9 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #' | --- | --- | --- |
 #' | `"text"` | [er_style_tte_risktable_text()] | Number-at-risk counts as a text grid, one row per stratum (the only built-in, and the default). |
 #'
+#' See [er_style_tte()] for details on how style builder functions are 
+#' defined for the TTE mini-grammar, should a custom style be required.
+#' 
 #' @examples
 #' library(survival)
 #' lung |>
@@ -249,6 +258,9 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"line"` | [er_style_tte_model_line()] | Fitted `S(t)` curve with an uncertainty band (the only built-in, and the default). |
+#'
+#' See [er_style_tte()] for details on how style builder functions are 
+#' defined for the TTE mini-grammar, should a custom style be required.
 #'
 #' @seealso [er_tte()], [er_style_tte_model_line()], [er_model_interface]
 #'
@@ -347,6 +359,9 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #' | `"n"` | [er_style_tte_summary_n()] | Subject/event counts; model- and stratification-agnostic. |
 #' | `"coefficients"` | [er_style_tte_summary_coefficients()] | One line per model parameter, from `model`'s [er_summary()] `coefficients` table. |
 #' | `"gof"` | [er_style_tte_summary_gof()] | A goodness-of-fit annotation from `model`'s [er_summary()] `glance` table. |
+#'
+#' See [er_style_tte()] for details on how style builder functions are 
+#' defined for the TTE mini-grammar, should a custom style be required.
 #'
 #' @examples
 #' library(survival)

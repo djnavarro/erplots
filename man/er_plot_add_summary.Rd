@@ -61,6 +61,11 @@ customisation options are available:\tabular{lll}{
    \code{"coefficients"} \tab \code{\link[=er_style_summary_coefficients]{er_style_summary_coefficients()}} \tab One line per model parameter, from \code{\link[=er_summary]{er_summary()}}'s \code{coefficients} table. \cr
    \code{"gof"} \tab \code{\link[=er_style_summary_gof]{er_style_summary_gof()}} \tab A goodness-of-fit annotation (N/AIC/BIC/R-squared) from \code{\link[=er_summary]{er_summary()}}'s \code{glance} table. \cr
 }
+
+
+See \code{\link[=er_style]{er_style()}} for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.
 }
 
 \examples{

@@ -66,6 +66,11 @@ customisation options are available:\tabular{lll}{
    \code{"line"} \tab \code{\link[=er_style_model_line]{er_style_model_line()}} \tab Fitted curve only, no ribbon. \cr
    \code{"spaghetti"} \tab \code{\link[=er_style_model_spaghetti]{er_style_model_spaghetti()}} \tab Fitted curve plus a spaghetti plot of simulated draws, for models implementing \code{\link[=er_simulate]{er_simulate()}}. \cr
 }
+
+
+See \code{\link[=er_style]{er_style()}} for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.
 }
 
 \examples{

@@ -50,6 +50,10 @@ customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"text"} \tab \code{\link[=er_style_tte_risktable_text]{er_style_tte_risktable_text()}} \tab Number-at-risk counts as a text grid, one row per stratum (the only built-in, and the default). \cr
 }
+
+
+See \code{\link[=er_style_tte]{er_style_tte()}} for details on how style builder functions are
+defined for the TTE mini-grammar, should a custom style be required.
 }
 
 \examples{

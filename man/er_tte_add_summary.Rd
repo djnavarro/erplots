@@ -78,6 +78,10 @@ customisation options are available:\tabular{lll}{
    \code{"coefficients"} \tab \code{\link[=er_style_tte_summary_coefficients]{er_style_tte_summary_coefficients()}} \tab One line per model parameter, from \code{model}'s \code{\link[=er_summary]{er_summary()}} \code{coefficients} table. \cr
    \code{"gof"} \tab \code{\link[=er_style_tte_summary_gof]{er_style_tte_summary_gof()}} \tab A goodness-of-fit annotation from \code{model}'s \code{\link[=er_summary]{er_summary()}} \code{glance} table. \cr
 }
+
+
+See \code{\link[=er_style_tte]{er_style_tte()}} for details on how style builder functions are
+defined for the TTE mini-grammar, should a custom style be required.
 }
 
 \examples{

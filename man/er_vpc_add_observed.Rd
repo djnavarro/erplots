@@ -42,6 +42,10 @@ customisation options are available:\tabular{lll}{
    \code{"quantile_line"} \tab \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}} \tab One line per requested percentile against a continuous \code{plot_by} axis. \cr
    \code{"quantile_errorbar"} \tab \code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}} \tab Point + error bar per bin and per requested percentile. \cr
 }
+
+
+See \code{\link[=er_style_vpc]{er_style_vpc()}} for details on how style builder functions are
+defined for the VPC mini-grammar, should a custom style be required.
 }
 
 \seealso{

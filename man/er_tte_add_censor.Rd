@@ -34,6 +34,10 @@ customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"ticks"} \tab \code{\link[=er_style_tte_censor_ticks]{er_style_tte_censor_ticks()}} \tab Tick marks at each censoring time, on the curve's current step height (the only built-in, and the default). \cr
 }
+
+
+See \code{\link[=er_style_tte]{er_style_tte()}} for details on how style builder functions are
+defined for the TTE mini-grammar, should a custom style be required.
 }
 
 \examples{

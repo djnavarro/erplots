@@ -73,6 +73,10 @@ customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"line"} \tab \code{\link[=er_style_tte_model_line]{er_style_tte_model_line()}} \tab Fitted \code{S(t)} curve with an uncertainty band (the only built-in, and the default). \cr
 }
+
+
+See \code{\link[=er_style_tte]{er_style_tte()}} for details on how style builder functions are
+defined for the TTE mini-grammar, should a custom style be required.
 }
 
 \seealso{

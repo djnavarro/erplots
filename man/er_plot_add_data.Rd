@@ -43,6 +43,11 @@ customisation options are available:\tabular{lll}{
    \code{"hex"} \tab \code{\link[=er_style_data_hex]{er_style_data_hex()}} \tab 2D hexbin density of the raw points on the main panel. \cr
    \code{"boxjitter"} \tab \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} \tab Boxplot + jittered points in a stacked panel, split by response (binary response only). \cr
 }
+
+
+See \code{\link[=er_style]{er_style()}} for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.
 }
 
 \section{Default builders}{

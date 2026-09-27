@@ -47,6 +47,10 @@
 #' | `"line"` | [er_style_model_line()] | Fitted curve only, no ribbon. |
 #' | `"spaghetti"` | [er_style_model_spaghetti()] | Fitted curve plus a spaghetti plot of simulated draws, for models implementing [er_simulate()]. |
 #'
+#' See [er_style()] for details on how style builder functions are 
+#' defined for the exposure-response mini-grammar, should a custom style 
+#' be required.
+#'
 #' @returns The input `object`, with the model layer added.
 #'
 #' @examples
@@ -170,6 +174,10 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #' | `"coefficients"` | [er_style_summary_coefficients()] | One line per model parameter, from [er_summary()]'s `coefficients` table. |
 #' | `"gof"` | [er_style_summary_gof()] | A goodness-of-fit annotation (N/AIC/BIC/R-squared) from [er_summary()]'s `glance` table. |
 #'
+#' See [er_style()] for details on how style builder functions are 
+#' defined for the exposure-response mini-grammar, should a custom style 
+#' be required.
+#'
 #' @returns The input `object`, with the summary layer added.
 #'
 #' @examples
@@ -280,6 +288,10 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' | `"errorbar_vlines"` | [er_style_quantile_errorbar_vlines()] | `"errorbar"` plus a labelled vline at every bin boundary. |
 #' | `"pointrange"` | [er_style_quantile_pointrange()] | Point + range per bin, via [ggplot2::geom_pointrange()]. |
 #' | `"pointrange_vlines"` | [er_style_quantile_pointrange_vlines()] | `"pointrange"` plus a labelled vline at every bin boundary. |
+#'
+#' See [er_style()] for details on how style builder functions are 
+#' defined for the exposure-response mini-grammar, should a custom style 
+#' be required.
 #'
 #'
 #' @examples
@@ -414,6 +426,10 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' | `"overlay"` | [er_style_data_overlay()] | Raw points (jittered for a binary response) drawn on the main panel (the default). |
 #' | `"hex"` | [er_style_data_hex()] | 2D hexbin density of the raw points on the main panel. |
 #' | `"boxjitter"` | [er_style_data_boxjitter()] | Boxplot + jittered points in a stacked panel, split by response (binary response only). |
+#'
+#' See [er_style()] for details on how style builder functions are 
+#' defined for the exposure-response mini-grammar, should a custom style 
+#' be required.
 #'
 #' @section Default builders:
 #' The default builder for the data layer is `er_style_data_overlay()`, 
@@ -630,6 +646,10 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' | `"linerange"` | [er_style_group_linerange()] | Median dot with inner/outer-range lines per group level, group levels on the y-axis. |
 #' | `"boxjitter"` | [er_style_group_boxjitter()] | `"boxplot"` with jittered raw exposure values overlaid. |
 #' | `"violinjitter"` | [er_style_group_violinjitter()] | `"violin"` with jittered raw exposure values overlaid. |
+#'
+#' See [er_style()] for details on how style builder functions are 
+#' defined for the exposure-response mini-grammar, should a custom style 
+#' be required.
 #'
 #' @examples
 #' if (requireNamespace("erglm", quietly = TRUE)) {

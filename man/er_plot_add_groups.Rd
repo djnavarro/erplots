@@ -91,6 +91,11 @@ customisation options are available:\tabular{lll}{
    \code{"boxjitter"} \tab \code{\link[=er_style_group_boxjitter]{er_style_group_boxjitter()}} \tab \code{"boxplot"} with jittered raw exposure values overlaid. \cr
    \code{"violinjitter"} \tab \code{\link[=er_style_group_violinjitter]{er_style_group_violinjitter()}} \tab \code{"violin"} with jittered raw exposure values overlaid. \cr
 }
+
+
+See \code{\link[=er_style]{er_style()}} for details on how style builder functions are
+defined for the exposure-response mini-grammar, should a custom style
+be required.
 }
 
 \examples{

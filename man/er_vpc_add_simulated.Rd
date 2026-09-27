@@ -74,6 +74,10 @@ customisation options are available:\tabular{lll}{
    \code{"quantile_ribbon"} \tab \code{\link[=er_style_vpc_simulated_quantile_ribbon]{er_style_vpc_simulated_quantile_ribbon()}} \tab One ribbon per requested percentile against a continuous \code{plot_by} axis. \cr
    \code{"quantile_errorbar"} \tab \code{\link[=er_style_vpc_simulated_quantile_errorbar]{er_style_vpc_simulated_quantile_errorbar()}} \tab Point + error bar per bin and per requested percentile. \cr
 }
+
+
+See \code{\link[=er_style_vpc]{er_style_vpc()}} for details on how style builder functions are
+defined for the VPC mini-grammar, should a custom style be required.
 }
 
 \seealso{

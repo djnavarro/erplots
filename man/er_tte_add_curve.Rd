@@ -33,6 +33,10 @@ customisation options are available:\tabular{lll}{
    Label \tab Builder \tab Description \cr
    \code{"km"} \tab \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}} \tab Kaplan-Meier step curve with a confidence band (the only built-in, and the default). \cr
 }
+
+
+See \code{\link[=er_style_tte]{er_style_tte()}} for details on how style builder functions are
+defined for the TTE mini-grammar, should a custom style be required.
 }
 
 \examples{
