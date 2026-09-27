@@ -317,9 +317,7 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #'   `?er_model_interface`). Defaults to `0.95`. Ignored when `model` is
 #'   `NULL`.
 #' @param summary_args A named list of additional arguments forwarded to
-#'   [er_summary()], distinct from `...` the same way
-#'   [er_tte_add_model()]'s `predict_args` is distinct from its own
-#'   `...` -- see its "Details".
+#'   [er_summary()] when generating summaries.
 #' @param ... Additional named arguments forwarded to the `style` builder
 #'   function when the plot is built.
 #'

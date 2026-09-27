@@ -30,10 +30,7 @@ compute the relevant plot object (see "Styles" below).}
 to \code{0.95}.}
 
 \item{predict_args}{A named list of additional arguments forwarded to
-\code{\link[=er_predict]{er_predict()}} (e.g. a model-specific argument its \code{er_predict()}
-method requires beyond \code{model}/\code{newdata}/\code{conf_level}). Distinct
-from \code{...}: \code{predict_args} reaches \code{\link[=er_predict]{er_predict()}}, \code{...} reaches
-\code{style} -- see "Details".}
+\code{\link[=er_predict]{er_predict()}} when generating model-based predictions.}
 
 \item{...}{Additional named arguments forwarded to the \code{style} builder
 function when the plot is built.}

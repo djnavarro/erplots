@@ -84,9 +84,7 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #'   (e.g., `"mean_errorbar"`, the default), or a builder function used to 
 #'   compute the relevant plot object (see "Styles" below).
 #' @param simulate_args A named list of additional arguments forwarded to
-#'   [er_simulate()], only used with `model`. Distinct from `...` the
-#'   same way [er_plot_add_model()]'s `predict_args` is distinct from its
-#'   own `...` -- see that function's "Details" for the rationale.
+#'   [er_simulate()] when simulating from the model.
 #' @param ... Additional named arguments forwarded to the `style` builder
 #'   function when the plot is built.
 #'

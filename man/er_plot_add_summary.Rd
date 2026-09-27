@@ -37,9 +37,7 @@ result -- see \code{?er_model_interface}). Defaults to \code{0.95}. Ignored
 when \code{model} is \code{NULL}.}
 
 \item{summary_args}{A named list of additional arguments forwarded to
-\code{\link[=er_summary]{er_summary()}}, distinct from \code{...} the same way
-\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args} is distinct from its own
-\code{...} -- see "Details" there.}
+\code{\link[=er_summary]{er_summary()}} when generating summaries.}
 
 \item{...}{Additional named arguments forwarded to the \code{style} builder
 function when the plot is built.}

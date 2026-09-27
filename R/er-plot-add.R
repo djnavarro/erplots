@@ -16,10 +16,7 @@
 #' @param conf_level Confidence level for the prediction ribbon. Defaults
 #'   to `0.95`.
 #' @param predict_args A named list of additional arguments forwarded to
-#'   [er_predict()] (e.g. a model-specific argument its `er_predict()`
-#'   method requires beyond `model`/`newdata`/`conf_level`). Distinct
-#'   from `...`: `predict_args` reaches [er_predict()], `...` reaches
-#'   `style` -- see "Details".
+#'   [er_predict()] when generating model-based predictions.
 #' @param ... Additional named arguments forwarded to the `style` builder
 #'   function when the plot is built.
 #'
@@ -155,9 +152,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   result -- see `?er_model_interface`). Defaults to `0.95`. Ignored
 #'   when `model` is `NULL`.
 #' @param summary_args A named list of additional arguments forwarded to
-#'   [er_summary()], distinct from `...` the same way
-#'   [er_plot_add_model()]'s `predict_args` is distinct from its own
-#'   `...` -- see "Details" there.
+#'   [er_summary()] when generating summaries.
 #' @param ... Additional named arguments forwarded to the `style` builder
 #'   function when the plot is built.
 #'

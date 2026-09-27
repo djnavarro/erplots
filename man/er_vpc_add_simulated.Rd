@@ -40,9 +40,7 @@ either be a string corresponding to one of the registered style labels
 compute the relevant plot object (see "Styles" below).}
 
 \item{simulate_args}{A named list of additional arguments forwarded to
-\code{\link[=er_simulate]{er_simulate()}}, only used with \code{model}. Distinct from \code{...} the
-same way \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s \code{predict_args} is distinct from its
-own \code{...} -- see that function's "Details" for the rationale.}
+\code{\link[=er_simulate]{er_simulate()}} when simulating from the model.}
 
 \item{...}{Additional named arguments forwarded to the \code{style} builder
 function when the plot is built.}
