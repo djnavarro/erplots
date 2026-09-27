@@ -59,17 +59,41 @@
 #' See [er_style_vpc()] for the shared interface every VPC-grammar
 #' builder implements.
 #'
-#' `er_style_vpc_observed_mean_errorbar()` (the default) plots
-#' `config$summary`'s rate/mean + confidence interval, adapting its
-#' x-position to `plot_by`'s type (`config$is_numeric_group`): equally
-#' spaced at each bin's categorical (or quantile-bin) label when
-#' `plot_by` is categorical, or at each bin's numeric median (`x_median`,
-#' from `config$summary`) on `plot_by`'s own numeric scale when `plot_by` is
-#' numeric. Because it adapts its x-position family at build time rather
-#' than declaring one statically, it carries no `vpc_layout` tag -- pair it
-#' with [er_style_vpc_simulated_mean_errorbar()], which mirrors the same
-#' adaptive logic.
+#' @section Choosing a builder:
+#' All three builders plot the observed side of a bin against the
+#' simulated side drawn by their [er_style_vpc_simulated()] counterpart;
+#' which one to reach for depends on how much of the response's
+#' distribution you need to see, and what kind of response/`plot_by`
+#' you have:
 #'
+#' * `er_style_vpc_observed_mean_errorbar()` (the default) -- one
+#'   point + confidence interval per bin, summarising the rate/mean
+#'   only. Works for every response type and either kind of `plot_by`.
+#'   Start here unless you specifically need percentile bands.
+#' * `er_style_vpc_observed_quantile_line()` -- a continuous line per
+#'   requested percentile, for a fuller picture of the response's
+#'   distribution across bins. Requires a continuous/count response and
+#'   a numeric `plot_by`; pairs with
+#'   [er_style_vpc_simulated_quantile_ribbon()].
+#' * `er_style_vpc_observed_quantile_errorbar()` -- a point + interval
+#'   per requested percentile per bin, the discrete-bin analogue of the
+#'   line idiom above. Same response-type restriction, but also works
+#'   with a categorical `plot_by`; pairs with
+#'   [er_style_vpc_simulated_quantile_errorbar()].
+#'
+#' @section Mean/errorbar (default):
+#' `er_style_vpc_observed_mean_errorbar()` plots `config$summary`'s
+#' rate/mean + confidence interval, adapting its x-position to
+#' `plot_by`'s type (`config$is_numeric_group`): equally spaced at each
+#' bin's categorical (or quantile-bin) label when `plot_by` is
+#' categorical, or at each bin's numeric median (`x_median`, from
+#' `config$summary`) on `plot_by`'s own numeric scale when `plot_by` is
+#' numeric. Because it adapts its x-position family at build time rather
+#' than declaring one statically, it carries no `vpc_layout` tag -- pair
+#' it with [er_style_vpc_simulated_mean_errorbar()], which mirrors the
+#' same adaptive logic.
+#'
+#' @section Percentile line:
 #' `er_style_vpc_observed_quantile_line()` plots `config$percentiles` --
 #' one line per requested percentile -- at each bin's numeric midpoint on
 #' `plot_by`'s own numeric scale, for pairing with
@@ -78,6 +102,7 @@
 #' `probs` argument); calling `er_style_vpc_observed_quantile_line()`
 #' without it errors.
 #'
+#' @section Percentile errorbar:
 #' `er_style_vpc_observed_quantile_errorbar()` plots `config$percentiles`
 #' -- a point + confidence interval (via [ci_quantile()]) for each
 #' requested percentile -- for pairing with
@@ -100,6 +125,7 @@
 #' distinguishable by their y-position -- dodging support may be added
 #' in a future release.
 #'
+#' @section Legends and overlap:
 #' Each builder maps a constant `color = "Observed"`, so ggplot2 merges
 #' its legend entry with whatever the paired simulated-layer builder
 #' maps for `"Simulated"` into a single combined legend.
