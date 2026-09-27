@@ -102,10 +102,9 @@ as a fraction of the panel's width/height. Default \code{0.05}.}
 
 \item{fields}{Fields from \code{glance} to include for
 \code{er_style_tte_summary_gof()}, and the order they're shown in: one
-or more of \code{"n"} (labelled "N"), \code{"aic"} ("AIC"), \code{"bic"} ("BIC"),
-or \code{"r_squared"} (labelled "R-squared"). Defaults to all four, in
-that order. A field is shown only when both present and non-\code{NA}
-in the model's \code{glance} result.}
+or more of \code{"n"}, \code{"aic"}, \code{"bic"}, or \code{"r_squared"}. Defaults to
+all four, in that order. A field is shown only when both present and
+non-\code{NA} in the model's \code{glance} result.}
 }
 \value{
 A geom, or a list of geoms.
@@ -168,7 +167,7 @@ supplied model's \code{coefficients} table (see \code{\link[=er_summary]{er_summ
 \code{coefficients} field); it draws nothing if \code{coefficients} wasn't
 supplied, or if the layer is stratified. \code{er_style_tte_summary_gof()}
 draws a single-line, comma-separated goodness-of-fit annotation from
-the model's \code{glance} field -- a curated subset (\code{N}, \code{AIC}, \code{BIC},
+the model's \code{glance} field -- a curated subset (N, AIC, BIC,
 R-squared) rather than every reserved \code{glance} column, showing only
 whichever of those four are actually present and non-\code{NA}; it draws
 nothing if none of them are available, or if the layer is stratified.

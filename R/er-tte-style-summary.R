@@ -31,10 +31,9 @@
 #' @param label_fill Label background fill. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
 #' @param fields Fields from `glance` to include for
 #'   `er_style_tte_summary_gof()`, and the order they're shown in: one
-#'   or more of `"n"` (labelled "N"), `"aic"` ("AIC"), `"bic"` ("BIC"),
-#'   or `"r_squared"` (labelled "R-squared"). Defaults to all four, in
-#'   that order. A field is shown only when both present and non-`NA`
-#'   in the model's `glance` result.
+#'   or more of `"n"`, `"aic"`, `"bic"`, or `"r_squared"`. Defaults to 
+#'   all four, in that order. A field is shown only when both present and 
+#'   non-`NA` in the model's `glance` result.
 #'
 #' @details
 #' See [er_style_tte()] for the shared builder interface these
@@ -80,7 +79,7 @@
 #' `coefficients` field); it draws nothing if `coefficients` wasn't
 #' supplied, or if the layer is stratified. `er_style_tte_summary_gof()`
 #' draws a single-line, comma-separated goodness-of-fit annotation from
-#' the model's `glance` field -- a curated subset (`N`, `AIC`, `BIC`,
+#' the model's `glance` field -- a curated subset (N, AIC, BIC,
 #' R-squared) rather than every reserved `glance` column, showing only
 #' whichever of those four are actually present and non-`NA`; it draws
 #' nothing if none of them are available, or if the layer is stratified.

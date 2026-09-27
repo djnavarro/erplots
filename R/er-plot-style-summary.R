@@ -18,9 +18,8 @@
 #' @param label_colour Label text colour. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
 #' @param label_fill Label background fill. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
 #' @param fields Fields from `glance` to include for `er_style_summary_gof()`,
-#'   and the order they're shown in: one or more of `"n"` (labelled "N"),
-#'   `"aic"` ("AIC"), `"bic"` ("BIC"), or `"r_squared"` (labelled
-#'   "R-squared"). Defaults to all four, in that order. A field is shown
+#'   and the order they're shown in: one or more of `"n"`, `"aic"`, `"bic"`, or 
+#'   `"r_squared"`. Defaults to all four, in that order. A field is shown
 #'   only when both present and non-`NA` in the model's `glance` result.
 #' @param ... Additional named arguments forwarded from [er_plot_add_model()]'s own `...`.
 #'
@@ -44,7 +43,7 @@
 #'   stratified.
 #' * `er_style_summary_gof()` -- a single-line, comma-separated
 #'   goodness-of-fit annotation from the model's `glance` field (see
-#'   [er_summary()]) -- a curated subset (`N`, `AIC`, `BIC`, R-squared)
+#'   [er_summary()]) -- a curated subset (N, AIC, BIC, R-squared)
 #'   rather than every reserved `glance` column, showing only whichever
 #'   of those four are actually present and non-`NA`. Same restrictions
 #'   as `er_style_summary_coefficients()`: draws nothing if none of

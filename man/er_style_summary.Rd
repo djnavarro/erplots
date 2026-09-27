@@ -96,9 +96,8 @@ Defaults to \code{0.05}.}
 \item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...}.}
 
 \item{fields}{Fields from \code{glance} to include for \code{er_style_summary_gof()},
-and the order they're shown in: one or more of \code{"n"} (labelled "N"),
-\code{"aic"} ("AIC"), \code{"bic"} ("BIC"), or \code{"r_squared"} (labelled
-"R-squared"). Defaults to all four, in that order. A field is shown
+and the order they're shown in: one or more of \code{"n"}, \code{"aic"}, \code{"bic"}, or
+\code{"r_squared"}. Defaults to all four, in that order. A field is shown
 only when both present and non-\code{NA} in the model's \code{glance} result.}
 }
 \value{
@@ -130,7 +129,7 @@ nothing if \code{coefficients} wasn't supplied, or if the layer is
 stratified.
 \item \code{er_style_summary_gof()} -- a single-line, comma-separated
 goodness-of-fit annotation from the model's \code{glance} field (see
-\code{\link[=er_summary]{er_summary()}}) -- a curated subset (\code{N}, \code{AIC}, \code{BIC}, R-squared)
+\code{\link[=er_summary]{er_summary()}}) -- a curated subset (N, AIC, BIC, R-squared)
 rather than every reserved \code{glance} column, showing only whichever
 of those four are actually present and non-\code{NA}. Same restrictions
 as \code{er_style_summary_coefficients()}: draws nothing if none of
