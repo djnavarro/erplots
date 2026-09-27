@@ -21,10 +21,9 @@ function when the plot is built.}
 The input \code{object}, with the censor layer added.
 }
 \description{
-Adds the censor layer: a tick mark at every time a subject was
-censored, read from the fit already stored on \code{object$km} (see
-\code{\link[=er_tte]{er_tte()}}) -- no recomputation happens here. Singleton (a second
-call replaces the previous one).
+Adds the censoring layer to a TTE plot, showing the times at which a
+a subject was censored, read from the fit already stored internally within
+the plot object.
 }
 \section{Styles}{
 

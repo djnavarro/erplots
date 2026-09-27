@@ -29,12 +29,10 @@ function when the plot is built.}
 The input \code{object}, with the risktable layer added.
 }
 \description{
-Adds the risktable layer: a patchwork panel stacked below the curve,
-showing the number of subjects still at risk at a grid of time
-points (one row per stratum, when stratified) -- read from the fit
-already stored on \code{object$km} (see \code{\link[=er_tte]{er_tte()}}) via
-\code{summary.survfit(..., extend = TRUE)}. Singleton (a second call
-replaces the previous one).
+Adds the at-risk table layer to a TTE plot: a separate panel stacked
+below the curve, showing the number of subjects still at risk at a
+grid of time points and computed from the fit already stored internally
+within the plot object.
 }
 \details{
 The same time breaks used for the number-at-risk grid also become

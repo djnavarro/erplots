@@ -48,7 +48,7 @@ The input \code{object}, with the model layer added.
 }
 \description{
 Adds the model layer to a TTE plot: a fitted survival curve with an
-uncertainty band derived from the corresponding time-to-event model
+uncertainty band derived from the corresponding time-to-event model.
 }
 \details{
 The model layer of a TTE plot is used to display predictions generated

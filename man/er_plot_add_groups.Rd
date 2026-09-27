@@ -48,7 +48,7 @@ function when the plot is built.}
 The input \code{object}, with a group panel added.
 }
 \description{
-Adds a group layer: a boxplot/violin panel showing the \emph{exposure}
+Adds a group layer: a boxplot/violin panel showing the exposure
 distribution, split by one or more grouping variables (continuous
 grouping variables are binned into quantiles first).
 }

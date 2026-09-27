@@ -574,7 +574,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 
 #' Add a grouped exposure-distribution panel
 #'
-#' Adds a group layer: a boxplot/violin panel showing the *exposure*
+#' Adds a group layer: a boxplot/violin panel showing the exposure
 #' distribution, split by one or more grouping variables (continuous
 #' grouping variables are binned into quantiles first).
 #'

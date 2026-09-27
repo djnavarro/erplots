@@ -1,10 +1,8 @@
 
 #' Add the observed-data layer to a VPC plot
 #'
-#' Bins the observed data by `plot_by` (see [er_vpc()]) and computes its
-#' response summary (rate/mean + confidence interval, plus empirical
-#' percentiles for a continuous/count response), for later comparison
-#' against a simulated layer added via [er_vpc_add_simulated()].
+#' Bins the observed data for a VPC plot and computes binned 
+#' response summaries for later comparison against a simulated data layer.
 #'
 #' @param object Partially constructed VPC (has S3 class `er_vpc`).
 #' @param style Style used to draw the VPC observed data layer. Can 
@@ -64,10 +62,8 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 
 #' Add the simulated-data layer to a VPC plot
 #'
-#' Bins simulated data using the same cutpoints [er_vpc_add_observed()]
-#' already computed, and summarizes it (mean + a percentile interval
-#' across replicates, plus simulated percentile bands for a
-#' continuous/count response).
+#' Bins the simulation data for a VPC plot and computes binned 
+#' response summaries for comparison against the observed data layer.
 #'
 #' @param object Partially constructed VPC (has S3 class `er_vpc`), which
 #'   must already have an observed layer (see [er_vpc_add_observed()]).

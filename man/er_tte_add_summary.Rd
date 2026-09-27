@@ -48,12 +48,8 @@ function when the plot is built.}
 The input \code{object}, with the summary layer added.
 }
 \description{
-Adds the summary layer: a corner-placed text/label annotation, drawn
-from a log-rank test comparing survival across \code{stratify_by}'s levels
-(the default style, \code{survival::survdiff()}), a supplied model's
-\code{\link[=er_summary]{er_summary()}} result, or purely descriptive observation/event counts
--- depending on \code{style}. Singleton (a second call replaces the
-previous one).
+Adds the summary layer to a TTE plot: a corner-placed text/label annotation,
+summarising one or more aspects to the plot or the data.
 }
 \details{
 The annotation is placed in whichever corner of the panel is

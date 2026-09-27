@@ -49,10 +49,8 @@ function when the plot is built.}
 \code{object}, with \code{object$layer$simulated} populated.
 }
 \description{
-Bins simulated data using the same cutpoints \code{\link[=er_vpc_add_observed]{er_vpc_add_observed()}}
-already computed, and summarizes it (mean + a percentile interval
-across replicates, plus simulated percentile bands for a
-continuous/count response).
+Bins the simulation data for a VPC plot and computes binned
+response summaries for comparison against the observed data layer.
 }
 \details{
 \code{sim} and \code{model} are mutually exclusive; supply exactly one. \code{model}

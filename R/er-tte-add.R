@@ -67,10 +67,9 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 
 #' Add a censoring-marks layer
 #'
-#' Adds the censor layer: a tick mark at every time a subject was
-#' censored, read from the fit already stored on `object$km` (see
-#' [er_tte()]) -- no recomputation happens here. Singleton (a second
-#' call replaces the previous one).
+#' Adds the censoring layer to a TTE plot, showing the times at which a 
+#' a subject was censored, read from the fit already stored internally within 
+#' the plot object.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param style Style used to draw the censoring marks layer. Can 
@@ -128,12 +127,10 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 
 #' Add a number-at-risk panel
 #'
-#' Adds the risktable layer: a patchwork panel stacked below the curve,
-#' showing the number of subjects still at risk at a grid of time
-#' points (one row per stratum, when stratified) -- read from the fit
-#' already stored on `object$km` (see [er_tte()]) via
-#' `summary.survfit(..., extend = TRUE)`. Singleton (a second call
-#' replaces the previous one).
+#' Adds the at-risk table layer to a TTE plot: a separate panel stacked 
+#' below the curve, showing the number of subjects still at risk at a 
+#' grid of time points and computed from the fit already stored internally
+#' within the plot object.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param style Style used to generate the at-risk table in the plot. Can 
@@ -211,7 +208,7 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #' Add a model-based survival curve overlay
 #'
 #' Adds the model layer to a TTE plot: a fitted survival curve with an
-#' uncertainty band derived from the corresponding time-to-event model
+#' uncertainty band derived from the corresponding time-to-event model.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param model A fitted time-to-event model. Must implement
@@ -304,12 +301,8 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 
 #' Add a summary annotation layer
 #'
-#' Adds the summary layer: a corner-placed text/label annotation, drawn
-#' from a log-rank test comparing survival across `stratify_by`'s levels
-#' (the default style, `survival::survdiff()`), a supplied model's
-#' [er_summary()] result, or purely descriptive observation/event counts
-#' -- depending on `style`. Singleton (a second call replaces the
-#' previous one).
+#' Adds the summary layer to a TTE plot: a corner-placed text/label annotation, 
+#' summarising one or more aspects to the plot or the data.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param model A fitted time-to-event model implementing [er_summary()],
