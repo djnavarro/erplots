@@ -102,7 +102,7 @@ Clopper-Pearson interval:
 erglm_data |> 
   er_plot(aucss, biomarker_change) |> 
   er_plot_add_model(mod_gaussian) |> 
-  er_plot_add_quantiles(bins = 6, conf_level = .8) |> 
+  er_plot_add_quantiles(n_bins = 6, conf_level = .8) |> 
   plot()
 ```
 

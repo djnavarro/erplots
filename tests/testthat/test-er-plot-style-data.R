@@ -182,8 +182,8 @@ test_that("er_style_data_overlay's new style arguments override their defaults",
   expect_equal(out_binary_default[[1]]$aes_params$size, 1)
 
   # an explicit jitter_height overrides the response-type default uniformly
-  out_binary_custom <- do.call(er_style_data_overlay, args(p_binary, jitter_height = 0.2, alpha = 0.9, size = 3))
-  out_cont_custom    <- do.call(er_style_data_overlay, args(p_cont, jitter_height = 0.2, alpha = 0.9, size = 3))
+  out_binary_custom <- do.call(er_style_data_overlay, args(p_binary, jitter_height = 0.2, alpha = 0.9, point_size = 3))
+  out_cont_custom    <- do.call(er_style_data_overlay, args(p_cont, jitter_height = 0.2, alpha = 0.9, point_size = 3))
   expect_equal(out_binary_custom[[1]]$position$height, 0.2)
   expect_equal(out_cont_custom[[1]]$position$height, 0.2)
   expect_equal(out_binary_custom[[1]]$aes_params$alpha, 0.9)
@@ -283,7 +283,7 @@ test_that("er_plot_add_data() forwards new style arguments through `...` to the 
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
-    er_plot_add_data(style = er_style_data_overlay, jitter_height = 0.2, alpha = 0.9, size = 3)
+    er_plot_add_data(style = er_style_data_overlay, jitter_height = 0.2, alpha = 0.9, point_size = 3)
 
   expect_no_error(er_plot_build(plt))
 

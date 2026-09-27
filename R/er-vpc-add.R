@@ -71,6 +71,10 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #'   `sim_resp`. Mutually exclusive with `sim`.
 #' @param sim Simulated data with matching exposure/response/`plot_by`
 #'   columns and `sim_id`. Mutually exclusive with `model`.
+#' @param style Style used to draw the VPC simulation layer. Can
+#'   either be a string corresponding to one of the registered style labels
+#'   (e.g., `"mean_errorbar"`, the default), or a builder function used to
+#'   compute the relevant plot object (see "Styles" below).
 #' @param nsim Number of simulation replicates, only used with `model`.
 #'   Defaults to `100`.
 #' @param seed Optional RNG seed. Used for `model`'s own simulation draws,
@@ -78,10 +82,6 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #'   this layer's random tie-break when [er_vpc()]'s `ties` is
 #'   `"split-even"` -- see [er_vpc()]'s own `seed` argument for the
 #'   observed layer's independent tie-break seed.
-#' @param style Style used to draw the VPC simulation layer. Can
-#'   either be a string corresponding to one of the registered style labels
-#'   (e.g., `"mean_errorbar"`, the default), or a builder function used to
-#'   compute the relevant plot object (see "Styles" below).
 #' @param simulate_args A named list of additional arguments forwarded to
 #'   [er_simulate()] when simulating from the model.
 #' @param ... Additional named arguments forwarded to the `style` builder
@@ -116,8 +116,9 @@ er_vpc_add_observed <- function(object, style = er_style_vpc_observed_mean_error
 #' @seealso [er_vpc()], [er_vpc_add_observed()], [er_style_vpc_simulated()]
 #'
 #' @export
-er_vpc_add_simulated <- function(object, model = NULL, sim = NULL, nsim = 100, seed = NULL,
+er_vpc_add_simulated <- function(object, model = NULL, sim = NULL,
                                   style = er_style_vpc_simulated_mean_errorbar,
+                                  nsim = 100, seed = NULL,
                                   simulate_args = list(), ...) {
 
   dots <- rlang::list2(...)

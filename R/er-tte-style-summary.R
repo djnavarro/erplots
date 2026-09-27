@@ -117,8 +117,8 @@ NULL
 
 #' @rdname er_style_tte_summary
 #' @export
-er_style_tte_summary_logrank <- function(data, config, stratify, time, strata, theme, ...,
-                                          inset = 0.05, label_size = NULL, label_colour = NULL, label_fill = NULL) {
+er_style_tte_summary_logrank <- function(data, config, stratify, time, strata, theme,
+                                          inset = 0.05, label_size = NULL, label_colour = NULL, label_fill = NULL, ...) {
 
   if (is.null(config$logrank_p_value)) return(list())
 

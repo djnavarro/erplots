@@ -64,8 +64,8 @@ NULL
 
 #' @rdname er_style_tte_curve
 #' @export
-er_style_tte_curve_km <- function(data, config, stratify, time, strata, theme, ...,
-                                   show_ci = TRUE, ribbon_alpha = 0.15, linewidth = 1) {
+er_style_tte_curve_km <- function(data, config, stratify, time, strata, theme,
+                                   show_ci = TRUE, ribbon_alpha = 0.15, linewidth = 1, ...) {
 
   step_table <- if (stratify) {
     config$table |> dplyr::mutate(xmax = dplyr::lead(time, default = config$time_upper), .by = strata)

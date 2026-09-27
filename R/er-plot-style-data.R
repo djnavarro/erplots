@@ -26,7 +26,7 @@
 #' @param alpha Point transparency for `er_style_data_overlay()` (defaults
 #'   to `0.4`); fill transparency for `er_style_data_hex()` (defaults to
 #'   `0.85`).
-#' @param size Point size for `er_style_data_overlay()`. Defaults to `1`.
+#' @param point_size Point size for `er_style_data_overlay()`. Defaults to `1`.
 #' @param box_width Width of `er_style_data_boxjitter()`'s boxplot.
 #'   Defaults to `0.6`.
 #' @param box_alpha Transparency of `er_style_data_boxjitter()`'s boxplot
@@ -119,13 +119,13 @@ NULL
 
 #' @rdname er_style_data
 #' @export
-er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...,
+er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme,
                                                   box_width = 0.6,
                                                   box_alpha = 0.4,
                                                   show_outliers = FALSE,
                                                   jitter_height = NULL,
                                                   jitter_size = 1,
-                                                  jitter_alpha = 0.6) {
+                                                  jitter_alpha = 0.6, ...) {
 
   # binary-response-only panel builder: filters to responders (upper
   # panel, response == 1) or non-responders (lower panel, response == 0),
@@ -208,10 +208,10 @@ er_style_data_boxjitter <- er_style_tag(function(data, config, stratify, exposur
 
 #' @rdname er_style_data
 #' @export
-er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...,
+er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme,
                                                 jitter_height = NULL,
                                                 alpha = 0.4,
-                                                size = 1) {
+                                                point_size = 1, ...) {
 
   # unlike `er_style_data_boxjitter()`, this builder draws points at their
   # true (exposure, response) coordinates and its output is meant to be
@@ -247,7 +247,7 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
       mapping = plot_map,
       position = ggplot2::position_jitter(width = 0, height = jitter_height, seed = config$seed),
       alpha = alpha,
-      size = size,
+      size = point_size,
       key_glyph = theme$draw_key
     )
   )
@@ -258,8 +258,8 @@ er_style_data_overlay <- er_style_tag(function(data, config, stratify, exposure,
 
 #' @rdname er_style_data
 #' @export
-er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme, ...,
-                                            bins = 30, alpha = 0.85) {
+er_style_data_hex <- er_style_tag(function(data, config, stratify, exposure, response, strata, theme,
+                                            bins = 30, alpha = 0.85, ...) {
 
   # a 2D-binned density alternative to `er_style_data_overlay()`'s raw
   # scatter, for when N is large enough that individual points overplot

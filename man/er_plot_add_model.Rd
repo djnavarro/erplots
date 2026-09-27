@@ -7,8 +7,8 @@
 er_plot_add_model(
   object,
   model,
-  keep_strata = NULL,
   style = NULL,
+  keep_strata = NULL,
   conf_level = 0.95,
   predict_args = list(),
   ...
@@ -19,14 +19,14 @@ er_plot_add_model(
 
 \item{model}{A fitted exposure-response model. Must implement \code{\link[=er_predict]{er_predict()}}.}
 
-\item{keep_strata}{Logical; whether this layer should use stratification.
-Defaults to \code{TRUE} when a stratification variable has been specified,
-and \code{FALSE} otherwise.}
-
 \item{style}{Style used to draw the model curve/ribbon layer. Can
 either be a string corresponding to one of the registered style labels
 (e.g., \code{"ribbonline"}, the default), or a builder function used to
 compute the relevant plot object (see "Styles" below).}
+
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{conf_level}{Confidence level for the prediction ribbon. Defaults
 to \code{0.95}.}

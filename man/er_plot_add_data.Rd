@@ -4,19 +4,19 @@
 \alias{er_plot_add_data}
 \title{Add a raw-data layer}
 \usage{
-er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
+er_plot_add_data(object, style = NULL, keep_strata = NULL, panel = "both", ...)
 }
 \arguments{
 \item{object}{Partially constructed plot (has S3 class \code{er_plot}).}
-
-\item{keep_strata}{Logical; whether this layer should use stratification.
-Defaults to \code{TRUE} when a stratification variable has been specified,
-and \code{FALSE} otherwise.}
 
 \item{style}{Style used to draw the data layer. Can
 either be a string corresponding to one of the registered style labels
 (e.g., \code{"overlay"}, the default), or a builder function used to
 compute the relevant plot object (see "Styles" below).}
+
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{panel}{Character string: \code{"upper"}, \code{"lower"}, or \code{"both"} (the
 default). Only meaningful for \code{\link[=er_style_data_boxjitter]{er_style_data_boxjitter()}} on a

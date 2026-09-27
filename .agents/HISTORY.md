@@ -1923,3 +1923,89 @@ and the internal top-of-file comment in `R/er-style-registry.R`. Added a
 previously withheld pending this decision, unlike the `zorder`/`layout`
 rename and the `layer` grammar-prefixing, which already had entries
 since they were never in question.
+
+## Argument-order and naming consistency sweep
+
+A full audit of every exported function's signature (the three object
+constructors, the twelve `er_plot_add_*()`/`er_vpc_add_*()`/
+`er_tte_add_*()` layer verbs, every built-in `er_style_*()` builder, and
+the `cut_quantile()`/`cut_exposure_quantile()` helpers) turned up several
+places where the same concept was ordered or named differently across
+otherwise-parallel functions. Addressed as a deliberate batch of
+breaking changes while the package is still early enough (low user
+base) to take them without deprecation shims, consistent with the
+package's existing "no deprecation shims" convention:
+
+- **`style`/`keep_strata`/`conf_level` position.** `style`'s position
+  had drifted 2nd/3rd/4th/6th across the twelve layer verbs depending on
+  how many required arguments preceded it, and `keep_strata` disagreed
+  in position between `er_plot_add_quantiles()` (before `bins`) and
+  `er_plot_add_groups()` (after `bins`). Standardized to `object,
+  <model/group_by>, style, keep_strata, conf_level, <layer-specific
+  args>, ...` everywhere all apply -- `conf_level` also moved ahead of
+  `bins` in `er_plot_add_quantiles()` and ahead of `nsim`/`seed` in
+  `er_vpc_add_simulated()` to match.
+- **`er_vpc()`'s `stratify_by` position.** Sat after the entire
+  `plot_by` binning-config block (`plot_by`/`n_bins`/`ties`/
+  `quantile_type`/`labeller`), unlike `er_plot()`/`er_tte()`'s own
+  `stratify_by`, both immediately after their response/event argument.
+  Moved to match; the binning-config block stays contiguous, just one
+  slot later.
+- **`...`'s position within a builder's own signature.** Split cleanly
+  by category: model/data/tte-curve-family builders (11 total --
+  `er_style_model_ribbonline()`/`_line()`/`_spaghetti()`,
+  `er_style_data_overlay()`/`_boxjitter()`/`_hex()`,
+  `er_style_tte_curve_km()`/`_censor_ticks()`/`_risktable_text()`/
+  `_model_line()`, plus `er_style_tte_summary_logrank()` breaking from
+  its own `tte_summary` siblings) placed `...` immediately after
+  `theme`, ahead of their own named arguments; everything else placed it
+  last. Confirmed safe to unify before changing anything: every builder
+  is invoked internally via `rlang::exec(style, ..., !!!layer$dots)`
+  with fully named arguments, so `...`'s formal position has no
+  functional effect, and no builder introspects its own call via
+  `match.call()`/`sys.call()`/`formals()`. Standardized all 11 to
+  dots-last, matching the documented shared-signature template in
+  `?er_style`/`?er_style_tte`/`extending.Rmd` and the majority of
+  existing builders.
+- **`bins`/`n`/`n_bins` naming.** The "number of quantile bins" concept
+  had three names across `er_vpc()` (`n_bins`), `er_plot_add_quantiles()`/
+  `er_plot_add_groups()` (`bins`), and `cut_quantile()`/
+  `cut_exposure_quantile()` (`n`). Standardized on `n_bins` (matching
+  `er_vpc()`, the only one of the three already plural-explicit)
+  throughout, including the internal helpers that feed them
+  (`.layer_quantile()`, `.layer_group()`, `.cut_quantile_bin_num()`,
+  `.resolve_quantile_ties()`, `.resolve_quantile_labels()`) and a custom
+  `labeller`'s own positional-callback convention (now documented as
+  `labeller(n_bins, breaks)`). Left `er_style_data_hex()`'s and
+  `er_style_group_histogram()`'s own `bins` (straight passthroughs to
+  `ggplot2::geom_hex()`/`geom_histogram()`'s own `bins`) alone -- a
+  different concept that happens to share a name.
+- **`size`/`point_size` naming.** "Size of a plotted point marker" was
+  `point_size` in the quantile/VPC builder family and plain `size` in
+  `er_style_data_overlay()`/`er_style_tte_censor_ticks()`. Standardized
+  on `point_size`: the package already splits `linewidth` out from a
+  bare `size` for the same disambiguation reason ggplot2 itself did in
+  3.4, and every other "how big is this element" argument in the
+  package is already `<thing>_size` (`label_size`, `text_size`,
+  `jitter_size`, `pointrange_size`). `er_style_group_linerange()`'s own
+  `size` was excluded from this rename and instead renamed to
+  `scale_factor`: inspecting its body showed it isn't a point size at
+  all, but a single multiplier applied to three different elements (a
+  dot and two line ranges) at three different ratios
+  (`2.5x`/`1.25x`/`0.5x`) -- calling it `point_size` would have been
+  actively misleading. `scale_factor` was chosen over the shorter
+  `scale` specifically to avoid colliding with ggplot2's own "scale"
+  terminology (colour/axis scales).
+- **`alpha_dot`/`alpha_inner`/`alpha_outer` naming order.** The same
+  `er_style_group_linerange()` builder's three per-part alpha arguments
+  used a `<property>_<thing>` prefix order, the only place in the
+  package that does -- every other alpha argument (`ribbon_alpha`,
+  `box_alpha`, `jitter_alpha`) and every other multi-element styling
+  knob (`_linetype`, `_colour`) uses a `<thing>_<property>` suffix
+  order. Renamed to `dot_alpha`/`inner_alpha`/`outer_alpha` to match.
+
+Every change above was verified against the existing test/vignette
+suite before being made (confirming call sites use named, not
+positional, arguments) and the full test suite was re-run after each
+one. Each is recorded individually under `NEWS.md`'s `## Breaking
+changes` section for the current in-development version.

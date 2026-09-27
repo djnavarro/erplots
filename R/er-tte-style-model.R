@@ -69,8 +69,8 @@ NULL
 
 #' @rdname er_style_tte_model
 #' @export
-er_style_tte_model_line <- function(data, config, stratify, time, strata, theme, ...,
-                                     show_ci = TRUE, ribbon_alpha = 0.15, linewidth = 1) {
+er_style_tte_model_line <- function(data, config, stratify, time, strata, theme,
+                                     show_ci = TRUE, ribbon_alpha = 0.15, linewidth = 1, ...) {
 
   predictions <- config$predictions
   geoms <- list()

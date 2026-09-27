@@ -8,13 +8,13 @@ er_vpc(
   data,
   exposure,
   response,
+  stratify_by = NULL,
   response_type = "auto",
   plot_by = NULL,
   n_bins = 4,
   ties = "upward",
   quantile_type = 7,
   labeller = NULL,
-  stratify_by = NULL,
   conf_level = 0.95,
   probs = c(0.1, 0.5, 0.9),
   seed = NULL
@@ -26,6 +26,14 @@ er_vpc(
 \item{exposure}{Exposure variable (one variable, unquoted).}
 
 \item{response}{Response variable (one variable, unquoted).}
+
+\item{stratify_by}{Optional variable (unquoted) splitting the VPC into
+one facet panel per level, via \code{ggplot2::facet_wrap()}, used as-is.
+Must be discrete -- a numeric column errors; bin it yourself first
+with \code{\link[=cut_quantile]{cut_quantile()}}/\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} and pass the
+resulting factor, for full control over bin count/tie-breaking/labels.
+Must resolve to a different variable than \code{plot_by}. Defaults to
+\code{NULL} (no faceting, a single panel, matching prior behaviour).}
 
 \item{response_type}{One of \code{"auto"} (the default), \code{"binary"},
 \code{"continuous"}, or \code{"count"}.}
@@ -50,14 +58,6 @@ layers must always agree on how \code{plot_by} is binned --
 \code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}}'s attributes on the observed layer's own
 binned column) rather than re-resolving them, so both sides always
 stay in sync.}
-
-\item{stratify_by}{Optional variable (unquoted) splitting the VPC into
-one facet panel per level, via \code{ggplot2::facet_wrap()}, used as-is.
-Must be discrete -- a numeric column errors; bin it yourself first
-with \code{\link[=cut_quantile]{cut_quantile()}}/\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} and pass the
-resulting factor, for full control over bin count/tie-breaking/labels.
-Must resolve to a different variable than \code{plot_by}. Defaults to
-\code{NULL} (no faceting, a single panel, matching prior behaviour).}
 
 \item{conf_level}{Confidence level for both the observed- and
 simulated-side intervals. Must be strictly between 0 and 1.

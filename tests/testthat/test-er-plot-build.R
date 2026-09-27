@@ -146,7 +146,7 @@ test_that("er_plot_build() hides out-of-window quantile bin markers, warns, but 
   # data, not `built$layer$quantile$config`.
   plt_wide <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_quantiles(bins = 4)
+    er_plot_add_quantiles(n_bins = 4)
   built_wide <- er_plot_build(plt_wide)
   gb_wide <- ggplot2::ggplot_build(built_wide$output)
   point_layer_wide <- which(vapply(gb_wide$plot$layers, function(l) inherits(l$geom, "GeomPoint"), logical(1)))
@@ -155,7 +155,7 @@ test_that("er_plot_build() hides out-of-window quantile bin markers, warns, but 
 
   plt_narrow <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_quantiles(bins = 4) |>
+    er_plot_add_quantiles(n_bins = 4) |>
     er_plot_theme(xlim = c(0, 100))
 
   expect_warning(built_narrow <- er_plot_build(plt_narrow), "quantile bin marker")
@@ -172,7 +172,7 @@ test_that("er_plot_build() hides out-of-window quantile bin markers, warns, but 
 test_that("er_plot_build() hides out-of-window quantile-bin boundary vlines and warns", {
   plt_wide <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_quantiles(bins = 4, style = er_style_quantile_errorbar_vlines)
+    er_plot_add_quantiles(n_bins = 4, style = er_style_quantile_errorbar_vlines)
   built_wide <- er_plot_build(plt_wide)
   gb_wide <- ggplot2::ggplot_build(built_wide$output)
   vline_layer_wide <- which(vapply(gb_wide$plot$layers, function(l) inherits(l$geom, "GeomVline"), logical(1)))
@@ -184,7 +184,7 @@ test_that("er_plot_build() hides out-of-window quantile-bin boundary vlines and 
   # first.
   plt_narrow <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_quantiles(bins = 4, style = er_style_quantile_errorbar_vlines) |>
+    er_plot_add_quantiles(n_bins = 4, style = er_style_quantile_errorbar_vlines) |>
     er_plot_theme(xlim = c(0, 300))
 
   expect_warning(built_narrow <- er_plot_build(plt_narrow), "quantile-bin boundary line")
@@ -200,7 +200,7 @@ test_that("er_plot_build() hides out-of-window quantile-bin boundary vlines and 
 test_that("er_plot_build() does not warn about the quantile layer when every bin marker is in range", {
   plt <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_quantiles(bins = 4)
+    er_plot_add_quantiles(n_bins = 4)
 
   expect_no_warning(er_plot_build(plt))
 })

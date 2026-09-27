@@ -45,7 +45,7 @@ test_that("er_tte_add_summary's log-rank p-value matches a direct survival::surv
 test_that("er_tte_add_summary matches survdiff() with more than 2 strata", {
   # stratify_by must be discrete -- bin age into 3 quantile groups first
   df <- survival::lung
-  df$age_grp <- cut_quantile(df$age, n = 3)
+  df$age_grp <- cut_quantile(df$age, n_bins = 3)
   obj <- df |> er_tte(time, status == 2, stratify_by = age_grp) |> er_tte_add_summary()
 
   lr_direct <- survival::survdiff(

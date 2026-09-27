@@ -6,10 +6,10 @@
 \usage{
 er_plot_add_quantiles(
   object,
-  keep_strata = NULL,
   style = NULL,
-  bins = 4,
+  keep_strata = NULL,
   conf_level = 0.95,
+  n_bins = 4,
   ties = "upward",
   quantile_type = 7,
   labeller = NULL,
@@ -19,19 +19,19 @@ er_plot_add_quantiles(
 \arguments{
 \item{object}{Partially constructed plot, an \code{er_plot} object.}
 
-\item{keep_strata}{Logical; whether this layer should use stratification.
-Defaults to \code{TRUE} when a stratification variable has been specified,
-and \code{FALSE} otherwise.}
-
 \item{style}{Style used to draw the quantile summary layer. Can
 either be a string corresponding to one of the registered style labels
 (e.g., \code{"errorbar"}, the default), or a builder function used to
 compute the relevant plot object (see "Styles" below).}
 
-\item{bins}{Number of exposure bins (not counting placebo). Defaults
-to \code{4}.}
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{conf_level}{Confidence level for the interval. Defaults to \code{0.95}.}
+
+\item{n_bins}{Number of exposure bins (not counting placebo). Defaults
+to \code{4}.}
 
 \item{ties, quantile_type, labeller}{Passed straight through to
 \code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} to control how the exposure variable is
@@ -62,7 +62,7 @@ default to \code{"continuous"} and are summarised the same way as any other
 continuous response unless \code{response_type = "count"} is declared
 explicitly in \code{\link[=er_plot]{er_plot()}}.
 
-\code{bins}/\code{ties}/\code{quantile_type}/\code{labeller} are local to this layer --
+\code{n_bins}/\code{ties}/\code{quantile_type}/\code{labeller} are local to this layer --
 they aren't shared with \code{\link[=er_plot_add_groups]{er_plot_add_groups()}}, even when that layer
 groups by the same exposure variable. \code{\link[=er_plot_build]{er_plot_build()}} warns (doesn't
 error) if the two disagree in that specific case; pass matching values

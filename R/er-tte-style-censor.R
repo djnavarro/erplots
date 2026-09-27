@@ -19,7 +19,7 @@
 #'   [er_tte_add_censor()]'s own `...`.
 #' @param shape Point shape for a censoring mark. Default `3` (a plus
 #'   sign), the conventional Kaplan-Meier censoring glyph.
-#' @param size Point size. Default `2`.
+#' @param point_size Point size. Default `2`.
 #' @param stroke Point stroke width. Default `0.75`.
 #'
 #' @details
@@ -49,7 +49,7 @@
 #' lung |>
 #'   er_tte(time, status == 2) |>
 #'   er_tte_add_curve() |>
-#'   er_tte_add_censor(style = er_style_tte_censor_ticks, shape = 124, size = 3) |>
+#'   er_tte_add_censor(style = er_style_tte_censor_ticks, shape = 124, point_size = 3) |>
 #'   plot()
 #'
 #' @name er_style_tte_censor
@@ -58,8 +58,8 @@ NULL
 
 #' @rdname er_style_tte_censor
 #' @export
-er_style_tte_censor_ticks <- function(data, config, stratify, time, strata, theme, ...,
-                                       shape = 3, size = 2, stroke = 0.75) {
+er_style_tte_censor_ticks <- function(data, config, stratify, time, strata, theme,
+                                       shape = 3, point_size = 2, stroke = 0.75, ...) {
 
   if (nrow(config$table) == 0) return(list())
 
@@ -74,7 +74,7 @@ er_style_tte_censor_ticks <- function(data, config, stratify, time, strata, them
       data = config$table,
       mapping = censor_mapping,
       shape = shape,
-      size = size,
+      size = point_size,
       stroke = stroke,
       show.legend = FALSE
     )

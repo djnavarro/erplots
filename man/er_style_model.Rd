@@ -15,11 +15,11 @@ er_style_model_ribbonline(
   response,
   strata,
   theme,
-  ...,
   ribbon_fill = "grey40",
   ribbon_alpha = 0.25,
   ribbon_edges = FALSE,
-  linewidth = 1
+  linewidth = 1,
+  ...
 )
 
 er_style_model_line(
@@ -30,8 +30,8 @@ er_style_model_line(
   response,
   strata,
   theme,
-  ...,
-  linewidth = 1
+  linewidth = 1,
+  ...
 )
 
 er_style_model_spaghetti(
@@ -42,10 +42,10 @@ er_style_model_spaghetti(
   response,
   strata,
   theme,
-  ...,
   alpha = NULL,
   linewidth = 1,
-  nsim = 100L
+  nsim = 100L,
+  ...
 )
 }
 \arguments{
@@ -62,13 +62,6 @@ er_style_model_spaghetti(
 \item{strata}{Stratification variable}
 
 \item{theme}{Theme components}
-
-\item{...}{Additional named arguments forwarded from
-\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing extra
-arguments to a builder" section. \code{er_style_model_spaghetti()} reads a
-\code{seed} from here (falling back to \code{config$seed} -- currently always
-\code{NULL} for the model layer -- when none is supplied) to pass to
-\code{\link[=er_simulate]{er_simulate()}}, letting a caller override erglm's auto-selected seed.}
 
 \item{ribbon_fill}{Fill colour for \code{er_style_model_ribbonline()}'s
 ribbon. Only takes effect when the layer is unstratified -- a
@@ -87,6 +80,13 @@ Default \code{FALSE} (ribbon fill only).}
 model builders (\code{er_style_model_ribbonline()}/\verb{_line()}'s single
 curve, \code{er_style_model_spaghetti()}'s mean curve drawn on top of
 the spaghetti draws). Default \code{1}.}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own \code{...}; see \code{\link[=er_style]{er_style()}}'s "Passing extra
+arguments to a builder" section. \code{er_style_model_spaghetti()} reads a
+\code{seed} from here (falling back to \code{config$seed} -- currently always
+\code{NULL} for the model layer -- when none is supplied) to pass to
+\code{\link[=er_simulate]{er_simulate()}}, letting a caller override erglm's auto-selected seed.}
 
 \item{alpha}{Transparency of \code{er_style_model_spaghetti()}'s individual
 simulated draws (\code{0}-\code{1}). Defaults to \code{NULL}, which uses \code{0.1}

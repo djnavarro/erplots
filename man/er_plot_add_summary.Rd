@@ -7,8 +7,8 @@
 er_plot_add_summary(
   object,
   model = NULL,
-  keep_strata = NULL,
   style = NULL,
+  keep_strata = NULL,
   conf_level = 0.95,
   summary_args = list(),
   ...
@@ -22,14 +22,14 @@ Only needed for builder styles (e.g.
 \code{\link[=er_style_summary_pvalue]{er_style_summary_pvalue()}}) that produce model-based summaries; a
 purely descriptive builder (e.g. \code{\link[=er_style_summary_n]{er_style_summary_n()}}) ignores it.}
 
-\item{keep_strata}{Logical; whether this layer should use stratification.
-Defaults to \code{TRUE} when a stratification variable has been specified,
-and \code{FALSE} otherwise.}
-
 \item{style}{Style used to draw the summary annotation layer. Can
 either be a string corresponding to one of the registered style labels
 (e.g., \code{"pvalue"}, the default), or a builder function used to
 compute the relevant plot object (see "Styles" below).}
+
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (used,
 e.g., for the \code{conf_low}/\code{conf_high} columns of its \code{coefficients}

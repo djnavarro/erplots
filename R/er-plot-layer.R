@@ -134,13 +134,13 @@
 
 # layer_quantile ---------------------------------------------------------------
 
-.layer_quantile <- function(object, stratify, bins, conf_level, style, dots = list(),
+.layer_quantile <- function(object, stratify, n_bins, conf_level, style, dots = list(),
                              ties = "upward", quantile_type = 7, labeller = NULL) {
 
   layer_quantile <- list()
   config <- list()
 
-  config$n_quantiles <- bins
+  config$n_quantiles <- n_bins
   config$conf_level <- conf_level
 
   binned <- object$data |>
@@ -148,7 +148,7 @@
       response = .data[[object$response$name]],
       exposure_bins = cut_exposure_quantile(
         x = .data[[object$exposure$name]],
-        n = config$n_quantiles,
+        n_bins = config$n_quantiles,
         ties = ties,
         quantile_type = quantile_type,
         labeller = labeller
@@ -361,7 +361,7 @@
 
 # layer_group ------------------------------------------------------------------
 
-.layer_group <- function(object, group_cols, stratify, bins, style, dots = list(),
+.layer_group <- function(object, group_cols, stratify, n_bins, style, dots = list(),
                           ties = "upward", quantile_type = 7, labeller = NULL) {
 
   # grouping by the plot's own stratification variable while also
@@ -408,7 +408,7 @@
         dat <- dat |>
           dplyr::mutate(
             {{new_g_sym}} := .data[[g]] |>
-              cut_exposure_quantile(n = bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |>
+              cut_exposure_quantile(n_bins = n_bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |>
               .set_label(.get_label(dat[[g]]) %||% g)
           )
 
@@ -416,7 +416,7 @@
         dat <- dat |>
           dplyr::mutate(
             {{new_g_sym}} := .data[[g]] |>
-              cut_quantile(n = bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |>
+              cut_quantile(n_bins = n_bins %||% 4, ties = ties, quantile_type = quantile_type, labeller = labeller) |>
               .set_label(.get_label(dat[[g]]) %||% g)
           )
       }
@@ -479,7 +479,7 @@
 # no reason they'd need to agree, so nothing there is checked. Compares
 # `breaks`/`ties` (read back off each layer's own binned column, stored on
 # `config$breaks`/`config$ties` by `.layer_quantile()`/`.layer_group()`
-# above) rather than the raw `bins`/`ties`/`quantile_type` arguments, so a
+# above) rather than the raw `n_bins`/`ties`/`quantile_type` arguments, so a
 # `quantile_type` difference that happens to produce identical breaks
 # doesn't spuriously warn.
 #' @noRd
@@ -509,7 +509,7 @@
         length(group_config$breaks) - 1, if (length(group_config$breaks) == 2) "" else "s",
         group_config$ties
       ),
-      "i" = "Pass matching `bins`/`ties`/`quantile_type` to both calls if you want the two panels' bins to line up, or ignore this warning if the difference is intentional."
+      "i" = "Pass matching `n_bins`/`ties`/`quantile_type` to both calls if you want the two panels' bins to line up, or ignore this warning if the difference is intentional."
     ))
   }
   invisible(NULL)

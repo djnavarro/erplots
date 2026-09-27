@@ -7,7 +7,7 @@
 \usage{
 cut_exposure_quantile(
   x,
-  n = 4,
+  n_bins = 4,
   is_placebo = NULL,
   ties = c("upward", "downward", "split-even"),
   seed = NULL,
@@ -17,7 +17,7 @@ cut_exposure_quantile(
 
 cut_quantile(
   x,
-  n = 4,
+  n_bins = 4,
   ties = c("upward", "downward", "split-even"),
   seed = NULL,
   quantile_type = 7,
@@ -27,7 +27,7 @@ cut_quantile(
 \arguments{
 \item{x}{Numeric vector}
 
-\item{n}{Number of bins}
+\item{n_bins}{Number of bins}
 
 \item{is_placebo}{Logical vector indicating placebo samples}
 
@@ -49,37 +49,37 @@ as \code{\link[stats:quantile]{stats::quantile()}}'s own \code{type} argument to
 quantile break points. Defaults to \code{7}, matching
 \code{\link[stats:quantile]{stats::quantile()}}'s own default.}
 
-\item{labeller}{Controls the labels used for the \code{n} quantile bins
+\item{labeller}{Controls the labels used for the \code{n_bins} quantile bins
 (\code{cut_exposure_quantile()}'s separate \code{"Placebo"} level is always
 used as-is, regardless of \code{labeller}). \code{NULL} (the default) labels
-bins \code{"Q1"}, \code{"Q2"}, etc. A function is called as \code{labeller(n, breaks)} (the actual bin count and the \code{n + 1} quantile cutpoints,
+bins \code{"Q1"}, \code{"Q2"}, etc. A function is called as \code{labeller(n_bins, breaks)} (the actual bin count and the \code{n_bins + 1} quantile cutpoints,
 after any resolution-driven fallback -- see \verb{@details} below) and
-must return a character vector of length \code{n}; this is the hook for,
+must return a character vector of length \code{n_bins}; this is the hook for,
 e.g., range-style labels built from \code{breaks}. A character vector is
-used directly as the \code{n} labels.}
+used directly as the \code{n_bins} labels.}
 }
 \value{
 A factor with \code{"ties"} and \code{"quantile_type"} attributes
 recording those two arguments. \code{cut_exposure_quantile()}'s result
-additionally carries a \code{"breaks"} attribute holding the \code{n + 1}
+additionally carries a \code{"breaks"} attribute holding the \code{n_bins + 1}
 quantile cutpoints used to form the bins.
 }
 \description{
-\code{cut_quantile()} bins a numeric vector into \code{n} quantile groups.
+\code{cut_quantile()} bins a numeric vector into \code{n_bins} quantile groups.
 \code{cut_exposure_quantile()} does the same for an exposure variable,
 additionally keeping placebo (\code{0}) observations in their own bin.
 }
 \details{
 Both functions error if \code{x} has fewer than 2 distinct
 non-missing values, since quantile bins aren't well-defined in that
-case. If \code{x} doesn't have enough resolution to distinguish all \code{n}
+case. If \code{x} doesn't have enough resolution to distinguish all \code{n_bins}
 requested bins (e.g. many repeated values clustered at one end),
 both functions warn and fall back to using as many bins as the data
 supports, rather than erroring or silently showing fewer bins with
 no explanation. \code{cut_exposure_quantile()}'s \code{"breaks"} attribute is
 read back out by quantile-layer builders that draw bin-boundary
 separators (e.g. \code{\link[=er_style_quantile_errorbar_vlines]{er_style_quantile_errorbar_vlines()}}) via
-\code{attr(exposure_bins, "breaks")}. Because that fallback can lower \code{n}
+\code{attr(exposure_bins, "breaks")}. Because that fallback can lower \code{n_bins}
 below what was originally requested, a character-vector \code{labeller}
 is length-checked against the \emph{actual} bin count, not the requested
 one, and errors informatively on a mismatch.
@@ -90,7 +90,7 @@ cut_quantile(x)
 cut_exposure_quantile(abs(x))
 cut_quantile(x, ties = "split-even", seed = 8213)
 cut_quantile(x, quantile_type = 1)
-cut_quantile(x, labeller = function(n, breaks) paste0("Group ", 1:n))
+cut_quantile(x, labeller = function(n_bins, breaks) paste0("Group ", 1:n_bins))
 cut_quantile(x, labeller = c("Low", "Mid-low", "Mid-high", "High"))
 
 }

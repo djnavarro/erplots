@@ -12,10 +12,10 @@ er_style_tte_censor_ticks(
   time,
   strata,
   theme,
-  ...,
   shape = 3,
-  size = 2,
-  stroke = 0.75
+  point_size = 2,
+  stroke = 0.75,
+  ...
 )
 }
 \arguments{
@@ -36,15 +36,15 @@ stratified).}
 
 \item{theme}{\code{object$theme}.}
 
-\item{...}{Additional named arguments forwarded from
-\code{\link[=er_tte_add_censor]{er_tte_add_censor()}}'s own \code{...}.}
-
 \item{shape}{Point shape for a censoring mark. Default \code{3} (a plus
 sign), the conventional Kaplan-Meier censoring glyph.}
 
-\item{size}{Point size. Default \code{2}.}
+\item{point_size}{Point size. Default \code{2}.}
 
 \item{stroke}{Point stroke width. Default \code{0.75}.}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_tte_add_censor]{er_tte_add_censor()}}'s own \code{...}.}
 }
 \value{
 A geom, or a list of geoms.
@@ -76,7 +76,7 @@ library(survival)
 lung |>
   er_tte(time, status == 2) |>
   er_tte_add_curve() |>
-  er_tte_add_censor(style = er_style_tte_censor_ticks, shape = 124, size = 3) |>
+  er_tte_add_censor(style = er_style_tte_censor_ticks, shape = 124, point_size = 3) |>
   plot()
 
 }

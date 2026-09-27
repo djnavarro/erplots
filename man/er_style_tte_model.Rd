@@ -12,10 +12,10 @@ er_style_tte_model_line(
   time,
   strata,
   theme,
-  ...,
   show_ci = TRUE,
   ribbon_alpha = 0.15,
-  linewidth = 1
+  linewidth = 1,
+  ...
 )
 }
 \arguments{
@@ -36,15 +36,15 @@ from \code{\link[=er_predict_survival]{er_predict_survival()}}, with \code{time}
 
 \item{theme}{\code{object$theme}.}
 
-\item{...}{Additional named arguments forwarded from
-\code{\link[=er_tte_add_model]{er_tte_add_model()}}'s own \code{...}.}
-
 \item{show_ci}{Whether to draw the confidence band. Default \code{TRUE}.}
 
 \item{ribbon_alpha}{Transparency of the confidence band (\code{0}-\code{1}).
 Default \code{0.15}.}
 
 \item{linewidth}{Width of the curve's line. Default \code{1}.}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_tte_add_model]{er_tte_add_model()}}'s own \code{...}.}
 }
 \value{
 A geom, or a list of geoms.

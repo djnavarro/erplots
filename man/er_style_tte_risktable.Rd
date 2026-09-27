@@ -12,9 +12,9 @@ er_style_tte_risktable_text(
   time,
   strata,
   theme,
-  ...,
   text_size = 3.5,
-  show_percent = FALSE
+  show_percent = FALSE,
+  ...
 )
 }
 \arguments{
@@ -37,15 +37,15 @@ as the curve panel's x-axis ticks).}
 
 \item{theme}{\code{object$theme}.}
 
-\item{...}{Additional named arguments forwarded from
-\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}'s own \code{...}.}
-
 \item{text_size}{Size of the risk-count text. Default \code{3.5}.}
 
 \item{show_percent}{Whether to append each break's \code{n_risk} as a
 percentage of that stratum's own baseline (time-zero) size,
 formatted via \code{\link[=er_tte_theme]{er_tte_theme()}}'s \code{format_percent}. Default \code{FALSE}
 (a bare count, the previous behaviour).}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_tte_add_risktable]{er_tte_add_risktable()}}'s own \code{...}.}
 }
 \value{
 A geom, or a list of geoms.

@@ -63,8 +63,8 @@ NULL
 
 #' @rdname er_style_tte_risktable
 #' @export
-er_style_tte_risktable_text <- function(data, config, stratify, time, strata, theme, ...,
-                                         text_size = 3.5, show_percent = FALSE) {
+er_style_tte_risktable_text <- function(data, config, stratify, time, strata, theme,
+                                         text_size = 3.5, show_percent = FALSE, ...) {
 
   strata_levels <- if (stratify) rev(unique(config$table$strata)) else "All"
   table <- config$table

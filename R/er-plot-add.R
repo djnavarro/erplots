@@ -8,13 +8,13 @@
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`).
 #' @param model A fitted exposure-response model. Must implement [er_predict()].
-#' @param keep_strata Logical; whether this layer should use stratification.
-#'   Defaults to `TRUE` when a stratification variable has been specified,
-#'   and `FALSE` otherwise.
 #' @param style Style used to draw the model curve/ribbon layer. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"ribbonline"`, the default), or a builder function used to
 #'   compute the relevant plot object (see "Styles" below).
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified,
+#'   and `FALSE` otherwise.
 #' @param conf_level Confidence level for the prediction ribbon. Defaults
 #'   to `0.95`.
 #' @param predict_args A named list of additional arguments forwarded to
@@ -96,8 +96,8 @@
 #'   [er_plot_add_data()], [er_plot_add_groups()], [er_style()]
 #'
 #' @export
-er_plot_add_model <- function(object, model, keep_strata = NULL,
-                                style = NULL, conf_level = 0.95,
+er_plot_add_model <- function(object, model, style = NULL,
+                                keep_strata = NULL, conf_level = 0.95,
                                 predict_args = list(), ...) {
 
   dots <- rlang::list2(...)
@@ -140,13 +140,13 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   Only needed for builder styles (e.g.
 #'   [er_style_summary_pvalue()]) that produce model-based summaries; a
 #'   purely descriptive builder (e.g. [er_style_summary_n()]) ignores it.
-#' @param keep_strata Logical; whether this layer should use stratification.
-#'   Defaults to `TRUE` when a stratification variable has been specified,
-#'   and `FALSE` otherwise.
 #' @param style Style used to draw the summary annotation layer. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"pvalue"`, the default), or a builder function used to
 #'   compute the relevant plot object (see "Styles" below).
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified,
+#'   and `FALSE` otherwise.
 #' @param conf_level Confidence level forwarded to [er_summary()] (used,
 #'   e.g., for the `conf_low`/`conf_high` columns of its `coefficients`
 #'   result -- see `?er_model_interface`). Defaults to `0.95`. Ignored
@@ -195,7 +195,7 @@ er_plot_add_model <- function(object, model, keep_strata = NULL,
 #'   [er_plot_add_data()], [er_plot_add_groups()], [er_style()]
 #'
 #' @export
-er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style = NULL,
+er_plot_add_summary <- function(object, model = NULL, style = NULL, keep_strata = NULL,
                                   conf_level = 0.95, summary_args = list(), ...) {
 
   dots <- rlang::list2(...)
@@ -234,16 +234,16 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' summarised with a point estimate and confidence interval.
 #'
 #' @param object Partially constructed plot, an `er_plot` object.
-#' @param keep_strata Logical; whether this layer should use stratification.
-#'   Defaults to `TRUE` when a stratification variable has been specified,
-#'   and `FALSE` otherwise.
 #' @param style Style used to draw the quantile summary layer. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"errorbar"`, the default), or a builder function used to
 #'   compute the relevant plot object (see "Styles" below).
-#' @param bins Number of exposure bins (not counting placebo). Defaults
-#'   to `4`.
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified,
+#'   and `FALSE` otherwise.
 #' @param conf_level Confidence level for the interval. Defaults to `0.95`.
+#' @param n_bins Number of exposure bins (not counting placebo). Defaults
+#'   to `4`.
 #' @param ties,quantile_type,labeller Passed straight through to
 #'   [cut_exposure_quantile()] to control how the exposure variable is
 #'   split into bins -- see its documentation for what each controls.
@@ -264,7 +264,7 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #' continuous response unless `response_type = "count"` is declared
 #' explicitly in [er_plot()].
 #'
-#' `bins`/`ties`/`quantile_type`/`labeller` are local to this layer --
+#' `n_bins`/`ties`/`quantile_type`/`labeller` are local to this layer --
 #' they aren't shared with [er_plot_add_groups()], even when that layer
 #' groups by the same exposure variable. [er_plot_build()] warns (doesn't
 #' error) if the two disagree in that specific case; pass matching values
@@ -353,8 +353,8 @@ er_plot_add_summary <- function(object, model = NULL, keep_strata = NULL, style 
 #'   [er_style()]
 #'
 #' @export
-er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
-                                    bins = 4, conf_level = 0.95,
+er_plot_add_quantiles <- function(object, style = NULL, keep_strata = NULL,
+                                    conf_level = 0.95, n_bins = 4,
                                     ties = "upward", quantile_type = 7,
                                     labeller = NULL, ...) {
 
@@ -373,7 +373,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
   object$layer$quantile <- .layer_quantile(
     object = object,
     stratify = keep_strata,
-    bins = bins,
+    n_bins = n_bins,
     conf_level = conf_level,
     style = style,
     dots = dots,
@@ -395,13 +395,13 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #' the plot, but other possibilities are available.
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`).
-#' @param keep_strata Logical; whether this layer should use stratification.
-#'   Defaults to `TRUE` when a stratification variable has been specified,
-#'   and `FALSE` otherwise.
 #' @param style Style used to draw the data layer. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"overlay"`, the default), or a builder function used to
 #'   compute the relevant plot object (see "Styles" below).
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified,
+#'   and `FALSE` otherwise.
 #' @param panel Character string: `"upper"`, `"lower"`, or `"both"` (the
 #'   default). Only meaningful for [er_style_data_boxjitter()] on a
 #'   binary response; see "Details" for when `"both"` is required.
@@ -518,7 +518,7 @@ er_plot_add_quantiles <- function(object, keep_strata = NULL, style = NULL,
 #'   [er_plot_add_quantiles()], [er_plot_add_groups()], [er_style()]
 #'
 #' @export
-er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "both", ...) {
+er_plot_add_data <- function(object, style = NULL, keep_strata = NULL, panel = "both", ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
@@ -585,12 +585,12 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"boxplot"`, the default), or a builder function used to
 #'   compute the relevant plot object (see "Styles" below).
-#' @param bins Number of quantile bins used for continuous grouping
-#'   variables (`NULL`, the default, uses [cut_quantile()]'s own default).
-#'   Applied identically to every grouping variable added by this call.
 #' @param keep_strata Logical; whether this layer should use stratification.
 #'   Defaults to `TRUE` when a stratification variable has been specified,
 #'   and `FALSE` otherwise.
+#' @param n_bins Number of quantile bins used for continuous grouping
+#'   variables (`NULL`, the default, uses [cut_quantile()]'s own default).
+#'   Applied identically to every grouping variable added by this call.
 #' @param ties,quantile_type,labeller Passed straight through to
 #'   [cut_quantile()]/[cut_exposure_quantile()] to control how a
 #'   continuous grouping variable is split into bins -- see their
@@ -618,7 +618,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #' stratifying by the same column at once; pass `keep_strata = FALSE`
 #' for that grouping variable instead.
 #'
-#' `bins`/`ties`/`quantile_type`/`labeller` are local to this call --
+#' `n_bins`/`ties`/`quantile_type`/`labeller` are local to this call --
 #' different grouping variables (including across separate
 #' `er_plot_add_groups()` calls) aren't required to agree, and generally
 #' shouldn't: they're usually different variables with no reason to share
@@ -668,7 +668,7 @@ er_plot_add_data <- function(object, keep_strata = NULL, style = NULL, panel = "
 #'   [er_plot_add_quantiles()], [er_plot_add_data()], [er_style()]
 #'
 #' @export
-er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep_strata = NULL,
+er_plot_add_groups <- function(object, group_by, style = NULL, keep_strata = NULL, n_bins = NULL,
                                  ties = "upward", quantile_type = 7, labeller = NULL, ...) {
 
   dots <- rlang::list2(...)
@@ -692,7 +692,7 @@ er_plot_add_groups <- function(object, group_by, style = NULL, bins = NULL, keep
     ties = ties,
     quantile_type = quantile_type,
     labeller = labeller,
-    bins = bins,
+    n_bins = n_bins,
     style = style,
     dots = dots
   )

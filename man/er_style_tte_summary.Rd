@@ -15,11 +15,11 @@ er_style_tte_summary_logrank(
   time,
   strata,
   theme,
-  ...,
   inset = 0.05,
   label_size = NULL,
   label_colour = NULL,
-  label_fill = NULL
+  label_fill = NULL,
+  ...
 )
 
 er_style_tte_summary_n(
@@ -88,9 +88,6 @@ relative to the plotted survival curve(s) -- see \code{\link[=er_style]{er_style
 \item{theme}{\code{object$theme} -- \code{theme$format_p}/\code{theme$format_number}
 format the annotation's numbers.}
 
-\item{...}{Additional named arguments forwarded from
-\code{\link[=er_tte_add_summary]{er_tte_add_summary()}}'s own \code{...}.}
-
 \item{inset}{Distance from the panel edge for the annotation label,
 as a fraction of the panel's width/height. Default \code{0.05}.}
 
@@ -99,6 +96,9 @@ as a fraction of the panel's width/height. Default \code{0.05}.}
 \item{label_colour}{Label text colour. Defaults to \code{NULL} (\code{\link[ggplot2:geom_label]{ggplot2::geom_label()}}'s own default).}
 
 \item{label_fill}{Label background fill. Defaults to \code{NULL} (\code{\link[ggplot2:geom_label]{ggplot2::geom_label()}}'s own default).}
+
+\item{...}{Additional named arguments forwarded from
+\code{\link[=er_tte_add_summary]{er_tte_add_summary()}}'s own \code{...}.}
 
 \item{fields}{Fields from \code{glance} to include for
 \code{er_style_tte_summary_gof()}, and the order they're shown in: one

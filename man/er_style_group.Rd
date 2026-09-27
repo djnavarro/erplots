@@ -58,12 +58,12 @@ er_style_group_linerange(
   response,
   strata,
   theme,
-  size = 1,
+  scale_factor = 1,
   inner_range = c(0.25, 0.75),
   outer_range = c(0.05, 0.95),
-  alpha_dot = 1,
-  alpha_inner = 0.8,
-  alpha_outer = 0.4,
+  dot_alpha = 1,
+  inner_alpha = 0.8,
+  outer_alpha = 0.4,
   ...
 )
 
@@ -138,14 +138,14 @@ draws a fresh jitter.}
 linetype for \code{er_style_group_violin()}. Default to \code{NULL} (no
 quantile lines drawn) and \code{"solid"} respectively.}
 
-\item{size}{Overall size multiplier for \code{er_style_group_linerange()}'s
+\item{scale_factor}{Overall size multiplier for \code{er_style_group_linerange()}'s
 dot and lines. Defaults to \code{1}.}
 
 \item{inner_range, outer_range}{Quantile probabilities (length 2) for
 \code{er_style_group_linerange()}'s thick and thin lines. Default to
 \code{c(0.25, 0.75)} and \code{c(0.05, 0.95)} respectively.}
 
-\item{alpha_dot, alpha_inner, alpha_outer}{Per-part transparency for
+\item{dot_alpha, inner_alpha, outer_alpha}{Per-part transparency for
 \code{er_style_group_linerange()}'s dot, inner line, and outer line.
 Default to \code{1}, \code{0.8}, and \code{0.4} respectively.}
 

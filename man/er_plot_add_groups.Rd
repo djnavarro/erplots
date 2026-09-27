@@ -8,8 +8,8 @@ er_plot_add_groups(
   object,
   group_by,
   style = NULL,
-  bins = NULL,
   keep_strata = NULL,
+  n_bins = NULL,
   ties = "upward",
   quantile_type = 7,
   labeller = NULL,
@@ -27,13 +27,13 @@ either be a string corresponding to one of the registered style labels
 (e.g., \code{"boxplot"}, the default), or a builder function used to
 compute the relevant plot object (see "Styles" below).}
 
-\item{bins}{Number of quantile bins used for continuous grouping
-variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).
-Applied identically to every grouping variable added by this call.}
-
 \item{keep_strata}{Logical; whether this layer should use stratification.
 Defaults to \code{TRUE} when a stratification variable has been specified,
 and \code{FALSE} otherwise.}
+
+\item{n_bins}{Number of quantile bins used for continuous grouping
+variables (\code{NULL}, the default, uses \code{\link[=cut_quantile]{cut_quantile()}}'s own default).
+Applied identically to every grouping variable added by this call.}
 
 \item{ties, quantile_type, labeller}{Passed straight through to
 \code{\link[=cut_quantile]{cut_quantile()}}/\code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} to control how a
@@ -69,7 +69,7 @@ stratification variable, since that would mean grouping and
 stratifying by the same column at once; pass \code{keep_strata = FALSE}
 for that grouping variable instead.
 
-\code{bins}/\code{ties}/\code{quantile_type}/\code{labeller} are local to this call --
+\code{n_bins}/\code{ties}/\code{quantile_type}/\code{labeller} are local to this call --
 different grouping variables (including across separate
 \code{er_plot_add_groups()} calls) aren't required to agree, and generally
 shouldn't: they're usually different variables with no reason to share

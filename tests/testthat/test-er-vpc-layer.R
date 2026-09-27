@@ -72,7 +72,7 @@ test_that("the observed and simulated layers assign a tied exposure value to the
 
     # rebuild the actual per-row bin assignment used by each layer, since
     # config$summary is already aggregated to one row per bin
-    obs_bins <- cut_exposure_quantile(exposure, n = 4, ties = rule)
+    obs_bins <- cut_exposure_quantile(exposure, n_bins = 4, ties = rule)
     sim_bins <- .apply_exposure_breaks(
       sim$exposure, attr(obs_bins, "breaks"),
       ties = vpc$layer$observed$config$ties, labels = vpc$layer$observed$config$labels
@@ -86,8 +86,8 @@ test_that("the observed and simulated layers assign a tied exposure value to the
     expect_equal(length(unique(as.character(obs_bins[exposure == 10]))), 1)
   }
 
-  obs_bins_up <- cut_exposure_quantile(exposure, n = 4, ties = "upward")
-  obs_bins_down <- cut_exposure_quantile(exposure, n = 4, ties = "downward")
+  obs_bins_up <- cut_exposure_quantile(exposure, n_bins = 4, ties = "upward")
+  obs_bins_down <- cut_exposure_quantile(exposure, n_bins = 4, ties = "downward")
   expect_false(identical(as.character(obs_bins_up[exposure == 10]), as.character(obs_bins_down[exposure == 10])))
 })
 

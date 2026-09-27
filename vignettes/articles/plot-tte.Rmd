@@ -70,7 +70,7 @@ A genuinely continuous covariate, like `age`, needs binning into groups first --
 
 ```{r stratified-continuous-covariate}
 lung |>
-  transform(age_grp = cut_quantile(age, n = 3)) |>
+  transform(age_grp = cut_quantile(age, n_bins = 3)) |>
   er_tte(time, status == 2, stratify_by = age_grp) |>
   er_tte_add_curve() |>
   plot()

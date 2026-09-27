@@ -26,6 +26,13 @@
 #' @param data Data frame or tibble containing the observed data.
 #' @param exposure Exposure variable (one variable, unquoted).
 #' @param response Response variable (one variable, unquoted).
+#' @param stratify_by Optional variable (unquoted) splitting the VPC into
+#'   one facet panel per level, via `ggplot2::facet_wrap()`, used as-is.
+#'   Must be discrete -- a numeric column errors; bin it yourself first
+#'   with [cut_quantile()]/[cut_exposure_quantile()] and pass the
+#'   resulting factor, for full control over bin count/tie-breaking/labels.
+#'   Must resolve to a different variable than `plot_by`. Defaults to
+#'   `NULL` (no faceting, a single panel, matching prior behaviour).
 #' @param response_type One of `"auto"` (the default), `"binary"`,
 #'   `"continuous"`, or `"count"`.
 #' @param plot_by Variable (unquoted) plotted on the x-axis and used to
@@ -46,13 +53,6 @@
 #'   [cut_exposure_quantile()]'s attributes on the observed layer's own
 #'   binned column) rather than re-resolving them, so both sides always
 #'   stay in sync.
-#' @param stratify_by Optional variable (unquoted) splitting the VPC into
-#'   one facet panel per level, via `ggplot2::facet_wrap()`, used as-is.
-#'   Must be discrete -- a numeric column errors; bin it yourself first
-#'   with [cut_quantile()]/[cut_exposure_quantile()] and pass the
-#'   resulting factor, for full control over bin count/tie-breaking/labels.
-#'   Must resolve to a different variable than `plot_by`. Defaults to
-#'   `NULL` (no faceting, a single panel, matching prior behaviour).
 #' @param conf_level Confidence level for both the observed- and
 #'   simulated-side intervals. Must be strictly between 0 and 1.
 #'   Defaults to `0.95`.
@@ -92,10 +92,10 @@ NULL
 
 #' @rdname er_vpc
 #' @export
-er_vpc <- function(data, exposure, response, response_type = "auto",
+er_vpc <- function(data, exposure, response, stratify_by = NULL,
+                    response_type = "auto",
                     plot_by = NULL, n_bins = 4,
                     ties = "upward", quantile_type = 7, labeller = NULL,
-                    stratify_by = NULL,
                     conf_level = 0.95, probs = c(0.1, 0.5, 0.9), seed = NULL) {
 
   # see `er_plot()`'s identical `dplyr::ungroup()` call for the rationale

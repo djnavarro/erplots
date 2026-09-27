@@ -7,8 +7,8 @@
 er_tte_add_summary(
   object,
   model = NULL,
-  keep_strata = NULL,
   style = NULL,
+  keep_strata = NULL,
   conf_level = 0.95,
   summary_args = list(),
   ...
@@ -21,14 +21,14 @@ er_tte_add_summary(
 or \code{NULL} (the default). Only needed for styles that produce
 model-based summaries, ignored by other style builder functions.}
 
-\item{keep_strata}{Logical; whether this layer should use stratification.
-Defaults to \code{TRUE} when a stratification variable has been specified,
-and \code{FALSE} otherwise.}
-
 \item{style}{Style used to produce the summary layer annotation. Can
 either be a string corresponding to one of the registered style labels
 (e.g., \code{"logrank"}, the default), or a builder function used to compute the
 relevant plot object (see "Styles" below).}
+
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{conf_level}{Confidence level forwarded to \code{\link[=er_summary]{er_summary()}} (see
 \code{?er_model_interface}). Defaults to \code{0.95}. Ignored when \code{model} is

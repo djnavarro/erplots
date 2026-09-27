@@ -7,8 +7,8 @@
 er_tte_add_model(
   object,
   model,
-  keep_strata = NULL,
   style = NULL,
+  keep_strata = NULL,
   conf_level = 0.95,
   time_grid = NULL,
   predict_args = list(),
@@ -21,14 +21,14 @@ er_tte_add_model(
 \item{model}{A fitted time-to-event model. Must implement
 \code{\link[=er_predict_survival]{er_predict_survival()}}.}
 
-\item{keep_strata}{Logical; whether this layer should use stratification.
-Defaults to \code{TRUE} when a stratification variable has been specified,
-and \code{FALSE} otherwise.}
-
 \item{style}{Style used to draw the model-based survival curve. Can
 either be a string corresponding to one of the registered style labels
 (e.g., \code{"line"}, the default), or a builder function used to compute the
 relevant plot object (see "Styles" below).}
+
+\item{keep_strata}{Logical; whether this layer should use stratification.
+Defaults to \code{TRUE} when a stratification variable has been specified,
+and \code{FALSE} otherwise.}
 
 \item{conf_level}{Confidence level for the prediction band. Defaults
 to \code{0.95}.}

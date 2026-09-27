@@ -150,10 +150,10 @@ test_that(".layer_quantile constructs the correct data structure", {
 })
 
 test_that("er_plot_add_quantiles() forwards ties/quantile_type/labeller to cut_exposure_quantile()", {
-  plt_default <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  plt_default <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   plt_custom <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_quantiles(bins = 4, ties = "downward", quantile_type = 1,
+    er_plot_add_quantiles(n_bins = 4, ties = "downward", quantile_type = 1,
                            labeller = c("Low", "Mid-low", "Mid-high", "High"))
 
   cfg_default <- plt_default$layer$quantile$config
@@ -411,11 +411,11 @@ test_that(".layer_group constructs the correct data structure", {
   expect_equal(attr(fct1s, "label"), attr(er_test_data$sex, "label"))
 })
 
-test_that("er_plot_add_groups()'s bins argument actually controls the bin count", {
+test_that("er_plot_add_groups()'s n_bins argument actually controls the bin count", {
   # previously dead code -- cut_exposure_quantile()/cut_quantile() were
-  # always called with no `n =`, silently ignoring `bins`
-  plt_exposure <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_groups(aucss, bins = 6)
-  plt_covariate <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_groups(weight, bins = 6)
+  # always called with no `n_bins =`, silently ignoring `n_bins`
+  plt_exposure <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_groups(aucss, n_bins = 6)
+  plt_covariate <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_groups(weight, n_bins = 6)
 
   fct_exposure <- plt_exposure$layer$group$config[[".aucss_quantile"]]$data[[1]]
   fct_covariate <- plt_covariate$layer$group$config[[".weight_quantile"]]$data[[1]]
@@ -427,11 +427,11 @@ test_that("er_plot_add_groups()'s bins argument actually controls the bin count"
 test_that("er_plot_add_groups() forwards ties/quantile_type/labeller to cut_exposure_quantile()/cut_quantile()", {
   plt_exposure <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_groups(aucss, bins = 4, ties = "downward", quantile_type = 1,
+    er_plot_add_groups(aucss, n_bins = 4, ties = "downward", quantile_type = 1,
                         labeller = c("Low", "Mid-low", "Mid-high", "High"))
   plt_covariate <- er_test_data |>
     er_plot(aucss, ae1) |>
-    er_plot_add_groups(weight, bins = 4, ties = "downward", quantile_type = 1,
+    er_plot_add_groups(weight, n_bins = 4, ties = "downward", quantile_type = 1,
                         labeller = c("Low", "Mid-low", "Mid-high", "High"))
 
   fct_exposure <- plt_exposure$layer$group$config[[".aucss_quantile"]]$data[[1]]

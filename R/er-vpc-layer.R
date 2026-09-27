@@ -102,7 +102,7 @@
   if (config$is_numeric_group) {
     is_placebo <- if (group_var == exp_var) dat[[exp_var]] == 0 else rep(FALSE, nrow(dat))
     exposure_bins <- cut_exposure_quantile(
-      dat[[group_var]], n = n_bins, is_placebo = is_placebo,
+      dat[[group_var]], n_bins = n_bins, is_placebo = is_placebo,
       ties = object$group$ties, quantile_type = object$group$quantile_type,
       labeller = object$group$labeller, seed = object$group$seed
     )

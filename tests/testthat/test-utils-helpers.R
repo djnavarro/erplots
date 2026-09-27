@@ -100,7 +100,7 @@ test_that("ci_poisson returns a named lower/upper vector", {
 
 test_that(".apply_exposure_breaks() defaults reproduce its prior, hardcoded behaviour", {
   x <- c(0, 0, 1:9, rep(10, 5), 11:15)
-  breaks <- attr(cut_exposure_quantile(x, n = 4), "breaks")
+  breaks <- attr(cut_exposure_quantile(x, n_bins = 4), "breaks")
 
   result <- .apply_exposure_breaks(x, breaks, is_placebo = x == 0)
   expect_equal(levels(result), c("Placebo", "Q1", "Q2", "Q3", "Q4"))
@@ -113,7 +113,7 @@ test_that(".apply_exposure_breaks() defaults reproduce its prior, hardcoded beha
 
 test_that(".apply_exposure_breaks() honours ties/labels/seed", {
   x <- c(1:9, rep(10, 5), 11:15)
-  breaks <- attr(cut_exposure_quantile(x, n = 4), "breaks")
+  breaks <- attr(cut_exposure_quantile(x, n_bins = 4), "breaks")
 
   up <- .apply_exposure_breaks(x, breaks, ties = "upward")
   down <- .apply_exposure_breaks(x, breaks, ties = "downward")
@@ -138,7 +138,7 @@ test_that("cut_exposure_quantile errors clearly on constant, all-NA, or too-few-
 
 test_that("cut_exposure_quantile works normally with at least 2 distinct non-placebo values", {
   x <- c(0, 0, 1, 2, 3, 4)
-  result <- cut_exposure_quantile(x, n = 2)
+  result <- cut_exposure_quantile(x, n_bins = 2)
   expect_s3_class(result, "factor")
   expect_equal(levels(result), c("Placebo", "Q1", "Q2"))
   expect_equal(as.character(result[1:2]), c("Placebo", "Placebo"))
@@ -150,7 +150,7 @@ test_that("cut_exposure_quantile warns and gracefully degrades when requested bi
   # opaque 'breaks' are not unique cut() error
   x <- c(rep(1, 18), 2)
   expect_warning(
-    result <- cut_exposure_quantile(x, n = 4),
+    result <- cut_exposure_quantile(x, n_bins = 4),
     "only 1 are distinguishable"
   )
   expect_equal(levels(result), c("Placebo", "Q1"))
@@ -159,13 +159,13 @@ test_that("cut_exposure_quantile warns and gracefully degrades when requested bi
   # a case that degrades to more than 1 (but still fewer than requested) bin
   x2 <- c(rep(1, 10), rep(2, 10), 3)
   expect_warning(
-    result2 <- cut_exposure_quantile(x2, n = 10),
+    result2 <- cut_exposure_quantile(x2, n_bins = 10),
     "only 2 are distinguishable"
   )
   expect_equal(levels(result2), c("Placebo", "Q1", "Q2"))
 
   # enough resolution for the requested bins -- no warning
-  expect_no_warning(cut_exposure_quantile(1:100, n = 4))
+  expect_no_warning(cut_exposure_quantile(1:100, n_bins = 4))
 })
 
 test_that("cut_quantile errors clearly on constant, all-NA, or too-few-value input", {
@@ -175,15 +175,15 @@ test_that("cut_quantile errors clearly on constant, all-NA, or too-few-value inp
 })
 
 test_that("cut_quantile works normally with at least 2 distinct values", {
-  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4)
+  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n_bins = 4)
   expect_s3_class(result, "factor")
   expect_equal(levels(result), paste0("Q", 1:4))
 })
 
 test_that("cut_quantile defaults to ties = \"upward\" and records it as an attribute", {
   x <- c(1:9, rep(10, 5), 11:15)
-  default_result <- cut_quantile(x, n = 4)
-  upward_result <- cut_quantile(x, n = 4, ties = "upward")
+  default_result <- cut_quantile(x, n_bins = 4)
+  upward_result <- cut_quantile(x, n_bins = 4, ties = "upward")
 
   expect_equal(default_result, upward_result)
   expect_equal(attr(default_result, "ties"), "upward")
@@ -193,8 +193,8 @@ test_that("cut_quantile's ties argument controls how a tied break value is assig
   # a run of `10`s straddles the 50%/75% quantile breaks (10 and 10.5)
   x <- c(1:9, rep(10, 5), 11:15)
 
-  upward <- cut_quantile(x, n = 4, ties = "upward")
-  downward <- cut_quantile(x, n = 4, ties = "downward")
+  upward <- cut_quantile(x, n_bins = 4, ties = "upward")
+  downward <- cut_quantile(x, n_bins = 4, ties = "downward")
 
   # "upward" (right = TRUE): ties at a break go to the lower bin
   expect_equal(as.integer(table(upward)), c(5, 9, 0, 5))
@@ -208,7 +208,7 @@ test_that("cut_quantile's ties argument controls how a tied break value is assig
 test_that("cut_quantile's ties = \"split-even\" balances bin sizes and is reproducible with a seed", {
   x <- c(1:9, rep(10, 5), 11:15)
 
-  split_even <- cut_quantile(x, n = 4, ties = "split-even", seed = 7148)
+  split_even <- cut_quantile(x, n_bins = 4, ties = "split-even", seed = 7148)
   counts <- as.integer(table(split_even))
 
   # as close to equal as 19 observations across 4 bins can get
@@ -217,15 +217,15 @@ test_that("cut_quantile's ties = \"split-even\" balances bin sizes and is reprod
 
   # same seed -> identical result
   expect_identical(
-    cut_quantile(x, n = 4, ties = "split-even", seed = 7148),
+    cut_quantile(x, n_bins = 4, ties = "split-even", seed = 7148),
     split_even
   )
 })
 
 test_that("cut_quantile defaults to quantile_type = 7 and records it as an attribute", {
   x <- c(1:9, rep(10, 5), 11:15)
-  default_result <- cut_quantile(x, n = 4)
-  type7_result <- cut_quantile(x, n = 4, quantile_type = 7)
+  default_result <- cut_quantile(x, n_bins = 4)
+  type7_result <- cut_quantile(x, n_bins = 4, quantile_type = 7)
 
   expect_equal(default_result, type7_result)
   expect_equal(attr(default_result, "quantile_type"), 7)
@@ -233,8 +233,8 @@ test_that("cut_quantile defaults to quantile_type = 7 and records it as an attri
 
 test_that("cut_quantile's quantile_type argument is forwarded to stats::quantile()", {
   x <- c(1:9, rep(10, 5), 11:15)
-  result_type1 <- cut_quantile(x, n = 4, quantile_type = 1)
-  result_type7 <- cut_quantile(x, n = 4, quantile_type = 7)
+  result_type1 <- cut_quantile(x, n_bins = 4, quantile_type = 1)
+  result_type7 <- cut_quantile(x, n_bins = 4, quantile_type = 7)
 
   # the two types disagree on this skewed vector, so the resulting bin
   # membership should differ
@@ -246,7 +246,7 @@ test_that("cut_exposure_quantile's quantile_type controls the breaks attribute a
   x <- c(rep(0, 5), 1:9, rep(10, 5), 11:15)
   non_placebo_x <- x[x != 0]
 
-  result <- cut_exposure_quantile(x, n = 4, quantile_type = 1)
+  result <- cut_exposure_quantile(x, n_bins = 4, quantile_type = 1)
 
   expect_equal(
     unname(attr(result, "breaks")),
@@ -256,7 +256,7 @@ test_that("cut_exposure_quantile's quantile_type controls the breaks attribute a
 })
 
 test_that("cut_quantile defaults to Q1..Qn labels when labeller is NULL", {
-  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = NULL)
+  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n_bins = 4, labeller = NULL)
   expect_equal(levels(result), paste0("Q", 1:4))
 })
 
@@ -269,7 +269,7 @@ test_that("cut_quantile accepts a function labeller, called with (n, breaks)", {
     paste0("Group ", seq_len(n))
   }
 
-  result <- cut_quantile(x, n = 4, labeller = labeller)
+  result <- cut_quantile(x, n_bins = 4, labeller = labeller)
 
   expect_equal(levels(result), paste0("Group ", 1:4))
   expect_equal(captured$n, 4)
@@ -277,17 +277,17 @@ test_that("cut_quantile accepts a function labeller, called with (n, breaks)", {
 })
 
 test_that("cut_quantile accepts a character vector labeller", {
-  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = c("Low", "Mid-low", "Mid-high", "High"))
+  result <- cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n_bins = 4, labeller = c("Low", "Mid-low", "Mid-high", "High"))
   expect_equal(levels(result), c("Low", "Mid-low", "Mid-high", "High"))
 })
 
 test_that("cut_quantile errors informatively when labeller's length doesn't match the actual bin count", {
   expect_error(
-    cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = c("a", "b")),
+    cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n_bins = 4, labeller = c("a", "b")),
     "must produce 4 labels"
   )
   expect_error(
-    cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n = 4, labeller = function(n, breaks) "only one"),
+    cut_quantile(c(1, 2, 3, 4, 5, 6, 7, 8), n_bins = 4, labeller = function(n, breaks) "only one"),
     "must produce 4 labels"
   )
 
@@ -296,7 +296,7 @@ test_that("cut_quantile errors informatively when labeller's length doesn't matc
   x <- c(rep(1, 18), 2)
   expect_warning(
     expect_error(
-      cut_quantile(x, n = 4, labeller = c("a", "b", "c", "d")),
+      cut_quantile(x, n_bins = 4, labeller = c("a", "b", "c", "d")),
       "must produce 1 label"
     ),
     "only 1 are distinguishable"
@@ -305,15 +305,15 @@ test_that("cut_quantile errors informatively when labeller's length doesn't matc
 
 test_that("cut_exposure_quantile's labeller only relabels the non-placebo bins", {
   x <- c(0, 0, 1, 2, 3, 4, 5, 6, 7, 8)
-  result <- cut_exposure_quantile(x, n = 4, labeller = c("Low", "Mid-low", "Mid-high", "High"))
+  result <- cut_exposure_quantile(x, n_bins = 4, labeller = c("Low", "Mid-low", "Mid-high", "High"))
   expect_equal(levels(result), c("Placebo", "Low", "Mid-low", "Mid-high", "High"))
 })
 
 test_that("cut_exposure_quantile's ties argument only affects the non-placebo bins", {
   x <- c(rep(0, 5), 1:9, rep(10, 5), 11:15)
 
-  upward <- cut_exposure_quantile(x, n = 4, ties = "upward")
-  split_even <- cut_exposure_quantile(x, n = 4, ties = "split-even", seed = 314)
+  upward <- cut_exposure_quantile(x, n_bins = 4, ties = "upward")
+  split_even <- cut_exposure_quantile(x, n_bins = 4, ties = "split-even", seed = 314)
 
   expect_equal(as.integer(table(upward)), c(5, 5, 9, 0, 5))
   expect_equal(sort(as.integer(table(split_even))[-1]), c(4, 5, 5, 5))

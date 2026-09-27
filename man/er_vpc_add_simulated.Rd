@@ -8,9 +8,9 @@ er_vpc_add_simulated(
   object,
   model = NULL,
   sim = NULL,
+  style = er_style_vpc_simulated_mean_errorbar,
   nsim = 100,
   seed = NULL,
-  style = er_style_vpc_simulated_mean_errorbar,
   simulate_args = list(),
   ...
 )
@@ -25,6 +25,11 @@ must already have an observed layer (see \code{\link[=er_vpc_add_observed]{er_vp
 \item{sim}{Simulated data with matching exposure/response/\code{plot_by}
 columns and \code{sim_id}. Mutually exclusive with \code{model}.}
 
+\item{style}{Style used to draw the VPC simulation layer. Can
+either be a string corresponding to one of the registered style labels
+(e.g., \code{"mean_errorbar"}, the default), or a builder function used to
+compute the relevant plot object (see "Styles" below).}
+
 \item{nsim}{Number of simulation replicates, only used with \code{model}.
 Defaults to \code{100}.}
 
@@ -33,11 +38,6 @@ and also (regardless of whether \code{sim}/\code{model} was supplied) to seed
 this layer's random tie-break when \code{\link[=er_vpc]{er_vpc()}}'s \code{ties} is
 \code{"split-even"} -- see \code{\link[=er_vpc]{er_vpc()}}'s own \code{seed} argument for the
 observed layer's independent tie-break seed.}
-
-\item{style}{Style used to draw the VPC simulation layer. Can
-either be a string corresponding to one of the registered style labels
-(e.g., \code{"mean_errorbar"}, the default), or a builder function used to
-compute the relevant plot object (see "Styles" below).}
 
 \item{simulate_args}{A named list of additional arguments forwarded to
 \code{\link[=er_simulate]{er_simulate()}} when simulating from the model.}

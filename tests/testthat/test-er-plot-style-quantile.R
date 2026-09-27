@@ -205,7 +205,7 @@ test_that("er_plot_add_quantiles() builds and renders with style = er_style_quan
 
 
 test_that(".layer_quantile() stores interior quantile breaks in config$breaks", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
 
   breaks <- p1$layer$quantile$config$breaks
   expect_length(breaks, 5)
@@ -213,7 +213,7 @@ test_that(".layer_quantile() stores interior quantile breaks in config$breaks", 
 })
 
 test_that("er_style_quantile_errorbar_vlines adds a geom_vline at every bin boundary, including the outer edges", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
 
   args1 <- list(
     data = p1$data,
@@ -238,7 +238,7 @@ test_that("er_style_quantile_errorbar_vlines adds a geom_vline at every bin boun
 })
 
 test_that("er_style_quantile_pointrange_vlines adds a geom_vline at every bin boundary, including the outer edges", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
 
   args1 <- list(
     data = p1$data,
@@ -331,7 +331,7 @@ test_that("er_style_quantile_errorbar() overrides also apply in the stratified b
 })
 
 test_that("er_style_quantile_errorbar_vlines() respects vline_colour and vline_linetype overrides", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -354,7 +354,7 @@ test_that("er_style_quantile_errorbar_vlines() respects vline_colour and vline_l
 })
 
 test_that("er_style_quantile_errorbar_vlines() forwards point_size / label_size to the inner builder", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -424,7 +424,7 @@ test_that("er_style_quantile_pointrange() label_size also applies in the stratif
 
 test_that("er_style_quantile_pointrange_vlines() forwards all new args and passes vline params", {
   p1 <- er_plot(er_test_data, aucss, ae1) |>
-    er_plot_add_quantiles(bins = 4, style = er_style_quantile_pointrange_vlines)
+    er_plot_add_quantiles(n_bins = 4, style = er_style_quantile_pointrange_vlines)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -466,7 +466,7 @@ test_that(".quantile_label_side() picks the vertical half opposite the least-cro
 })
 
 test_that("vline_labels = FALSE (the default) leaves _vlines builders' output unchanged", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -485,7 +485,7 @@ test_that("vline_labels = FALSE (the default) leaves _vlines builders' output un
 })
 
 test_that("vline_labels = TRUE adds a geom_label at every bin boundary, including the outer edges", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -508,7 +508,7 @@ test_that("vline_labels = TRUE adds a geom_label at every bin boundary, includin
 })
 
 test_that("vline_label_position overrides the automatic top/bottom heuristic", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -533,7 +533,7 @@ test_that("vline_label_position overrides the automatic top/bottom heuristic", {
 })
 
 test_that("vline_label_size/vline_label_colour/vline_label_fill override defaults", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -554,7 +554,7 @@ test_that("vline_label_size/vline_label_colour/vline_label_fill override default
 })
 
 test_that("interior vline_labels are centred on their vline (vjust = 0.5) with hjust picking top/bottom", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -580,7 +580,7 @@ test_that("interior vline_labels are centred on their vline (vjust = 0.5) with h
 })
 
 test_that("the outermost two vline_labels hang inward, to avoid overflowing the exposure axis limits", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -603,7 +603,7 @@ test_that("the outermost two vline_labels hang inward, to avoid overflowing the 
 })
 
 test_that("vline_label_digits controls rounding of the label text (default 0)", {
-  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  p1 <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   args <- list(
     data     = p1$data,
     config   = p1$layer$quantile$config,
@@ -635,7 +635,7 @@ test_that(".layer_summary()'s corner_distance output is unchanged after the .com
 })
 
 test_that(".layer_quantile() also computes corner_distance", {
-  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_quantiles(bins = 4)
+  plt <- er_test_data |> er_plot(aucss, ae1) |> er_plot_add_quantiles(n_bins = 4)
   expect_equal(names(plt$layer$quantile$config$corner_distance), c("top_left", "top_right", "bottom_left", "bottom_right"))
 })
 
@@ -644,19 +644,19 @@ test_that("er_plot_add_quantiles() builds and renders with vline_labels = TRUE, 
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
     er_plot_add_summary(er_test_mod1) |>
-    er_plot_add_quantiles(bins = 4, style = er_style_quantile_errorbar_vlines, vline_labels = TRUE)
+    er_plot_add_quantiles(n_bins = 4, style = er_style_quantile_errorbar_vlines, vline_labels = TRUE)
   expect_no_error(er_plot_build(plt))
 
   plt_pointrange <- er_test_data |>
     er_plot(aucss, ae1) |>
     er_plot_add_model(er_test_mod1) |>
-    er_plot_add_quantiles(bins = 4, style = er_style_quantile_pointrange_vlines, vline_labels = TRUE)
+    er_plot_add_quantiles(n_bins = 4, style = er_style_quantile_pointrange_vlines, vline_labels = TRUE)
   expect_no_error(er_plot_build(plt_pointrange))
 
   plt_strat <- er_test_data |>
     er_plot(aucss, ae1, sex) |>
     er_plot_add_model(er_test_mod1) |>
-    er_plot_add_quantiles(bins = 4, style = er_style_quantile_errorbar_vlines, vline_labels = TRUE) |>
+    er_plot_add_quantiles(n_bins = 4, style = er_style_quantile_errorbar_vlines, vline_labels = TRUE) |>
     er_plot_add_summary(er_test_mod1)
   expect_no_error(er_plot_build(plt_strat))
 })

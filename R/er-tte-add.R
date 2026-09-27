@@ -212,13 +212,13 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #' @param object Partially constructed plot (has S3 class `er_tte`).
 #' @param model A fitted time-to-event model. Must implement
 #'   [er_predict_survival()].
-#' @param keep_strata Logical; whether this layer should use stratification.
-#'   Defaults to `TRUE` when a stratification variable has been specified,
-#'   and `FALSE` otherwise.
 #' @param style Style used to draw the model-based survival curve. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"line"`, the default), or a builder function used to compute the
 #'   relevant plot object (see "Styles" below).
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified,
+#'   and `FALSE` otherwise.
 #' @param conf_level Confidence level for the prediction band. Defaults
 #'   to `0.95`.
 #' @param time_grid Numeric vector of times at which to predict `S(t)`,
@@ -261,7 +261,7 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #' @seealso [er_tte()], [er_style_tte_model_line()], [er_model_interface]
 #'
 #' @export
-er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
+er_tte_add_model <- function(object, model, style = NULL, keep_strata = NULL,
                               conf_level = 0.95, time_grid = NULL,
                               predict_args = list(), ...) {
 
@@ -307,13 +307,13 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #' @param model A fitted time-to-event model implementing [er_summary()],
 #'   or `NULL` (the default). Only needed for styles that produce
 #'   model-based summaries, ignored by other style builder functions.
-#' @param keep_strata Logical; whether this layer should use stratification.
-#'   Defaults to `TRUE` when a stratification variable has been specified,
-#'   and `FALSE` otherwise.
 #' @param style Style used to produce the summary layer annotation. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"logrank"`, the default), or a builder function used to compute the
 #'   relevant plot object (see "Styles" below).
+#' @param keep_strata Logical; whether this layer should use stratification.
+#'   Defaults to `TRUE` when a stratification variable has been specified,
+#'   and `FALSE` otherwise.
 #' @param conf_level Confidence level forwarded to [er_summary()] (see
 #'   `?er_model_interface`). Defaults to `0.95`. Ignored when `model` is
 #'   `NULL`.
@@ -370,7 +370,7 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #' @seealso [er_tte()], [er_style_tte_summary_logrank()]
 #'
 #' @export
-er_tte_add_summary <- function(object, model = NULL, keep_strata = NULL, style = NULL,
+er_tte_add_summary <- function(object, model = NULL, style = NULL, keep_strata = NULL,
                                 conf_level = 0.95, summary_args = list(), ...) {
 
   dots <- rlang::list2(...)

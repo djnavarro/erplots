@@ -350,7 +350,7 @@ test_that("er_style_group_linerange() computes correct median/quantile values", 
   expect_equal(drug_row$outer_hi, unname(stats::quantile(drug_aucss, 0.95)))
 })
 
-test_that("er_style_group_linerange() size argument scales dot/line sizes together", {
+test_that("er_style_group_linerange() scale_factor argument scales dot/line sizes together", {
   p1 <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_groups(treatment, style = er_style_group_linerange)
   args <- list(
@@ -364,14 +364,14 @@ test_that("er_style_group_linerange() size argument scales dot/line sizes togeth
   )
 
   out_default <- do.call(er_style_group_linerange, args)
-  out_double  <- do.call(er_style_group_linerange, c(args, list(size = 2)))
+  out_double  <- do.call(er_style_group_linerange, c(args, list(scale_factor = 2)))
 
   expect_equal(out_double[[1]]$aes_params$linewidth, out_default[[1]]$aes_params$linewidth * 2)
   expect_equal(out_double[[2]]$aes_params$linewidth, out_default[[2]]$aes_params$linewidth * 2)
   expect_equal(out_double[[3]]$aes_params$size, out_default[[3]]$aes_params$size * 2)
 })
 
-test_that("er_style_group_linerange() alpha_dot/alpha_inner/alpha_outer override defaults", {
+test_that("er_style_group_linerange() dot_alpha/inner_alpha/outer_alpha override defaults", {
   p1 <- er_plot(er_test_data, aucss, ae1) |>
     er_plot_add_groups(treatment, style = er_style_group_linerange)
   args <- list(
@@ -390,7 +390,7 @@ test_that("er_style_group_linerange() alpha_dot/alpha_inner/alpha_outer override
   expect_equal(out_default[[3]]$aes_params$alpha, 1)
 
   out_custom <- do.call(er_style_group_linerange, c(args, list(
-    alpha_dot = 0.9, alpha_inner = 0.6, alpha_outer = 0.2
+    dot_alpha = 0.9, inner_alpha = 0.6, outer_alpha = 0.2
   )))
   expect_equal(out_custom[[1]]$aes_params$alpha, 0.2)
   expect_equal(out_custom[[2]]$aes_params$alpha, 0.6)

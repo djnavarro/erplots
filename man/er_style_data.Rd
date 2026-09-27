@@ -15,13 +15,13 @@ er_style_data_boxjitter(
   response,
   strata,
   theme,
-  ...,
   box_width = 0.6,
   box_alpha = 0.4,
   show_outliers = FALSE,
   jitter_height = NULL,
   jitter_size = 1,
-  jitter_alpha = 0.6
+  jitter_alpha = 0.6,
+  ...
 )
 
 er_style_data_overlay(
@@ -32,10 +32,10 @@ er_style_data_overlay(
   response,
   strata,
   theme,
-  ...,
   jitter_height = NULL,
   alpha = 0.4,
-  size = 1
+  point_size = 1,
+  ...
 )
 
 er_style_data_hex(
@@ -46,9 +46,9 @@ er_style_data_hex(
   response,
   strata,
   theme,
-  ...,
   bins = 30,
-  alpha = 0.85
+  alpha = 0.85,
+  ...
 )
 }
 \arguments{
@@ -65,13 +65,6 @@ er_style_data_hex(
 \item{strata}{Stratification variable.}
 
 \item{theme}{Theme components.}
-
-\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_data]{er_plot_add_data()}}'s
-own \code{...}. \code{er_style_data_overlay()}/\code{er_style_data_boxjitter()} read a
-\code{seed} from here (via \code{config$seed}, \code{NULL} when not supplied) and pass
-it to \code{\link[ggplot2:position_jitter]{ggplot2::position_jitter()}}, letting a caller make the jitter
-reproducible across repeated \code{plot()} calls on the same object; with no
-\code{seed}, each render draws a fresh jitter, as for any other jittered geom.}
 
 \item{box_width}{Width of \code{er_style_data_boxjitter()}'s boxplot.
 Defaults to \code{0.6}.}
@@ -95,11 +88,18 @@ jittered points. Defaults to \code{1}.}
 \item{jitter_alpha}{Transparency of \code{er_style_data_boxjitter()}'s
 jittered points. Defaults to \code{0.6}.}
 
+\item{...}{Additional named arguments forwarded from \code{\link[=er_plot_add_data]{er_plot_add_data()}}'s
+own \code{...}. \code{er_style_data_overlay()}/\code{er_style_data_boxjitter()} read a
+\code{seed} from here (via \code{config$seed}, \code{NULL} when not supplied) and pass
+it to \code{\link[ggplot2:position_jitter]{ggplot2::position_jitter()}}, letting a caller make the jitter
+reproducible across repeated \code{plot()} calls on the same object; with no
+\code{seed}, each render draws a fresh jitter, as for any other jittered geom.}
+
 \item{alpha}{Point transparency for \code{er_style_data_overlay()} (defaults
 to \code{0.4}); fill transparency for \code{er_style_data_hex()} (defaults to
 \code{0.85}).}
 
-\item{size}{Point size for \code{er_style_data_overlay()}. Defaults to \code{1}.}
+\item{point_size}{Point size for \code{er_style_data_overlay()}. Defaults to \code{1}.}
 
 \item{bins}{Number of hex bins for \code{er_style_data_hex()}. Defaults to \code{30}.}
 }

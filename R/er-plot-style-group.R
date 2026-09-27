@@ -22,12 +22,12 @@
 #' @param quantiles,quantile_linetype Violin quantile positions and
 #'   linetype for `er_style_group_violin()`. Default to `NULL` (no
 #'   quantile lines drawn) and `"solid"` respectively.
-#' @param size Overall size multiplier for `er_style_group_linerange()`'s
+#' @param scale_factor Overall size multiplier for `er_style_group_linerange()`'s
 #'   dot and lines. Defaults to `1`.
 #' @param inner_range,outer_range Quantile probabilities (length 2) for
 #'   `er_style_group_linerange()`'s thick and thin lines. Default to
 #'   `c(0.25, 0.75)` and `c(0.05, 0.95)` respectively.
-#' @param alpha_dot,alpha_inner,alpha_outer Per-part transparency for
+#' @param dot_alpha,inner_alpha,outer_alpha Per-part transparency for
 #'   `er_style_group_linerange()`'s dot, inner line, and outer line.
 #'   Default to `1`, `0.8`, and `0.4` respectively.
 #' @param jitter_height,jitter_size,jitter_alpha Vertical jitter, point
@@ -291,8 +291,8 @@ er_style_group_violin <- er_style_tag(er_style_group_violin, layer = "plot_group
 #' @rdname er_style_group
 #' @export
 er_style_group_linerange <- function(data, config, stratify, exposure, response, strata, theme,
-                                      size = 1, inner_range = c(0.25, 0.75), outer_range = c(0.05, 0.95),
-                                      alpha_dot = 1, alpha_inner = 0.8, alpha_outer = 0.4, ...) {
+                                      scale_factor = 1, inner_range = c(0.25, 0.75), outer_range = c(0.05, 0.95),
+                                      dot_alpha = 1, inner_alpha = 0.8, outer_alpha = 0.4, ...) {
 
   if (length(inner_range) != 2 || inner_range[1] >= inner_range[2] ||
       any(inner_range < 0) || any(inner_range > 1)) {
@@ -315,13 +315,13 @@ er_style_group_linerange <- function(data, config, stratify, exposure, response,
       outer_hi = unname(stats::quantile(.data[[exposure$name]], outer_range[2]))
     )
 
-  # a single overall `size` argument scales all three parts together --
+  # a single overall `scale_factor` argument scales all three parts together --
   # the outer line is deliberately the thinnest, the inner line about
   # half the dot's diameter, and the dot itself the most visually
   # prominent of the three, matching the issue's stated visual design.
-  dot_size <- 2.5 * size
-  inner_linewidth <- 1.25 * size
-  outer_linewidth <- 0.5 * size
+  dot_size <- 2.5 * scale_factor
+  inner_linewidth <- 1.25 * scale_factor
+  outer_linewidth <- 0.5 * scale_factor
 
   if (stratify == FALSE) {
 
@@ -330,7 +330,7 @@ er_style_group_linerange <- function(data, config, stratify, exposure, response,
       mapping = ggplot2::aes(y = lvl, xmin = outer_lo, xmax = outer_hi),
       orientation = "y",
       linewidth = outer_linewidth,
-      alpha = alpha_outer,
+      alpha = outer_alpha,
       key_glyph = theme$draw_key
     )
     inner <- ggplot2::geom_linerange(
@@ -338,14 +338,14 @@ er_style_group_linerange <- function(data, config, stratify, exposure, response,
       mapping = ggplot2::aes(y = lvl, xmin = inner_lo, xmax = inner_hi),
       orientation = "y",
       linewidth = inner_linewidth,
-      alpha = alpha_inner,
+      alpha = inner_alpha,
       key_glyph = theme$draw_key
     )
     dot <- ggplot2::geom_point(
       data = summary_df,
       mapping = ggplot2::aes(y = lvl, x = med),
       size = dot_size,
-      alpha = alpha_dot,
+      alpha = dot_alpha,
       key_glyph = theme$draw_key
     )
   }
@@ -365,7 +365,7 @@ er_style_group_linerange <- function(data, config, stratify, exposure, response,
       orientation = "y",
       position = dodge,
       linewidth = outer_linewidth,
-      alpha = alpha_outer,
+      alpha = outer_alpha,
       key_glyph = theme$draw_key
     )
     inner <- ggplot2::geom_linerange(
@@ -377,7 +377,7 @@ er_style_group_linerange <- function(data, config, stratify, exposure, response,
       orientation = "y",
       position = dodge,
       linewidth = inner_linewidth,
-      alpha = alpha_inner,
+      alpha = inner_alpha,
       key_glyph = theme$draw_key
     )
     dot <- ggplot2::geom_point(
@@ -388,7 +388,7 @@ er_style_group_linerange <- function(data, config, stratify, exposure, response,
       ),
       position = dodge,
       size = dot_size,
-      alpha = alpha_dot,
+      alpha = dot_alpha,
       key_glyph = theme$draw_key
     )
   }

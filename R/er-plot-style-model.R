@@ -122,11 +122,11 @@ NULL
 
 #' @rdname er_style_model
 #' @export
-er_style_model_ribbonline <- function(data, config, stratify, exposure, response, strata, theme, ...,
+er_style_model_ribbonline <- function(data, config, stratify, exposure, response, strata, theme,
                                        ribbon_fill = "grey40",
                                        ribbon_alpha = 0.25,
                                        ribbon_edges = FALSE,
-                                       linewidth = 1) {
+                                       linewidth = 1, ...) {
 
   if (stratify == FALSE) {
 
@@ -224,8 +224,8 @@ er_style_model_ribbonline <- er_style_tag(er_style_model_ribbonline, layer = "pl
 
 #' @rdname er_style_model
 #' @export
-er_style_model_line <- function(data, config, stratify, exposure, response, strata, theme, ...,
-                                 linewidth = 1) {
+er_style_model_line <- function(data, config, stratify, exposure, response, strata, theme,
+                                 linewidth = 1, ...) {
 
   if (stratify == FALSE) {
 
@@ -262,10 +262,10 @@ er_style_model_line <- er_style_tag(er_style_model_line, layer = "plot_model", l
 
 #' @rdname er_style_model
 #' @export
-er_style_model_spaghetti <- function(data, config, stratify, exposure, response, strata, theme, ...,
+er_style_model_spaghetti <- function(data, config, stratify, exposure, response, strata, theme,
                                       alpha = NULL,
                                       linewidth = 1,
-                                      nsim = 100L) {
+                                      nsim = 100L, ...) {
 
   # a user-supplied `seed` (via `er_plot_add_model()`'s `...`) takes
   # priority over `config$seed` (always `NULL` for the model layer at
@@ -293,7 +293,7 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
       paste(class(config$model), collapse = "/"),
       ">; falling back to `style = er_style_model_ribbonline`."
     ))
-    return(er_style_model_ribbonline(data, config, stratify, exposure, response, strata, theme, ..., linewidth = linewidth))
+    return(er_style_model_ribbonline(data, config, stratify, exposure, response, strata, theme, linewidth = linewidth, ...))
   }
 
   if (stratify == FALSE) {
