@@ -353,8 +353,6 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 }
 
 
-# source: Conover, *Practical Nonparametric Statistics*
-
 #' Distribution-free confidence interval for a sample quantile
 #'
 #' Computes a nonparametric confidence interval for a sample quantile using
@@ -382,6 +380,10 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #'   indices are clipped to `[1, length(x)]`, so a very small or extreme-`prob`
 #'   bin returns a (still valid, but wider-than-nominal) interval built from
 #'   the most extreme order statistics available rather than `NA`.
+#'
+#' @references
+#' Conover, W. J. (1999). *Practical Nonparametric Statistics* (3rd ed.).
+#' New York: John Wiley & Sons. ISBN 0-471-16068-7.
 #'
 #' @export
 #' @examples

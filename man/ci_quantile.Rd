@@ -42,3 +42,7 @@ the most extreme order statistics available rather than \code{NA}.
 ci_quantile(rnorm(100), prob = 0.1)
 
 }
+\references{
+Conover, W. J. (1999). \emph{Practical Nonparametric Statistics} (3rd ed.).
+New York: John Wiley & Sons. ISBN 0-471-16068-7.
+}
