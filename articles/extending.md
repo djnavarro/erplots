@@ -172,7 +172,7 @@ inspect_config <- function(data, config, stratify, exposure, response, strata, t
 
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_add_quantiles(bins = 6, style = inspect_config) |>
+  er_plot_add_quantiles(n_bins = 6, style = inspect_config) |>
   plot()
 #> # A tibble: 7 × 12
 #>   exposure_bins strata    n1    n0 x_mid y_mid y_mid_lbl ci_lower ci_upper
@@ -850,8 +850,8 @@ is the more direct route:
 library(survival)
 
 er_style_tte_curve_median <- er_style_tag(
-  function(data, config, stratify, time, strata, theme, ...,
-           show_ci = TRUE, ribbon_alpha = 0.15, linewidth = 1) {
+  function(data, config, stratify, time, strata, theme,
+           show_ci = TRUE, ribbon_alpha = 0.15, linewidth = 1, ...) {
     geoms <- er_style_tte_curve_km(
       data, config, stratify, time, strata, theme,
       show_ci = show_ci, ribbon_alpha = ribbon_alpha, linewidth = linewidth

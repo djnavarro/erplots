@@ -177,6 +177,79 @@
   ([`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)’s own
   `stratify_by` has the same discrete-only requirement from the outset,
   being new in this release.)
+- `style`/`keep_strata`’s argument position is standardised across every
+  `er_plot_add_*()`/`er_vpc_add_*()`/`er_tte_add_*()` layer function:
+  `style` now always comes immediately after `object` and any required
+  model/grouping argument, and `keep_strata` (where the layer has one)
+  always comes immediately after `style`. `conf_level` (where the layer
+  has one) always comes immediately after `keep_strata`, ahead of any
+  layer-specific argument such as
+  [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)’s
+  `bins` or
+  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)’s
+  `time_grid`. Calls that name these arguments (the documented usage)
+  are unaffected; positional calls that relied on the previous ordering
+  will need updating.
+- [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)’s
+  `stratify_by` argument moves to immediately after `response`, matching
+  where
+  [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md)
+  already place their own `stratify_by`; it previously sat after
+  `plot_by`’s binning arguments
+  (`plot_by`/`n_bins`/`ties`/`quantile_type`/`labeller`). Calls that
+  name `stratify_by` (the documented usage) are unaffected.
+- The position of `...` relative to a builder’s own named arguments is
+  standardised to always come last, across every built-in `er_style_*()`
+  builder:
+  [`er_style_model_ribbonline()`](https://erplots.djnavarro.net/reference/er_style_model.md)/`_line()`/
+  `_spaghetti()`,
+  [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)/`_boxjitter()`/`_hex()`,
+  [`er_style_tte_curve_km()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md),
+  [`er_style_tte_censor_ticks()`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md),
+  [`er_style_tte_risktable_text()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md),
+  [`er_style_tte_model_line()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md),
+  and
+  [`er_style_tte_summary_logrank()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)
+  previously placed `...` immediately after `theme`, ahead of their own
+  style-specific arguments, unlike every other built-in builder. Calls
+  that name these arguments (the documented usage) are unaffected.
+- The “number of quantile bins” argument is renamed to `n_bins`
+  everywhere, matching
+  [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)’s
+  existing name: `bins` in
+  [`er_plot_add_quantiles()`](https://erplots.djnavarro.net/reference/er_plot_add_quantiles.md)/[`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
+  and `n` in
+  [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md),
+  all become `n_bins`. A custom `labeller` function is now called as
+  `labeller(n_bins, breaks)` rather than `labeller(n, breaks)` – since
+  this call is positional, only the documentation changed; existing
+  custom `labeller` functions keep working regardless of their own
+  parameter names.
+  [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)’s
+  and
+  [`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md)’s
+  own `bins` arguments (2D-hexbin/histogram bin counts, forwarded
+  straight to the matching `ggplot2` geom) are unrelated and unchanged.
+- [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md)’s
+  and
+  [`er_style_tte_censor_ticks()`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md)’s
+  `size` argument (a plotted point’s size) is renamed to `point_size`,
+  matching the quantile/VPC builder family’s existing name for the same
+  concept
+  ([`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md),
+  `er_style_vpc_observed/ simulated_mean_errorbar()`, etc.) and the
+  package’s own `<thing>_size` convention (`label_size`, `text_size`,
+  `jitter_size`).
+- [`er_style_group_linerange()`](https://erplots.djnavarro.net/reference/er_style_group.md)’s
+  `size` argument is renamed to `scale_factor`, since it isn’t a point
+  size at all – it’s a single multiplier applied to three different
+  elements (a dot and two line ranges) at three different ratios, so
+  neither `size` nor `point_size` described it accurately.
+- [`er_style_group_linerange()`](https://erplots.djnavarro.net/reference/er_style_group.md)’s
+  `alpha_dot`/`alpha_inner`/`alpha_outer` are renamed to
+  `dot_alpha`/`inner_alpha`/`outer_alpha`, matching the `<thing>_alpha`
+  suffix order used by every other alpha argument in the package
+  (`ribbon_alpha`, `box_alpha`, `jitter_alpha`).
 
 ### Bug fixes
 

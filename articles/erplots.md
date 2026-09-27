@@ -128,8 +128,8 @@ erglm_data |>
 
 ![](erplots_files/figure-html/add-quantiles-1.png)
 
-You can change the number of bins with the `bins` argument, e.g.
-`er_plot_add_quantiles(bins = 6)`.
+You can change the number of bins with the `n_bins` argument, e.g.
+`er_plot_add_quantiles(n_bins = 6)`.
 
 ### Adding the raw data
 

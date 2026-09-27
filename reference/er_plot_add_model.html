@@ -71,8 +71,8 @@ uncertainty ribbon, or possibly a spaghetti plot of simulated draws.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_plot_add_model</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">model</span>,</span>
-<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  predict_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -91,17 +91,17 @@ uncertainty ribbon, or possibly a spaghetti plot of simulated draws.</p>
 <dd><p>A fitted exposure-response model. Must implement <code><a href="er_model_interface.html">er_predict()</a></code>.</p></dd>
 
 
-<dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
-<dd><p>Logical; whether this layer should use stratification.
-Defaults to <code>TRUE</code> when a stratification variable has been specified,
-and <code>FALSE</code> otherwise.</p></dd>
-
-
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Style used to draw the model curve/ribbon layer. Can
 either be a string corresponding to one of the registered style labels
 (e.g., <code>"ribbonline"</code>, the default), or a builder function used to
 compute the relevant plot object (see "Styles" below).</p></dd>
+
+
+<dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
+<dd><p>Logical; whether this layer should use stratification.
+Defaults to <code>TRUE</code> when a stratification variable has been specified,
+and <code>FALSE</code> otherwise.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>

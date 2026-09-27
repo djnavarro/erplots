@@ -395,7 +395,7 @@ inspect:</p>
 <span></span>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">6</span>, style <span class="op">=</span> <span class="va">inspect_config</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span>n_bins <span class="op">=</span> <span class="fl">6</span>, style <span class="op">=</span> <span class="va">inspect_config</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 12</span></span></span>
 <span><span class="co">#&gt;   exposure_bins strata    n1    n0 x_mid y_mid y_mid_lbl ci_lower ci_upper</span></span>
@@ -1096,8 +1096,8 @@ curve builder and adding one more geom is the more direct route:</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">er_style_tte_curve_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
-<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">time</span>, <span class="va">strata</span>, <span class="va">theme</span>, <span class="va">...</span>,</span>
-<span>           <span class="va">show_ci</span> <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">ribbon_alpha</span> <span class="op">=</span> <span class="fl">0.15</span>, <span class="va">linewidth</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">time</span>, <span class="va">strata</span>, <span class="va">theme</span>,</span>
+<span>           <span class="va">show_ci</span> <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">ribbon_alpha</span> <span class="op">=</span> <span class="fl">0.15</span>, <span class="va">linewidth</span> <span class="op">=</span> <span class="fl">1</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">geoms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tte_curve.html">er_style_tte_curve_km</a></span><span class="op">(</span></span>
 <span>      <span class="va">data</span>, <span class="va">config</span>, <span class="va">stratify</span>, <span class="va">time</span>, <span class="va">strata</span>, <span class="va">theme</span>,</span>
 <span>      show_ci <span class="op">=</span> <span class="va">show_ci</span>, ribbon_alpha <span class="op">=</span> <span class="va">ribbon_alpha</span>, linewidth <span class="op">=</span> <span class="va">linewidth</span></span>

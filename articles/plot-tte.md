@@ -108,7 +108,7 @@ gives full control over bin count, tie-breaking, and labels:
 ``` r
 
 lung |>
-  transform(age_grp = cut_quantile(age, n = 3)) |>
+  transform(age_grp = cut_quantile(age, n_bins = 3)) |>
   er_tte(time, status == 2, stratify_by = age_grp) |>
   er_tte_add_curve() |>
   plot()

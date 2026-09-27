@@ -9,8 +9,8 @@ uncertainty band derived from the corresponding time-to-event model.
 er_tte_add_model(
   object,
   model,
-  keep_strata = NULL,
   style = NULL,
+  keep_strata = NULL,
   conf_level = 0.95,
   time_grid = NULL,
   predict_args = list(),
@@ -29,18 +29,18 @@ er_tte_add_model(
   A fitted time-to-event model. Must implement
   [`er_predict_survival()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
 
-- keep_strata:
-
-  Logical; whether this layer should use stratification. Defaults to
-  `TRUE` when a stratification variable has been specified, and `FALSE`
-  otherwise.
-
 - style:
 
   Style used to draw the model-based survival curve. Can either be a
   string corresponding to one of the registered style labels (e.g.,
   `"line"`, the default), or a builder function used to compute the
   relevant plot object (see "Styles" below).
+
+- keep_strata:
+
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - conf_level:
 

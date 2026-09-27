@@ -81,11 +81,11 @@ comparing survival across <code>stratify_by</code>'s levels, a supplied model's
 <span>  <span class="va">time</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span>,</span>
 <span>  inset <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  label_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  label_colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  label_fill <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  label_fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">er_style_tte_summary_n</span><span class="op">(</span></span>
@@ -170,11 +170,6 @@ relative to the plotted survival curve(s) – see <code><a href="er_style.html">
 format the annotation's numbers.</p></dd>
 
 
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from
-<code><a href="er_tte_add_summary.html">er_tte_add_summary()</a></code>'s own <code>...</code>.</p></dd>
-
-
 <dt id="arg-inset">inset<a class="anchor" aria-label="anchor" href="#arg-inset"></a></dt>
 <dd><p>Distance from the panel edge for the annotation label,
 as a fraction of the panel's width/height. Default <code>0.05</code>.</p></dd>
@@ -190,6 +185,11 @@ as a fraction of the panel's width/height. Default <code>0.05</code>.</p></dd>
 
 <dt id="arg-label-fill">label_fill<a class="anchor" aria-label="anchor" href="#arg-label-fill"></a></dt>
 <dd><p>Label background fill. Defaults to <code>NULL</code> (<code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">ggplot2::geom_label()</a></code>'s own default).</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional named arguments forwarded from
+<code><a href="er_tte_add_summary.html">er_tte_add_summary()</a></code>'s own <code>...</code>.</p></dd>
 
 
 <dt id="arg-fields">fields<a class="anchor" aria-label="anchor" href="#arg-fields"></a></dt>

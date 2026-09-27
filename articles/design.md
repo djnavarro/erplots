@@ -128,8 +128,8 @@ than combining the two.
 
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_add_quantiles(bins = 8) |>
-  er_plot_add_quantiles(bins = 4) |> # overwrites the bins = 8 call
+  er_plot_add_quantiles(n_bins = 8) |>
+  er_plot_add_quantiles(n_bins = 4) |> # overwrites the n_bins = 8 call
   plot() # rendered plot has 4 quantile bins (plus placebo group)
 ```
 

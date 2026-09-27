@@ -16,13 +16,13 @@ er_style_data_boxjitter(
   response,
   strata,
   theme,
-  ...,
   box_width = 0.6,
   box_alpha = 0.4,
   show_outliers = FALSE,
   jitter_height = NULL,
   jitter_size = 1,
-  jitter_alpha = 0.6
+  jitter_alpha = 0.6,
+  ...
 )
 
 er_style_data_overlay(
@@ -33,10 +33,10 @@ er_style_data_overlay(
   response,
   strata,
   theme,
-  ...,
   jitter_height = NULL,
   alpha = 0.4,
-  size = 1
+  point_size = 1,
+  ...
 )
 
 er_style_data_hex(
@@ -47,9 +47,9 @@ er_style_data_hex(
   response,
   strata,
   theme,
-  ...,
   bins = 30,
-  alpha = 0.85
+  alpha = 0.85,
+  ...
 )
 ```
 
@@ -82,19 +82,6 @@ er_style_data_hex(
 - theme:
 
   Theme components.
-
-- ...:
-
-  Additional named arguments forwarded from
-  [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)'s
-  own `...`. `er_style_data_overlay()`/`er_style_data_boxjitter()` read
-  a `seed` from here (via `config$seed`, `NULL` when not supplied) and
-  pass it to
-  [`ggplot2::position_jitter()`](https://ggplot2.tidyverse.org/reference/position_jitter.html),
-  letting a caller make the jitter reproducible across repeated
-  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) calls on the
-  same object; with no `seed`, each render draws a fresh jitter, as for
-  any other jittered geom.
 
 - box_width:
 
@@ -129,12 +116,25 @@ er_style_data_hex(
   Transparency of `er_style_data_boxjitter()`'s jittered points.
   Defaults to `0.6`.
 
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)'s
+  own `...`. `er_style_data_overlay()`/`er_style_data_boxjitter()` read
+  a `seed` from here (via `config$seed`, `NULL` when not supplied) and
+  pass it to
+  [`ggplot2::position_jitter()`](https://ggplot2.tidyverse.org/reference/position_jitter.html),
+  letting a caller make the jitter reproducible across repeated
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) calls on the
+  same object; with no `seed`, each render draws a fresh jitter, as for
+  any other jittered geom.
+
 - alpha:
 
   Point transparency for `er_style_data_overlay()` (defaults to `0.4`);
   fill transparency for `er_style_data_hex()` (defaults to `0.85`).
 
-- size:
+- point_size:
 
   Point size for `er_style_data_overlay()`. Defaults to `1`.
 

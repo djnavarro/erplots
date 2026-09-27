@@ -15,10 +15,10 @@ er_style_tte_curve_km(
   time,
   strata,
   theme,
-  ...,
   show_ci = TRUE,
   ribbon_alpha = 0.15,
-  linewidth = 1
+  linewidth = 1,
+  ...
 )
 ```
 
@@ -53,12 +53,6 @@ er_style_tte_curve_km(
 
   `object$theme`.
 
-- ...:
-
-  Additional named arguments forwarded from
-  [`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md)'s
-  own `...`.
-
 - show_ci:
 
   Whether to draw the confidence band. Default `TRUE`.
@@ -70,6 +64,12 @@ er_style_tte_curve_km(
 - linewidth:
 
   Width of the step curve's line. Default `1`.
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_tte_add_curve()`](https://erplots.djnavarro.net/reference/er_tte_add_curve.md)'s
+  own `...`.
 
 ## Value
 

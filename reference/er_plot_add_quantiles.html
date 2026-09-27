@@ -73,10 +73,10 @@ summarised with a point estimate and confidence interval.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_plot_add_quantiles</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
-<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  bins <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  n_bins <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  ties <span class="op">=</span> <span class="st">"upward"</span>,</span>
 <span>  quantile_type <span class="op">=</span> <span class="fl">7</span>,</span>
 <span>  labeller <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -92,12 +92,6 @@ summarised with a point estimate and confidence interval.</p>
 <dd><p>Partially constructed plot, an <code>er_plot</code> object.</p></dd>
 
 
-<dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
-<dd><p>Logical; whether this layer should use stratification.
-Defaults to <code>TRUE</code> when a stratification variable has been specified,
-and <code>FALSE</code> otherwise.</p></dd>
-
-
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Style used to draw the quantile summary layer. Can
 either be a string corresponding to one of the registered style labels
@@ -105,13 +99,19 @@ either be a string corresponding to one of the registered style labels
 compute the relevant plot object (see "Styles" below).</p></dd>
 
 
-<dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
-<dd><p>Number of exposure bins (not counting placebo). Defaults
-to <code>4</code>.</p></dd>
+<dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
+<dd><p>Logical; whether this layer should use stratification.
+Defaults to <code>TRUE</code> when a stratification variable has been specified,
+and <code>FALSE</code> otherwise.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
 <dd><p>Confidence level for the interval. Defaults to <code>0.95</code>.</p></dd>
+
+
+<dt id="arg-n-bins">n_bins<a class="anchor" aria-label="anchor" href="#arg-n-bins"></a></dt>
+<dd><p>Number of exposure bins (not counting placebo). Defaults
+to <code>4</code>.</p></dd>
 
 
 <dt id="arg-ties-quantile-type-labeller">ties, quantile_type, labeller<a class="anchor" aria-label="anchor" href="#arg-ties-quantile-type-labeller"></a></dt>
@@ -139,7 +139,7 @@ set in <code><a href="er_plot.html">er_plot()</a></code>:</p><ul><li><p><code>"b
 default to <code>"continuous"</code> and are summarised the same way as any other
 continuous response unless <code>response_type = "count"</code> is declared
 explicitly in <code><a href="er_plot.html">er_plot()</a></code>.</p>
-<p><code>bins</code>/<code>ties</code>/<code>quantile_type</code>/<code>labeller</code> are local to this layer –
+<p><code>n_bins</code>/<code>ties</code>/<code>quantile_type</code>/<code>labeller</code> are local to this layer –
 they aren't shared with <code><a href="er_plot_add_groups.html">er_plot_add_groups()</a></code>, even when that layer
 groups by the same exposure variable. <code><a href="er_plot_build.html">er_plot_build()</a></code> warns (doesn't
 error) if the two disagree in that specific case; pass matching values

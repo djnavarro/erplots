@@ -53,8 +53,8 @@ order statistics available rather than `NA`.
 
 ## References
 
-Conover, W. J. (1999). *Practical Nonparametric Statistics* (3rd ed.).
-New York: John Wiley & Sons. ISBN 0-471-16068-7.
+Conover, W. J. (1999). *Practical Nonparametric Statistics* (Third
+edition). New York: John Wiley & Sons. ISBN 0-471-16068-7.
 
 ## Examples
 

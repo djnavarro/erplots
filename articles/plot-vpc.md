@@ -151,7 +151,7 @@ give full control over bin count, tie-breaking, and labels:
 ``` r
 
 erglm_data |> 
-  transform(weight_grp = cut_quantile(weight, n = 3)) |>
+  transform(weight_grp = cut_quantile(weight, n_bins = 3)) |>
   er_vpc(exposure = aucss, response = ae1, stratify_by = weight_grp) |>
   er_vpc_add_observed() |>
   er_vpc_add_simulated(model = mod, seed = 1234) |>

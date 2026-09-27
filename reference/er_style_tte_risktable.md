@@ -18,9 +18,9 @@ er_style_tte_risktable_text(
   time,
   strata,
   theme,
-  ...,
   text_size = 3.5,
-  show_percent = FALSE
+  show_percent = FALSE,
+  ...
 )
 ```
 
@@ -55,12 +55,6 @@ er_style_tte_risktable_text(
 
   `object$theme`.
 
-- ...:
-
-  Additional named arguments forwarded from
-  [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)'s
-  own `...`.
-
 - text_size:
 
   Size of the risk-count text. Default `3.5`.
@@ -72,6 +66,12 @@ er_style_tte_risktable_text(
   [`er_tte_theme()`](https://erplots.djnavarro.net/reference/er_tte_theme.md)'s
   `format_percent`. Default `FALSE` (a bare count, the previous
   behaviour).
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_tte_add_risktable()`](https://erplots.djnavarro.net/reference/er_tte_add_risktable.md)'s
+  own `...`.
 
 ## Value
 

@@ -7,7 +7,7 @@ panel of the plot, but other possibilities are available.
 ## Usage
 
 ``` r
-er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
+er_plot_add_data(object, style = NULL, keep_strata = NULL, panel = "both", ...)
 ```
 
 ## Arguments
@@ -16,18 +16,18 @@ er_plot_add_data(object, keep_strata = NULL, style = NULL, panel = "both", ...)
 
   Partially constructed plot (has S3 class `er_plot`).
 
-- keep_strata:
-
-  Logical; whether this layer should use stratification. Defaults to
-  `TRUE` when a stratification variable has been specified, and `FALSE`
-  otherwise.
-
 - style:
 
   Style used to draw the data layer. Can either be a string
   corresponding to one of the registered style labels (e.g.,
   `"overlay"`, the default), or a builder function used to compute the
   relevant plot object (see "Styles" below).
+
+- keep_strata:
+
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - panel:
 

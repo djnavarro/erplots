@@ -56,12 +56,12 @@ er_style_group_linerange(
   response,
   strata,
   theme,
-  size = 1,
+  scale_factor = 1,
   inner_range = c(0.25, 0.75),
   outer_range = c(0.05, 0.95),
-  alpha_dot = 1,
-  alpha_inner = 0.8,
-  alpha_outer = 0.4,
+  dot_alpha = 1,
+  inner_alpha = 0.8,
+  outer_alpha = 0.4,
   ...
 )
 
@@ -171,7 +171,7 @@ er_style_group_violinjitter(
   Default to `NULL` (no quantile lines drawn) and `"solid"`
   respectively.
 
-- size:
+- scale_factor:
 
   Overall size multiplier for `er_style_group_linerange()`'s dot and
   lines. Defaults to `1`.
@@ -182,7 +182,7 @@ er_style_group_violinjitter(
   thick and thin lines. Default to `c(0.25, 0.75)` and `c(0.05, 0.95)`
   respectively.
 
-- alpha_dot, alpha_inner, alpha_outer:
+- dot_alpha, inner_alpha, outer_alpha:
 
   Per-part transparency for `er_style_group_linerange()`'s dot, inner
   line, and outer line. Default to `1`, `0.8`, and `0.4` respectively.

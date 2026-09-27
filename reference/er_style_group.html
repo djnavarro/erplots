@@ -119,12 +119,12 @@ histogram panel.</p>
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  size <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  scale_factor <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  inner_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.75</span><span class="op">)</span>,</span>
 <span>  outer_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
-<span>  alpha_dot <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  alpha_inner <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>  alpha_outer <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span>  dot_alpha <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  inner_alpha <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  outer_alpha <span class="op">=</span> <span class="fl">0.4</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -227,7 +227,7 @@ linetype for <code>er_style_group_violin()</code>. Default to <code>NULL</code> 
 quantile lines drawn) and <code>"solid"</code> respectively.</p></dd>
 
 
-<dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
+<dt id="arg-scale-factor">scale_factor<a class="anchor" aria-label="anchor" href="#arg-scale-factor"></a></dt>
 <dd><p>Overall size multiplier for <code>er_style_group_linerange()</code>'s
 dot and lines. Defaults to <code>1</code>.</p></dd>
 
@@ -238,7 +238,7 @@ dot and lines. Defaults to <code>1</code>.</p></dd>
 <code>c(0.25, 0.75)</code> and <code>c(0.05, 0.95)</code> respectively.</p></dd>
 
 
-<dt id="arg-alpha-dot-alpha-inner-alpha-outer">alpha_dot, alpha_inner, alpha_outer<a class="anchor" aria-label="anchor" href="#arg-alpha-dot-alpha-inner-alpha-outer"></a></dt>
+<dt id="arg-dot-alpha-inner-alpha-outer-alpha">dot_alpha, inner_alpha, outer_alpha<a class="anchor" aria-label="anchor" href="#arg-dot-alpha-inner-alpha-outer-alpha"></a></dt>
 <dd><p>Per-part transparency for
 <code>er_style_group_linerange()</code>'s dot, inner line, and outer line.
 Default to <code>1</code>, <code>0.8</code>, and <code>0.4</code> respectively.</p></dd>

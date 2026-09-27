@@ -84,9 +84,9 @@ panel directly – see <code><a href="er_tte_build.html">er_tte_build()</a></cod
 <span>  <span class="va">time</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span>,</span>
 <span>  text_size <span class="op">=</span> <span class="fl">3.5</span>,</span>
-<span>  show_percent <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  show_percent <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -125,11 +125,6 @@ as the curve panel's x-axis ticks).</p></dd>
 <dd><p><code>object$theme</code>.</p></dd>
 
 
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from
-<code><a href="er_tte_add_risktable.html">er_tte_add_risktable()</a></code>'s own <code>...</code>.</p></dd>
-
-
 <dt id="arg-text-size">text_size<a class="anchor" aria-label="anchor" href="#arg-text-size"></a></dt>
 <dd><p>Size of the risk-count text. Default <code>3.5</code>.</p></dd>
 
@@ -139,6 +134,11 @@ as the curve panel's x-axis ticks).</p></dd>
 percentage of that stratum's own baseline (time-zero) size,
 formatted via <code><a href="er_tte_theme.html">er_tte_theme()</a></code>'s <code>format_percent</code>. Default <code>FALSE</code>
 (a bare count, the previous behaviour).</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional named arguments forwarded from
+<code><a href="er_tte_add_risktable.html">er_tte_add_risktable()</a></code>'s own <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

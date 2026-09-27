@@ -14,13 +14,13 @@ er_vpc(
   data,
   exposure,
   response,
+  stratify_by = NULL,
   response_type = "auto",
   plot_by = NULL,
   n_bins = 4,
   ties = "upward",
   quantile_type = 7,
   labeller = NULL,
-  stratify_by = NULL,
   conf_level = 0.95,
   probs = c(0.1, 0.5, 0.9),
   seed = NULL
@@ -40,6 +40,19 @@ er_vpc(
 - response:
 
   Response variable (one variable, unquoted).
+
+- stratify_by:
+
+  Optional variable (unquoted) splitting the VPC into one facet panel
+  per level, via
+  [`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html),
+  used as-is. Must be discrete – a numeric column errors; bin it
+  yourself first with
+  [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
+  and pass the resulting factor, for full control over bin
+  count/tie-breaking/labels. Must resolve to a different variable than
+  `plot_by`. Defaults to `NULL` (no faceting, a single panel, matching
+  prior behaviour).
 
 - response_type:
 
@@ -72,19 +85,6 @@ er_vpc(
   [`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)'s
   attributes on the observed layer's own binned column) rather than
   re-resolving them, so both sides always stay in sync.
-
-- stratify_by:
-
-  Optional variable (unquoted) splitting the VPC into one facet panel
-  per level, via
-  [`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html),
-  used as-is. Must be discrete – a numeric column errors; bin it
-  yourself first with
-  [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
-  and pass the resulting factor, for full control over bin
-  count/tie-breaking/labels. Must resolve to a different variable than
-  `plot_by`. Defaults to `NULL` (no faceting, a single panel, matching
-  prior behaviour).
 
 - conf_level:
 

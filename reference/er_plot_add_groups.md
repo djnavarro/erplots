@@ -11,8 +11,8 @@ er_plot_add_groups(
   object,
   group_by,
   style = NULL,
-  bins = NULL,
   keep_strata = NULL,
+  n_bins = NULL,
   ties = "upward",
   quantile_type = 7,
   labeller = NULL,
@@ -38,19 +38,19 @@ er_plot_add_groups(
   `"boxplot"`, the default), or a builder function used to compute the
   relevant plot object (see "Styles" below).
 
-- bins:
+- keep_strata:
+
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
+
+- n_bins:
 
   Number of quantile bins used for continuous grouping variables
   (`NULL`, the default, uses
   [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)'s
   own default). Applied identically to every grouping variable added by
   this call.
-
-- keep_strata:
-
-  Logical; whether this layer should use stratification. Defaults to
-  `TRUE` when a stratification variable has been specified, and `FALSE`
-  otherwise.
 
 - ties, quantile_type, labeller:
 
@@ -92,7 +92,7 @@ stratification variable, since that would mean grouping and stratifying
 by the same column at once; pass `keep_strata = FALSE` for that grouping
 variable instead.
 
-`bins`/`ties`/`quantile_type`/`labeller` are local to this call –
+`n_bins`/`ties`/`quantile_type`/`labeller` are local to this call –
 different grouping variables (including across separate
 `er_plot_add_groups()` calls) aren't required to agree, and generally
 shouldn't: they're usually different variables with no reason to share a

@@ -9,8 +9,8 @@ uncertainty ribbon, or possibly a spaghetti plot of simulated draws.
 er_plot_add_model(
   object,
   model,
-  keep_strata = NULL,
   style = NULL,
+  keep_strata = NULL,
   conf_level = 0.95,
   predict_args = list(),
   ...
@@ -28,18 +28,18 @@ er_plot_add_model(
   A fitted exposure-response model. Must implement
   [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md).
 
-- keep_strata:
-
-  Logical; whether this layer should use stratification. Defaults to
-  `TRUE` when a stratification variable has been specified, and `FALSE`
-  otherwise.
-
 - style:
 
   Style used to draw the model curve/ribbon layer. Can either be a
   string corresponding to one of the registered style labels (e.g.,
   `"ribbonline"`, the default), or a builder function used to compute
   the relevant plot object (see "Styles" below).
+
+- keep_strata:
+
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - conf_level:
 

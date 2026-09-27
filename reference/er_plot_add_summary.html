@@ -74,8 +74,8 @@ from the raw <code>(exposure, response)</code> coordinates of the data.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_plot_add_summary</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  summary_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -97,17 +97,17 @@ Only needed for builder styles (e.g.
 purely descriptive builder (e.g. <code><a href="er_style_summary.html">er_style_summary_n()</a></code>) ignores it.</p></dd>
 
 
-<dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
-<dd><p>Logical; whether this layer should use stratification.
-Defaults to <code>TRUE</code> when a stratification variable has been specified,
-and <code>FALSE</code> otherwise.</p></dd>
-
-
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Style used to draw the summary annotation layer. Can
 either be a string corresponding to one of the registered style labels
 (e.g., <code>"pvalue"</code>, the default), or a builder function used to
 compute the relevant plot object (see "Styles" below).</p></dd>
+
+
+<dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
+<dd><p>Logical; whether this layer should use stratification.
+Defaults to <code>TRUE</code> when a stratification variable has been specified,
+and <code>FALSE</code> otherwise.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>

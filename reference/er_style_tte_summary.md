@@ -17,11 +17,11 @@ er_style_tte_summary_logrank(
   time,
   strata,
   theme,
-  ...,
   inset = 0.05,
   label_size = NULL,
   label_colour = NULL,
-  label_fill = NULL
+  label_fill = NULL,
+  ...
 )
 
 er_style_tte_summary_n(
@@ -108,12 +108,6 @@ er_style_tte_summary_gof(
   `object$theme` – `theme$format_p`/`theme$format_number` format the
   annotation's numbers.
 
-- ...:
-
-  Additional named arguments forwarded from
-  [`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)'s
-  own `...`.
-
 - inset:
 
   Distance from the panel edge for the annotation label, as a fraction
@@ -136,6 +130,12 @@ er_style_tte_summary_gof(
   Label background fill. Defaults to `NULL`
   ([`ggplot2::geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)'s
   own default).
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_tte_add_summary()`](https://erplots.djnavarro.net/reference/er_tte_add_summary.md)'s
+  own `...`.
 
 - fields:
 

@@ -75,8 +75,8 @@ grouping variables are binned into quantiles first).</p>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">group_by</span>,</span>
 <span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_bins <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ties <span class="op">=</span> <span class="st">"upward"</span>,</span>
 <span>  quantile_type <span class="op">=</span> <span class="fl">7</span>,</span>
 <span>  labeller <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -104,16 +104,16 @@ either be a string corresponding to one of the registered style labels
 compute the relevant plot object (see "Styles" below).</p></dd>
 
 
-<dt id="arg-bins">bins<a class="anchor" aria-label="anchor" href="#arg-bins"></a></dt>
-<dd><p>Number of quantile bins used for continuous grouping
-variables (<code>NULL</code>, the default, uses <code><a href="cut_quantile.html">cut_quantile()</a></code>'s own default).
-Applied identically to every grouping variable added by this call.</p></dd>
-
-
 <dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
 <dd><p>Logical; whether this layer should use stratification.
 Defaults to <code>TRUE</code> when a stratification variable has been specified,
 and <code>FALSE</code> otherwise.</p></dd>
+
+
+<dt id="arg-n-bins">n_bins<a class="anchor" aria-label="anchor" href="#arg-n-bins"></a></dt>
+<dd><p>Number of quantile bins used for continuous grouping
+variables (<code>NULL</code>, the default, uses <code><a href="cut_quantile.html">cut_quantile()</a></code>'s own default).
+Applied identically to every grouping variable added by this call.</p></dd>
 
 
 <dt id="arg-ties-quantile-type-labeller">ties, quantile_type, labeller<a class="anchor" aria-label="anchor" href="#arg-ties-quantile-type-labeller"></a></dt>
@@ -148,7 +148,7 @@ informatively; an untagged builder is never checked.</p>
 stratification variable, since that would mean grouping and
 stratifying by the same column at once; pass <code>keep_strata = FALSE</code>
 for that grouping variable instead.</p>
-<p><code>bins</code>/<code>ties</code>/<code>quantile_type</code>/<code>labeller</code> are local to this call –
+<p><code>n_bins</code>/<code>ties</code>/<code>quantile_type</code>/<code>labeller</code> are local to this call –
 different grouping variables (including across separate
 <code>er_plot_add_groups()</code> calls) aren't required to agree, and generally
 shouldn't: they're usually different variables with no reason to share

@@ -1,6 +1,6 @@
 # Cut a continuous variable into quantiles
 
-`cut_quantile()` bins a numeric vector into `n` quantile groups.
+`cut_quantile()` bins a numeric vector into `n_bins` quantile groups.
 `cut_exposure_quantile()` does the same for an exposure variable,
 additionally keeping placebo (`0`) observations in their own bin.
 
@@ -9,7 +9,7 @@ additionally keeping placebo (`0`) observations in their own bin.
 ``` r
 cut_exposure_quantile(
   x,
-  n = 4,
+  n_bins = 4,
   is_placebo = NULL,
   ties = c("upward", "downward", "split-even"),
   seed = NULL,
@@ -19,7 +19,7 @@ cut_exposure_quantile(
 
 cut_quantile(
   x,
-  n = 4,
+  n_bins = 4,
   ties = c("upward", "downward", "split-even"),
   seed = NULL,
   quantile_type = 7,
@@ -33,7 +33,7 @@ cut_quantile(
 
   Numeric vector
 
-- n:
+- n_bins:
 
   Number of bins
 
@@ -71,38 +71,38 @@ cut_quantile(
 
 - labeller:
 
-  Controls the labels used for the `n` quantile bins
+  Controls the labels used for the `n_bins` quantile bins
   (`cut_exposure_quantile()`'s separate `"Placebo"` level is always used
   as-is, regardless of `labeller`). `NULL` (the default) labels bins
-  `"Q1"`, `"Q2"`, etc. A function is called as `labeller(n, breaks)`
-  (the actual bin count and the `n + 1` quantile cutpoints, after any
-  resolution-driven fallback – see `@details` below) and must return a
-  character vector of length `n`; this is the hook for, e.g.,
-  range-style labels built from `breaks`. A character vector is used
-  directly as the `n` labels.
+  `"Q1"`, `"Q2"`, etc. A function is called as
+  `labeller(n_bins, breaks)` (the actual bin count and the `n_bins + 1`
+  quantile cutpoints, after any resolution-driven fallback – see
+  `@details` below) and must return a character vector of length
+  `n_bins`; this is the hook for, e.g., range-style labels built from
+  `breaks`. A character vector is used directly as the `n_bins` labels.
 
 ## Value
 
 A factor with `"ties"` and `"quantile_type"` attributes recording those
 two arguments. `cut_exposure_quantile()`'s result additionally carries a
-`"breaks"` attribute holding the `n + 1` quantile cutpoints used to form
-the bins.
+`"breaks"` attribute holding the `n_bins + 1` quantile cutpoints used to
+form the bins.
 
 ## Details
 
 Both functions error if `x` has fewer than 2 distinct non-missing
 values, since quantile bins aren't well-defined in that case. If `x`
-doesn't have enough resolution to distinguish all `n` requested bins
-(e.g. many repeated values clustered at one end), both functions warn
-and fall back to using as many bins as the data supports, rather than
-erroring or silently showing fewer bins with no explanation.
+doesn't have enough resolution to distinguish all `n_bins` requested
+bins (e.g. many repeated values clustered at one end), both functions
+warn and fall back to using as many bins as the data supports, rather
+than erroring or silently showing fewer bins with no explanation.
 `cut_exposure_quantile()`'s `"breaks"` attribute is read back out by
 quantile-layer builders that draw bin-boundary separators (e.g.
 [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md))
-via `attr(exposure_bins, "breaks")`. Because that fallback can lower `n`
-below what was originally requested, a character-vector `labeller` is
-length-checked against the *actual* bin count, not the requested one,
-and errors informatively on a mismatch.
+via `attr(exposure_bins, "breaks")`. Because that fallback can lower
+`n_bins` below what was originally requested, a character-vector
+`labeller` is length-checked against the *actual* bin count, not the
+requested one, and errors informatively on a mismatch.
 
 ## Examples
 
@@ -151,7 +151,7 @@ cut_quantile(x, quantile_type = 1)
 #> attr(,"quantile_type")
 #> [1] 1
 #> Levels: Q1 Q2 Q3 Q4
-cut_quantile(x, labeller = function(n, breaks) paste0("Group ", 1:n))
+cut_quantile(x, labeller = function(n_bins, breaks) paste0("Group ", 1:n_bins))
 #>   [1] Group 4 Group 3 Group 4 Group 3 Group 2 Group 2 Group 3 Group 2 Group 2
 #>  [10] Group 3 Group 1 Group 3 Group 2 Group 1 Group 1 Group 3 Group 1 Group 2
 #>  [19] Group 4 Group 2 Group 2 Group 1 Group 4 Group 3 Group 4 Group 4 Group 1

@@ -10,10 +10,10 @@ and confidence interval.
 ``` r
 er_plot_add_quantiles(
   object,
-  keep_strata = NULL,
   style = NULL,
-  bins = 4,
+  keep_strata = NULL,
   conf_level = 0.95,
+  n_bins = 4,
   ties = "upward",
   quantile_type = 7,
   labeller = NULL,
@@ -27,12 +27,6 @@ er_plot_add_quantiles(
 
   Partially constructed plot, an `er_plot` object.
 
-- keep_strata:
-
-  Logical; whether this layer should use stratification. Defaults to
-  `TRUE` when a stratification variable has been specified, and `FALSE`
-  otherwise.
-
 - style:
 
   Style used to draw the quantile summary layer. Can either be a string
@@ -40,13 +34,19 @@ er_plot_add_quantiles(
   `"errorbar"`, the default), or a builder function used to compute the
   relevant plot object (see "Styles" below).
 
-- bins:
+- keep_strata:
 
-  Number of exposure bins (not counting placebo). Defaults to `4`.
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - conf_level:
 
   Confidence level for the interval. Defaults to `0.95`.
+
+- n_bins:
+
+  Number of exposure bins (not counting placebo). Defaults to `4`.
 
 - ties, quantile_type, labeller:
 
@@ -84,8 +84,8 @@ continuous response unless `response_type = "count"` is declared
 explicitly in
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md).
 
-`bins`/`ties`/`quantile_type`/`labeller` are local to this layer – they
-aren't shared with
+`n_bins`/`ties`/`quantile_type`/`labeller` are local to this layer –
+they aren't shared with
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md),
 even when that layer groups by the same exposure variable.
 [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)

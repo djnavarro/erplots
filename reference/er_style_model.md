@@ -16,11 +16,11 @@ er_style_model_ribbonline(
   response,
   strata,
   theme,
-  ...,
   ribbon_fill = "grey40",
   ribbon_alpha = 0.25,
   ribbon_edges = FALSE,
-  linewidth = 1
+  linewidth = 1,
+  ...
 )
 
 er_style_model_line(
@@ -31,8 +31,8 @@ er_style_model_line(
   response,
   strata,
   theme,
-  ...,
-  linewidth = 1
+  linewidth = 1,
+  ...
 )
 
 er_style_model_spaghetti(
@@ -43,10 +43,10 @@ er_style_model_spaghetti(
   response,
   strata,
   theme,
-  ...,
   alpha = NULL,
   linewidth = 1,
-  nsim = 100L
+  nsim = 100L,
+  ...
 )
 ```
 
@@ -80,19 +80,6 @@ er_style_model_spaghetti(
 
   Theme components
 
-- ...:
-
-  Additional named arguments forwarded from
-  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
-  own `...`; see
-  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
-  "Passing extra arguments to a builder" section.
-  `er_style_model_spaghetti()` reads a `seed` from here (falling back to
-  `config$seed` – currently always `NULL` for the model layer – when
-  none is supplied) to pass to
-  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
-  letting a caller override erglm's auto-selected seed.
-
 - ribbon_fill:
 
   Fill colour for `er_style_model_ribbonline()`'s ribbon. Only takes
@@ -118,6 +105,19 @@ er_style_model_spaghetti(
   (`er_style_model_ribbonline()`/`_line()`'s single curve,
   `er_style_model_spaghetti()`'s mean curve drawn on top of the
   spaghetti draws). Default `1`.
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_plot_add_model()`](https://erplots.djnavarro.net/reference/er_plot_add_model.md)'s
+  own `...`; see
+  [`er_style()`](https://erplots.djnavarro.net/reference/er_style.md)'s
+  "Passing extra arguments to a builder" section.
+  `er_style_model_spaghetti()` reads a `seed` from here (falling back to
+  `config$seed` – currently always `NULL` for the model layer – when
+  none is supplied) to pass to
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md),
+  letting a caller override erglm's auto-selected seed.
 
 - alpha:
 

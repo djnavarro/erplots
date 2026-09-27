@@ -15,10 +15,10 @@ er_style_tte_model_line(
   time,
   strata,
   theme,
-  ...,
   show_ci = TRUE,
   ribbon_alpha = 0.15,
-  linewidth = 1
+  linewidth = 1,
+  ...
 )
 ```
 
@@ -53,12 +53,6 @@ er_style_tte_model_line(
 
   `object$theme`.
 
-- ...:
-
-  Additional named arguments forwarded from
-  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)'s
-  own `...`.
-
 - show_ci:
 
   Whether to draw the confidence band. Default `TRUE`.
@@ -70,6 +64,12 @@ er_style_tte_model_line(
 - linewidth:
 
   Width of the curve's line. Default `1`.
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)'s
+  own `...`.
 
 ## Value
 

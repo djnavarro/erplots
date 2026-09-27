@@ -10,9 +10,9 @@ er_vpc_add_simulated(
   object,
   model = NULL,
   sim = NULL,
+  style = er_style_vpc_simulated_mean_errorbar,
   nsim = 100,
   seed = NULL,
-  style = er_style_vpc_simulated_mean_errorbar,
   simulate_args = list(),
   ...
 )
@@ -37,6 +37,13 @@ er_vpc_add_simulated(
   Simulated data with matching exposure/response/`plot_by` columns and
   `sim_id`. Mutually exclusive with `model`.
 
+- style:
+
+  Style used to draw the VPC simulation layer. Can either be a string
+  corresponding to one of the registered style labels (e.g.,
+  `"mean_errorbar"`, the default), or a builder function used to compute
+  the relevant plot object (see "Styles" below).
+
 - nsim:
 
   Number of simulation replicates, only used with `model`. Defaults to
@@ -51,13 +58,6 @@ er_vpc_add_simulated(
   `ties` is `"split-even"` – see
   [`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)'s own
   `seed` argument for the observed layer's independent tie-break seed.
-
-- style:
-
-  Style used to draw the VPC simulation layer. Can either be a string
-  corresponding to one of the registered style labels (e.g.,
-  `"mean_errorbar"`, the default), or a builder function used to compute
-  the relevant plot object (see "Styles" below).
 
 - simulate_args:
 

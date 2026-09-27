@@ -218,7 +218,7 @@ You can modify the number of bins:
 erglm_data |> 
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
-  er_plot_add_quantiles(bins = 6) |> 
+  er_plot_add_quantiles(n_bins = 6) |> 
   plot()
 ```
 
@@ -238,7 +238,7 @@ method to those response types.
 erglm_data |> 
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
-  er_plot_add_quantiles(bins = 6, conf_level = .8) |> 
+  er_plot_add_quantiles(n_bins = 6, conf_level = .8) |> 
   plot()
 ```
 

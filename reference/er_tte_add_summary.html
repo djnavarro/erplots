@@ -71,8 +71,8 @@ summarising one or more aspects of the plot or the data.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">er_tte_add_summary</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep_strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  summary_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -93,17 +93,17 @@ or <code>NULL</code> (the default). Only needed for styles that produce
 model-based summaries, ignored by other style builder functions.</p></dd>
 
 
-<dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
-<dd><p>Logical; whether this layer should use stratification.
-Defaults to <code>TRUE</code> when a stratification variable has been specified,
-and <code>FALSE</code> otherwise.</p></dd>
-
-
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
 <dd><p>Style used to produce the summary layer annotation. Can
 either be a string corresponding to one of the registered style labels
 (e.g., <code>"logrank"</code>, the default), or a builder function used to compute the
 relevant plot object (see "Styles" below).</p></dd>
+
+
+<dt id="arg-keep-strata">keep_strata<a class="anchor" aria-label="anchor" href="#arg-keep-strata"></a></dt>
+<dd><p>Logical; whether this layer should use stratification.
+Defaults to <code>TRUE</code> when a stratification variable has been specified,
+and <code>FALSE</code> otherwise.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>

@@ -14,10 +14,10 @@ er_style_tte_censor_ticks(
   time,
   strata,
   theme,
-  ...,
   shape = 3,
-  size = 2,
-  stroke = 0.75
+  point_size = 2,
+  stroke = 0.75,
+  ...
 )
 ```
 
@@ -50,24 +50,24 @@ er_style_tte_censor_ticks(
 
   `object$theme`.
 
-- ...:
-
-  Additional named arguments forwarded from
-  [`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)'s
-  own `...`.
-
 - shape:
 
   Point shape for a censoring mark. Default `3` (a plus sign), the
   conventional Kaplan-Meier censoring glyph.
 
-- size:
+- point_size:
 
   Point size. Default `2`.
 
 - stroke:
 
   Point stroke width. Default `0.75`.
+
+- ...:
+
+  Additional named arguments forwarded from
+  [`er_tte_add_censor()`](https://erplots.djnavarro.net/reference/er_tte_add_censor.md)'s
+  own `...`.
 
 ## Value
 
@@ -109,7 +109,7 @@ library(survival)
 lung |>
   er_tte(time, status == 2) |>
   er_tte_add_curve() |>
-  er_tte_add_censor(style = er_style_tte_censor_ticks, shape = 124, size = 3) |>
+  er_tte_add_censor(style = er_style_tte_censor_ticks, shape = 124, point_size = 3) |>
   plot()
 
 ```

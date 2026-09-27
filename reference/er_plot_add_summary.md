@@ -10,8 +10,8 @@ from the raw `(exposure, response)` coordinates of the data.
 er_plot_add_summary(
   object,
   model = NULL,
-  keep_strata = NULL,
   style = NULL,
+  keep_strata = NULL,
   conf_level = 0.95,
   summary_args = list(),
   ...
@@ -33,18 +33,18 @@ er_plot_add_summary(
   [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md))
   ignores it.
 
-- keep_strata:
-
-  Logical; whether this layer should use stratification. Defaults to
-  `TRUE` when a stratification variable has been specified, and `FALSE`
-  otherwise.
-
 - style:
 
   Style used to draw the summary annotation layer. Can either be a
   string corresponding to one of the registered style labels (e.g.,
   `"pvalue"`, the default), or a builder function used to compute the
   relevant plot object (see "Styles" below).
+
+- keep_strata:
+
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - conf_level:
 

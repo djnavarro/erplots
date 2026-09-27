@@ -79,11 +79,11 @@ spaghetti plot of simulated draws.</p>
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span>,</span>
 <span>  ribbon_fill <span class="op">=</span> <span class="st">"grey40"</span>,</span>
 <span>  ribbon_alpha <span class="op">=</span> <span class="fl">0.25</span>,</span>
 <span>  ribbon_edges <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  linewidth <span class="op">=</span> <span class="fl">1</span></span>
+<span>  linewidth <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">er_style_model_line</span><span class="op">(</span></span>
@@ -94,8 +94,8 @@ spaghetti plot of simulated draws.</p>
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span>,</span>
-<span>  linewidth <span class="op">=</span> <span class="fl">1</span></span>
+<span>  linewidth <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">er_style_model_spaghetti</span><span class="op">(</span></span>
@@ -106,10 +106,10 @@ spaghetti plot of simulated draws.</p>
 <span>  <span class="va">response</span>,</span>
 <span>  <span class="va">strata</span>,</span>
 <span>  <span class="va">theme</span>,</span>
-<span>  <span class="va">...</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linewidth <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  nsim <span class="op">=</span> <span class="fl">100L</span></span>
+<span>  nsim <span class="op">=</span> <span class="fl">100L</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -145,15 +145,6 @@ spaghetti plot of simulated draws.</p>
 <dd><p>Theme components</p></dd>
 
 
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional named arguments forwarded from
-<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>'s own <code>...</code>; see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra
-arguments to a builder" section. <code>er_style_model_spaghetti()</code> reads a
-<code>seed</code> from here (falling back to <code>config$seed</code> – currently always
-<code>NULL</code> for the model layer – when none is supplied) to pass to
-<code><a href="er_model_interface.html">er_simulate()</a></code>, letting a caller override erglm's auto-selected seed.</p></dd>
-
-
 <dt id="arg-ribbon-fill">ribbon_fill<a class="anchor" aria-label="anchor" href="#arg-ribbon-fill"></a></dt>
 <dd><p>Fill colour for <code>er_style_model_ribbonline()</code>'s
 ribbon. Only takes effect when the layer is unstratified – a
@@ -178,6 +169,15 @@ Default <code>FALSE</code> (ribbon fill only).</p></dd>
 model builders (<code>er_style_model_ribbonline()</code>/<code>_line()</code>'s single
 curve, <code>er_style_model_spaghetti()</code>'s mean curve drawn on top of
 the spaghetti draws). Default <code>1</code>.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional named arguments forwarded from
+<code><a href="er_plot_add_model.html">er_plot_add_model()</a></code>'s own <code>...</code>; see <code><a href="er_style.html">er_style()</a></code>'s "Passing extra
+arguments to a builder" section. <code>er_style_model_spaghetti()</code> reads a
+<code>seed</code> from here (falling back to <code>config$seed</code> – currently always
+<code>NULL</code> for the model layer – when none is supplied) to pass to
+<code><a href="er_model_interface.html">er_simulate()</a></code>, letting a caller override erglm's auto-selected seed.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>

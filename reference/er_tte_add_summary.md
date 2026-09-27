@@ -9,8 +9,8 @@ annotation, summarising one or more aspects of the plot or the data.
 er_tte_add_summary(
   object,
   model = NULL,
-  keep_strata = NULL,
   style = NULL,
+  keep_strata = NULL,
   conf_level = 0.95,
   summary_args = list(),
   ...
@@ -30,18 +30,18 @@ er_tte_add_summary(
   or `NULL` (the default). Only needed for styles that produce
   model-based summaries, ignored by other style builder functions.
 
-- keep_strata:
-
-  Logical; whether this layer should use stratification. Defaults to
-  `TRUE` when a stratification variable has been specified, and `FALSE`
-  otherwise.
-
 - style:
 
   Style used to produce the summary layer annotation. Can either be a
   string corresponding to one of the registered style labels (e.g.,
   `"logrank"`, the default), or a builder function used to compute the
   relevant plot object (see "Styles" below).
+
+- keep_strata:
+
+  Logical; whether this layer should use stratification. Defaults to
+  `TRUE` when a stratification variable has been specified, and `FALSE`
+  otherwise.
 
 - conf_level:
 
