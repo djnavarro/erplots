@@ -141,18 +141,48 @@ point/interval per bin \emph{and} per requested percentile.
 \details{
 See \code{\link[=er_style_vpc]{er_style_vpc()}} for the shared interface every VPC-grammar
 builder implements.
+}
+\section{Choosing a builder}{
 
-\code{er_style_vpc_simulated_mean_errorbar()} (the default) plots
-\code{config$summary}'s mean + percentile interval (of the mean, across
-replicates), adapting its x-position to \code{plot_by}'s type
-(\code{config$is_numeric_group}): equally spaced at each bin's categorical
-(or quantile-bin) label when \code{plot_by} is categorical, or at each
-bin's numeric median (\code{x_median}, from \code{config$summary}) on the
-\code{plot_by}'s own numeric scale when \code{plot_by} is numeric. Because it adapts its
-x-position family at build time rather than declaring one statically,
-it carries no \code{vpc_layout} tag -- pair it with
+All three builders plot the simulated side of a bin against the
+observed side drawn by their \code{\link[=er_style_vpc_observed]{er_style_vpc_observed()}} counterpart;
+which one to reach for depends on how much of the response's
+distribution you need to see, and what kind of response/\code{plot_by}
+you have:
+\itemize{
+\item \code{er_style_vpc_simulated_mean_errorbar()} (the default) -- one
+point + percentile interval per bin, summarising the mean only.
+Works for every response type and either kind of \code{plot_by}. Start
+here unless you specifically need percentile bands.
+\item \code{er_style_vpc_simulated_quantile_ribbon()} -- a shaded band per
+requested percentile, for a fuller picture of the response's
+distribution across bins. Requires a continuous/count response and
+a numeric \code{plot_by}; pairs with
+\code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_quantile_line()}}.
+\item \code{er_style_vpc_simulated_quantile_errorbar()} -- a point + interval
+per requested percentile per bin, the discrete-bin analogue of the
+ribbon idiom above. Same response-type restriction, but also works
+with a categorical \code{plot_by}; pairs with
+\code{\link[=er_style_vpc_observed_quantile_errorbar]{er_style_vpc_observed_quantile_errorbar()}}.
+}
+}
+
+\section{Mean/errorbar (default)}{
+
+\code{er_style_vpc_simulated_mean_errorbar()} plots \code{config$summary}'s
+mean + percentile interval (of the mean, across replicates), adapting
+its x-position to \code{plot_by}'s type (\code{config$is_numeric_group}):
+equally spaced at each bin's categorical (or quantile-bin) label when
+\code{plot_by} is categorical, or at each bin's numeric median (\code{x_median},
+from \code{config$summary}) on the \code{plot_by}'s own numeric scale when
+\code{plot_by} is numeric. Because it adapts its x-position family at
+build time rather than declaring one statically, it carries no
+\code{vpc_layout} tag -- pair it with
 \code{\link[=er_style_vpc_observed_mean_errorbar]{er_style_vpc_observed_mean_errorbar()}}, which mirrors the same
 adaptive logic.
+}
+
+\section{Percentile ribbon}{
 
 \code{er_style_vpc_simulated_quantile_ribbon()} plots \code{config$percentiles}
 -- one shaded band (median line + interval) per requested percentile
@@ -161,6 +191,9 @@ with \code{\link[=er_style_vpc_observed_quantile_line]{er_style_vpc_observed_qua
 only computed for a continuous/count response (see \code{\link[=er_vpc]{er_vpc()}}'s
 \code{probs} argument); calling \code{er_style_vpc_simulated_quantile_ribbon()}
 without it errors.
+}
+
+\section{Percentile errorbar}{
 
 \code{er_style_vpc_simulated_quantile_errorbar()} plots \code{config$percentiles}
 -- a point + across-replicate percentile interval for each requested
@@ -173,6 +206,9 @@ continuous/count response, erroring informatively without
 \code{config$percentiles}. As with the observed-layer counterpart, when
 more than one percentile is requested they are currently all plotted
 at the same x-position within a bin rather than dodged apart.
+}
+
+\section{Legends and overlap}{
 
 \code{er_style_vpc_simulated_mean_errorbar()}/\code{er_style_vpc_simulated_quantile_errorbar()}
 map a constant \code{color = "Simulated"}; \code{er_style_vpc_simulated_quantile_ribbon()}
@@ -192,6 +228,7 @@ by drawing each band's own \code{ci_lower}/\code{ci_upper} bounds as a line (see
 \code{edge_linetype}/\code{edge_linewidth}/\code{edge_colour}), which stays legible
 even where the fills themselves are illegible.
 }
+
 \examples{
 if (requireNamespace("erglm", quietly = TRUE)) {
   library(erglm)
