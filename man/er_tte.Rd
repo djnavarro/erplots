@@ -27,13 +27,10 @@ An (empty of layers) plot object of class \code{er_tte}, with the
 Kaplan-Meier fit already computed on \code{object$km}.
 }
 \description{
-Create an \code{er_tte} specification for a Kaplan-Meier/survival-over-time
-figure. This is a separate mini-grammar from \code{\link[=er_plot]{er_plot()}}/\code{\link[=er_vpc]{er_vpc()}}:
-those two share an exposure-response-vs-exposure coordinate system
-(\code{er_predict()}'s contract is "response value at a given exposure"),
-whereas \code{er_tte()} uses a time x-axis/survival-probability y-axis --
-the natural coordinate system for a Kaplan-Meier curve, not something
-\code{er_plot()}'s layers can express.
+Create an \code{er_tte} specification for a time-to-event plot.
+Build the plot by adding layers for survival curves,
+censoring markers, risk tables, textual summaries, and model predictions;
+render with \code{plot()}/\code{print()} or \code{\link[=er_tte_build]{er_tte_build()}}.
 }
 \details{
 \code{er_tte()} computes the (single-arm) Kaplan-Meier estimate once, via

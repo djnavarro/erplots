@@ -1,13 +1,10 @@
 
 #' The time-to-event plotting mini-language
 #'
-#' Create an `er_tte` specification for a Kaplan-Meier/survival-over-time
-#' figure. This is a separate mini-grammar from [er_plot()]/[er_vpc()]:
-#' those two share an exposure-response-vs-exposure coordinate system
-#' (`er_predict()`'s contract is "response value at a given exposure"),
-#' whereas `er_tte()` uses a time x-axis/survival-probability y-axis --
-#' the natural coordinate system for a Kaplan-Meier curve, not something
-#' `er_plot()`'s layers can express.
+#' Create an `er_tte` specification for a time-to-event plot.
+#' Build the plot by adding layers for survival curves, 
+#' censoring markers, risk tables, textual summaries, and model predictions;
+#' render with `plot()`/`print()` or [er_tte_build()].
 #'
 #' @details
 #' `er_tte()` computes the (single-arm) Kaplan-Meier estimate once, via
