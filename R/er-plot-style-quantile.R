@@ -34,19 +34,38 @@
 #'   rounded to. Defaults to `0`.
 #' @param ... Additional named arguments forwarded from [er_plot_add_quantiles()]'s own `...`.
 #'
-#' @details `er_style_quantile_errorbar()` and
-#' `er_style_quantile_pointrange()` are the base builders; their
-#' `_vlines` variants add a line at every quantile-bin boundary --
+#' @details
+#' See [er_style()] for the shared builder interface these functions
+#' implement, including how to write a custom builder of your own.
+#'
+#' @section Choosing a builder:
+#' All four builders summarise the same per-bin point/interval; which
+#' one to reach for is a choice of visual idiom, independent of
+#' response type:
+#'
+#' * `er_style_quantile_errorbar()` (the default) -- a point with an
+#'   error bar.
+#' * `er_style_quantile_pointrange()` -- a point with a range line
+#'   ([ggplot2::geom_pointrange()]) instead of an error bar.
+#' * `er_style_quantile_errorbar_vlines()` /
+#'   `er_style_quantile_pointrange_vlines()` -- the same two idioms,
+#'   plus a dotted vertical line at every quantile-bin boundary (see
+#'   "Boundary lines" below).
+#'
+#' All built-in quantile builders are tagged `er_style_tag(fn, layer =
+#' "plot_quantile")`, so [er_plot_add_quantiles()] errors informatively
+#' if handed a builder tagged for a different layer.
+#'
+#' @section Boundary lines:
+#' The `_vlines` variants add a line at every quantile-bin boundary --
 #' including the two outer boundaries at the minimum non-placebo
 #' exposure and the overall maximum exposure, not just the boundaries
 #' shared between two adjacent bins -- so a reader can see every bin
 #' edge from the plot alone. A boundary whose exposure value falls
 #' outside a narrowed [er_plot_theme()] `xlim` is dropped (with a
-#' warning), the same way a quantile summary marker is. All built-in
-#' quantile builders are tagged `er_style_tag(fn, layer =
-#' "plot_quantile")`, so [er_plot_add_quantiles()] errors informatively
-#' if handed a builder tagged for a different layer.
+#' warning), the same way a quantile summary marker is.
 #'
+#' @section Boundary labels:
 #' The `_vlines` variants can also label each boundary with its
 #' exposure value (`vline_labels = TRUE`, off by default). Labels are
 #' drawn with [ggplot2::geom_label()] (an opaque background, since a
@@ -61,15 +80,13 @@
 #' independently. Override with `"top"`/`"bottom"` to place labels
 #' manually instead.
 #'
+#' @section Stratified dodging:
 #' When stratified, all four builders horizontally dodge each quantile
 #' bin's points/bars/labels apart by [er_plot_theme()]'s `dodge_width`
 #' (a fraction of the exposure range, default `0.05`) -- a cross-layer,
 #' stratification-wide setting controlled via `er_plot_theme()` rather
 #' than a per-builder argument here, since it's about how stratification
 #' lays out a dodged layer, not one builder's own visual style.
-#'
-#' See [er_style()] for the shared builder interface these functions
-#' implement, including how to write a custom builder of your own.
 #'
 #' @returns A geom, or a list of geoms; see [er_style()].
 #'
