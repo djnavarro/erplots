@@ -375,7 +375,7 @@ er_style_quantile_errorbar <- function(data, config, stratify, exposure, respons
     point <- ggplot2::geom_point(
       data = summary_dodged,
       mapping = ggplot2::aes(
-        x = x_dodge, 
+        x = x_dodge,
         y = y_mid,
         color = .data[["strata"]]
       ),
@@ -383,32 +383,32 @@ er_style_quantile_errorbar <- function(data, config, stratify, exposure, respons
       size = point_size,
       key_glyph = theme$draw_key
     )
-    
+
     bar <- ggplot2::geom_errorbar(
       data = summary_dodged,
       mapping = ggplot2::aes(
-        x = x_dodge, 
-        ymin = ci_lower, 
+        x = x_dodge,
+        ymin = ci_lower,
         ymax = ci_upper,
-        color = .data[["strata"]]  
+        color = .data[["strata"]]
       ),
       inherit.aes = FALSE,
       width = errorbar_width * (exposure$limits[2] - exposure$limits[1]),
       key_glyph = theme$draw_key
     )
-    
+
     label <- ggplot2::geom_text(
       data = summary_dodged,
       mapping = ggplot2::aes(
-        x = x_dodge, 
-        y = y_lbl, 
+        x = x_dodge,
+        y = y_lbl,
         label = y_mid_lbl,
         color = .data[["strata"]]
       ),
       inherit.aes = FALSE,
       size = label_size,
       show.legend = FALSE
-    ) 
+    )
   }
 
   geoms <- list(point, bar, label)

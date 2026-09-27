@@ -31,7 +31,7 @@
 #'
 #' @param object Partially constructed plot (has S3 class `er_plot`)
 #' @param xlab,ylab Exposure/response axis label (single string).
-#' @param strata_lab Stratification legend label (single string). 
+#' @param strata_lab Stratification legend label (single string).
 #'   Errors if `stratify_by` wasn't set in
 #'   [er_plot()] -- there's no stratification legend to label.
 #' @param title,subtitle,caption Plot-level annotation text (single

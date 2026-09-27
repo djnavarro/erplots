@@ -31,8 +31,8 @@
 #' @param label_fill Label background fill. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
 #' @param fields Fields from `glance` to include for
 #'   `er_style_tte_summary_gof()`, and the order they're shown in: one
-#'   or more of `"n"`, `"aic"`, `"bic"`, or `"r_squared"`. Defaults to 
-#'   all four, in that order. A field is shown only when both present and 
+#'   or more of `"n"`, `"aic"`, `"bic"`, or `"r_squared"`. Defaults to
+#'   all four, in that order. A field is shown only when both present and
 #'   non-`NA` in the model's `glance` result.
 #'
 #' @details

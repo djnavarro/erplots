@@ -145,7 +145,7 @@ er_style_model_ribbonline <- function(data, config, stratify, exposure, response
     model_line <- ggplot2::geom_path(
       data = config$predictions,
       mapping = ggplot2::aes(
-        x = .data[[exposure$name]], 
+        x = .data[[exposure$name]],
         y = fit_resp
       ),
       linewidth = linewidth,
@@ -173,7 +173,7 @@ er_style_model_ribbonline <- function(data, config, stratify, exposure, response
     model_line <- ggplot2::geom_path(
       data = config$predictions,
       mapping = ggplot2::aes(
-        x = .data[[exposure$name]], 
+        x = .data[[exposure$name]],
         y = fit_resp,
         color = .data[[strata$name]]
       ),
@@ -281,8 +281,8 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
   # reproduces the previous fixed-per-stratify-status default.
   if (is.null(alpha)) alpha <- if (stratify) 0.25 else 0.1
 
-  newdata <- config$predictions |> 
-    dplyr::select(dplyr::all_of(c(exposure$name, strata$name))) |> 
+  newdata <- config$predictions |>
+    dplyr::select(dplyr::all_of(c(exposure$name, strata$name))) |>
     dplyr::distinct()
 
   sim <- er_simulate(config$model, newdata = newdata, nsim = nsim, seed = seed)
@@ -312,7 +312,7 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
     model_line <- ggplot2::geom_path(
       data = config$predictions,
       mapping = ggplot2::aes(
-        x = .data[[exposure$name]], 
+        x = .data[[exposure$name]],
         y = fit_resp
       ),
       linewidth = linewidth,
@@ -323,7 +323,7 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
   if (stratify == TRUE) {
 
     model_spaghetti <- ggplot2::geom_path(
-      data = sim |> 
+      data = sim |>
         dplyr::mutate(sim_id2 = paste(.data[["sim_id"]], .data[[strata$name]])),
       mapping = ggplot2::aes(
         x = .data[[exposure$name]],
@@ -338,15 +338,15 @@ er_style_model_spaghetti <- function(data, config, stratify, exposure, response,
     model_line <- ggplot2::geom_path(
       data = config$predictions,
       mapping = ggplot2::aes(
-        x = .data[[exposure$name]], 
+        x = .data[[exposure$name]],
         y = fit_resp,
         color = .data[[strata$name]]
       ),
       linewidth = linewidth,
       key_glyph = theme$draw_key
-    )    
+    )
   }
-  
+
   geoms <- list(model_spaghetti, model_line)
   return(geoms)
 }

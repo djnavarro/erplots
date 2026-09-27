@@ -53,7 +53,7 @@ uncertainty band derived from the corresponding time-to-event model.
 \details{
 The model layer of a TTE plot is used to display predictions generated
 from an underlying survival model (e.g., parametric accelerated failure
-time model, Cox proportional hazard model, etc). It uses the \code{model}
+time model, Cox proportional hazards model, etc). It uses the \code{model}
 object to create the predictions, using the \code{\link[=er_predict_survival]{er_predict_survival()}}
 method for the relevant model class to do the work. The \code{model} object
 is permitted to reference covariates other than the plot stratification

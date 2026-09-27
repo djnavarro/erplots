@@ -149,14 +149,14 @@ er_style_group_boxplot <- function(data, config, stratify, exposure, response, s
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(
-      x = .data[[exposure$name]], 
+      x = .data[[exposure$name]],
       y = lvl
     )
-  } 
+  }
   if (stratify == TRUE) {
     plot_map <- ggplot2::aes(
-      x = .data[[exposure$name]], 
-      y = lvl, 
+      x = .data[[exposure$name]],
+      y = lvl,
       fill = .data[[strata$name]]
     )
   }
@@ -171,14 +171,14 @@ er_style_group_boxplot <- function(data, config, stratify, exposure, response, s
     ggplot2::geom_boxplot(
       data = config$data,
       mapping = plot_map,
-      alpha = alpha, 
+      alpha = alpha,
       outlier.shape = outlier_shape,
       key_glyph = theme$draw_key
     ),
     ggplot2::coord_cartesian(
-      xlim = exposure$limits, 
+      xlim = exposure$limits,
       clip = "off"
-    ) 
+    )
   )
 
   return(geoms)
@@ -196,7 +196,7 @@ er_style_group_histogram <- function(data, config, stratify, exposure, response,
   }
   if (stratify == TRUE) {
     plot_map <- ggplot2::aes(
-      x = .data[[exposure$name]], 
+      x = .data[[exposure$name]],
       fill = .data[[strata$name]]
     )
   }
@@ -222,11 +222,11 @@ er_style_group_histogram <- function(data, config, stratify, exposure, response,
     # `er_style_group_boxplot()`/`er_style_group_violin()`, where the
     # group variable *is* the y-axis.
     ggplot2::facet_grid(
-      rows = ggplot2::vars(lvl), 
+      rows = ggplot2::vars(lvl),
       switch = "y"
     ),
     ggplot2::coord_cartesian(
-      xlim = exposure$limits, 
+      xlim = exposure$limits,
       clip = "off"
     ),
     # ggplot2's default for a left-hand strip (`switch = "y"`) rotates
@@ -252,14 +252,14 @@ er_style_group_violin <- function(data, config, stratify, exposure, response, st
 
   if (stratify == FALSE) {
     plot_map <- ggplot2::aes(
-      x = .data[[exposure$name]], 
+      x = .data[[exposure$name]],
       y = lvl
     )
-  } 
+  }
   if (stratify == TRUE) {
     plot_map <- ggplot2::aes(
-      x = .data[[exposure$name]], 
-      y = lvl, 
+      x = .data[[exposure$name]],
+      y = lvl,
       fill = .data[[strata$name]]
     )
   }
@@ -278,9 +278,9 @@ er_style_group_violin <- function(data, config, stratify, exposure, response, st
   geoms <- list(
     do.call(ggplot2::geom_violin, geom_args),
     ggplot2::coord_cartesian(
-      xlim = exposure$limits, 
+      xlim = exposure$limits,
       clip = "off"
-    ) 
+    )
   )
 
   return(geoms)

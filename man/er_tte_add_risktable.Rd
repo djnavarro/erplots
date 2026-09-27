@@ -31,7 +31,7 @@ The input \code{object}, with the risktable layer added.
 \description{
 Adds the at-risk table layer to a TTE plot: a separate panel stacked
 below the curve, showing the number of subjects still at risk at a
-grid of time points and computed from the fit already stored internally
+grid of time points, computed from the fit already stored internally
 within the plot object.
 }
 \details{

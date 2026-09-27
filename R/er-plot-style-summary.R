@@ -18,7 +18,7 @@
 #' @param label_colour Label text colour. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
 #' @param label_fill Label background fill. Defaults to `NULL` ([ggplot2::geom_label()]'s own default).
 #' @param fields Fields from `glance` to include for `er_style_summary_gof()`,
-#'   and the order they're shown in: one or more of `"n"`, `"aic"`, `"bic"`, or 
+#'   and the order they're shown in: one or more of `"n"`, `"aic"`, `"bic"`, or
 #'   `"r_squared"`. Defaults to all four, in that order. A field is shown
 #'   only when both present and non-`NA` in the model's `glance` result.
 #' @param ... Additional named arguments forwarded from [er_plot_add_model()]'s own `...`.

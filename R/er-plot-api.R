@@ -107,20 +107,20 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
       response = .plot_variable(role = "response"),
       strata = .plot_variable(role = "strata"),
       layer = list(
-        model    = NULL, 
+        model    = NULL,
         summary  = NULL,
-        quantile = NULL, 
+        quantile = NULL,
         data     = NULL,
         overlay  = NULL,
         group    = NULL
       ),
       plot = list(
-        base = NULL, 
-        data = NULL, 
+        base = NULL,
+        data = NULL,
         group = NULL
       ),
       theme = list(),
-      output = NULL 
+      output = NULL
     ),
     class = "er_plot"
   )
@@ -132,10 +132,10 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   object$exposure$name <- exposure_name
   object$response$name <- response_name
   if (!is.null(strata_name)) object$strata$name <- strata_name
-  
+
   # store (default) variable labels
   object$exposure$label <- .get_label(object$data[[object$exposure$name]]) %||% object$exposure$name
-  object$response$label <- .get_label(object$data[[object$response$name]]) %||% object$response$name    
+  object$response$label <- .get_label(object$data[[object$response$name]]) %||% object$response$name
   if (!is.null(object$strata$name)) {
     object$strata$label <- .get_label(object$data[[object$strata$name]]) %||% object$strata$name
   }
@@ -169,12 +169,12 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   object$theme$format_p <- scales::label_pvalue(accuracy = .001, add_p = TRUE)
   object$theme$format_percent <- scales::label_percent(accuracy = 1)
   object$theme$format_number <- scales::label_number(accuracy = 0.01)
-  object$theme$height <- list(base = 6, data = 2, group = 3) 
+  object$theme$height <- list(base = 6, data = 2, group = 3)
   object$theme$theme_base <- ggplot2::theme_bw()
   object$theme$theme_extra <- ggplot2::theme(
     panel.border = ggplot2::element_rect(
-      fill = NA, 
-      color = "grey80", 
+      fill = NA,
+      color = "grey80",
       linewidth = .5
     ),
     legend.position = "bottom"
@@ -188,7 +188,7 @@ er_plot <- function(data, exposure, response, stratify_by = NULL, response_type 
   object$theme$title <- NULL
   object$theme$subtitle <- NULL
   object$theme$caption <- NULL
- 
+
   return(object)
 }
 
@@ -205,7 +205,7 @@ print.er_plot <- function(x, ...) {
   cat("    - exposure:        ", x$exposure$name  %||% "<none>", "\n", sep = "")
   cat("    - response:        ", x$response$name  %||% "<none>", "\n", sep = "")
   cat("    - stratification:  ", x$strata$name    %||% "<none>", "\n", sep = "")
-  
+
   if (any(layer_set)) {
     cat("  plot layers:\n")
     if (layer_set["model"])    cat("    - model:           ", paste(class(x$layer$model$config$model), collapse = "/"), "\n", sep = "")
@@ -229,7 +229,7 @@ print.er_plot <- function(x, ...) {
 
   if (is.null(x$output))  cat("  output built: no")
   if (!is.null(x$output)) cat("  output built: yes")
-  
+
   return(invisible(x))
 }
 
@@ -246,17 +246,17 @@ plot.er_plot <- function(x, y = NULL, ...) {
 #'
 #' Assembles the layers into ggplot2 objects, applies shared theming and legend
 #' deduplication across layers, and composes the final output with
-#' patchwork. 
-#' 
+#' patchwork.
+#'
 #' @param object Partially constructed plot (has S3 class `er_plot`).
 #'
 #' @returns The input `object`, with `object$plot` (per-layer ggplot2
 #'   objects) and `object$output` (the final composed plot) populated.
-#' 
+#'
 #' @details
-#' The user does not typically invoke this function directly. Instead, it is 
+#' The user does not typically invoke this function directly. Instead, it is
 #' called automatically when `plot()` is called.
-#' 
+#'
 #'
 #' @seealso [er_plot()]
 #'
@@ -305,8 +305,8 @@ er_plot_build <- function(object) {
 
   # output
   object$output <- patchwork::wrap_plots(
-    composition$plots, 
-    ncol = 1, 
+    composition$plots,
+    ncol = 1,
     heights = composition$info$size,
     guides = "collect",
     axes = "collect"

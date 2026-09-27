@@ -262,7 +262,7 @@
 #' @export
 #' @examples
 #' ci_clopper_pearson(1, 10)
-#' 
+#'
 ci_clopper_pearson <- function(x, n, conf_level = 0.95) {
   alpha <- 1 - conf_level
   lower <- if (x > 0) stats::qbeta(alpha/2, x, n - x + 1) else 0
@@ -358,8 +358,8 @@ ci_poisson <- function(x, n, conf_level = 0.95) {
 #' Distribution-free confidence interval for a sample quantile
 #'
 #' Computes a nonparametric confidence interval for a sample quantile using
-#' the order-statistic method: the interval endpoints are order statistics 
-#' of `x`, chosen via the binomial distribution of ranks so that no assumption 
+#' the order-statistic method: the interval endpoints are order statistics
+#' of `x`, chosen via the binomial distribution of ranks so that no assumption
 #' is made about the shape of `x`'s distribution.
 #'
 #' @param x Numeric vector of observations
@@ -488,7 +488,7 @@ ci_quantile <- function(x, prob = 0.5, conf_level = 0.95) {
 #' cut_quantile(x, quantile_type = 1)
 #' cut_quantile(x, labeller = function(n, breaks) paste0("Group ", 1:n))
 #' cut_quantile(x, labeller = c("Low", "Mid-low", "Mid-high", "High"))
-#' 
+#'
 NULL
 
 # Shared by both `cut_quantile()`/`cut_exposure_quantile()`: assigns each

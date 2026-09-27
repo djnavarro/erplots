@@ -109,7 +109,7 @@ NULL
 #' List builders registered for string-based `style` dispatch
 #'
 #' Style builder functions can be tagged with a `"label"` attribute used to
-#' register a convenient short name for that style: `er_style_labels()` lists 
+#' register a convenient short name for that style: `er_style_labels()` lists
 #' the currently registered styles, optionally filtered to a single `layer`.
 #'
 #' @param layer A single layer name (e.g. `"tte_summary"`), or `NULL` (the

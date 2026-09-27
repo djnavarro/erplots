@@ -104,8 +104,8 @@ erglm_data |>
   er_plot_add_model(mod, style = build_model_dashed) |>
   plot()
 
-# a model with a covariate beyond the exposure variable still works even when 
-# this layer isn't stratifying by it: `sex` is set to a reference value 
+# a model with a covariate beyond the exposure variable still works even when
+# this layer isn't stratifying by it: `sex` is set to a reference value
 # when building the prediction grid, which may not be what the user wants
 mod_sex <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
 erglm_data |>

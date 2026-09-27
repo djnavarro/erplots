@@ -2,7 +2,7 @@
 #' The time-to-event plotting mini-language
 #'
 #' Create an `er_tte` specification for a time-to-event plot.
-#' Build the plot by adding layers for survival curves, 
+#' Build the plot by adding layers for survival curves,
 #' censoring markers, risk tables, textual summaries, and model predictions;
 #' render with `plot()`/`print()` or [er_tte_build()].
 #'
@@ -318,7 +318,7 @@ plot.er_tte <- function(x, y = NULL, ...) {
 
 #' Build and render a time-to-event plot
 #'
-#' Assembles the layers for a time-to-event plot object: a survival panel that displays 
+#' Assembles the layers for a time-to-event plot object: a survival panel that displays
 #' the curve, censor, summary, and model layers' geoms, when present. When a risk
 #' table layer is also present the result contains two panels stacked vertically.
 #'

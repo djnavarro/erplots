@@ -2,15 +2,15 @@
 
 #' Add a Kaplan-Meier curve layer
 #'
-#' Adds the curve layer to a TTE plot: a Kaplan-Meier step curve with a 
-#' confidence band, computed from the fit already contained within the plot 
+#' Adds the curve layer to a TTE plot: a Kaplan-Meier step curve with a
+#' confidence band, computed from the fit already contained within the plot
 #' object.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
-#' @param style Style used to draw the Kaplan-Meier curve and ribbon. Can 
+#' @param style Style used to draw the Kaplan-Meier curve and ribbon. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"km"`, the default), or a builder function used to compute the
-#'   relevant plot object (see "Styles" below). 
+#'   relevant plot object (see "Styles" below).
 #' @param ... Additional named arguments forwarded to the `style` builder
 #'   function when the plot is built.
 #'
@@ -18,16 +18,16 @@
 #'
 #' @section Styles:
 #' The following pre-defined styles are available for this layer. Please
-#' see the documentation for the corresponding builder function to see what 
+#' see the documentation for the corresponding builder function to see what
 #' customisation options are available:
-#' 
+#'
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"km"` | [er_style_tte_curve_km()] | Kaplan-Meier step curve with a confidence band (the only built-in, and the default). |
 #'
-#' See [er_style_tte()] for details on how style builder functions are 
+#' See [er_style_tte()] for details on how style builder functions are
 #' defined for the TTE mini-grammar, should a custom style be required.
-#' 
+#'
 #' @examples
 #' library(survival)
 #' lung |>
@@ -67,15 +67,15 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 
 #' Add a censoring-marks layer
 #'
-#' Adds the censoring layer to a TTE plot, showing the times at which a 
-#' subject was censored, read from the fit already stored internally within 
+#' Adds the censoring layer to a TTE plot, showing the times at which a
+#' subject was censored, read from the fit already stored internally within
 #' the plot object.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
-#' @param style Style used to draw the censoring marks layer. Can 
+#' @param style Style used to draw the censoring marks layer. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"ticks"`, the default), or a builder function used to compute the
-#'   relevant plot object (see "Styles" below). 
+#'   relevant plot object (see "Styles" below).
 #' @param ... Additional named arguments forwarded to the `style` builder
 #'   function when the plot is built.
 #'
@@ -83,16 +83,16 @@ er_tte_add_curve <- function(object, style = NULL, ...) {
 #'
 #' @section Styles:
 #' The following pre-defined styles are available for this layer. Please
-#' see the documentation for the corresponding builder function to see what 
+#' see the documentation for the corresponding builder function to see what
 #' customisation options are available:
-#' 
+#'
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"ticks"` | [er_style_tte_censor_ticks()] | Tick marks at each censoring time, on the curve's current step height (the only built-in, and the default). |
 #'
-#' See [er_style_tte()] for details on how style builder functions are 
+#' See [er_style_tte()] for details on how style builder functions are
 #' defined for the TTE mini-grammar, should a custom style be required.
-#' 
+#'
 #' @examples
 #' library(survival)
 #' lung |>
@@ -127,16 +127,16 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 
 #' Add a number-at-risk panel
 #'
-#' Adds the at-risk table layer to a TTE plot: a separate panel stacked 
-#' below the curve, showing the number of subjects still at risk at a 
-#' grid of time points and computed from the fit already stored internally
+#' Adds the at-risk table layer to a TTE plot: a separate panel stacked
+#' below the curve, showing the number of subjects still at risk at a
+#' grid of time points, computed from the fit already stored internally
 #' within the plot object.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
-#' @param style Style used to generate the at-risk table in the plot. Can 
+#' @param style Style used to generate the at-risk table in the plot. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"text"`, the default), or a builder function used to compute the
-#'   relevant plot object (see "Styles" below). 
+#'   relevant plot object (see "Styles" below).
 #' @param times Numeric vector of time points at which to report the
 #'   number at risk, or `NULL` (the default) to use `n_times` evenly
 #'   spaced breaks across the time range.
@@ -155,16 +155,16 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #'
 #' @section Styles:
 #' The following pre-defined styles are available for this layer. Please
-#' see the documentation for the corresponding builder function to see what 
+#' see the documentation for the corresponding builder function to see what
 #' customisation options are available:
-#' 
+#'
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"text"` | [er_style_tte_risktable_text()] | Number-at-risk counts as a text grid, one row per stratum (the only built-in, and the default). |
 #'
-#' See [er_style_tte()] for details on how style builder functions are 
+#' See [er_style_tte()] for details on how style builder functions are
 #' defined for the TTE mini-grammar, should a custom style be required.
-#' 
+#'
 #' @examples
 #' library(survival)
 #' lung |>
@@ -213,12 +213,12 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #' @param model A fitted time-to-event model. Must implement
 #'   [er_predict_survival()].
 #' @param keep_strata Logical; whether this layer should use stratification.
-#'   Defaults to `TRUE` when a stratification variable has been specified, 
+#'   Defaults to `TRUE` when a stratification variable has been specified,
 #'   and `FALSE` otherwise.
-#' @param style Style used to draw the model-based survival curve. Can 
+#' @param style Style used to draw the model-based survival curve. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"line"`, the default), or a builder function used to compute the
-#'   relevant plot object (see "Styles" below). 
+#'   relevant plot object (see "Styles" below).
 #' @param conf_level Confidence level for the prediction band. Defaults
 #'   to `0.95`.
 #' @param time_grid Numeric vector of times at which to predict `S(t)`,
@@ -232,30 +232,30 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #' @details
 #' The model layer of a TTE plot is used to display predictions generated
 #' from an underlying survival model (e.g., parametric accelerated failure
-#' time model, Cox proportional hazard model, etc). It uses the `model` 
+#' time model, Cox proportional hazards model, etc). It uses the `model`
 #' object to create the predictions, using the [er_predict_survival()]
 #' method for the relevant model class to do the work. The `model` object
 #' is permitted to reference covariates other than the plot stratification
-#' variable: see the details section of [er_plot_add_model()] for the 
+#' variable: see the details section of [er_plot_add_model()] for the
 #' specifics.
-#' 
-#' Note that erplots does not check that `model` was fit on the same 
+#'
+#' Note that erplots does not check that `model` was fit on the same
 #' time/event variables passed to the plot itself; it is left to the user
-#' to ensure that the data set provided to the model is consistent with 
+#' to ensure that the data set provided to the model is consistent with
 #' the data provided to the TTE plot.
 #'
 #' @returns The input `object`, with the model layer added.
 #'
 #' @section Styles:
 #' The following pre-defined styles are available for this layer. Please
-#' see the documentation for the corresponding builder function to see what 
+#' see the documentation for the corresponding builder function to see what
 #' customisation options are available:
-#' 
+#'
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"line"` | [er_style_tte_model_line()] | Fitted `S(t)` curve with an uncertainty band (the only built-in, and the default). |
 #'
-#' See [er_style_tte()] for details on how style builder functions are 
+#' See [er_style_tte()] for details on how style builder functions are
 #' defined for the TTE mini-grammar, should a custom style be required.
 #'
 #' @seealso [er_tte()], [er_style_tte_model_line()], [er_model_interface]
@@ -300,7 +300,7 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 
 #' Add a summary annotation layer
 #'
-#' Adds the summary layer to a TTE plot: a corner-placed text/label annotation, 
+#' Adds the summary layer to a TTE plot: a corner-placed text/label annotation,
 #' summarising one or more aspects of the plot or the data.
 #'
 #' @param object Partially constructed plot (has S3 class `er_tte`).
@@ -308,12 +308,12 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #'   or `NULL` (the default). Only needed for styles that produce
 #'   model-based summaries, ignored by other style builder functions.
 #' @param keep_strata Logical; whether this layer should use stratification.
-#'   Defaults to `TRUE` when a stratification variable has been specified, 
+#'   Defaults to `TRUE` when a stratification variable has been specified,
 #'   and `FALSE` otherwise.
-#' @param style Style used to produce the summary layer annotation. Can 
+#' @param style Style used to produce the summary layer annotation. Can
 #'   either be a string corresponding to one of the registered style labels
 #'   (e.g., `"logrank"`, the default), or a builder function used to compute the
-#'   relevant plot object (see "Styles" below). 
+#'   relevant plot object (see "Styles" below).
 #' @param conf_level Confidence level forwarded to [er_summary()] (see
 #'   `?er_model_interface`). Defaults to `0.95`. Ignored when `model` is
 #'   `NULL`.
@@ -338,9 +338,9 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #'
 #' @section Styles:
 #' The following pre-defined styles are available for this layer. Please
-#' see the documentation for the corresponding builder function to see what 
+#' see the documentation for the corresponding builder function to see what
 #' customisation options are available:
-#' 
+#'
 #' | Label | Builder | Description |
 #' | --- | --- | --- |
 #' | `"logrank"` | [er_style_tte_summary_logrank()] | Log-rank test p-value comparing survival across `stratify_by`'s levels (the default). |
@@ -348,7 +348,7 @@ er_tte_add_model <- function(object, model, keep_strata = NULL, style = NULL,
 #' | `"coefficients"` | [er_style_tte_summary_coefficients()] | One line per model parameter, from `model`'s [er_summary()] `coefficients` table. |
 #' | `"gof"` | [er_style_tte_summary_gof()] | A goodness-of-fit annotation from `model`'s [er_summary()] `glance` table. |
 #'
-#' See [er_style_tte()] for details on how style builder functions are 
+#' See [er_style_tte()] for details on how style builder functions are
 #' defined for the TTE mini-grammar, should a custom style be required.
 #'
 #' @examples

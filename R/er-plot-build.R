@@ -6,14 +6,14 @@
   base <- ggplot2::ggplot() +
     object$theme$theme_base +
     ggplot2::scale_y_continuous(
-      oob = scales::oob_keep, 
+      oob = scales::oob_keep,
       expand = ggplot2::expansion(mult = .01, add = 0)
     )  +
     ggplot2::coord_cartesian(
-      xlim = object$exposure$limits, 
-      ylim = object$response$limits, 
+      xlim = object$exposure$limits,
+      ylim = object$response$limits,
       clip = "off"
-    ) 
+    )
 
   # an overlay builder tagged `draw_order = "background"` (e.g.
   # `er_style_data_hex()`) draws before the model/summary/quantile geoms,
@@ -128,15 +128,15 @@
       layer_label = sprintf("group panel (\"%s\") observations", g)
     )
 
-    group_plots[[g]] <- ggplot2::ggplot() + 
+    group_plots[[g]] <- ggplot2::ggplot() +
       theme$theme_base +
       do.call(group_config$style, c(
         list(data, group_config, group_config$stratify, exposure, response, strata, theme),
         group_config$dots
       ))
   }
-  
-  return(group_plots)  
+
+  return(group_plots)
 }
 
 .build_model_geoms <- function(object) {
@@ -171,7 +171,7 @@
     config$dots
   ))
   return(summary_geoms)
-  
+
 }
 
 .build_quantile_geoms <- function(object) {
