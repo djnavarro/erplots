@@ -24,27 +24,36 @@
 #'   only when both present and non-`NA` in the model's `glance` result.
 #' @param ... Additional named arguments forwarded from [er_plot_add_model()]'s own `...`.
 #'
-#' @details `er_style_summary_pvalue()`
-#' draws a formatted p-value from the model's [er_summary()] result;
-#' `er_style_summary_n()` draws observation counts and doesn't have to
-#' originate from a fitted model at all.
-#' `er_style_summary_coefficients()` draws one line per row of the model's
-#' `coefficients` table (see [er_summary()]'s `coefficients` field), useful
-#' for models with several parameters and no single privileged p-value
-#' (e.g. a multi-parameter nonlinear model); it draws nothing if
-#' `coefficients` wasn't supplied, or if the layer is stratified.
-#' `er_style_summary_gof()` draws a single-line, comma-separated
-#' goodness-of-fit annotation from the model's `glance` field (see
-#' [er_summary()]) -- a curated subset (`N`, `AIC`, `BIC`, R-squared) rather
-#' than every reserved `glance` column, showing only whichever of those
-#' four are actually present and non-`NA`; it draws nothing if none of them
-#' are available, or if the layer is stratified. All four builders are
-#' tagged `er_style_tag(fn, layer = "plot_summary")`, so [er_plot_add_summary()]
-#' errors informatively if a builder tagged for a different layer is passed
-#' to it instead.
-#'
+#' @details
 #' See [er_style()] for the shared builder interface these functions
 #' implement, including how to write a custom builder of your own.
+#'
+#' @section Choosing a builder:
+#' Each builder draws a different kind of annotation, with its own
+#' data requirements:
+#'
+#' * `er_style_summary_pvalue()` (the default) -- a formatted p-value
+#'   from the model's [er_summary()] result.
+#' * `er_style_summary_n()` -- observation counts. Doesn't have to
+#'   originate from a fitted model at all.
+#' * `er_style_summary_coefficients()` -- one line per row of the
+#'   model's `coefficients` table (see [er_summary()]'s `coefficients`
+#'   field), useful for models with several parameters and no single
+#'   privileged p-value (e.g. a multi-parameter nonlinear model). Draws
+#'   nothing if `coefficients` wasn't supplied, or if the layer is
+#'   stratified.
+#' * `er_style_summary_gof()` -- a single-line, comma-separated
+#'   goodness-of-fit annotation from the model's `glance` field (see
+#'   [er_summary()]) -- a curated subset (`N`, `AIC`, `BIC`, R-squared)
+#'   rather than every reserved `glance` column, showing only whichever
+#'   of those four are actually present and non-`NA`. Same restrictions
+#'   as `er_style_summary_coefficients()`: draws nothing if none of
+#'   those fields are available, or if the layer is stratified.
+#'
+#' @section Tags:
+#' All four builders are tagged `er_style_tag(fn, layer = "plot_summary")`,
+#' so [er_plot_add_summary()] errors informatively if a builder tagged
+#' for a different layer is passed to it instead.
 #'
 #' @returns A geom, or a list of geoms; see [er_style()].
 #'
