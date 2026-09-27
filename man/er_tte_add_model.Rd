@@ -22,8 +22,9 @@ er_tte_add_model(
 \code{\link[=er_predict_survival]{er_predict_survival()}}.}
 
 \item{keep_strata}{Logical; whether this layer should draw one curve
-per stratum level. Defaults to \code{!is.null(object$strata)}.
-#' @param style Style used to draw the model-based survival curve. Can
+per stratum level. Defaults to \code{!is.null(object$strata)}.}
+
+\item{style}{Style used to draw the model-based survival curve. Can
 either be a string corresponding to one of the registered style labels
 (e.g., \code{"line"}, the default), or a builder function used to compute the
 relevant plot object (see "Styles" below).}
