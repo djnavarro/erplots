@@ -16,7 +16,7 @@ relevant plot object (see "Styles" below).}
 
 \item{times}{Numeric vector of time points at which to report the
 number at risk, or \code{NULL} (the default) to use \code{n_times} evenly
-spaced breaks spanning \code{object$time$limits}.}
+spaced breaks across the time range.}
 
 \item{n_times}{Number of evenly spaced breaks to use when \code{times} is
 \code{NULL}. Must be a single whole number of at least 2. Ignored when

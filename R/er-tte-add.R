@@ -136,7 +136,7 @@ er_tte_add_censor <- function(object, style = NULL, ...) {
 #'   relevant plot object (see "Styles" below). 
 #' @param times Numeric vector of time points at which to report the
 #'   number at risk, or `NULL` (the default) to use `n_times` evenly
-#'   spaced breaks spanning `object$time$limits`.
+#'   spaced breaks across the time range.
 #' @param n_times Number of evenly spaced breaks to use when `times` is
 #'   `NULL`. Must be a single whole number of at least 2. Ignored when
 #'   `times` is supplied. Defaults to `6`.
@@ -218,7 +218,7 @@ er_tte_add_risktable <- function(object, style = NULL, times = NULL, n_times = 6
 #'   to `0.95`.
 #' @param time_grid Numeric vector of times at which to predict `S(t)`,
 #'   or `NULL` (the default) to use 100 points evenly spaced across
-#'   `object$time$limits`.
+#'   the time range.
 #' @param predict_args A named list of additional arguments forwarded to
 #'   [er_predict_survival()] when generating model-based predictions.
 #' @param ... Additional named arguments forwarded to the `style` builder

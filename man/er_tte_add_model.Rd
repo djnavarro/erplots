@@ -35,7 +35,7 @@ to \code{0.95}.}
 
 \item{time_grid}{Numeric vector of times at which to predict \code{S(t)},
 or \code{NULL} (the default) to use 100 points evenly spaced across
-\code{object$time$limits}.}
+the time range.}
 
 \item{predict_args}{A named list of additional arguments forwarded to
 \code{\link[=er_predict_survival]{er_predict_survival()}} when generating model-based predictions.}
