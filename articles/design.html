@@ -308,6 +308,16 @@ stratification should fall back to one panel per stratum level instead
 of a shared legend – the concrete instance of “a layer’s own encoding
 takes precedence” that motivated the general rule. See
 <code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> for the full breakdown.</li>
+<li>
+<code><a href="../reference/er_style_data.html">er_style_data_hex()</a></code> (<code>"overlay"</code>-layout, a
+2D hexbin density): the concrete instance of “a layer’s own encoding
+takes precedence” that already exists, rather than a hypothetical – fill
+is already spoken for by bin density (declared via
+<code>fill_role = "density"</code>), so it doesn’t encode strata at all.
+If <code>stratify_by</code> is set and this layer’s own
+<code>keep_strata</code> isn’t turned off, all strata are silently
+pooled into a single hex-binned density (with an informational message),
+rather than partially or misleadingly encoding strata.</li>
 </ul>
 <p>A <code>config$color_role</code> tag (<code>"strata"</code> or
 <code>"response"</code>) records which meaning applies for a given

@@ -205,9 +205,12 @@ t-interval approximation can misbehave (a negative lower bound), and the
 </h2>
 <p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> adds the raw observations at their
 true <code>(exposure, response)</code> coordinates via
-<code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>, the default and only built-in
-builder for a continuous response – no jitter is needed, since the
-response isn’t confined to 0/1:</p>
+<code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>, the default builder for a
+continuous response – no jitter is needed, since the response isn’t
+confined to 0/1. <code><a href="../reference/er_style_data.html">er_style_data_hex()</a></code> (2D density via
+<code>geom_hex()</code>) is also available for a continuous response;
+see the <a href="plot-vpc.html">VPC article</a> or
+<code><a href="../reference/er_style_data.html">?er_style_data</a></code> for an example:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -262,7 +265,7 @@ methods:</p>
 <code class="sourceCode R"><span><span class="va">emax_df</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">exp_1</span>, <span class="va">rsp_1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_emax</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod_emax</span>, style <span class="op">=</span> <span class="va">er_style_summary_coefficients</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">mod_emax</span>, style <span class="op">=</span> <span class="st">"coefficients"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>

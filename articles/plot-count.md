@@ -211,8 +211,13 @@ low_count_data |>
 adds the raw observations at their true `(exposure, response)`
 coordinates via
 [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),
-the default and only built-in builder for a count response – no jitter
-is needed, since the response isn’t confined to 0/1:
+the default builder for a count response – no jitter is needed, since
+the response isn’t confined to 0/1.
+[`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+(2D density via `geom_hex()`) is also available for a count response;
+see
+[`?er_style_data`](https://erplots.djnavarro.net/reference/er_style_data.md)
+for details:
 
 ``` r
 

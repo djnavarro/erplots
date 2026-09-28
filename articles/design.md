@@ -211,6 +211,15 @@ that builder belongs to:
   rule. See
   [`er_plot_add_data()`](https://erplots.djnavarro.net/reference/er_plot_add_data.md)
   for the full breakdown.
+- [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+  (`"overlay"`-layout, a 2D hexbin density): the concrete instance of “a
+  layer’s own encoding takes precedence” that already exists, rather
+  than a hypothetical – fill is already spoken for by bin density
+  (declared via `fill_role = "density"`), so it doesn’t encode strata at
+  all. If `stratify_by` is set and this layer’s own `keep_strata` isn’t
+  turned off, all strata are silently pooled into a single hex-binned
+  density (with an informational message), rather than partially or
+  misleadingly encoding strata.
 
 A `config$color_role` tag (`"strata"` or `"response"`) records which
 meaning applies for a given data-layer build, so erplots knows whether

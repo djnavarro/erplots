@@ -32,16 +32,16 @@ p <- erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
   er_plot_add_quantiles() |>
-  er_plot_add_data(style = er_style_data_boxjitter)
+  er_plot_add_data(style = "boxjitter")
 ```
 
 ## Two stages: `object$plot`, then `object$output`
 
-Calling [`plot()`](https://rdrr.io/r/graphics/plot.default.html) (or
-[`print()`](https://rdrr.io/r/base/print.html)) on an `er_plot` object
-calls
+Calling [`plot()`](https://rdrr.io/r/graphics/plot.default.html) on an
+`er_plot` object calls
 [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
-first.
+first ([`print()`](https://rdrr.io/r/base/print.html) does not – it only
+prints a text summary of the object’s layers).
 [`er_plot_build()`](https://erplots.djnavarro.net/reference/er_plot_build.md)
 does its work in two stages, and both intermediate results are kept on
 the returned object rather than discarded:

@@ -127,7 +127,7 @@ and count responses too.
 
 erglm_data |> 
   er_plot(aucss, ae1) |> 
-  er_plot_add_model(mod, style = er_style_model_spaghetti) |> 
+  er_plot_add_model(mod, style = "spaghetti") |> 
   er_plot_add_quantiles() |> 
   plot()
 #> Using seed = 7040. Pass `seed = 7040` to reproduce this result.
@@ -176,7 +176,7 @@ method already populates `glance` (alongside `p_value` and
 erglm_data |> 
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
-  er_plot_add_summary(model = mod, style = er_style_summary_gof) |> 
+  er_plot_add_summary(model = mod, style = "gof") |> 
   plot()
 ```
 
@@ -264,8 +264,12 @@ the
 [continuous](https://erplots.djnavarro.net/articles/plot-continuous.html#data-layer)
 and
 [count](https://erplots.djnavarro.net/articles/plot-count.html#data-layer)
-articles) covers that case there, and a custom `"panel"`-layout builder
-(e.g. a single colour-encoded panel) remains possible via
+articles) covers that case there, as does
+[`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+(a 2D hexbin density overlay, also usable for a binary response – see
+[`?er_style_data`](https://erplots.djnavarro.net/reference/er_style_data.md)),
+and a custom `"panel"`-layout builder (e.g. a single colour-encoded
+panel) remains possible via
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
 if a project needs one – see the [Extending
 erplots](https://erplots.djnavarro.net/articles/extending.md) article.
@@ -293,7 +297,7 @@ p_boxjitter <- erglm_data |>
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
   er_plot_add_quantiles() |> 
-  er_plot_add_data(style = er_style_data_boxjitter) |> 
+  er_plot_add_data(style = "boxjitter") |> 
   er_plot_build()
 
 p_overlay$output | p_boxjitter$output
@@ -319,7 +323,7 @@ p_overlay_strat <- erglm_data |>
 p_boxjitter_strat <- erglm_data |> 
   er_plot(aucss, ae1, stratify_by = sex) |> 
   er_plot_add_model(mod_strat) |> 
-  er_plot_add_data(style = er_style_data_boxjitter) |> 
+  er_plot_add_data(style = "boxjitter") |> 
   er_plot_build()
 
 p_overlay_strat$output | p_boxjitter_strat$output
@@ -371,8 +375,20 @@ erglm_data |>
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
   er_plot_add_quantiles() |>
-  er_plot_add_groups(group_by = sex, style = er_style_group_violin) |> 
+  er_plot_add_groups(group_by = sex, style = "violin") |> 
   plot()
 ```
 
 ![](plot-binary_files/figure-html/group-3-1.png)
+
+A handful of further group builders round out the set:
+[`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md)
+puts counts on the y-axis instead of the group variable itself,
+[`er_style_group_linerange()`](https://erplots.djnavarro.net/reference/er_style_group.md)
+draws a minimal range instead of a full box/violin shape, and
+[`er_style_group_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md)/
+[`er_style_group_violinjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md)
+overlay the raw jittered exposure values on top of the boxplot/violin
+shape – see
+[`?er_style_group`](https://erplots.djnavarro.net/reference/er_style_group.md)
+for the full list.

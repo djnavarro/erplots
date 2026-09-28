@@ -224,11 +224,11 @@ emax_df |>
     response = rsp_1, 
     response_type = "continuous"
   ) |> 
-  er_vpc_add_observed(style = er_style_vpc_observed_quantile_line) |> 
+  er_vpc_add_observed(style = "quantile_line") |> 
   er_vpc_add_simulated(
     model = mod, 
     seed = 1234, 
-    style = er_style_vpc_simulated_quantile_ribbon
+    style = "quantile_ribbon"
   ) |>
   plot()
 ```
@@ -251,11 +251,11 @@ emax_df |>
     response = rsp_1, 
     response_type = "continuous"
   ) |> 
-  er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |> 
+  er_vpc_add_observed(style = "quantile_errorbar") |> 
   er_vpc_add_simulated(
     model = mod, 
     seed = 1234, 
-    style = er_style_vpc_simulated_quantile_errorbar
+    style = "quantile_errorbar"
   ) |>
   plot()
 ```
@@ -285,11 +285,11 @@ emax_df |>
     response_type = "continuous",
     plot_by = cnt_a
   ) |> 
-  er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |> 
+  er_vpc_add_observed(style = "quantile_errorbar") |> 
   er_vpc_add_simulated(
     model = mod, 
     seed = 1234, 
-    style = er_style_vpc_simulated_quantile_errorbar
+    style = "quantile_errorbar"
   ) |>
   plot()
 ```
@@ -310,11 +310,11 @@ emax_df |>
     response_type = "continuous",
     plot_by = cnt_a
   ) |> 
-  er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |> 
+  er_vpc_add_observed(style = "quantile_errorbar") |> 
   er_vpc_add_simulated(
     model = mod, 
     seed = 1234, 
-    style = er_style_vpc_simulated_quantile_ribbon
+    style = "quantile_ribbon"
   ) |>
   plot()
 ```
@@ -487,11 +487,11 @@ emax_df |>
     n_bins = 5,
     probs = c(0.1, 0.3, 0.5, 0.7, 0.9)
   ) |>
-  er_vpc_add_observed(style = er_style_vpc_observed_quantile_errorbar) |>
+  er_vpc_add_observed(style = "quantile_errorbar") |>
   er_vpc_add_simulated(
     model = mod,
     seed = 1234,
-    style = er_style_vpc_simulated_quantile_errorbar
+    style = "quantile_errorbar"
   ) |>
   plot()
 ```
@@ -526,7 +526,7 @@ emax_df |>
     probs = c(0.1, 0.3, 0.5, 0.7, 0.9)
   ) |>
   er_vpc_add_observed(
-    style = er_style_vpc_observed_quantile_errorbar,
+    style = "quantile_errorbar",
     dodge = -0.005, 
     prob_dodge_width = 0.005,
     errorbar_width = 0.0025
@@ -534,7 +534,7 @@ emax_df |>
   er_vpc_add_simulated(
     model = mod,
     seed = 1234,
-    style = er_style_vpc_simulated_quantile_errorbar,
+    style = "quantile_errorbar",
     dodge = 0.005, 
     prob_dodge_width = 0.005,
     errorbar_width = 0.0025
@@ -571,11 +571,11 @@ emax_df |>
     n_bins = 5,
     probs = c(0.1, 0.3, 0.5, 0.7, 0.9)
   ) |>
-  er_vpc_add_observed(style = er_style_vpc_observed_quantile_line) |>
+  er_vpc_add_observed(style = "quantile_line") |>
   er_vpc_add_simulated(
     model = mod,
     seed = 1234,
-    style = er_style_vpc_simulated_quantile_ribbon
+    style = "quantile_ribbon"
   ) |>
   plot()
 ```
@@ -597,11 +597,11 @@ emax_df |>
     n_bins = 5,
     probs = c(0.1, 0.3, 0.5, 0.7, 0.9)
   ) |>
-  er_vpc_add_observed(style = er_style_vpc_observed_quantile_line) |>
+  er_vpc_add_observed(style = "quantile_line") |>
   er_vpc_add_simulated(
     model = mod,
     seed = 1234,
-    style = er_style_vpc_simulated_quantile_ribbon,
+    style = "quantile_ribbon",
     ribbon_alpha = 0.1,
     ribbon_edges = TRUE
   ) |>
@@ -623,11 +623,11 @@ emax_df |>
     n_bins = 5,
     probs = c(0.1, 0.5, 0.9)
   ) |>
-  er_vpc_add_observed(style = er_style_vpc_observed_quantile_line) |>
+  er_vpc_add_observed(style = "quantile_line") |>
   er_vpc_add_simulated(
     model = mod,
     seed = 1234,
-    style = er_style_vpc_simulated_quantile_ribbon,
+    style = "quantile_ribbon",
     ribbon_alpha = 0.2,
     ribbon_edges = TRUE
   ) |>

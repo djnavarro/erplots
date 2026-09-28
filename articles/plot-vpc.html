@@ -266,11 +266,11 @@ response variable:</p>
 <span>    response <span class="op">=</span> <span class="va">rsp_1</span>, </span>
 <span>    response_type <span class="op">=</span> <span class="st">"continuous"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_line</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"quantile_line"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
 <span>    model <span class="op">=</span> <span class="va">mod</span>, </span>
 <span>    seed <span class="op">=</span> <span class="fl">1234</span>, </span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_ribbon</span></span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_ribbon"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-vpc_files/figure-html/continuous-vpc-quantile-line-1.png" class="r-plt" alt="" width="700"></p>
@@ -287,11 +287,11 @@ observed quantiles:</p>
 <span>    response <span class="op">=</span> <span class="va">rsp_1</span>, </span>
 <span>    response_type <span class="op">=</span> <span class="st">"continuous"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_errorbar</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"quantile_errorbar"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
 <span>    model <span class="op">=</span> <span class="va">mod</span>, </span>
 <span>    seed <span class="op">=</span> <span class="fl">1234</span>, </span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_errorbar</span></span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_errorbar"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-vpc_files/figure-html/continuous-vpc-quantile-errorbar-1.png" class="r-plt" alt="" width="700"></p>
@@ -319,11 +319,11 @@ errorbar style:</p>
 <span>    response_type <span class="op">=</span> <span class="st">"continuous"</span>,</span>
 <span>    plot_by <span class="op">=</span> <span class="va">cnt_a</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_errorbar</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"quantile_errorbar"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
 <span>    model <span class="op">=</span> <span class="va">mod</span>, </span>
 <span>    seed <span class="op">=</span> <span class="fl">1234</span>, </span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_errorbar</span></span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_errorbar"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-vpc_files/figure-html/continuous-vpc-cnt-a-errorbar-1.png" class="r-plt" alt="" width="700"></p>
@@ -339,11 +339,11 @@ legibility):</p>
 <span>    response_type <span class="op">=</span> <span class="st">"continuous"</span>,</span>
 <span>    plot_by <span class="op">=</span> <span class="va">cnt_a</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_errorbar</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"quantile_errorbar"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
 <span>    model <span class="op">=</span> <span class="va">mod</span>, </span>
 <span>    seed <span class="op">=</span> <span class="fl">1234</span>, </span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_ribbon</span></span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_ribbon"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-vpc_files/figure-html/continuous-vpc-cnt-a-ribbon-1.png" class="r-plt" alt="" width="700"></p>
@@ -485,11 +485,11 @@ model simulations:</p>
 <span>    n_bins <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>    probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_errorbar</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"quantile_errorbar"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
 <span>    model <span class="op">=</span> <span class="va">mod</span>,</span>
 <span>    seed <span class="op">=</span> <span class="fl">1234</span>,</span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_errorbar</span></span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_errorbar"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-vpc_files/figure-html/errorbar-collision-1.png" class="r-plt" alt="" width="700"></p>
@@ -525,7 +525,7 @@ together after dodging</li>
 <span>    probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span></span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_errorbar</span>,</span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_errorbar"</span>,</span>
 <span>    dodge <span class="op">=</span> <span class="op">-</span><span class="fl">0.005</span>, </span>
 <span>    prob_dodge_width <span class="op">=</span> <span class="fl">0.005</span>,</span>
 <span>    errorbar_width <span class="op">=</span> <span class="fl">0.0025</span></span>
@@ -533,7 +533,7 @@ together after dodging</li>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
 <span>    model <span class="op">=</span> <span class="va">mod</span>,</span>
 <span>    seed <span class="op">=</span> <span class="fl">1234</span>,</span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_errorbar</span>,</span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_errorbar"</span>,</span>
 <span>    dodge <span class="op">=</span> <span class="fl">0.005</span>, </span>
 <span>    prob_dodge_width <span class="op">=</span> <span class="fl">0.005</span>,</span>
 <span>    errorbar_width <span class="op">=</span> <span class="fl">0.0025</span></span>
@@ -566,11 +566,11 @@ impossible to tell where the boundaries are:</p>
 <span>    n_bins <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>    probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_line</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"quantile_line"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
 <span>    model <span class="op">=</span> <span class="va">mod</span>,</span>
 <span>    seed <span class="op">=</span> <span class="fl">1234</span>,</span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_ribbon</span></span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_ribbon"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="plot-vpc_files/figure-html/ribbon-collision-1.png" class="r-plt" alt="" width="700"></p>
@@ -587,11 +587,11 @@ but the plot is still difficult to read:</p>
 <span>    n_bins <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>    probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_line</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"quantile_line"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
 <span>    model <span class="op">=</span> <span class="va">mod</span>,</span>
 <span>    seed <span class="op">=</span> <span class="fl">1234</span>,</span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_ribbon</span>,</span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_ribbon"</span>,</span>
 <span>    ribbon_alpha <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>    ribbon_edges <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -608,11 +608,11 @@ would have to revert from five quantile bands to the usual three:</p>
 <span>    n_bins <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>    probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_line</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"quantile_line"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated</a></span><span class="op">(</span></span>
 <span>    model <span class="op">=</span> <span class="va">mod</span>,</span>
 <span>    seed <span class="op">=</span> <span class="fl">1234</span>,</span>
-<span>    style <span class="op">=</span> <span class="va">er_style_vpc_simulated_quantile_ribbon</span>,</span>
+<span>    style <span class="op">=</span> <span class="st">"quantile_ribbon"</span>,</span>
 <span>    ribbon_alpha <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>    ribbon_edges <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>

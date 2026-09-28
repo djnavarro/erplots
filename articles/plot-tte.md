@@ -148,7 +148,7 @@ single overall line otherwise):
 lung |>
   er_tte(time, status == 2) |>
   er_tte_add_curve() |>
-  er_tte_add_summary(style = er_style_tte_summary_n) |>
+  er_tte_add_summary(style = "n") |>
   plot()
 ```
 
@@ -343,7 +343,7 @@ own baseline (time-zero) size, alongside the bare count:
 lung |>
   er_tte(time, status == 2) |>
   er_tte_add_curve() |>
-  er_tte_add_risktable(style = er_style_tte_risktable_text, show_percent = TRUE) |>
+  er_tte_add_risktable(style = "text", show_percent = TRUE) |>
   plot()
 ```
 

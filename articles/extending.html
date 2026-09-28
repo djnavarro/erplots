@@ -178,7 +178,10 @@ layer:</p>
 <td>
 <code><a href="../reference/er_style_group.html">er_style_group_boxplot()</a></code> (default),
 <code><a href="../reference/er_style_group.html">er_style_group_histogram()</a></code>,
-<code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code>
+<code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code>,
+<code><a href="../reference/er_style_group.html">er_style_group_linerange()</a></code>,
+<code><a href="../reference/er_style_group.html">er_style_group_boxjitter()</a></code>,
+<code><a href="../reference/er_style_group.html">er_style_group_violinjitter()</a></code>
 </td>
 </tr>
 </tbody>
@@ -610,7 +613,7 @@ that:</p>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">biomarker_change</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_data_hex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"hex"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="extending_files/figure-html/fill-role-1.png" class="r-plt" alt="" width="700"></p>
 <p>Note the legend is titled “Count”, not the (nonexistent, here) strata
@@ -624,9 +627,10 @@ builder.</p>
 <h3 id="y_role-what-a-builders-y-axis-means">
 <code>y_role</code>: what a builder’s y-axis means<a class="anchor" aria-label="anchor" href="#y_role-what-a-builders-y-axis-means"></a>
 </h3>
-<p><code><a href="../reference/er_plot_add_groups.html">er_plot_add_groups()</a></code>’s default builders
-(<code><a href="../reference/er_style_group.html">er_style_group_boxplot()</a></code>,
-<code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code>) put the <em>group variable
+<p><code><a href="../reference/er_plot_add_groups.html">er_plot_add_groups()</a></code>’s default builder,
+<code><a href="../reference/er_style_group.html">er_style_group_boxplot()</a></code> (along with the rest of the
+built-in group builders except <code><a href="../reference/er_style_group.html">er_style_group_histogram()</a></code>,
+e.g. <code><a href="../reference/er_style_group.html">er_style_group_violin()</a></code>), puts the <em>group variable
 itself</em> on the y-axis – one categorical row per level – so the group
 variable’s own label is the right axis title.
 <code><a href="../reference/er_style_group.html">er_style_group_histogram()</a></code> instead needs its y-axis free
@@ -640,7 +644,7 @@ title the y-axis “Count” rather than the group variable’s label:</p>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="va">treatment</span>, style <span class="op">=</span> <span class="va">er_style_group_histogram</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_groups.html">er_plot_add_groups</a></span><span class="op">(</span>group_by <span class="op">=</span> <span class="va">treatment</span>, style <span class="op">=</span> <span class="st">"histogram"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="extending_files/figure-html/y-role-1.png" class="r-plt" alt="" width="700"></p>
 <p>Like <code>fill_role</code>, this tag is optional – a group builder
@@ -772,17 +776,20 @@ separate patchwork panel, never sharing space with the
 model/summary/quantile layers, so the tag is inert there if set.</p>
 </div>
 <div class="section level3">
-<h3 id="one-function-five-independent-arguments">One function, five independent arguments<a class="anchor" aria-label="anchor" href="#one-function-five-independent-arguments"></a>
+<h3 id="one-function-several-independent-arguments">One function, several independent arguments<a class="anchor" aria-label="anchor" href="#one-function-several-independent-arguments"></a>
 </h3>
 <p><code>layout</code>, <code>fill_role</code>, <code>y_role</code>,
-<code>layer</code>, and <code>draw_order</code> are all set via the same
-<code><a href="../reference/er_style_tag.html">er_style_tag()</a></code> call rather than five separate wrapper
-functions. Each argument is independent and optional (aside from
+<code>layer</code>, <code>draw_order</code>, <code>label</code>, and
+<code>overwrite</code> are all set via the same
+<code><a href="../reference/er_style_tag.html">er_style_tag()</a></code> call rather than separate wrapper functions.
+Each argument is independent and optional (aside from
 <code>layout</code> being mandatory for a data-layer builder
-specifically – see above), so a builder that needs to declare more than
-one piece of metadata – say, a custom “overlay”-layout data builder
-whose <code>fill</code> also means something other than strata, and
-whose geoms cover the whole panel – can do it in one call:</p>
+specifically – see above, and <code>overwrite</code> requiring
+<code>label</code>, which in turn requires <code>layer</code>), so a
+builder that needs to declare more than one piece of metadata – say, a
+custom “overlay”-layout data builder whose <code>fill</code> also means
+something other than strata, and whose geoms cover the whole panel – can
+do it in one call:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_density_builder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/er_style_tag.html">er_style_tag</a></span><span class="op">(</span></span>
 <span>  <span class="va">my_density_builder</span>,</span>
@@ -851,6 +858,23 @@ mismatches error immediately</td>
 <td>
 <code>"foreground"</code> (drawn after model/summary/quantile)
 vs. <code>"background"</code> (drawn before)</td>
+</tr>
+<tr class="even">
+<td><code>label</code></td>
+<td>Any builder</td>
+<td>No – requires <code>layer</code> to also be set</td>
+<td>Registers a short string (e.g. <code>"line"</code>) as an alias for
+the builder, usable wherever <code>style</code> is accepted – see
+[er_style_labels()]</td>
+</tr>
+<tr class="odd">
+<td><code>overwrite</code></td>
+<td>Any builder</td>
+<td>No – requires <code>label</code>, defaults to
+<code>FALSE</code>
+</td>
+<td>Whether re-registering an already-taken <code>(layer, label)</code>
+pair to a different function is allowed</td>
 </tr>
 </tbody>
 </table>
@@ -1012,7 +1036,7 @@ binning happens:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_vpc.html">er_vpc</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_vpc_observed_quantile_line</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"quantile_line"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `.check_style_response_type()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> `style` does not support a "binary" response.</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> It only supports: "continuous", "count".</span></span></code></pre></div>
@@ -1075,12 +1099,15 @@ stratum, same panel) rather than VPC’s facet-only treatment. See
 <code>config$time_upper</code>; the censor layer gets a
 <code>config$table</code> already filtered to censoring events; the
 risktable layer gets its own
-<code>config$table</code>/<code>config$breaks</code>; the pvalue layer
-gets <code>config$p_value</code>/ <code>config$corner_distance</code>;
-the model layer gets <code>config$predictions</code>/
-<code>config$time_grid</code>. A custom builder for a given layer reads
-whichever of these its own layer actually populates – see
-<code><a href="../reference/er_style_tte_curve.html">er_style_tte_curve()</a></code>/
+<code>config$table</code>/<code>config$breaks</code>; the summary layer
+gets <code>config$logrank_p_value</code> (the log-rank p-value,
+<code>NULL</code> when unstratified or fewer than 2 strata levels are
+present), <code>config$summary</code> (the supplied model’s
+<code><a href="../reference/er_model_interface.html">er_summary()</a></code> result, when one was given), and
+<code>config$corner_distance</code>; the model layer gets
+<code>config$predictions</code>/<code>config$time_grid</code>. A custom
+builder for a given layer reads whichever of these its own layer
+actually populates – see <code><a href="../reference/er_style_tte_curve.html">er_style_tte_curve()</a></code>/
 <code><a href="../reference/er_style_tte_censor.html">er_style_tte_censor()</a></code>/<code><a href="../reference/er_style_tte_risktable.html">er_style_tte_risktable()</a></code>/<code><a href="../reference/er_style_tte_summary.html">er_style_tte_summary()</a></code>/
 <code><a href="../reference/er_style_tte_model.html">er_style_tte_model()</a></code> for the exact shape of each.</p>
 <div class="section level3">

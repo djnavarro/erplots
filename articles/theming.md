@@ -175,7 +175,7 @@ look of any single builder.
 erglm_data |>
   er_plot(aucss, ae1, stratify_by = sex) |>
   er_plot_add_model(mod_strat) |>
-  er_plot_add_quantiles(style = er_style_quantile_errorbar) |>
+  er_plot_add_quantiles(style = "errorbar") |>
   er_plot_theme(dodge_width = 0.15) |>
   plot()
 ```
@@ -203,8 +203,8 @@ rather than ggplot2’s own default mid-intensity blue:
 
 erglm_data |>
   er_plot(aucss, biomarker_change) |>
-  er_plot_add_model(mod_gaussian, style = er_style_model_line) |>
-  er_plot_add_data(style = er_style_data_hex) |>
+  er_plot_add_model(mod_gaussian, style = "line") |>
+  er_plot_add_data(style = "hex") |>
   plot()
 ```
 
@@ -216,8 +216,8 @@ erglm_data |>
 
 erglm_data |>
   er_plot(aucss, biomarker_change) |>
-  er_plot_add_model(mod_gaussian, style = er_style_model_line) |>
-  er_plot_add_data(style = er_style_data_hex) |>
+  er_plot_add_model(mod_gaussian, style = "line") |>
+  er_plot_add_data(style = "hex") |>
   er_plot_theme(fill_continuous = ggplot2::scale_fill_viridis_c()) |>
   plot()
 ```

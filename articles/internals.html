@@ -120,13 +120,14 @@ the object and patch it by hand.</p>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_quantiles.html">er_plot_add_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">er_style_data_boxjitter</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/er_plot_add_data.html">er_plot_add_data</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"boxjitter"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="two-stages-objectplot-then-objectoutput">Two stages: <code>object$plot</code>, then
 <code>object$output</code><a class="anchor" aria-label="anchor" href="#two-stages-objectplot-then-objectoutput"></a>
 </h2>
-<p>Calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> (or <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>) on an
-<code>er_plot</code> object calls <code><a href="../reference/er_plot_build.html">er_plot_build()</a></code> first.
+<p>Calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on an <code>er_plot</code> object calls
+<code><a href="../reference/er_plot_build.html">er_plot_build()</a></code> first (<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> does not – it
+only prints a text summary of the object’s layers).
 <code><a href="../reference/er_plot_build.html">er_plot_build()</a></code> does its work in two stages, and both
 intermediate results are kept on the returned object rather than
 discarded:</p>

@@ -348,7 +348,7 @@ into two different calls (<code><a href="../reference/er_model_interface.html">e
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span></span>
 <span>    <span class="va">landmark_mod</span>,</span>
-<span>    style <span class="op">=</span> <span class="va">er_style_model_spaghetti</span>,</span>
+<span>    style <span class="op">=</span> <span class="st">"spaghetti"</span>,</span>
 <span>    predict_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>landmark_time <span class="op">=</span> <span class="fl">90</span><span class="op">)</span>,</span>
 <span>    seed <span class="op">=</span> <span class="fl">8213</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -437,7 +437,7 @@ the draws:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span>, style <span class="op">=</span> <span class="va">er_style_model_spaghetti</span>, seed <span class="op">=</span> <span class="fl">8213</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span>, style <span class="op">=</span> <span class="st">"spaghetti"</span>, seed <span class="op">=</span> <span class="fl">8213</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="model-interface_files/figure-html/toy-simulate-plot-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -579,7 +579,7 @@ contract exists for:</p>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">biomarker_change</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">emax_mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">emax_mod</span>, style <span class="op">=</span> <span class="va">er_style_summary_coefficients</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/er_plot_add_summary.html">er_plot_add_summary</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">emax_mod</span>, style <span class="op">=</span> <span class="st">"coefficients"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="model-interface_files/figure-html/toy-emax-summary-1.png" class="r-plt" alt="" width="700"></p>
 <p>Note the explicit <code>p_value = NULL</code> above, and the explicit
@@ -719,7 +719,7 @@ call them:</p>
 <code>er_plot_add_model(your_model)</code> exercises
 <code><a href="../reference/er_model_interface.html">er_predict()</a></code> alone.</li>
 <li>
-<code>er_plot_add_model(your_model, style = er_style_model_spaghetti)</code>
+<code>er_plot_add_model(your_model, style = "spaghetti")</code>
 additionally exercises <code><a href="../reference/er_model_interface.html">er_simulate()</a></code>’s
 <code>fit_resp</code>.</li>
 <li>

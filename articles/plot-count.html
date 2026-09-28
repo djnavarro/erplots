@@ -249,9 +249,11 @@ Poisson interval, which stays non-negative:</p>
 </h2>
 <p><code><a href="../reference/er_plot_add_data.html">er_plot_add_data()</a></code> adds the raw observations at their
 true <code>(exposure, response)</code> coordinates via
-<code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>, the default and only built-in
-builder for a count response – no jitter is needed, since the response
-isn’t confined to 0/1:</p>
+<code><a href="../reference/er_style_data.html">er_style_data_overlay()</a></code>, the default builder for a count
+response – no jitter is needed, since the response isn’t confined to
+0/1. <code><a href="../reference/er_style_data.html">er_style_data_hex()</a></code> (2D density via
+<code>geom_hex()</code>) is also available for a count response; see
+<code><a href="../reference/er_style_data.html">?er_style_data</a></code> for details:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span><span class="va">aucss</span>, <span class="va">ae_count</span><span class="op">)</span> <span class="op">|&gt;</span> </span>

@@ -54,7 +54,7 @@ builders for each layer:
 | Data | [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md) (default), [`er_style_data_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_data.md), [`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md) |
 | Quantile | [`er_style_quantile_errorbar()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) (default), [`er_style_quantile_errorbar_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md), [`er_style_quantile_pointrange()`](https://erplots.djnavarro.net/reference/er_style_quantile.md), [`er_style_quantile_pointrange_vlines()`](https://erplots.djnavarro.net/reference/er_style_quantile.md) |
 | Summary | [`er_style_summary_pvalue()`](https://erplots.djnavarro.net/reference/er_style_summary.md) (default), [`er_style_summary_n()`](https://erplots.djnavarro.net/reference/er_style_summary.md), [`er_style_summary_coefficients()`](https://erplots.djnavarro.net/reference/er_style_summary.md), [`er_style_summary_gof()`](https://erplots.djnavarro.net/reference/er_style_summary.md) |
-| Groups | [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md) (default), [`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md), [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md) |
+| Groups | [`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md) (default), [`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md), [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md), [`er_style_group_linerange()`](https://erplots.djnavarro.net/reference/er_style_group.md), [`er_style_group_boxjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md), [`er_style_group_violinjitter()`](https://erplots.djnavarro.net/reference/er_style_group.md) |
 
 These builders cover a wide variety of different stylistic features you
 might want to employ in your exposure-response plots, but if the feature
@@ -401,7 +401,7 @@ attr(er_style_data_hex, "er_style_fill_role")
 erglm_data |>
   er_plot(aucss, biomarker_change) |>
   er_plot_add_model(erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())) |>
-  er_plot_add_data(style = er_style_data_hex) |>
+  er_plot_add_data(style = "hex") |>
   plot()
 ```
 
@@ -416,10 +416,12 @@ for every other builder.
 ### `y_role`: what a builder’s y-axis means
 
 [`er_plot_add_groups()`](https://erplots.djnavarro.net/reference/er_plot_add_groups.md)’s
-default builders
-([`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md),
-[`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md))
-put the *group variable itself* on the y-axis – one categorical row per
+default builder,
+[`er_style_group_boxplot()`](https://erplots.djnavarro.net/reference/er_style_group.md)
+(along with the rest of the built-in group builders except
+[`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md),
+e.g. [`er_style_group_violin()`](https://erplots.djnavarro.net/reference/er_style_group.md)),
+puts the *group variable itself* on the y-axis – one categorical row per
 level – so the group variable’s own label is the right axis title.
 [`er_style_group_histogram()`](https://erplots.djnavarro.net/reference/er_style_group.md)
 instead needs its y-axis free for counts, moving group levels onto facet
@@ -434,7 +436,7 @@ attr(er_style_group_histogram, "er_style_y_role")
 erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
-  er_plot_add_groups(group_by = treatment, style = er_style_group_histogram) |>
+  er_plot_add_groups(group_by = treatment, style = "histogram") |>
   plot()
 ```
 
@@ -582,14 +584,15 @@ are drawn in their own, separate patchwork panel, never sharing space
 with the model/summary/quantile layers, so the tag is inert there if
 set.
 
-### One function, five independent arguments
+### One function, several independent arguments
 
-`layout`, `fill_role`, `y_role`, `layer`, and `draw_order` are all set
-via the same
+`layout`, `fill_role`, `y_role`, `layer`, `draw_order`, `label`, and
+`overwrite` are all set via the same
 [`er_style_tag()`](https://erplots.djnavarro.net/reference/er_style_tag.md)
-call rather than five separate wrapper functions. Each argument is
+call rather than separate wrapper functions. Each argument is
 independent and optional (aside from `layout` being mandatory for a
-data-layer builder specifically – see above), so a builder that needs to
+data-layer builder specifically – see above, and `overwrite` requiring
+`label`, which in turn requires `layer`), so a builder that needs to
 declare more than one piece of metadata – say, a custom “overlay”-layout
 data builder whose `fill` also means something other than strata, and
 whose geoms cover the whole panel – can do it in one call:
@@ -619,6 +622,8 @@ together).
 | `y_role` | Group-layer builders only | No – defaults to the group variable’s label | y-axis title when the y-axis isn’t the group variable itself (e.g. `"count"`) |
 | `layer` | Any builder | No – unchecked if unset | Which `er_plot_add_*()` the builder is meant for; mismatches error immediately |
 | `draw_order` | `"overlay"`-layout data builders only | No – defaults to `"foreground"` | `"foreground"` (drawn after model/summary/quantile) vs. `"background"` (drawn before) |
+| `label` | Any builder | No – requires `layer` to also be set | Registers a short string (e.g. `"line"`) as an alias for the builder, usable wherever `style` is accepted – see \[er_style_labels()\] |
+| `overwrite` | Any builder | No – requires `label`, defaults to `FALSE` | Whether re-registering an already-taken `(layer, label)` pair to a different function is allowed |
 
 None of this machinery is needed for a builder that draws a familiar
 idiom in a familiar slot – the crossbar example above needed no tags at
@@ -753,7 +758,7 @@ happens:
 
 erglm_data |>
   er_vpc(exposure = aucss, response = ae1) |>
-  er_vpc_add_observed(style = er_style_vpc_observed_quantile_line)
+  er_vpc_add_observed(style = "quantile_line")
 #> Error in `.check_style_response_type()`:
 #> ! `style` does not support a "binary" response.
 #> ℹ It only supports: "continuous", "count".
@@ -825,10 +830,15 @@ for the full rationale.
 (the tidy Kaplan-Meier table, with a `(0, 1)` origin row already
 prepended) and `config$time_upper`; the censor layer gets a
 `config$table` already filtered to censoring events; the risktable layer
-gets its own `config$table`/`config$breaks`; the pvalue layer gets
-`config$p_value`/ `config$corner_distance`; the model layer gets
-`config$predictions`/ `config$time_grid`. A custom builder for a given
-layer reads whichever of these its own layer actually populates – see
+gets its own `config$table`/`config$breaks`; the summary layer gets
+`config$logrank_p_value` (the log-rank p-value, `NULL` when unstratified
+or fewer than 2 strata levels are present), `config$summary` (the
+supplied model’s
+[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+result, when one was given), and `config$corner_distance`; the model
+layer gets `config$predictions`/`config$time_grid`. A custom builder for
+a given layer reads whichever of these its own layer actually populates
+– see
 [`er_style_tte_curve()`](https://erplots.djnavarro.net/reference/er_style_tte_curve.md)/
 [`er_style_tte_censor()`](https://erplots.djnavarro.net/reference/er_style_tte_censor.md)/[`er_style_tte_risktable()`](https://erplots.djnavarro.net/reference/er_style_tte_risktable.md)/[`er_style_tte_summary()`](https://erplots.djnavarro.net/reference/er_style_tte_summary.md)/
 [`er_style_tte_model()`](https://erplots.djnavarro.net/reference/er_style_tte_model.md)

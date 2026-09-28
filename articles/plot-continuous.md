@@ -147,8 +147,14 @@ can misbehave (a negative lower bound), and the
 adds the raw observations at their true `(exposure, response)`
 coordinates via
 [`er_style_data_overlay()`](https://erplots.djnavarro.net/reference/er_style_data.md),
-the default and only built-in builder for a continuous response – no
-jitter is needed, since the response isn’t confined to 0/1:
+the default builder for a continuous response – no jitter is needed,
+since the response isn’t confined to 0/1.
+[`er_style_data_hex()`](https://erplots.djnavarro.net/reference/er_style_data.md)
+(2D density via `geom_hex()`) is also available for a continuous
+response; see the [VPC
+article](https://erplots.djnavarro.net/articles/plot-vpc.md) or
+[`?er_style_data`](https://erplots.djnavarro.net/reference/er_style_data.md)
+for an example:
 
 ``` r
 
@@ -221,7 +227,7 @@ mod_emax <- emax_nls(
 emax_df |> 
   er_plot(exp_1, rsp_1) |> 
   er_plot_add_model(mod_emax) |> 
-  er_plot_add_summary(model = mod_emax, style = er_style_summary_coefficients) |> 
+  er_plot_add_summary(model = mod_emax, style = "coefficients") |> 
   er_plot_add_quantiles() |> 
   er_plot_add_data() |> 
   plot()

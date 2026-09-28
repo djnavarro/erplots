@@ -318,7 +318,7 @@ erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(
     landmark_mod,
-    style = er_style_model_spaghetti,
+    style = "spaghetti",
     predict_args = list(landmark_time = 90),
     seed = 8213
   ) |>
@@ -416,7 +416,7 @@ With this in place, both the spaghetti plot and the VPC work:
 
 erglm_data |>
   er_plot(aucss, ae1) |>
-  er_plot_add_model(mod, style = er_style_model_spaghetti, seed = 8213) |>
+  er_plot_add_model(mod, style = "spaghetti", seed = 8213) |> 
   plot()
 ```
 
@@ -567,7 +567,7 @@ er_summary.toy_emax <- function(model, ...) {
 erglm_data |>
   er_plot(aucss, biomarker_change) |>
   er_plot_add_model(emax_mod) |>
-  er_plot_add_summary(model = emax_mod, style = er_style_summary_coefficients) |>
+  er_plot_add_summary(model = emax_mod, style = "coefficients") |> 
   plot()
 ```
 
@@ -728,8 +728,8 @@ call them:
 - `er_plot_add_model(your_model)` exercises
   [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
   alone.
-- `er_plot_add_model(your_model, style = er_style_model_spaghetti)`
-  additionally exercises
+- `er_plot_add_model(your_model, style = "spaghetti")` additionally
+  exercises
   [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
   `fit_resp`.
 - `er_vpc_add_simulated(model = your_model, ...)` additionally exercises
