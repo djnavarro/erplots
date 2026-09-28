@@ -160,9 +160,10 @@ low_count_data |>
 ## Data layer
 
 `er_plot_add_data()` adds the raw observations at their true `(exposure,
-response)` coordinates via `er_style_data_overlay()`, the default and only
-built-in builder for a count response -- no jitter is needed, since the
-response isn't confined to 0/1:
+response)` coordinates via `er_style_data_overlay()`, the default builder
+for a count response -- no jitter is needed, since the response isn't
+confined to 0/1. `er_style_data_hex()` (2D density via `geom_hex()`) is
+also available for a count response; see `?er_style_data` for details:
 
 ```{r data-overlay-count}
 erglm_data |> 

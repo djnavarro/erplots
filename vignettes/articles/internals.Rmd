@@ -37,14 +37,15 @@ p <- erglm_data |>
   er_plot(aucss, ae1) |>
   er_plot_add_model(mod) |>
   er_plot_add_quantiles() |>
-  er_plot_add_data(style = er_style_data_boxjitter)
+  er_plot_add_data(style = "boxjitter")
 ```
 
 ## Two stages: `object$plot`, then `object$output`
 
-Calling `plot()` (or `print()`) on an `er_plot` object calls `er_plot_build()`
-first. `er_plot_build()` does its work in two stages, and both intermediate
-results are kept on the returned object rather than discarded:
+Calling `plot()` on an `er_plot` object calls `er_plot_build()` first
+(`print()` does not -- it only prints a text summary of the object's
+layers). `er_plot_build()` does its work in two stages, and both
+intermediate results are kept on the returned object rather than discarded:
 
 ```{r build}
 built <- er_plot_build(p)

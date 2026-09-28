@@ -100,7 +100,7 @@ applies unchanged to continuous and count responses too.
 ```{r model-1}
 erglm_data |> 
   er_plot(aucss, ae1) |> 
-  er_plot_add_model(mod, style = er_style_model_spaghetti) |> 
+  er_plot_add_model(mod, style = "spaghetti") |> 
   er_plot_add_quantiles() |> 
   plot()
 ```
@@ -134,7 +134,7 @@ so no extra setup is needed here:
 erglm_data |> 
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
-  er_plot_add_summary(model = mod, style = er_style_summary_gof) |> 
+  er_plot_add_summary(model = mod, style = "gof") |> 
   plot()
 ```
 
@@ -200,9 +200,11 @@ continuous/count response; `er_style_data_overlay()` (raw points at their
 true `(exposure, response)` coordinates, shown in the
 [continuous](plot-continuous.html#data-layer) and
 [count](plot-count.html#data-layer) articles) covers that case
-there, and a custom `"panel"`-layout builder (e.g. a single
-colour-encoded panel) remains possible via `er_style_tag()` if a project
-needs one -- see the [Extending erplots](extending.html) article. Each
+there, as does `er_style_data_hex()` (a 2D hexbin density overlay, also
+usable for a binary response -- see `?er_style_data`), and a custom
+`"panel"`-layout builder (e.g. a single colour-encoded panel) remains
+possible via `er_style_tag()` if a project needs one -- see the
+[Extending erplots](extending.html) article. Each
 builder declares which of the two structural families it belongs to
 via `er_style_tag()`, which is what `er_plot_add_data()` uses to decide
 whether to merge it into the main panel or stack it in panels below.
@@ -222,7 +224,7 @@ p_boxjitter <- erglm_data |>
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
   er_plot_add_quantiles() |> 
-  er_plot_add_data(style = er_style_data_boxjitter) |> 
+  er_plot_add_data(style = "boxjitter") |> 
   er_plot_build()
 
 p_overlay$output | p_boxjitter$output
@@ -243,7 +245,7 @@ p_overlay_strat <- erglm_data |>
 p_boxjitter_strat <- erglm_data |> 
   er_plot(aucss, ae1, stratify_by = sex) |> 
   er_plot_add_model(mod_strat) |> 
-  er_plot_add_data(style = er_style_data_boxjitter) |> 
+  er_plot_add_data(style = "boxjitter") |> 
   er_plot_build()
 
 p_overlay_strat$output | p_boxjitter_strat$output
@@ -284,6 +286,14 @@ erglm_data |>
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
   er_plot_add_quantiles() |>
-  er_plot_add_groups(group_by = sex, style = er_style_group_violin) |> 
+  er_plot_add_groups(group_by = sex, style = "violin") |> 
   plot()
 ```
+
+A handful of further group builders round out the set: `er_style_group_histogram()`
+puts counts on the y-axis instead of the group variable itself,
+`er_style_group_linerange()` draws a minimal range instead of a full
+box/violin shape, and `er_style_group_boxjitter()`/
+`er_style_group_violinjitter()` overlay the raw jittered exposure values
+on top of the boxplot/violin shape -- see `?er_style_group` for the full
+list.
