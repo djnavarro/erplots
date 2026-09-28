@@ -166,35 +166,17 @@ draws a different kind of annotation – goodness-of-fit rather than a
 p-value – built from a curated, compact subset of
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)’s
 `glance` field (`N`, `AIC`, `BIC`, `R²`, whichever are present and
-non-`NA`). erglm’s own models don’t populate `glance` yet, so the code
-below fakes up a version of
+non-`NA`). erglm’s own
 [`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-that does, purely to demonstrate the display idiom. Ordinarily this is
-something a model-fitting package writes once, permanently, for its own
-kind of model (the same way erglm already has a permanent
-[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
-that supplies `p_value`); the chunk below just does that same step by
-hand, inline, for demonstration purposes only – it’s not something you’d
-normally write yourself when just using erplots:
+method already populates `glance` (alongside `p_value` and
+`coefficients`), so no extra setup is needed here:
 
 ``` r
-
-er_summary.erglm_model_glance_demo <- function(model, ...) {
-  list(glance = tibble::tibble(
-    n = stats::nobs(model),
-    aic = stats::AIC(model),
-    bic = stats::BIC(model)
-  ))
-}
-registerS3method("er_summary", "erglm_model_glance_demo", er_summary.erglm_model_glance_demo)
-
-mod_glance_demo <- mod
-class(mod_glance_demo) <- c("erglm_model_glance_demo", class(mod_glance_demo))
 
 erglm_data |> 
   er_plot(aucss, ae1) |> 
   er_plot_add_model(mod) |> 
-  er_plot_add_summary(model = mod_glance_demo, style = er_style_summary_gof) |> 
+  er_plot_add_summary(model = mod, style = er_style_summary_gof) |> 
   plot()
 ```
 
