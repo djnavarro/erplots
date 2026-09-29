@@ -31,17 +31,38 @@ library(erplots)
 library(erglm)
 ```
 
-`erglm_data` has an exposure column, `aucss`, and several response
-columns of different kinds: `ae1`/`ae2` are binary (did an adverse event
-occur?), `biomarker_change` is continuous, and `ae_count` is a count. It
-also has some grouping/stratification columns, `sex` and `treatment`.
-We’ll start with `ae1`.
+## The data
 
-(erplots also ships its own simulated example dataset, `erplots_data`,
-with multiple exposure columns and one exposure/response pair suited to
-each of the Emax, logistic, linear, and Poisson regression scenarios –
-see
-[`?erplots_data`](https://erplots.djnavarro.net/reference/erplots_data.md).)
+To orient you to the synthetic dataset, we’ll start by taking a look at
+the structure of the `erglm_data` data frame.
+
+``` r
+
+head(erglm_data)
+#>   id    sex age weight dose treatment    aucss  cmaxss ae1 ae2 ae_count
+#> 1  1   Male  35     79  200      Drug  673.091  97.328   0   1        1
+#> 2  2 Female  22     58  200      Drug 2806.115 300.615   1   1        6
+#> 3  3 Female  28     58    0   Placebo    0.000   0.000   0   0        1
+#> 4  4 Female  18     57  100      Drug 1169.045 197.783   1   1        0
+#> 5  5   Male  28     77  100      Drug  377.288  51.429   0   0        0
+#> 6  6 Female  19     76  200      Drug  327.079  25.373   1   0        0
+#>   biomarker_change ae_duration
+#> 1         1.216895   12.402338
+#> 2         4.867072   13.697841
+#> 3        -1.832830    5.262023
+#> 4         1.900170    6.699422
+#> 5        -1.009179    6.152825
+#> 6        -4.972753   12.829726
+```
+
+As you can see, `erglm_data` has exposure columns labelled `aucss` and
+`cmaxss`, and response columns of different kinds: `ae1` and `ae2` are
+binary variables showing whether a particular adverse event did or did
+not occur, `biomarker_change` is a continuous response variable, and
+`ae_count` provides a count response (the number of adverse events of
+some kind). The dataset also provides covariate and design variables
+such as `sex` and `treatment` that might be used for grouping or
+stratifying the plot. We’ll start with `ae1`.
 
 ``` r
 

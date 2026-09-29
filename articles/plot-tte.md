@@ -1,14 +1,8 @@
 # Time-to-event plots
 
-``` r
-
-library(erplots)
-library(survival)
-library(ertte)
-```
-
 Alongside the
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) and
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)
 mini-grammars covered in the other articles, erplots supplies a third,
 separate mini-grammar built around
 [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) for
@@ -16,17 +10,24 @@ Kaplan-Meier/survival-over-time figures. It has a different coordinate
 system to the other two: time on the x-axis, survival probability on the
 y-axis, rather than exposure-vs-response.
 [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md) itself
-computes the Kaplan-Meier estimate once
-([`survival::survfit()`](https://rdrr.io/pkg/survival/man/survfit.html)),
+computes the Kaplan-Meier estimate once at the start of the pipeline,
 and every layer added afterwards reads from that shared fit rather than
 recomputing it. As with
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md),
-nothing is drawn until at least one `er_tte_add_*()` layer has been
-added and the pipeline is plotted.
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) and
+[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md), nothing
+is drawn until at least one `er_tte_add_*()` layer has been added and
+the pipeline is plotted.
 
 This article uses the `lung` dataset from the survival package
 throughout, treating `status == 2` as the event indicator (the dataset
 codes `1` = censored, `2` = dead).
+
+``` r
+
+library(erplots)
+library(survival)
+library(ertte)
+```
 
 ## A single curve
 

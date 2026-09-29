@@ -90,26 +90,26 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/ertte" class="external-link">ertte</a></span><span class="op">)</span></span></code></pre></div>
-<p>Alongside the <code><a href="../reference/er_plot.html">er_plot()</a></code>/<code><a href="../reference/er_vpc.html">er_vpc()</a></code>
+<p>Alongside the <code><a href="../reference/er_plot.html">er_plot()</a></code> and <code><a href="../reference/er_vpc.html">er_vpc()</a></code>
 mini-grammars covered in the other articles, erplots supplies a third,
 separate mini-grammar built around <code><a href="../reference/er_tte.html">er_tte()</a></code> for
 Kaplan-Meier/survival-over-time figures. It has a different coordinate
 system to the other two: time on the x-axis, survival probability on the
 y-axis, rather than exposure-vs-response. <code><a href="../reference/er_tte.html">er_tte()</a></code> itself
-computes the Kaplan-Meier estimate once
-(<code><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survival::survfit()</a></code>), and every layer added afterwards
-reads from that shared fit rather than recomputing it. As with
-<code><a href="../reference/er_plot.html">er_plot()</a></code>/<code><a href="../reference/er_vpc.html">er_vpc()</a></code>, nothing is drawn until at
-least one <code>er_tte_add_*()</code> layer has been added and the
-pipeline is plotted.</p>
+computes the Kaplan-Meier estimate once at the start of the pipeline,
+and every layer added afterwards reads from that shared fit rather than
+recomputing it. As with <code><a href="../reference/er_plot.html">er_plot()</a></code> and
+<code><a href="../reference/er_vpc.html">er_vpc()</a></code>, nothing is drawn until at least one
+<code>er_tte_add_*()</code> layer has been added and the pipeline is
+plotted.</p>
 <p>This article uses the <code>lung</code> dataset from the survival
 package throughout, treating <code>status == 2</code> as the event
 indicator (the dataset codes <code>1</code> = censored, <code>2</code> =
 dead).</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/ertte" class="external-link">ertte</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="a-single-curve">A single curve<a class="anchor" aria-label="anchor" href="#a-single-curve"></a>
 </h2>

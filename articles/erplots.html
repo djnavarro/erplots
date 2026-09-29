@@ -117,18 +117,39 @@ model for these examples.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>
-<p><code>erglm_data</code> has an exposure column, <code>aucss</code>,
-and several response columns of different kinds:
-<code>ae1</code>/<code>ae2</code> are binary (did an adverse event
-occur?), <code>biomarker_change</code> is continuous, and
-<code>ae_count</code> is a count. It also has some
-grouping/stratification columns, <code>sex</code> and
-<code>treatment</code>. We’ll start with <code>ae1</code>.</p>
-<p>(erplots also ships its own simulated example dataset,
-<code>erplots_data</code>, with multiple exposure columns and one
-exposure/response pair suited to each of the Emax, logistic, linear, and
-Poisson regression scenarios – see <code><a href="../reference/erplots_data.html">?erplots_data</a></code>.)</p>
+</div>
+<div class="section level2">
+<h2 id="the-data">The data<a class="anchor" aria-label="anchor" href="#the-data"></a>
+</h2>
+<p>To orient you to the synthetic dataset, we’ll start by taking a look
+at the structure of the <code>erglm_data</code> data frame.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">erglm_data</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   id    sex age weight dose treatment    aucss  cmaxss ae1 ae2 ae_count</span></span>
+<span><span class="co">#&gt; 1  1   Male  35     79  200      Drug  673.091  97.328   0   1        1</span></span>
+<span><span class="co">#&gt; 2  2 Female  22     58  200      Drug 2806.115 300.615   1   1        6</span></span>
+<span><span class="co">#&gt; 3  3 Female  28     58    0   Placebo    0.000   0.000   0   0        1</span></span>
+<span><span class="co">#&gt; 4  4 Female  18     57  100      Drug 1169.045 197.783   1   1        0</span></span>
+<span><span class="co">#&gt; 5  5   Male  28     77  100      Drug  377.288  51.429   0   0        0</span></span>
+<span><span class="co">#&gt; 6  6 Female  19     76  200      Drug  327.079  25.373   1   0        0</span></span>
+<span><span class="co">#&gt;   biomarker_change ae_duration</span></span>
+<span><span class="co">#&gt; 1         1.216895   12.402338</span></span>
+<span><span class="co">#&gt; 2         4.867072   13.697841</span></span>
+<span><span class="co">#&gt; 3        -1.832830    5.262023</span></span>
+<span><span class="co">#&gt; 4         1.900170    6.699422</span></span>
+<span><span class="co">#&gt; 5        -1.009179    6.152825</span></span>
+<span><span class="co">#&gt; 6        -4.972753   12.829726</span></span></code></pre></div>
+<p>As you can see, <code>erglm_data</code> has exposure columns labelled
+<code>aucss</code> and <code>cmaxss</code>, and response columns of
+different kinds: <code>ae1</code> and <code>ae2</code> are binary
+variables showing whether a particular adverse event did or did not
+occur, <code>biomarker_change</code> is a continuous response variable,
+and <code>ae_count</code> provides a count response (the number of
+adverse events of some kind). The dataset also provides covariate and
+design variables such as <code>sex</code> and <code>treatment</code>
+that might be used for grouping or stratifying the plot. We’ll start
+with <code>ae1</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -142,7 +163,7 @@ erplots which column is the exposure and which is the response. On its
 own it doesn’t draw anything – it’s just bookkeeping, the same way
 <code>ggplot(df, aes(x, y))</code> doesn’t draw anything until you add a
 geom:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;er_plot&gt;</span></span>
@@ -158,7 +179,7 @@ of difference between erplots and ggplot2 is that <code><a href="https://rdrr.io
 doesn’t render the plot: all it does is print out a summary of your plot
 specification. If you want to render the plot, you need to explicitly
 add <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to the end of your pipeline:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -172,7 +193,7 @@ canvas.</p>
 <p><code><a href="../reference/er_plot_add_model.html">er_plot_add_model()</a></code> draws the model’s fitted curve, with
 a confidence ribbon around it. This is where the fitted model you built
 earlier comes in:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -188,7 +209,7 @@ simple, model-free summary of the raw data.
 of roughly equal size and, within each bin, plots the observed response
 rate (or mean, for a continuous or count response) with a confidence
 interval:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -205,7 +226,7 @@ argument, e.g. <code>er_plot_add_quantiles(n_bins = 6)</code>.</p>
 on top of the curve. For a binary response the points are jittered
 vertically a little, since the underlying values are exactly 0 or 1 and
 would otherwise draw as two solid lines:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -220,7 +241,7 @@ would otherwise draw as two solid lines:</p>
 <p><code><a href="../reference/er_plot_add_summary.html">er_plot_add_summary()</a></code> places a small text annotation in
 the corner of the plot that has the least data in it. The default draws
 the model’s headline p-value, if it has one:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -239,7 +260,7 @@ useful for checking, say, whether exposure differs by treatment arm. It
 adds a small boxplot panel below the main plot, and unlike the other
 layers you can call it more than once to add several panels side by
 side:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -253,7 +274,7 @@ side:</p>
 </h3>
 <p>Every layer above is optional, and you can mix and match them in any
 combination. A fairly complete plot might look like this:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -274,7 +295,7 @@ colour (and, where relevant, fill) aesthetic to every layer, with one
 shared legend. Because the curve now needs to differ between groups, the
 model you pass in should include the stratification variable as a
 predictor:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_strat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae1</span> <span class="op">~</span> <span class="va">aucss</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
@@ -293,7 +314,7 @@ change from baseline in some biomarker) or a count response (e.g. the
 number of adverse events a patient experienced). erplots figures out
 which kind of response you have from the data, and adjusts the quantile
 summary accordingly – a mean and interval instead of a rate:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">biomarker_change</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
@@ -307,7 +328,7 @@ summary accordingly – a mean and interval instead of a rate:</p>
 via <code>response_type = "count"</code>, so that it uses an interval
 designed for counts rather than treating it as an ordinary continuous
 measurement:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_count</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://erglm.djnavarro.net/reference/erglm_model.html" class="external-link">erglm_model</a></span><span class="op">(</span><span class="va">ae_count</span> <span class="op">~</span> <span class="va">aucss</span>, <span class="va">erglm_data</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
@@ -326,7 +347,7 @@ measurement:</p>
 remapping any aesthetic: axis/legend labels, a plot title, axis limits,
 the overall ggplot2 theme, a discrete colour/fill palette for
 stratification, and more.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">erglm_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot.html">er_plot</a></span><span class="op">(</span>exposure <span class="op">=</span> <span class="va">aucss</span>, response <span class="op">=</span> <span class="va">ae1</span>, stratify_by <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/er_plot_add_model.html">er_plot_add_model</a></span><span class="op">(</span><span class="va">mod_strat</span><span class="op">)</span> <span class="op">|&gt;</span></span>

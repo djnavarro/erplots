@@ -90,21 +90,14 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/emaxnls" class="external-link">emaxnls</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>
 <p>Alongside the <code><a href="../reference/er_plot.html">er_plot()</a></code> mini-grammar covered in the <a href="plot-binary.html">binary</a>, <a href="plot-continuous.html">continuous</a>, and <a href="plot-count.html">count</a> articles, erplots supplies a second,
 smaller mini-grammar built around <code><a href="../reference/er_vpc.html">er_vpc()</a></code> for constructing
 visual predictive checks (VPCs). A VPC compares what a model predicts
 against what was actually observed, binned by exposure (or some other
 variable of interest), so that any systematic mismatch between model and
-data is easy to spot. The grammar is deliberately narrower than
-<code><a href="../reference/er_plot.html">er_plot()</a></code>’s in one respect: there’s no colour/facet
-precedence rule to reconcile across builders, since an optional
-<code>stratify_by</code> splits the plot into facet panels only (see
-<code><a href="../reference/er_vpc.html">?er_vpc</a></code>), never colour. But the same model-agnostic
-philosophy still applies – any model implementing
+data is easy to spot. The VPC grammar is deliberately narrower than the
+<code><a href="../reference/er_plot.html">er_plot()</a></code> one, but the same model-agnostic philosophy still
+applies – any model implementing
 <code><a href="../reference/er_model_interface.html">er_predict()</a></code>/<code><a href="../reference/er_model_interface.html">er_simulate()</a></code> (see <a href="model-interface.html">Implementing the model interface</a>) can be
 visualised this way, and this article uses the same erglm and emaxnls
 models as the other articles to demonstrate it. As with
@@ -113,6 +106,10 @@ plot’s variables and bins; nothing is drawn until
 <code><a href="../reference/er_vpc_add_observed.html">er_vpc_add_observed()</a></code> and
 <code><a href="../reference/er_vpc_add_simulated.html">er_vpc_add_simulated()</a></code> are added and the pipeline is
 plotted.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erplots" class="external-link">erplots</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/emaxnls" class="external-link">emaxnls</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/djnavarro/erglm" class="external-link">erglm</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="binary-response">Binary response<a class="anchor" aria-label="anchor" href="#binary-response"></a>
 </h2>

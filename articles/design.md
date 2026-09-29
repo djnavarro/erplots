@@ -1,10 +1,16 @@
 # The exposure-response plotting grammar
 
 The goal of this article is to describe the **grammar** that erplots
-uses to generate exposure-response plots. It’s not intended to describe
-all the style options available to users, or cover the mechanics of how
-plots are constructed. If you want to see those in more detail, there
-are articles covering
+uses to generate exposure-response plots, focusing on the core
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
+grammar rather than the VPC and TTE grammars: additional detail on those
+is available in the articles on [visual predictive
+checks](https://erplots.djnavarro.net/articles/plot-vpc.md) and
+[time-to-event
+plots](https://erplots.djnavarro.net/articles/plot-tte.md). It’s not
+intended to describe all the style options available to users, or cover
+the mechanics of how plots are constructed. If you want to see those in
+more detail, there are articles covering
 [binary](https://erplots.djnavarro.net/articles/plot-binary.md),
 [continuous](https://erplots.djnavarro.net/articles/plot-continuous.md),
 and [count](https://erplots.djnavarro.net/articles/plot-count.md)

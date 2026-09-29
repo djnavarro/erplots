@@ -1,12 +1,5 @@
 # Visual predictive checks
 
-``` r
-
-library(erplots)
-library(emaxnls)
-library(erglm)
-```
-
 Alongside the
 [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)
 mini-grammar covered in the
@@ -18,14 +11,10 @@ articles, erplots supplies a second, smaller mini-grammar built around
 constructing visual predictive checks (VPCs). A VPC compares what a
 model predicts against what was actually observed, binned by exposure
 (or some other variable of interest), so that any systematic mismatch
-between model and data is easy to spot. The grammar is deliberately
-narrower than
-[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)’s in
-one respect: there’s no colour/facet precedence rule to reconcile across
-builders, since an optional `stratify_by` splits the plot into facet
-panels only (see
-[`?er_vpc`](https://erplots.djnavarro.net/reference/er_vpc.md)), never
-colour. But the same model-agnostic philosophy still applies – any model
+between model and data is easy to spot. The VPC grammar is deliberately
+narrower than the
+[`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md) one,
+but the same model-agnostic philosophy still applies – any model
 implementing
 [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
 (see [Implementing the model
@@ -39,6 +28,13 @@ only sets up the plot’s variables and bins; nothing is drawn until
 and
 [`er_vpc_add_simulated()`](https://erplots.djnavarro.net/reference/er_vpc_add_simulated.md)
 are added and the pipeline is plotted.
+
+``` r
+
+library(erplots)
+library(emaxnls)
+library(erglm)
+```
 
 ## Binary response
 
