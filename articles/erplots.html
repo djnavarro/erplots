@@ -125,20 +125,20 @@ model for these examples.</p>
 at the structure of the <code>erglm_data</code> data frame.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">erglm_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   id    sex age weight dose treatment    aucss  cmaxss ae1 ae2 ae_count</span></span>
-<span><span class="co">#&gt; 1  1   Male  35     79  200      Drug  673.091  97.328   0   1        1</span></span>
-<span><span class="co">#&gt; 2  2 Female  22     58  200      Drug 2806.115 300.615   1   1        6</span></span>
-<span><span class="co">#&gt; 3  3 Female  28     58    0   Placebo    0.000   0.000   0   0        1</span></span>
-<span><span class="co">#&gt; 4  4 Female  18     57  100      Drug 1169.045 197.783   1   1        0</span></span>
-<span><span class="co">#&gt; 5  5   Male  28     77  100      Drug  377.288  51.429   0   0        0</span></span>
-<span><span class="co">#&gt; 6  6 Female  19     76  200      Drug  327.079  25.373   1   0        0</span></span>
+<span><span class="co">#&gt;   id    sex age weight dose treatment   aucss cmaxss ae1 ae2 ae_count</span></span>
+<span><span class="co">#&gt; 1  1   Male  35     79  200      Drug  673.09  97.33   0   1        1</span></span>
+<span><span class="co">#&gt; 2  2 Female  22     58  200      Drug 2806.12 300.62   1   1        6</span></span>
+<span><span class="co">#&gt; 3  3 Female  28     58    0   Placebo    0.00   0.00   0   0        1</span></span>
+<span><span class="co">#&gt; 4  4 Female  18     57  100      Drug 1169.04 197.78   1   1        0</span></span>
+<span><span class="co">#&gt; 5  5   Male  28     77  100      Drug  377.29  51.43   0   0        0</span></span>
+<span><span class="co">#&gt; 6  6 Female  19     76  200      Drug  327.08  25.37   1   0        0</span></span>
 <span><span class="co">#&gt;   biomarker_change ae_duration</span></span>
-<span><span class="co">#&gt; 1         1.216895   12.402338</span></span>
-<span><span class="co">#&gt; 2         4.867072   13.697841</span></span>
-<span><span class="co">#&gt; 3        -1.832830    5.262023</span></span>
-<span><span class="co">#&gt; 4         1.900170    6.699422</span></span>
-<span><span class="co">#&gt; 5        -1.009179    6.152825</span></span>
-<span><span class="co">#&gt; 6        -4.972753   12.829726</span></span></code></pre></div>
+<span><span class="co">#&gt; 1             1.22       12.40</span></span>
+<span><span class="co">#&gt; 2             4.87       13.70</span></span>
+<span><span class="co">#&gt; 3            -1.83        5.26</span></span>
+<span><span class="co">#&gt; 4             1.90        6.70</span></span>
+<span><span class="co">#&gt; 5            -1.01        6.15</span></span>
+<span><span class="co">#&gt; 6            -4.97       12.83</span></span></code></pre></div>
 <p>As you can see, <code>erglm_data</code> has exposure columns labelled
 <code>aucss</code> and <code>cmaxss</code>, and response columns of
 different kinds: <code>ae1</code> and <code>ae2</code> are binary

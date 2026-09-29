@@ -39,20 +39,20 @@ the structure of the `erglm_data` data frame.
 ``` r
 
 head(erglm_data)
-#>   id    sex age weight dose treatment    aucss  cmaxss ae1 ae2 ae_count
-#> 1  1   Male  35     79  200      Drug  673.091  97.328   0   1        1
-#> 2  2 Female  22     58  200      Drug 2806.115 300.615   1   1        6
-#> 3  3 Female  28     58    0   Placebo    0.000   0.000   0   0        1
-#> 4  4 Female  18     57  100      Drug 1169.045 197.783   1   1        0
-#> 5  5   Male  28     77  100      Drug  377.288  51.429   0   0        0
-#> 6  6 Female  19     76  200      Drug  327.079  25.373   1   0        0
+#>   id    sex age weight dose treatment   aucss cmaxss ae1 ae2 ae_count
+#> 1  1   Male  35     79  200      Drug  673.09  97.33   0   1        1
+#> 2  2 Female  22     58  200      Drug 2806.12 300.62   1   1        6
+#> 3  3 Female  28     58    0   Placebo    0.00   0.00   0   0        1
+#> 4  4 Female  18     57  100      Drug 1169.04 197.78   1   1        0
+#> 5  5   Male  28     77  100      Drug  377.29  51.43   0   0        0
+#> 6  6 Female  19     76  200      Drug  327.08  25.37   1   0        0
 #>   biomarker_change ae_duration
-#> 1         1.216895   12.402338
-#> 2         4.867072   13.697841
-#> 3        -1.832830    5.262023
-#> 4         1.900170    6.699422
-#> 5        -1.009179    6.152825
-#> 6        -4.972753   12.829726
+#> 1             1.22       12.40
+#> 2             4.87       13.70
+#> 3            -1.83        5.26
+#> 4             1.90        6.70
+#> 5            -1.01        6.15
+#> 6            -4.97       12.83
 ```
 
 As you can see, `erglm_data` has exposure columns labelled `aucss` and
