@@ -57,16 +57,23 @@ library(erplots)
 library(erglm)
 ```
 
-`erglm_data` has an exposure column, `aucss`, and several response
-columns of different kinds: `ae1`/`ae2` are binary (did an adverse event
-occur?), `biomarker_change` is continuous, and `ae_count` is a count. It
-also has some grouping/stratification columns, `sex` and `treatment`.
-We'll start with `ae1`.
+## The data
 
-(erplots also ships its own simulated example dataset, `erplots_data`,
-with multiple exposure columns and one exposure/response pair suited to
-each of the Emax, logistic, linear, and Poisson regression scenarios --
-see `?erplots_data`.)
+To orient you to the synthetic dataset, we'll start by taking a look
+at the structure of the `erglm_data` data frame.
+
+```{r}
+head(erglm_data)
+```
+
+As you can see, `erglm_data` has exposure columns labelled `aucss` and
+`cmaxss`, and response columns of different kinds: `ae1` and `ae2` are 
+binary variables showing whether a particular adverse event did or
+did not occur, `biomarker_change` is a continuous response variable, 
+and `ae_count` provides a count response (the number of adverse 
+events of some kind). The dataset also provides covariate and design
+variables such as `sex` and `treatment` that might be used for 
+grouping or stratifying the plot. We'll start with `ae1`.
 
 ```{r fit-mod}
 mod <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())

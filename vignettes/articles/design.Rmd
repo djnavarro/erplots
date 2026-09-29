@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The goal of this article is to describe the **grammar** that erplots uses to generate exposure-response plots. It's not intended to describe all the style options available to users, or cover the mechanics of how plots are constructed. If you want to see those in more detail, there are articles covering [binary](plot-binary.html), [continuous](plot-continuous.html), and
+The goal of this article is to describe the **grammar** that erplots uses to generate exposure-response plots, focusing on the core `er_plot()` grammar rather than the VPC and TTE grammars: additional detail on those is available in the articles on [visual predictive checks](plot-vpc.html) and [time-to-event plots](plot-tte.html). It's not intended to describe all the style options available to users, or cover the mechanics of how plots are constructed. If you want to see those in more detail, there are articles covering [binary](plot-binary.html), [continuous](plot-continuous.html), and
 [count](plot-count.html) response data. You can also read the article on [extending erplots](extending.html) if you want to learn how you can write your own functions that change how the plots are displayed. 
 
 <!-- agent-note: whenever a future change lands that alters any of the
