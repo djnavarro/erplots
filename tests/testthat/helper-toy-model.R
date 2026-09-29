@@ -43,10 +43,16 @@ er_predict.er_test_toy_model <- function(model, newdata, conf_level = 0.95, ...)
   z_scale <- -stats::qnorm((1 - conf_level) / 2)
 
   link_pred <- stats::predict(fit, newdata, se.fit = TRUE, type = "link")
+  # stats::predict() names its output using newdata's row names (here,
+  # the default "1", "2", ... row numbers); mirror erglm_predict()'s own
+  # unname() so a plain-data-frame newdata's fit_resp/ci_lower/ci_upper
+  # compare equal to erglm's, rather than picking up spurious names().
+  fit_link <- unname(link_pred$fit)
+  se_link <- unname(link_pred$se.fit)
 
-  newdata$fit_resp <- inverse_link(link_pred$fit)
-  newdata$ci_lower <- inverse_link(link_pred$fit - z_scale * link_pred$se.fit)
-  newdata$ci_upper <- inverse_link(link_pred$fit + z_scale * link_pred$se.fit)
+  newdata$fit_resp <- inverse_link(fit_link)
+  newdata$ci_lower <- inverse_link(fit_link - z_scale * se_link)
+  newdata$ci_upper <- inverse_link(fit_link + z_scale * se_link)
   newdata
 }
 

@@ -5,6 +5,16 @@
 # the toy wrapper -- see AGENTS.md's "Internal toy lm/glm test wrapper"
 # section. All tests here are gated on erglm being installed, since
 # comparing against a real erglm fit is the whole point.
+#
+# `er_test_toy_model()`'s own `er_summary()` method builds `coefficients`/
+# `glance` as tibbles (helper-toy-model.R), but erglm itself may return
+# either tibbles or plain data frames depending on version (erglm 0.2
+# drops the tibble dependency and returns plain data frames). Comparing a
+# tibble subset against a data-frame subset with `expect_equal()` fails on
+# class alone even when every value matches, so `.as_plain_df()` strips
+# both sides down to a base data.frame before comparison -- the tests care
+# about values agreeing, not which data-frame subclass either side returns.
+.as_plain_df <- function(x) as.data.frame(x, stringsAsFactors = FALSE)
 
 test_that("er_predict() agrees between er_test_toy_model() and erglm for a binomial/logit fit", {
   skip_if_not_installed("erglm")
@@ -45,12 +55,12 @@ test_that("er_summary() agrees between er_test_toy_model() and erglm for a binom
 
   expect_equal(s_toy$p_value, s_glm$p_value)
   expect_equal(
-    s_toy$coefficients[c("estimate", "std_error", "statistic", "p_value", "conf_low", "conf_high")],
-    s_glm$coefficients[c("estimate", "std_error", "statistic", "p_value", "conf_low", "conf_high")]
+    .as_plain_df(s_toy$coefficients[c("estimate", "std_error", "statistic", "p_value", "conf_low", "conf_high")]),
+    .as_plain_df(s_glm$coefficients[c("estimate", "std_error", "statistic", "p_value", "conf_low", "conf_high")])
   )
   expect_equal(
-    s_toy$glance[c("n", "df_residual", "logLik", "aic", "bic", "deviance", "r_squared")],
-    s_glm$glance[c("n", "df_residual", "logLik", "aic", "bic", "deviance", "r_squared")]
+    .as_plain_df(s_toy$glance[c("n", "df_residual", "logLik", "aic", "bic", "deviance", "r_squared")]),
+    .as_plain_df(s_glm$glance[c("n", "df_residual", "logLik", "aic", "bic", "deviance", "r_squared")])
   )
 })
 
@@ -65,12 +75,12 @@ test_that("er_summary() agrees between er_test_toy_model() and erglm for a gauss
 
   expect_equal(s_toy$p_value, s_glm$p_value)
   expect_equal(
-    s_toy$coefficients[c("estimate", "std_error", "statistic", "p_value", "conf_low", "conf_high")],
-    s_glm$coefficients[c("estimate", "std_error", "statistic", "p_value", "conf_low", "conf_high")]
+    .as_plain_df(s_toy$coefficients[c("estimate", "std_error", "statistic", "p_value", "conf_low", "conf_high")]),
+    .as_plain_df(s_glm$coefficients[c("estimate", "std_error", "statistic", "p_value", "conf_low", "conf_high")])
   )
   expect_equal(
-    s_toy$glance[c("n", "df_residual", "logLik", "aic", "bic", "deviance", "r_squared")],
-    s_glm$glance[c("n", "df_residual", "logLik", "aic", "bic", "deviance", "r_squared")]
+    .as_plain_df(s_toy$glance[c("n", "df_residual", "logLik", "aic", "bic", "deviance", "r_squared")]),
+    .as_plain_df(s_glm$glance[c("n", "df_residual", "logLik", "aic", "bic", "deviance", "r_squared")])
   )
 })
 
