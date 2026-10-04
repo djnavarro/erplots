@@ -77,20 +77,6 @@ tag, since the two grammars' model builders share no signature or
 handed a builder tagged for a different layer (including
 \code{\link[=er_plot_add_model]{er_plot_add_model()}}'s own builders).
 }
-\examples{
-if (requireNamespace("ertte", quietly = TRUE)) {
-  library(survival)
-  library(ertte)
-  mod <- ertte_aft(Surv(time, status == 2) ~ age, lung)
-
-  lung |>
-    er_tte(time, status == 2) |>
-    er_tte_add_curve() |>
-    er_tte_add_model(mod, style = er_style_tte_model_line, ribbon_alpha = 0.3) |>
-    plot()
-}
-
-}
 \seealso{
 \code{\link[=er_tte_add_model]{er_tte_add_model()}}, \code{\link[=er_style_tte_curve_km]{er_style_tte_curve_km()}}, \code{\link[=er_style_tte]{er_style_tte()}}
 }

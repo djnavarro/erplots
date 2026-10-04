@@ -49,19 +49,6 @@
 #'
 #' @returns A geom, or a list of geoms.
 #'
-#' @examples
-#' if (requireNamespace("ertte", quietly = TRUE)) {
-#'   library(survival)
-#'   library(ertte)
-#'   mod <- ertte_aft(Surv(time, status == 2) ~ age, lung)
-#'
-#'   lung |>
-#'     er_tte(time, status == 2) |>
-#'     er_tte_add_curve() |>
-#'     er_tte_add_model(mod, style = er_style_tte_model_line, ribbon_alpha = 0.3) |>
-#'     plot()
-#' }
-#'
 #' @seealso [er_tte_add_model()], [er_style_tte_curve_km()], [er_style_tte()]
 #'
 #' @name er_style_tte_model
