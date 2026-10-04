@@ -149,36 +149,6 @@ erplots_data
 #> #   cmin_ss <dbl>, biomarker_change <dbl>, responder <int>,
 #> #   adverse_event <int>, symptom_score <dbl>, n_events <int>
 
-# Emax (continuous): biomarker_change ~ auc_ss
-if (requireNamespace("emaxnls", quietly = TRUE)) {
-  mod <- emaxnls::emax_nls(
-    structural_model = biomarker_change ~ auc_ss,
-    covariate_model = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
-    data = erplots_data
-  )
-  erplots_data |>
-    er_plot(auc_ss, biomarker_change) |>
-    er_plot_add_model(mod) |>
-    er_plot_add_data() |>
-    plot()
-}
-
-
-# Emax (binary): responder ~ cmax_ss
-if (requireNamespace("emaxnls", quietly = TRUE)) {
-  mod <- emaxnls::emax_logistic(
-    structural_model = responder ~ cmax_ss,
-    covariate_model = list(E0 ~ 1, Emax ~ 1, logEC50 ~ 1),
-    data = erplots_data
-  )
-  erplots_data |>
-    er_plot(cmax_ss, responder) |>
-    er_plot_add_model(mod) |>
-    er_plot_add_quantiles() |>
-    plot()
-}
-
-
 # Logistic regression: adverse_event ~ auc_ss
 if (requireNamespace("erglm", quietly = TRUE)) {
   mod <- erglm::erglm_model(adverse_event ~ auc_ss, data = erplots_data, family = binomial())

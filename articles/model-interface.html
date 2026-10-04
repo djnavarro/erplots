@@ -808,11 +808,11 @@ the full interface for time-to-event models:
 reductions of a survival curve (letting a time-to-event model plug into
 the ordinary <code><a href="../reference/er_plot.html">er_plot()</a></code>/<code><a href="../reference/er_vpc.html">er_vpc()</a></code> grammar too),
 plus <code>er_predict_survival.ertte_model()</code> – wrapping its own
-<code><a href="https://ertte.djnavarro.net/reference/ertte_predict.html" class="external-link">ertte_predict()</a></code> – for the full <code>S(t)</code> curve
+<code>ertte_predict()</code> – for the full <code>S(t)</code> curve
 overlay <code><a href="../reference/er_tte_add_model.html">er_tte_add_model()</a></code> needs. Unlike
 <code>toy_survival</code> above, it handles the Weibull/log-normal scale
 parameter this article’s simplified exponential example sidesteps, via
-<code><a href="https://ertte.djnavarro.net/reference/ertte_predict.html" class="external-link">ertte_predict()</a></code>’s own machinery rather than the
+<code>ertte_predict()</code>’s own machinery rather than the
 from-scratch delta method used here.</li>
 </ul>
 <p>All three are <code>Suggests</code>-only dependencies of erplots (see

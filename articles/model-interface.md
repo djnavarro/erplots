@@ -813,15 +813,12 @@ simplified model:
   (letting a time-to-event model plug into the ordinary
   [`er_plot()`](https://erplots.djnavarro.net/reference/er_plot.md)/[`er_vpc()`](https://erplots.djnavarro.net/reference/er_vpc.md)
   grammar too), plus `er_predict_survival.ertte_model()` – wrapping its
-  own
-  [`ertte_predict()`](https://ertte.djnavarro.net/reference/ertte_predict.html)
-  – for the full `S(t)` curve overlay
+  own `ertte_predict()` – for the full `S(t)` curve overlay
   [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)
   needs. Unlike `toy_survival` above, it handles the Weibull/log-normal
   scale parameter this article’s simplified exponential example
-  sidesteps, via
-  [`ertte_predict()`](https://ertte.djnavarro.net/reference/ertte_predict.html)’s
-  own machinery rather than the from-scratch delta method used here.
+  sidesteps, via `ertte_predict()`’s own machinery rather than the
+  from-scratch delta method used here.
 
 All three are `Suggests`-only dependencies of erplots (see
 `DESCRIPTION`), used here only as worked examples – there’s no
