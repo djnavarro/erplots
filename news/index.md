@@ -2,6 +2,8 @@
 
 ## erplots 0.2.0
 
+CRAN release: 2026-10-04
+
 ### New features
 
 - Added [`er_tte()`](https://erplots.djnavarro.net/reference/er_tte.md),
@@ -33,10 +35,11 @@
   [`?er_model_interface`](https://erplots.djnavarro.net/reference/er_model_interface.md))
   powering
   [`er_tte_add_model()`](https://erplots.djnavarro.net/reference/er_tte_add_model.md)’s
-  `S(t)` overlay. The new companion package `ertte`
-  (`Suggests`/`Remotes`-only, GitHub- only like `erglm`/`emaxnls`)
-  implements it, alongside the existing
-  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
+  `S(t)` overlay. The new companion package `ertte` (GitHub-only, like
+  `erglm`/ `emaxnls`, but not a declared `Suggests`/`Remotes` dependency
+  of `erplots`) implements it, alongside the existing
+  [`er_predict()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/
+  [`er_simulate()`](https://erplots.djnavarro.net/reference/er_model_interface.md)/[`er_summary()`](https://erplots.djnavarro.net/reference/er_model_interface.md)
   methods.
 - [`cut_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)/[`cut_exposure_quantile()`](https://erplots.djnavarro.net/reference/cut_quantile.md)
   gain a `ties` argument controlling how a value that sits exactly on an
