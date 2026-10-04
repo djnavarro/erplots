@@ -17,9 +17,10 @@
   `er_plot_theme()`/`er_vpc_theme()`. See the new `plot-tte` vignette.
 * Added `er_predict_survival()`, a fourth model-interface generic (see
   `?er_model_interface`) powering `er_tte_add_model()`'s `S(t)` overlay.
-  The new companion package `ertte` (`Suggests`/`Remotes`-only, GitHub-
-  only like `erglm`/`emaxnls`) implements it, alongside the existing
-  `er_predict()`/`er_simulate()`/`er_summary()` methods.
+  The new companion package `ertte` (GitHub-only, like `erglm`/
+  `emaxnls`, but not a declared `Suggests`/`Remotes` dependency of
+  `erplots`) implements it, alongside the existing `er_predict()`/
+  `er_simulate()`/`er_summary()` methods.
 * `cut_quantile()`/`cut_exposure_quantile()` gain a `ties` argument
   controlling how a value that sits exactly on an interior quantile break
   is assigned (`"upward"`, the default and prior behaviour; `"downward"`;
