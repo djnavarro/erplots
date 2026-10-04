@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/djnavarro/erplots/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/djnavarro/erplots/blob/v0.2.0/DESCRIPTION)
 
 Navarro D (2026). *erplots: Model-Agnostic Exposure-Response Plots*. R
 package version 0.2.0, <https://github.com/djnavarro/erplots>.
