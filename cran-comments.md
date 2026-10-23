@@ -2,47 +2,40 @@
 
 ## Summary
 
-This is a feature release (0.2.0), following 0.1.2 (published
-2026-09-09). The main addition is `er_tte()`, a third mini-grammar
-(alongside the existing `er_plot()`/`er_vpc()`) for Kaplan-Meier/
-survival-over-time figures, and a matching `er_predict_survival()`
-model-interface generic. It also includes several pre-1.0 breaking
-renames and bug fixes. See `NEWS.md` for the complete list.
+This is a patch release (0.2.1), fixing the `WARN` currently reported on
+the CRAN checks page for 0.2.0 (`Check: for unstated dependencies in
+'tests', '::' or ':::' import not declared from: 'ertte'`).
 
-## Suggests
-
-`erglm` and `emaxnls` (optional companion model-fitting packages) are
-both now on CRAN, so no `Remotes:` entry is needed for either. `ertte`
-(also GitHub-only) was added to `Suggests` mid-cycle but has been
-removed again before this submission, so this package has no
-`Remotes:` field and no GitHub-only `Suggests` dependency at all.
+`ertte` was deliberately dropped from `Suggests` before the 0.2.0
+submission because it wasn't yet on CRAN at the time (see that release's
+own `cran-comments.md`), but `tests/testthat/test-tte-model-sync.R` --
+a `skip_if_not_installed("ertte")`-gated integration test file -- calls
+`ertte::` directly. That was silently fine while `ertte` was GitHub-only
+and absent from CRAN's check machines; now that `ertte` 0.1.1 is on CRAN,
+their machines install and run it, surfacing the undeclared dependency.
+This release re-adds `ertte` to `Suggests` (no `Remotes:` entry needed,
+since it's on CRAN) -- no other code changes.
 
 ## Test environments
 
-* Local: Ubuntu 24.04, R 4.6.1 (`R CMD check --as-cran`)
+* Local: Ubuntu 24.04, R 4.6.1 (`R CMD check --as-cran`), with `ertte`
+  0.1.0 installed -- confirms `tests/testthat/test-tte-model-sync.R`
+  passes against a real `ertte` fit now that the dependency is declared.
 * GitHub Actions: ubuntu-latest (R-devel/release/oldrel-1),
   windows-latest (R-release), macos-latest/arm64 (R-release)
-* R-hub (<https://github.com/djnavarro/erplots/actions/runs/37194834347>):
-  windows, ubuntu-clang, ubuntu-next, donttest -- all `Status: OK`.
-  `nosuggests` reports 1 error re-building the vignette, because that
-  requires `knitr`/`rmarkdown`, which the platform deliberately omits
-  along with the rest of `Suggests` -- expected for any package with a
-  `VignetteBuilder`, not a package bug.
-* win-builder (R-devel, R-release) and mac-builder (R-release,
-  R-devel): all four `Status: OK`, 0 errors/warnings/notes.
+* win-builder (R-devel, R-release): `Status: OK`, 0 errors/warnings/notes.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes, except the expected `nosuggests` case
-above.
+0 errors | 0 warnings | 0 notes.
 
 ## Downstream dependencies
 
-`erglm` and `emaxnls` depend on `erplots` via `Suggests` and are both
-on CRAN (genuine reverse dependencies); `ertte` also Suggests
-`erplots` but is GitHub-only, checked as a courtesy.
-`revdepcheck::revdep_check()` against this submission's source: 0 new
-problems for all three.
+`erglm` and `emaxnls` depend on `erplots` via `Suggests`; `ertte` depends
+on `erplots` via `Suggests` too, and `erplots` now depends on `ertte` via
+`Suggests` in the same direction (both sides declared, no cycle issue
+since neither is a hard dependency). `revdepcheck::revdep_check()`
+against this submission's source: 0 new problems for all three.
 
 Thank you for your consideration.
 
