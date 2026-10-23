@@ -1,5 +1,15 @@
 # Changelog
 
+## erplots 0.2.1
+
+### Bug fixes
+
+- `ertte` is back in `Suggests` (no `Remotes:` needed now that it’s on
+  CRAN). It was dropped before the 0.2.0 submission because it wasn’t
+  yet on CRAN, but `tests/testthat/test-tte-model-sync.R` calls it
+  directly, which CRAN’s checks flagged as an undeclared dependency once
+  `ertte` became available on their check machines.
+
 ## erplots 0.2.0
 
 CRAN release: 2026-10-04

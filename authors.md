@@ -11,12 +11,12 @@ Source:
 [`DESCRIPTION`](https://github.com/djnavarro/erplots/blob/main/DESCRIPTION)
 
 Navarro D (2026). *erplots: Model-Agnostic Exposure-Response Plots*. R
-package version 0.2.0.9000, <https://github.com/djnavarro/erplots>.
+package version 0.2.1, <https://github.com/djnavarro/erplots>.
 
     @Manual{,
       title = {erplots: Model-Agnostic Exposure-Response Plots},
       author = {Danielle Navarro},
       year = {2026},
-      note = {R package version 0.2.0.9000},
+      note = {R package version 0.2.1},
       url = {https://github.com/djnavarro/erplots},
     }
