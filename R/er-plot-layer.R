@@ -575,21 +575,29 @@
 .get_model_predictions <- function(model, conf_level, exposure, strata, stratify, data,
                                     predict_args = list()) {
 
-  pred_dat <- seq(exposure$limits[1], exposure$limits[2], length.out = 300L) |>
-    data.frame() |> .set_names(exposure$name)
+  # a caller-supplied `newdata` replaces the generated grid entirely (no
+  # strata crossing or reference-covariate filling) and is removed from
+  # `predict_args` so it isn't passed to `er_predict()` twice
+  if ("newdata" %in% names(predict_args)) {
+    pred_dat <- predict_args$newdata
+    predict_args$newdata <- NULL
+  } else {
+    pred_dat <- seq(exposure$limits[1], exposure$limits[2], length.out = 300L) |>
+      data.frame() |> .set_names(exposure$name)
 
-  if (stratify) pred_dat <- pred_dat |>
-    dplyr::cross_join(data.frame(strata$limits) |> .set_names(strata$name))
+    if (stratify) pred_dat <- pred_dat |>
+      dplyr::cross_join(data.frame(strata$limits) |> .set_names(strata$name))
 
-  # a fitted model's formula may reference covariates beyond the exposure
-  # (and, when `stratify`, strata) variable -- erplots never inspects a
-  # model's formula (it's deliberately model-agnostic), so instead of
-  # guessing which covariates matter, fill in *every* other column of the
-  # original fitting data at a single reference value. An `er_predict()`
-  # method ignores extra columns it doesn't need, so this is harmless when
-  # the model has no such covariates, and avoids the "object not found"
-  # crash inside `predict()` when it does
-  pred_dat <- .fill_reference_covariates(pred_dat, data)
+    # a fitted model's formula may reference covariates beyond the exposure
+    # (and, when `stratify`, strata) variable -- erplots never inspects a
+    # model's formula (it's deliberately model-agnostic), so instead of
+    # guessing which covariates matter, fill in *every* other column of the
+    # original fitting data at a single reference value. An `er_predict()`
+    # method ignores extra columns it doesn't need, so this is harmless when
+    # the model has no such covariates, and avoids the "object not found"
+    # crash inside `predict()` when it does
+    pred_dat <- .fill_reference_covariates(pred_dat, data)
+  }
 
   model_predictions <- rlang::exec(
     er_predict, model = model, newdata = pred_dat, conf_level = conf_level, !!!predict_args
