@@ -490,3 +490,18 @@ test_that(".layer_overlay constructs the correct data structure", {
   expect_equal(cfg1$response_type, "binary")
   expect_equal(cfg3$response_type, "continuous")
 })
+
+
+test_that("predict_args$newdata replaces the generated prediction grid", {
+  mod <- er_test_toy_model(ae1 ~ aucss, er_test_data, family = stats::binomial())
+  grid <- data.frame(aucss = c(10, 20, 30))
+
+  p <- er_plot(er_test_data, aucss, ae1) |>
+    er_plot_add_model(mod, predict_args = list(newdata = grid))
+
+  expect_equal(nrow(p$layer$model$config$predictions), 3L)
+  expect_equal(p$layer$model$config$predictions$aucss, grid$aucss)
+
+  p_default <- er_plot(er_test_data, aucss, ae1) |> er_plot_add_model(mod)
+  expect_equal(nrow(p_default$layer$model$config$predictions), 300L)
+})

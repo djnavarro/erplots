@@ -18,7 +18,11 @@
 #' @param conf_level Confidence level for the prediction ribbon. Defaults
 #'   to `0.95`.
 #' @param predict_args A named list of additional arguments forwarded to
-#'   [er_predict()] when generating model-based predictions.
+#'   [er_predict()] when generating model-based predictions. If it contains
+#'   `newdata`, that data frame is used as the prediction grid in place of
+#'   the one erplots generates (no strata crossing or reference-covariate
+#'   filling is applied), so it must include the exposure column and, when
+#'   the layer is stratified, the strata column.
 #' @param ... Additional named arguments forwarded to the `style` builder
 #'   function when the plot is built.
 #'

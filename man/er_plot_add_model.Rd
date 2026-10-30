@@ -32,7 +32,11 @@ and \code{FALSE} otherwise.}
 to \code{0.95}.}
 
 \item{predict_args}{A named list of additional arguments forwarded to
-\code{\link[=er_predict]{er_predict()}} when generating model-based predictions.}
+\code{\link[=er_predict]{er_predict()}} when generating model-based predictions. If it contains
+\code{newdata}, that data frame is used as the prediction grid in place of
+the one erplots generates (no strata crossing or reference-covariate
+filling is applied), so it must include the exposure column and, when
+the layer is stratified, the strata column.}
 
 \item{...}{Additional named arguments forwarded to the \code{style} builder
 function when the plot is built.}
