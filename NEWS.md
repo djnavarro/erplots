@@ -8,6 +8,11 @@
   which CRAN's checks flagged as an undeclared dependency once `ertte`
   became available on their check machines.
 
+## New features
+
+* `er_plot_add_quantiles()` gains an `include_placebo` argument to omit the
+  placebo bin from the quantile layer.
+
 # erplots 0.2.0
 
 ## New features

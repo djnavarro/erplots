@@ -247,6 +247,11 @@ er_plot_add_summary <- function(object, model = NULL, style = NULL, keep_strata 
 #' @param ties,quantile_type,labeller Passed straight through to
 #'   [cut_exposure_quantile()] to control how the exposure variable is
 #'   split into bins -- see its documentation for what each controls.
+#' @param include_placebo Logical; whether to show the placebo bin in this
+#'   layer. Defaults to `TRUE`. If `FALSE`, the placebo bin is omitted from
+#'   this layer only; the remaining bins are unchanged. Placebo observations
+#'   are those with an exposure of exactly zero, so this has no effect when
+#'   the exposure variable contains no zeros.
 #' @param ... Additional named arguments forwarded to the `style` builder
 #'   function when the plot is built.
 #'
@@ -356,11 +361,14 @@ er_plot_add_summary <- function(object, model = NULL, style = NULL, keep_strata 
 er_plot_add_quantiles <- function(object, style = NULL, keep_strata = NULL,
                                     conf_level = 0.95, n_bins = 4,
                                     ties = "upward", quantile_type = 7,
-                                    labeller = NULL, ...) {
+                                    labeller = NULL, include_placebo = TRUE, ...) {
 
   dots <- rlang::list2(...)
   .check_dots_named(dots)
   if (!inherits(object, "er_plot")) rlang::abort("`object` must be an er_plot object")
+  if (!is.logical(include_placebo) || length(include_placebo) != 1 || is.na(include_placebo)) {
+    rlang::abort("`include_placebo` must be `TRUE` or `FALSE`")
+  }
   if (!is.null(style) && !is.function(style) && !is.character(style)) {
     rlang::abort("`style` must be a function, a registered label string, or NULL")
   }
@@ -379,7 +387,8 @@ er_plot_add_quantiles <- function(object, style = NULL, keep_strata = NULL,
     dots = dots,
     ties = ties,
     quantile_type = quantile_type,
-    labeller = labeller
+    labeller = labeller,
+    include_placebo = include_placebo
   )
 
   return(object)
