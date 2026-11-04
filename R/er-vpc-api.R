@@ -53,6 +53,12 @@
 #'   [cut_exposure_quantile()]'s attributes on the observed layer's own
 #'   binned column) rather than re-resolving them, so both sides always
 #'   stay in sync.
+#' @param include_placebo Logical; whether to show the placebo bin (observations
+#'   with an exposure of exactly zero) in both the observed and simulated
+#'   layers. Defaults to `TRUE`. If `FALSE`, placebo rows are dropped from
+#'   both layers, and the remaining bins are unchanged. Only relevant when
+#'   `plot_by` is the exposure variable itself and contains zeros; otherwise
+#'   it has no effect.
 #' @param conf_level Confidence level for both the observed- and
 #'   simulated-side intervals. Must be strictly between 0 and 1.
 #'   Defaults to `0.95`.
@@ -96,6 +102,7 @@ er_vpc <- function(data, exposure, response, stratify_by = NULL,
                     response_type = "auto",
                     plot_by = NULL, n_bins = 4,
                     ties = "upward", quantile_type = 7, labeller = NULL,
+                    include_placebo = TRUE,
                     conf_level = 0.95, probs = c(0.1, 0.5, 0.9), seed = NULL) {
 
   # see `er_plot()`'s identical `dplyr::ungroup()` call for the rationale
@@ -139,6 +146,9 @@ er_vpc <- function(data, exposure, response, stratify_by = NULL,
     rlang::abort("`n_bins` must be a single positive whole number.")
   }
   ties <- match.arg(ties, c("upward", "downward", "split-even"))
+  if (!is.logical(include_placebo) || length(include_placebo) != 1L || is.na(include_placebo)) {
+    rlang::abort("`include_placebo` must be `TRUE` or `FALSE`.")
+  }
 
   strata_quo <- rlang::enquo(stratify_by)
   strata_var <- if (rlang::quo_is_null(strata_quo)) NULL else rlang::as_name(strata_quo)
@@ -201,6 +211,7 @@ er_vpc <- function(data, exposure, response, stratify_by = NULL,
   object$group$ties <- ties
   object$group$quantile_type <- quantile_type
   object$group$labeller <- labeller
+  object$group$include_placebo <- include_placebo
   object$group$conf_level <- conf_level
   object$group$probs <- probs
   # this call's own randomness (the observed side's `ties = "split-even"`

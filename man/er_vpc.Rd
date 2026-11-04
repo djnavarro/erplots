@@ -15,6 +15,7 @@ er_vpc(
   ties = "upward",
   quantile_type = 7,
   labeller = NULL,
+  include_placebo = TRUE,
   conf_level = 0.95,
   probs = c(0.1, 0.5, 0.9),
   seed = NULL
@@ -58,6 +59,13 @@ layers must always agree on how \code{plot_by} is binned --
 \code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}}'s attributes on the observed layer's own
 binned column) rather than re-resolving them, so both sides always
 stay in sync.}
+
+\item{include_placebo}{Logical; whether to show the placebo bin (observations
+with an exposure of exactly zero) in both the observed and simulated
+layers. Defaults to \code{TRUE}. If \code{FALSE}, placebo rows are dropped from
+both layers, and the remaining bins are unchanged. Only relevant when
+\code{plot_by} is the exposure variable itself and contains zeros; otherwise
+it has no effect.}
 
 \item{conf_level}{Confidence level for both the observed- and
 simulated-side intervals. Must be strictly between 0 and 1.
