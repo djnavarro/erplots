@@ -135,7 +135,8 @@
 # layer_quantile ---------------------------------------------------------------
 
 .layer_quantile <- function(object, stratify, n_bins, conf_level, style, dots = list(),
-                             ties = "upward", quantile_type = 7, labeller = NULL) {
+                             ties = "upward", quantile_type = 7, labeller = NULL,
+                             include_placebo = TRUE) {
 
   layer_quantile <- list()
   config <- list()
@@ -167,6 +168,13 @@
   # source-of-truth on the computed column avoids the two ever silently
   # drifting apart if that changes
   config$ties <- attr(binned$exposure_bins, "ties")
+
+  # drop placebo only after cutpoints are read, so the remaining bins match
+  # those of `include_placebo = TRUE`
+  if (!include_placebo) {
+    binned <- binned |>
+      dplyr::filter(exposure_bins != "Placebo")
+  }
 
   # visual distance from corners, identical to `.layer_summary()`'s own
   # computation -- lets `er_style_quantile_errorbar_vlines()`/

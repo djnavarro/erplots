@@ -660,3 +660,29 @@ test_that("er_plot_add_quantiles() builds and renders with vline_labels = TRUE, 
     er_plot_add_summary(er_test_mod1)
   expect_no_error(er_plot_build(plt_strat))
 })
+
+
+test_that("er_plot_add_quantiles(include_placebo = FALSE) drops only the placebo bin", {
+  p_all <- er_plot(erplots_data, auc_ss, responder) |>
+    er_plot_add_quantiles()
+  p_no <- er_plot(erplots_data, auc_ss, responder) |>
+    er_plot_add_quantiles(include_placebo = FALSE)
+
+  all_bins <- as.character(p_all$layer$quantile$config$summary$exposure_bins)
+  no_bins <- as.character(p_no$layer$quantile$config$summary$exposure_bins)
+
+  expect_true("Placebo" %in% all_bins)
+  expect_false("Placebo" %in% no_bins)
+  expect_setequal(no_bins, setdiff(all_bins, "Placebo"))
+  expect_identical(
+    p_no$layer$quantile$config$breaks,
+    p_all$layer$quantile$config$breaks
+  )
+  expect_no_error(ggplot2::ggplot_build(plot(p_no)))
+})
+
+test_that("er_plot_add_quantiles() validates include_placebo", {
+  p <- er_plot(erplots_data, auc_ss, responder)
+  expect_error(er_plot_add_quantiles(p, include_placebo = NA), "include_placebo")
+  expect_error(er_plot_add_quantiles(p, include_placebo = "no"), "include_placebo")
+})

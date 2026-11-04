@@ -13,6 +13,7 @@ er_plot_add_quantiles(
   ties = "upward",
   quantile_type = 7,
   labeller = NULL,
+  include_placebo = TRUE,
   ...
 )
 }
@@ -36,6 +37,12 @@ to \code{4}.}
 \item{ties, quantile_type, labeller}{Passed straight through to
 \code{\link[=cut_exposure_quantile]{cut_exposure_quantile()}} to control how the exposure variable is
 split into bins -- see its documentation for what each controls.}
+
+\item{include_placebo}{Logical; whether to show the placebo bin in this
+layer. Defaults to \code{TRUE}. If \code{FALSE}, the placebo bin is omitted from
+this layer only; the remaining bins are unchanged. Placebo observations
+are those with an exposure of exactly zero, so this has no effect when
+the exposure variable contains no zeros.}
 
 \item{...}{Additional named arguments forwarded to the \code{style} builder
 function when the plot is built.}

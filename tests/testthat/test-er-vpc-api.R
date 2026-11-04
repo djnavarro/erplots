@@ -175,3 +175,30 @@ test_that("er_vpc_build() labels the x-axis with plot_by's label, not exposure's
   expect_equal(ggplot2::get_labs(built$output)$x, vpc$group$label)
   expect_false(identical(ggplot2::get_labs(built$output)$x, vpc$exposure$label))
 })
+
+
+test_that("er_vpc(include_placebo = FALSE) drops placebo from observed and simulated layers", {
+  sim <- erplots_data[rep(seq_len(nrow(erplots_data)), 2), ]
+  sim$sim_resp <- sim$responder
+  sim$sim_id <- rep(1:2, each = nrow(erplots_data))
+
+  build <- function(ip) {
+    er_vpc(erplots_data, auc_ss, responder, include_placebo = ip) |>
+      er_vpc_add_observed() |>
+      er_vpc_add_simulated(sim = sim)
+  }
+  p_all <- build(TRUE)
+  p_no <- build(FALSE)
+
+  obs_all <- as.character(p_all$layer$observed$config$summary$.vpc_bin)
+  obs_no <- as.character(p_no$layer$observed$config$summary$.vpc_bin)
+  sim_all <- as.character(p_all$layer$simulated$config$summary$.vpc_bin)
+  sim_no <- as.character(p_no$layer$simulated$config$summary$.vpc_bin)
+
+  expect_true("Placebo" %in% obs_all)
+  expect_false("Placebo" %in% obs_no)
+  expect_false("Placebo" %in% sim_no)
+  expect_setequal(obs_no, setdiff(obs_all, "Placebo"))
+  expect_setequal(sim_no, setdiff(sim_all, "Placebo"))
+  expect_error(er_vpc(erplots_data, auc_ss, responder, include_placebo = NA), "include_placebo")
+})

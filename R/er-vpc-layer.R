@@ -116,6 +116,9 @@
     config$ties <- attr(exposure_bins, "ties")
     config$labels <- levels(exposure_bins)[-1] # drop "Placebo"
     dat$.vpc_bin <- exposure_bins
+    if (!isTRUE(object$group$include_placebo %||% TRUE)) {
+      dat <- dat[dat$.vpc_bin != "Placebo", , drop = FALSE]
+    }
   } else {
     config$breaks <- NULL
     config$ties <- NULL
@@ -260,6 +263,9 @@
       sim[[group_var]], obs_config$breaks, is_placebo,
       ties = obs_config$ties, labels = obs_config$labels, seed = seed
     )
+    if (!isTRUE(object$group$include_placebo %||% TRUE)) {
+      sim <- sim[sim$.vpc_bin != "Placebo", , drop = FALSE]
+    }
   } else {
     sim$.vpc_bin <- sim[[group_var]]
   }
